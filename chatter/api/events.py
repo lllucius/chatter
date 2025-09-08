@@ -304,7 +304,9 @@ async def get_sse_stats(
     # For non-admin users, only show basic stats
     return SSEStatsResponse(
         total_connections=stats["total_connections"],
-        your_connections=stats["connections_by_user"].get(current_user.id, 0),
+        your_connections=stats["connections_by_user"].get(
+            current_user.id, 0
+        ),
     )
 
 

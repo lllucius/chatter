@@ -319,7 +319,9 @@ class UnifiedTemplateManager:
                 from chatter.models.workflow import (
                     WorkflowTemplate as DBWorkflowTemplate,
                 )
-                from chatter.models.workflow import WorkflowType
+                from chatter.models.workflow import (
+                    WorkflowType,
+                )
 
                 # Determine category based on name/type
                 category = self._determine_template_category(
@@ -491,7 +493,9 @@ class UnifiedTemplateManager:
                 from chatter.models.workflow import (
                     WorkflowTemplate as DBWorkflowTemplate,
                 )
-                from chatter.models.workflow import WorkflowType
+                from chatter.models.workflow import (
+                    WorkflowType,
+                )
 
                 category = self._determine_template_category(
                     template.name, template.workflow_type
@@ -591,7 +595,11 @@ class UnifiedTemplateManager:
         """
         try:
             # Use centralized validation service
-            return workflow_validation_service.validate_workflow_template(template)
+            return (
+                workflow_validation_service.validate_workflow_template(
+                    template
+                )
+            )
         except Exception as e:
             logger.error(f"Template validation failed: {e}")
             return ValidationResult(

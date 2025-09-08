@@ -4,7 +4,7 @@ import json
 import os
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, patch, Mock
+from unittest.mock import AsyncMock, Mock, patch
 
 import pytest
 from typer.testing import CliRunner
@@ -76,7 +76,9 @@ class TestChatterSDKClient:
 
             # Create config file with token
             test_token = "saved_token"
-            config_file.write_text(json.dumps({"access_token": test_token}))
+            config_file.write_text(
+                json.dumps({"access_token": test_token})
+            )
 
             with patch("pathlib.Path.home") as mock_home:
                 mock_home.return_value = Path(temp_dir)
@@ -174,7 +176,9 @@ class TestCLICommands:
         """Test chat subcommand help."""
         result = self.runner.invoke(app, ["chat", "--help"])
         assert result.exit_code == 0
-        assert "Chat and conversation management commands" in result.stdout
+        assert (
+            "Chat and conversation management commands" in result.stdout
+        )
         assert "send" in result.stdout
         assert "conversations" in result.stdout
         assert "show" in result.stdout
@@ -222,7 +226,9 @@ class TestCLICommands:
         """Test events subcommand help."""
         result = self.runner.invoke(app, ["events", "--help"])
         assert result.exit_code == 0
-        assert "Event monitoring and streaming commands" in result.stdout
+        assert (
+            "Event monitoring and streaming commands" in result.stdout
+        )
         assert "stats" in result.stdout
         assert "test-broadcast" in result.stdout
 
@@ -277,14 +283,25 @@ class TestCLICommands:
         """Test that all command groups appear in main help."""
         result = self.runner.invoke(app, ["--help"])
         assert result.exit_code == 0
-        
+
         # Check all command groups are present
         expected_commands = [
-            "health", "auth", "prompts", "profiles", "jobs", 
-            "documents", "chat", "models", "events", "agents", 
-            "data", "analytics", "config", "version"
+            "health",
+            "auth",
+            "prompts",
+            "profiles",
+            "jobs",
+            "documents",
+            "chat",
+            "models",
+            "events",
+            "agents",
+            "data",
+            "analytics",
+            "config",
+            "version",
         ]
-        
+
         for command in expected_commands:
             assert command in result.stdout
 
@@ -298,8 +315,12 @@ class TestCLICommands:
         mock_response.timestamp = "2024-01-01T00:00:00Z"
         mock_response.details = None
 
-        mock_client.health_api.health_check_healthz_get = AsyncMock(return_value=mock_response)
-        mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_client.health_api.health_check_healthz_get = AsyncMock(
+            return_value=mock_response
+        )
+        mock_get_client.return_value.__aenter__ = AsyncMock(
+            return_value=mock_client
+        )
         mock_get_client.return_value.__aexit__ = AsyncMock()
 
         result = self.runner.invoke(app, ["health", "check"])
@@ -311,7 +332,7 @@ class TestCLICommands:
         """Test config command shows environment variables."""
         env_vars = {
             "CHATTER_API_BASE_URL": "https://test.example.com",
-            "CHATTER_ACCESS_TOKEN": "test_token"
+            "CHATTER_ACCESS_TOKEN": "test_token",
         }
 
         with patch.dict(os.environ, env_vars):
@@ -321,7 +342,9 @@ class TestCLICommands:
             assert "Set" in result.stdout  # Token should show as "Set"
 
     @patch('chatter.api_cli.ChatterSDKClient')
-    def test_get_client_loads_token_from_config(self, mock_sdk_client_class):
+    def test_get_client_loads_token_from_config(
+        self, mock_sdk_client_class
+    ):
         """Test that get_client loads token from local config when env var not set."""
         from chatter.api_cli import get_client
 
@@ -333,9 +356,14 @@ class TestCLICommands:
         mock_final_client = Mock()
 
         # Set up the mock to return different instances for different calls
-        mock_sdk_client_class.side_effect = [mock_temp_client, mock_final_client]
+        mock_sdk_client_class.side_effect = [
+            mock_temp_client,
+            mock_final_client,
+        ]
 
-        with patch.dict(os.environ, {}, clear=True):  # Clear CHATTER_ACCESS_TOKEN
+        with patch.dict(
+            os.environ, {}, clear=True
+        ):  # Clear CHATTER_ACCESS_TOKEN
             get_client()
 
             # Verify that ChatterSDKClient was called twice
@@ -343,7 +371,9 @@ class TestCLICommands:
             # First call should be with no access_token to load from config
             mock_sdk_client_class.assert_any_call()
             # Second call should be with the loaded token
-            mock_sdk_client_class.assert_any_call(access_token="loaded_token")
+            mock_sdk_client_class.assert_any_call(
+                access_token="loaded_token"
+            )
 
 
 class TestErrorHandling:
@@ -362,7 +392,9 @@ class TestErrorHandling:
         mock_client.health_api.health_check_healthz_get = AsyncMock(
             side_effect=ApiException(status=401, reason="Unauthorized")
         )
-        mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_get_client.return_value.__aenter__ = AsyncMock(
+            return_value=mock_client
+        )
         mock_get_client.return_value.__aexit__ = AsyncMock()
 
         result = self.runner.invoke(app, ["health", "check"])
@@ -379,7 +411,9 @@ class TestErrorHandling:
         mock_client.health_api.health_check_healthz_get = AsyncMock(
             side_effect=ApiException(status=404, reason="Not Found")
         )
-        mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_get_client.return_value.__aenter__ = AsyncMock(
+            return_value=mock_client
+        )
         mock_get_client.return_value.__aexit__ = AsyncMock()
 
         result = self.runner.invoke(app, ["health", "check"])
@@ -393,7 +427,9 @@ class TestErrorHandling:
         mock_client.health_api.health_check_healthz_get = AsyncMock(
             side_effect=Exception("Generic error")
         )
-        mock_get_client.return_value.__aenter__ = AsyncMock(return_value=mock_client)
+        mock_get_client.return_value.__aenter__ = AsyncMock(
+            return_value=mock_client
+        )
         mock_get_client.return_value.__aexit__ = AsyncMock()
 
         result = self.runner.invoke(app, ["health", "check"])
@@ -418,8 +454,9 @@ class TestAsyncDecorator:
 
     def test_run_async_decorator_with_api_exception(self):
         """Test run_async decorator handles API exceptions."""
-        from chatter.api_cli import run_async
         from chatter_sdk.exceptions import ApiException
+
+        from chatter.api_cli import run_async
 
         @run_async
         async def test_func():

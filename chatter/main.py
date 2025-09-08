@@ -233,8 +233,8 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
 
     # Initialize unified event system
     try:
-        from chatter.core.monitoring import MonitoringService
         from chatter.core.events import initialize_event_system
+        from chatter.core.monitoring import MonitoringService
         from chatter.utils.audit_logging import AuditLogger
         from chatter.utils.database import get_session_maker
 
@@ -293,9 +293,7 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
         await shutdown_event_system()
         logger.info("Event system shutdown")
     except Exception as e:
-        logger.error(
-            "Failed to shutdown event system", error=str(e)
-        )
+        logger.error("Failed to shutdown event system", error=str(e))
 
     await close_database()
     logger.info("Chatter application shutdown complete")

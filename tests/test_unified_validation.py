@@ -7,9 +7,9 @@ from chatter.core.validation import (
     SecurityValidationError,
     ValidationContext,
     ValidationError,
+    ValidationResult,
     validation_engine,
 )
-from chatter.core.validation import ValidationResult
 from chatter.core.validation.validators import (
     BusinessValidator,
     InputValidator,
@@ -232,7 +232,6 @@ class TestValidationContext:
         assert context.is_validator_enabled("input")
         assert context.is_validator_enabled("security")
         assert not context.is_validator_enabled("business")
-
 
 
 class TestValidationResult:

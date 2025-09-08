@@ -77,7 +77,9 @@ class ConversationService:
                 # Prepare metadata with workflow_config
                 metadata = kwargs.get('metadata', {})
                 if kwargs.get('workflow_config') is not None:
-                    metadata['workflow_config'] = kwargs.get('workflow_config')
+                    metadata['workflow_config'] = kwargs.get(
+                        'workflow_config'
+                    )
 
                 conversation = Conversation(
                     title=title,
@@ -92,7 +94,9 @@ class ConversationService:
                 # Prepare metadata with workflow_config
                 metadata = conversation_data.extra_metadata or {}
                 if conversation_data.workflow_config is not None:
-                    metadata['workflow_config'] = conversation_data.workflow_config
+                    metadata['workflow_config'] = (
+                        conversation_data.workflow_config
+                    )
 
                 # Use schema object
                 conversation = Conversation(
@@ -249,7 +253,9 @@ class ConversationService:
                         'status': kwargs.get('status'),
                         'temperature': kwargs.get('temperature'),
                         'max_tokens': kwargs.get('max_tokens'),
-                        'workflow_config': kwargs.get('workflow_config'),
+                        'workflow_config': kwargs.get(
+                            'workflow_config'
+                        ),
                         'metadata': kwargs.get('metadata'),
                     },
                 )()
@@ -277,14 +283,20 @@ class ConversationService:
                 # Store workflow_config in extra_metadata
                 if conversation.extra_metadata is None:
                     conversation.extra_metadata = {}
-                conversation.extra_metadata['workflow_config'] = update_data.workflow_config
+                conversation.extra_metadata['workflow_config'] = (
+                    update_data.workflow_config
+                )
 
             if update_data.extra_metadata is not None:
                 # Merge metadata
                 if conversation.extra_metadata:
-                    conversation.extra_metadata.update(update_data.extra_metadata)
+                    conversation.extra_metadata.update(
+                        update_data.extra_metadata
+                    )
                 else:
-                    conversation.extra_metadata = update_data.extra_metadata
+                    conversation.extra_metadata = (
+                        update_data.extra_metadata
+                    )
 
             await self.session.flush()
             await self.session.refresh(conversation)

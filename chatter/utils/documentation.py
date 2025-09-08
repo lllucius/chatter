@@ -187,6 +187,7 @@ class APIDocumentationEnhancer:
 
         # Add server configuration
         from chatter.config import settings
+
         schema["servers"] = [
             {
                 "url": settings.api_base_url,

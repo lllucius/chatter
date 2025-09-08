@@ -308,7 +308,9 @@ async def get_available_tools(
             # Convert Pydantic model to dict if needed
             if hasattr(args_schema, 'model_json_schema'):
                 args_schema = args_schema.model_json_schema()
-            elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
+            elif hasattr(args_schema, '__dict__') and not isinstance(
+                args_schema, dict
+            ):
                 args_schema = {}
 
             all_tools.append(
@@ -326,7 +328,9 @@ async def get_available_tools(
             # Convert Pydantic model to dict if needed
             if hasattr(args_schema, 'model_json_schema'):
                 args_schema = args_schema.model_json_schema()
-            elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
+            elif hasattr(args_schema, '__dict__') and not isinstance(
+                args_schema, dict
+            ):
                 args_schema = {}
 
             all_tools.append(

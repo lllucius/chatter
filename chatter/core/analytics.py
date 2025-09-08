@@ -9,7 +9,7 @@ import psutil
 from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.cache_factory import CacheFactory, cache_factory
+from chatter.core.cache_factory import cache_factory
 from chatter.core.cache_interface import CacheInterface
 from chatter.models.conversation import (
     Conversation,
@@ -36,7 +36,9 @@ class AnalyticsService:
         """
         self.session = session
         self.performance_monitor = get_performance_monitor()
-        self.cache_factory = cache_factory  # Use global singleton instance
+        self.cache_factory = (
+            cache_factory  # Use global singleton instance
+        )
         self._cache_instance: CacheInterface | None = None
 
     def _get_cache_instance(self) -> CacheInterface | None:
@@ -45,12 +47,15 @@ class AnalyticsService:
             try:
                 # Try to get a general cache instance
                 from chatter.core.cache_factory import CacheType
+
                 self._cache_instance = self.cache_factory.get_cache(
                     CacheType.GENERAL
                 )
                 # If no existing instance, create one
                 if self._cache_instance is None:
-                    self._cache_instance = self.cache_factory.create_general_cache()
+                    self._cache_instance = (
+                        self.cache_factory.create_general_cache()
+                    )
             except Exception as e:
                 logger.debug(f"Could not get cache instance: {e}")
         return self._cache_instance
@@ -78,8 +83,12 @@ class AnalyticsService:
 
             # Look for embedding generation related operations
             embedding_operations = [
-                op for op in summary.keys()
-                if any(term in op.lower() for term in ['embed', 'generate', 'encode'])
+                op
+                for op in summary.keys()
+                if any(
+                    term in op.lower()
+                    for term in ['embed', 'generate', 'encode']
+                )
             ]
 
             if not embedding_operations:
@@ -90,13 +99,17 @@ class AnalyticsService:
 
             for operation in embedding_operations:
                 op_data = summary[operation]
-                total_time += op_data.get('avg_ms', 0) * op_data.get('count', 0)
+                total_time += op_data.get('avg_ms', 0) * op_data.get(
+                    'count', 0
+                )
                 total_count += op_data.get('count', 0)
 
             return total_time / total_count if total_count > 0 else 0.0
 
         except Exception as e:
-            logger.debug(f"Could not get embedding generation time: {e}")
+            logger.debug(
+                f"Could not get embedding generation time: {e}"
+            )
             return 0.0
 
     async def _get_vector_database_size(self) -> int:
@@ -107,7 +120,9 @@ class AnalyticsService:
             vector_count_result = await self.session.execute(
                 select(
                     func.count(Document.id).label('doc_count'),
-                    func.sum(Document.chunk_count).label('total_chunks')
+                    func.sum(Document.chunk_count).label(
+                        'total_chunks'
+                    ),
                 ).where(Document.status == DocumentStatus.PROCESSED)
             )
 
@@ -121,7 +136,9 @@ class AnalyticsService:
                 bytes_per_vector = 1536 * 4  # 6KB per vector
                 metadata_overhead = 1024  # 1KB overhead per vector
 
-                estimated_size = total_chunks * (bytes_per_vector + metadata_overhead)
+                estimated_size = total_chunks * (
+                    bytes_per_vector + metadata_overhead
+                )
                 return int(estimated_size)
 
             return 0
@@ -138,10 +155,18 @@ class AnalyticsService:
                 stats = await cache.get_stats()
                 if stats and hasattr(stats, 'hit_rate'):
                     return stats.hit_rate
-                elif stats and hasattr(stats, 'cache_hits') and hasattr(stats, 'total_requests'):
+                elif (
+                    stats
+                    and hasattr(stats, 'cache_hits')
+                    and hasattr(stats, 'total_requests')
+                ):
                     # Calculate hit rate if not directly available
                     total_requests = stats.total_requests
-                    return (stats.cache_hits / total_requests) if total_requests > 0 else 0.0
+                    return (
+                        (stats.cache_hits / total_requests)
+                        if total_requests > 0
+                        else 0.0
+                    )
 
             return 0.0
 

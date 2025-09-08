@@ -4,7 +4,6 @@ This module provides a consolidated interface for all event types in the system,
 including SSE events, audit events, and system monitoring events.
 """
 
-import asyncio
 import uuid
 from abc import ABC, abstractmethod
 from collections import defaultdict
@@ -475,6 +474,7 @@ def validate_event_structure(event: UnifiedEvent) -> bool:
 # Consolidated Event Manager (replaces unified_events.py functionality)
 # ============================================================================
 
+
 class EventManager:
     """Consolidated event manager for all event handling in Chatter."""
 
@@ -491,24 +491,32 @@ class EventManager:
         }
         # SSE connections for real-time events
         self._sse_connections: dict[str, Any] = {}
-        
-    async def initialize(self, audit_logger=None, monitoring_service=None):
+
+    async def initialize(
+        self, audit_logger=None, monitoring_service=None
+    ):
         """Initialize the event management system."""
         if self._initialized:
             logger.warning("Event manager already initialized")
             return
 
         try:
-            logger.info("Initializing consolidated event management system")
+            logger.info(
+                "Initializing consolidated event management system"
+            )
             self._initialized = True
-            logger.info("Event management system initialized successfully")
+            logger.info(
+                "Event management system initialized successfully"
+            )
         except Exception as e:
-            logger.error("Failed to initialize event system", error=str(e))
+            logger.error(
+                "Failed to initialize event system", error=str(e)
+            )
             raise
 
     async def emit_event(self, event: UnifiedEvent) -> bool:
         """Emit an event through the consolidated system."""
-        if not validate_event(event):
+        if not validate_event_structure(event):
             self._event_stats["errors"] += 1
             return False
 
@@ -523,15 +531,17 @@ class EventManager:
             success = await event_router.emit(event)
             if success:
                 self._event_stats["processed"] += 1
-                
+
                 # Handle SSE events for real-time updates
                 if event.category == EventCategory.REALTIME:
                     await self._handle_sse_event(event)
-                    
+
             return success
-            
+
         except Exception as e:
-            logger.error("Failed to emit event", event_id=event.id, error=str(e))
+            logger.error(
+                "Failed to emit event", event_id=event.id, error=str(e)
+            )
             self._event_stats["errors"] += 1
             return False
 
@@ -543,7 +553,9 @@ class EventManager:
             try:
                 await connection.send_event(event)
             except Exception as e:
-                logger.debug(f"Failed to send event to SSE connection {connection_id}: {e}")
+                logger.debug(
+                    f"Failed to send event to SSE connection {connection_id}: {e}"
+                )
 
     def get_stats(self) -> dict[str, Any]:
         """Get event processing statistics."""
@@ -559,11 +571,14 @@ class EventManager:
 event_manager = EventManager()
 
 
-# ============================================================================  
+# ============================================================================
 # Convenience Functions (replaces unified_events.py wrapper functions)
 # ============================================================================
 
-async def initialize_event_system(audit_logger=None, monitoring_service=None):
+
+async def initialize_event_system(
+    audit_logger=None, monitoring_service=None
+):
     """Initialize the consolidated event system."""
     await event_manager.initialize(audit_logger, monitoring_service)
 
@@ -573,35 +588,52 @@ async def shutdown_event_system():
     await event_manager.shutdown()
 
 
-async def emit_realtime_event(event_type: str, data: dict[str, Any], **kwargs) -> bool:
+async def emit_realtime_event(
+    event_type: str, data: dict[str, Any], **kwargs
+) -> bool:
     """Emit a real-time event."""
     event = create_realtime_event(event_type, data, **kwargs)
     return await event_manager.emit_event(event)
 
 
-async def emit_audit_event(event_type: str, data: dict[str, Any], user_id: str | None = None, **kwargs) -> bool:
+async def emit_audit_event(
+    event_type: str,
+    data: dict[str, Any],
+    user_id: str | None = None,
+    **kwargs,
+) -> bool:
     """Emit an audit event."""
-    event = create_audit_event(event_type, data, user_id=user_id, **kwargs)
+    event = create_audit_event(
+        event_type, data, user_id=user_id, **kwargs
+    )
     return await event_manager.emit_event(event)
 
 
-async def emit_security_event(event_type: str, data: dict[str, Any], **kwargs) -> bool:
+async def emit_security_event(
+    event_type: str, data: dict[str, Any], **kwargs
+) -> bool:
     """Emit a security event."""
     event = create_security_event(event_type, data, **kwargs)
     return await event_manager.emit_event(event)
 
 
-async def emit_system_alert(message: str, severity: str = "info", **kwargs) -> bool:
+async def emit_system_alert(
+    message: str, severity: str = "info", **kwargs
+) -> bool:
     """Emit a system alert."""
     event = create_analytics_event(
         "system.alert",
         {
             "message": message,
             "severity": severity,
-            **kwargs.get("data", {})
+            **kwargs.get("data", {}),
         },
-        priority=EventPriority.HIGH if severity in ["error", "critical"] else EventPriority.NORMAL,
-        **{k: v for k, v in kwargs.items() if k != "data"}
+        priority=(
+            EventPriority.HIGH
+            if severity in ["error", "critical"]
+            else EventPriority.NORMAL
+        ),
+        **{k: v for k, v in kwargs.items() if k != "data"},
     )
     return await event_manager.emit_event(event)
 

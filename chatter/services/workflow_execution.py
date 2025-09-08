@@ -257,7 +257,9 @@ class WorkflowExecutionService:
 
         try:
             # Build execution graph
-            nodes = {node["id"]: node for node in workflow_definition.nodes}
+            nodes = {
+                node["id"]: node for node in workflow_definition.nodes
+            }
             edges_by_source = {}
             for edge in workflow_definition.edges:
                 source = edge["source"]
@@ -267,7 +269,8 @@ class WorkflowExecutionService:
 
             # Find start node
             start_nodes = [
-                node for node in workflow_definition.nodes
+                node
+                for node in workflow_definition.nodes
                 if node.get("data", {}).get("nodeType") == "start"
             ]
 
@@ -290,7 +293,9 @@ class WorkflowExecutionService:
                 current_data.update(result)
 
             completed_at = datetime.utcnow()
-            total_time = int((completed_at - started_at).total_seconds() * 1000)
+            total_time = int(
+                (completed_at - started_at).total_seconds() * 1000
+            )
 
             return {
                 "execution_id": execution_id,
@@ -306,7 +311,9 @@ class WorkflowExecutionService:
         except Exception as e:
             logger.error(f"Workflow execution failed: {e}")
             completed_at = datetime.utcnow()
-            total_time = int((completed_at - started_at).total_seconds() * 1000)
+            total_time = int(
+                (completed_at - started_at).total_seconds() * 1000
+            )
 
             return {
                 "execution_id": execution_id,
@@ -347,7 +354,9 @@ class WorkflowExecutionService:
         step_start = datetime.utcnow()
 
         try:
-            node_result = await self._execute_single_node(node, data, context, variables)
+            node_result = await self._execute_single_node(
+                node, data, context, variables
+            )
             step_status = "completed"
             step_error = None
 
@@ -365,16 +374,22 @@ class WorkflowExecutionService:
         step_time = int((step_end - step_start).total_seconds() * 1000)
 
         # Record execution step
-        steps.append({
-            "node_id": node_id,
-            "node_type": node.get("data", {}).get("nodeType", "unknown"),
-            "status": step_status,
-            "input_data": data.copy(),
-            "output_data": node_result if step_status == "completed" else None,
-            "error": step_error,
-            "execution_time_ms": step_time,
-            "timestamp": step_start,
-        })
+        steps.append(
+            {
+                "node_id": node_id,
+                "node_type": node.get("data", {}).get(
+                    "nodeType", "unknown"
+                ),
+                "status": step_status,
+                "input_data": data.copy(),
+                "output_data": (
+                    node_result if step_status == "completed" else None
+                ),
+                "error": step_error,
+                "execution_time_ms": step_time,
+                "timestamp": step_start,
+            }
+        )
 
         # Continue to next nodes if execution succeeded
         if step_status == "completed":
@@ -382,7 +397,9 @@ class WorkflowExecutionService:
 
             for edge in next_edges:
                 # Check edge conditions if any
-                if await self._should_follow_edge(edge, data, context, variables):
+                if await self._should_follow_edge(
+                    edge, data, context, variables
+                ):
                     await self._execute_node_graph(
                         edge["target"],
                         nodes,
@@ -414,17 +431,29 @@ class WorkflowExecutionService:
         elif node_type == "tool":
             return await self._execute_tool_node(node, data, config)
         elif node_type == "memory":
-            return await self._execute_memory_node(node, data, config, context)
+            return await self._execute_memory_node(
+                node, data, config, context
+            )
         elif node_type == "retrieval":
-            return await self._execute_retrieval_node(node, data, config)
+            return await self._execute_retrieval_node(
+                node, data, config
+            )
         elif node_type == "conditional":
-            return await self._execute_conditional_node(node, data, config)
+            return await self._execute_conditional_node(
+                node, data, config
+            )
         elif node_type == "loop":
-            return await self._execute_loop_node(node, data, config, context, variables)
+            return await self._execute_loop_node(
+                node, data, config, context, variables
+            )
         elif node_type == "variable":
-            return await self._execute_variable_node(node, data, config, variables)
+            return await self._execute_variable_node(
+                node, data, config, variables
+            )
         elif node_type == "error_handler":
-            return await self._execute_error_handler_node(node, data, config)
+            return await self._execute_error_handler_node(
+                node, data, config
+            )
         elif node_type == "delay":
             return await self._execute_delay_node(node, data, config)
         else:
@@ -432,13 +461,19 @@ class WorkflowExecutionService:
             return {}
 
     async def _execute_start_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute start node - just pass through data."""
         return {"workflow_started": True}
 
     async def _execute_model_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute model node - make LLM call."""
         try:
@@ -450,11 +485,15 @@ class WorkflowExecutionService:
             # Build prompt from current data
             user_content = data.get("content", data.get("query", ""))
             if not user_content:
-                user_content = str(data)  # Fallback to data representation
+                user_content = str(
+                    data
+                )  # Fallback to data representation
 
             messages = []
             if system_message:
-                messages.append({"role": "system", "content": system_message})
+                messages.append(
+                    {"role": "system", "content": system_message}
+                )
             messages.append({"role": "user", "content": user_content})
 
             # Make LLM call
@@ -468,7 +507,9 @@ class WorkflowExecutionService:
             return {
                 "model_response": response.get("content", ""),
                 "model_used": model,
-                "tokens_used": response.get("usage", {}).get("total_tokens", 0),
+                "tokens_used": response.get("usage", {}).get(
+                    "total_tokens", 0
+                ),
             }
 
         except Exception as e:
@@ -476,7 +517,10 @@ class WorkflowExecutionService:
             raise
 
     async def _execute_tool_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute tool node - call external tool."""
         try:
@@ -522,14 +566,19 @@ class WorkflowExecutionService:
                 value = memory.get(key, None)
                 return {"memory_value": value, "key": key}
             else:
-                raise ValueError(f"Unknown memory operation: {operation}")
+                raise ValueError(
+                    f"Unknown memory operation: {operation}"
+                )
 
         except Exception as e:
             logger.error(f"Memory node execution failed: {e}")
             raise
 
     async def _execute_retrieval_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute retrieval node - search documents."""
         try:
@@ -551,7 +600,10 @@ class WorkflowExecutionService:
             raise
 
     async def _execute_conditional_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute conditional node - evaluate condition."""
         try:
@@ -624,33 +676,60 @@ class WorkflowExecutionService:
 
             if operation == "set":
                 variables[variable_name] = value
-                return {"variable_set": True, "name": variable_name, "value": value}
+                return {
+                    "variable_set": True,
+                    "name": variable_name,
+                    "value": value,
+                }
             elif operation == "get":
                 current_value = variables.get(variable_name, None)
-                return {"variable_value": current_value, "name": variable_name}
+                return {
+                    "variable_value": current_value,
+                    "name": variable_name,
+                }
             elif operation == "append":
                 if variable_name not in variables:
                     variables[variable_name] = []
                 if isinstance(variables[variable_name], list):
                     variables[variable_name].append(value)
-                return {"variable_appended": True, "name": variable_name}
+                return {
+                    "variable_appended": True,
+                    "name": variable_name,
+                }
             elif operation == "increment":
                 current = variables.get(variable_name, 0)
-                variables[variable_name] = current + (value if isinstance(value, int | float) else 1)
-                return {"variable_incremented": True, "name": variable_name, "value": variables[variable_name]}
+                variables[variable_name] = current + (
+                    value if isinstance(value, int | float) else 1
+                )
+                return {
+                    "variable_incremented": True,
+                    "name": variable_name,
+                    "value": variables[variable_name],
+                }
             elif operation == "decrement":
                 current = variables.get(variable_name, 0)
-                variables[variable_name] = current - (value if isinstance(value, int | float) else 1)
-                return {"variable_decremented": True, "name": variable_name, "value": variables[variable_name]}
+                variables[variable_name] = current - (
+                    value if isinstance(value, int | float) else 1
+                )
+                return {
+                    "variable_decremented": True,
+                    "name": variable_name,
+                    "value": variables[variable_name],
+                }
             else:
-                raise ValueError(f"Unknown variable operation: {operation}")
+                raise ValueError(
+                    f"Unknown variable operation: {operation}"
+                )
 
         except Exception as e:
             logger.error(f"Variable node execution failed: {e}")
             raise
 
     async def _execute_error_handler_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute error handler node - handle errors."""
         try:
@@ -669,7 +748,10 @@ class WorkflowExecutionService:
             raise
 
     async def _execute_delay_node(
-        self, node: dict[str, Any], data: dict[str, Any], config: dict[str, Any]
+        self,
+        node: dict[str, Any],
+        data: dict[str, Any],
+        config: dict[str, Any],
     ) -> dict[str, Any]:
         """Execute delay node - introduce time delays."""
         import asyncio

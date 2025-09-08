@@ -1,8 +1,7 @@
 """Unit tests for API validation functions that don't require database."""
 
-from ulid import ULID
-
 import pytest
+from ulid import ULID
 
 from chatter.api.chat import _map_workflow_type
 from chatter.utils.problem import BadRequestProblem
@@ -46,7 +45,7 @@ class TestULIDValidation:
     def test_valid_ulid(self):
         """Test validation of valid ULIDs."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         valid_ulid = str(ULID())
         result = ValidatedULID.validate(valid_ulid)
         assert result == valid_ulid
@@ -54,7 +53,7 @@ class TestULIDValidation:
     def test_error_case_ulid(self):
         """Test validation of the specific ULID from the error case."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         error_ulid = "01K4NFEZK5027EEC011J336R5Z"
         result = ValidatedULID.validate(error_ulid)
         assert result == error_ulid
@@ -62,7 +61,7 @@ class TestULIDValidation:
     def test_invalid_ulid_format(self):
         """Test validation fails for invalid ULID format."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         with pytest.raises(BadRequestProblem) as exc_info:
             ValidatedULID.validate("not-a-ulid")
 
@@ -72,21 +71,21 @@ class TestULIDValidation:
     def test_empty_ulid(self):
         """Test validation fails for empty ULID."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         with pytest.raises(BadRequestProblem):
             ValidatedULID.validate("")
 
     def test_none_ulid(self):
         """Test validation fails for None ULID."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         with pytest.raises((BadRequestProblem, TypeError)):
             ValidatedULID.validate(None)
 
     def test_malformed_ulid(self):
         """Test validation fails for malformed ULIDs."""
         from chatter.api.dependencies import ValidatedULID
-        
+
         malformed_ulids = [
             "123e4567-e89b-12d3-a456-426614174000",  # UUID format
             "01K4NFEZK5027EEC011J336R5",  # Missing character

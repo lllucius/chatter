@@ -147,14 +147,24 @@ class ConversationResponse(ConversationBase):
     system_prompt: str | None = Field(None, description="System prompt")
     context_window: int = Field(..., description="Context window size")
     memory_enabled: bool = Field(..., description="Memory enabled")
-    memory_strategy: str | None = Field(None, description="Memory strategy")
+    memory_strategy: str | None = Field(
+        None, description="Memory strategy"
+    )
     retrieval_limit: int = Field(..., description="Retrieval limit")
-    retrieval_score_threshold: float = Field(..., description="Retrieval score threshold")
+    retrieval_score_threshold: float = Field(
+        ..., description="Retrieval score threshold"
+    )
 
     # Metadata fields that were missing
-    tags: list[str] | None = Field(None, description="Conversation tags")
-    extra_metadata: dict[str, Any] | None = Field(None, description="Extra metadata")
-    workflow_config: dict[str, Any] | None = Field(None, description="Workflow configuration")
+    tags: list[str] | None = Field(
+        None, description="Conversation tags"
+    )
+    extra_metadata: dict[str, Any] | None = Field(
+        None, description="Extra metadata"
+    )
+    workflow_config: dict[str, Any] | None = Field(
+        None, description="Workflow configuration"
+    )
 
     created_at: datetime = Field(..., description="Creation timestamp")
     updated_at: datetime = Field(

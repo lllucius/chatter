@@ -146,5 +146,3 @@ class FilterParams(BaseModel):
     created_before: datetime | None = Field(
         None, description="Created before date"
     )
-
-

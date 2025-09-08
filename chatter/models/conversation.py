@@ -6,7 +6,12 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+)
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,
@@ -209,7 +214,9 @@ class Conversation(Base):
             "extra_metadata": self.extra_metadata,
             "workflow_config": self.workflow_config,
             "last_message_at": (
-                self.last_message_at.isoformat() if self.last_message_at else None
+                self.last_message_at.isoformat()
+                if self.last_message_at
+                else None
             ),
             "created_at": (
                 self.created_at.isoformat() if self.created_at else None

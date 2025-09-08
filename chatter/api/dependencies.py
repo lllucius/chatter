@@ -33,10 +33,14 @@ class ValidatedULID(str):
                     detail="Invalid ULID format: must be a valid ULID"
                 ) from e
 
-        return core_schema.chain_schema([
-            core_schema.str_schema(min_length=1),
-            core_schema.no_info_plain_validator_function(validate_ulid),
-        ])
+        return core_schema.chain_schema(
+            [
+                core_schema.str_schema(min_length=1),
+                core_schema.no_info_plain_validator_function(
+                    validate_ulid
+                ),
+            ]
+        )
 
     @classmethod
     def validate(cls, v):

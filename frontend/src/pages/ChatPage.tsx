@@ -296,6 +296,9 @@ const ChatPage: React.FC = () => {
         )
       );
 
+    } catch (err: any) {
+      console.error('Streaming response error:', err);
+    }
   };
 
   const sendMessage = async () => {

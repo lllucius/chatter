@@ -1,4 +1,4 @@
-import React, { useState, useContext, useEffect } from 'react';
+import React, { useState, useContext } from 'react';
 import {
   Dialog,
   DialogTitle,
@@ -36,12 +36,6 @@ import { DocumentResponse, DocumentSearchRequest } from '../sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import { formatFileSize, getStatusColor } from '../utils/common';
-import {
-  DocumentUploadedEvent,
-  DocumentProcessingStartedEvent,
-  DocumentProcessingCompletedEvent,
-  DocumentProcessingFailedEvent
-} from '../services/sse-types';
 
 interface DocumentCreateData {
   file: File;
@@ -52,7 +46,7 @@ interface DocumentUpdateData {
   title?: string;
 }
 
-const DocumentsPage: React.FC = () => {
+const DocumentsPageRefactored: React.FC = () => {
   const { darkMode } = useContext(ThemeContext);
   const { on } = useSSE();
   
@@ -61,38 +55,6 @@ const DocumentsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
-
-  // State for force refresh after SSE events
-  const [refreshKey, setRefreshKey] = useState(0);
-
-  // SSE Event Listeners for real-time document updates
-  useEffect(() => {
-    // Attach listeners for real-time updates
-    const unsubscribeDocumentUploaded = on('document.uploaded', () => {
-      setRefreshKey(prev => prev + 1);
-    });
-
-    const unsubscribeProcessingStarted = on('document.processing_started', () => {
-      setRefreshKey(prev => prev + 1);
-    });
-
-    const unsubscribeProcessingCompleted = on('document.processing_completed', () => {
-      setRefreshKey(prev => prev + 1);
-    });
-
-    const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
-      const docEvent = event as DocumentProcessingFailedEvent;
-      toastService.error(`Document processing failed: ${docEvent.data.error}`);
-      setRefreshKey(prev => prev + 1);
-    });
-
-    return () => {
-      unsubscribeDocumentUploaded();
-      unsubscribeProcessingStarted();
-      unsubscribeProcessingCompleted();
-      unsubscribeProcessingFailed();
-    };
-  }, [on]);
 
   // Custom file size renderer
   const createFileSizeRenderer = (): CrudColumn<DocumentResponse>['render'] => {
@@ -290,13 +252,13 @@ const DocumentsPage: React.FC = () => {
       // Create a blob URL and trigger download
       const blob = new Blob([response.data], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
-      const a = window.document.createElement('a');
+      const a = document.createElement('a');
       a.href = url;
       a.download = document.filename;
-      window.document.body.appendChild(a);
+      document.body.appendChild(a);
       a.click();
       window.URL.revokeObjectURL(url);
-      window.document.body.removeChild(a);
+      document.body.removeChild(a);
     } catch (err: any) {
       toastService.error(err, 'Failed to download document');
     }
@@ -396,7 +358,6 @@ const DocumentsPage: React.FC = () => {
   return (
     <PageLayout title="Document Management" toolbar={toolbar}>
       <CrudDataTable
-        key={refreshKey} // Force refresh on SSE events
         config={config}
         service={service}
         FormComponent={DocumentForm}
@@ -473,4 +434,4 @@ const DocumentsPage: React.FC = () => {
   );
 };
 
-export default DocumentsPage;
+export default DocumentsPageRefactored;

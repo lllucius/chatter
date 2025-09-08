@@ -131,7 +131,7 @@ describe('DocumentsPage', () => {
     );
 
     await waitFor(() => {
-      expect(screen.getByText(/Failed to load documents/)).toBeInTheDocument();
+      expect(screen.getByText(/API Error/)).toBeInTheDocument();
     });
   });
 

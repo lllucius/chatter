@@ -34,7 +34,7 @@ export class SSEEventManager {
       return;
     }
 
-    if (this.eventSource && this.eventSource.readyState !== EventSource.CLOSED) {
+    if (this.isConnected || this.connectionStartTime) {
       console.log('SSE: Already connected or connecting');
       return;
     }

@@ -6,6 +6,7 @@ without importing any application modules, avoiding initialization issues.
 """
 
 import asyncio
+import functools
 import json
 import os
 import sys
@@ -144,6 +145,7 @@ def get_client() -> ChatterSDKClient:
 
 def run_async(async_func):
     """Helper decorator to run async functions in typer commands."""
+    @functools.wraps(async_func)
     def wrapper(*args, **kwargs):
         try:
             return asyncio.run(async_func(*args, **kwargs))

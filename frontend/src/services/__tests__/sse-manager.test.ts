@@ -72,6 +72,7 @@ class MockEventSource implements EventSource {
 vi.mock('../chatter-sdk', () => ({
   chatterSDK: {
     isAuthenticated: vi.fn(() => true),
+    getURL: vi.fn(() => 'http://localhost:8000'),
     getBaseURL: vi.fn(() => 'http://localhost:8000'),
     getAuthHeaders: vi.fn(() => ({ Authorization: 'Bearer test-token' })),
     getToken: vi.fn(() => 'test-token'),

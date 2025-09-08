@@ -2,26 +2,22 @@
  * Tests for Toast Service
  */
 
+import { vi, describe, beforeEach, expect, test } from 'vitest';
 import { toast } from 'react-toastify';
-import { ToastService } from '../toast-service';
+import { toastService } from '../toast-service';
 
 // Mock react-toastify
-jest.mock('react-toastify', () => ({
-  toast: {
-    success: jest.fn(),
-    error: jest.fn(),
-    info: jest.fn(),
-    warning: jest.fn(),
-    dismiss: jest.fn(),
-  }
+vi.mock('react-toastify', () => ({
+  toast: Object.assign(vi.fn().mockImplementation(() => 'mock-toast-id'), {
+    dismiss: vi.fn(),
+  }),
 }));
 
 describe('ToastService', () => {
-  let toastService: ToastService;
-
   beforeEach(() => {
-    toastService = new ToastService();
-    jest.clearAllMocks();
+    vi.clearAllMocks();
+    // Reset toast count
+    (toastService as any).toastCount = 0;
   });
 
   describe('Basic Toast Operations', () => {
@@ -29,7 +25,7 @@ describe('ToastService', () => {
       const message = 'Operation completed successfully';
       toastService.success(message);
 
-      expect(toast.success).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         type: 'success',
         autoClose: 6000,
         closeButton: false,
@@ -42,9 +38,9 @@ describe('ToastService', () => {
       const message = 'An error occurred';
       toastService.error(message);
 
-      expect(toast.error).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         type: 'error',
-        autoClose: 6000,
+        autoClose: false,
         closeButton: true, // Error toasts should have close button
         onOpen: expect.any(Function),
         onClose: expect.any(Function)
@@ -55,7 +51,7 @@ describe('ToastService', () => {
       const message = 'Information message';
       toastService.info(message);
 
-      expect(toast.info).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         type: 'info',
         autoClose: 6000,
         closeButton: false,
@@ -68,7 +64,7 @@ describe('ToastService', () => {
       const message = 'Warning message';
       toastService.warning(message);
 
-      expect(toast.warning).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         type: 'warning',
         autoClose: 6000,
         closeButton: false,
@@ -85,7 +81,7 @@ describe('ToastService', () => {
 
       toastService.success(message, options);
 
-      expect(toast.success).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         autoClose: 3000
       }));
     });
@@ -96,7 +92,7 @@ describe('ToastService', () => {
 
       toastService.info(message, options);
 
-      expect(toast.info).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         autoClose: false
       }));
     });
@@ -107,7 +103,7 @@ describe('ToastService', () => {
 
       toastService.info(message, options);
 
-      expect(toast.info).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         closeButton: true
       }));
     });
@@ -118,7 +114,7 @@ describe('ToastService', () => {
 
       toastService.error(message, options);
 
-      expect(toast.error).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         closeButton: false
       }));
     });
@@ -127,11 +123,11 @@ describe('ToastService', () => {
   describe('Toast Limit Management', () => {
     test('should track toast count', () => {
       // Simulate toast opening
-      const openCallback = jest.fn();
+      const openCallback = vi.fn();
       toastService.success('Test 1');
       
       // Get the onOpen callback and call it to simulate toast opening
-      const callArgs = (toast.success as jest.Mock).mock.calls[0];
+      const callArgs = (toast.success as any).mock.calls[0];
       const options = callArgs[1];
       options.onOpen();
 
@@ -142,7 +138,7 @@ describe('ToastService', () => {
       // Set up service at max capacity
       for (let i = 0; i < 4; i++) {
         toastService.success(`Message ${i}`);
-        const callArgs = (toast.success as jest.Mock).mock.calls[i];
+        const callArgs = (toast.success as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen(); // Simulate toast opening
       }
@@ -154,7 +150,7 @@ describe('ToastService', () => {
     test('should decrement count when toast closes', () => {
       toastService.success('Test message');
       
-      const callArgs = (toast.success as jest.Mock).mock.calls[0];
+      const callArgs = (toast.success as any).mock.calls[0];
       const options = callArgs[1];
       
       // Simulate toast opening and closing
@@ -328,7 +324,7 @@ describe('ToastService', () => {
         toastService.info(`Toast ${i}`);
         
         // Simulate opening and closing
-        const callArgs = (toast.info as jest.Mock).mock.calls[i];
+        const callArgs = (toast.info as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen();
         options.onClose();

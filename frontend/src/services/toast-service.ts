@@ -123,6 +123,14 @@ class ToastService {
     return this.showToast(message, { type: 'warning', autoClose, closeButton: false });
   }
 
+  loading(message: string) {
+    return this.showToast(message, { type: 'info', autoClose: false, closeButton: false });
+  }
+
+  getToastCount(): number {
+    return this.toastCount;
+  }
+
   dismiss(toastId?: string | number) {
     toast.dismiss(toastId);
   }

@@ -33,6 +33,48 @@ export enum EventPriority {
   CRITICAL = 'critical'
 }
 
+// SSE Event Type constants for frontend usage
+export enum SSEEventType {
+  // Chat Events
+  CHAT_MESSAGE_CHUNK = 'chat.message_chunk',
+  CHAT_MESSAGE_COMPLETE = 'chat.message_complete',
+  
+  // Workflow Events  
+  WORKFLOW_STATUS = 'workflow.status',
+  WORKFLOW_STARTED = 'workflow.started',
+  WORKFLOW_COMPLETED = 'workflow.completed',
+  WORKFLOW_FAILED = 'workflow.failed',
+  
+  // Document Events
+  DOCUMENT_PROCESSING = 'document.processing_progress',
+  DOCUMENT_UPLOADED = 'document.uploaded',
+  DOCUMENT_PROCESSING_STARTED = 'document.processing_started', 
+  DOCUMENT_PROCESSING_COMPLETED = 'document.processing_completed',
+  DOCUMENT_PROCESSING_FAILED = 'document.processing_failed',
+  
+  // Job Events
+  JOB_STARTED = 'job.started',
+  JOB_COMPLETED = 'job.completed',
+  JOB_FAILED = 'job.failed',
+  JOB_PROGRESS = 'job.progress',
+  
+  // Backup Events
+  BACKUP_STARTED = 'backup.started',
+  BACKUP_COMPLETED = 'backup.completed',
+  BACKUP_FAILED = 'backup.failed',
+  BACKUP_PROGRESS = 'backup.progress',
+  
+  // Plugin Events
+  PLUGIN_STARTED = 'plugin.started',
+  PLUGIN_STOPPED = 'plugin.stopped',
+  PLUGIN_ERROR = 'plugin.error',
+  
+  // System Events
+  SYSTEM_ALERT = 'system.alert',
+  SYSTEM_STATUS = 'system.status',
+  CONNECTION_ESTABLISHED = 'connection.established'
+}
+
 // Enhanced event with unified system metadata
 export interface UnifiedSSEEvent extends SSEEvent {
   category?: EventCategory;

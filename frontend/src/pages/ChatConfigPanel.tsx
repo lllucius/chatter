@@ -96,7 +96,7 @@ const ChatConfigPanel: React.FC<Props> = ({
   const loadConversations = useCallback(async () => {
     setLoadingConversations(true);
     try {
-      const response = await chatterClient.conversations.listConversationsApiV1ChatConversationsGet({
+      const response = await chatterClient.chat.listConversationsApiV1ChatConversationsGet({
         limit: 20,
         sortBy: 'updated_at',
         sortOrder: 'desc'
@@ -107,6 +107,7 @@ const ChatConfigPanel: React.FC<Props> = ({
         // eslint-disable-next-line no-console
         console.error('Failed to load conversations:', error);
       }
+      // Set empty array on error to prevent infinite loading
       setConversations([]);
     } finally {
       setLoadingConversations(false);
@@ -115,7 +116,8 @@ const ChatConfigPanel: React.FC<Props> = ({
 
   useEffect(() => {
     loadConversations();
-  }, [loadConversations]);
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []); // Intentionally empty deps to run only once on mount
 
   if (collapsed) {
     return (

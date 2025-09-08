@@ -310,7 +310,7 @@ async def get_available_tools(
                 args_schema = args_schema.model_json_schema()
             elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
                 args_schema = {}
-            
+
             all_tools.append(
                 AvailableToolResponse(
                     name=tool.name,
@@ -328,7 +328,7 @@ async def get_available_tools(
                 args_schema = args_schema.model_json_schema()
             elif hasattr(args_schema, '__dict__') and not isinstance(args_schema, dict):
                 args_schema = {}
-            
+
             all_tools.append(
                 AvailableToolResponse(
                     name=tool.name,

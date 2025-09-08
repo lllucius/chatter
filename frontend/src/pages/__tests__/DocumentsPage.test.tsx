@@ -1,5 +1,5 @@
 import React from 'react';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent, waitFor, act } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
@@ -93,11 +93,13 @@ describe('DocumentsPage', () => {
   });
 
   it('loads and displays documents', async () => {
-    render(
-      <TestWrapper>
-        <DocumentsPage />
-      </TestWrapper>
-    );
+    await act(async () => {
+      render(
+        <TestWrapper>
+          <DocumentsPage />
+        </TestWrapper>
+      );
+    });
 
     // Wait for documents to load and display
     await waitFor(() => {
@@ -109,11 +111,13 @@ describe('DocumentsPage', () => {
   });
 
   it('calls API on mount', async () => {
-    render(
-      <TestWrapper>
-        <DocumentsPage />
-      </TestWrapper>
-    );
+    await act(async () => {
+      render(
+        <TestWrapper>
+          <DocumentsPage />
+        </TestWrapper>
+      );
+    });
 
     // Should call the API immediately
     expect(chatterSDK.documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
@@ -124,11 +128,13 @@ describe('DocumentsPage', () => {
       new Error('API Error')
     );
 
-    render(
-      <TestWrapper>
-        <DocumentsPage />
-      </TestWrapper>
-    );
+    await act(async () => {
+      render(
+        <TestWrapper>
+          <DocumentsPage />
+        </TestWrapper>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByText(/API Error/)).toBeInTheDocument();
@@ -136,11 +142,13 @@ describe('DocumentsPage', () => {
   });
 
   it('shows document status correctly', async () => {
-    render(
-      <TestWrapper>
-        <DocumentsPage />
-      </TestWrapper>
-    );
+    await act(async () => {
+      render(
+        <TestWrapper>
+          <DocumentsPage />
+        </TestWrapper>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByText('processed')).toBeInTheDocument();
@@ -149,11 +157,13 @@ describe('DocumentsPage', () => {
   });
 
   it('renders page header correctly', async () => {
-    render(
-      <TestWrapper>
-        <DocumentsPage />
-      </TestWrapper>
-    );
+    await act(async () => {
+      render(
+        <TestWrapper>
+          <DocumentsPage />
+        </TestWrapper>
+      );
+    });
 
     await waitFor(() => {
       expect(screen.getByText('Document Management')).toBeInTheDocument();

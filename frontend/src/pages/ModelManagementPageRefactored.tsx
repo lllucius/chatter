@@ -7,9 +7,7 @@ import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
 import { 
   createTypeChipRenderer,
-  createStatusChipRenderer,
-  createMonospaceTextRenderer,
-  createConditionalChipRenderer
+  createMonospaceTextRenderer
 } from '../components/CrudRenderers';
 import { chatterSDK } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
@@ -133,7 +131,7 @@ const ModelManagementPageRefactored: React.FC = () => {
               defaultProvider: defaultProviderBody,
             });
             toastService.success('Default provider updated');
-          } catch (error) {
+          } catch {
             toastService.error('Failed to set default provider');
           }
         }

@@ -14,7 +14,6 @@ import {
   TablePagination,
   IconButton,
   Chip,
-  Alert,
   CircularProgress,
   Dialog,
   DialogTitle,
@@ -89,15 +88,14 @@ const DocumentsPage: React.FC = () => {
   // SSE Event Listeners for real-time document updates
   useEffect(() => {
     // Attach listeners regardless of current connection; they will receive events when the stream is open
-    const unsubscribeDocumentUploaded = on('document.uploaded', (event) => {
-      const docEvent = event as DocumentUploadedEvent;
-      console.log('Document uploaded:', docEvent.data);
+    const unsubscribeDocumentUploaded = on('document.uploaded', () => {
+      // Document uploaded - refresh the document list
       loadDocuments();
     });
 
     const unsubscribeProcessingStarted = on('document.processing_started', (event) => {
       const docEvent = event as DocumentProcessingStartedEvent;
-      console.log('Document processing started:', docEvent.data);
+      // Document processing started - update status
       setDocuments(prev => prev.map(doc =>
         String(doc.id) === String(docEvent.data.document_id)
           ? { ...doc, status: 'processing' as any }
@@ -107,7 +105,7 @@ const DocumentsPage: React.FC = () => {
 
     const unsubscribeProcessingCompleted = on('document.processing_completed', (event) => {
       const docEvent = event as DocumentProcessingCompletedEvent;
-      console.log('Document processing completed:', docEvent.data);
+      // Document processing completed - update status and chunk count
       setDocuments(prev => prev.map(doc =>
         String(doc.id) === String(docEvent.data.document_id)
           ? { 
@@ -122,7 +120,7 @@ const DocumentsPage: React.FC = () => {
 
     const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
       const docEvent = event as DocumentProcessingFailedEvent;
-      console.log('Document processing failed:', docEvent.data);
+      // Document processing failed - update status and show error
       setDocuments(prev => prev.map(doc =>
         String(doc.id) === String(docEvent.data.document_id)
           ? { ...doc, status: 'failed' as any }

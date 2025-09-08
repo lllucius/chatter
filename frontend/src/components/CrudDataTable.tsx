@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode } from 'react';
+import React, { useState, useEffect, ReactNode, useCallback } from 'react';
 import {
   Box,
   Card,
@@ -14,11 +14,8 @@ import {
   IconButton,
   Alert,
   CircularProgress,
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   Menu,
+  MenuItem,
   ListItemIcon,
   Fab,
   Tooltip,
@@ -107,7 +104,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   const [actionMenuItem, setActionMenuItem] = useState<T | null>(null);
 
   // Load data
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
@@ -120,11 +117,11 @@ export function CrudDataTable<T, TCreate, TUpdate>({
     } finally {
       setLoading(false);
     }
-  };
+  }, [page, rowsPerPage, service, config.entityNamePlural]);
 
   useEffect(() => {
     loadData();
-  }, [page, rowsPerPage]);
+  }, [loadData]);
 
   // CRUD operations
   const handleCreate = () => {
@@ -147,7 +144,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
         await service.delete(getItemId(item));
         toastService.success(`${config.entityName} deleted successfully`);
         await loadData();
-      } catch (err) {
+      } catch {
         toastService.error(`Failed to delete ${config.entityName.toLowerCase()}`);
       }
     }
@@ -164,7 +161,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
       }
       setDialogOpen(false);
       await loadData();
-    } catch (err) {
+    } catch {
       toastService.error(`Failed to ${dialogMode} ${config.entityName.toLowerCase()}`);
     }
   };
@@ -188,7 +185,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   };
 
   // Pagination handlers
-  const handleChangePage = (event: unknown, newPage: number) => {
+  const handleChangePage = (_event: unknown, newPage: number) => {
     setPage(newPage);
   };
 
@@ -272,7 +269,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
                   </TableCell>
                 </TableRow>
               ) : (
-                items.map((item, index) => (
+                items.map((item) => (
                   <TableRow key={getItemId(item)} hover>
                     {config.columns.map((column) => (
                       <TableCell key={String(column.id)}>

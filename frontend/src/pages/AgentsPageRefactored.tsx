@@ -1,9 +1,12 @@
 import React from 'react';
-import { Chip, Switch } from '@mui/material';
 import { SmartToy as BotIcon } from '@mui/icons-material';
-import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
+import { 
+  createNameWithDescriptionRenderer, 
+  createBooleanSwitchRenderer,
+  createDateRenderer 
+} from '../components/CrudRenderers';
 import { chatterSDK } from '../services/chatter-sdk';
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from '../sdk';
 
@@ -14,11 +17,7 @@ const AgentsPageRefactored: React.FC = () => {
       id: 'name',
       label: 'Name',
       width: '200px',
-    },
-    {
-      id: 'description',
-      label: 'Description',
-      width: '300px',
+      render: createNameWithDescriptionRenderer<AgentResponse>(),
     },
     {
       id: 'model',
@@ -29,19 +28,13 @@ const AgentsPageRefactored: React.FC = () => {
       id: 'is_active',
       label: 'Active',
       width: '100px',
-      render: (value) => (
-        <Switch
-          checked={!!value}
-          disabled
-          size="small"
-        />
-      ),
+      render: createBooleanSwitchRenderer<AgentResponse>(),
     },
     {
       id: 'updated_at',
       label: 'Updated',
       width: '140px',
-      render: (value) => value ? format(new Date(value), 'MMM dd, yyyy') : '',
+      render: createDateRenderer<AgentResponse>(),
     },
   ];
 
@@ -54,8 +47,8 @@ const AgentsPageRefactored: React.FC = () => {
       {
         icon: <BotIcon />,
         label: 'Test Agent',
-        onClick: (agent) => {
-          console.log('Test agent:', agent.name);
+        onClick: () => {
+          // TODO: Implement test agent functionality
         },
       },
     ],

@@ -106,8 +106,8 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
   const handleCopy = useCallback(async () => {
     try {
       await navigator.clipboard.writeText(message.content);
-    } catch (err) {
-      console.error('Failed to copy message:', err);
+    } catch {
+      // Copy failed - user will notice no text was copied
     }
     handleMenuClose();
   }, [message.content]);

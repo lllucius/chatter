@@ -55,10 +55,10 @@ import chatter_sdk
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
-# Defining the host is optional and defaults to http://localhost
+# Defining the host is optional and defaults to http://localhost:8000
 # See configuration.py for a list of all supported configuration parameters.
 configuration = chatter_sdk.Configuration(
-    host = "http://localhost"
+    host = "http://localhost:8000"
 )
 
 # The client must configure the authentication and authorization parameters
@@ -90,7 +90,7 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 ## Documentation for API Endpoints
 
-All URIs are relative to *http://localhost*
+All URIs are relative to *http://localhost:8000*
 
 Class | Method | HTTP request | Description
 ------------ | ------------- | ------------- | -------------
@@ -266,6 +266,19 @@ Class | Method | HTTP request | Description
 *ToolServersApi* | [**test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post**](docs/ToolServersApi.md#test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post) | **POST** /api/v1/toolservers/servers/{server_id}/test-connectivity | Test Server Connectivity
 *ToolServersApi* | [**update_tool_permission_api_v1_toolservers_permissions_permission_id_put**](docs/ToolServersApi.md#update_tool_permission_api_v1_toolservers_permissions_permission_id_put) | **PUT** /api/v1/toolservers/permissions/{permission_id} | Update Tool Permission
 *ToolServersApi* | [**update_tool_server_api_v1_toolservers_servers_server_id_put**](docs/ToolServersApi.md#update_tool_server_api_v1_toolservers_servers_server_id_put) | **PUT** /api/v1/toolservers/servers/{server_id} | Update Tool Server
+*WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_workflows_definitions_post) | **POST** /api/v1/workflows/workflows/definitions | Create Workflow Definition
+*WorkflowsApi* | [**create_workflow_template_api_v1_workflows_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_workflows_templates_post) | **POST** /api/v1/workflows/workflows/templates | Create Workflow Template
+*WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/workflows/definitions/{workflow_id} | Delete Workflow Definition
+*WorkflowsApi* | [**execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/workflows/definitions/{workflow_id}/execute | Execute Workflow
+*WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_workflows_node_types_get) | **GET** /api/v1/workflows/workflows/node-types | Get Supported Node Types
+*WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
+*WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id} | Get Workflow Definition
+*WorkflowsApi* | [**list_workflow_definitions_api_v1_workflows_workflows_definitions_get**](docs/WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_workflows_definitions_get) | **GET** /api/v1/workflows/workflows/definitions | List Workflow Definitions
+*WorkflowsApi* | [**list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get**](docs/WorkflowsApi.md#list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id}/executions | List Workflow Executions
+*WorkflowsApi* | [**list_workflow_templates_api_v1_workflows_workflows_templates_get**](docs/WorkflowsApi.md#list_workflow_templates_api_v1_workflows_workflows_templates_get) | **GET** /api/v1/workflows/workflows/templates | List Workflow Templates
+*WorkflowsApi* | [**update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put**](docs/WorkflowsApi.md#update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put) | **PUT** /api/v1/workflows/workflows/definitions/{workflow_id} | Update Workflow Definition
+*WorkflowsApi* | [**update_workflow_template_api_v1_workflows_workflows_templates_template_id_put**](docs/WorkflowsApi.md#update_workflow_template_api_v1_workflows_workflows_templates_template_id_put) | **PUT** /api/v1/workflows/workflows/templates/{template_id} | Update Workflow Template
+*WorkflowsApi* | [**validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post**](docs/WorkflowsApi.md#validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post) | **POST** /api/v1/workflows/workflows/definitions/validate | Validate Workflow Definition
 *AgentsApi* | [**bulk_create_agents_api_v1_agents_bulk_post**](docs/AgentsApi.md#bulk_create_agents_api_v1_agents_bulk_post) | **POST** /api/v1/agents/bulk | Bulk Create Agents
 *AgentsApi* | [**bulk_delete_agents_api_v1_agents_bulk_delete**](docs/AgentsApi.md#bulk_delete_agents_api_v1_agents_bulk_delete) | **DELETE** /api/v1/agents/bulk | Bulk Delete Agents
 *AgentsApi* | [**create_agent_api_v1_agents_post**](docs/AgentsApi.md#create_agent_api_v1_agents_post) | **POST** /api/v1/agents/ | Create a new agent
@@ -278,6 +291,19 @@ Class | Method | HTTP request | Description
 *AgentsApi* | [**list_agents_api_v1_agents_get**](docs/AgentsApi.md#list_agents_api_v1_agents_get) | **GET** /api/v1/agents/ | List agents
 *AgentsApi* | [**update_agent_api_v1_agents_agent_id_put**](docs/AgentsApi.md#update_agent_api_v1_agents_agent_id_put) | **PUT** /api/v1/agents/{agent_id} | Update Agent
 *DefaultApi* | [**root_get**](docs/DefaultApi.md#root_get) | **GET** / | Root
+*WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_workflows_definitions_post) | **POST** /api/v1/workflows/workflows/definitions | Create Workflow Definition
+*WorkflowsApi* | [**create_workflow_template_api_v1_workflows_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_workflows_templates_post) | **POST** /api/v1/workflows/workflows/templates | Create Workflow Template
+*WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/workflows/definitions/{workflow_id} | Delete Workflow Definition
+*WorkflowsApi* | [**execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/workflows/definitions/{workflow_id}/execute | Execute Workflow
+*WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_workflows_node_types_get) | **GET** /api/v1/workflows/workflows/node-types | Get Supported Node Types
+*WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
+*WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id} | Get Workflow Definition
+*WorkflowsApi* | [**list_workflow_definitions_api_v1_workflows_workflows_definitions_get**](docs/WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_workflows_definitions_get) | **GET** /api/v1/workflows/workflows/definitions | List Workflow Definitions
+*WorkflowsApi* | [**list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get**](docs/WorkflowsApi.md#list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/workflows/definitions/{workflow_id}/executions | List Workflow Executions
+*WorkflowsApi* | [**list_workflow_templates_api_v1_workflows_workflows_templates_get**](docs/WorkflowsApi.md#list_workflow_templates_api_v1_workflows_workflows_templates_get) | **GET** /api/v1/workflows/workflows/templates | List Workflow Templates
+*WorkflowsApi* | [**update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put**](docs/WorkflowsApi.md#update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put) | **PUT** /api/v1/workflows/workflows/definitions/{workflow_id} | Update Workflow Definition
+*WorkflowsApi* | [**update_workflow_template_api_v1_workflows_workflows_templates_template_id_put**](docs/WorkflowsApi.md#update_workflow_template_api_v1_workflows_workflows_templates_template_id_put) | **PUT** /api/v1/workflows/workflows/templates/{template_id} | Update Workflow Template
+*WorkflowsApi* | [**validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post**](docs/WorkflowsApi.md#validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post) | **POST** /api/v1/workflows/workflows/definitions/validate | Validate Workflow Definition
 
 
 ## Documentation For Models
@@ -317,12 +343,16 @@ Class | Method | HTTP request | Description
  - [BackupResponse](docs/BackupResponse.md)
  - [BackupType](docs/BackupType.md)
  - [BodyListAgentsApiV1AgentsGet](docs/BodyListAgentsApiV1AgentsGet.md)
+ - [BottleneckInfo](docs/BottleneckInfo.md)
  - [BulkDeleteResponse](docs/BulkDeleteResponse.md)
  - [BulkOperationResult](docs/BulkOperationResult.md)
  - [BulkToolServerOperation](docs/BulkToolServerOperation.md)
  - [ChatRequest](docs/ChatRequest.md)
  - [ChatResponse](docs/ChatResponse.md)
  - [ChatResponse1](docs/ChatResponse1.md)
+ - [ChatterSchemasChatWorkflowTemplatesResponse](docs/ChatterSchemasChatWorkflowTemplatesResponse.md)
+ - [ChatterSchemasWorkflowsWorkflowTemplatesResponse](docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md)
+ - [ComplexityMetrics](docs/ComplexityMetrics.md)
  - [ConversationCreate](docs/ConversationCreate.md)
  - [ConversationDeleteResponse](docs/ConversationDeleteResponse.md)
  - [ConversationResponse](docs/ConversationResponse.md)
@@ -372,12 +402,14 @@ Class | Method | HTTP request | Description
  - [JobStatus](docs/JobStatus.md)
  - [LocationInner](docs/LocationInner.md)
  - [LogoutResponse](docs/LogoutResponse.md)
+ - [MaxValue](docs/MaxValue.md)
  - [McpStatusResponse](docs/McpStatusResponse.md)
  - [MessageDeleteResponse](docs/MessageDeleteResponse.md)
  - [MessageResponse](docs/MessageResponse.md)
  - [MessageRole](docs/MessageRole.md)
  - [MetricType](docs/MetricType.md)
  - [MetricsResponse](docs/MetricsResponse.md)
+ - [MinValue](docs/MinValue.md)
  - [ModelDefCreate](docs/ModelDefCreate.md)
  - [ModelDefList](docs/ModelDefList.md)
  - [ModelDefUpdate](docs/ModelDefUpdate.md)
@@ -385,7 +417,10 @@ Class | Method | HTTP request | Description
  - [ModelDefaultResponse](docs/ModelDefaultResponse.md)
  - [ModelDeleteResponse](docs/ModelDeleteResponse.md)
  - [ModelType](docs/ModelType.md)
+ - [NodePropertyDefinition](docs/NodePropertyDefinition.md)
+ - [NodeTypeResponse](docs/NodeTypeResponse.md)
  - [OAuthConfigSchema](docs/OAuthConfigSchema.md)
+ - [OptimizationSuggestion](docs/OptimizationSuggestion.md)
  - [PaginationRequest](docs/PaginationRequest.md)
  - [PasswordChange](docs/PasswordChange.md)
  - [PasswordChangeResponse](docs/PasswordChangeResponse.md)
@@ -476,8 +511,22 @@ Class | Method | HTTP request | Description
  - [UserUpdate](docs/UserUpdate.md)
  - [ValidationError](docs/ValidationError.md)
  - [VariantAllocation](docs/VariantAllocation.md)
+ - [WorkflowAnalyticsResponse](docs/WorkflowAnalyticsResponse.md)
+ - [WorkflowDefinitionCreate](docs/WorkflowDefinitionCreate.md)
+ - [WorkflowDefinitionResponse](docs/WorkflowDefinitionResponse.md)
+ - [WorkflowDefinitionUpdate](docs/WorkflowDefinitionUpdate.md)
+ - [WorkflowDefinitionsResponse](docs/WorkflowDefinitionsResponse.md)
+ - [WorkflowEdge](docs/WorkflowEdge.md)
+ - [WorkflowEdgeData](docs/WorkflowEdgeData.md)
+ - [WorkflowExecutionRequest](docs/WorkflowExecutionRequest.md)
+ - [WorkflowExecutionResponse](docs/WorkflowExecutionResponse.md)
+ - [WorkflowNode](docs/WorkflowNode.md)
+ - [WorkflowNodeData](docs/WorkflowNodeData.md)
+ - [WorkflowTemplateCreate](docs/WorkflowTemplateCreate.md)
  - [WorkflowTemplateInfo](docs/WorkflowTemplateInfo.md)
- - [WorkflowTemplatesResponse](docs/WorkflowTemplatesResponse.md)
+ - [WorkflowTemplateResponse](docs/WorkflowTemplateResponse.md)
+ - [WorkflowTemplateUpdate](docs/WorkflowTemplateUpdate.md)
+ - [WorkflowValidationResponse](docs/WorkflowValidationResponse.md)
 
 
 <a id="documentation-for-authorization"></a>

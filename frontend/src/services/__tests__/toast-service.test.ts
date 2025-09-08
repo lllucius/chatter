@@ -123,11 +123,10 @@ describe('ToastService', () => {
   describe('Toast Limit Management', () => {
     test('should track toast count', () => {
       // Simulate toast opening
-      const openCallback = vi.fn();
-      toastService.success('Test 1');
+      const result = toastService.success('Test 1');
       
       // Get the onOpen callback and call it to simulate toast opening
-      const callArgs = (toast.success as any).mock.calls[0];
+      const callArgs = (toast as any).mock.calls[0];
       const options = callArgs[1];
       options.onOpen();
 
@@ -138,7 +137,7 @@ describe('ToastService', () => {
       // Set up service at max capacity
       for (let i = 0; i < 4; i++) {
         toastService.success(`Message ${i}`);
-        const callArgs = (toast.success as any).mock.calls[i];
+        const callArgs = (toast as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen(); // Simulate toast opening
       }
@@ -150,7 +149,7 @@ describe('ToastService', () => {
     test('should decrement count when toast closes', () => {
       toastService.success('Test message');
       
-      const callArgs = (toast.success as any).mock.calls[0];
+      const callArgs = (toast as any).mock.calls[0];
       const options = callArgs[1];
       
       // Simulate toast opening and closing
@@ -187,7 +186,7 @@ describe('ToastService', () => {
       const message = 'Loading...';
       toastService.loading(message);
 
-      expect(toast.info).toHaveBeenCalledWith(message, expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith(message, expect.objectContaining({
         autoClose: false, // Loading should not auto-close
         closeButton: false
       }));
@@ -197,12 +196,12 @@ describe('ToastService', () => {
   describe('Error Handling', () => {
     test('should handle empty messages gracefully', () => {
       toastService.info('');
-      expect(toast.info).toHaveBeenCalledWith('', expect.any(Object));
+      expect(toast).toHaveBeenCalledWith('', expect.any(Object));
     });
 
     test('should handle null/undefined messages', () => {
       toastService.info(null as any);
-      expect(toast.info).toHaveBeenCalledWith(null, expect.any(Object));
+      expect(toast).toHaveBeenCalledWith(null, expect.any(Object));
     });
 
     test('should handle invalid autoClose values', () => {
@@ -210,7 +209,7 @@ describe('ToastService', () => {
       toastService.info('Test', options);
 
       // Should still call toast with the provided value
-      expect(toast.info).toHaveBeenCalledWith('Test', expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith('Test', expect.objectContaining({
         autoClose: -1
       }));
     });
@@ -220,7 +219,7 @@ describe('ToastService', () => {
     test('should set correct default options', () => {
       toastService.info('Default options test');
 
-      expect(toast.info).toHaveBeenCalledWith('Default options test', expect.objectContaining({
+      expect(toast).toHaveBeenCalledWith('Default options test', expect.objectContaining({
         hideProgressBar: false,
         closeOnClick: true,
         pauseOnHover: true,
@@ -232,7 +231,7 @@ describe('ToastService', () => {
       // This would test position if it was configurable
       toastService.info('Position test');
       
-      expect(toast.info).toHaveBeenCalled();
+      expect(toast).toHaveBeenCalled();
     });
   });
 

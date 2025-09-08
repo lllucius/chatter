@@ -786,9 +786,10 @@ async def create_job(
 
     async with get_client() as sdk_client:
         job_request = JobCreateRequest(
-            job_type=job_type,
+            name=f"{job_type}_job",
+            function_name=job_type,
             priority=priority,
-            data=job_data
+            kwargs=job_data
         )
 
         response = await sdk_client.jobs_api.create_job_api_v1_jobs_post(

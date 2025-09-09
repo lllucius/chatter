@@ -61,7 +61,6 @@ const AdministrationPage: React.FC = () => {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [dialogType, setDialogType] = useState<'user' | 'backup' | 'plugin' | 'job'>('user');
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState('');
   
   // More options menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
@@ -178,7 +177,7 @@ const AdministrationPage: React.FC = () => {
     } catch (error: any) {
       // eslint-disable-next-line no-console
       console.error('Failed to load jobs:', error);
-      setError('Failed to load jobs');
+      toastService.error(error, 'Failed to load jobs');
     } finally {
       setDataLoading(false);
     }
@@ -189,7 +188,7 @@ const AdministrationPage: React.FC = () => {
       const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
       setJobStats(response.data);
     } catch (error: any) {
-      console.error('Failed to load job stats:', error);
+      toastService.error(error, 'Failed to load job stats');
     }
   }, []);
 
@@ -200,8 +199,7 @@ const AdministrationPage: React.FC = () => {
       const items = response.backups || [];
       setBackups(items);
     } catch (error: any) {
-      console.error('Failed to load backups:', error);
-      setError('Failed to load backups');
+      toastService.error(error, 'Failed to load backups');
     } finally {
       setDataLoading(false);
     }
@@ -212,7 +210,7 @@ const AdministrationPage: React.FC = () => {
       const response = await getSDK().plugins.listPluginsApiV1Plugins({});
       setPlugins(response.plugins || []);
     } catch (error: any) {
-      console.error('Failed to load plugins:', error);
+      toastService.error(error, 'Failed to load plugins');
     }
   }, []);
 
@@ -300,45 +298,26 @@ const AdministrationPage: React.FC = () => {
   const handleJobAction = async (action: 'cancel', jobId: string) => {
     try {
       setLoading(true);
-      setError('');
       switch (action) {
         case 'cancel':
           await getSDK().jobs.cancelJobApiV1JobsJobIdCancel({ jobId });
-          console.log('Job cancelled successfully!');
+          toastService.success('Job cancelled successfully!');
           loadJobs();
           loadJobStats();
           break;
       }
     } catch (error: any) {
-      console.error(`Error ${action} job:`, error);
-      const errorMsg = error.response?.data?.detail || error.message || `Failed to ${action} job`;
-      setError(errorMsg);
+      toastService.error(error, `Failed to ${action} job`);
     } finally {
       setLoading(false);
     }
   };
 
-  const showToast = (messageOrError: string | any, type: 'success' | 'error' | 'info' | 'warning' = 'info', fallback?: string) => {
-    switch (type) {
-      case 'success':
-        toastService.success(messageOrError);
-        break;
-      case 'error':
-        toastService.error(messageOrError, fallback);
-        break;
-      case 'warning':
-        toastService.warning(messageOrError, fallback);
-        break;
-      default:
-        toastService.info(messageOrError);
-    }
-  };
 
   // Bulk operations functions
   const performBulkOperation = async () => {
     try {
       setLoading(true);
-      setError('');
       
       const filters: any = {};
       
@@ -374,9 +353,8 @@ const AdministrationPage: React.FC = () => {
 
       const operation = bulkOperationData.dryRun ? 'Preview' : 'Deleted';
       const affectedCount = result?.data.successful_deletions || 0;
-      showToast(
-        `${operation}: ${affectedCount} ${bulkOperationData.operationType}`, 
-        bulkOperationData.dryRun ? 'info' : 'success'
+      toastService[bulkOperationData.dryRun ? 'info' : 'success'](
+        `${operation}: ${affectedCount} ${bulkOperationData.operationType}`
       );
 
       addNotification({
@@ -386,9 +364,7 @@ const AdministrationPage: React.FC = () => {
       });
 
     } catch (error: any) {
-      console.error('Bulk operation failed:', error);
-      setError(error.response?.data?.detail || error.message || 'Bulk operation failed');
-      showToast(error, 'error', 'Bulk operation failed');
+      toastService.error(error, 'Bulk operation failed');
     } finally {
       setLoading(false);
     }
@@ -413,21 +389,20 @@ const AdministrationPage: React.FC = () => {
   const handleUserSettingsSave = async () => {
     try {
       // In a real app, this would call the API to update the user
-      showToast('User settings updated successfully!', 'success');
+      toastService.success('User settings updated successfully!');
       setUserSettingsOpen(false);
       setEditingUser(null);
     } catch (error: any) {
-      showToast(error, 'error', 'Failed to update user settings');
+      toastService.error(error, 'Failed to update user settings');
     }
   };
 
   const handleBackupDownload = async () => {
     try {
       setLoading(true);
-      showToast('Backup download functionality will be available soon', 'info');
+      toastService.info('Backup download functionality will be available soon');
     } catch (error: any) {
-      console.error('Error downloading backup:', error);
-      setError('Failed to download backup');
+      toastService.error(error, 'Failed to download backup');
     } finally {
       setLoading(false);
     }
@@ -437,22 +412,20 @@ const AdministrationPage: React.FC = () => {
     try {
       if (enabled) {
         await getSDK().plugins.enablePluginApiV1PluginsPluginIdEnable({ pluginId });
-        showToast('Plugin enabled successfully', 'success');
+        toastService.success('Plugin enabled successfully');
       } else {
         await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisable({ pluginId });
-        showToast('Plugin disabled successfully', 'success');
+        toastService.success('Plugin disabled successfully');
       }
       loadPlugins();
     } catch (error: any) {
-      console.error('Error toggling plugin:', error);
-      setError('Failed to toggle plugin status');
+      toastService.error(error, 'Failed to toggle plugin status');
     }
   };
 
   const openDialog = (type: 'user' | 'backup' | 'plugin' | 'job') => {
     setDialogType(type);
     setDialogOpen(true);
-    setError('');
     setFormData({
       userId: '',
       email: '',
@@ -481,7 +454,6 @@ const AdministrationPage: React.FC = () => {
   const handleSubmit = async () => {
     try {
       setLoading(true);
-      setError('');
       switch (dialogType) {
         case 'user':
           await getSDK().auth.authRegister({
@@ -489,7 +461,7 @@ const AdministrationPage: React.FC = () => {
             email: formData.email,
             password: formData.password,
           });
-          showToast('User created successfully!', 'success');
+          toastService.success('User created successfully!');
           break;
         case 'backup':
           await getSDK().dataManagement.createBackupApiV1DataBackup({
@@ -498,7 +470,7 @@ const AdministrationPage: React.FC = () => {
             backup_type: 'full' as any,
             include_files: formData.includeDocuments,
           });
-          showToast('Backup created successfully!', 'success');
+          toastService.success('Backup created successfully!');
           loadBackups();
           break;
         case 'plugin':
@@ -506,7 +478,7 @@ const AdministrationPage: React.FC = () => {
             plugin_path: formData.pluginUrl,
             enable_on_install: true,
           });
-          showToast('Plugin installation started successfully!', 'success');
+          toastService.success('Plugin installation started successfully!');
           loadPlugins();
           break;
         case 'job':
@@ -521,7 +493,7 @@ const AdministrationPage: React.FC = () => {
               schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
             };
             await getSDK().jobs.createJobApiV1Jobs(jobCreateRequest);
-            showToast('Job created successfully!', 'success');
+            toastService.success('Job created successfully!');
             addNotification({
               title: 'Job Created',
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
@@ -555,9 +527,7 @@ const AdministrationPage: React.FC = () => {
         maxRetries: 3,
       });
     } catch (error: any) {
-      console.error('Error submitting form:', error);
-      const errorMsg = error.response?.data?.detail || error.message || 'An error occurred. Please try again.';
-      setError(errorMsg);
+      toastService.error(error, 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
     }
@@ -567,32 +537,29 @@ const AdministrationPage: React.FC = () => {
     if (window.confirm(`Are you sure you want to delete this ${type}?`)) {
       try {
         setLoading(true);
-        setError('');
         switch (type) {
           case 'user':
-            showToast('User deletion functionality requires implementation of admin user management API', 'warning');
+            toastService.warning('User deletion functionality requires implementation of admin user management API');
             break;
           case 'backup':
-            showToast('Backup deletion is not yet supported by the API', 'warning');
+            toastService.warning('Backup deletion is not yet supported by the API');
             break;
           case 'plugin':
             await getSDK().plugins.uninstallPluginApiV1PluginsPluginId({
               pluginId: id
             });
-            showToast('Plugin uninstalled successfully!', 'success');
+            toastService.success('Plugin uninstalled successfully!');
             loadPlugins();
             break;
           case 'job':
             await getSDK().jobs.cancelJobApiV1JobsJobIdCancel(id);
-            showToast('Job cancelled successfully!', 'success');
+            toastService.success('Job cancelled successfully!');
             loadJobs();
             loadJobStats();
             break;
         }
       } catch (error: any) {
-        console.error(`Error deleting ${type}:`, error);
-        const errorMsg = error.response?.data?.detail || error.message || `Failed to delete ${type}`;
-        setError(errorMsg);
+        toastService.error(error, `Failed to delete ${type}`);
       } finally {
         setLoading(false);
       }
@@ -602,22 +569,19 @@ const AdministrationPage: React.FC = () => {
   const handleEditAction = async (type: string) => {
     try {
       setLoading(true);
-      setError('');
       switch (type) {
         case 'user':
-          showToast('User editing functionality requires implementation of admin user management API', 'warning');
+          toastService.warning('User editing functionality requires implementation of admin user management API');
           break;
         case 'backup':
-          showToast('Backup editing functionality would be implemented with backup management API', 'warning');
+          toastService.warning('Backup editing functionality would be implemented with backup management API');
           break;
         case 'plugin':
-          showToast('Plugin editing functionality would be implemented based on plugin architecture', 'warning');
+          toastService.warning('Plugin editing functionality would be implemented based on plugin architecture');
           break;
       }
     } catch (error: any) {
-      console.error(`Error editing ${type}:`, error);
-      const errorMsg = error.response?.data?.detail || error.message || `Failed to edit ${type}`;
-      setError(errorMsg);
+      toastService.error(error, `Failed to edit ${type}`);
     } finally {
       setLoading(false);
     }
@@ -641,12 +605,6 @@ const AdministrationPage: React.FC = () => {
 
   return (
     <PageLayout title="Administration" toolbar={toolbar}>
-
-      {error && (
-        <Alert severity="error" sx={{ mb: 3 }}>
-          {error}
-        </Alert>
-      )}
 
       {/* Notifications Panel */}
       {notifications.length > 0 && (

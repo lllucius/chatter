@@ -66,6 +66,47 @@ const ModelManagementPageRefactored: React.FC = () => {
     setActiveTab(newValue);
   };
 
+  // Dynamic toolbar based on active tab
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          loadProviders();
+          // The CRUD table handles its own refresh
+        }}
+        size="small"
+      >
+        Refresh
+      </Button>
+      {activeTab === 0 ? (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            // The CRUD table handles creation via the "Create Provider" button in the toolbar
+          }}
+          size="small"
+        >
+          Create Provider
+        </Button>
+      ) : (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            // The CRUD table handles creation via the "Create Model" button in the toolbar
+          }}
+          disabled={providers.length === 0}
+          size="small"
+        >
+          Create Model
+        </Button>
+      )}
+    </>
+  );
+
   // Provider columns and config
   const providerColumns: CrudColumn<Provider>[] = [
     {
@@ -319,49 +360,6 @@ const ModelManagementPageRefactored: React.FC = () => {
     <ModelForm {...props} providers={providers} />
   );
 
-  const toolbar = (
-    <>
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={() => {
-          if (activeTab === 0) {
-            loadProviders();
-          }
-          // The CRUD table handles its own refresh
-        }}
-        size="small"
-      >
-        Refresh
-      </Button>
-      {activeTab === 0 && (
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation
-          }}
-          size="small"
-        >
-          Create Provider
-        </Button>
-      )}
-      {activeTab === 1 && (
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation
-          }}
-          disabled={providers.length === 0}
-          size="small"
-        >
-          Create Model
-        </Button>
-      )}
-    </>
-  );
-
   return (
     <PageLayout title="Model Management" toolbar={toolbar}>
       <Tabs
@@ -371,8 +369,8 @@ const ModelManagementPageRefactored: React.FC = () => {
         scrollButtons="auto"
         sx={{ mb: 2 }}
       >
-        <Tab value={0} label="Providers" />
-        <Tab value={1} label="Models" />
+        <Tab iconPosition="start" value={0} label="Providers" />
+        <Tab iconPosition="start" value={1} label="Models" />
       </Tabs>
 
       <TabPanel value={activeTab} index={0}>

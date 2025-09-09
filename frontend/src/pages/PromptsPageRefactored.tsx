@@ -102,9 +102,7 @@ const PromptsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().prompts.deletePromptApiV1PromptsPromptId({
-        promptId: id,
-      });
+      await getSDK().prompts.deletePromptApiV1PromptsPromptId(id);
     },
   };
 

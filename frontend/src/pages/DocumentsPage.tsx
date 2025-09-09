@@ -308,9 +308,7 @@ const DocumentsPage: React.FC = () => {
         query: searchQuery,
         limit: 10,
       };
-      const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearch({ 
-        documentSearchRequest: searchRequest 
-      });
+      const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearch(searchRequest);
       setSearchResults(response.results);
     } catch (err: any) {
       toastService.error(err, 'Failed to search documents');

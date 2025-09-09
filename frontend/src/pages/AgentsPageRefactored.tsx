@@ -73,17 +73,15 @@ const AgentsPageRefactored: React.FC = () => {
     },
 
     create: async (data: AgentCreateRequest) => {
-      const response = await getSDK().agents.createAgentApiV1Agents({
-        agentCreateRequest: data,
-      });
+      const response = await getSDK().agents.createAgentApiV1Agents(data);
       return response.data;
     },
 
     update: async (id: string, data: AgentUpdateRequest) => {
-      const response = await getSDK().agents.updateAgentApiV1AgentsAgentId({
-        agentId: id,
-        agentUpdateRequest: data,
-      });
+      const response = await getSDK().agents.updateAgentApiV1AgentsAgentId(
+        id,
+        data
+      );
       return response.data;
     },
 

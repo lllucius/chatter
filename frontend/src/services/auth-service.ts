@@ -44,9 +44,7 @@ class AuthService {
         password,
       };
 
-      const response = await this.baseSDK.auth.loginApiV1AuthLoginPost({
-        userLogin: loginData,
-      });
+      const response = await this.baseSDK.auth.authLogin(loginData);
 
       if (response.accessToken) {
         this.token = response.accessToken;
@@ -78,7 +76,7 @@ class AuthService {
     try {
       if (this.isAuthenticated()) {
         const authenticatedSDK = this.getSDK();
-        await authenticatedSDK.auth.logoutApiV1AuthLogoutPost();
+        await authenticatedSDK.auth.authLogout();
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -95,8 +93,8 @@ class AuthService {
         return false;
       }
 
-      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefreshPost({
-        tokenRefresh: { refreshToken },
+      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh({
+        refresh_token: refreshToken,
       });
 
       if (response.accessToken) {

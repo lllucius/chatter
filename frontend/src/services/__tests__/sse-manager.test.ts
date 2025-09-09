@@ -140,6 +140,8 @@ describe('SSEEventManager', () => {
   afterEach(() => {
     sseManager.disconnect();
     vi.clearAllTimers();
+    // Reset mock stream reader to prevent race conditions
+    mockStreamReader = null;
   });
 
   describe('Connection Management', () => {
@@ -219,12 +221,17 @@ describe('SSEEventManager', () => {
   });
 
   describe('Event Processing', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       // Mock fetch to return a stream with test events
       (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
       sseManager.connect();
-      // Wait for connection
-      return new Promise(resolve => setTimeout(resolve, 50));
+      // Wait for connection - make sure mockStreamReader is available
+      await new Promise(resolve => setTimeout(resolve, 50));
+      
+      // Ensure mockStreamReader is not null
+      if (!mockStreamReader) {
+        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+      }
     });
 
     test('should process chat message chunk events', async () => {
@@ -247,6 +254,13 @@ describe('SSEEventManager', () => {
         mockStreamReader.addMessage(sseMessage);
         // Allow time for message processing
         await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        // Fallback: create a new mock if needed
+        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+        if (mockStreamReader) {
+          mockStreamReader.addMessage(sseMessage);
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
       
       expect(listener).toHaveBeenCalledWith(eventData);
@@ -273,6 +287,13 @@ describe('SSEEventManager', () => {
       if (mockStreamReader) {
         mockStreamReader.addMessage(sseMessage);
         await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        // Fallback: create a new mock if needed
+        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+        if (mockStreamReader) {
+          mockStreamReader.addMessage(sseMessage);
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
       
       expect(listener).toHaveBeenCalledWith(eventData);
@@ -299,6 +320,13 @@ describe('SSEEventManager', () => {
       if (mockStreamReader) {
         mockStreamReader.addMessage(sseMessage);
         await new Promise(resolve => setTimeout(resolve, 50));
+      } else {
+        // Fallback: create a new mock if needed
+        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+        if (mockStreamReader) {
+          mockStreamReader.addMessage(sseMessage);
+          await new Promise(resolve => setTimeout(resolve, 50));
+        }
       }
       
       expect(listener).toHaveBeenCalledWith(eventData);

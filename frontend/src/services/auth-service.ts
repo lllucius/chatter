@@ -1,15 +1,54 @@
 /**
- * Authentication service using ChatterSDK directly
+ * Authentication service using individual API classes
  * Manages tokens and provides authenticated SDK instances
  */
-import { ChatterSDK, UserLogin } from 'chatter-sdk';
+import { 
+  Configuration,
+  AuthenticationApi,
+  AgentsApi,
+  ProfilesApi,
+  PromptsApi,
+  DocumentsApi,
+  ToolServersApi,
+  ChatApi,
+  ModelRegistryApi,
+  WorkflowsApi,
+  ABTestingApi,
+  AnalyticsApi,
+  DataManagementApi,
+  EventsApi,
+  HealthApi,
+  JobsApi,
+  PluginsApi,
+  UserLogin
+} from 'chatter-sdk';
+
+// Unified SDK interface that matches the expected structure
+interface ChatterSDK {
+  auth: AuthenticationApi;
+  agents: AgentsApi;
+  profiles: ProfilesApi;
+  prompts: PromptsApi;
+  documents: DocumentsApi;
+  toolServers: ToolServersApi;
+  chat: ChatApi;
+  modelRegistry: ModelRegistryApi;
+  workflows: WorkflowsApi;
+  abTesting: ABTestingApi;
+  analytics: AnalyticsApi;
+  dataManagement: DataManagementApi;
+  events: EventsApi;
+  health: HealthApi;
+  jobs: JobsApi;
+  plugins: PluginsApi;
+}
 
 class AuthService {
   private token: string | null = null;
-  private baseSDK: ChatterSDK;
+  private baseConfiguration: Configuration;
 
   constructor() {
-    this.baseSDK = new ChatterSDK({
+    this.baseConfiguration = new Configuration({
       basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
     });
     this.loadTokenFromStorage();
@@ -31,10 +70,31 @@ class AuthService {
   }
 
   public getSDK(): ChatterSDK {
-    if (this.token) {
-      return this.baseSDK.withAuth(this.token, 'bearer');
-    }
-    return this.baseSDK;
+    const configuration = this.token
+      ? new Configuration({
+          ...this.baseConfiguration,
+          accessToken: this.token,
+        })
+      : this.baseConfiguration;
+
+    return {
+      auth: new AuthenticationApi(configuration),
+      agents: new AgentsApi(configuration),
+      profiles: new ProfilesApi(configuration),
+      prompts: new PromptsApi(configuration),
+      documents: new DocumentsApi(configuration),
+      toolServers: new ToolServersApi(configuration),
+      chat: new ChatApi(configuration),
+      modelRegistry: new ModelRegistryApi(configuration),
+      workflows: new WorkflowsApi(configuration),
+      abTesting: new ABTestingApi(configuration),
+      analytics: new AnalyticsApi(configuration),
+      dataManagement: new DataManagementApi(configuration),
+      events: new EventsApi(configuration),
+      health: new HealthApi(configuration),
+      jobs: new JobsApi(configuration),
+      plugins: new PluginsApi(configuration),
+    };
   }
 
   public async login(username: string, password: string): Promise<void> {
@@ -44,7 +104,9 @@ class AuthService {
         password,
       };
 
-      const response = await this.baseSDK.auth.authLogin(loginData);
+      const response = await this.getSDK().auth.loginApiV1AuthLoginPost({
+        userLogin: loginData,
+      });
 
       if (response.accessToken) {
         this.token = response.accessToken;
@@ -75,8 +137,8 @@ class AuthService {
   public async logout(): Promise<void> {
     try {
       if (this.isAuthenticated()) {
-        const authenticatedSDK = this.getSDK();
-        await authenticatedSDK.auth.authLogout();
+        const sdk = this.getSDK();
+        await sdk.auth.logoutApiV1AuthLogoutPost();
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -93,8 +155,10 @@ class AuthService {
         return false;
       }
 
-      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh({
-        refresh_token: refreshToken,
+      const response = await this.getSDK().auth.refreshTokenApiV1AuthRefreshPost({
+        tokenRefresh: {
+          refresh_token: refreshToken,
+        },
       });
 
       if (response.accessToken) {
@@ -124,12 +188,15 @@ class AuthService {
   }
 
   public getURL(): string | null {
-    return this.baseSDK.withConfig({}).basePath || null;
+    return this.baseConfiguration.basePath || null;
   }
 }
 
 // Create and export a singleton instance
 export const authService = new AuthService();
+
+// Export the ChatterSDK type for use in other files
+export type { ChatterSDK };
 
 // Export the ChatterSDK instance for direct use
 export const getSDK = (): ChatterSDK => authService.getSDK();

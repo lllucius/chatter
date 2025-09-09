@@ -16,17 +16,17 @@ A complete, hand-crafted TypeScript SDK for the Chatter API with full type safet
 ## Installation
 
 ```bash
-npm install @chatter/sdk-ts
+npm install @chatter/sdk/typescript
 # or
-yarn add @chatter/sdk-ts
+yarn add @chatter/sdk/typescript
 # or
-pnpm add @chatter/sdk-ts
+pnpm add @chatter/sdk/typescript
 ```
 
 ## Quick Start
 
 ```typescript
-import { ChatterSDK } from '@chatter/sdk-ts';
+import { ChatterSDK } from '@chatter/sdk/typescript';
 
 // Initialize the SDK
 const chatter = new ChatterSDK({
@@ -118,7 +118,7 @@ const authenticatedChatter = chatter.withAuth('new-token', 'bearer');
 ### Middleware
 
 ```typescript
-import { ChatterSDK, Middleware } from '@chatter/sdk-ts';
+import { ChatterSDK, Middleware } from '@chatter/sdk/typescript';
 
 // Custom logging middleware
 const loggingMiddleware: Middleware = {
@@ -145,7 +145,7 @@ const withLogging = chatter.withMiddleware(loggingMiddleware);
 The SDK provides comprehensive error handling with typed error objects:
 
 ```typescript
-import { ChatterAPIError, ChatterSDKError } from '@chatter/sdk-ts';
+import { ChatterAPIError, ChatterSDKError } from '@chatter/sdk/typescript';
 
 try {
   const response = await chatter.chat.chatChat({

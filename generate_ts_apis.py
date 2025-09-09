@@ -363,7 +363,7 @@ def main():
     grouped_ops = group_operations_by_tag(spec)
     
     # Generate API classes
-    apis_dir = Path("sdk-ts/src/apis")
+    apis_dir = Path("sdk/typescript/src/apis")
     apis_dir.mkdir(parents=True, exist_ok=True)
     
     api_classes = []

@@ -1,5 +1,5 @@
 {
-  "name": "@chatter/sdk-ts",
+  "name": "@chatter/sdk/typescript",
   "version": "0.1.0",
   "description": "Complete TypeScript SDK for Chatter API - Hand-crafted with full type safety",
   "main": "./dist/index.js",
@@ -38,6 +38,6 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/lllucius/chatter.git",
-    "directory": "sdk-ts"
+    "directory": "sdk/typescript"
   }
 }

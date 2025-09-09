@@ -199,7 +199,7 @@ def main():
     schemas = spec.get("components", {}).get("schemas", {})
     
     # Generate models
-    models_dir = Path("sdk-ts/src/models")
+    models_dir = Path("sdk/typescript/src/models")
     models_dir.mkdir(parents=True, exist_ok=True)
     
     model_files = []

@@ -2,7 +2,7 @@
  * Generated API client for Authentication
  */
 import { APIKeyCreate, APIKeyResponse, APIKeyRevokeResponse, AccountDeactivateResponse, LogoutResponse, PasswordChange, PasswordChangeResponse, PasswordResetConfirmResponse, PasswordResetRequestResponse, TokenRefresh, TokenRefreshResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AuthenticationApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,8 +21,8 @@ Returns:
     User data and authentication tokens
    */
   public async authRegister(data: UserCreate): Promise<TokenResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -40,8 +40,8 @@ Returns:
     User data and authentication tokens
    */
   public async authLogin(data: UserLogin): Promise<TokenResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -59,8 +59,8 @@ Returns:
     New access and refresh tokens
    */
   public async refreshTokenApiV1AuthRefresh(data: TokenRefresh): Promise<TokenRefreshResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -76,8 +76,8 @@ Returns:
     Current user data
    */
   public async getCurrentUserInfoApiV1AuthMe(): Promise<UserResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<UserResponse>(`/api/v1/auth/me`, requestOptions);
@@ -94,8 +94,8 @@ Returns:
     Updated user data
    */
   public async updateProfileApiV1AuthMe(data: UserUpdate): Promise<UserResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -114,8 +114,8 @@ Returns:
     Success message
    */
   public async changePasswordApiV1AuthChangePassword(data: PasswordChange): Promise<PasswordChangeResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -134,8 +134,8 @@ Returns:
     Created API key
    */
   public async createApiKeyApiV1AuthApiKey(data: APIKeyCreate): Promise<APIKeyResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -153,8 +153,8 @@ Returns:
     Success message
    */
   public async revokeApiKeyApiV1AuthApiKey(): Promise<APIKeyRevokeResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<APIKeyRevokeResponse>(`/api/v1/auth/api-key`, requestOptions);
@@ -170,8 +170,8 @@ Returns:
     List of API keys
    */
   public async listApiKeysApiV1AuthApiKeys(): Promise<APIKeyResponse[]> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<APIKeyResponse[]>(`/api/v1/auth/api-keys`, requestOptions);
@@ -188,8 +188,8 @@ Returns:
     Success message
    */
   public async authLogout(): Promise<LogoutResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<LogoutResponse>(`/api/v1/auth/logout`, requestOptions);
@@ -205,12 +205,13 @@ Args:
 Returns:
     Success message
    */
-  public async requestPasswordResetApiV1AuthPasswordResetRequest(options?: RequestOptions): Promise<PasswordResetRequestResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+  public async requestPasswordResetApiV1AuthPasswordResetRequest(options?: { email?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PasswordResetRequestResponse> {
+    const requestOptions = {
+      method: 'POST' as const,
       headers: options?.headers,
       query: {
-        'email': options?.email ?? '',
+        'email': options?.email,
+        ...options?.query
       },
     };
 
@@ -228,13 +229,14 @@ Args:
 Returns:
     Success message
    */
-  public async confirmPasswordResetApiV1AuthPasswordResetConfirm(options?: RequestOptions): Promise<PasswordResetConfirmResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+  public async confirmPasswordResetApiV1AuthPasswordResetConfirm(options?: { token?: string; newPassword?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PasswordResetConfirmResponse> {
+    const requestOptions = {
+      method: 'POST' as const,
       headers: options?.headers,
       query: {
-        'token': options?.token ?? '',
-        'new_password': options?.newPassword ?? '',
+        'token': options?.token,
+        'new_password': options?.newPassword,
+        ...options?.query
       },
     };
 
@@ -252,8 +254,8 @@ Returns:
     Success message
    */
   public async deactivateAccountApiV1AuthAccount(): Promise<AccountDeactivateResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<AccountDeactivateResponse>(`/api/v1/auth/account`, requestOptions);

@@ -1,8 +1,8 @@
 /**
  * Generated API client for Prompts
  */
-import { PromptCloneRequest, PromptCreate, PromptDeleteResponse, PromptListResponse, PromptResponse, PromptStatsResponse, PromptTestRequest, PromptTestResponse, PromptUpdate } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { PromptCategory, PromptCloneRequest, PromptCreate, PromptDeleteResponse, PromptListResponse, PromptResponse, PromptStatsResponse, PromptTestRequest, PromptTestResponse, PromptType, PromptUpdate } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class PromptsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,8 +21,8 @@ Returns:
     Created prompt information
    */
   public async createPromptApiV1Prompts(data: PromptCreate): Promise<PromptResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -39,8 +39,8 @@ Returns:
     Prompt statistics
    */
   public async getPromptStatsApiV1PromptsStatsOverview(): Promise<PromptStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<PromptStatsResponse>(`/api/v1/prompts/stats/overview`, requestOptions);
@@ -64,9 +64,9 @@ Args:
 Returns:
     List of prompts with pagination info
    */
-  public async listPromptsApiV1Prompts(options?: RequestOptions): Promise<PromptListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listPromptsApiV1Prompts(options?: { promptType?: PromptType | null; category?: PromptCategory | null; tags?: string[] | null; isPublic?: boolean | null; isChain?: boolean | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PromptListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'prompt_type': options?.promptType,
@@ -78,6 +78,7 @@ Returns:
         'offset': options?.offset,
         'sort_by': options?.sortBy,
         'sort_order': options?.sortOrder,
+        ...options?.query
       },
     };
 
@@ -96,8 +97,8 @@ Returns:
     Prompt information
    */
   public async getPromptApiV1PromptsPromptId(promptId: string): Promise<PromptResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<PromptResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
@@ -115,8 +116,8 @@ Returns:
     Updated prompt information
    */
   public async updatePromptApiV1PromptsPromptId(promptId: string, data: PromptUpdate): Promise<PromptResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -135,8 +136,8 @@ Returns:
     Success message
    */
   public async deletePromptApiV1PromptsPromptId(promptId: string): Promise<PromptDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<PromptDeleteResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
@@ -154,8 +155,8 @@ Returns:
     Test results
    */
   public async testPromptApiV1PromptsPromptIdTest(promptId: string, data: PromptTestRequest): Promise<PromptTestResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -174,8 +175,8 @@ Returns:
     Cloned prompt information
    */
   public async clonePromptApiV1PromptsPromptIdClone(promptId: string, data: PromptCloneRequest): Promise<PromptResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 

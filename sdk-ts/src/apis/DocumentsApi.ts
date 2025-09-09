@@ -1,8 +1,8 @@
 /**
  * Generated API client for Documents
  */
-import { DocumentChunksResponse, DocumentDeleteResponse, DocumentListResponse, DocumentProcessingRequest, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentSearchResponse, DocumentStatsResponse, DocumentUpdate, Record } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { DocumentChunksResponse, DocumentDeleteResponse, DocumentListResponse, DocumentProcessingRequest, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentSearchResponse, DocumentStatsResponse, DocumentStatus, DocumentType, DocumentUpdate } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -27,8 +27,8 @@ Returns:
     Created document information
    */
   public async uploadDocumentApiV1DocumentsUpload(data: FormData): Promise<DocumentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -52,9 +52,9 @@ Args:
 Returns:
     List of documents with pagination info
    */
-  public async listDocumentsApiV1Documents(options?: RequestOptions): Promise<DocumentListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listDocumentsApiV1Documents(options?: { status?: DocumentStatus | null; documentType?: DocumentType | null; tags?: string[] | null; ownerId?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'status': options?.status,
@@ -65,6 +65,7 @@ Returns:
         'offset': options?.offset,
         'sort_by': options?.sortBy,
         'sort_order': options?.sortOrder,
+        ...options?.query
       },
     };
 
@@ -82,8 +83,8 @@ Returns:
     Document information
    */
   public async getDocumentApiV1DocumentsDocumentId(documentId: string): Promise<DocumentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<DocumentResponse>(`/api/v1/documents/${documentId}`, requestOptions);
@@ -101,8 +102,8 @@ Returns:
     Updated document information
    */
   public async updateDocumentApiV1DocumentsDocumentId(documentId: string, data: DocumentUpdate): Promise<DocumentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -121,8 +122,8 @@ Returns:
     Success message
    */
   public async deleteDocumentApiV1DocumentsDocumentId(documentId: string): Promise<DocumentDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<DocumentDeleteResponse>(`/api/v1/documents/${documentId}`, requestOptions);
@@ -139,8 +140,8 @@ Returns:
     Search results
    */
   public async searchDocumentsApiV1DocumentsSearch(data: DocumentSearchRequest): Promise<DocumentSearchResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -159,13 +160,14 @@ Args:
 Returns:
     List of document chunks with pagination
    */
-  public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: RequestOptions): Promise<DocumentChunksResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentChunksResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
+        ...options?.query
       },
     };
 
@@ -184,8 +186,8 @@ Returns:
     Processing status
    */
   public async processDocumentApiV1DocumentsDocumentIdProcess(documentId: string, data: DocumentProcessingRequest): Promise<DocumentProcessingResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -202,8 +204,8 @@ Returns:
     Document statistics
    */
   public async getDocumentStatsApiV1DocumentsStatsOverview(): Promise<DocumentStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<DocumentStatsResponse>(`/api/v1/documents/stats/overview`, requestOptions);
@@ -220,8 +222,8 @@ Returns:
     File download response
    */
   public async downloadDocumentApiV1DocumentsDocumentIdDownload(documentId: string): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/documents/${documentId}/download`, requestOptions);
@@ -238,8 +240,8 @@ Returns:
     Processing status
    */
   public async reprocessDocumentApiV1DocumentsDocumentIdReprocess(documentId: string): Promise<DocumentProcessingResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<DocumentProcessingResponse>(`/api/v1/documents/${documentId}/reprocess`, requestOptions);

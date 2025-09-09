@@ -1,8 +1,8 @@
 /**
  * Generated API client for Plugins
  */
-import { PluginActionResponse, PluginDeleteResponse, PluginHealthCheckResponse, PluginInstallRequest, PluginListResponse, PluginResponse, PluginStatsResponse, PluginUpdateRequest, Record } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { PluginActionResponse, PluginDeleteResponse, PluginHealthCheckResponse, PluginInstallRequest, PluginListResponse, PluginResponse, PluginStatsResponse, PluginStatus, PluginType, PluginUpdateRequest } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class PluginsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,8 +21,8 @@ Returns:
     Installed plugin data
    */
   public async installPluginApiV1PluginsInstall(data: PluginInstallRequest): Promise<PluginResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -39,14 +39,15 @@ Args:
 Returns:
     List of installed plugins
    */
-  public async listPluginsApiV1Plugins(options?: RequestOptions): Promise<PluginListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listPluginsApiV1Plugins(options?: { pluginType?: PluginType | null; status?: PluginStatus | null; enabled?: boolean | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PluginListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'plugin_type': options?.pluginType,
         'status': options?.status,
         'enabled': options?.enabled,
+        ...options?.query
       },
     };
 
@@ -64,8 +65,8 @@ Returns:
     Plugin data
    */
   public async getPluginApiV1PluginsPluginId(pluginId: string): Promise<PluginResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<PluginResponse>(`/api/v1/plugins/${pluginId}`, requestOptions);
@@ -83,8 +84,8 @@ Returns:
     Updated plugin data
    */
   public async updatePluginApiV1PluginsPluginId(pluginId: string, data: PluginUpdateRequest): Promise<PluginResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -102,8 +103,8 @@ Returns:
     Uninstall result
    */
   public async uninstallPluginApiV1PluginsPluginId(pluginId: string): Promise<PluginDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<PluginDeleteResponse>(`/api/v1/plugins/${pluginId}`, requestOptions);
@@ -120,8 +121,8 @@ Returns:
     Action result
    */
   public async enablePluginApiV1PluginsPluginIdEnable(pluginId: string): Promise<PluginActionResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<PluginActionResponse>(`/api/v1/plugins/${pluginId}/enable`, requestOptions);
@@ -138,8 +139,8 @@ Returns:
     Action result
    */
   public async disablePluginApiV1PluginsPluginIdDisable(pluginId: string): Promise<PluginActionResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<PluginActionResponse>(`/api/v1/plugins/${pluginId}/disable`, requestOptions);
@@ -155,12 +156,13 @@ Args:
 Returns:
     Health check results
    */
-  public async healthCheckPluginsApiV1PluginsHealth(options?: RequestOptions): Promise<PluginHealthCheckResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async healthCheckPluginsApiV1PluginsHealth(options?: { autoDisableUnhealthy?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PluginHealthCheckResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'auto_disable_unhealthy': options?.autoDisableUnhealthy,
+        ...options?.query
       },
     };
 
@@ -177,8 +179,8 @@ Returns:
     Plugin system statistics
    */
   public async getPluginStatsApiV1PluginsStats(): Promise<PluginStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<PluginStatsResponse>(`/api/v1/plugins/stats`, requestOptions);
@@ -195,8 +197,8 @@ Returns:
     Dependency check results
    */
   public async checkPluginDependenciesApiV1PluginsPluginIdDependencies(pluginId: string): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/plugins/${pluginId}/dependencies`, requestOptions);
@@ -213,8 +215,8 @@ Returns:
     Bulk operation results
    */
   public async bulkEnablePluginsApiV1PluginsBulkEnable(data: string[]): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -232,8 +234,8 @@ Returns:
     Bulk operation results
    */
   public async bulkDisablePluginsApiV1PluginsBulkDisable(data: string[]): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 

@@ -1,8 +1,8 @@
 /**
  * Generated API client for Data Management
  */
-import { BackupListResponse, BackupRequest, BackupResponse, BulkDeleteResponse, ExportDataRequest, ExportDataResponse, RestoreRequest, RestoreResponse, StorageStatsResponse } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { BackupListResponse, BackupRequest, BackupResponse, BackupType, BulkDeleteResponse, ExportDataRequest, ExportDataResponse, RestoreRequest, RestoreResponse, StorageStatsResponse } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DataManagementApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -13,8 +13,8 @@ export class DataManagementApi extends BaseAPI {
    * Export data in specified format.
    */
   public async exportDataApiV1DataExport(data: ExportDataRequest): Promise<ExportDataResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -24,8 +24,8 @@ export class DataManagementApi extends BaseAPI {
    * Create a data backup.
    */
   public async createBackupApiV1DataBackup(data: BackupRequest): Promise<BackupResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -34,13 +34,14 @@ export class DataManagementApi extends BaseAPI {
   /**List Backups
    * List available backups.
    */
-  public async listBackupsApiV1DataBackups(options?: RequestOptions): Promise<BackupListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listBackupsApiV1DataBackups(options?: { backupType?: BackupType | null; status?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<BackupListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'backup_type': options?.backupType,
         'status': options?.status,
+        ...options?.query
       },
     };
 
@@ -50,8 +51,8 @@ export class DataManagementApi extends BaseAPI {
    * Restore data from a backup.
    */
   public async restoreFromBackupApiV1DataRestore(data: RestoreRequest): Promise<RestoreResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -61,8 +62,8 @@ export class DataManagementApi extends BaseAPI {
    * Get storage statistics and usage information.
    */
   public async getStorageStatsApiV1DataStats(): Promise<StorageStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<StorageStatsResponse>(`/api/v1/data/stats`, requestOptions);
@@ -71,8 +72,8 @@ export class DataManagementApi extends BaseAPI {
    * Bulk delete documents.
    */
   public async bulkDeleteDocumentsApiV1DataBulkDeleteDocuments(data: string[]): Promise<BulkDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -82,8 +83,8 @@ export class DataManagementApi extends BaseAPI {
    * Bulk delete conversations.
    */
   public async bulkDeleteConversationsApiV1DataBulkDeleteConversations(data: string[]): Promise<BulkDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -93,8 +94,8 @@ export class DataManagementApi extends BaseAPI {
    * Bulk delete prompts.
    */
   public async bulkDeletePromptsApiV1DataBulkDeletePrompts(data: string[]): Promise<BulkDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 

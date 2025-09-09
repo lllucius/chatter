@@ -1,8 +1,8 @@
 /**
  * Generated API client for Chat
  */
-import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse, Record } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ChatApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -93,8 +93,8 @@ Available templates:
 
    */
   public async createConversationApiV1ChatConversations(data: ConversationCreate): Promise<ConversationResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -103,13 +103,14 @@ Available templates:
   /**List Conversations
    * List conversations for the current user.
    */
-  public async listConversationsApiV1ChatConversations(options?: RequestOptions): Promise<ConversationSearchResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listConversationsApiV1ChatConversations(options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationSearchResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
+        ...options?.query
       },
     };
 
@@ -118,12 +119,13 @@ Available templates:
   /**Get Conversation
    * Get conversation details with optional messages.
    */
-  public async getConversationApiV1ChatConversationsConversationId(conversationId: string, options?: RequestOptions): Promise<ConversationWithMessages> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getConversationApiV1ChatConversationsConversationId(conversationId: string, options?: { includeMessages?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationWithMessages> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'include_messages': options?.includeMessages,
+        ...options?.query
       },
     };
 
@@ -133,8 +135,8 @@ Available templates:
    * Update conversation.
    */
   public async updateConversationApiV1ChatConversationsConversationId(conversationId: string, data: ConversationUpdate): Promise<ConversationResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -144,8 +146,8 @@ Available templates:
    * Delete conversation.
    */
   public async deleteConversationApiV1ChatConversationsConversationId(conversationId: string): Promise<ConversationDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<ConversationDeleteResponse>(`/api/v1/chat/conversations/${conversationId}`, requestOptions);
@@ -153,13 +155,14 @@ Available templates:
   /**Get Conversation Messages
    * Get messages from a conversation.
    */
-  public async getConversationMessagesApiV1ChatConversationsConversationIdMessages(conversationId: string, options?: RequestOptions): Promise<MessageResponse[]> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getConversationMessagesApiV1ChatConversationsConversationIdMessages(conversationId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<MessageResponse[]> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
+        ...options?.query
       },
     };
 
@@ -169,8 +172,8 @@ Available templates:
    * Delete a message from a conversation.
    */
   public async deleteMessageApiV1ChatConversationsConversationIdMessagesMessageId(conversationId: string, messageId: string): Promise<MessageDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<MessageDeleteResponse>(`/api/v1/chat/conversations/${conversationId}/messages/${messageId}`, requestOptions);
@@ -257,8 +260,8 @@ Available templates:
 
    */
   public async chatChat(data: ChatRequest): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -268,8 +271,8 @@ Available templates:
    * Get list of available MCP tools.
    */
   public async getAvailableToolsApiV1ChatToolsAvailable(): Promise<AvailableToolsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<AvailableToolsResponse>(`/api/v1/chat/tools/available`, requestOptions);
@@ -278,8 +281,8 @@ Available templates:
    * Get available workflow templates.
    */
   public async getWorkflowTemplatesApiV1ChatTemplates(): Promise<chatter__schemas__chat__WorkflowTemplatesResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<chatter__schemas__chat__WorkflowTemplatesResponse>(`/api/v1/chat/templates`, requestOptions);
@@ -366,8 +369,8 @@ Available templates:
 
    */
   public async chatWithTemplateApiV1ChatTemplateTemplateName(templateName: string, data: ChatRequest): Promise<ChatResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -377,8 +380,8 @@ Available templates:
    * Get workflow performance statistics.
    */
   public async getPerformanceStatsApiV1ChatPerformanceStats(): Promise<PerformanceStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<PerformanceStatsResponse>(`/api/v1/chat/performance/stats`, requestOptions);
@@ -387,8 +390,8 @@ Available templates:
    * Get MCP service status.
    */
   public async getMcpStatusApiV1ChatMcpStatus(): Promise<McpStatusResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<McpStatusResponse>(`/api/v1/chat/mcp/status`, requestOptions);

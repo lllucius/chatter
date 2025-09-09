@@ -1,8 +1,8 @@
 /**
  * Generated API client for Jobs
  */
-import { JobActionResponse, JobCreateRequest, JobListResponse, JobResponse, JobStatsResponse, Record } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { JobActionResponse, JobCreateRequest, JobListResponse, JobPriority, JobResponse, JobStatsResponse, JobStatus } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class JobsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -20,8 +20,8 @@ Returns:
     Created job data
    */
   public async createJobApiV1Jobs(data: JobCreateRequest): Promise<JobResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -37,9 +37,9 @@ Args:
 Returns:
     List of jobs with pagination info
    */
-  public async listJobsApiV1Jobs(data: string[] | null, options?: RequestOptions): Promise<JobListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listJobsApiV1Jobs(data: string[] | null, options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'status': options?.status,
@@ -52,6 +52,7 @@ Returns:
         'offset': options?.offset,
         'sort_by': options?.sortBy,
         'sort_order': options?.sortOrder,
+        ...options?.query
       },
       body: data,
     };
@@ -69,8 +70,8 @@ Returns:
     Job data
    */
   public async getJobApiV1JobsJobId(jobId: string): Promise<JobResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<JobResponse>(`/api/v1/jobs/${jobId}`, requestOptions);
@@ -86,8 +87,8 @@ Returns:
     Cancellation result
    */
   public async cancelJobApiV1JobsJobIdCancel(jobId: string): Promise<JobActionResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<JobActionResponse>(`/api/v1/jobs/${jobId}/cancel`, requestOptions);
@@ -102,8 +103,8 @@ Returns:
     Job statistics
    */
   public async getJobStatsApiV1JobsStatsOverview(): Promise<JobStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<JobStatsResponse>(`/api/v1/jobs/stats/overview`, requestOptions);
@@ -121,12 +122,13 @@ Args:
 Returns:
     Cleanup statistics
    */
-  public async cleanupJobsApiV1JobsCleanup(options?: RequestOptions): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+  public async cleanupJobsApiV1JobsCleanup(options?: { force?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestOptions = {
+      method: 'POST' as const,
       headers: options?.headers,
       query: {
         'force': options?.force,
+        ...options?.query
       },
     };
 

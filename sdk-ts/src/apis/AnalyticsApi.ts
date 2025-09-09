@@ -1,8 +1,8 @@
 /**
  * Generated API client for Analytics
  */
-import { ConversationStatsResponse, DashboardResponse, DocumentAnalyticsResponse, PerformanceMetricsResponse, Record, SystemAnalyticsResponse, UsageMetricsResponse } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { ConversationStatsResponse, DashboardResponse, DocumentAnalyticsResponse, PerformanceMetricsResponse, SystemAnalyticsResponse, UsageMetricsResponse } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AnalyticsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -22,14 +22,15 @@ Args:
 Returns:
     Conversation statistics
    */
-  public async getConversationStatsApiV1AnalyticsConversations(options?: RequestOptions): Promise<ConversationStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getConversationStatsApiV1AnalyticsConversations(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationStatsResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -48,14 +49,15 @@ Args:
 Returns:
     Usage metrics
    */
-  public async getUsageMetricsApiV1AnalyticsUsage(options?: RequestOptions): Promise<UsageMetricsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getUsageMetricsApiV1AnalyticsUsage(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<UsageMetricsResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -72,14 +74,15 @@ Args:
 Returns:
     Performance metrics
    */
-  public async getPerformanceMetricsApiV1AnalyticsPerformance(options?: RequestOptions): Promise<PerformanceMetricsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getPerformanceMetricsApiV1AnalyticsPerformance(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PerformanceMetricsResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -96,14 +99,15 @@ Args:
 Returns:
     Document analytics
    */
-  public async getDocumentAnalyticsApiV1AnalyticsDocuments(options?: RequestOptions): Promise<DocumentAnalyticsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getDocumentAnalyticsApiV1AnalyticsDocuments(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentAnalyticsResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -121,8 +125,8 @@ Returns:
     System analytics
    */
   public async getSystemAnalyticsApiV1AnalyticsSystem(): Promise<SystemAnalyticsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<SystemAnalyticsResponse>(`/api/v1/analytics/system`, requestOptions);
@@ -138,14 +142,15 @@ Args:
 Returns:
     Complete dashboard data
    */
-  public async getDashboardApiV1AnalyticsDashboard(options?: RequestOptions): Promise<DashboardResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getDashboardApiV1AnalyticsDashboard(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DashboardResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -162,14 +167,15 @@ Args:
 Returns:
     Tool server analytics data
    */
-  public async getToolServerAnalyticsApiV1AnalyticsToolservers(options?: RequestOptions): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getToolServerAnalyticsApiV1AnalyticsToolservers(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -189,14 +195,15 @@ Args:
 Returns:
     User-specific analytics
    */
-  public async getUserAnalyticsApiV1AnalyticsUsersUserId(userId: string, options?: RequestOptions): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async getUserAnalyticsApiV1AnalyticsUsersUserId(userId: string, options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -217,16 +224,17 @@ Args:
 Returns:
     Exported analytics report
    */
-  public async exportAnalyticsApiV1AnalyticsExport(options?: RequestOptions): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+  public async exportAnalyticsApiV1AnalyticsExport(options?: { format?: string; metrics?: string[]; startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestOptions = {
+      method: 'POST' as const,
       headers: options?.headers,
       query: {
         'format': options?.format,
-        'metrics': options?.metrics ?? '',
+        'metrics': options?.metrics,
         'start_date': options?.startDate,
         'end_date': options?.endDate,
         'period': options?.period,
+        ...options?.query
       },
     };
 
@@ -239,8 +247,8 @@ Returns:
     Health check results for analytics system
    */
   public async getAnalyticsHealthApiV1AnalyticsHealth(): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/analytics/health`, requestOptions);
@@ -252,8 +260,8 @@ Returns:
     Summary of analytics metrics
    */
   public async getAnalyticsMetricsSummaryApiV1AnalyticsMetricsSummary(): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/analytics/metrics/summary`, requestOptions);

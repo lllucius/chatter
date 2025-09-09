@@ -1,8 +1,8 @@
 /**
  * Generated API client for Events
  */
-import { Record, SSEStatsResponse, TestEventResponse } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { SSEStatsResponse, TestEventResponse } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class EventsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -20,8 +20,8 @@ Returns:
     StreamingResponse with SSE format
    */
   public async eventsStreamApiV1EventsStream(): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/events/stream`, requestOptions);
@@ -37,8 +37,8 @@ Returns:
     StreamingResponse with SSE format for all events
    */
   public async adminEventsStreamApiV1EventsAdminStream(): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>>(`/api/v1/events/admin/stream`, requestOptions);
@@ -53,8 +53,8 @@ Returns:
     SSE service statistics
    */
   public async getSseStatsApiV1EventsStats(): Promise<SSEStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<SSEStatsResponse>(`/api/v1/events/stats`, requestOptions);
@@ -69,8 +69,8 @@ Returns:
     Success message with event ID
    */
   public async triggerTestEventApiV1EventsTestEvent(): Promise<TestEventResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<TestEventResponse>(`/api/v1/events/test-event`, requestOptions);
@@ -85,8 +85,8 @@ Returns:
     Success message with event ID
    */
   public async triggerBroadcastTestApiV1EventsBroadcastTest(): Promise<TestEventResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
     };
 
     return this.request<TestEventResponse>(`/api/v1/events/broadcast-test`, requestOptions);

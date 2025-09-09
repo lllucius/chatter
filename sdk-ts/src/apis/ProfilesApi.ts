@@ -1,8 +1,8 @@
 /**
  * Generated API client for Profiles
  */
-import { AvailableProvidersResponse, ProfileCloneRequest, ProfileCreate, ProfileDeleteResponse, ProfileListResponse, ProfileResponse, ProfileStatsResponse, ProfileTestRequest, ProfileTestResponse, ProfileUpdate } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { AvailableProvidersResponse, ProfileCloneRequest, ProfileCreate, ProfileDeleteResponse, ProfileListResponse, ProfileResponse, ProfileStatsResponse, ProfileTestRequest, ProfileTestResponse, ProfileType, ProfileUpdate } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ProfilesApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,8 +21,8 @@ Returns:
     Created profile information
    */
   public async createProfileApiV1Profiles(data: ProfileCreate): Promise<ProfileResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -46,9 +46,9 @@ Args:
 Returns:
     List of profiles with pagination info
    */
-  public async listProfilesApiV1Profiles(options?: RequestOptions): Promise<ProfileListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listProfilesApiV1Profiles(options?: { profileType?: ProfileType | null; llmProvider?: string | null; tags?: string[] | null; isPublic?: boolean | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ProfileListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'profile_type': options?.profileType,
@@ -59,6 +59,7 @@ Returns:
         'offset': options?.offset,
         'sort_by': options?.sortBy,
         'sort_order': options?.sortOrder,
+        ...options?.query
       },
     };
 
@@ -76,8 +77,8 @@ Returns:
     Profile information
    */
   public async getProfileApiV1ProfilesProfileId(profileId: string): Promise<ProfileResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<ProfileResponse>(`/api/v1/profiles/${profileId}`, requestOptions);
@@ -95,8 +96,8 @@ Returns:
     Updated profile information
    */
   public async updateProfileApiV1ProfilesProfileId(profileId: string, data: ProfileUpdate): Promise<ProfileResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -115,8 +116,8 @@ Returns:
     Success message
    */
   public async deleteProfileApiV1ProfilesProfileId(profileId: string): Promise<ProfileDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<ProfileDeleteResponse>(`/api/v1/profiles/${profileId}`, requestOptions);
@@ -134,8 +135,8 @@ Returns:
     Test results
    */
   public async testProfileApiV1ProfilesProfileIdTest(profileId: string, data: ProfileTestRequest): Promise<ProfileTestResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -154,8 +155,8 @@ Returns:
     Cloned profile information
    */
   public async cloneProfileApiV1ProfilesProfileIdClone(profileId: string, data: ProfileCloneRequest): Promise<ProfileResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -172,8 +173,8 @@ Returns:
     Profile statistics
    */
   public async getProfileStatsApiV1ProfilesStatsOverview(): Promise<ProfileStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<ProfileStatsResponse>(`/api/v1/profiles/stats/overview`, requestOptions);
@@ -190,8 +191,8 @@ Returns:
     Available providers information
    */
   public async getAvailableProvidersApiV1ProfilesProvidersAvailable(): Promise<AvailableProvidersResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<AvailableProvidersResponse>(`/api/v1/profiles/providers/available`, requestOptions);

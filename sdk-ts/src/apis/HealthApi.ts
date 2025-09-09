@@ -2,7 +2,7 @@
  * Generated API client for Health
  */
 import { CorrelationTraceResponse, HealthCheckResponse, MetricsResponse, ReadinessCheckResponse } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class HealthApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -16,8 +16,8 @@ Returns:
     Health status
    */
   public async healthCheckEndpointHealthz(): Promise<HealthCheckResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<HealthCheckResponse>(`/healthz`, requestOptions);
@@ -36,8 +36,8 @@ Returns:
     Returns 200 if ready, 503 if not ready.
    */
   public async readinessCheckReadyz(): Promise<ReadinessCheckResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<ReadinessCheckResponse>(`/readyz`, requestOptions);
@@ -52,8 +52,8 @@ Returns:
     Health status indicating the application is alive
    */
   public async livenessCheckLive(): Promise<HealthCheckResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<HealthCheckResponse>(`/live`, requestOptions);
@@ -65,8 +65,8 @@ Returns:
     Application metrics including performance and health data
    */
   public async getMetricsMetrics(): Promise<MetricsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<MetricsResponse>(`/metrics`, requestOptions);
@@ -81,8 +81,8 @@ Returns:
     List of requests associated with the correlation ID
    */
   public async getCorrelationTraceTraceCorrelationId(correlationId: string): Promise<CorrelationTraceResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<CorrelationTraceResponse>(`/trace/${correlationId}`, requestOptions);

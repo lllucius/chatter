@@ -188,7 +188,10 @@ def generate_method(path: str, method: str, operation: Dict[str, Any]) -> str:
     # Options parameter (for query params, headers, etc.)
     needs_options = bool(params["query"] or params["header"] or params["cookie"])
     if needs_options:
-        method_params.append("options?: RequestOptions")
+        method_params.append("options?: { " + 
+                           "".join([f"{camel_case(p['name'])}?: {typescript_type_from_schema(p.get('schema', {'type': 'string'}))}; " 
+                                   for p in params["query"] + params["header"] + params["cookie"]]) + 
+                           "query?: HTTPQuery; headers?: HTTPHeaders; }")
     
     params_str = ", ".join(method_params)
     
@@ -207,8 +210,8 @@ def generate_method(path: str, method: str, operation: Dict[str, Any]) -> str:
    * {operation.get('description', '').replace('*/', '')}
    */
   public async {method_name}({params_str}): Promise<{response_type}> {{
-    const requestOptions: RequestOptions = {{
-      method: '{method.upper()}',"""
+    const requestOptions = {{
+      method: '{method.upper()}' as const,"""
     
     # Add headers from parameters
     if params["header"]:
@@ -232,14 +235,10 @@ def generate_method(path: str, method: str, operation: Dict[str, Any]) -> str:
         for query_param in params["query"]:
             param_name = query_param["name"]
             camel_name = camel_case(param_name)
-            required = query_param.get("required", False)
-            if required:
-                method_body += f"""
-        '{param_name}': options?.{camel_name} ?? '',"""
-            else:
-                method_body += f"""
+            method_body += f"""
         '{param_name}': options?.{camel_name},"""
         method_body += """
+        ...options?.query
       },"""
     elif needs_options:
         method_body += """
@@ -287,24 +286,35 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
         
         # Extract types used in this method
         response_type = get_response_type(operation)
-        if response_type and response_type not in ["unknown", "string", "number", "boolean"]:
+        if response_type and not response_type.startswith("Record<"):
             # Extract type names from union types, arrays, etc.
-            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9]*\b', response_type)
+            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', response_type)
             imports.update(type_names)
         
         request_body_type = get_request_body_type(operation)
-        if request_body_type and request_body_type not in ["unknown", "string", "number", "boolean", "FormData", "URLSearchParams"]:
-            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9]*\b', request_body_type)
+        if request_body_type and not request_body_type.startswith("Record<") and request_body_type not in ["FormData", "URLSearchParams"]:
+            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', request_body_type)
             imports.update(type_names)
+        
+        # Also check parameter types
+        params = get_parameters(operation)
+        for param_list in params.values():
+            for param in param_list:
+                param_type = typescript_type_from_schema(param.get("schema", {}))
+                type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', param_type)
+                imports.update(type_names)
     
     # Generate import statements
     import_statements = []
     if imports:
-        import_list = ", ".join(sorted(imports))
-        import_statements.append(f"import {{ {import_list} }} from '../models/index';")
+        # Filter out built-in TypeScript types and generic Record types
+        filtered_imports = [imp for imp in imports if imp not in ['Record', 'string', 'number', 'boolean', 'unknown', 'null']]
+        if filtered_imports:
+            import_list = ", ".join(sorted(filtered_imports))
+            import_statements.append(f"import {{ {import_list} }} from '../models/index';")
     
     import_statements.extend([
-        "import { BaseAPI, Configuration, RequestOptions } from '../runtime';",
+        "import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';",
         ""
     ])
     

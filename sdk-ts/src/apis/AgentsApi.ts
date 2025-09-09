@@ -1,8 +1,8 @@
 /**
  * Generated API client for Agents
  */
-import { AgentBulkCreateRequest, AgentBulkCreateResponse, AgentBulkDeleteRequest, AgentCreateRequest, AgentDeleteResponse, AgentHealthResponse, AgentInteractRequest, AgentInteractResponse, AgentListResponse, AgentResponse, AgentStatsResponse, AgentUpdateRequest, Record } from '../models/index';
-import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+import { AgentBulkCreateRequest, AgentBulkCreateResponse, AgentBulkDeleteRequest, AgentCreateRequest, AgentDeleteResponse, AgentHealthResponse, AgentInteractRequest, AgentInteractResponse, AgentListResponse, AgentResponse, AgentStatsResponse, AgentStatus, AgentType, AgentUpdateRequest, Body_list_agents_api_v1_agents__get } from '../models/index';
+import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AgentsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -13,8 +13,8 @@ export class AgentsApi extends BaseAPI {
    * Create a new AI agent with specified configuration and capabilities.
    */
   public async createAgentApiV1Agents(data: AgentCreateRequest): Promise<AgentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -23,13 +23,14 @@ export class AgentsApi extends BaseAPI {
   /**List agents
    * List all agents with optional filtering and pagination. Users can only see their own agents.
    */
-  public async listAgentsApiV1Agents(data: Body_list_agents_api_v1_agents__get, options?: RequestOptions): Promise<AgentListResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+  public async listAgentsApiV1Agents(data: Body_list_agents_api_v1_agents__get, options?: { agentType?: AgentType | null; status?: AgentStatus | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<AgentListResponse> {
+    const requestOptions = {
+      method: 'GET' as const,
       headers: options?.headers,
       query: {
         'agent_type': options?.agentType,
         'status': options?.status,
+        ...options?.query
       },
       body: data,
     };
@@ -40,8 +41,8 @@ export class AgentsApi extends BaseAPI {
    * Get predefined agent templates for common use cases.
    */
   public async getAgentTemplatesApiV1AgentsTemplates(): Promise<Record<string, unknown>[]> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<Record<string, unknown>[]>(`/api/v1/agents/templates`, requestOptions);
@@ -50,8 +51,8 @@ export class AgentsApi extends BaseAPI {
    * Get comprehensive statistics about all agents for the current user.
    */
   public async getAgentStatsApiV1AgentsStatsOverview(): Promise<AgentStatsResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<AgentStatsResponse>(`/api/v1/agents/stats/overview`, requestOptions);
@@ -69,8 +70,8 @@ Returns:
     Agent data
    */
   public async getAgentApiV1AgentsAgentId(agentId: string): Promise<AgentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<AgentResponse>(`/api/v1/agents/${agentId}`, requestOptions);
@@ -88,8 +89,8 @@ Returns:
     Updated agent data
    */
   public async updateAgentApiV1AgentsAgentId(agentId: string, data: AgentUpdateRequest): Promise<AgentResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'PUT',
+    const requestOptions = {
+      method: 'PUT' as const,
       body: data,
     };
 
@@ -107,8 +108,8 @@ Returns:
     Deletion result
    */
   public async deleteAgentApiV1AgentsAgentId(agentId: string): Promise<AgentDeleteResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
     };
 
     return this.request<AgentDeleteResponse>(`/api/v1/agents/${agentId}`, requestOptions);
@@ -117,8 +118,8 @@ Returns:
    * Send a message to an agent and receive a response. Rate limited per user per agent.
    */
   public async interactWithAgentApiV1AgentsAgentIdInteract(agentId: string, data: AgentInteractRequest): Promise<AgentInteractResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -136,8 +137,8 @@ Returns:
     Agent health information
    */
   public async getAgentHealthApiV1AgentsAgentIdHealth(agentId: string): Promise<AgentHealthResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'GET',
+    const requestOptions = {
+      method: 'GET' as const,
     };
 
     return this.request<AgentHealthResponse>(`/api/v1/agents/${agentId}/health`, requestOptions);
@@ -154,8 +155,8 @@ Returns:
     Bulk creation results
    */
   public async bulkCreateAgentsApiV1AgentsBulk(data: AgentBulkCreateRequest): Promise<AgentBulkCreateResponse> {
-    const requestOptions: RequestOptions = {
-      method: 'POST',
+    const requestOptions = {
+      method: 'POST' as const,
       body: data,
     };
 
@@ -173,8 +174,8 @@ Returns:
     Bulk deletion results
    */
   public async bulkDeleteAgentsApiV1AgentsBulk(data: AgentBulkDeleteRequest): Promise<Record<string, unknown>> {
-    const requestOptions: RequestOptions = {
-      method: 'DELETE',
+    const requestOptions = {
+      method: 'DELETE' as const,
       body: data,
     };
 

@@ -731,10 +731,10 @@ const ABTestingPage: React.FC = () => {
 
   const toolbar = (
     <>
-      <Button onClick={loadTests} startIcon={<RefreshIcon />}>
+      <Button onClick={loadTests} startIcon={<RefreshIcon />} size="small">
         Refresh
       </Button>
-      <Button variant="contained" onClick={() => handleOpenDialog()} startIcon={<AddIcon />}>
+      <Button variant="contained" onClick={() => handleOpenDialog()} startIcon={<AddIcon />} size="small">
         Create Test
       </Button>
     </>

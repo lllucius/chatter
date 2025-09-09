@@ -125,6 +125,7 @@ const HealthPage: React.FC = () => {
       startIcon={<RefreshIcon />}
       onClick={loadHealthData}
       disabled={loading}
+      size="small"
     >
       Refresh
     </Button>

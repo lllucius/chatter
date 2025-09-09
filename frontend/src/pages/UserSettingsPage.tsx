@@ -88,7 +88,7 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const updatedProfile = await getSDK().updateProfile(values);
+        const updatedProfile = await getSDK().auth.updateProfileApiV1AuthMe(values);
         setUserProfile({ ...userProfile!, ...updatedProfile });
         toastService.success('Profile updated successfully');
       } catch (error: any) {

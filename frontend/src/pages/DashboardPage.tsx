@@ -246,7 +246,7 @@ const DashboardPage: React.FC = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           {dashboardApi.error}
           <Box sx={{ mt: 1 }}>
-            <Button variant="outlined" onClick={dashboardApi.execute}>
+            <Button variant="outlined" onClick={dashboardApi.execute} size="small">
               Retry
             </Button>
           </Box>

@@ -1084,7 +1084,7 @@ async def list_documents(
             console.print("No documents found.")
             return
 
-        table = Table(title=f"Documents ({response.total} total)")
+        table = Table(title=f"Documents ({response.total_count} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Type", style="yellow")

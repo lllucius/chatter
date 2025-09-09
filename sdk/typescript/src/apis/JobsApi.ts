@@ -37,7 +37,7 @@ Args:
 Returns:
     List of jobs with pagination info
    */
-  public async listJobsApiV1Jobs(data: string[] | null, options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
+  public async listJobsApiV1Jobs(options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
     const requestOptions = {
       method: 'GET' as const,
       headers: options?.headers,
@@ -54,7 +54,6 @@ Returns:
         'sort_order': options?.sortOrder,
         ...options?.query
       },
-      body: data,
     };
 
     return this.request<JobListResponse>(`/api/v1/jobs/`, requestOptions);

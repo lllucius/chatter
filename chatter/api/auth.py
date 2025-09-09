@@ -1,6 +1,6 @@
 """Enhanced authentication endpoints with comprehensive security."""
 
-from fastapi import APIRouter, Depends, Request, status
+from fastapi import APIRouter, Depends, Request, Response, status
 from fastapi.security import HTTPAuthorizationCredentials, HTTPBearer
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -206,6 +206,7 @@ async def register(
 async def login(
     user_data: UserLogin,
     request: Request,
+    response: Response,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenResponse:
     """Authenticate user and return tokens with enhanced security.
@@ -213,6 +214,7 @@ async def login(
     Args:
         user_data: User login data
         request: HTTP request for security logging
+        response: HTTP response for cookie setting
         auth_service: Authentication service
 
     Returns:
@@ -244,34 +246,67 @@ async def login(
     await log_login_success(user.id, client_ip, user_agent)
 
     tokens = auth_service.create_tokens(user)
+    
+    # Set refresh token as HttpOnly cookie
+    response.set_cookie(
+        key="refresh_token",
+        value=tokens["refresh_token"],
+        httponly=True,
+        secure=True,  # HTTPS only in production
+        samesite="strict",
+        max_age=60 * 60 * 24 * 7,  # 7 days (should match settings.refresh_token_expire_days)
+        path="/"
+    )
 
+    # Return only access token in response body (remove refresh_token from response)
+    response_data = {k: v for k, v in tokens.items() if k != "refresh_token"}
+    
     return TokenResponse(
-        **tokens, user=UserResponse.model_validate(user)
+        **response_data, user=UserResponse.model_validate(user)
     )
 
 
 @router.post("/refresh", response_model=TokenRefreshResponse)
 async def refresh_token(
-    token_data: TokenRefresh,
     request: Request,
+    response: Response,
     auth_service: AuthService = Depends(get_auth_service),
 ) -> TokenRefreshResponse:
     """Refresh access token with enhanced security validation.
 
     Args:
-        token_data: Refresh token data
-        request: HTTP request for security logging
+        request: HTTP request for security logging and cookie reading
+        response: HTTP response for setting new refresh token cookie
         auth_service: Authentication service
 
     Returns:
-        New access and refresh tokens
+        New access token (refresh token set in HttpOnly cookie)
     """
     client_ip = get_client_ip(request)
+    
+    # Read refresh token from HttpOnly cookie
+    refresh_token = request.cookies.get("refresh_token")
+    if not refresh_token:
+        raise AuthenticationProblem(
+            detail="Refresh token not found"
+        ) from None
 
     try:
-        result = await auth_service.refresh_access_token(
-            token_data.refresh_token
-        )
+        result = await auth_service.refresh_access_token(refresh_token)
+        
+        # Set new refresh token as HttpOnly cookie if provided
+        if "refresh_token" in result:
+            response.set_cookie(
+                key="refresh_token",
+                value=result["refresh_token"],
+                httponly=True,
+                secure=True,  # HTTPS only in production
+                samesite="strict",
+                max_age=60 * 60 * 24 * 7,  # 7 days
+                path="/"
+            )
+            # Remove refresh token from response body
+            result = {k: v for k, v in result.items() if k != "refresh_token"}
 
         # Log token refresh
         from chatter.core.monitoring import (
@@ -283,7 +318,7 @@ async def refresh_token(
         from chatter.utils.security_enhanced import verify_token
 
         # Extract user ID for logging
-        payload = verify_token(token_data.refresh_token)
+        payload = verify_token(refresh_token)
         user_id = payload.get("sub") if payload else None
 
         if user_id:
@@ -473,6 +508,7 @@ async def list_api_keys(
 @router.post("/logout", response_model=LogoutResponse)
 async def logout(
     request: Request,
+    response: Response,
     current_user: User = Depends(get_current_user),
     auth_service: AuthService = Depends(get_auth_service),
 ) -> LogoutResponse:
@@ -480,6 +516,7 @@ async def logout(
 
     Args:
         request: HTTP request for security logging
+        response: HTTP response for cookie clearing
         current_user: Current authenticated user
         auth_service: Authentication service
 
@@ -489,6 +526,15 @@ async def logout(
     client_ip = get_client_ip(request)
 
     await auth_service.revoke_token(current_user.id)
+    
+    # Clear refresh token cookie
+    response.delete_cookie(
+        key="refresh_token",
+        path="/",
+        httponly=True,
+        secure=True,
+        samesite="strict"
+    )
 
     # Log logout for security monitoring
     from chatter.core.monitoring import (

@@ -1,17 +1,20 @@
 /**
  * Authentication service using ChatterSDK directly
  * Manages tokens and provides authenticated SDK instances
+ * Uses memory for access tokens and HttpOnly cookies for refresh tokens
  */
 import { ChatterSDK, UserLogin } from 'chatter-sdk';
 
 class AuthService {
-  private token: string | null = null;
+  private token: string | null = null; // Store access token in memory only
   private baseSDK: ChatterSDK;
   private initialized: boolean = false;
+  private refreshInProgress: boolean = false; // Prevent multiple concurrent refresh attempts
 
   constructor() {
     this.baseSDK = new ChatterSDK({
       basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      credentials: 'include', // Include cookies for refresh token
     });
     this.initialize();
   }
@@ -25,17 +28,10 @@ class AuthService {
       return;
     }
     
-    this.loadTokenFromStorage();
+    // No longer load from localStorage - access tokens are memory-only
     this.initialized = true;
     
     console.log('[AuthService] Initialized with base URL:', this.baseSDK.withConfig({}).basePath);
-  }
-
-  private loadTokenFromStorage() {
-    const storedToken = localStorage.getItem('chatter_access_token');
-    if (storedToken) {
-      this.token = storedToken;
-    }
   }
 
   public isAuthenticated(): boolean {
@@ -63,13 +59,10 @@ class AuthService {
       const response = await this.baseSDK.auth.authLogin(loginData);
 
       if (response.access_token) {
-        this.token = response.access_token;
-        localStorage.setItem('chatter_access_token', response.access_token);
+        this.token = response.access_token; // Store in memory only
         
-        // Store refresh token if available
-        if (response.refresh_token) {
-          localStorage.setItem('chatter_refresh_token', response.refresh_token);
-        }
+        // Refresh token is automatically stored in HttpOnly cookie by the server
+        // No need to manually handle refresh token storage
       } else {
         throw new Error('No access token received');
       }
@@ -102,25 +95,33 @@ class AuthService {
   }
 
   public async refreshToken(): Promise<boolean> {
-    try {
-      const refreshToken = localStorage.getItem('chatter_refresh_token');
-      if (!refreshToken) {
-        return false;
-      }
+    if (this.refreshInProgress) {
+      // Wait for the current refresh to complete
+      return new Promise((resolve) => {
+        const checkRefresh = () => {
+          if (!this.refreshInProgress) {
+            resolve(this.isAuthenticated());
+          } else {
+            setTimeout(checkRefresh, 100);
+          }
+        };
+        checkRefresh();
+      });
+    }
 
+    this.refreshInProgress = true;
+
+    try {
+      // Use empty refresh token - the actual refresh token is in HttpOnly cookie
+      // and will be sent automatically with credentials: 'include'
       const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh({
-        refreshToken: refreshToken,
+        refreshToken: '', // Server will use the cookie
       });
 
       if (response.access_token) {
-        this.token = response.access_token;
-        localStorage.setItem('chatter_access_token', response.access_token);
+        this.token = response.access_token; // Store in memory only
         
-        // Update refresh token if provided
-        if (response.refresh_token) {
-          localStorage.setItem('chatter_refresh_token', response.refresh_token);
-        }
-        
+        // New refresh token is automatically set in HttpOnly cookie by server
         return true;
       }
       
@@ -129,13 +130,15 @@ class AuthService {
       console.error('Token refresh failed:', error);
       this.clearToken();
       return false;
+    } finally {
+      this.refreshInProgress = false;
     }
   }
 
   private clearToken() {
     this.token = null;
-    localStorage.removeItem('chatter_access_token');
-    localStorage.removeItem('chatter_refresh_token');
+    // No localStorage cleanup needed - tokens are memory-only now
+    // HttpOnly refresh token cookie will be cleared by server on logout
   }
 
   public getURL(): string | null {
@@ -150,6 +153,36 @@ class AuthService {
       basePath: this.baseSDK.withConfig({}).basePath,
       hasToken: !!this.token
     };
+  }
+
+  /**
+   * Execute an authenticated API request with automatic token refresh
+   * This method will automatically refresh the token if the request fails with 401
+   */
+  public async executeWithAuth<T>(apiCall: (sdk: ChatterSDK) => Promise<T>): Promise<T> {
+    const sdk = this.getSDK();
+    
+    try {
+      return await apiCall(sdk);
+    } catch (error: any) {
+      // Check if it's an authentication error (401)
+      if (error?.status === 401 || error?.response?.status === 401) {
+        console.log('[AuthService] Access token expired, attempting refresh...');
+        
+        const refreshSuccess = await this.refreshToken();
+        if (refreshSuccess) {
+          console.log('[AuthService] Token refresh successful, retrying request...');
+          const refreshedSDK = this.getSDK();
+          return await apiCall(refreshedSDK);
+        } else {
+          console.error('[AuthService] Token refresh failed, user needs to re-login');
+          throw new Error('Authentication failed - please login again');
+        }
+      }
+      
+      // Re-throw other errors
+      throw error;
+    }
   }
 }
 

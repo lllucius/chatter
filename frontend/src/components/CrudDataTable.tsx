@@ -19,6 +19,7 @@ import {
   ListItemIcon,
   Fab,
   Tooltip,
+  Divider,
 } from '@mui/material';
 import {
   Edit as EditIcon,
@@ -196,34 +197,6 @@ export function CrudDataTable<T, TCreate, TUpdate>({
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* Header */}
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 3 }}>
-        <Typography variant="h4" component="h1">
-          {config.entityNamePlural}
-        </Typography>
-        <Box sx={{ display: 'flex', gap: 1 }}>
-          {config.enableRefresh && (
-            <Button
-              variant="outlined"
-              startIcon={<RefreshIcon />}
-              onClick={loadData}
-              disabled={loading}
-            >
-              Refresh
-            </Button>
-          )}
-          {config.enableCreate && service.create && FormComponent && (
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={handleCreate}
-            >
-              Add {config.entityName}
-            </Button>
-          )}
-        </Box>
-      </Box>
-
       {/* Error Alert */}
       {error && (
         <Alert severity="error" sx={{ mb: 2 }}>
@@ -281,39 +254,14 @@ export function CrudDataTable<T, TCreate, TUpdate>({
                     ))}
                     {(config.enableEdit || config.enableDelete || config.actions) && (
                       <TableCell>
-                        <Box sx={{ display: 'flex', gap: 0.5 }}>
-                          {config.enableEdit && service.update && FormComponent && (
-                            <Tooltip title={`Edit ${config.entityName}`}>
-                              <IconButton
-                                size="small"
-                                onClick={() => handleEdit(item)}
-                              >
-                                <EditIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                          {config.enableDelete && service.delete && (
-                            <Tooltip title={`Delete ${config.entityName}`}>
-                              <IconButton
-                                size="small"
-                                color="error"
-                                onClick={() => handleDelete(item)}
-                              >
-                                <DeleteIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                          {config.actions && config.actions.length > 0 && (
-                            <Tooltip title="More actions">
-                              <IconButton
-                                size="small"
-                                onClick={(e) => handleActionMenuOpen(e, item)}
-                              >
-                                <MoreVertIcon fontSize="small" />
-                              </IconButton>
-                            </Tooltip>
-                          )}
-                        </Box>
+                        <Tooltip title="Actions">
+                          <IconButton
+                            size="small"
+                            onClick={(e) => handleActionMenuOpen(e, item)}
+                          >
+                            <MoreVertIcon fontSize="small" />
+                          </IconButton>
+                        </Tooltip>
                       </TableCell>
                     )}
                   </TableRow>
@@ -341,6 +289,31 @@ export function CrudDataTable<T, TCreate, TUpdate>({
         open={Boolean(actionMenuAnchor)}
         onClose={handleActionMenuClose}
       >
+        {config.enableEdit && service.update && FormComponent && (
+          <MenuItem onClick={() => {
+            if (actionMenuItem) {
+              handleEdit(actionMenuItem);
+            }
+            handleActionMenuClose();
+          }}>
+            <ListItemIcon><EditIcon /></ListItemIcon>
+            Edit {config.entityName}
+          </MenuItem>
+        )}
+        {config.enableDelete && service.delete && (
+          <MenuItem onClick={() => {
+            if (actionMenuItem) {
+              handleDelete(actionMenuItem);
+            }
+            handleActionMenuClose();
+          }}>
+            <ListItemIcon><DeleteIcon /></ListItemIcon>
+            Delete {config.entityName}
+          </MenuItem>
+        )}
+        {(config.enableEdit || config.enableDelete) && config.actions && config.actions.length > 0 && (
+          <Divider />
+        )}
         {config.actions?.map((action, index) => (
           <MenuItem key={index} onClick={() => handleActionClick(action)}>
             <ListItemIcon>{action.icon}</ListItemIcon>

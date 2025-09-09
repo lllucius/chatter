@@ -286,16 +286,22 @@ const ChatPage: React.FC = () => {
         setMessages((prev) => [...prev, assistantMessage]);
       }
 
-      // Make streaming request with proper headers
-      const token = localStorage.getItem('token') || '';
-      const response = await fetch('/api/v1/chat', {
+      // Use SDK configuration for consistent base URL and authentication
+      const sdk = getSDK();
+      const config = (sdk as any).chat.configuration;
+      const basePath = config.basePath || '';
+      const headers = config.headers || {};
+      
+      // Make streaming request with SDK-based configuration
+      const response = await fetch(`${basePath}/api/v1/chat`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
-          'Authorization': `Bearer ${token}`,
+          ...headers,
         },
+        credentials: config.credentials || 'include',
         body: JSON.stringify({
           ...chatRequest,
           stream: true, // Ensure streaming is enabled

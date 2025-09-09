@@ -245,15 +245,13 @@ const ABTestingPage: React.FC = () => {
       };
 
       if (editingTest) {
-        await getSDK().abTesting.updateAbTestApiV1AbTestsTestId({
-          testId: editingTest.id,
-          aBTestUpdateRequest: testData,
-        });
+        await getSDK().abTesting.updateAbTestApiV1AbTestsTestId(
+          editingTest.id,
+          testData
+        );
         toastService.success('Test updated successfully');
       } else {
-        await getSDK().abTesting.createAbTestApiV1AbTests({
-          aBTestCreateRequest: testData,
-        });
+        await getSDK().abTesting.createAbTestApiV1AbTests(testData);
         toastService.success('Test created successfully');
       }
 

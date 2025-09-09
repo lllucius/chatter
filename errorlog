@@ -1,570 +1,151 @@
-src/components/ConversationHistory.tsx(188,19): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & ListItemOwnProps & CommonProps & Omit<any, "children" | ... 15 more ... | "secondaryAction">): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; key: string; button: true; onClick: () => void; selected: boolean; sx: { borderRadius: number; mb: number; border: "1px solid" | "2px solid"; borderColor: "divider" | "primary.main"; }; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<ListItemTypeMap<{}, "li">>): Element | null', gave the following error.
-    Type '{ children: Element[]; key: string; button: true; onClick: () => void; selected: boolean; sx: { borderRadius: number; mb: number; border: "1px solid" | "2px solid"; borderColor: "divider" | "primary.main"; }; }' is not assignable to type 'IntrinsicAttributes & ListItemOwnProps & CommonProps & Omit<DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, "children" | ... 15 more ... | "secondaryAction">'.
-      Property 'button' does not exist on type 'IntrinsicAttributes & ListItemOwnProps & CommonProps & Omit<DetailedHTMLProps<LiHTMLAttributes<HTMLLIElement>, HTMLLIElement>, "children" | ... 15 more ... | "secondaryAction">'.
-src/components/ConversationHistory.tsx(220,43): error TS2551: Property 'created_at' does not exist on type 'ConversationResponse'. Did you mean 'createdAt'?
-src/components/ConversationHistory.tsx(221,62): error TS2551: Property 'created_at' does not exist on type 'ConversationResponse'. Did you mean 'createdAt'?
-src/components/CustomScrollbar.tsx(76,7): error TS2322: Type '{ children: ReactNode; className: string | undefined; style: { accentColor?: AccentColor | undefined; alignContent?: AlignContent | undefined; ... 822 more ...; vectorEffect?: VectorEffect | undefined; }; options: { ...; }; }' is not assignable to type 'IntrinsicAttributes & Props & RefAttributes<SimpleBarCore | null>'.
-  Property 'options' does not exist on type 'IntrinsicAttributes & Props & RefAttributes<SimpleBarCore | null>'.
-src/components/ModelForm.tsx(33,5): error TS2345: Argument of type '{ provider_id: string; name: string; model_type: string; display_name: string; description: string; model_name: string; dimensions: number; supports_batch: boolean; is_active: boolean; }' is not assignable to parameter of type 'ModelDefCreate | (() => ModelDefCreate)'.
-  Object literal may only specify known properties, and 'provider_id' does not exist in type 'ModelDefCreate | (() => ModelDefCreate)'.
-src/components/ModelForm.tsx(50,11): error TS2345: Argument of type '{ provider_id: any; name: any; model_type: any; display_name: any; description: string; model_name: any; dimensions: number | null | undefined; supports_batch: any; is_active: any; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'provider_id' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(50,36): error TS2339: Property 'provider_id' does not exist on type 'ModelDefUpdate'.
-src/components/ModelForm.tsx(51,29): error TS2339: Property 'name' does not exist on type 'ModelDefUpdate'.
-src/components/ModelForm.tsx(52,35): error TS2339: Property 'model_type' does not exist on type 'ModelDefUpdate'.
-src/components/ModelForm.tsx(53,37): error TS2551: Property 'display_name' does not exist on type 'ModelDefUpdate'. Did you mean 'displayName'?
-src/components/ModelForm.tsx(55,35): error TS2551: Property 'model_name' does not exist on type 'ModelDefUpdate'. Did you mean 'modelName'?
-src/components/ModelForm.tsx(57,39): error TS2551: Property 'supports_batch' does not exist on type 'ModelDefUpdate'. Did you mean 'supportsBatch'?
-src/components/ModelForm.tsx(58,34): error TS2551: Property 'is_active' does not exist on type 'ModelDefUpdate'. Did you mean 'isActive'?
-src/components/ModelForm.tsx(62,11): error TS2345: Argument of type '{ provider_id: string; name: string; model_type: string; display_name: string; description: string; model_name: string; dimensions: number; supports_batch: boolean; is_active: boolean; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'provider_id' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(93,31): error TS2551: Property 'provider_id' does not exist on type 'ModelDefCreate'. Did you mean 'providerId'?
-src/components/ModelForm.tsx(94,59): error TS2345: Argument of type '{ provider_id: any; name: string; modelType: ModelType; displayName: string; description?: string | null | undefined; modelName: string; maxTokens?: number | null | undefined; ... 8 more ...; providerId: string; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'provider_id' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(97,15): error TS2322: Type '{ children: Element[]; value: any; onChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<Omit<HTMLInputElement, "value"> & { ...; }> | (Event & { ...; }) | (Event & { ...; })) => void; disabled: boolean; label: string; helperText: string; }' is not assignable to type 'IntrinsicAttributes & SelectProps<any>'.
-  Property 'helperText' does not exist on type 'IntrinsicAttributes & SelectProps<any>'.
-src/components/ModelForm.tsx(101,22): error TS2551: Property 'display_name' does not exist on type 'Provider'. Did you mean 'displayName'?
-src/components/ModelForm.tsx(120,31): error TS2551: Property 'model_type' does not exist on type 'ModelDefCreate'. Did you mean 'modelType'?
-src/components/ModelForm.tsx(122,69): error TS2339: Property 'model_type' does not exist on type 'ModelDefCreate'.
-src/components/ModelForm.tsx(131,15): error TS2322: Type '{ children: Element[]; value: any; onChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<Omit<HTMLInputElement, "value"> & { ...; }> | (Event & { ...; }) | (Event & { ...; })) => void; disabled: boolean; label: string; helperText: string; }' is not assignable to type 'IntrinsicAttributes & SelectProps<any>'.
-  Property 'helperText' does not exist on type 'IntrinsicAttributes & SelectProps<any>'.
-src/components/ModelForm.tsx(142,29): error TS2551: Property 'display_name' does not exist on type 'ModelDefCreate'. Did you mean 'displayName'?
-src/components/ModelForm.tsx(143,57): error TS2345: Argument of type '{ display_name: string; name: string; modelType: ModelType; displayName: string; description?: string | null | undefined; modelName: string; maxTokens?: number | null | undefined; ... 8 more ...; providerId: string; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'display_name' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(150,29): error TS2551: Property 'model_name' does not exist on type 'ModelDefCreate'. Did you mean 'modelName'?
-src/components/ModelForm.tsx(151,57): error TS2345: Argument of type '{ model_name: string; name: string; modelType: ModelType; displayName: string; description?: string | null | undefined; modelName: string; maxTokens?: number | null | undefined; ... 8 more ...; providerId: string; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'model_name' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(154,21): error TS2551: Property 'model_type' does not exist on type 'ModelDefCreate'. Did you mean 'modelType'?
-src/components/ModelForm.tsx(176,35): error TS2551: Property 'supports_batch' does not exist on type 'ModelDefCreate'. Did you mean 'supportsBatch'?
-src/components/ModelForm.tsx(177,61): error TS2345: Argument of type '{ supports_batch: boolean; name: string; modelType: ModelType; displayName: string; description?: string | null | undefined; modelName: string; maxTokens?: number | null | undefined; ... 8 more ...; providerId: string; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'supports_batch' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(186,35): error TS2551: Property 'is_active' does not exist on type 'ModelDefCreate'. Did you mean 'isActive'?
-src/components/ModelForm.tsx(187,61): error TS2345: Argument of type '{ is_active: boolean; name: string; modelType: ModelType; displayName: string; description?: string | null | undefined; modelName: string; maxTokens?: number | null | undefined; ... 8 more ...; providerId: string; }' is not assignable to parameter of type 'SetStateAction<ModelDefCreate>'.
-  Object literal may only specify known properties, and 'is_active' does not exist in type 'SetStateAction<ModelDefCreate>'.
-src/components/ModelForm.tsx(199,49): error TS2551: Property 'display_name' does not exist on type 'ModelDefCreate'. Did you mean 'displayName'?
-src/components/ModelForm.tsx(199,75): error TS2551: Property 'model_name' does not exist on type 'ModelDefCreate'. Did you mean 'modelName'?
-src/components/ProfileForm.tsx(58,34): error TS2551: Property 'llm_model' does not exist on type 'ProfileUpdate'. Did you mean 'llmModel'?
-src/components/ProfileForm.tsx(59,37): error TS2551: Property 'llm_provider' does not exist on type 'ProfileUpdate'. Did you mean 'llmProvider'?
-src/components/ProfileForm.tsx(61,35): error TS2551: Property 'max_tokens' does not exist on type 'ProfileUpdate'. Did you mean 'maxTokens'?
-src/components/ProfileForm.tsx(62,30): error TS2551: Property 'top_p' does not exist on type 'ProfileUpdate'. Did you mean 'topP'?
-src/components/ProfileForm.tsx(63,42): error TS2551: Property 'frequency_penalty' does not exist on type 'ProfileUpdate'. Did you mean 'frequencyPenalty'?
-src/components/ProfileForm.tsx(64,41): error TS2551: Property 'presence_penalty' does not exist on type 'ProfileUpdate'. Did you mean 'presencePenalty'?
-src/components/PromptForm.tsx(53,37): error TS2551: Property 'prompt_type' does not exist on type 'PromptUpdate'. Did you mean 'promptType'?
-src/components/PromptForm.tsx(73,22): error TS2345: Argument of type '{ name: string; description: string; content: string; category: string; prompt_type: "template" | "system" | "few_shot" | "chain_of_thought"; variables: string[]; }' is not assignable to parameter of type 'PromptCreate | PromptUpdate'.
-  Type '{ name: string; description: string; content: string; category: string; prompt_type: "template" | "system" | "few_shot" | "chain_of_thought"; variables: string[]; }' is not assignable to type 'PromptUpdate'.
-    Types of property 'category' are incompatible.
-      Type 'string' is not assignable to type 'PromptCategory | null | undefined'.
-src/components/ProviderForm.tsx(31,5): error TS2345: Argument of type '{ name: string; provider_type: string; display_name: string; description: string; api_key_required: boolean; base_url: string; is_active: boolean; }' is not assignable to parameter of type 'ProviderCreate | (() => ProviderCreate)'.
-  Object literal may only specify known properties, and 'provider_type' does not exist in type 'ProviderCreate | (() => ProviderCreate)'.
-src/components/ProviderForm.tsx(53,29): error TS2339: Property 'name' does not exist on type 'ProviderUpdate'.
-src/components/ProviderForm.tsx(54,11): error TS2345: Argument of type '{ name: any; provider_type: any; display_name: any; description: string; api_key_required: any; base_url: any; is_active: any; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'provider_type' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(54,38): error TS2339: Property 'provider_type' does not exist on type 'ProviderUpdate'.
-src/components/ProviderForm.tsx(55,37): error TS2551: Property 'display_name' does not exist on type 'ProviderUpdate'. Did you mean 'displayName'?
-src/components/ProviderForm.tsx(57,41): error TS2551: Property 'api_key_required' does not exist on type 'ProviderUpdate'. Did you mean 'apiKeyRequired'?
-src/components/ProviderForm.tsx(58,33): error TS2551: Property 'base_url' does not exist on type 'ProviderUpdate'. Did you mean 'baseUrl'?
-src/components/ProviderForm.tsx(59,34): error TS2551: Property 'is_active' does not exist on type 'ProviderUpdate'. Did you mean 'isActive'?
-src/components/ProviderForm.tsx(64,11): error TS2345: Argument of type '{ name: string; provider_type: string; display_name: string; description: string; api_key_required: boolean; base_url: string; is_active: boolean; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'provider_type' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(102,31): error TS2551: Property 'provider_type' does not exist on type 'ProviderCreate'. Did you mean 'providerType'?
-src/components/ProviderForm.tsx(103,59): error TS2345: Argument of type '{ provider_type: any; name: string; providerType: ProviderType; displayName: string; description?: string | null | undefined; apiKeyRequired?: boolean | undefined; baseUrl?: string | ... 1 more ... | undefined; defaultConfig?: { ...; } | undefined; isActive?: boolean | undefined; isDefault?: boolean | undefined; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'provider_type' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(106,15): error TS2322: Type '{ children: Element[]; value: any; onChange: (e: ChangeEvent<HTMLInputElement> | ChangeEvent<Omit<HTMLInputElement, "value"> & { ...; }> | (Event & { ...; }) | (Event & { ...; })) => void; disabled: boolean; label: string; helperText: string; }' is not assignable to type 'IntrinsicAttributes & SelectProps<any>'.
-  Property 'helperText' does not exist on type 'IntrinsicAttributes & SelectProps<any>'.
-src/components/ProviderForm.tsx(118,29): error TS2551: Property 'display_name' does not exist on type 'ProviderCreate'. Did you mean 'displayName'?
-src/components/ProviderForm.tsx(119,57): error TS2345: Argument of type '{ display_name: string; name: string; providerType: ProviderType; displayName: string; description?: string | null | undefined; apiKeyRequired?: boolean | undefined; baseUrl?: string | ... 1 more ... | undefined; defaultConfig?: { ...; } | undefined; isActive?: boolean | undefined; isDefault?: boolean | undefined; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'display_name' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(134,29): error TS2551: Property 'base_url' does not exist on type 'ProviderCreate'. Did you mean 'baseUrl'?
-src/components/ProviderForm.tsx(135,57): error TS2345: Argument of type '{ base_url: string; name: string; providerType: ProviderType; displayName: string; description?: string | null | undefined; apiKeyRequired?: boolean | undefined; baseUrl?: string | ... 1 more ... | undefined; defaultConfig?: { ...; } | undefined; isActive?: boolean | undefined; isDefault?: boolean | undefined; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'base_url' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(141,35): error TS2551: Property 'api_key_required' does not exist on type 'ProviderCreate'. Did you mean 'apiKeyRequired'?
-src/components/ProviderForm.tsx(142,61): error TS2345: Argument of type '{ api_key_required: boolean; name: string; providerType: ProviderType; displayName: string; description?: string | null | undefined; apiKeyRequired?: boolean | undefined; baseUrl?: string | ... 1 more ... | undefined; defaultConfig?: { ...; } | undefined; isActive?: boolean | undefined; isDefault?: boolean | undefin...' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'api_key_required' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(151,35): error TS2551: Property 'is_active' does not exist on type 'ProviderCreate'. Did you mean 'isActive'?
-src/components/ProviderForm.tsx(152,61): error TS2345: Argument of type '{ is_active: boolean; name: string; providerType: ProviderType; displayName: string; description?: string | null | undefined; apiKeyRequired?: boolean | undefined; baseUrl?: string | ... 1 more ... | undefined; defaultConfig?: { ...; } | undefined; isActive?: boolean | undefined; isDefault?: boolean | undefined; }' is not assignable to parameter of type 'SetStateAction<ProviderCreate>'.
-  Object literal may only specify known properties, and 'is_active' does not exist in type 'SetStateAction<ProviderCreate>'.
-src/components/ProviderForm.tsx(164,49): error TS2551: Property 'display_name' does not exist on type 'ProviderCreate'. Did you mean 'displayName'?
-src/components/workflow/TemplateManager.tsx(303,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; key: string; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; key: string; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/components/workflow/WorkflowEditor.tsx(123,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-  Type 'FunctionComponent<NodeProps<WorkflowNodeData>>' is not assignable to type 'FunctionComponent<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-    Type 'Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }' is not assignable to type 'NodeProps<WorkflowNodeData>'.
-      Type 'Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }' is not assignable to type 'Pick<WorkflowNodeData, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId">'.
-        Property 'width' is optional in type 'Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }' but required in type 'Pick<WorkflowNodeData, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId">'.
-src/components/workflow/WorkflowEditor.tsx(124,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(125,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(126,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(127,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(128,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(129,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(130,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(131,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(132,3): error TS2322: Type 'FC<NodeProps<WorkflowNodeData>>' is not assignable to type 'ComponentType<Pick<Node<Record<string, unknown>, string | undefined>, "id" | "width" | "height" | "data" | "sourcePosition" | "targetPosition" | "dragHandle" | "parentId"> & Required<...> & { ...; } & { ...; }>'.
-src/components/workflow/WorkflowEditor.tsx(230,42): error TS2345: Argument of type 'Edge<WorkflowEdgeData, string | undefined>[]' is not assignable to parameter of type '{ id: string; type: string; animated: boolean; source: string; target: string; sourceHandle: string | null; targetHandle: string | null; }[]'.
-  Type 'Edge<WorkflowEdgeData, string | undefined>' is not assignable to type '{ id: string; type: string; animated: boolean; source: string; target: string; sourceHandle: string | null; targetHandle: string | null; }'.
-    Types of property 'type' are incompatible.
-      Type 'string | undefined' is not assignable to type 'string'.
-        Type 'undefined' is not assignable to type 'string'.
-src/components/workflow/WorkflowExamples.ts(1,36): error TS2307: Cannot find module '../WorkflowEditor' or its corresponding type declarations.
-src/components/workflow/WorkflowExamples.ts(278,46): error TS7006: Parameter 'node' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(284,48): error TS7006: Parameter 'n' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(287,28): error TS7006: Parameter 'edge' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(292,49): error TS7006: Parameter 'node' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(297,62): error TS7006: Parameter 'n' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(306,52): error TS7006: Parameter 'node' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(307,30): error TS7006: Parameter 'node' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(324,28): error TS7006: Parameter 'node' implicitly has an 'any' type.
-src/components/workflow/WorkflowExamples.ts(328,28): error TS7006: Parameter 'edge' implicitly has an 'any' type.
-src/components/workflow/edges/CustomEdge.tsx(59,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & ChipOwnProps & ChipSlotsAndSlotProps & CommonProps & Omit<...>): Element | null', gave the following error.
-    Type '{}' is not assignable to type 'ReactNode'.
-  Overload 2 of 2, '(props: DefaultComponentProps<ChipTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{}' is not assignable to type 'ReactNode'.
-src/components/workflow/nodes/ConditionalNode.tsx(7,43): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/ConditionalNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/DelayNode.tsx(7,37): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/DelayNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/ErrorHandlerNode.tsx(7,44): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/ErrorHandlerNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/LoopNode.tsx(7,36): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/LoopNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/MemoryNode.tsx(7,38): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/MemoryNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/ModelNode.tsx(7,37): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/ModelNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/RetrievalNode.tsx(7,41): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/RetrievalNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/StartNode.tsx(7,37): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-  Type 'WorkflowNodeData' is missing the following properties from type '{ id: string; position: XYPosition; data: Record<string, unknown>; sourcePosition?: Position | undefined; targetPosition?: Position | undefined; ... 19 more ...; measured?: { ...; } | undefined; }': id, position, data
-src/components/workflow/nodes/ToolNode.tsx(7,36): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/ToolNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/components/workflow/nodes/VariableNode.tsx(7,40): error TS2344: Type 'WorkflowNodeData' does not satisfy the constraint 'Node<Record<string, unknown>, string | undefined>'.
-src/components/workflow/nodes/VariableNode.tsx(8,18): error TS18046: 'data' is of type 'unknown'.
-src/hooks/__tests__/useForm.test.tsx(41,67): error TS2554: Expected 1 arguments, but got 2.
-src/pages/ABTestingPage.tsx(141,29): error TS2339: Property 'data' does not exist on type 'ABTestListResponse'.
-src/pages/ABTestingPage.tsx(160,85): error TS2339: Property 'data' does not exist on type 'ABTestMetricsResponse'.
-src/pages/ABTestingPage.tsx(161,85): error TS2339: Property 'data' does not exist on type 'ABTestResultsResponse'.
-src/pages/ABTestingPage.tsx(175,25): error TS2551: Property 'test_type' does not exist on type 'ABTestResponse'. Did you mean 'testType'?
-src/pages/ABTestingPage.tsx(178,25): error TS2339: Property 'allocation' does not exist on type 'TestVariant'.
-src/pages/ABTestingPage.tsx(180,35): error TS2551: Property 'minimum_sample_size' does not exist on type 'ABTestResponse'. Did you mean 'minSampleSize'?
-src/pages/ABTestingPage.tsx(181,32): error TS2551: Property 'confidence_level' does not exist on type 'ABTestResponse'. Did you mean 'confidenceLevel'?
-src/pages/ABTestingPage.tsx(182,30): error TS2339: Property 'primary_metric' does not exist on type 'ABTestResponse'.
-src/pages/ABTestingPage.tsx(183,29): error TS2551: Property 'duration_days' does not exist on type 'ABTestResponse'. Did you mean 'durationDays'?
-src/pages/ABTestingPage.tsx(236,9): error TS2322: Type '{ name: string; allocation: number; configuration: {}; }[]' is not assignable to type 'TestVariant[]'.
-  Type '{ name: string; allocation: number; configuration: {}; }' is missing the following properties from type 'TestVariant': description, _configuration
-src/pages/ABTestingPage.tsx(255,11): error TS2322: Type 'ABTestCreateRequest | ABTestUpdateRequest' is not assignable to type 'ABTestCreateRequest'.
-  Type 'ABTestUpdateRequest' is missing the following properties from type 'ABTestCreateRequest': testType, allocationStrategy, variants, metrics
-src/pages/ABTestingPage.tsx(294,84): error TS2345: Argument of type '{ testId: string; }' is not assignable to parameter of type 'EndAbTestApiV1AbTestsTestIdEndPostRequest'.
-  Property 'winnerVariant' is missing in type '{ testId: string; }' but required in type 'EndAbTestApiV1AbTestsTestIdEndPostRequest'.
-src/pages/ABTestingPage.tsx(340,12): error TS2678: Type '"stopped"' is not comparable to type 'TestStatus'.
-src/pages/ABTestingPage.tsx(350,12): error TS2678: Type '"stopped"' is not comparable to type 'TestStatus'.
-src/pages/ABTestingPage.tsx(554,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(557,68): error TS2551: Property 'test_type' does not exist on type 'ABTestResponse'. Did you mean 'testType'?
-src/pages/ABTestingPage.tsx(559,72): error TS2551: Property 'duration_days' does not exist on type 'ABTestResponse'. Did you mean 'durationDays'?
-src/pages/ABTestingPage.tsx(560,75): error TS2551: Property 'minimum_sample_size' does not exist on type 'ABTestResponse'. Did you mean 'minSampleSize'?
-src/pages/ABTestingPage.tsx(561,75): error TS2551: Property 'confidence_level' does not exist on type 'ABTestResponse'. Did you mean 'confidenceLevel'?
-src/pages/ABTestingPage.tsx(562,33): error TS2551: Property 'created_at' does not exist on type 'ABTestResponse'. Did you mean 'createdAt'?
-src/pages/ABTestingPage.tsx(563,89): error TS2551: Property 'created_at' does not exist on type 'ABTestResponse'. Did you mean 'createdAt'?
-src/pages/ABTestingPage.tsx(573,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(580,50): error TS2339: Property 'allocation' does not exist on type 'TestVariant'.
-src/pages/ABTestingPage.tsx(584,40): error TS2339: Property 'allocation' does not exist on type 'TestVariant'.
-src/pages/ABTestingPage.tsx(598,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(613,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(628,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(643,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/ABTestingPage.tsx(715,51): error TS2345: Argument of type 'ABTestResponse | null' is not assignable to parameter of type 'ABTestResponse | undefined'.
-  Type 'null' is not assignable to type 'ABTestResponse | undefined'.
-src/pages/ABTestingPage.tsx(795,41): error TS2551: Property 'test_type' does not exist on type 'ABTestResponse'. Did you mean 'testType'?
-src/pages/ABTestingPage.tsx(806,38): error TS2551: Property 'minimum_sample_size' does not exist on type 'ABTestResponse'. Did you mean 'minSampleSize'?
-src/pages/ABTestingPage.tsx(808,29): error TS2551: Property 'created_at' does not exist on type 'ABTestResponse'. Did you mean 'createdAt'?
-src/pages/ABTestingPage.tsx(808,63): error TS2551: Property 'created_at' does not exist on type 'ABTestResponse'. Did you mean 'createdAt'?
-src/pages/AdministrationPage.tsx(190,28): error TS2339: Property 'data' does not exist on type 'JobStatsResponse'.
-src/pages/AdministrationPage.tsx(361,15): error TS2345: Argument of type '{ filters: any; dry_run: boolean; }' is not assignable to parameter of type 'BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest'.
-  Object literal may only specify known properties, and 'filters' does not exist in type 'BulkDeleteConversationsApiV1DataBulkDeleteConversationsPostRequest'.
-src/pages/AdministrationPage.tsx(369,15): error TS2345: Argument of type '{ filters: any; dry_run: boolean; }' is not assignable to parameter of type 'BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest'.
-  Object literal may only specify known properties, and 'filters' does not exist in type 'BulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPostRequest'.
-src/pages/AdministrationPage.tsx(377,15): error TS2345: Argument of type '{ filters: any; dry_run: boolean; }' is not assignable to parameter of type 'BulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest'.
-  Object literal may only specify known properties, and 'filters' does not exist in type 'BulkDeletePromptsApiV1DataBulkDeletePromptsPostRequest'.
-src/pages/AdministrationPage.tsx(386,34): error TS2339: Property 'data' does not exist on type 'BulkDeleteResponse'.
-src/pages/AdministrationPage.tsx(392,42): error TS2339: Property 'data' does not exist on type 'BulkDeleteResponse'.
-src/pages/AdministrationPage.tsx(509,15): error TS2322: Type '{ name: string; description: string; backup_type: any; include_files: boolean; }' is not assignable to type 'BackupRequest'.
-  Object literal may only specify known properties, but 'backup_type' does not exist in type 'BackupRequest'. Did you mean to write 'backupType'?
-src/pages/AdministrationPage.tsx(519,15): error TS2322: Type '{ plugin_path: string; enable_on_install: true; }' is not assignable to type 'PluginInstallRequest'.
-  Object literal may only specify known properties, but 'plugin_path' does not exist in type 'PluginInstallRequest'. Did you mean to write 'pluginPath'?
-src/pages/AdministrationPage.tsx(530,15): error TS2322: Type '{ name: string; function_name: string; args: any; kwargs: any; priority: JobPriority; max_retries: number; schedule_at: string | undefined; }' is not assignable to type 'JobCreateRequest'.
-  Object literal may only specify known properties, but 'function_name' does not exist in type 'JobCreateRequest'. Did you mean to write 'functionName'?
-src/pages/AdministrationPage.tsx(555,9): error TS2345: Argument of type '{ userId: string; email: string; password: string; role: string; serverName: string; serverUrl: string; description: string; backupName: string; includeUserData: true; includeDocuments: true; includeConfigurations: true; ... 7 more ...; maxRetries: number; }' is not assignable to parameter of type 'SetStateAction<{ userId: string; email: string; password: string; role: string; description: string; backupName: string; includeUserData: boolean; includeDocuments: boolean; includeConfigurations: boolean; ... 7 more ...; maxRetries: number; }>'.
-  Object literal may only specify known properties, and 'serverName' does not exist in type 'SetStateAction<{ userId: string; email: string; password: string; role: string; description: string; backupName: string; includeUserData: boolean; includeDocuments: boolean; includeConfigurations: boolean; ... 7 more ...; maxRetries: number; }>'.
-src/pages/AdministrationPage.tsx(723,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AdministrationPage.tsx(747,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AdministrationPage.tsx(773,48): error TS2551: Property 'backup_type' does not exist on type 'BackupResponse'. Did you mean 'backupType'?
-src/pages/AdministrationPage.tsx(773,108): error TS2551: Property 'created_at' does not exist on type 'BackupResponse'. Did you mean 'createdAt'?
-src/pages/AdministrationPage.tsx(773,137): error TS2551: Property 'created_at' does not exist on type 'BackupResponse'. Did you mean 'createdAt'?
-src/pages/AdministrationPage.tsx(778,59): error TS2554: Expected 0 arguments, but got 1.
-src/pages/AdministrationPage.tsx(799,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AdministrationPage.tsx(816,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element | null; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element | null; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AdministrationPage.tsx(820,40): error TS2551: Property 'total_jobs' does not exist on type 'JobStatsResponse'. Did you mean 'totalJobs'?
-src/pages/AdministrationPage.tsx(820,73): error TS2551: Property 'pending_jobs' does not exist on type 'JobStatsResponse'. Did you mean 'pendingJobs'?
-src/pages/AdministrationPage.tsx(820,108): error TS2551: Property 'running_jobs' does not exist on type 'JobStatsResponse'. Did you mean 'runningJobs'?
-src/pages/AdministrationPage.tsx(855,27): error TS2551: Property 'function_name' does not exist on type 'JobResponse'. Did you mean 'functionName'?
-src/pages/AdministrationPage.tsx(855,70): error TS2551: Property 'function_name' does not exist on type 'JobResponse'. Did you mean 'functionName'?
-src/pages/AdministrationPage.tsx(858,27): error TS2551: Property 'created_at' does not exist on type 'JobResponse'. Did you mean 'createdAt'?
-src/pages/AdministrationPage.tsx(858,75): error TS2551: Property 'created_at' does not exist on type 'JobResponse'. Did you mean 'createdAt'?
-src/pages/AdministrationPage.tsx(980,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AdministrationPage.tsx(1036,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element[]; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element[]; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/AgentsPageRefactored.tsx(23,7): error TS2322: Type '"model"' is not assignable to type 'keyof AgentResponse'.
-src/pages/AgentsPageRefactored.tsx(28,7): error TS2322: Type '"is_active"' is not assignable to type 'keyof AgentResponse'.
-src/pages/AgentsPageRefactored.tsx(34,7): error TS2820: Type '"updated_at"' is not assignable to type 'keyof AgentResponse'. Did you mean '"updatedAt"'?
-src/pages/AgentsPageRefactored.tsx(66,9): error TS2345: Argument of type '{ page: number; per_page: number; }' is not assignable to parameter of type 'ListAgentsApiV1AgentsGetRequest'.
-  Object literal may only specify known properties, and 'page' does not exist in type 'ListAgentsApiV1AgentsGetRequest'.
-src/pages/AgentsPageRefactored.tsx(70,25): error TS2339: Property 'data' does not exist on type 'AgentListResponse'.
-src/pages/AgentsPageRefactored.tsx(71,25): error TS2339: Property 'data' does not exist on type 'AgentListResponse'.
-src/pages/AgentsPageRefactored.tsx(79,23): error TS2339: Property 'data' does not exist on type 'AgentResponse'.
-src/pages/AgentsPageRefactored.tsx(87,23): error TS2339: Property 'data' does not exist on type 'AgentResponse'.
-src/pages/ChatConfigPanel.tsx(205,56): error TS2551: Property 'updated_at' does not exist on type 'ConversationResponse'. Did you mean 'updatedAt'?
-src/pages/ChatConfigPanel.tsx(238,44): error TS2551: Property 'llm_model' does not exist on type 'ProfileResponse'. Did you mean 'llmModel'?
-src/pages/ChatPage.tsx(147,9): error TS2322: Type '{ title: string; profile_id: string | undefined; enable_retrieval: any; system_prompt: string | undefined; }' is not assignable to type 'ConversationCreate'.
-  Object literal may only specify known properties, but 'profile_id' does not exist in type 'ConversationCreate'. Did you mean to write 'profileId'?
-src/pages/ChatPage.tsx(189,64): error TS7006: Parameter 'msg' implicitly has an 'any' type.
-src/pages/ChatPage.tsx(288,39): error TS2339: Property 'chatStream' does not exist on type 'ChatterSDK'.
-src/pages/ChatPage.tsx(399,9): error TS2322: Type '{ message: string; conversation_id: string | undefined; stream: any; profile_id: string | undefined; temperature: number | undefined; max_tokens: number | undefined; enable_retrieval: any; document_ids: string[] | undefined; system_prompt_override: string | undefined; }' is not assignable to type 'ChatRequest'.
-  Object literal may only specify known properties, but 'conversation_id' does not exist in type 'ChatRequest'. Did you mean to write 'conversationId'?
-src/pages/ChatPage.tsx(401,81): error TS2551: Property 'profile_id' does not exist on type 'ConversationResponse'. Did you mean 'profileId'?
-src/pages/ChatPage.tsx(531,9): error TS2322: Type '{ message: string; conversation_id: string | undefined; stream: any; profile_id: string; temperature: number; max_tokens: number; enable_retrieval: any; document_ids: string[] | undefined; system_prompt_override: string | undefined; }' is not assignable to type 'ChatRequest'.
-  Object literal may only specify known properties, but 'conversation_id' does not exist in type 'ChatRequest'. Did you mean to write 'conversationId'?
-src/pages/ChatPage.tsx(550,52): error TS2554: Expected 1 arguments, but got 2.
-src/pages/ConversationsPage.tsx(86,23): error TS2551: Property 'created_at' does not exist on type 'ConversationResponse'. Did you mean 'createdAt'?
-src/pages/ConversationsPage.tsx(86,65): error TS2551: Property 'created_at' does not exist on type 'ConversationResponse'. Did you mean 'createdAt'?
-src/pages/ConversationsPage.tsx(91,23): error TS2551: Property 'updated_at' does not exist on type 'ConversationResponse'. Did you mean 'updatedAt'?
-src/pages/ConversationsPage.tsx(91,65): error TS2551: Property 'updated_at' does not exist on type 'ConversationResponse'. Did you mean 'updatedAt'?
-src/pages/ConversationsPage.tsx(187,26): error TS7006: Parameter 'conversation' implicitly has an 'any' type.
-src/pages/ConversationsPage.tsx(295,44): error TS7006: Parameter 'conversation' implicitly has an 'any' type.
-src/pages/ConversationsPage.tsx(424,52): error TS2551: Property 'created_at' does not exist on type 'MessageResponse'. Did you mean 'createdAt'?
-src/pages/ConversationsPage.tsx(426,34): error TS2551: Property 'total_tokens' does not exist on type 'MessageResponse'. Did you mean 'totalTokens'?
-src/pages/ConversationsPage.tsx(428,47): error TS2551: Property 'total_tokens' does not exist on type 'MessageResponse'. Did you mean 'totalTokens'?
-src/pages/DashboardPage.tsx(165,35): error TS2339: Property 'data' does not exist on type 'DashboardResponse'.
-src/pages/DashboardPage.tsx(166,48): error TS2339: Property 'data' does not exist on type 'PerformanceMetricsResponse'.
-src/pages/DashboardPage.tsx(167,38): error TS2339: Property 'data' does not exist on type 'SystemAnalyticsResponse'.
-src/pages/DashboardPage.tsx(168,36): error TS2339: Property 'data' does not exist on type 'UsageMetricsResponse'.
-src/pages/DashboardPage.tsx(169,42): error TS2339: Property 'data' does not exist on type 'DocumentAnalyticsResponse'.
-src/pages/DocumentsPage.tsx(139,7): error TS2820: Type '"mime_type"' is not assignable to type 'keyof DocumentResponse'. Did you mean '"mimeType"'?
-src/pages/DocumentsPage.tsx(145,7): error TS2820: Type '"file_size"' is not assignable to type 'keyof DocumentResponse'. Did you mean '"fileSize"'?
-src/pages/DocumentsPage.tsx(151,7): error TS2820: Type '"chunk_count"' is not assignable to type 'keyof DocumentResponse'. Did you mean '"chunkCount"'?
-src/pages/DocumentsPage.tsx(163,7): error TS2820: Type '"created_at"' is not assignable to type 'keyof DocumentResponse'. Did you mean '"createdAt"'?
-src/pages/DocumentsPage.tsx(182,28): error TS2339: Property 'data' does not exist on type 'DocumentChunksResponse'.
-src/pages/DocumentsPage.tsx(182,51): error TS2339: Property 'data' does not exist on type 'DocumentChunksResponse'.
-src/pages/DocumentsPage.tsx(182,81): error TS2339: Property 'data' does not exist on type 'DocumentChunksResponse'.
-src/pages/DocumentsPage.tsx(183,43): error TS2339: Property 'data' does not exist on type 'DocumentChunksResponse'.
-src/pages/DocumentsPage.tsx(184,18): error TS7006: Parameter 'chunk' implicitly has an 'any' type.
-src/pages/DocumentsPage.tsx(192,65): error TS2551: Property 'chunk_count' does not exist on type 'DocumentResponse'. Did you mean 'chunkCount'?
-src/pages/DocumentsPage.tsx(251,48): error TS2551: Property 'mime_type' does not exist on type 'DocumentResponse'. Did you mean 'mimeType'?
-src/pages/DocumentsPage.tsx(252,63): error TS2551: Property 'file_size' does not exist on type 'DocumentResponse'. Did you mean 'fileSize'?
-src/pages/DocumentsPage.tsx(259,73): error TS2551: Property 'created_at' does not exist on type 'DocumentResponse'. Did you mean 'createdAt'?
-src/pages/DocumentsPage.tsx(261,56): error TS2551: Property 'chunk_count' does not exist on type 'DocumentResponse'. Did you mean 'chunkCount'?
-src/pages/DocumentsPage.tsx(262,28): error TS2551: Property 'extra_metadata' does not exist on type 'DocumentResponse'. Did you mean 'extraMetadata'?
-src/pages/DocumentsPage.tsx(262,102): error TS2551: Property 'extra_metadata' does not exist on type 'DocumentResponse'. Did you mean 'extraMetadata'?
-src/pages/DocumentsPage.tsx(368,23): error TS2339: Property 'data' does not exist on type 'DocumentResponse'.
-src/pages/HealthPage.tsx(59,32): error TS2339: Property 'data' does not exist on type 'HealthCheckResponse'.
-src/pages/HealthPage.tsx(60,41): error TS2339: Property 'data' does not exist on type 'ToolServerResponse[]'.
-src/pages/HealthPage.tsx(378,33): error TS2339: Property 'command' does not exist on type 'ToolServerResponse'.
-src/pages/HealthPage.tsx(389,31): error TS2551: Property 'last_health_check' does not exist on type 'ToolServerResponse'. Did you mean 'lastHealthCheck'?
-src/pages/HealthPage.tsx(391,51): error TS2551: Property 'last_health_check' does not exist on type 'ToolServerResponse'. Did you mean 'lastHealthCheck'?
-src/pages/HealthPage.tsx(398,31): error TS2551: Property 'last_health_check' does not exist on type 'ToolServerResponse'. Did you mean 'lastHealthCheck'?
-src/pages/HealthPage.tsx(400,51): error TS2551: Property 'last_health_check' does not exist on type 'ToolServerResponse'. Did you mean 'lastHealthCheck'?
-src/pages/ModelManagementPageRefactored.tsx(72,7): error TS2820: Type '"display_name"' is not assignable to type 'keyof Provider'. Did you mean '"displayName"'?
-src/pages/ModelManagementPageRefactored.tsx(84,17): error TS2551: Property 'is_default' does not exist on type 'Provider'. Did you mean 'isDefault'?
-src/pages/ModelManagementPageRefactored.tsx(91,7): error TS2820: Type '"provider_type"' is not assignable to type 'keyof Provider'. Did you mean '"providerType"'?
-src/pages/ModelManagementPageRefactored.tsx(96,7): error TS2820: Type '"is_active"' is not assignable to type 'keyof Provider'. Did you mean '"isActive"'?
-src/pages/ModelManagementPageRefactored.tsx(122,23): error TS2551: Property 'is_default' does not exist on type 'Provider'. Did you mean 'isDefault'?
-src/pages/ModelManagementPageRefactored.tsx(124,58): error TS2352: Conversion of type '{ provider_id: any; model_type: any; }' to type 'DefaultProvider' may be a mistake because neither type sufficiently overlaps with the other. If this was intentional, convert the expression to 'unknown' first.
-  Property 'modelType' is missing in type '{ provider_id: any; model_type: any; }' but required in type 'DefaultProvider'.
-src/pages/ModelManagementPageRefactored.tsx(195,7): error TS2820: Type '"display_name"' is not assignable to type 'keyof ModelDefWithProvider'. Did you mean '"displayName"'?
-src/pages/ModelManagementPageRefactored.tsx(207,17): error TS2551: Property 'is_default' does not exist on type 'ModelDefWithProvider'. Did you mean 'isDefault'?
-src/pages/ModelManagementPageRefactored.tsx(223,7): error TS2820: Type '"model_type"' is not assignable to type 'keyof ModelDefWithProvider'. Did you mean '"modelType"'?
-src/pages/ModelManagementPageRefactored.tsx(228,7): error TS2820: Type '"is_active"' is not assignable to type 'keyof ModelDefWithProvider'. Did you mean '"isActive"'?
-src/pages/ModelManagementPageRefactored.tsx(239,7): error TS2820: Type '"model_name"' is not assignable to type 'keyof ModelDefWithProvider'. Did you mean '"modelName"'?
-src/pages/ModelManagementPageRefactored.tsx(259,20): error TS2551: Property 'is_default' does not exist on type 'ModelDefWithProvider'. Did you mean 'isDefault'?
-src/pages/PasswordResetPage.tsx(51,26): error TS2339: Property 'requestPasswordReset' does not exist on type 'ChatterSDK'.
-src/pages/PasswordResetPage.tsx(85,26): error TS2339: Property 'confirmPasswordReset' does not exist on type 'ChatterSDK'.
-src/pages/PasswordResetPage.tsx(137,50): error TS2339: Property 'setValue' does not exist on type 'UseFormReturn<RequestResetFormValues>'.
-src/pages/PasswordResetPage.tsx(172,50): error TS2339: Property 'setValue' does not exist on type 'UseFormReturn<ConfirmResetFormValues>'.
-src/pages/PasswordResetPage.tsx(183,50): error TS2339: Property 'setValue' does not exist on type 'UseFormReturn<ConfirmResetFormValues>'.
-src/pages/PasswordResetPage.tsx(193,50): error TS2339: Property 'setValue' does not exist on type 'UseFormReturn<ConfirmResetFormValues>'.
-src/pages/ProfilesPageRefactored.tsx(22,49): error TS2344: Type 'ProfileResponse' does not satisfy the constraint '{ name?: string | undefined; display_name?: string | undefined; description?: string | undefined; }'.
-  Types of property 'description' are incompatible.
-    Type 'string | null | undefined' is not assignable to type 'string | undefined'.
-      Type 'null' is not assignable to type 'string | undefined'.
-src/pages/PromptsPageRefactored.tsx(34,7): error TS2820: Type '"prompt_type"' is not assignable to type 'keyof PromptResponse'. Did you mean '"promptType"'?
-src/pages/PromptsPageRefactored.tsx(48,7): error TS2820: Type '"updated_at"' is not assignable to type 'keyof PromptResponse'. Did you mean '"updatedAt"'?
-src/pages/PromptsPageRefactored.tsx(80,9): error TS2345: Argument of type '{ page: number; per_page: number; }' is not assignable to parameter of type 'ListPromptsApiV1PromptsGetRequest'.
-  Object literal may only specify known properties, and 'page' does not exist in type 'ListPromptsApiV1PromptsGetRequest'.
-src/pages/ToolsPageRefactored.tsx(183,28): error TS2339: Property 'refreshServerTools' does not exist on type 'ChatterSDK'.
-src/pages/ToolsPageRefactored.tsx(214,58): error TS2345: Argument of type 'RemoteServerCreate' is not assignable to parameter of type 'ToolServerCreate'.
-  Property 'displayName' is missing in type 'RemoteServerCreate' but required in type 'ToolServerCreate'.
-src/pages/ToolsPageRefactored.tsx(224,24): error TS2551: Property 'deleteToolServer' does not exist on type 'ChatterSDK'. Did you mean 'getToolServers'?
-src/pages/ToolsPageRefactored.tsx(244,12): error TS2722: Cannot invoke an object which is possibly 'undefined'.
-src/pages/ToolsPageRefactored.tsx(270,30): error TS2339: Property 'disableTool' does not exist on type 'ChatterSDK'.
-src/pages/ToolsPageRefactored.tsx(273,30): error TS2339: Property 'enableTool' does not exist on type 'ChatterSDK'.
-src/pages/ToolsPageRefactored.tsx(297,41): error TS2339: Property 'getAllTools' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(91,49): error TS2339: Property 'updateProfile' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(128,26): error TS2339: Property 'changePassword' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(133,22): error TS2339: Property 'reset' does not exist on type 'UseFormReturn<PasswordFormValues>'.
-src/pages/UserSettingsPage.tsx(148,41): error TS2339: Property 'createApiKey' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(152,20): error TS2339: Property 'reset' does not exist on type 'UseFormReturn<ApiKeyFormValues>'.
-src/pages/UserSettingsPage.tsx(162,40): error TS2339: Property 'getCurrentUser' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(164,19): error TS2551: Property 'setValues' does not exist on type 'UseFormReturn<ProfileFormValues>'. Did you mean 'values'?
-src/pages/UserSettingsPage.tsx(176,37): error TS2339: Property 'listApiKeys' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(187,24): error TS2339: Property 'revokeApiKey' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(197,24): error TS2339: Property 'deactivateAccount' does not exist on type 'ChatterSDK'.
-src/pages/UserSettingsPage.tsx(249,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(258,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(269,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(279,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(290,38): error TS2551: Property 'submitting' does not exist on type 'UseFormReturn<ProfileFormValues>'. Did you mean 'isSubmitting'?
-src/pages/UserSettingsPage.tsx(305,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(316,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(327,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/UserSettingsPage.tsx(343,39): error TS2551: Property 'submitting' does not exist on type 'UseFormReturn<PasswordFormValues>'. Did you mean 'isSubmitting'?
-src/pages/UserSettingsPage.tsx(500,33): error TS2551: Property 'submitting' does not exist on type 'UseFormReturn<ApiKeyFormValues>'. Did you mean 'isSubmitting'?
-src/pages/WorkflowManagementPage.tsx(150,34): error TS2339: Property 'data' does not exist on type 'AvailableToolsResponse'.
-src/pages/WorkflowManagementPage.tsx(178,9): error TS2322: Type '{ message: string; stream: false; conversation_id: undefined; workflow: any; }' is not assignable to type 'ChatRequest'.
-  Object literal may only specify known properties, but 'conversation_id' does not exist in type 'ChatRequest'. Did you mean to write 'conversationId'?
-src/pages/WorkflowManagementPage.tsx(183,9): error TS2345: Argument of type 'string' is not assignable to parameter of type 'ChatWithTemplateApiV1ChatTemplateTemplateNamePostRequest'.
-src/pages/WorkflowManagementPage.tsx(190,83): error TS2339: Property 'data' does not exist on type 'ChatResponse'.
-src/pages/WorkflowManagementPage.tsx(243,13): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; lg: number; key: string; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; lg: number; key: string; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(259,39): error TS2551: Property 'workflow_type' does not exist on type 'WorkflowTemplateInfo'. Did you mean 'workflowType'?
-src/pages/WorkflowManagementPage.tsx(264,31): error TS2339: Property 'category' does not exist on type 'WorkflowTemplateInfo'.
-src/pages/WorkflowManagementPage.tsx(266,41): error TS2339: Property 'category' does not exist on type 'WorkflowTemplateInfo'.
-src/pages/WorkflowManagementPage.tsx(273,29): error TS2551: Property 'required_tools' does not exist on type 'WorkflowTemplateInfo'. Did you mean 'requiredTools'?
-src/pages/WorkflowManagementPage.tsx(273,56): error TS2551: Property 'required_tools' does not exist on type 'WorkflowTemplateInfo'. Did you mean 'requiredTools'?
-src/pages/WorkflowManagementPage.tsx(279,35): error TS2551: Property 'required_tools' does not exist on type 'WorkflowTemplateInfo'. Did you mean 'requiredTools'?
-src/pages/WorkflowManagementPage.tsx(279,55): error TS7006: Parameter 'tool' implicitly has an 'any' type.
-src/pages/WorkflowManagementPage.tsx(279,61): error TS7006: Parameter 'index' implicitly has an 'any' type.
-src/pages/WorkflowManagementPage.tsx(292,29): error TS2339: Property 'parameters' does not exist on type 'WorkflowTemplateInfo'.
-src/pages/WorkflowManagementPage.tsx(292,64): error TS2339: Property 'parameters' does not exist on type 'WorkflowTemplateInfo'.
-src/pages/WorkflowManagementPage.tsx(295,59): error TS2339: Property 'parameters' does not exist on type 'WorkflowTemplateInfo'.
-src/pages/WorkflowManagementPage.tsx(354,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(371,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(388,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(413,15): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; key: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; key: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(424,37): error TS2339: Property 'server' does not exist on type 'AvailableToolResponse'.
-src/pages/WorkflowManagementPage.tsx(547,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(560,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(575,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/pages/WorkflowManagementPage.tsx(588,9): error TS2769: No overload matches this call.
-  Overload 1 of 2, '(props: { component: ElementType<any, keyof IntrinsicElements>; } & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<...> & Omit<...>): Element | null', gave the following error.
-    Property 'component' is missing in type '{ children: Element; item: true; xs: number; sm: number; md: number; }' but required in type '{ component: ElementType<any, keyof IntrinsicElements>; }'.
-  Overload 2 of 2, '(props: DefaultComponentProps<GridTypeMap<{}, "div">>): Element | null', gave the following error.
-    Type '{ children: Element; item: true; xs: number; sm: number; md: number; }' is not assignable to type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-      Property 'item' does not exist on type 'IntrinsicAttributes & GridBaseProps & { sx?: SxProps<Theme> | undefined; } & SystemProps<Theme> & Omit<...>'.
-src/services/__tests__/sse-manager.test.ts(123,36): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(126,22): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(136,38): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(138,53): error TS2554: Expected 1 arguments, but got 0.
-src/services/__tests__/sse-manager.test.ts(158,51): error TS2554: Expected 1 arguments, but got 0.
-src/services/__tests__/sse-manager.test.ts(183,35): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(191,35): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(192,38): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(202,35): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(203,35): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(213,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(221,35): error TS2345: Argument of type 'SSEEventType.CHAT_MESSAGE_CHUNK' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(246,35): error TS2345: Argument of type 'SSEEventType.WORKFLOW_STATUS' is not assignable to parameter of type '"backup.started" | "backup.completed" | "backup.failed" | "backup.progress" | "job.started" | "job.completed" | "job.failed" | "job.progress" | "document.uploaded" | "document.processing_started" | ... 9 more ... | "*"'.
-src/services/__tests__/sse-manager.test.ts(308,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(348,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(371,53): error TS2554: Expected 1 arguments, but got 0.
-src/services/__tests__/sse-manager.test.ts(375,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(390,53): error TS2554: Expected 1 arguments, but got 0.
-src/services/__tests__/sse-manager.test.ts(393,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/sse-manager.test.ts(409,24): error TS2503: Cannot find namespace 'vi'.
-src/services/__tests__/toast-service.test.ts(98,34): error TS2345: Argument of type '{ autoClose: boolean; }' is not assignable to parameter of type 'number | false | ToastOptions | undefined'.
-  Type '{ autoClose: boolean; }' is not assignable to type 'ToastOptions'.
-    Types of property 'autoClose' are incompatible.
-      Type 'boolean' is not assignable to type 'number | false | undefined'.
-src/services/__tests__/toast-service.test.ts(347,24): error TS2339: Property 'destroy' does not exist on type 'ToastService'.
-src/services/__tests__/toast-service.test.ts(348,22): error TS2339: Property 'destroy' does not exist on type 'ToastService'.
-src/services/chatter-sdk.ts(27,11): error TS2564: Property 'configuration' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(31,10): error TS2564: Property 'auth' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(32,10): error TS2564: Property 'abTesting' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(33,10): error TS2564: Property 'agents' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(34,10): error TS2564: Property 'analytics' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(35,10): error TS2564: Property 'chat' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(36,10): error TS2564: Property 'dataManagement' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(37,10): error TS2564: Property 'default' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(38,10): error TS2564: Property 'documents' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(39,10): error TS2564: Property 'events' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(40,10): error TS2564: Property 'health' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(41,10): error TS2564: Property 'jobs' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(42,10): error TS2564: Property 'modelRegistry' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(43,10): error TS2564: Property 'plugins' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(44,10): error TS2564: Property 'profiles' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(45,10): error TS2564: Property 'prompts' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(46,10): error TS2564: Property 'toolServers' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(49,10): error TS2564: Property 'conversations' has no initializer and is not definitely assigned in the constructor.
-src/services/chatter-sdk.ts(245,29): error TS2551: Property 'listToolServersApiV1ToolServersGet' does not exist on type 'ToolServersApi'. Did you mean 'listToolServersApiV1ToolserversServersGet'?
-src/services/chatter-sdk.ts(249,29): error TS2551: Property 'createToolServerApiV1ToolServersPost' does not exist on type 'ToolServersApi'. Did you mean 'createToolServerApiV1ToolserversServersPost'?
-src/services/chatter-sdk.ts(255,29): error TS2551: Property 'updateToolServerApiV1ToolServersServerIdPut' does not exist on type 'ToolServersApi'. Did you mean 'updateToolServerApiV1ToolserversServersServerIdPut'?
-src/services/chatter-sdk.ts(262,29): error TS2551: Property 'enableToolServerApiV1ToolServersServerIdEnablePost' does not exist on type 'ToolServersApi'. Did you mean 'enableToolServerApiV1ToolserversServersServerIdEnablePost'?
-src/services/chatter-sdk.ts(268,29): error TS2551: Property 'disableToolServerApiV1ToolServersServerIdDisablePost' does not exist on type 'ToolServersApi'. Did you mean 'disableToolServerApiV1ToolserversServersServerIdDisablePost'?
-src/services/sse-manager.ts(495,44): error TS2339: Property 'message' does not exist on type '{ backup_id: string; started_at: string; } | { backup_id: string; backup_path: string; completed_at: string; } | { backup_id: string; error: string; failed_at: string; } | { backup_id: string; progress_percent: number; current_step: string; } | ... 12 more ... | { ...; }'.
-  Property 'message' does not exist on type '{ backup_id: string; started_at: string; }'.
-src/services/sse-manager.ts(507,9): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(508,7): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(508,44): error TS7006: Parameter 'listener' implicitly has an 'any' type.
-src/services/sse-manager.ts(523,10): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(524,7): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(526,5): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(539,9): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(540,7): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(540,37): error TS7053: Element implicitly has an 'any' type because expression of type 'string' can't be used to index type 'SSEEventListeners'.
-  No index signature with a parameter of type 'string' was found on type 'SSEEventListeners'.
-src/services/sse-manager.ts(540,73): error TS7006: Parameter 'l' implicitly has an 'any' type.
+
+> @chatter/sdk-ts@0.1.0 prepare
+> npm run build
+
+
+> @chatter/sdk-ts@0.1.0 build
+> tsc && tsc -p tsconfig.esm.json
+
+src/apis/ChatApi.ts(283,66): error TS2304: Cannot find name 'chatter__schemas__chat__WorkflowTemplatesResponse'.
+src/apis/ChatApi.ts(288,25): error TS2304: Cannot find name 'chatter__schemas__chat__WorkflowTemplatesResponse'.
+src/apis/DefaultApi.ts(4,34): error TS6133: 'HTTPQuery' is declared but its value is never read.
+src/apis/DefaultApi.ts(4,45): error TS6133: 'HTTPHeaders' is declared but its value is never read.
+src/apis/EventsApi.ts(5,34): error TS6133: 'HTTPQuery' is declared but its value is never read.
+src/apis/EventsApi.ts(5,45): error TS6133: 'HTTPHeaders' is declared but its value is never read.
+src/apis/HealthApi.ts(5,34): error TS6133: 'HTTPQuery' is declared but its value is never read.
+src/apis/HealthApi.ts(5,45): error TS6133: 'HTTPHeaders' is declared but its value is never read.
+src/apis/WorkflowsApi.ts(5,34): error TS6133: 'HTTPQuery' is declared but its value is never read.
+src/apis/WorkflowsApi.ts(5,45): error TS6133: 'HTTPHeaders' is declared but its value is never read.
+src/apis/WorkflowsApi.ts(67,81): error TS2304: Cannot find name 'chatter__schemas__workflows__WorkflowTemplatesResponse'.
+src/apis/WorkflowsApi.ts(72,25): error TS2304: Cannot find name 'chatter__schemas__workflows__WorkflowTemplatesResponse'.
+src/models/ABTestActionResponse.ts(13,15): error TS2304: Cannot find name 'TestStatus'.
+src/models/ABTestCreateRequest.ts(11,14): error TS2304: Cannot find name 'TestType'.
+src/models/ABTestCreateRequest.ts(13,24): error TS2304: Cannot find name 'VariantAllocation'.
+src/models/ABTestCreateRequest.ts(15,13): error TS2304: Cannot find name 'TestVariant'.
+src/models/ABTestCreateRequest.ts(17,12): error TS2304: Cannot find name 'MetricType'.
+src/models/ABTestListResponse.ts(7,10): error TS2552: Cannot find name 'ABTestResponse'. Did you mean 'ABTestListResponse'?
+src/models/ABTestMetricsResponse.ts(9,12): error TS2552: Cannot find name 'TestMetric'. Did you mean 'TextMetrics'?
+src/models/ABTestResponse.ts(13,14): error TS2304: Cannot find name 'TestType'.
+src/models/ABTestResponse.ts(15,11): error TS2304: Cannot find name 'TestStatus'.
+src/models/ABTestResponse.ts(17,24): error TS2304: Cannot find name 'VariantAllocation'.
+src/models/ABTestResponse.ts(19,13): error TS2304: Cannot find name 'TestVariant'.
+src/models/ABTestResponse.ts(21,12): error TS2304: Cannot find name 'MetricType'.
+src/models/ABTestResultsResponse.ts(11,11): error TS2304: Cannot find name 'TestStatus'.
+src/models/ABTestResultsResponse.ts(13,12): error TS2304: Cannot find name 'TestMetric'.
+src/models/ABTestUpdateRequest.ts(11,12): error TS2304: Cannot find name 'TestStatus'.
+src/models/AgentBulkCreateRequest.ts(7,11): error TS2304: Cannot find name 'AgentCreateRequest'.
+src/models/AgentBulkCreateResponse.ts(7,12): error TS2304: Cannot find name 'AgentResponse'.
+src/models/AgentCreateRequest.ts(11,15): error TS2304: Cannot find name 'AgentType'.
+src/models/AgentCreateRequest.ts(21,18): error TS2304: Cannot find name 'AgentCapability'.
+src/models/AgentHealthResponse.ts(9,11): error TS2304: Cannot find name 'AgentStatus'.
+src/models/AgentListResponse.ts(7,11): error TS2304: Cannot find name 'AgentResponse'.
+src/models/AgentResponse.ts(13,9): error TS2304: Cannot find name 'AgentType'.
+src/models/AgentResponse.ts(15,11): error TS2304: Cannot find name 'AgentStatus'.
+src/models/AgentResponse.ts(25,17): error TS2304: Cannot find name 'AgentCapability'.
+src/models/AgentUpdateRequest.ts(13,12): error TS2304: Cannot find name 'AgentStatus'.
+src/models/AgentUpdateRequest.ts(21,18): error TS2304: Cannot find name 'AgentCapability'.
+src/models/AvailableToolsResponse.ts(7,10): error TS2304: Cannot find name 'AvailableToolResponse'.
+src/models/BackupListResponse.ts(7,12): error TS2304: Cannot find name 'BackupResponse'.
+src/models/BackupRequest.ts(7,17): error TS2304: Cannot find name 'BackupType'.
+src/models/BackupResponse.ts(13,16): error TS2304: Cannot find name 'BackupType'.
+src/models/Body_list_agents_api_v1_agents__get.ts(6,16): error TS2304: Cannot find name 'PaginationRequest'.
+src/models/Body_list_agents_api_v1_agents__get.ts(7,13): error TS2304: Cannot find name 'SortingRequest'.
+src/models/ChatResponse.ts(9,12): error TS2304: Cannot find name 'MessageResponse'.
+src/models/ChatResponse.ts(11,17): error TS2304: Cannot find name 'ConversationResponse'.
+src/models/ConversationResponse.ts(17,11): error TS2304: Cannot find name 'ConversationStatus'.
+src/models/ConversationSearchResponse.ts(7,18): error TS2304: Cannot find name 'ConversationResponse'.
+src/models/ConversationUpdate.ts(11,12): error TS2304: Cannot find name 'ConversationStatus'.
+src/models/ConversationWithMessages.ts(17,11): error TS2304: Cannot find name 'ConversationStatus'.
+src/models/ConversationWithMessages.ts(59,14): error TS2304: Cannot find name 'MessageResponse'.
+src/models/DashboardResponse.ts(7,23): error TS2304: Cannot find name 'ConversationStatsResponse'.
+src/models/DashboardResponse.ts(9,18): error TS2304: Cannot find name 'UsageMetricsResponse'.
+src/models/DashboardResponse.ts(11,24): error TS2304: Cannot find name 'PerformanceMetricsResponse'.
+src/models/DashboardResponse.ts(13,23): error TS2304: Cannot find name 'DocumentAnalyticsResponse'.
+src/models/DashboardResponse.ts(15,18): error TS2304: Cannot find name 'SystemAnalyticsResponse'.
+src/models/DefaultProvider.ts(6,15): error TS2304: Cannot find name 'ModelType'.
+src/models/DocumentChunksResponse.ts(7,11): error TS2304: Cannot find name 'DocumentChunkResponse'.
+src/models/DocumentListResponse.ts(7,14): error TS2304: Cannot find name 'DocumentResponse'.
+src/models/DocumentProcessingResponse.ts(9,11): error TS2304: Cannot find name 'DocumentStatus'.
+src/models/DocumentResponse.ts(33,11): error TS2304: Cannot find name 'DocumentStatus'.
+src/models/DocumentSearchResponse.ts(7,12): error TS2304: Cannot find name 'DocumentSearchResult'.
+src/models/DocumentSearchResult.ts(17,13): error TS2304: Cannot find name 'DocumentResponse'.
+src/models/EmbeddingSpaceCreate.ts(17,24): error TS2304: Cannot find name 'ReductionStrategy'.
+src/models/EmbeddingSpaceCreate.ts(25,21): error TS2304: Cannot find name 'DistanceMetric'.
+src/models/EmbeddingSpaceList.ts(6,11): error TS2304: Cannot find name 'EmbeddingSpaceWithModel'.
+src/models/EmbeddingSpaceUpdate.ts(8,24): error TS2304: Cannot find name 'ReductionStrategy'.
+src/models/EmbeddingSpaceUpdate.ts(12,21): error TS2304: Cannot find name 'DistanceMetric'.
+src/models/EmbeddingSpaceWithModel.ts(17,24): error TS2304: Cannot find name 'ReductionStrategy'.
+src/models/EmbeddingSpaceWithModel.ts(25,21): error TS2304: Cannot find name 'DistanceMetric'.
+src/models/EmbeddingSpaceWithModel.ts(40,10): error TS2304: Cannot find name 'ModelDefWithProvider'.
+src/models/ExportDataRequest.ts(7,10): error TS2304: Cannot find name 'ExportScope'.
+src/models/ExportDataRequest.ts(9,12): error TS2304: Cannot find name 'DataFormat'.
+src/models/HTTPValidationError.ts(6,12): error TS2304: Cannot find name 'ValidationError'.
+src/models/HealthCheckResponse.ts(7,11): error TS2304: Cannot find name 'HealthStatus'.
+src/models/JobCreateRequest.ts(15,14): error TS2304: Cannot find name 'JobPriority'.
+src/models/JobListResponse.ts(7,9): error TS2304: Cannot find name 'JobResponse'.
+src/models/JobResponse.ts(13,13): error TS2304: Cannot find name 'JobPriority'.
+src/models/JobResponse.ts(15,11): error TS2304: Cannot find name 'JobStatus'.
+src/models/MessageResponse.ts(7,9): error TS2304: Cannot find name 'MessageRole'.
+src/models/ModelDefCreate.ts(9,15): error TS2304: Cannot find name 'ModelType'.
+src/models/ModelDefList.ts(6,11): error TS2304: Cannot find name 'ModelDefWithProvider'.
+src/models/ModelDefWithProvider.ts(9,15): error TS2304: Cannot find name 'ModelType'.
+src/models/ModelDefWithProvider.ts(38,13): error TS2304: Cannot find name 'Provider'.
+src/models/NodeTypeResponse.ts(15,15): error TS2304: Cannot find name 'NodePropertyDefinition'.
+src/models/PluginListResponse.ts(7,12): error TS2304: Cannot find name 'PluginResponse'.
+src/models/PluginResponse.ts(17,16): error TS2304: Cannot find name 'PluginType'.
+src/models/PluginResponse.ts(19,11): error TS2304: Cannot find name 'PluginStatus'.
+src/models/ProfileCloneRequest.ts(11,19): error TS2304: Cannot find name 'ProfileUpdate'.
+src/models/ProfileCreate.ts(11,18): error TS2304: Cannot find name 'ProfileType'.
+src/models/ProfileListResponse.ts(7,13): error TS2304: Cannot find name 'ProfileResponse'.
+src/models/ProfileResponse.ts(11,18): error TS2304: Cannot find name 'ProfileType'.
+src/models/ProfileStatsResponse.ts(13,23): error TS2304: Cannot find name 'ProfileResponse'.
+src/models/ProfileStatsResponse.ts(15,20): error TS2304: Cannot find name 'ProfileResponse'.
+src/models/ProfileUpdate.ts(11,18): error TS2304: Cannot find name 'ProfileType'.
+src/models/PromptCreate.ts(11,17): error TS2304: Cannot find name 'PromptType'.
+src/models/PromptCreate.ts(13,14): error TS2304: Cannot find name 'PromptCategory'.
+src/models/PromptListResponse.ts(7,12): error TS2304: Cannot find name 'PromptResponse'.
+src/models/PromptResponse.ts(15,16): error TS2304: Cannot find name 'PromptType'.
+src/models/PromptResponse.ts(17,13): error TS2304: Cannot find name 'PromptCategory'.
+src/models/PromptStatsResponse.ts(13,22): error TS2304: Cannot find name 'PromptResponse'.
+src/models/PromptStatsResponse.ts(15,19): error TS2304: Cannot find name 'PromptResponse'.
+src/models/PromptUpdate.ts(11,17): error TS2304: Cannot find name 'PromptType'.
+src/models/PromptUpdate.ts(13,14): error TS2304: Cannot find name 'PromptCategory'.
+src/models/Provider.ts(9,18): error TS2304: Cannot find name 'ProviderType'.
+src/models/ProviderCreate.ts(9,18): error TS2304: Cannot find name 'ProviderType'.
+src/models/ProviderList.ts(6,14): error TS2304: Cannot find name 'Provider'.
+src/models/ReadinessCheckResponse.ts(7,11): error TS2304: Cannot find name 'ReadinessStatus'.
+src/models/RoleToolAccessCreate.ts(7,9): error TS2304: Cannot find name 'UserRole'.
+src/models/RoleToolAccessCreate.ts(13,17): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/RoleToolAccessResponse.ts(7,9): error TS2304: Cannot find name 'UserRole'.
+src/models/RoleToolAccessResponse.ts(13,17): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/ServerToolResponse.ts(21,11): error TS2304: Cannot find name 'ToolStatus'.
+src/models/ServerToolsResponse.ts(7,10): error TS2304: Cannot find name 'ServerToolResponse'.
+src/models/TestMetric.ts(7,16): error TS2304: Cannot find name 'MetricType'.
+src/models/TokenResponse.ts(15,9): error TS2304: Cannot find name 'UserResponse'.
+src/models/ToolAccessResult.ts(9,17): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/ToolPermissionCreate.ts(13,17): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/ToolPermissionResponse.ts(13,17): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/ToolPermissionUpdate.ts(6,18): error TS2304: Cannot find name 'ToolAccessLevel'.
+src/models/ToolServerCreate.ts(17,18): error TS2304: Cannot find name 'OAuthConfigSchema'.
+src/models/ToolServerHealthCheck.ts(11,11): error TS2304: Cannot find name 'ServerStatus'.
+src/models/ToolServerMetrics.ts(11,11): error TS2304: Cannot find name 'ServerStatus'.
+src/models/ToolServerResponse.ts(17,18): error TS2304: Cannot find name 'OAuthConfigSchema'.
+src/models/ToolServerResponse.ts(31,11): error TS2304: Cannot find name 'ServerStatus'.
+src/models/ToolServerResponse.ts(49,11): error TS2304: Cannot find name 'ServerToolResponse'.
+src/models/ToolServerUpdate.ts(10,18): error TS2304: Cannot find name 'OAuthConfigSchema'.
+src/models/WorkflowAnalyticsResponse.ts(7,15): error TS2304: Cannot find name 'ComplexityMetrics'.
+src/models/WorkflowAnalyticsResponse.ts(9,16): error TS2304: Cannot find name 'BottleneckInfo'.
+src/models/WorkflowAnalyticsResponse.ts(11,29): error TS2304: Cannot find name 'OptimizationSuggestion'.
+src/models/WorkflowDefinitionCreate.ts(11,10): error TS2304: Cannot find name 'WorkflowNode'.
+src/models/WorkflowDefinitionCreate.ts(13,10): error TS2304: Cannot find name 'WorkflowEdge'.
+src/models/WorkflowDefinitionResponse.ts(11,10): error TS2304: Cannot find name 'WorkflowNode'.
+src/models/WorkflowDefinitionResponse.ts(13,10): error TS2304: Cannot find name 'WorkflowEdge'.
+src/models/WorkflowDefinitionUpdate.ts(11,11): error TS2304: Cannot find name 'WorkflowNode'.
+src/models/WorkflowDefinitionUpdate.ts(13,11): error TS2304: Cannot find name 'WorkflowEdge'.
+src/models/WorkflowDefinitionsResponse.ts(7,16): error TS2304: Cannot find name 'WorkflowDefinitionResponse'.
+src/models/WorkflowEdge.ts(19,10): error TS2304: Cannot find name 'WorkflowEdgeData'.
+src/models/WorkflowNode.ts(13,9): error TS2304: Cannot find name 'WorkflowNodeData'.
+src/models/WorkflowValidationResponse.ts(9,11): error TS2304: Cannot find name 'ValidationError'.
+src/models/WorkflowValidationResponse.ts(11,13): error TS2304: Cannot find name 'ValidationError'.
+src/models/chatter__schemas__chat__WorkflowTemplatesResponse.ts(7,29): error TS2304: Cannot find name 'WorkflowTemplateInfo'.
+src/models/chatter__schemas__workflows__WorkflowTemplatesResponse.ts(7,14): error TS2304: Cannot find name 'WorkflowTemplateResponse'.

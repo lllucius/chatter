@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: WorkflowValidationResponse
  */
+import { ValidationError } from './ValidationError';
+
 
 export interface WorkflowValidationResponse {
   /** Whether workflow is valid */

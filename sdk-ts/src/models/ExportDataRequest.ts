@@ -1,6 +1,9 @@
 /**
  * Generated from OpenAPI schema: ExportDataRequest
  */
+import { DataFormat } from './DataFormat';
+import { ExportScope } from './ExportScope';
+
 
 export interface ExportDataRequest {
   /** Export scope */

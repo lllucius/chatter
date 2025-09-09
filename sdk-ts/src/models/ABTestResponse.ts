@@ -1,6 +1,12 @@
 /**
  * Generated from OpenAPI schema: ABTestResponse
  */
+import { MetricType } from './MetricType';
+import { TestStatus } from './TestStatus';
+import { TestType } from './TestType';
+import { TestVariant } from './TestVariant';
+import { VariantAllocation } from './VariantAllocation';
+
 
 export interface ABTestResponse {
   /** Test ID */

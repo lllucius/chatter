@@ -2,7 +2,7 @@
  * Generated API client for Health
  */
 import { CorrelationTraceResponse, HealthCheckResponse, MetricsResponse, ReadinessCheckResponse } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration } from '../runtime';
 
 export class HealthApi extends BaseAPI {
   constructor(configuration?: Configuration) {

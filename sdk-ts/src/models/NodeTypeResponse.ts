@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: NodeTypeResponse
  */
+import { NodePropertyDefinition } from './NodePropertyDefinition';
+
 
 export interface NodeTypeResponse {
   /** Node type identifier */

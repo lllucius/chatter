@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ToolServerMetrics
  */
+import { ServerStatus } from './ServerStatus';
+
 
 export interface ToolServerMetrics {
   /** Server ID */

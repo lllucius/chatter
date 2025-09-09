@@ -1,6 +1,12 @@
 /**
  * Generated from OpenAPI schema: DashboardResponse
  */
+import { ConversationStatsResponse } from './ConversationStatsResponse';
+import { DocumentAnalyticsResponse } from './DocumentAnalyticsResponse';
+import { PerformanceMetricsResponse } from './PerformanceMetricsResponse';
+import { SystemAnalyticsResponse } from './SystemAnalyticsResponse';
+import { UsageMetricsResponse } from './UsageMetricsResponse';
+
 
 export interface DashboardResponse {
   /** Conversation statistics */

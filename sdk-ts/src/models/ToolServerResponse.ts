@@ -1,6 +1,10 @@
 /**
  * Generated from OpenAPI schema: ToolServerResponse
  */
+import { OAuthConfigSchema } from './OAuthConfigSchema';
+import { ServerStatus } from './ServerStatus';
+import { ServerToolResponse } from './ServerToolResponse';
+
 
 export interface ToolServerResponse {
   /** Server name */

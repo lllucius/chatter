@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: DocumentResponse
  */
+import { DocumentStatus } from './DocumentStatus';
+
 
 export interface DocumentResponse {
   /** Document title */

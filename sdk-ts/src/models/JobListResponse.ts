@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: JobListResponse
  */
+import { JobResponse } from './JobResponse';
+
 
 export interface JobListResponse {
   /** List of jobs */

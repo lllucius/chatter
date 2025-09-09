@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: DocumentChunksResponse
  */
+import { DocumentChunkResponse } from './DocumentChunkResponse';
+
 
 export interface DocumentChunksResponse {
   /** List of document chunks */

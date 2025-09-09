@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ConversationResponse
  */
+import { ConversationStatus } from './ConversationStatus';
+
 
 export interface ConversationResponse {
   /** Conversation title */

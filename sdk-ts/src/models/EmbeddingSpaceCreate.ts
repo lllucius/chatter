@@ -1,6 +1,9 @@
 /**
  * Generated from OpenAPI schema: EmbeddingSpaceCreate
  */
+import { DistanceMetric } from './DistanceMetric';
+import { ReductionStrategy } from './ReductionStrategy';
+
 
 export interface EmbeddingSpaceCreate {
   /** Unique space name */

@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: WorkflowNode
  */
+import { WorkflowNodeData } from './WorkflowNodeData';
+
 
 export interface WorkflowNode {
   /** Unique node identifier */

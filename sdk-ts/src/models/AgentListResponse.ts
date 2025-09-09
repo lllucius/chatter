@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: AgentListResponse
  */
+import { AgentResponse } from './AgentResponse';
+
 
 export interface AgentListResponse {
   /** List of agents */

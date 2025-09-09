@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: PromptListResponse
  */
+import { PromptResponse } from './PromptResponse';
+
 
 export interface PromptListResponse {
   /** List of prompts */

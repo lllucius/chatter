@@ -1,6 +1,9 @@
 /**
  * Generated from OpenAPI schema: WorkflowDefinitionResponse
  */
+import { WorkflowEdge } from './WorkflowEdge';
+import { WorkflowNode } from './WorkflowNode';
+
 
 export interface WorkflowDefinitionResponse {
   /** Workflow name */

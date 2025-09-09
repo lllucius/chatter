@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ServerToolResponse
  */
+import { ToolStatus } from './ToolStatus';
+
 
 export interface ServerToolResponse {
   /** Tool name */

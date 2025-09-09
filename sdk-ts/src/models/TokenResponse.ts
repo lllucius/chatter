@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: TokenResponse
  */
+import { UserResponse } from './UserResponse';
+
 
 export interface TokenResponse {
   /** JWT access token */

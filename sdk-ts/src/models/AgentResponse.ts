@@ -1,6 +1,10 @@
 /**
  * Generated from OpenAPI schema: AgentResponse
  */
+import { AgentCapability } from './AgentCapability';
+import { AgentStatus } from './AgentStatus';
+import { AgentType } from './AgentType';
+
 
 export interface AgentResponse {
   /** Agent ID */

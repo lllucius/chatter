@@ -1,6 +1,10 @@
 /**
  * Generated from OpenAPI schema: WorkflowAnalyticsResponse
  */
+import { BottleneckInfo } from './BottleneckInfo';
+import { ComplexityMetrics } from './ComplexityMetrics';
+import { OptimizationSuggestion } from './OptimizationSuggestion';
+
 
 export interface WorkflowAnalyticsResponse {
   /** Complexity metrics */

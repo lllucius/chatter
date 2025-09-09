@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ModelDefCreate
  */
+import { ModelType } from './ModelType';
+
 
 export interface ModelDefCreate {
   /** Model name */

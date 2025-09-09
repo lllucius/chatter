@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ToolServerCreate
  */
+import { OAuthConfigSchema } from './OAuthConfigSchema';
+
 
 export interface ToolServerCreate {
   /** Server name */

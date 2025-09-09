@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: AgentHealthResponse
  */
+import { AgentStatus } from './AgentStatus';
+
 
 export interface AgentHealthResponse {
   /** Agent ID */

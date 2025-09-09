@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ProfileUpdate
  */
+import { ProfileType } from './ProfileType';
+
 
 export interface ProfileUpdate {
   /** Profile name */

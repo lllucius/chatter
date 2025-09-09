@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: MessageResponse
  */
+import { MessageRole } from './MessageRole';
+
 
 export interface MessageResponse {
   /** Message role */

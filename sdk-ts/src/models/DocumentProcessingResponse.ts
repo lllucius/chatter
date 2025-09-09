@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: DocumentProcessingResponse
  */
+import { DocumentStatus } from './DocumentStatus';
+
 
 export interface DocumentProcessingResponse {
   /** Document ID */

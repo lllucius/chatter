@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: DocumentListResponse
  */
+import { DocumentResponse } from './DocumentResponse';
+
 
 export interface DocumentListResponse {
   /** List of documents */

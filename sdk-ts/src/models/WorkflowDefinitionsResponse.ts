@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: WorkflowDefinitionsResponse
  */
+import { WorkflowDefinitionResponse } from './WorkflowDefinitionResponse';
+
 
 export interface WorkflowDefinitionsResponse {
   /** Workflow definitions */

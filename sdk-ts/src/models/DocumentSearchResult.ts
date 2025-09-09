@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: DocumentSearchResult
  */
+import { DocumentResponse } from './DocumentResponse';
+
 
 export interface DocumentSearchResult {
   /** Document ID */

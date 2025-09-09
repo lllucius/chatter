@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: PromptStatsResponse
  */
+import { PromptResponse } from './PromptResponse';
+
 
 export interface PromptStatsResponse {
   /** Total number of prompts */

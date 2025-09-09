@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ABTestActionResponse
  */
+import { TestStatus } from './TestStatus';
 
 export interface ABTestActionResponse {
   /** Whether action was successful */

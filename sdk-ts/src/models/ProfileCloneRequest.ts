@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ProfileCloneRequest
  */
+import { ProfileUpdate } from './ProfileUpdate';
+
 
 export interface ProfileCloneRequest {
   /** New profile name */

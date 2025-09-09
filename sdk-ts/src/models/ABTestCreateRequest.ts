@@ -1,6 +1,10 @@
 /**
  * Generated from OpenAPI schema: ABTestCreateRequest
  */
+import { TestType } from './TestType';
+import { VariantAllocation } from './VariantAllocation';
+import { TestVariant } from './TestVariant';
+import { MetricType } from './MetricType';
 
 export interface ABTestCreateRequest {
   /** Test name */

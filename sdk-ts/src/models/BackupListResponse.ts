@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: BackupListResponse
  */
+import { BackupResponse } from './BackupResponse';
+
 
 export interface BackupListResponse {
   /** List of backups */

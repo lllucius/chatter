@@ -231,6 +231,7 @@ class BackupEventData(ValidatedEventData):
     progress: float | None = Field(None, ge=0.0, le=100.0)
     backup_path: str | None = Field(None, max_length=1000)
     error: str | None = Field(None, max_length=1000)
+    updated_at: str | None = Field(None, description="Last update timestamp")
 
 
 class JobEventData(ValidatedEventData):

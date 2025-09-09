@@ -149,9 +149,7 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await getSDK().chat.createConversationApiV1ChatConversations({
-        conversationCreate: createRequest,
-      });
+      const response = await getSDK().chat.createConversationApiV1ChatConversations(createRequest);
       setCurrentConversation(response.data);
       setMessages([]);
 
@@ -182,9 +180,9 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages({
-        conversationId: conversation.id
-      });
+      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
+        conversation.id
+      );
       
       // Convert messages to ExtendedChatMessage format
       const chatMessages: ExtendedChatMessage[] = response.map(msg => ({
@@ -290,7 +288,7 @@ const ChatPage: React.FC = () => {
 
       // Make streaming request with proper headers
       const token = localStorage.getItem('token') || '';
-      const response = await fetch('/api/v1/chat/chat', {
+      const response = await fetch('/api/v1/chat', {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -415,7 +413,7 @@ const ChatPage: React.FC = () => {
         await handleStreamingResponse(sendRequest);
       } else {
         // Use regular API
-        const response = await getSDK().chat.chatApiV1ChatChat({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatChat(sendRequest);
 
         // Narrow the SDK's loosely-typed response
         type ApiChatMessage = {
@@ -554,7 +552,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
         await handleStreamingResponse(sendRequest, assistantMessageId);
       } else {
-        const response = await getSDK().chat.chatApiV1ChatChat({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatChat(sendRequest);
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',

@@ -97,7 +97,6 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(config.pageSize || 10);
   const [total, setTotal] = useState(0);
-  const [error, setError] = useState<string | null>(null);
   
   // Dialog state - use individual internal state for these
   const [internalDialogOpen, setInternalDialogOpen] = useState(false);
@@ -122,12 +121,10 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   const loadData = useCallback(async () => {
     try {
       setLoading(true);
-      setError(null);
       const result = await service.list(page, rowsPerPage);
       setItems(result.items);
       setTotal(result.total);
     } catch (err) {
-      setError(err instanceof Error ? err.message : 'Failed to load data');
       toastService.error(`Failed to load ${config.entityNamePlural.toLowerCase()}`);
     } finally {
       setLoading(false);
@@ -216,13 +213,6 @@ export function CrudDataTable<T, TCreate, TUpdate>({
 
   return (
     <Box sx={{ width: '100%' }}>
-      {/* Error Alert */}
-      {error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {error}
-        </Alert>
-      )}
-
       {/* Data Table */}
       <Card>
         <TableContainer>

@@ -155,6 +155,16 @@ def run_async(async_func):
         try:
             return asyncio.run(async_func(*args, **kwargs))
         except ApiException as e:
+            # Try to extract detail from Problem response
+            error_detail = None
+            if hasattr(e, 'body') and e.body:
+                try:
+                    import json
+                    error_data = json.loads(e.body)
+                    error_detail = error_data.get('detail')
+                except (json.JSONDecodeError, AttributeError):
+                    pass
+            
             if e.status == 401:
                 console.print(
                     "❌ [red]Authentication failed. Please login first.[/red]"
@@ -168,13 +178,18 @@ def run_async(async_func):
                 )
             elif e.status == 404:
                 console.print("❌ [red]Resource not found.[/red]")
+            elif e.status == 422 and error_detail:
+                console.print(
+                    f"❌ [red]Validation Failed: {error_detail}[/red]"
+                )
             elif e.status == 500:
                 console.print(
                     "❌ [red]Server error. Please try again later.[/red]"
                 )
             else:
+                error_msg = error_detail if error_detail else e.reason
                 console.print(
-                    f"❌ [red]API Error ({e.status}): {e.reason}[/red]"
+                    f"❌ [red]API Error ({e.status}): {error_msg}[/red]"
                 )
             sys.exit(1)
         except Exception as e:
@@ -203,7 +218,7 @@ async def health_check():
     """Check API health status."""
     async with get_client() as sdk_client:
         response = (
-            await sdk_client.health_api.health_check_healthz_get()
+            await sdk_client.health_api.health_check_endpoint_healthz_get()
         )
 
         status_color = (
@@ -249,19 +264,59 @@ async def get_metrics():
         console.print("[bold]System Metrics[/bold]")
 
         # Display health metrics
-        console.print("[cyan]Health Metrics:[/cyan]")
-        for metric_name, metric_value in response.health.items():
-            console.print(f"  {metric_name}: {metric_value}")
+        if hasattr(response, 'health') and response.health:
+            console.print("[cyan]Health Metrics:[/cyan]")
+            if isinstance(response.health, dict):
+                for metric_name, metric_value in response.health.items():
+                    console.print(f"  {metric_name}: {metric_value}")
+            else:
+                console.print(f"  Health: {response.health}")
 
         # Display performance metrics
-        console.print("[cyan]Performance Metrics:[/cyan]")
-        for metric_name, metric_value in response.performance.items():
-            console.print(f"  {metric_name}: {metric_value}")
+        if hasattr(response, 'performance') and response.performance:
+            console.print("[cyan]Performance Metrics:[/cyan]")
+            if isinstance(response.performance, dict):
+                for metric_name, metric_value in response.performance.items():
+                    console.print(f"  {metric_name}: {metric_value}")
+            else:
+                console.print(f"  Performance: {response.performance}")
 
-        # Display endpoint metrics
-        console.print("[cyan]Endpoint Metrics:[/cyan]")
-        for metric_name, metric_value in response.endpoints.items():
-            console.print(f"  {metric_name}: {metric_value}")
+        # Display endpoint metrics with proper formatting
+        if hasattr(response, 'endpoints') and response.endpoints:
+            console.print("[cyan]Endpoint Metrics:[/cyan]")
+            if isinstance(response.endpoints, dict):
+                for endpoint, metrics in response.endpoints.items():
+                    console.print(f"  {endpoint}:")
+                    if isinstance(metrics, dict):
+                        table = Table(show_header=False, box=None, padding=(0, 2))
+                        table.add_column("Metric", style="dim")
+                        table.add_column("Value", style="green")
+                        
+                        for metric_key, metric_value in metrics.items():
+                            # Format metric names nicely
+                            formatted_key = metric_key.replace('_', ' ').title()
+                            if isinstance(metric_value, float):
+                                if 'time' in metric_key.lower():
+                                    formatted_value = f"{metric_value:.2f}ms"
+                                elif 'rate' in metric_key.lower():
+                                    formatted_value = f"{metric_value:.1%}"
+                                else:
+                                    formatted_value = f"{metric_value:.2f}"
+                            else:
+                                formatted_value = str(metric_value)
+                            table.add_row(formatted_key, formatted_value)
+                        
+                        console.print(table)
+                    else:
+                        console.print(f"    {metrics}")
+                    console.print()
+            else:
+                console.print(f"  Endpoints: {response.endpoints}")
+
+        # If none of the expected fields are present, show the whole response
+        if not any(hasattr(response, attr) for attr in ['health', 'performance', 'endpoints']):
+            console.print("[yellow]Raw response (unexpected format):[/yellow]")
+            console.print(str(response))
 
 
 # Authentication Commands
@@ -328,14 +383,10 @@ async def whoami():
 
         table.add_row("ID", str(response.id))
         table.add_row("Email", response.email)
-        table.add_row(
-            "Role",
-            (
-                response.role.value
-                if hasattr(response.role, 'value')
-                else str(response.role)
-            ),
-        )
+        table.add_row("Username", response.username)
+        table.add_row("Is Superuser", "Yes" if response.is_superuser else "No")
+        table.add_row("Is Active", "Yes" if response.is_active else "No")
+        table.add_row("Is Verified", "Yes" if response.is_verified else "No")
         table.add_row("Created", str(response.created_at))
 
         console.print(table)
@@ -393,7 +444,7 @@ async def list_prompts(
 @prompts_app.command("show")
 @run_async
 async def show_prompt(
-    prompt_id: int = typer.Argument(..., help="Prompt ID")
+    prompt_id: str = typer.Argument(..., help="Prompt ID")
 ):
     """Show detailed prompt information."""
     async with get_client() as sdk_client:
@@ -448,7 +499,7 @@ async def create_prompt(
 @prompts_app.command("delete")
 @run_async
 async def delete_prompt(
-    prompt_id: int = typer.Argument(..., help="Prompt ID to delete"),
+    prompt_id: str = typer.Argument(..., help="Prompt ID to delete"),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Delete a prompt."""
@@ -472,7 +523,7 @@ async def delete_prompt(
 @prompts_app.command("clone")
 @run_async
 async def clone_prompt(
-    prompt_id: int = typer.Argument(..., help="Prompt ID to clone"),
+    prompt_id: str = typer.Argument(..., help="Prompt ID to clone"),
     new_name: str = typer.Option(None, help="Name for cloned prompt"),
 ):
     """Clone an existing prompt."""
@@ -494,7 +545,7 @@ async def clone_prompt(
 @prompts_app.command("test")
 @run_async
 async def test_prompt(
-    prompt_id: int = typer.Argument(..., help="Prompt ID to test"),
+    prompt_id: str = typer.Argument(..., help="Prompt ID to test"),
     variables: str = typer.Option(
         None, help="Template variables as JSON"
     ),
@@ -1802,25 +1853,57 @@ async def event_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'active_connections'):
+        # Track if we added any rows
+        rows_added = False
+
+        # Add expected event metrics with safe attribute access
+        if hasattr(response, 'active_connections') and response.active_connections is not None:
             table.add_row(
                 "Active Connections", str(response.active_connections)
             )
-        if hasattr(response, 'total_events_sent'):
+            rows_added = True
+        if hasattr(response, 'total_events_sent') and response.total_events_sent is not None:
             table.add_row(
                 "Total Events Sent", str(response.total_events_sent)
             )
-        if hasattr(response, 'events_per_minute'):
+            rows_added = True
+        if hasattr(response, 'events_per_minute') and response.events_per_minute is not None:
             table.add_row(
                 "Events Per Minute", f"{response.events_per_minute:.2f}"
             )
-        if hasattr(response, 'avg_connection_duration'):
+            rows_added = True
+        if hasattr(response, 'avg_connection_duration') and response.avg_connection_duration is not None:
             table.add_row(
                 "Avg Connection Duration",
                 f"{response.avg_connection_duration:.1f}s",
             )
+            rows_added = True
 
-        console.print(table)
+        # Try to get any other numeric attributes from the response
+        if not rows_added and hasattr(response, '__dict__'):
+            for attr_name, attr_value in response.__dict__.items():
+                if not attr_name.startswith('_') and attr_value is not None:
+                    # Format attribute name nicely
+                    display_name = attr_name.replace('_', ' ').title()
+                    # Format numeric values appropriately
+                    if isinstance(attr_value, float):
+                        if 'duration' in attr_name.lower() or 'time' in attr_name.lower():
+                            formatted_value = f"{attr_value:.1f}s"
+                        elif 'rate' in attr_name.lower() or 'per_minute' in attr_name.lower():
+                            formatted_value = f"{attr_value:.2f}"
+                        else:
+                            formatted_value = f"{attr_value:.2f}"
+                    else:
+                        formatted_value = str(attr_value)
+                    table.add_row(display_name, formatted_value)
+                    rows_added = True
+
+        if rows_added:
+            console.print(table)
+        else:
+            console.print("[yellow]No event statistics available[/yellow]")
+            # Show the raw response for debugging
+            console.print(f"[dim]Raw response: {response}[/dim]")
 
 
 @events_app.command("test-broadcast")
@@ -2173,24 +2256,45 @@ async def dashboard():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        # Add dashboard metrics
-        if hasattr(response, 'total_users'):
+        # Track if we added any rows
+        rows_added = False
+
+        # Add dashboard metrics with safe attribute access
+        if hasattr(response, 'total_users') and response.total_users is not None:
             table.add_row("Total Users", str(response.total_users))
-        if hasattr(response, 'active_conversations'):
+            rows_added = True
+        if hasattr(response, 'active_conversations') and response.active_conversations is not None:
             table.add_row(
                 "Active Conversations",
                 str(response.active_conversations),
             )
-        if hasattr(response, 'total_messages'):
+            rows_added = True
+        if hasattr(response, 'total_messages') and response.total_messages is not None:
             table.add_row(
                 "Total Messages", str(response.total_messages)
             )
-        if hasattr(response, 'documents_processed'):
+            rows_added = True
+        if hasattr(response, 'documents_processed') and response.documents_processed is not None:
             table.add_row(
                 "Documents Processed", str(response.documents_processed)
             )
+            rows_added = True
 
-        console.print(table)
+        # Try to get any other numeric attributes from the response
+        if not rows_added and hasattr(response, '__dict__'):
+            for attr_name, attr_value in response.__dict__.items():
+                if not attr_name.startswith('_') and attr_value is not None:
+                    # Format attribute name nicely
+                    display_name = attr_name.replace('_', ' ').title()
+                    table.add_row(display_name, str(attr_value))
+                    rows_added = True
+
+        if rows_added:
+            console.print(table)
+        else:
+            console.print("[yellow]No dashboard data available[/yellow]")
+            # Show the raw response for debugging
+            console.print(f"[dim]Raw response: {response}[/dim]")
 
 
 # Plugins Commands

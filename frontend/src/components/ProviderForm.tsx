@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   Box,
 } from '@mui/material';
-import { ProviderCreate, ProviderUpdate } from '../sdk';
+import { ProviderCreate, ProviderUpdate } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface ProviderFormProps extends CrudFormProps<ProviderCreate, ProviderUpdate> {}

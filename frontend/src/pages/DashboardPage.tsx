@@ -44,7 +44,7 @@ import {
   ShowChart,
   Computer,
 } from '@mui/icons-material';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
 import PageLayout from '../components/PageLayout';

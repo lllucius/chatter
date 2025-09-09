@@ -19,7 +19,7 @@ import {
   createUsageStatsRenderer,
   createPerformanceRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 
 interface TabPanelProps {

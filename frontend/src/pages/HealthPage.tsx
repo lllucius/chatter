@@ -33,9 +33,9 @@ import {
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
-import { ToolServerResponse } from '../sdk';
+import { ToolServerResponse } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 
 const HealthPage: React.FC = () => {

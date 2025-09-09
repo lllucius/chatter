@@ -8,8 +8,8 @@ import {
   createTypeChipRenderer,
   createDateRenderer
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
-import { PromptResponse, PromptCreate, PromptUpdate } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { PromptResponse, PromptCreate, PromptUpdate } from 'chatter-sdk';
 
 const PromptsPageRefactored: React.FC = () => {
   // Define columns

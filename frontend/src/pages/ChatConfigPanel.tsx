@@ -28,9 +28,9 @@ import {
   Description as DocumentIcon,
   Chat as ConversationIcon,
 } from '@mui/icons-material';
-import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from '../sdk';
+import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 
 interface Props {
   profiles: ProfileResponse[];

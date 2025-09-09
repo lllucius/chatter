@@ -46,7 +46,7 @@ import {
 } from '@mui/icons-material';
 import { useTheme } from '@mui/material/styles';
 import useMediaQuery from '@mui/material/useMediaQuery';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { ThemeContext } from '../App';
 import { RightSidebarProvider, useRightSidebar } from './RightSidebarContext';
 

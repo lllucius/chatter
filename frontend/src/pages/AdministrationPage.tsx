@@ -47,8 +47,8 @@ import {
   Edit as EditIcon,
   DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
-import { chatterClient } from '../sdk/client';
-import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from 'chatter-sdk';
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
 import CustomScrollbar from '../components/CustomScrollbar';

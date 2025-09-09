@@ -50,7 +50,7 @@ import {
   TrendingFlat as TrendingFlatIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import {
   ABTestResponse,
@@ -60,7 +60,7 @@ import {
   ABTestResultsResponse,
   TestStatus,
   TestType,
-} from '../sdk';
+} from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 
 interface TabPanelProps {

@@ -1,21 +1,5 @@
 import {
-  Configuration,
-  AuthenticationApi,
-  ABTestingApi,
-  AgentsApi,
-  AnalyticsApi,
-  ChatApi,
-  DataManagementApi,
-  DefaultApi,
-  DocumentsApi,
-  EventsApi,
-  HealthApi,
-  JobsApi,
-  ModelRegistryApi,
-  PluginsApi,
-  ProfilesApi,
-  PromptsApi,
-  ToolServersApi,
+  ChatterSDK,
   UserLogin,
   ToolServerCreate,
   ToolServerUpdate,
@@ -23,28 +7,10 @@ import {
   ConversationUpdate,
 } from 'chatter-sdk';
 
-class ChatterSDK {
-  private configuration: Configuration;
+class ChatterSDKWrapper {
+  private chatterSDK: ChatterSDK;
   private token: string | null = null;
   
-  // API instances
-  public auth: AuthenticationApi;
-  public abTesting: ABTestingApi;
-  public agents: AgentsApi;
-  public analytics: AnalyticsApi;
-  public chat: ChatApi;
-  public dataManagement: DataManagementApi;
-  public default: DefaultApi;
-  public documents: DocumentsApi;
-  public events: EventsApi;
-  public health: HealthApi;
-  public jobs: JobsApi;
-  public modelRegistry: ModelRegistryApi;
-  public plugins: PluginsApi;
-  public profiles: ProfilesApi;
-  public prompts: PromptsApi;
-  public toolServers: ToolServersApi;
-
   // Convenience objects for compatibility
   public conversations: {
     listConversationsApiV1ChatConversationsGet: (params?: any) => Promise<any>;
@@ -59,53 +25,43 @@ class ChatterSDK {
   };
 
   constructor() {
-    this.initializeConfiguration();
-    this.initializeAPIs();
+    this.chatterSDK = new ChatterSDK({
+      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+    });
     this.loadTokenFromStorage();
     this.initializeConvenienceObjects();
   }
 
-  private initializeConfiguration() {
-    this.configuration = new Configuration({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-      accessToken: () => this.token || '',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-  }
-
-  private initializeAPIs() {
-    this.auth = new AuthenticationApi(this.configuration);
-    this.abTesting = new ABTestingApi(this.configuration);
-    this.agents = new AgentsApi(this.configuration);
-    this.analytics = new AnalyticsApi(this.configuration);
-    this.chat = new ChatApi(this.configuration);
-    this.dataManagement = new DataManagementApi(this.configuration);
-    this.default = new DefaultApi(this.configuration);
-    this.documents = new DocumentsApi(this.configuration);
-    this.events = new EventsApi(this.configuration);
-    this.health = new HealthApi(this.configuration);
-    this.jobs = new JobsApi(this.configuration);
-    this.modelRegistry = new ModelRegistryApi(this.configuration);
-    this.plugins = new PluginsApi(this.configuration);
-    this.profiles = new ProfilesApi(this.configuration);
-    this.prompts = new PromptsApi(this.configuration);
-    this.toolServers = new ToolServersApi(this.configuration);
-  }
+  // Expose API instances through getters for compatibility
+  public get auth() { return this.chatterSDK.auth; }
+  public get abTesting() { return this.chatterSDK.abTesting; }
+  public get agents() { return this.chatterSDK.agents; }
+  public get analytics() { return this.chatterSDK.analytics; }
+  public get chat() { return this.chatterSDK.chat; }
+  public get dataManagement() { return this.chatterSDK.dataManagement; }
+  public get default() { return this.chatterSDK.default; }
+  public get documents() { return this.chatterSDK.documents; }
+  public get events() { return this.chatterSDK.events; }
+  public get health() { return this.chatterSDK.health; }
+  public get jobs() { return this.chatterSDK.jobs; }
+  public get modelRegistry() { return this.chatterSDK.models; }
+  public get plugins() { return this.chatterSDK.plugins; }
+  public get profiles() { return this.chatterSDK.profiles; }
+  public get prompts() { return this.chatterSDK.prompts; }
+  public get toolServers() { return this.chatterSDK.toolServers; }
 
   private initializeConvenienceObjects() {
     // Create conversations object that delegates to chat API for compatibility
     this.conversations = {
-      listConversationsApiV1ChatConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
-      listConversationsApiV1ConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
-      createConversationApiV1ChatConversationsPost: (params) => this.chat.createConversationApiV1ChatConversationsPost(params),
-      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
-      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
-      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
-      chatApiV1ChatChatPost: (params) => this.chat.chatApiV1ChatChatPost(params),
+      listConversationsApiV1ChatConversationsGet: (params = {}) => this.chatterSDK.chat.listConversationsApiV1ChatConversationsGet(params),
+      listConversationsApiV1ConversationsGet: (params = {}) => this.chatterSDK.chat.listConversationsApiV1ChatConversationsGet(params),
+      createConversationApiV1ChatConversationsPost: (params) => this.chatterSDK.chat.createConversationApiV1ChatConversationsPost(params),
+      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.chatterSDK.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.chatterSDK.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.chatterSDK.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
+      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.chatterSDK.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
+      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.chatterSDK.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
+      chatApiV1ChatChatPost: (params) => this.chatterSDK.chat.chatApiV1ChatChatPost(params),
     };
   }
 
@@ -117,21 +73,17 @@ class ChatterSDK {
   }
 
   public getURL(): string | null {
-    return this.configuration.basePath;
+    return this.chatterSDK.withConfig({}).basePath || null;
   }
 
   public setToken(token: string) {
     this.token = token;
     localStorage.setItem('chatter_access_token', token);
     
-    // Update configuration with new token
-    this.configuration = new Configuration({
-      ...this.configuration,
-      accessToken: () => this.token || '',
-    });
+    // Create new SDK instance with token
+    this.chatterSDK = this.chatterSDK.withAuth(token, 'bearer');
     
-    // Reinitialize all APIs with new configuration
-    this.initializeAPIs();
+    // Reinitialize convenience objects with new SDK instance
     this.initializeConvenienceObjects();
   }
 
@@ -144,16 +96,12 @@ class ChatterSDK {
     localStorage.removeItem('chatter_access_token');
     localStorage.removeItem('chatter_refresh_token');
     
-    // Update configuration to remove token
-    this.configuration = new Configuration({
+    // Create new SDK instance without token
+    this.chatterSDK = new ChatterSDK({
       basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
     
-    // Reinitialize all APIs with new configuration
-    this.initializeAPIs();
+    // Reinitialize convenience objects
     this.initializeConvenienceObjects();
   }
 
@@ -168,7 +116,7 @@ class ChatterSDK {
         password,
       };
 
-      const response = await this.auth.loginApiV1AuthLoginPost({
+      const response = await this.chatterSDK.auth.loginApiV1AuthLoginPost({
         userLogin: loginData,
       });
 
@@ -200,7 +148,7 @@ class ChatterSDK {
   public async logout(): Promise<void> {
     try {
       if (this.isAuthenticated()) {
-        await this.auth.logoutApiV1AuthLogoutPost();
+        await this.chatterSDK.auth.logoutApiV1AuthLogoutPost();
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -217,7 +165,7 @@ class ChatterSDK {
         return false;
       }
 
-      const response = await this.auth.refreshTokenApiV1AuthRefreshPost({
+      const response = await this.chatterSDK.auth.refreshTokenApiV1AuthRefreshPost({
         tokenRefresh: { refreshToken },
       });
 
@@ -242,87 +190,87 @@ class ChatterSDK {
 
   // Convenience methods that match the old API interface
   public async getToolServers() {
-    return this.toolServers.listToolServersApiV1ToolServersGet({});
+    return this.chatterSDK.toolServers.listToolServersApiV1ToolServersGet({});
   }
 
   public async createToolServer(serverData: ToolServerCreate) {
-    return this.toolServers.createToolServerApiV1ToolServersPost({
+    return this.chatterSDK.toolServers.createToolServerApiV1ToolServersPost({
       toolServerCreateRequest: serverData,
     });
   }
 
   public async updateToolServer(serverId: string, updateData: ToolServerUpdate) {
-    return this.toolServers.updateToolServerApiV1ToolServersServerIdPut({
+    return this.chatterSDK.toolServers.updateToolServerApiV1ToolServersServerIdPut({
       serverId,
       toolServerUpdateRequest: updateData,
     });
   }
 
   public async enableToolServer(serverId: string) {
-    return this.toolServers.enableToolServerApiV1ToolServersServerIdEnablePost({
+    return this.chatterSDK.toolServers.enableToolServerApiV1ToolServersServerIdEnablePost({
       serverId,
     });
   }
 
   public async disableToolServer(serverId: string) {
-    return this.toolServers.disableToolServerApiV1ToolServersServerIdDisablePost({
+    return this.chatterSDK.toolServers.disableToolServerApiV1ToolServersServerIdDisablePost({
       serverId,
     });
   }
 
   public async refreshServerTools(serverId: string) {
-    return this.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({
+    return this.chatterSDK.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({
       serverId,
     });
   }
 
   public async deleteToolServer(serverId: string) {
-    return this.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+    return this.chatterSDK.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
       serverId,
     });
   }
 
   public async enableTool(toolId: string) {
-    return this.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({
+    return this.chatterSDK.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({
       toolId,
     });
   }
 
   public async disableTool(toolId: string) {
-    return this.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({
+    return this.chatterSDK.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({
       toolId,
     });
   }
 
   public async getAllTools() {
-    return this.toolServers.listAllToolsApiV1ToolserversToolsAllGet();
+    return this.chatterSDK.toolServers.listAllToolsApiV1ToolserversToolsAllGet();
   }
 
   // Convenience methods for conversations (delegated to chat API)
   public async listConversations(params: any = {}) {
-    return this.chat.listConversationsApiV1ChatConversationsGet(params);
+    return this.chatterSDK.chat.listConversationsApiV1ChatConversationsGet(params);
   }
 
   public async createConversation(conversationData: ConversationCreate) {
-    return this.chat.createConversationApiV1ChatConversationsPost({
+    return this.chatterSDK.chat.createConversationApiV1ChatConversationsPost({
       conversationCreate: conversationData,
     });
   }
 
   public async deleteConversation(conversationId: string) {
-    return this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
+    return this.chatterSDK.chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
       conversationId,
     });
   }
 
   public async getConversation(conversationId: string) {
-    return this.chat.getConversationApiV1ChatConversationsConversationIdGet({
+    return this.chatterSDK.chat.getConversationApiV1ChatConversationsConversationIdGet({
       conversationId,
     });
   }
 
   public async updateConversation(conversationId: string, updateData: ConversationUpdate) {
-    return this.chat.updateConversationApiV1ChatConversationsConversationIdPut({
+    return this.chatterSDK.chat.updateConversationApiV1ChatConversationsConversationIdPut({
       conversationId,
       conversationUpdate: updateData,
     });
@@ -330,4 +278,4 @@ class ChatterSDK {
 }
 
 // Create and export a singleton instance
-export const chatterClient = new ChatterSDK();
+export const chatterClient = new ChatterSDKWrapper();

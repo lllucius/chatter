@@ -1,6 +1,6 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;

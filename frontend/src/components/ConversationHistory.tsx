@@ -33,8 +33,8 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../sdk/client';
-import { ConversationResponse } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { ConversationResponse } from 'chatter-sdk';
 
 interface ConversationHistoryProps {
   open: boolean;

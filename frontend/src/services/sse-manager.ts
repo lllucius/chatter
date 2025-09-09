@@ -6,7 +6,7 @@
  */
 
 import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 
 export class SSEEventManager {
   private eventSource: EventSource | null = null;

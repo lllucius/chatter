@@ -7,7 +7,7 @@
 import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
 import { sseEventManager } from './sse-manager';
 import { AnySSEEvent, SSEEventListener } from './sse-types';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 
 interface SSEContextValue {
   isConnected: boolean;

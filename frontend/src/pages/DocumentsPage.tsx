@@ -29,9 +29,9 @@ import {
   createCategoryChipRenderer,
   createDateRenderer,
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
-import { DocumentResponse, DocumentSearchRequest } from '../sdk';
+import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import { formatFileSize } from '../utils/common';

@@ -4,7 +4,7 @@
 
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
-import { chatterClient } from '../chatter-sdk';
+import { getSDK, authService } from "../../services/auth-service";
 import { AnySSEEvent, SSEEventType } from '../sse-types';
 
 // Mock ReadableStream for fetch response
@@ -120,7 +120,7 @@ describe('SSEEventManager', () => {
     vi.clearAllMocks();
     
     // Reset authentication mock
-    (chatterClient.isAuthenticated as vi.Mock).mockReturnValue(true);
+    (getSDK().isAuthenticated as vi.Mock).mockReturnValue(true);
     
     // Setup default fetch mock
     (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
@@ -133,7 +133,7 @@ describe('SSEEventManager', () => {
 
   describe('Connection Management', () => {
     test('should not connect when not authenticated', () => {
-      (chatterClient.isAuthenticated as vi.Mock).mockReturnValue(false);
+      (getSDK().isAuthenticated as vi.Mock).mockReturnValue(false);
       
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       sseManager.connect();

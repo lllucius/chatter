@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import DocumentsPage from '../DocumentsPage';
-import { chatterClient } from '../../services/chatter-sdk';
+import { getSDK, authService } from "../../services/auth-service";
 
 // Mock dependencies
 vi.mock('../../services/chatter-sdk', () => ({
@@ -87,7 +87,7 @@ describe('DocumentsPage', () => {
     vi.clearAllMocks();
     
     // Setup default API responses
-    vi.mocked(chatterClient.documents.listDocumentsApiV1DocumentsGet).mockResolvedValue({
+    vi.mocked(getSDK().documents.listDocumentsApiV1DocumentsGet).mockResolvedValue({
       data: { documents: mockDocuments }
     } as any);
   });
@@ -107,7 +107,7 @@ describe('DocumentsPage', () => {
       expect(screen.getByText('Another Document')).toBeInTheDocument();
     });
 
-    expect(chatterClient.documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
+    expect(getSDK().documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
   });
 
   it('calls API on mount', async () => {
@@ -120,11 +120,11 @@ describe('DocumentsPage', () => {
     });
 
     // Should call the API immediately
-    expect(chatterClient.documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
+    expect(getSDK().documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
   });
 
   it('displays error message when API call fails', async () => {
-    vi.mocked(chatterClient.documents.listDocumentsApiV1DocumentsGet).mockRejectedValue(
+    vi.mocked(getSDK().documents.listDocumentsApiV1DocumentsGet).mockRejectedValue(
       new Error('API Error')
     );
 

@@ -33,7 +33,7 @@ import {
   NetworkCheck as NetworkIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { ToolServerResponse } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
@@ -53,8 +53,8 @@ const HealthPage: React.FC = () => {
       setLoading(true);
       setError('');
       const [healthResponse, toolServerResponse] = await Promise.all([
-        chatterClient.health.healthCheckEndpointHealthzGet(),
-        chatterClient.toolServers.listToolServersApiV1ToolserversServersGet({}),
+        getSDK().health.healthCheckEndpointHealthzGet(),
+        getSDK().toolServers.listToolServersApiV1ToolserversServersGet({}),
       ]);
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);

@@ -47,7 +47,7 @@ import {
   Edit as EditIcon,
   DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from '../services/auth-service';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from 'chatter-sdk';
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
@@ -156,7 +156,7 @@ const AdministrationPage: React.FC = () => {
   const loadJobs = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await chatterClient.jobs.listJobsApiV1JobsGet({});
+      const response = await getSDK().jobs.listJobsApiV1JobsGet({});
       const newJobs = response.jobs || [];
       newJobs.forEach(job => {
         const previousState = lastJobStates.get(job.id);
@@ -186,7 +186,7 @@ const AdministrationPage: React.FC = () => {
 
   const loadJobStats = useCallback(async () => {
     try {
-      const response = await chatterClient.jobs.getJobStatsApiV1JobsStatsOverviewGet();
+      const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverviewGet();
       setJobStats(response.data);
     } catch (error: any) {
       console.error('Failed to load job stats:', error);
@@ -196,7 +196,7 @@ const AdministrationPage: React.FC = () => {
   const loadBackups = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await chatterClient.dataManagement.listBackupsApiV1DataBackupsGet({});
+      const response = await getSDK().dataManagement.listBackupsApiV1DataBackupsGet({});
       const items = response.backups || [];
       setBackups(items);
     } catch (error: any) {
@@ -209,7 +209,7 @@ const AdministrationPage: React.FC = () => {
 
   const loadPlugins = useCallback(async () => {
     try {
-      const response = await chatterClient.plugins.listPluginsApiV1PluginsGet({});
+      const response = await getSDK().plugins.listPluginsApiV1PluginsGet({});
       setPlugins(response.plugins || []);
     } catch (error: any) {
       console.error('Failed to load plugins:', error);
@@ -303,7 +303,7 @@ const AdministrationPage: React.FC = () => {
       setError('');
       switch (action) {
         case 'cancel':
-          await chatterClient.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
+          await getSDK().jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId });
           console.log('Job cancelled successfully!');
           loadJobs();
           loadJobStats();
@@ -356,7 +356,7 @@ const AdministrationPage: React.FC = () => {
       let result;
       switch (bulkOperationData.operationType) {
         case 'conversations':
-          result = await chatterClient.dataManagement.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(
+          result = await getSDK().dataManagement.bulkDeleteConversationsApiV1DataBulkDeleteConversationsPost(
             { 
               filters,
               dry_run: bulkOperationData.dryRun
@@ -364,7 +364,7 @@ const AdministrationPage: React.FC = () => {
           );
           break;
         case 'documents':
-          result = await chatterClient.dataManagement.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(
+          result = await getSDK().dataManagement.bulkDeleteDocumentsApiV1DataBulkDeleteDocumentsPost(
             { 
               filters,
               dry_run: bulkOperationData.dryRun
@@ -372,7 +372,7 @@ const AdministrationPage: React.FC = () => {
           );
           break;
         case 'prompts':
-          result = await chatterClient.dataManagement.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(
+          result = await getSDK().dataManagement.bulkDeletePromptsApiV1DataBulkDeletePromptsPost(
             { 
               filters,
               dry_run: bulkOperationData.dryRun
@@ -444,10 +444,10 @@ const AdministrationPage: React.FC = () => {
   const handlePluginToggle = async (pluginId: string, enabled: boolean) => {
     try {
       if (enabled) {
-        await chatterClient.plugins.enablePluginApiV1PluginsPluginIdEnablePost({ pluginId });
+        await getSDK().plugins.enablePluginApiV1PluginsPluginIdEnablePost({ pluginId });
         showToast('Plugin enabled successfully', 'success');
       } else {
-        await chatterClient.plugins.disablePluginApiV1PluginsPluginIdDisablePost({ pluginId });
+        await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisablePost({ pluginId });
         showToast('Plugin disabled successfully', 'success');
       }
       loadPlugins();
@@ -492,7 +492,7 @@ const AdministrationPage: React.FC = () => {
       setError('');
       switch (dialogType) {
         case 'user':
-          await chatterClient.auth.registerApiV1AuthRegisterPost({
+          await getSDK().auth.registerApiV1AuthRegisterPost({
             userCreate: {
               username: formData.userId,
               email: formData.email,
@@ -502,7 +502,7 @@ const AdministrationPage: React.FC = () => {
           showToast('User created successfully!', 'success');
           break;
         case 'backup':
-          await chatterClient.dataManagement.createBackupApiV1DataBackupPost({
+          await getSDK().dataManagement.createBackupApiV1DataBackupPost({
             backupRequest: {
               name: formData.backupName,
               description: formData.description,
@@ -514,7 +514,7 @@ const AdministrationPage: React.FC = () => {
           loadBackups();
           break;
         case 'plugin':
-          await chatterClient.plugins.installPluginApiV1PluginsInstallPost({
+          await getSDK().plugins.installPluginApiV1PluginsInstallPost({
             pluginInstallRequest: {
               plugin_path: formData.pluginUrl,
               enable_on_install: true,
@@ -534,7 +534,7 @@ const AdministrationPage: React.FC = () => {
               max_retries: formData.maxRetries,
               schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
             };
-            await chatterClient.jobs.createJobApiV1JobsPost({ jobCreateRequest });
+            await getSDK().jobs.createJobApiV1JobsPost({ jobCreateRequest });
             showToast('Job created successfully!', 'success');
             addNotification({
               title: 'Job Created',
@@ -590,14 +590,14 @@ const AdministrationPage: React.FC = () => {
             showToast('Backup deletion is not yet supported by the API', 'warning');
             break;
           case 'plugin':
-            await chatterClient.plugins.uninstallPluginApiV1PluginsPluginIdDelete({
+            await getSDK().plugins.uninstallPluginApiV1PluginsPluginIdDelete({
               pluginId: id
             });
             showToast('Plugin uninstalled successfully!', 'success');
             loadPlugins();
             break;
           case 'job':
-            await chatterClient.jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
+            await getSDK().jobs.cancelJobApiV1JobsJobIdCancelPost({ jobId: id });
             showToast('Job cancelled successfully!', 'success');
             loadJobs();
             loadJobStats();

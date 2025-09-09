@@ -44,7 +44,7 @@ import {
   ShowChart,
   Computer,
 } from '@mui/icons-material';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
 import PageLayout from '../components/PageLayout';
@@ -133,32 +133,32 @@ const DashboardPage: React.FC = () => {
   
   // Use custom API hooks for various analytics data
   const dashboardApi = useApi(
-    () => chatterClient.analytics.getDashboardApiV1AnalyticsDashboardGet(),
+    () => getSDK().analytics.getDashboardApiV1AnalyticsDashboardGet(),
     { immediate: true }
   );
 
   const performanceApi = useApi(
-    () => chatterClient.analytics.getPerformanceMetricsApiV1AnalyticsPerformanceGet(),
+    () => getSDK().analytics.getPerformanceMetricsApiV1AnalyticsPerformanceGet(),
     { immediate: true }
   );
 
   const systemApi = useApi(
-    () => chatterClient.analytics.getSystemAnalyticsApiV1AnalyticsSystemGet(),
+    () => getSDK().analytics.getSystemAnalyticsApiV1AnalyticsSystemGet(),
     { immediate: true }
   );
 
   const usageApi = useApi(
-    () => chatterClient.analytics.getUsageMetricsApiV1AnalyticsUsageGet(),
+    () => getSDK().analytics.getUsageMetricsApiV1AnalyticsUsageGet(),
     { immediate: true }
   );
 
   const documentApi = useApi(
-    () => chatterClient.analytics.getDocumentAnalyticsApiV1AnalyticsDocumentsGet(),
+    () => getSDK().analytics.getDocumentAnalyticsApiV1AnalyticsDocumentsGet(),
     { immediate: true }
   );
 
   const toolServerApi = useApi(
-    () => chatterClient.analytics.getToolServerAnalyticsApiV1AnalyticsToolserversGet(),
+    () => getSDK().analytics.getToolServerAnalyticsApiV1AnalyticsToolserversGet(),
     { immediate: true }
   );
 
@@ -221,7 +221,7 @@ const DashboardPage: React.FC = () => {
   // Helper function for exporting analytics
   const handleExportAnalytics = async (format: 'json' | 'csv' | 'xlsx' = 'json') => {
     try {
-      await chatterClient.analytics.exportAnalyticsApiV1AnalyticsExportPost({
+      await getSDK().analytics.exportAnalyticsApiV1AnalyticsExportPost({
         metrics: ['conversations', 'usage', 'performance'],
         format,
         period: '30d'

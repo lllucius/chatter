@@ -19,7 +19,7 @@ import {
   createUsageStatsRenderer,
   createPerformanceRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
 
 interface TabPanelProps {
@@ -164,10 +164,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (server) => {
         try {
           if (server.status === 'enabled') {
-            await chatterClient.toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({ serverId: server.id });
+            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({ serverId: server.id });
             toastService.success('Server disabled successfully');
           } else {
-            await chatterClient.toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({ serverId: server.id });
+            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({ serverId: server.id });
             toastService.success('Server enabled successfully');
           }
         } catch {
@@ -180,7 +180,7 @@ const ToolsPageRefactored: React.FC = () => {
       label: 'Refresh Tools',
       onClick: async (server) => {
         try {
-          await chatterClient.toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({ serverId: server.id });
+          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({ serverId: server.id });
           toastService.success('Server tools refreshed successfully');
         } catch {
           toastService.error('Failed to refresh server tools');
@@ -203,7 +203,7 @@ const ToolsPageRefactored: React.FC = () => {
 
   const serverService: CrudService<RemoteServer, RemoteServerCreate, RemoteServerUpdate> = {
     list: async () => {
-      const response = await chatterClient.toolServers.listToolServersApiV1ToolserversServersGet({});
+      const response = await getSDK().toolServers.listToolServersApiV1ToolserversServersGet({});
       return {
         items: response || [],
         total: response?.length || 0,
@@ -211,14 +211,14 @@ const ToolsPageRefactored: React.FC = () => {
     },
 
     create: async (data: RemoteServerCreate) => {
-      const response = await chatterClient.toolServers.createToolServerApiV1ToolserversServersPost({
+      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServersPost({
         toolServerCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await chatterClient.toolServers.updateToolServerApiV1ToolserversServersServerIdPut({
+      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerIdPut({
         serverId: id,
         toolServerUpdate: data,
       });
@@ -226,7 +226,7 @@ const ToolsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
         serverId: id,
       });
     },
@@ -274,10 +274,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (tool) => {
         try {
           if (tool.status === 'enabled') {
-            await chatterClient.toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({ toolId: tool.id });
+            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({ toolId: tool.id });
             toastService.success('Tool disabled successfully');
           } else {
-            await chatterClient.toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({ toolId: tool.id });
+            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({ toolId: tool.id });
             toastService.success('Tool enabled successfully');
           }
         } catch {
@@ -301,7 +301,7 @@ const ToolsPageRefactored: React.FC = () => {
 
   const toolService: CrudService<Tool, any, any> = {
     list: async () => {
-      const response = await chatterClient.toolServers.listAllToolsApiV1ToolserversToolsAllGet();
+      const response = await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAllGet();
       return {
         items: response || [],
         total: response?.length || 0,

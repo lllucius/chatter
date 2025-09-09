@@ -1,67 +1,39 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { chatterClient } from '../chatter-sdk';
+import { authService, getSDK } from '../auth-service';
 
-describe('ChatterSDK', () => {
+describe('AuthService and ChatterSDK', () => {
   beforeEach(() => {
     // Clear any stored tokens before each test
     localStorage.clear();
-    chatterClient.clearToken();
   });
 
   it('should be properly initialized', () => {
-    expect(chatterClient).toBeDefined();
-    expect(chatterClient.auth).toBeDefined();
-    expect(chatterClient.agents).toBeDefined();
-    expect(chatterClient.modelRegistry).toBeDefined();
-    expect(chatterClient.toolServers).toBeDefined();
-    expect(chatterClient.conversations).toBeDefined();
+    const sdk = getSDK();
+    expect(authService).toBeDefined();
+    expect(sdk).toBeDefined();
+    expect(sdk.auth).toBeDefined();
+    expect(sdk.agents).toBeDefined();
+    expect(sdk.models).toBeDefined();
+    expect(sdk.toolServers).toBeDefined();
+    expect(sdk.chat).toBeDefined();
   });
 
   it('should handle authentication state correctly', () => {
-    expect(chatterClient.isAuthenticated()).toBe(false);
-    expect(chatterClient.getToken()).toBeNull();
-
-    const testToken = 'test-token-123';
-    chatterClient.setToken(testToken);
-    
-    expect(chatterClient.isAuthenticated()).toBe(true);
-    expect(chatterClient.getToken()).toBe(testToken);
-    expect(localStorage.getItem('chatter_access_token')).toBe(testToken);
+    expect(authService.isAuthenticated()).toBe(false);
+    expect(authService.getToken()).toBeNull();
   });
 
-  it('should clear authentication correctly', () => {
-    const testToken = 'test-token-123';
-    chatterClient.setToken(testToken);
-    expect(chatterClient.isAuthenticated()).toBe(true);
-
-    chatterClient.clearToken();
-    
-    expect(chatterClient.isAuthenticated()).toBe(false);
-    expect(chatterClient.getToken()).toBeNull();
-    expect(localStorage.getItem('chatter_access_token')).toBeNull();
+  it('should provide SDK instances', () => {
+    const sdk = getSDK();
+    expect(sdk).toBeDefined();
+    expect(sdk.chat).toBeDefined();
+    expect(sdk.auth).toBeDefined();
   });
 
-  it('should have convenience methods for tool servers', () => {
-    expect(typeof chatterClient.getToolServers).toBe('function');
-    expect(typeof chatterClient.createToolServer).toBe('function');
-    expect(typeof chatterClient.updateToolServer).toBe('function');
-    expect(typeof chatterClient.enableToolServer).toBe('function');
-    expect(typeof chatterClient.disableToolServer).toBe('function');
-  });
-
-  it('should have convenience methods for conversations', () => {
-    expect(typeof chatterClient.listConversations).toBe('function');
-    expect(typeof chatterClient.createConversation).toBe('function');
-    expect(typeof chatterClient.deleteConversation).toBe('function');
-    expect(typeof chatterClient.getConversation).toBe('function');
-    expect(typeof chatterClient.updateConversation).toBe('function');
-  });
-
-  it('should have conversations object with API methods', () => {
-    expect(chatterClient.conversations).toBeDefined();
-    expect(typeof chatterClient.conversations.listConversationsApiV1ChatConversationsGet).toBe('function');
-    expect(typeof chatterClient.conversations.createConversationApiV1ChatConversationsPost).toBe('function');
-    expect(typeof chatterClient.conversations.deleteConversationApiV1ChatConversationsConversationIdDelete).toBe('function');
-    expect(typeof chatterClient.conversations.getConversationApiV1ChatConversationsConversationIdGet).toBe('function');
+  it('should provide authentication methods', () => {
+    expect(typeof authService.login).toBe('function');
+    expect(typeof authService.logout).toBe('function');
+    expect(typeof authService.isAuthenticated).toBe('function');
+    expect(typeof authService.getToken).toBe('function');
   });
 });

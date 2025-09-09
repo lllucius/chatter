@@ -9,7 +9,7 @@ import {
   createCategoryChipRenderer,
   createMonospaceTextRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 
 const ProfilesPageRefactored: React.FC = () => {
@@ -78,7 +78,7 @@ const ProfilesPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<ProfileResponse, ProfileCreate, ProfileUpdate> = {
     list: async () => {
-      const response = await chatterClient.profiles.listProfilesApiV1ProfilesGet({});
+      const response = await getSDK().profiles.listProfilesApiV1ProfilesGet({});
       return {
         items: response.profiles || [],
         total: response.totalCount || 0,
@@ -86,14 +86,14 @@ const ProfilesPageRefactored: React.FC = () => {
     },
 
     create: async (data: ProfileCreate) => {
-      const response = await chatterClient.profiles.createProfileApiV1ProfilesPost({
+      const response = await getSDK().profiles.createProfileApiV1ProfilesPost({
         profileCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await chatterClient.profiles.updateProfileApiV1ProfilesProfileIdPut({
+      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileIdPut({
         profileId: id,
         profileUpdate: data,
       });
@@ -101,7 +101,7 @@ const ProfilesPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.profiles.deleteProfileApiV1ProfilesProfileIdDelete({
+      await getSDK().profiles.deleteProfileApiV1ProfilesProfileIdDelete({
         profileId: id,
       });
     },

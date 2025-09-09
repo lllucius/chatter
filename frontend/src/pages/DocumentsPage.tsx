@@ -29,7 +29,7 @@ import {
   createCategoryChipRenderer,
   createDateRenderer,
 } from '../components/CrudRenderers';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
 import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
 import { ThemeContext } from '../App';
@@ -174,7 +174,7 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        const chunksResponse = await chatterClient.documents.getDocumentChunksApiV1DocumentsDocumentIdChunksGet({
+        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunksGet({
           documentId: document.id,
           limit: 3,
           offset: 0
@@ -279,7 +279,7 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      const response = await chatterClient.documents.downloadDocumentApiV1DocumentsDocumentIdDownloadGet({
+      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownloadGet({
         documentId: document.id
       });
 
@@ -308,7 +308,7 @@ const DocumentsPage: React.FC = () => {
         query: searchQuery,
         limit: 10,
       };
-      const response = await chatterClient.documents.searchDocumentsApiV1DocumentsSearchPost({ 
+      const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearchPost({ 
         documentSearchRequest: searchRequest 
       });
       setSearchResults(response.results);
@@ -346,7 +346,7 @@ const DocumentsPage: React.FC = () => {
   // Define service methods
   const service: CrudService<DocumentResponse, DocumentCreateData, DocumentUpdateData> = {
     list: async (page: number, pageSize: number) => {
-      const response = await chatterClient.documents.listDocumentsApiV1DocumentsGet({});
+      const response = await getSDK().documents.listDocumentsApiV1DocumentsGet({});
       const documents = response.documents || [];
       
       // Implement client-side pagination for now
@@ -361,7 +361,7 @@ const DocumentsPage: React.FC = () => {
     },
 
     create: async (data: DocumentCreateData) => {
-      const response = await chatterClient.documents.uploadDocumentApiV1DocumentsUploadPost({
+      const response = await getSDK().documents.uploadDocumentApiV1DocumentsUploadPost({
         file: data.file,
         title: data.title || undefined
       });
@@ -369,7 +369,7 @@ const DocumentsPage: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.documents.deleteDocumentApiV1DocumentsDocumentIdDelete({ 
+      await getSDK().documents.deleteDocumentApiV1DocumentsDocumentIdDelete({ 
         documentId: id 
       });
     },

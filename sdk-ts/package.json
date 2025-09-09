@@ -1,0 +1,43 @@
+{
+  "name": "@chatter/sdk-ts",
+  "version": "0.1.0",
+  "description": "Complete TypeScript SDK for Chatter API - Hand-crafted with full type safety",
+  "main": "./dist/index.js",
+  "module": "./dist/esm/index.js",
+  "types": "./dist/index.d.ts",
+  "sideEffects": false,
+  "scripts": {
+    "build": "tsc && tsc -p tsconfig.esm.json",
+    "build:cjs": "tsc",
+    "build:esm": "tsc -p tsconfig.esm.json",
+    "clean": "rm -rf dist",
+    "prepare": "npm run build",
+    "typecheck": "tsc --noEmit"
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "README.md"
+  ],
+  "keywords": [
+    "chatter",
+    "api",
+    "sdk",
+    "typescript",
+    "ai",
+    "chatbot"
+  ],
+  "author": "Chatter Team",
+  "license": "MIT",
+  "devDependencies": {
+    "typescript": "^5.0.0"
+  },
+  "engines": {
+    "node": ">=16.0.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lllucius/chatter.git",
+    "directory": "sdk-ts"
+  }
+}

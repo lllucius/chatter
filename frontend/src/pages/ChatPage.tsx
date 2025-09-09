@@ -31,7 +31,7 @@ import {
   Clear as ClearIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
@@ -113,10 +113,11 @@ const ChatPage: React.FC = () => {
 
   const loadData = async () => {
     try {
+      const sdk = getSDK();
       const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
-        chatterClient.profiles.listProfilesApiV1ProfilesGet({}),
-        chatterClient.prompts.listPromptsApiV1PromptsGet({}),
-        chatterClient.documents.listDocumentsApiV1DocumentsGet({}),
+        sdk.profiles.listProfilesApiV1ProfilesGet({}),
+        sdk.prompts.listPromptsApiV1PromptsGet({}),
+        sdk.documents.listDocumentsApiV1DocumentsGet({}),
       ]);
       setProfiles(profilesResponse.profiles);
       setPrompts(promptsResponse.prompts);
@@ -148,7 +149,7 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await chatterClient.chat.createConversationApiV1ChatConversationsPost({
+      const response = await getSDK().chat.createConversationApiV1ChatConversationsPost({
         conversationCreate: createRequest,
       });
       setCurrentConversation(response.data);
@@ -181,7 +182,7 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await chatterClient.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
+      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
         conversationId: conversation.id
       });
       
@@ -414,7 +415,7 @@ const ChatPage: React.FC = () => {
         await handleStreamingResponse(sendRequest);
       } else {
         // Use regular API
-        const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
 
         // Narrow the SDK's loosely-typed response
         type ApiChatMessage = {
@@ -553,7 +554,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
         await handleStreamingResponse(sendRequest, assistantMessageId);
       } else {
-        const response = await chatterClient.chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',

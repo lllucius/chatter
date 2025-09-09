@@ -6,7 +6,7 @@
  */
 
 import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
-import { chatterClient } from '../services/chatter-sdk';
+import { authService } from '../services/auth-service';
 
 export class SSEEventManager {
   private eventSource: EventSource | null = null;
@@ -26,10 +26,10 @@ export class SSEEventManager {
   private reconnectTimeouts: Set<NodeJS.Timeout> = new Set();
 
   /**
-   * Connect to the SSE stream using the current authentication from chatterClient
+   * Connect to the SSE stream using the current authentication from authService
    */
   public connect(): void {
-    if (!chatterClient.isAuthenticated()) {
+    if (!authService.isAuthenticated()) {
       console.error('SSE: Not authenticated. Please login first.');
       return;
     }
@@ -122,14 +122,14 @@ export class SSEEventManager {
    * Create the EventSource connection
    */
   private createConnection(): void {
-    if (!chatterClient.isAuthenticated()) {
+    if (!authService.isAuthenticated()) {
       console.error('SSE: Not authenticated');
       return;
     }
 
     try {
-      // Get token from chatterClient instead of directly from localStorage
-      const token = chatterClient.getToken();
+      // Get token from authService instead of directly from localStorage
+      const token = authService.getToken();
       if (!token) {
         console.error('SSE: No authentication token found');
         return;
@@ -137,7 +137,7 @@ export class SSEEventManager {
 
       // For now, we'll use the standard EventSource and rely on the server
       // to authenticate via cookies or we'll need to implement a custom solution
-      const baseURL = chatterClient.getURL() || window.location.origin;
+      const baseURL = authService.getURL() || window.location.origin;
       const url = `${baseURL}/api/v1/events/stream`;
       console.log('SSE: Connecting to', url);
 

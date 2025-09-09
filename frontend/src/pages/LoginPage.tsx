@@ -10,7 +10,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import { chatterClient } from '../services/chatter-sdk';
+import { authService } from '../services/auth-service';
 import { useForm } from '../hooks/useForm';
 
 interface LoginFormValues {
@@ -28,7 +28,7 @@ const LoginPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await chatterClient.login(values.username, values.password);
+        await authService.login(values.username, values.password);
         navigate('/dashboard');
       } catch (err: any) {
         const errorMessage = err.message || 'Login failed';
@@ -61,7 +61,7 @@ const LoginPage: React.FC = () => {
 
   // Redirect if already authenticated
   useEffect(() => {
-    if (chatterClient.isAuthenticated()) {
+    if (authService.isAuthenticated()) {
       navigate('/dashboard', { replace: true });
     }
   }, [navigate]);

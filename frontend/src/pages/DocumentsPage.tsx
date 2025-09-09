@@ -18,6 +18,7 @@ import {
   Search as SearchIcon,
   Visibility as ViewIcon,
   GetApp as DownloadIcon,
+  Add as AddIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
@@ -57,6 +58,9 @@ const DocumentsPage: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchResults, setSearchResults] = useState<any[]>([]);
   const [searching, setSearching] = useState(false);
+
+  // Upload dialog state
+  const [dialogOpen, setDialogOpen] = useState(false);
 
   // State for force refresh after SSE events
   const [refreshKey, setRefreshKey] = useState(0);
@@ -378,9 +382,19 @@ const DocumentsPage: React.FC = () => {
   const toolbar = (
     <>
       <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => setDialogOpen(true)}
+        sx={{ mr: 1 }}
+        size="small"
+      >
+        Upload Document
+      </Button>
+      <Button
         variant="outlined"
         startIcon={<SearchIcon />}
         onClick={() => setSearchDialogOpen(true)}
+        size="small"
       >
         Semantic Search
       </Button>
@@ -395,6 +409,8 @@ const DocumentsPage: React.FC = () => {
         service={service}
         FormComponent={DocumentForm}
         getItemId={getItemId}
+        externalDialogOpen={dialogOpen}
+        onExternalDialogClose={() => setDialogOpen(false)}
       />
 
       {/* Semantic Search Dialog */}

@@ -330,6 +330,7 @@ const ModelManagementPageRefactored: React.FC = () => {
           }
           // The CRUD table handles its own refresh
         }}
+        size="small"
       >
         Refresh
       </Button>

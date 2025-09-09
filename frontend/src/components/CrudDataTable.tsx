@@ -79,6 +79,8 @@ interface CrudDataTableProps<T, TCreate, TUpdate> {
   service: CrudService<T, TCreate, TUpdate>;
   FormComponent?: React.ComponentType<CrudFormProps<TCreate, TUpdate>>;
   getItemId: (item: T) => string;
+  externalDialogOpen?: boolean;
+  onExternalDialogClose?: () => void;
 }
 
 export function CrudDataTable<T, TCreate, TUpdate>({
@@ -86,6 +88,8 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   service,
   FormComponent,
   getItemId,
+  externalDialogOpen,
+  onExternalDialogClose,
 }: CrudDataTableProps<T, TCreate, TUpdate>) {
   // State management
   const [items, setItems] = useState<T[]>([]);
@@ -95,9 +99,19 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   const [total, setTotal] = useState(0);
   const [error, setError] = useState<string | null>(null);
   
-  // Dialog state
-  const [dialogOpen, setDialogOpen] = useState(false);
+  // Dialog state - use individual internal state for these
+  const [internalDialogOpen, setInternalDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
+
+  // Use external dialog state if provided, otherwise use internal state
+  const isDialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
+  const handleDialogClose = () => {
+    if (onExternalDialogClose) {
+      onExternalDialogClose();
+    } else {
+      setInternalDialogOpen(false);
+    }
+  };
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
   
   // Action menu state
@@ -128,13 +142,18 @@ export function CrudDataTable<T, TCreate, TUpdate>({
   const handleCreate = () => {
     setDialogMode('create');
     setSelectedItem(null);
-    setDialogOpen(true);
+    if (externalDialogOpen !== undefined) {
+      // External control - parent should handle the dialog opening
+      return;
+    } else {
+      setInternalDialogOpen(true);
+    }
   };
 
   const handleEdit = (item: T) => {
     setDialogMode('edit');
     setSelectedItem(item);
-    setDialogOpen(true);
+    setInternalDialogOpen(true);
   };
 
   const handleDelete = async (item: T) => {
@@ -160,7 +179,7 @@ export function CrudDataTable<T, TCreate, TUpdate>({
         await service.update(getItemId(selectedItem), data as TUpdate);
         toastService.success(`${config.entityName} updated successfully`);
       }
-      setDialogOpen(false);
+      handleDialogClose();
       await loadData();
     } catch {
       toastService.error(`Failed to ${dialogMode} ${config.entityName.toLowerCase()}`);
@@ -325,10 +344,10 @@ export function CrudDataTable<T, TCreate, TUpdate>({
       {/* Create/Edit Dialog */}
       {FormComponent && (
         <FormComponent
-          open={dialogOpen}
+          open={isDialogOpen}
           mode={dialogMode}
           initialData={selectedItem as TUpdate}
-          onClose={() => setDialogOpen(false)}
+          onClose={handleDialogClose}
           onSubmit={handleFormSubmit}
         />
       )}

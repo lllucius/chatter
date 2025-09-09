@@ -312,6 +312,10 @@ class PluginManager:
             ValueError: If plugin installation fails
         """
         async with self._operation_lock:
+            # Validate plugin_path is not empty or None
+            if not plugin_path or str(plugin_path).strip() == "":
+                raise ValueError("Plugin path cannot be empty")
+            
             plugin_path = Path(plugin_path)
 
             if not plugin_path.exists():

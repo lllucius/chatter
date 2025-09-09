@@ -4,7 +4,7 @@
 
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
-import { chatterClient } from '../chatter-sdk';
+import { chatterClient } from '../../sdk/client';
 import { AnySSEEvent, SSEEventType } from '../sse-types';
 
 // Mock ReadableStream for fetch response
@@ -98,7 +98,7 @@ const createMockResponse = (messages: string[] = []): Response => {
 };
 
 // Mock chatterClient
-vi.mock('../chatter-sdk', () => ({
+vi.mock('../../sdk/client', () => ({
   chatterClient: {
     isAuthenticated: vi.fn(() => true),
     getURL: vi.fn(() => 'http://localhost:8000'),

@@ -1,8 +1,8 @@
 /**
  * Generated API client for Chat
  */
-import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse, chatter__schemas__chat__WorkflowTemplatesResponse } from '../models/index';
+import { BaseAPI, Configuration } from '../runtime';
 
 export class ChatApi extends BaseAPI {
   constructor(configuration?: Configuration) {

@@ -2,7 +2,7 @@
  * Generated API client for Events
  */
 import { SSEStatsResponse, TestEventResponse } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration } from '../runtime';
 
 export class EventsApi extends BaseAPI {
   constructor(configuration?: Configuration) {

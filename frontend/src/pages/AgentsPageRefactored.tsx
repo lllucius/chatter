@@ -1,5 +1,10 @@
 import React from 'react';
-import { SmartToy as BotIcon } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { 
+  SmartToy as BotIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
 import { 
@@ -94,8 +99,33 @@ const AgentsPageRefactored: React.FC = () => {
 
   const getItemId = (item: AgentResponse) => item.id || '';
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          // The CRUD table handles its own refresh
+        }}
+        size="small"
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => {
+          // The CRUD table handles creation
+        }}
+        size="small"
+      >
+        Add Agent
+      </Button>
+    </>
+  );
+
   return (
-    <PageLayout title="AI Agents">
+    <PageLayout title="AI Agents" toolbar={toolbar}>
       <CrudDataTable
         config={config}
         service={service}

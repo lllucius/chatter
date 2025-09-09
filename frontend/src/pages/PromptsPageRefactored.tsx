@@ -1,5 +1,10 @@
 import React from 'react';
-import { Code as CodeIcon } from '@mui/icons-material';
+import { Button } from '@mui/material';
+import { 
+  Code as CodeIcon,
+  Refresh as RefreshIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
 import PromptForm from '../components/PromptForm';
@@ -108,8 +113,33 @@ const PromptsPageRefactored: React.FC = () => {
 
   const getItemId = (item: PromptResponse) => item.id;
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          // The CRUD table handles its own refresh
+        }}
+        size="small"
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => {
+          // The CRUD table handles creation
+        }}
+        size="small"
+      >
+        Add Prompt
+      </Button>
+    </>
+  );
+
   return (
-    <PageLayout title="Prompts">
+    <PageLayout title="Prompts" toolbar={toolbar}>
       <CrudDataTable
         config={config}
         service={service}

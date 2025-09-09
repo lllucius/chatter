@@ -3,8 +3,9 @@ import { authService, getSDK } from '../auth-service';
 
 describe('AuthService and ChatterSDK', () => {
   beforeEach(() => {
-    // Clear any stored tokens before each test
-    localStorage.clear();
+    // Reset auth service state before each test
+    // Note: We no longer use localStorage - tokens are memory-only
+    authService.initialize();
   });
 
   it('should be properly initialized', () => {
@@ -35,5 +36,7 @@ describe('AuthService and ChatterSDK', () => {
     expect(typeof authService.logout).toBe('function');
     expect(typeof authService.isAuthenticated).toBe('function');
     expect(typeof authService.getToken).toBe('function');
+    expect(typeof authService.refreshToken).toBe('function');
+    expect(typeof authService.executeWithAuth).toBe('function');
   });
 });

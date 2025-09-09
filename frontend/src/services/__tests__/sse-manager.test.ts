@@ -103,6 +103,9 @@ vi.mock('../auth-service', () => {
     isAuthenticated: vi.fn(() => true),
     getURL: vi.fn(() => 'http://localhost:8000'),
     getToken: vi.fn(() => 'test-token'),
+    getSDK: vi.fn(() => ({})),
+    refreshToken: vi.fn(() => Promise.resolve(true)),
+    executeWithAuth: vi.fn((apiCall) => apiCall({})),
   };
 
   return {
@@ -127,6 +130,8 @@ describe('SSEEventManager', () => {
     (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
     (authService.getURL as vi.Mock).mockReturnValue('http://localhost:8000');
     (authService.getToken as vi.Mock).mockReturnValue('test-token');
+    (authService.getSDK as vi.Mock).mockReturnValue({});
+    (authService.refreshToken as vi.Mock).mockResolvedValue(true);
     
     // Setup default fetch mock
     (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());

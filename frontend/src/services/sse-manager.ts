@@ -119,7 +119,7 @@ export class SSEEventManager {
   }
 
   /**
-   * Create the EventSource connection
+   * Create the EventSource connection using SDK authentication
    */
   private createConnection(): void {
     if (!authService.isAuthenticated()) {
@@ -128,21 +128,14 @@ export class SSEEventManager {
     }
 
     try {
-      // Get token from authService instead of directly from localStorage
-      const token = authService.getToken();
-      if (!token) {
-        console.error('SSE: No authentication token found');
-        return;
-      }
-
-      // For now, we'll use the standard EventSource and rely on the server
-      // to authenticate via cookies or we'll need to implement a custom solution
+      // Use SDK to get the base URL and handle authentication properly
+      const sdk = authService.getSDK();
       const baseURL = authService.getURL() || window.location.origin;
       const url = `${baseURL}/api/v1/events/stream`;
       console.log('SSE: Connecting to', url);
 
-      // We'll use a custom fetch to handle authentication properly
-      this.createAuthenticatedEventSource(url, token);
+      // Use SDK-based authentication with automatic retry
+      this.connectWithSDKAuth(url);
 
     } catch (error) {
       console.error('SSE: Failed to create connection:', error);
@@ -153,26 +146,40 @@ export class SSEEventManager {
   }
 
   /**
-   * Create an authenticated EventSource using a custom implementation
+   * Connect using SDK authentication with automatic token refresh
    */
-  private createAuthenticatedEventSource(url: string, token: string): void {
-    // For SSE with authentication, we'll use a fetch-based approach
-    // that allows us to set custom headers
-    this.connectWithFetch(url, token);
-  }
+  private async connectWithSDKAuth(url: string): Promise<void> {
+    const makeRequest = async (): Promise<Response> => {
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No access token available');
+      }
 
-  /**
-   * Connect using fetch for proper authentication support
-   */
-  private async connectWithFetch(url: string, token: string): Promise<void> {
-    try {
-      const response = await fetch(url, {
+      return fetch(url, {
         headers: {
           'Authorization': `Bearer ${token}`,
           'Accept': 'text/event-stream',
           'Cache-Control': 'no-cache',
         },
+        credentials: 'include', // Include cookies for refresh token
       });
+    };
+
+    try {
+      let response = await makeRequest();
+
+      // If unauthorized, try to refresh token and retry once
+      if (response.status === 401) {
+        console.log('SSE: Access token expired, attempting refresh...');
+        
+        const refreshSuccess = await authService.refreshToken();
+        if (refreshSuccess) {
+          console.log('SSE: Token refresh successful, retrying connection...');
+          response = await makeRequest();
+        } else {
+          throw new Error('SSE: Token refresh failed - authentication required');
+        }
+      }
 
       if (!response.ok) {
         throw new Error(`SSE: HTTP ${response.status} ${response.statusText}`);
@@ -573,6 +580,40 @@ export class SSEEventManager {
     }
 
     return false;
+  }
+
+  /**
+   * Trigger a test event using the SDK
+   * This demonstrates how to use SDK for non-streaming event operations
+   */
+  public async triggerTestEvent(): Promise<boolean> {
+    try {
+      const response = await authService.executeWithAuth(async (sdk) => {
+        return await sdk.events.triggerTestEventApiV1EventsTestEvent();
+      });
+      
+      console.log('SSE: Test event triggered successfully:', response);
+      return true;
+    } catch (error) {
+      console.error('SSE: Failed to trigger test event:', error);
+      return false;
+    }
+  }
+
+  /**
+   * Get SSE statistics using the SDK
+   */
+  public async getSSEStats(): Promise<any> {
+    try {
+      const response = await authService.executeWithAuth(async (sdk) => {
+        return await sdk.events.getSseStatsApiV1EventsStats();
+      });
+      
+      return response;
+    } catch (error) {
+      console.error('SSE: Failed to get SSE stats:', error);
+      return null;
+    }
   }
 }
 

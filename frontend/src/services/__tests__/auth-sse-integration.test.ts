@@ -1,0 +1,193 @@
+/**
+ * Integration tests for Auth Service and SSE Manager working together
+ */
+
+import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { authService } from '../auth-service';
+import { sseEventManager } from '../sse-manager';
+
+// Mock the actual auth service methods that would make network calls
+vi.mock('../auth-service', async () => {
+  const actual = await vi.importActual('../auth-service') as any;
+  
+  return {
+    ...actual,
+    authService: {
+      ...actual.authService,
+      isAuthenticated: vi.fn(() => false), // Start unauthenticated
+      getToken: vi.fn(() => null),
+      getURL: vi.fn(() => 'http://localhost:8000'),
+      refreshToken: vi.fn(() => Promise.resolve(true)),
+      getSDK: vi.fn(() => ({})),
+      executeWithAuth: vi.fn((apiCall) => apiCall({})),
+      // Mock the login to simulate token storage in memory
+      login: vi.fn(async () => {
+        // Simulate successful login by updating mocked methods
+        (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
+        (authService.getToken as vi.Mock).mockReturnValue('test-access-token');
+      }),
+      // Mock logout to clear tokens
+      logout: vi.fn(async () => {
+        (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
+        (authService.getToken as vi.Mock).mockReturnValue(null);
+      })
+    }
+  };
+});
+
+// Mock global fetch for SSE
+global.fetch = vi.fn();
+
+describe('Auth Service and SSE Manager Integration', () => {
+  beforeEach(() => {
+    vi.clearAllMocks();
+    
+    // Setup successful fetch response for SSE
+    const mockResponse = {
+      ok: true,
+      status: 200,
+      statusText: 'OK',
+      body: {
+        getReader: () => ({
+          read: vi.fn().mockResolvedValue({ done: true })
+        })
+      }
+    } as any;
+    
+    (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+    
+    // Reset SSE manager
+    sseEventManager.disconnect();
+  });
+
+  afterEach(() => {
+    sseEventManager.disconnect();
+    vi.clearAllTimers();
+  });
+
+  it('should not allow SSE connection when not authenticated', () => {
+    // Ensure we start unauthenticated
+    (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
+    
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    
+    sseEventManager.connect();
+    
+    expect(consoleSpy).toHaveBeenCalledWith('SSE: Not authenticated. Please login first.');
+    expect(sseEventManager.connected).toBe(false);
+    
+    consoleSpy.mockRestore();
+  });
+
+  it('should allow SSE connection after authentication', async () => {
+    // Start unauthenticated
+    (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
+    (authService.getToken as vi.Mock).mockReturnValue(null);
+    
+    // Try to connect - should fail
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    sseEventManager.connect();
+    expect(consoleSpy).toHaveBeenCalled();
+    consoleSpy.mockRestore();
+    
+    // Now login (simulate successful authentication)
+    await authService.login('test@example.com', 'password');
+    
+    // Verify we're now authenticated
+    expect(authService.isAuthenticated()).toBe(true);
+    expect(authService.getToken()).toBe('test-access-token');
+    
+    // Now SSE connection should work
+    sseEventManager.connect();
+    
+    // Give it a moment to process
+    await new Promise(resolve => setTimeout(resolve, 10));
+    
+    // Verify fetch was called with correct headers
+    expect(global.fetch).toHaveBeenCalledWith(
+      'http://localhost:8000/api/v1/events/stream',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Authorization': 'Bearer test-access-token',
+          'Accept': 'text/event-stream',
+          'Cache-Control': 'no-cache',
+        }),
+        credentials: 'include'
+      })
+    );
+  });
+
+  it('should handle token refresh during SSE connection', async () => {
+    // Setup authenticated state
+    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
+    (authService.getToken as vi.Mock).mockReturnValue('old-token');
+    
+    // Mock fetch to return 401 first time, then succeed
+    let callCount = 0;
+    (global.fetch as vi.Mock).mockImplementation(async () => {
+      callCount++;
+      if (callCount === 1) {
+        // First call - return 401 unauthorized
+        return {
+          ok: false,
+          status: 401,
+          statusText: 'Unauthorized'
+        };
+      } else {
+        // Second call - after refresh - return success
+        return {
+          ok: true,
+          status: 200,
+          statusText: 'OK',
+          body: {
+            getReader: () => ({
+              read: vi.fn().mockResolvedValue({ done: true })
+            })
+          }
+        };
+      }
+    });
+    
+    // Mock refresh to update token
+    (authService.refreshToken as vi.Mock).mockImplementation(async () => {
+      (authService.getToken as vi.Mock).mockReturnValue('new-refreshed-token');
+      return true;
+    });
+    
+    sseEventManager.connect();
+    
+    // Give it time to process the 401 and retry
+    await new Promise(resolve => setTimeout(resolve, 20));
+    
+    // Verify refresh was called
+    expect(authService.refreshToken).toHaveBeenCalled();
+    
+    // Verify fetch was called twice (initial + retry)
+    expect(global.fetch).toHaveBeenCalledTimes(2);
+    
+    // Verify second call used the refreshed token
+    expect(global.fetch).toHaveBeenLastCalledWith(
+      'http://localhost:8000/api/v1/events/stream',
+      expect.objectContaining({
+        headers: expect.objectContaining({
+          'Authorization': 'Bearer new-refreshed-token',
+        }),
+      })
+    );
+  });
+
+  it('should use executeWithAuth for SDK-based operations', async () => {
+    // Setup authenticated state
+    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
+    
+    // Test the new SSE manager SDK integration methods
+    const mockApiCall = vi.fn().mockResolvedValue({ event_id: 'test-123' });
+    (authService.executeWithAuth as vi.Mock).mockImplementation((apiCall) => apiCall({}));
+    
+    // This would be testing the SDK-based event operations
+    await authService.executeWithAuth(mockApiCall);
+    
+    expect(authService.executeWithAuth).toHaveBeenCalledWith(mockApiCall);
+    expect(mockApiCall).toHaveBeenCalled();
+  });
+});

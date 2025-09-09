@@ -318,6 +318,7 @@ const ToolsPageRefactored: React.FC = () => {
         onClick={() => {
           // The CRUD table handles its own refresh
         }}
+        size="small"
       >
         Refresh
       </Button>
@@ -328,8 +329,21 @@ const ToolsPageRefactored: React.FC = () => {
           onClick={() => {
             // The CRUD table handles creation
           }}
+          size="small"
         >
           Add Remote Server
+        </Button>
+      )}
+      {activeTab === 1 && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => {
+            // The CRUD table handles creation for tools
+          }}
+          size="small"
+        >
+          Add Tool
         </Button>
       )}
     </>

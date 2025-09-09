@@ -1,5 +1,9 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import { Typography, Button } from '@mui/material';
+import { 
+  Refresh as RefreshIcon,
+  Add as AddIcon
+} from '@mui/icons-material';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
@@ -107,8 +111,33 @@ const ProfilesPageRefactored: React.FC = () => {
 
   const getItemId = (item: ProfileResponse) => item.id || '';
 
+  const toolbar = (
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          // The CRUD table handles its own refresh
+        }}
+        size="small"
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => {
+          // The CRUD table handles creation
+        }}
+        size="small"
+      >
+        Add Profile
+      </Button>
+    </>
+  );
+
   return (
-    <PageLayout title="Profile Management">
+    <PageLayout title="Profile Management" toolbar={toolbar}>
       <CrudDataTable
         config={config}
         service={service}

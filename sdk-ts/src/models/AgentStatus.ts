@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AgentStatus
  */
-
 export enum AgentStatus {
   active = "active",
   inactive = "inactive",

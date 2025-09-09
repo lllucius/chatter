@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ConversationWithMessages
  */
+import { ConversationStatus } from './ConversationStatus';
+import { MessageResponse } from './MessageResponse';
 
 export interface ConversationWithMessages {
   /** Conversation title */

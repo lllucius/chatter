@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: WorkflowNodeData
  */
-
 export interface WorkflowNodeData {
   /** Node display label */
   label: string;

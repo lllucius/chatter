@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: OAuthConfigSchema
  */
-
 export interface OAuthConfigSchema {
   /** OAuth client ID */
   client_id: string;

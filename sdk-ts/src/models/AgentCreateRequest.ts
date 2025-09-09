@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: AgentCreateRequest
  */
+import { AgentCapability } from './AgentCapability';
+import { AgentType } from './AgentType';
 
 export interface AgentCreateRequest {
   /** Agent name */

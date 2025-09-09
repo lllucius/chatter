@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentUpdate
  */
-
 export interface DocumentUpdate {
   /** Document title */
   title?: string | null;

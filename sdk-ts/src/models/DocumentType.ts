@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentType
  */
-
 export enum DocumentType {
   pdf = "pdf",
   text = "text",

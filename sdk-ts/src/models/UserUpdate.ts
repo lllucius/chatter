@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UserUpdate
  */
-
 export interface UserUpdate {
   /** User email address */
   email?: string | null;

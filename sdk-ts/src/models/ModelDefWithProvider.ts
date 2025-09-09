@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: ModelDefWithProvider
  */
+import { ModelType } from './ModelType';
+import { Provider } from './Provider';
 
 export interface ModelDefWithProvider {
   /** Model name */

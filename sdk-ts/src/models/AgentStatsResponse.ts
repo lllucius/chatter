@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AgentStatsResponse
  */
-
 export interface AgentStatsResponse {
   /** Total number of agents */
   total_agents: number;

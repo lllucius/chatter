@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: BulkDeleteResponse
  */
-
 export interface BulkDeleteResponse {
   /** Total number of items requested for deletion */
   total_requested: number;

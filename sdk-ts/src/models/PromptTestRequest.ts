@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PromptTestRequest
  */
-
 export interface PromptTestRequest {
   /** Variables to test with */
   variables: Record<string, unknown>;

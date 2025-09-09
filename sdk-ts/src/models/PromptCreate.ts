@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: PromptCreate
  */
+import { PromptCategory } from './PromptCategory';
+import { PromptType } from './PromptType';
 
 export interface PromptCreate {
   /** Prompt name */

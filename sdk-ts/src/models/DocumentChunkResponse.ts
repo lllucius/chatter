@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentChunkResponse
  */
-
 export interface DocumentChunkResponse {
   /** Chunk ID */
   id: string;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: WorkflowExecutionResponse
  */
-
 export interface WorkflowExecutionResponse {
   /** Execution input data */
   input_data?: Record<string, unknown> | null;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ProfileTestResponse
  */
-
 export interface ProfileTestResponse {
   /** Profile ID */
   profile_id: string;

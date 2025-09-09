@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ServerStatus
  */
-
 export enum ServerStatus {
   enabled = "enabled",
   disabled = "disabled",

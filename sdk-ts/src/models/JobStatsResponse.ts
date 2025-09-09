@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: JobStatsResponse
  */
-
 export interface JobStatsResponse {
   /** Total number of jobs */
   total_jobs: number;

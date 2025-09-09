@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ConversationStatsResponse
  */
-
 export interface ConversationStatsResponse {
   /** Total number of conversations */
   total_conversations: number;

@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: RoleToolAccessCreate
  */
+import { ToolAccessLevel } from './ToolAccessLevel';
+import { UserRole } from './UserRole';
 
 export interface RoleToolAccessCreate {
   /** User role */

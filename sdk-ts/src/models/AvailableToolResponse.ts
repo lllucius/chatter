@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AvailableToolResponse
  */
-
 export interface AvailableToolResponse {
   /** Tool name */
   name: string;

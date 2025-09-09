@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: BackupResponse
  */
+import { BackupType } from './BackupType';
 
 export interface BackupResponse {
   /** Backup ID */

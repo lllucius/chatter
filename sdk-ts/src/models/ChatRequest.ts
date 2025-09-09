@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ChatRequest
  */
-
 export interface ChatRequest {
   /** User message */
   message: string;

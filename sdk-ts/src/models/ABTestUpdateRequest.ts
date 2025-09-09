@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ABTestUpdateRequest
  */
+import { TestStatus } from './TestStatus';
 
 export interface ABTestUpdateRequest {
   /** Test name */

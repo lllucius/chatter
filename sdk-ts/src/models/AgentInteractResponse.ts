@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AgentInteractResponse
  */
-
 export interface AgentInteractResponse {
   /** Agent ID */
   agent_id: string;

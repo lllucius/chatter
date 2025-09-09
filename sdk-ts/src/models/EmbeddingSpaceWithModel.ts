@@ -1,6 +1,9 @@
 /**
  * Generated from OpenAPI schema: EmbeddingSpaceWithModel
  */
+import { DistanceMetric } from './DistanceMetric';
+import { ModelDefWithProvider } from './ModelDefWithProvider';
+import { ReductionStrategy } from './ReductionStrategy';
 
 export interface EmbeddingSpaceWithModel {
   /** Unique space name */

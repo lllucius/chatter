@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AgentCapability
  */
-
 export enum AgentCapability {
   natural_language = "natural_language",
   memory = "memory",

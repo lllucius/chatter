@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PromptTestResponse
  */
-
 export interface PromptTestResponse {
   /** Rendered prompt content */
   rendered_content?: string | null;

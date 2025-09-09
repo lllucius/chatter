@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: TestMetric
  */
+import { MetricType } from './MetricType';
 
 export interface TestMetric {
   /** Type of metric */

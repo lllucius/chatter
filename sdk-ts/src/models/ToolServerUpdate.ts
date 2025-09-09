@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ToolServerUpdate
  */
+import { OAuthConfigSchema } from './OAuthConfigSchema';
 
 export interface ToolServerUpdate {
   display_name?: string | null;

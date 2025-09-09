@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ProfileCreate
  */
+import { ProfileType } from './ProfileType';
 
 export interface ProfileCreate {
   /** Profile name */

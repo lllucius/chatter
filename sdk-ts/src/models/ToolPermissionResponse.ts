@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ToolPermissionResponse
  */
+import { ToolAccessLevel } from './ToolAccessLevel';
 
 export interface ToolPermissionResponse {
   /** User ID */

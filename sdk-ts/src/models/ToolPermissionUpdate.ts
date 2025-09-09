@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ToolPermissionUpdate
  */
+import { ToolAccessLevel } from './ToolAccessLevel';
 
 export interface ToolPermissionUpdate {
   access_level?: ToolAccessLevel | null;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PluginHealthCheckResponse
  */
-
 export interface PluginHealthCheckResponse {
   /** Health check summary */
   summary: Record<string, unknown>;

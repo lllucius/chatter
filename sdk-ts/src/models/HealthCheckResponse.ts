@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: HealthCheckResponse
  */
+import { HealthStatus } from './HealthStatus';
 
 export interface HealthCheckResponse {
   /** Health status */

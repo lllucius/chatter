@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ModelDefUpdate
  */
-
 export interface ModelDefUpdate {
   display_name?: string | null;
   description?: string | null;

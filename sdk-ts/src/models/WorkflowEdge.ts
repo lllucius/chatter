@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: WorkflowEdge
  */
+import { WorkflowEdgeData } from './WorkflowEdgeData';
 
 export interface WorkflowEdge {
   /** Unique edge identifier */

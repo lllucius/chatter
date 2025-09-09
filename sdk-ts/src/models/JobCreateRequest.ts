@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: JobCreateRequest
  */
+import { JobPriority } from './JobPriority';
 
 export interface JobCreateRequest {
   /** Job name */

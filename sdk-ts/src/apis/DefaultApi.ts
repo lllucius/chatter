@@ -1,7 +1,7 @@
 /**
  * Generated API client for Default
  */
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration } from '../runtime';
 
 export class DefaultApi extends BaseAPI {
   constructor(configuration?: Configuration) {

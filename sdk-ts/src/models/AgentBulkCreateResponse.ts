@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: AgentBulkCreateResponse
  */
+import { AgentResponse } from './AgentResponse';
 
 export interface AgentBulkCreateResponse {
   /** Successfully created agents */

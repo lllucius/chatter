@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentProcessingRequest
  */
-
 export interface DocumentProcessingRequest {
   /** Force reprocessing */
   reprocess?: boolean;

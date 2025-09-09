@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ConversationCreate
  */
-
 export interface ConversationCreate {
   /** Conversation title */
   title: string;

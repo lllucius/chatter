@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ProfileTestRequest
  */
-
 export interface ProfileTestRequest {
   /** Test message */
   test_message: string;

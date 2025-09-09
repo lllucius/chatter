@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PerformanceMetricsResponse
  */
-
 export interface PerformanceMetricsResponse {
   /** Average response time */
   avg_response_time_ms: number;

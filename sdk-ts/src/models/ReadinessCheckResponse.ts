@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ReadinessCheckResponse
  */
+import { ReadinessStatus } from './ReadinessStatus';
 
 export interface ReadinessCheckResponse {
   /** Readiness status */

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PluginStatsResponse
  */
-
 export interface PluginStatsResponse {
   /** Total number of plugins */
   total_plugins: number;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ProviderUpdate
  */
-
 export interface ProviderUpdate {
   display_name?: string | null;
   description?: string | null;

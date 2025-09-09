@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: NodePropertyDefinition
  */
-
 export interface NodePropertyDefinition {
   /** Property name */
   name: string;

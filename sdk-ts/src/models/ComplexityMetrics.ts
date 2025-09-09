@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ComplexityMetrics
  */
-
 export interface ComplexityMetrics {
   /** Overall complexity score */
   score: number;

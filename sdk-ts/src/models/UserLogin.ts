@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UserLogin
  */
-
 export interface UserLogin {
   /** User email address */
   email?: string | null;

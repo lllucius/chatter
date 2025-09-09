@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: CorrelationTraceResponse
  */
-
 export interface CorrelationTraceResponse {
   /** Correlation ID */
   correlation_id: string;

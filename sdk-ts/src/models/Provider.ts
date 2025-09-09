@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: Provider
  */
+import { ProviderType } from './ProviderType';
 
 export interface Provider {
   /** Unique provider name */

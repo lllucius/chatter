@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: PluginListResponse
  */
+import { PluginResponse } from './PluginResponse';
 
 export interface PluginListResponse {
   /** List of plugins */

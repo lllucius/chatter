@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: JobResponse
  */
+import { JobPriority } from './JobPriority';
+import { JobStatus } from './JobStatus';
 
 export interface JobResponse {
   /** Job ID */

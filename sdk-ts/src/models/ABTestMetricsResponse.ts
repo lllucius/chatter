@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ABTestMetricsResponse
  */
+import { TestMetric } from './TestMetric';
 
 export interface ABTestMetricsResponse {
   /** Test ID */

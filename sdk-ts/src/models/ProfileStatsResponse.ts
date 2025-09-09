@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ProfileStatsResponse
  */
+import { ProfileResponse } from './ProfileResponse';
 
 export interface ProfileStatsResponse {
   /** Total number of profiles */

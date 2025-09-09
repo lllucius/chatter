@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ToolServerHealthCheck
  */
+import { ServerStatus } from './ServerStatus';
 
 export interface ToolServerHealthCheck {
   /** Server ID */

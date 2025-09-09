@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentAnalyticsResponse
  */
-
 export interface DocumentAnalyticsResponse {
   /** Total number of documents */
   total_documents: number;

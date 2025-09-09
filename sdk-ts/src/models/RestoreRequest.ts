@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: RestoreRequest
  */
-
 export interface RestoreRequest {
   /** Backup ID to restore from */
   backup_id: string;

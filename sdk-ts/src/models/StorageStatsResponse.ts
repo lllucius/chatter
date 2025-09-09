@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: StorageStatsResponse
  */
-
 export interface StorageStatsResponse {
   /** Total storage used in bytes */
   total_size: number;

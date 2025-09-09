@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: MessageRole
  */
-
 export enum MessageRole {
   user = "user",
   assistant = "assistant",

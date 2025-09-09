@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ToolAccessResult
  */
+import { ToolAccessLevel } from './ToolAccessLevel';
 
 export interface ToolAccessResult {
   /** Whether access is allowed */

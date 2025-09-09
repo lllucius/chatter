@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: APIKeyResponse
  */
-
 export interface APIKeyResponse {
   /** User ID */
   id: string;

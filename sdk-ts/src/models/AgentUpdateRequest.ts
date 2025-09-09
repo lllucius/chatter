@@ -1,6 +1,8 @@
 /**
  * Generated from OpenAPI schema: AgentUpdateRequest
  */
+import { AgentCapability } from './AgentCapability';
+import { AgentStatus } from './AgentStatus';
 
 export interface AgentUpdateRequest {
   /** Agent name */

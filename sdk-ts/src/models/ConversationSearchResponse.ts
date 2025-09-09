@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: ConversationSearchResponse
  */
+import { ConversationResponse } from './ConversationResponse';
 
 export interface ConversationSearchResponse {
   /** Conversations */

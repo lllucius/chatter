@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ExportScope
  */
-
 export enum ExportScope {
   user = "user",
   conversation = "conversation",

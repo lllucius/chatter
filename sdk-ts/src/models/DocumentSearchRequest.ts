@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: DocumentSearchRequest
  */
+import { DocumentType } from './DocumentType';
 
 export interface DocumentSearchRequest {
   /** Search query */

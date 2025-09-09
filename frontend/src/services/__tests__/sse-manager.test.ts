@@ -4,7 +4,7 @@
 
 import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
-import { getSDK, authService } from "../../services/auth-service";
+import { authService, getSDK } from "../../services/auth-service";
 import { AnySSEEvent, SSEEventType } from '../sse-types';
 
 // Mock ReadableStream for fetch response
@@ -97,17 +97,21 @@ const createMockResponse = (messages: string[] = []): Response => {
   } as Response;
 };
 
-// Mock chatterClient
-vi.mock('../chatter-sdk', () => ({
-  chatterClient: {
+// Mock authService
+vi.mock('../auth-service', () => {
+  const mockAuthService = {
     isAuthenticated: vi.fn(() => true),
     getURL: vi.fn(() => 'http://localhost:8000'),
-    getBaseURL: vi.fn(() => 'http://localhost:8000'),
-    getAuthHeaders: vi.fn(() => ({ Authorization: 'Bearer test-token' })),
     getToken: vi.fn(() => 'test-token'),
-    baseURL: 'http://localhost:8000'
-  }
-}));
+  };
+
+  return {
+    authService: mockAuthService,
+    getSDK: vi.fn(() => ({
+      // Mock SDK methods as needed for tests
+    }))
+  };
+});
 
 // Mock global fetch for SSE
 global.fetch = vi.fn();
@@ -120,7 +124,9 @@ describe('SSEEventManager', () => {
     vi.clearAllMocks();
     
     // Reset authentication mock
-    (getSDK().isAuthenticated as vi.Mock).mockReturnValue(true);
+    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
+    (authService.getURL as vi.Mock).mockReturnValue('http://localhost:8000');
+    (authService.getToken as vi.Mock).mockReturnValue('test-token');
     
     // Setup default fetch mock
     (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
@@ -133,7 +139,7 @@ describe('SSEEventManager', () => {
 
   describe('Connection Management', () => {
     test('should not connect when not authenticated', () => {
-      (getSDK().isAuthenticated as vi.Mock).mockReturnValue(false);
+      (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
       
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       sseManager.connect();

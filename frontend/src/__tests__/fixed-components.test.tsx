@@ -5,13 +5,16 @@ import WorkflowManagementPage from '../pages/WorkflowManagementPage';
 import ChatConfigPanel from '../pages/ChatConfigPanel';
 
 // Mock the client to prevent actual API calls
-vi.mock('../sdk/client', () => ({
-  chatterClient: {
+vi.mock('../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     chat: {
       getWorkflowTemplatesApiV1ChatTemplatesGet: vi.fn().mockResolvedValue({ templates: {} }),
       getAvailableToolsApiV1ChatToolsAvailableGet: vi.fn().mockResolvedValue({ data: { tools: [] } }),
       listConversationsApiV1ChatConversationsGet: vi.fn().mockResolvedValue({ conversations: [] })
     }
+  })),
+  authService: {
+    isAuthenticated: vi.fn(() => true)
   }
 }));
 

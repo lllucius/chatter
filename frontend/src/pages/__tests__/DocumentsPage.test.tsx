@@ -7,9 +7,8 @@ import DocumentsPage from '../DocumentsPage';
 import { getSDK, authService } from "../../services/auth-service";
 
 // Mock dependencies
-vi.mock('../../services/chatter-sdk', () => ({
-  chatterClient: {
-    isAuthenticated: vi.fn(() => true),
+vi.mock('../../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     documents: {
       listDocumentsApiV1DocumentsGet: vi.fn(),
       uploadDocumentApiV1DocumentsUploadPost: vi.fn(),
@@ -19,6 +18,9 @@ vi.mock('../../services/chatter-sdk', () => ({
       getDocumentChunksApiV1DocumentsDocumentIdChunksGet: vi.fn(),
       downloadDocumentApiV1DocumentsDocumentIdDownloadGet: vi.fn(),
     }
+  })),
+  authService: {
+    isAuthenticated: vi.fn(() => true)
   }
 }));
 

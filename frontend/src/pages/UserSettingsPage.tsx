@@ -34,7 +34,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { useForm } from '../hooks/useForm';
 import PageLayout from '../components/PageLayout';

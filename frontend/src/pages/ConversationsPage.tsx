@@ -39,8 +39,8 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { chatterClient } from '../sdk/client';
-import { ConversationResponse, MessageResponse } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { ConversationResponse, MessageResponse } from 'chatter-sdk';
 import { useApi } from '../hooks/useApi';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';

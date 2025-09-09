@@ -9,7 +9,7 @@ import {
   createTypeChipRenderer,
   createMonospaceTextRenderer
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 import {
   Provider,
@@ -19,7 +19,7 @@ import {
   ModelDefUpdate,
   ModelDefWithProvider,
   DefaultProvider,
-} from '../sdk';
+} from 'chatter-sdk';
 
 interface TabPanelProps {
   children?: React.ReactNode;

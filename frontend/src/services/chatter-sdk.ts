@@ -1,21 +1,5 @@
 import {
-  Configuration,
-  AuthenticationApi,
-  ABTestingApi,
-  AgentsApi,
-  AnalyticsApi,
-  ChatApi,
-  DataManagementApi,
-  DefaultApi,
-  DocumentsApi,
-  EventsApi,
-  HealthApi,
-  JobsApi,
-  ModelRegistryApi,
-  PluginsApi,
-  ProfilesApi,
-  PromptsApi,
-  ToolServersApi,
+  ChatterSDK,
   UserLogin,
   ToolServerCreate,
   ToolServerUpdate,
@@ -23,89 +7,48 @@ import {
   ConversationUpdate,
 } from 'chatter-sdk';
 
-class ChatterSDK {
-  private configuration: Configuration;
+class ChatterSDKWrapper {
+  private sdk: ChatterSDK;
   private token: string | null = null;
-  
-  // API instances
-  public auth: AuthenticationApi;
-  public abTesting: ABTestingApi;
-  public agents: AgentsApi;
-  public analytics: AnalyticsApi;
-  public chat: ChatApi;
-  public dataManagement: DataManagementApi;
-  public default: DefaultApi;
-  public documents: DocumentsApi;
-  public events: EventsApi;
-  public health: HealthApi;
-  public jobs: JobsApi;
-  public modelRegistry: ModelRegistryApi;
-  public plugins: PluginsApi;
-  public profiles: ProfilesApi;
-  public prompts: PromptsApi;
-  public toolServers: ToolServersApi;
-
-  // Convenience objects for compatibility
-  public conversations: {
-    listConversationsApiV1ChatConversationsGet: (params?: any) => Promise<any>;
-    listConversationsApiV1ConversationsGet: (params?: any) => Promise<any>;
-    createConversationApiV1ChatConversationsPost: (params: any) => Promise<any>;
-    deleteConversationApiV1ConversationsConversationIdDelete: (params: any) => Promise<any>;
-    deleteConversationApiV1ChatConversationsConversationIdDelete: (params: any) => Promise<any>;
-    getConversationApiV1ChatConversationsConversationIdGet: (params: any) => Promise<any>;
-    getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params: any) => Promise<any>;
-    updateConversationApiV1ChatConversationsConversationIdPut: (params: any) => Promise<any>;
-    chatApiV1ChatChatPost: (params: any) => Promise<any>;
-  };
 
   constructor() {
-    this.initializeConfiguration();
-    this.initializeAPIs();
-    this.loadTokenFromStorage();
-    this.initializeConvenienceObjects();
-  }
-
-  private initializeConfiguration() {
-    this.configuration = new Configuration({
+    this.sdk = new ChatterSDK({
       basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-      accessToken: () => this.token || '',
-      headers: {
-        'Content-Type': 'application/json',
-      },
     });
+    this.loadTokenFromStorage();
   }
 
-  private initializeAPIs() {
-    this.auth = new AuthenticationApi(this.configuration);
-    this.abTesting = new ABTestingApi(this.configuration);
-    this.agents = new AgentsApi(this.configuration);
-    this.analytics = new AnalyticsApi(this.configuration);
-    this.chat = new ChatApi(this.configuration);
-    this.dataManagement = new DataManagementApi(this.configuration);
-    this.default = new DefaultApi(this.configuration);
-    this.documents = new DocumentsApi(this.configuration);
-    this.events = new EventsApi(this.configuration);
-    this.health = new HealthApi(this.configuration);
-    this.jobs = new JobsApi(this.configuration);
-    this.modelRegistry = new ModelRegistryApi(this.configuration);
-    this.plugins = new PluginsApi(this.configuration);
-    this.profiles = new ProfilesApi(this.configuration);
-    this.prompts = new PromptsApi(this.configuration);
-    this.toolServers = new ToolServersApi(this.configuration);
-  }
+  // Direct access to the new SDK's APIs
+  public get auth() { return this.sdk.auth; }
+  public get abTesting() { return this.sdk.abTesting; }
+  public get agents() { return this.sdk.agents; }
+  public get analytics() { return this.sdk.analytics; }
+  public get chat() { return this.sdk.chat; }
+  public get dataManagement() { return this.sdk.dataManagement; }
+  public get default() { return this.sdk.default; }
+  public get documents() { return this.sdk.documents; }
+  public get events() { return this.sdk.events; }
+  public get health() { return this.sdk.health; }
+  public get jobs() { return this.sdk.jobs; }
+  public get modelRegistry() { return this.sdk.models; } // Note: new SDK uses 'models' instead of 'modelRegistry'
+  public get plugins() { return this.sdk.plugins; }
+  public get profiles() { return this.sdk.profiles; }
+  public get prompts() { return this.sdk.prompts; }
+  public get toolServers() { return this.sdk.toolServers; }
+  public get workflows() { return this.sdk.workflows; }
 
-  private initializeConvenienceObjects() {
-    // Create conversations object that delegates to chat API for compatibility
-    this.conversations = {
+  // Convenience objects for compatibility
+  public get conversations() {
+    return {
       listConversationsApiV1ChatConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
       listConversationsApiV1ConversationsGet: (params = {}) => this.chat.listConversationsApiV1ChatConversationsGet(params),
-      createConversationApiV1ChatConversationsPost: (params) => this.chat.createConversationApiV1ChatConversationsPost(params),
-      deleteConversationApiV1ConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      deleteConversationApiV1ChatConversationsConversationIdDelete: (params) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
-      getConversationApiV1ChatConversationsConversationIdGet: (params) => this.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
-      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params) => this.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
-      updateConversationApiV1ChatConversationsConversationIdPut: (params) => this.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
-      chatApiV1ChatChatPost: (params) => this.chat.chatApiV1ChatChatPost(params),
+      createConversationApiV1ChatConversationsPost: (params: any) => this.chat.createConversationApiV1ChatConversationsPost(params),
+      deleteConversationApiV1ConversationsConversationIdDelete: (params: any) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      deleteConversationApiV1ChatConversationsConversationIdDelete: (params: any) => this.chat.deleteConversationApiV1ChatConversationsConversationIdDelete(params),
+      getConversationApiV1ChatConversationsConversationIdGet: (params: any) => this.chat.getConversationApiV1ChatConversationsConversationIdGet(params),
+      getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet: (params: any) => this.chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(params),
+      updateConversationApiV1ChatConversationsConversationIdPut: (params: any) => this.chat.updateConversationApiV1ChatConversationsConversationIdPut(params),
+      chatApiV1ChatChatPost: (params: any) => this.chat.chatApiV1ChatChatPost(params),
     };
   }
 
@@ -116,23 +59,21 @@ class ChatterSDK {
     }
   }
 
+  private updateSDKWithToken() {
+    this.sdk = new ChatterSDK({
+      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      bearerToken: this.token || undefined,
+    });
+  }
+
   public getURL(): string | null {
-    return this.configuration.basePath;
+    return import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
   }
 
   public setToken(token: string) {
     this.token = token;
     localStorage.setItem('chatter_access_token', token);
-    
-    // Update configuration with new token
-    this.configuration = new Configuration({
-      ...this.configuration,
-      accessToken: () => this.token || '',
-    });
-    
-    // Reinitialize all APIs with new configuration
-    this.initializeAPIs();
-    this.initializeConvenienceObjects();
+    this.updateSDKWithToken();
   }
 
   public getToken(): string | null {
@@ -143,18 +84,7 @@ class ChatterSDK {
     this.token = null;
     localStorage.removeItem('chatter_access_token');
     localStorage.removeItem('chatter_refresh_token');
-    
-    // Update configuration to remove token
-    this.configuration = new Configuration({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
-      headers: {
-        'Content-Type': 'application/json',
-      },
-    });
-    
-    // Reinitialize all APIs with new configuration
-    this.initializeAPIs();
-    this.initializeConvenienceObjects();
+    this.updateSDKWithToken();
   }
 
   public isAuthenticated(): boolean {
@@ -330,4 +260,4 @@ class ChatterSDK {
 }
 
 // Create and export a singleton instance
-export const chatterClient = new ChatterSDK();
+export const chatterClient = new ChatterSDKWrapper();

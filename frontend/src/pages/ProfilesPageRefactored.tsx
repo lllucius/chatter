@@ -9,8 +9,8 @@ import {
   createCategoryChipRenderer,
   createMonospaceTextRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
-import { ProfileResponse, ProfileCreate, ProfileUpdate } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { ProfileResponse, ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 
 const ProfilesPageRefactored: React.FC = () => {
   // Define columns

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Email, VpnKey, CheckCircle } from '@mui/icons-material';
 import { useForm } from '../hooks/useForm';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
 
 interface RequestResetFormValues {

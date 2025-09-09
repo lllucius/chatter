@@ -7,8 +7,8 @@ import {
   createBooleanSwitchRenderer,
   createDateRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../sdk/client';
-import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from '../sdk';
+import { chatterClient } from '../services/chatter-sdk';
+import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from 'chatter-sdk';
 
 const AgentsPageRefactored: React.FC = () => {
   // Define columns

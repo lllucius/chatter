@@ -15,7 +15,7 @@ import {
   Box,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
-import { ProfileCreate, ProfileUpdate } from '../sdk';
+import { ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface ProfileFormProps extends CrudFormProps<ProfileCreate, ProfileUpdate> {}

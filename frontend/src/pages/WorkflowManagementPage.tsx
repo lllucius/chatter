@@ -65,9 +65,9 @@ import {
   ContentCopy as CopyIcon,
   Tune as TuneIcon,
 } from '@mui/icons-material';
-import { chatterClient } from '../sdk/client';
+import { chatterClient } from '../services/chatter-sdk';
 import { toastService } from '../services/toast-service';
-import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from '../sdk';
+import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from 'chatter-sdk';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import PageLayout from '../components/PageLayout';
 

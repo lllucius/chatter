@@ -265,6 +265,9 @@ class TestCLICommands:
         assert "chunks" in result.stdout
         assert "process" in result.stdout
         assert "stats" in result.stdout
+        assert "upload" in result.stdout
+        assert "download" in result.stdout
+        assert "update" in result.stdout
 
     def test_enhanced_prompts_help(self):
         """Test enhanced prompts subcommand help."""
@@ -278,6 +281,50 @@ class TestCLICommands:
         assert "clone" in result.stdout
         assert "test" in result.stdout
         assert "stats" in result.stdout
+
+    def test_plugins_help(self):
+        """Test plugins subcommand help."""
+        result = self.runner.invoke(app, ["plugins", "--help"])
+        assert result.exit_code == 0
+        assert "Plugin management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "install" in result.stdout
+        assert "uninstall" in result.stdout
+        assert "enable" in result.stdout
+        assert "disable" in result.stdout
+        assert "bulk-enable" in result.stdout
+        assert "bulk-disable" in result.stdout
+        assert "health" in result.stdout
+        assert "stats" in result.stdout
+
+    def test_toolservers_help(self):
+        """Test toolservers subcommand help."""
+        result = self.runner.invoke(app, ["toolservers", "--help"])
+        assert result.exit_code == 0
+        assert "Tool server management commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "delete" in result.stdout
+        assert "enable" in result.stdout
+        assert "disable" in result.stdout
+        assert "health" in result.stdout
+        assert "tools" in result.stdout
+
+    def test_ab_tests_help(self):
+        """Test ab-tests subcommand help."""
+        result = self.runner.invoke(app, ["ab-tests", "--help"])
+        assert result.exit_code == 0
+        assert "A/B testing and experimentation commands" in result.stdout
+        assert "list" in result.stdout
+        assert "show" in result.stdout
+        assert "create" in result.stdout
+        assert "start" in result.stdout
+        assert "end" in result.stdout
+        assert "results" in result.stdout
+        assert "metrics" in result.stdout
+        assert "delete" in result.stdout
 
     def test_all_commands_in_main_help(self):
         """Test that all command groups appear in main help."""
@@ -298,6 +345,9 @@ class TestCLICommands:
             "agents",
             "data",
             "analytics",
+            "plugins",
+            "toolservers",
+            "ab-tests",
             "config",
             "version",
         ]

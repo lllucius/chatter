@@ -1234,6 +1234,171 @@ async def document_stats():
         console.print(table)
 
 
+@documents_app.command("upload")
+@run_async
+async def upload_document(
+    file_path: str = typer.Argument(..., help="Path to file to upload"),
+    title: str = typer.Option(None, help="Document title"),
+    description: str = typer.Option(None, help="Document description"),
+    tags: str = typer.Option(
+        None, help="Document tags (JSON array string or comma-separated)"
+    ),
+    chunk_size: int = typer.Option(1000, help="Text chunk size for processing"),
+    chunk_overlap: int = typer.Option(200, help="Text chunk overlap"),
+    is_public: bool = typer.Option(False, help="Whether document is public"),
+):
+    """Upload a document."""
+    import json
+    from pathlib import Path
+    
+    file_path_obj = Path(file_path)
+    if not file_path_obj.exists():
+        console.print(f"❌ [red]File not found: {file_path}[/red]")
+        return
+    
+    if not file_path_obj.is_file():
+        console.print(f"❌ [red]Path is not a file: {file_path}[/red]")
+        return
+    
+    # Use file name as title if not provided
+    if not title:
+        title = file_path_obj.name
+    
+    # Read the file
+    try:
+        file_content = file_path_obj.read_bytes()
+    except Exception as e:
+        console.print(f"❌ [red]Error reading file: {e}[/red]")
+        return
+    
+    # Prepare file tuple for upload (filename, content, content_type)
+    file_tuple = (file_path_obj.name, file_content)
+    
+    async with get_client() as sdk_client:
+        try:
+            response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
+                file=file_tuple,
+                title=title,
+                description=description,
+                tags=tags,
+                chunk_size=chunk_size,
+                chunk_overlap=chunk_overlap,
+                is_public=is_public,
+            )
+
+            console.print("✅ [green]Document uploaded successfully![/green]")
+            console.print(f"[dim]Document ID: {response.id}[/dim]")
+            console.print(f"[dim]Name: {response.name}[/dim]")
+            console.print(f"[dim]Status: {response.status}[/dim]")
+            console.print(
+                f"[dim]Use 'chatter documents process {response.id}' to process the document[/dim]"
+            )
+
+        except Exception as e:
+            console.print(f"❌ [red]Upload failed: {e}[/red]")
+
+
+@documents_app.command("download")
+@run_async
+async def download_document(
+    document_id: str = typer.Argument(..., help="Document ID to download"),
+    output_path: str = typer.Option(
+        None, help="Output file path (defaults to document name)"
+    ),
+):
+    """Download a document."""
+    from pathlib import Path
+    
+    async with get_client() as sdk_client:
+        try:
+            # Get document info first to get the name
+            doc_response = await sdk_client.documents_api.get_document_api_v1_documents_document_id_get(
+                document_id=document_id
+            )
+            
+            # Download the document
+            download_response = await sdk_client.documents_api.download_document_api_v1_documents_document_id_download_get(
+                document_id=document_id
+            )
+            
+            # Determine output path
+            if not output_path:
+                output_path = doc_response.name or f"document_{document_id}"
+            
+            output_path_obj = Path(output_path)
+            
+            # Write the file
+            if hasattr(download_response, 'content'):
+                content = download_response.content
+            elif hasattr(download_response, 'data'):
+                content = download_response.data
+            else:
+                # If response is bytes directly
+                content = download_response
+            
+            if isinstance(content, str):
+                output_path_obj.write_text(content)
+            else:
+                output_path_obj.write_bytes(content)
+            
+            console.print("✅ [green]Document downloaded successfully![/green]")
+            console.print(f"[dim]Saved to: {output_path_obj.absolute()}[/dim]")
+            console.print(f"[dim]Size: {output_path_obj.stat().st_size:,} bytes[/dim]")
+
+        except FileNotFoundError:
+            console.print("❌ [red]Document not found[/red]")
+        except Exception as e:
+            console.print(f"❌ [red]Download failed: {e}[/red]")
+
+
+@documents_app.command("update")
+@run_async
+async def update_document(
+    document_id: str = typer.Argument(..., help="Document ID to update"),
+    title: str = typer.Option(None, help="New document title"),
+    description: str = typer.Option(None, help="New document description"),
+    tags: str = typer.Option(
+        None, help="New document tags (JSON array string or comma-separated)"
+    ),
+    is_public: bool = typer.Option(None, help="Whether document is public"),
+):
+    """Update document metadata."""
+    from chatter_sdk.models.document_update import DocumentUpdate
+    
+    # Build update data - only include fields that are provided
+    update_data = {}
+    if title is not None:
+        update_data["title"] = title
+    if description is not None:
+        update_data["description"] = description
+    if tags is not None:
+        update_data["tags"] = tags
+    if is_public is not None:
+        update_data["is_public"] = is_public
+    
+    if not update_data:
+        console.print("❌ [red]No update fields provided. Use --help to see available options.[/red]")
+        return
+    
+    async with get_client() as sdk_client:
+        try:
+            document_update = DocumentUpdate(**update_data)
+            response = await sdk_client.documents_api.update_document_api_v1_documents_document_id_put(
+                document_id=document_id,
+                document_update=document_update
+            )
+
+            console.print("✅ [green]Document updated successfully![/green]")
+            console.print(f"[dim]Document ID: {response.id}[/dim]")
+            console.print(f"[dim]Name: {response.name}[/dim]")
+            console.print(f"[dim]Status: {response.status}[/dim]")
+
+        except FileNotFoundError:
+            console.print("❌ [red]Document not found[/red]")
+        except Exception as e:
+            console.print(f"❌ [red]Update failed: {e}[/red]")
+
+
 # Chat Commands
 chat_app = typer.Typer(help="Chat and conversation management commands")
 app.add_typer(chat_app, name="chat")
@@ -2026,6 +2191,688 @@ async def dashboard():
             )
 
         console.print(table)
+
+
+# Plugins Commands
+plugins_app = typer.Typer(help="Plugin management commands")
+app.add_typer(plugins_app, name="plugins")
+
+
+@plugins_app.command("list")
+@run_async
+async def list_plugins(
+    limit: int = typer.Option(10, help="Number of plugins to list"),
+    offset: int = typer.Option(0, help="Number of plugins to skip"),
+    status: str = typer.Option(None, help="Filter by plugin status"),
+):
+    """List installed plugins."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.list_plugins_api_v1_plugins_get(
+            limit=limit, offset=offset, status=status
+        )
+
+        if not response.plugins:
+            console.print("No plugins found.")
+            return
+
+        table = Table(title=f"Plugins ({response.total} total)")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Version", style="yellow")
+        table.add_column("Status", style="magenta")
+        table.add_column("Description", style="blue")
+
+        for plugin in response.plugins:
+            table.add_row(
+                str(plugin.id),
+                plugin.name,
+                getattr(plugin, 'version', 'N/A'),
+                getattr(plugin, 'status', 'unknown'),
+                (getattr(plugin, 'description', 'No description') or 'No description')[:50] + "...",
+            )
+
+        console.print(table)
+
+
+@plugins_app.command("show")
+@run_async
+async def show_plugin(
+    plugin_id: str = typer.Argument(..., help="Plugin ID")
+):
+    """Show detailed plugin information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.get_plugin_api_v1_plugins_plugin_id_get(
+            plugin_id=plugin_id
+        )
+
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Version:[/dim] {getattr(response, 'version', 'N/A')}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
+                f"[dim]Author:[/dim] {getattr(response, 'author', 'N/A')}\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n\n"
+                f"[dim]Description:[/dim]\n{getattr(response, 'description', 'No description')}\n\n"
+                f"[dim]Configuration:[/dim]\n{getattr(response, 'config', 'No configuration')}",
+                title="Plugin Details",
+            )
+        )
+
+
+@plugins_app.command("install")
+@run_async
+async def install_plugin(
+    plugin_url: str = typer.Argument(..., help="Plugin URL or package name"),
+    force: bool = typer.Option(False, help="Force installation"),
+):
+    """Install a plugin."""
+    from chatter_sdk.models.plugin_install_request import PluginInstallRequest
+    
+    async with get_client() as sdk_client:
+        install_request = PluginInstallRequest(
+            url=plugin_url,
+            force=force,
+        )
+        
+        response = await sdk_client.plugins_api.install_plugin_api_v1_plugins_install_post(
+            plugin_install_request=install_request
+        )
+
+        console.print(f"✅ [green]Plugin installed: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Version: {getattr(response, 'version', 'N/A')}[/dim]")
+
+
+@plugins_app.command("uninstall")
+@run_async
+async def uninstall_plugin(
+    plugin_id: str = typer.Argument(..., help="Plugin ID to uninstall"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Uninstall a plugin."""
+    if not force:
+        confirm = Prompt.ask(
+            f"Are you sure you want to uninstall plugin {plugin_id}?",
+            choices=["y", "n"],
+        )
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+
+    async with get_client() as sdk_client:
+        await sdk_client.plugins_api.uninstall_plugin_api_v1_plugins_plugin_id_delete(
+            plugin_id=plugin_id
+        )
+
+        console.print(f"✅ [green]Uninstalled plugin {plugin_id}[/green]")
+
+
+@plugins_app.command("enable")
+@run_async
+async def enable_plugin(
+    plugin_id: str = typer.Argument(..., help="Plugin ID to enable"),
+):
+    """Enable a plugin."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.enable_plugin_api_v1_plugins_plugin_id_enable_post(
+            plugin_id=plugin_id
+        )
+
+        console.print(f"✅ [green]Enabled plugin {plugin_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@plugins_app.command("disable")
+@run_async
+async def disable_plugin(
+    plugin_id: str = typer.Argument(..., help="Plugin ID to disable"),
+):
+    """Disable a plugin."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.disable_plugin_api_v1_plugins_plugin_id_disable_post(
+            plugin_id=plugin_id
+        )
+
+        console.print(f"✅ [green]Disabled plugin {plugin_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@plugins_app.command("bulk-enable")
+@run_async
+async def bulk_enable_plugins(
+    plugin_ids: str = typer.Argument(
+        ..., help="Comma-separated plugin IDs to enable"
+    ),
+):
+    """Enable multiple plugins."""
+    ids = [id.strip() for id in plugin_ids.split(',')]
+    
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.bulk_enable_plugins_api_v1_plugins_bulk_enable_post(
+            plugin_ids=ids
+        )
+
+        success_count = getattr(response, 'enabled_count', len(ids))
+        console.print(f"✅ [green]Enabled {success_count} plugins[/green]")
+
+
+@plugins_app.command("bulk-disable")
+@run_async
+async def bulk_disable_plugins(
+    plugin_ids: str = typer.Argument(
+        ..., help="Comma-separated plugin IDs to disable"
+    ),
+):
+    """Disable multiple plugins."""
+    ids = [id.strip() for id in plugin_ids.split(',')]
+    
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.bulk_disable_plugins_api_v1_plugins_bulk_disable_post(
+            plugin_ids=ids
+        )
+
+        success_count = getattr(response, 'disabled_count', len(ids))
+        console.print(f"✅ [green]Disabled {success_count} plugins[/green]")
+
+
+@plugins_app.command("health")
+@run_async
+async def check_plugins_health():
+    """Check health status of all plugins."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.health_check_plugins_api_v1_plugins_health_get()
+
+        table = Table(title="Plugin Health Status")
+        table.add_column("Plugin", style="cyan")
+        table.add_column("Status", style="green")
+        table.add_column("Message", style="yellow")
+
+        if hasattr(response, 'plugins'):
+            for plugin_health in response.plugins:
+                status_color = "green" if plugin_health.status == "healthy" else "red"
+                table.add_row(
+                    plugin_health.name,
+                    f"[{status_color}]{plugin_health.status}[/{status_color}]",
+                    getattr(plugin_health, 'message', 'No message'),
+                )
+        
+        console.print(table)
+
+
+@plugins_app.command("stats")
+@run_async
+async def plugin_stats():
+    """Show plugin statistics."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.plugins_api.get_plugin_stats_api_v1_plugins_stats_get()
+
+        table = Table(title="Plugin Statistics")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Value", style="green")
+
+        if hasattr(response, 'total_plugins'):
+            table.add_row("Total Plugins", str(response.total_plugins))
+        if hasattr(response, 'enabled_plugins'):
+            table.add_row("Enabled Plugins", str(response.enabled_plugins))
+        if hasattr(response, 'disabled_plugins'):
+            table.add_row("Disabled Plugins", str(response.disabled_plugins))
+        if hasattr(response, 'total_usage'):
+            table.add_row("Total Usage", str(response.total_usage))
+
+        console.print(table)
+
+
+# Tool Servers Commands
+toolservers_app = typer.Typer(help="Tool server management commands")
+app.add_typer(toolservers_app, name="toolservers")
+
+
+@toolservers_app.command("list")
+@run_async
+async def list_tool_servers(
+    limit: int = typer.Option(10, help="Number of servers to list"),
+    offset: int = typer.Option(0, help="Number of servers to skip"),
+):
+    """List tool servers."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.list_tool_servers_api_v1_toolservers_servers_get(
+            limit=limit, offset=offset
+        )
+
+        if not response.servers:
+            console.print("No tool servers found.")
+            return
+
+        table = Table(title=f"Tool Servers ({response.total} total)")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("URL", style="yellow")
+        table.add_column("Status", style="magenta")
+        table.add_column("Tools", style="blue")
+
+        for server in response.servers:
+            tools_count = len(getattr(server, 'tools', []))
+            table.add_row(
+                str(server.id),
+                server.name,
+                getattr(server, 'url', 'N/A'),
+                getattr(server, 'status', 'unknown'),
+                str(tools_count),
+            )
+
+        console.print(table)
+
+
+@toolservers_app.command("show")
+@run_async
+async def show_tool_server(
+    server_id: str = typer.Argument(..., help="Tool server ID")
+):
+    """Show detailed tool server information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.get_tool_server_api_v1_toolservers_servers_server_id_get(
+            server_id=server_id
+        )
+
+        tools_info = ""
+        if hasattr(response, 'tools') and response.tools:
+            tools_info = "\n".join([f"- {tool.name}: {tool.description}" for tool in response.tools[:5]])
+            if len(response.tools) > 5:
+                tools_info += f"\n... and {len(response.tools) - 5} more tools"
+        else:
+            tools_info = "No tools available"
+
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]URL:[/dim] {getattr(response, 'url', 'N/A')}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
+                f"[dim]Version:[/dim] {getattr(response, 'version', 'N/A')}\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n\n"
+                f"[dim]Description:[/dim]\n{getattr(response, 'description', 'No description')}\n\n"
+                f"[dim]Available Tools:[/dim]\n{tools_info}",
+                title="Tool Server Details",
+            )
+        )
+
+
+@toolservers_app.command("create")
+@run_async
+async def create_tool_server(
+    name: str = typer.Option(..., help="Server name"),
+    url: str = typer.Option(..., help="Server URL"),
+    description: str = typer.Option(None, help="Server description"),
+    token: str = typer.Option(None, help="Authentication token"),
+):
+    """Create a new tool server."""
+    from chatter_sdk.models.tool_server_create import ToolServerCreate
+    
+    async with get_client() as sdk_client:
+        server_data = ToolServerCreate(
+            name=name,
+            url=url,
+            description=description,
+            auth_token=token,
+        )
+        
+        response = await sdk_client.tools_api.create_tool_server_api_v1_toolservers_servers_post(
+            tool_server_create=server_data
+        )
+
+        console.print(f"✅ [green]Created tool server: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]URL: {getattr(response, 'url', 'N/A')}[/dim]")
+
+
+@toolservers_app.command("delete")
+@run_async
+async def delete_tool_server(
+    server_id: str = typer.Argument(..., help="Tool server ID to delete"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Delete a tool server."""
+    if not force:
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete tool server {server_id}?",
+            choices=["y", "n"],
+        )
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+
+    async with get_client() as sdk_client:
+        await sdk_client.tools_api.delete_tool_server_api_v1_toolservers_servers_server_id_delete(
+            server_id=server_id
+        )
+
+        console.print(f"✅ [green]Deleted tool server {server_id}[/green]")
+
+
+@toolservers_app.command("enable")
+@run_async
+async def enable_tool_server(
+    server_id: str = typer.Argument(..., help="Tool server ID to enable"),
+):
+    """Enable a tool server."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.enable_tool_server_api_v1_toolservers_servers_server_id_enable_post(
+            server_id=server_id
+        )
+
+        console.print(f"✅ [green]Enabled tool server {server_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@toolservers_app.command("disable")
+@run_async
+async def disable_tool_server(
+    server_id: str = typer.Argument(..., help="Tool server ID to disable"),
+):
+    """Disable a tool server."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.disable_tool_server_api_v1_toolservers_servers_server_id_disable_post(
+            server_id=server_id
+        )
+
+        console.print(f"✅ [green]Disabled tool server {server_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@toolservers_app.command("health")
+@run_async
+async def check_tool_server_health(
+    server_id: str = typer.Argument(..., help="Tool server ID to check"),
+):
+    """Check health of a specific tool server."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.check_server_health_api_v1_toolservers_servers_server_id_health_get(
+            server_id=server_id
+        )
+
+        status_color = "green" if response.status == "healthy" else "red"
+        console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
+        
+        if hasattr(response, 'details'):
+            console.print(f"Details: {response.details}")
+        if hasattr(response, 'response_time'):
+            console.print(f"Response Time: {response.response_time}ms")
+
+
+@toolservers_app.command("tools")
+@run_async
+async def list_tools(
+    server_id: str = typer.Option(None, help="Filter by server ID"),
+    limit: int = typer.Option(10, help="Number of tools to list"),
+):
+    """List available tools across servers."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.tools_api.list_tools_api_v1_toolservers_tools_get(
+            server_id=server_id, limit=limit
+        )
+
+        if not response.tools:
+            console.print("No tools found.")
+            return
+
+        table = Table(title=f"Available Tools ({response.total} total)")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Server", style="yellow")
+        table.add_column("Status", style="magenta")
+        table.add_column("Description", style="blue")
+
+        for tool in response.tools:
+            table.add_row(
+                str(tool.id),
+                tool.name,
+                getattr(tool, 'server_name', 'N/A'),
+                getattr(tool, 'status', 'unknown'),
+                (getattr(tool, 'description', 'No description') or 'No description')[:50] + "...",
+            )
+
+        console.print(table)
+
+
+# A/B Testing Commands
+ab_testing_app = typer.Typer(help="A/B testing and experimentation commands")
+app.add_typer(ab_testing_app, name="ab-tests")
+
+
+@ab_testing_app.command("list")
+@run_async
+async def list_ab_tests(
+    limit: int = typer.Option(10, help="Number of tests to list"),
+    offset: int = typer.Option(0, help="Number of tests to skip"),
+    status: str = typer.Option(None, help="Filter by test status"),
+):
+    """List A/B tests."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.list_ab_tests_api_v1_ab_tests_get(
+            limit=limit, offset=offset, status=status
+        )
+
+        if not response.tests:
+            console.print("No A/B tests found.")
+            return
+
+        table = Table(title=f"A/B Tests ({response.total} total)")
+        table.add_column("ID", style="cyan")
+        table.add_column("Name", style="green")
+        table.add_column("Status", style="yellow")
+        table.add_column("Type", style="magenta")
+        table.add_column("Progress", style="blue")
+
+        for test in response.tests:
+            progress = f"{getattr(test, 'completion_percentage', 0):.1f}%"
+            table.add_row(
+                str(test.id),
+                test.name,
+                getattr(test, 'status', 'unknown'),
+                getattr(test, 'test_type', 'unknown'),
+                progress,
+            )
+
+        console.print(table)
+
+
+@ab_testing_app.command("show")
+@run_async
+async def show_ab_test(
+    test_id: str = typer.Argument(..., help="A/B test ID")
+):
+    """Show detailed A/B test information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.get_ab_test_api_v1_ab_tests_test_id_get(
+            test_id=test_id
+        )
+
+        console.print(
+            Panel.fit(
+                f"[bold]{response.name}[/bold]\n\n"
+                f"[dim]ID:[/dim] {response.id}\n"
+                f"[dim]Type:[/dim] {getattr(response, 'test_type', 'unknown')}\n"
+                f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
+                f"[dim]Progress:[/dim] {getattr(response, 'completion_percentage', 0):.1f}%\n"
+                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n"
+                f"[dim]Started:[/dim] {getattr(response, 'started_at', 'N/A')}\n"
+                f"[dim]Ends:[/dim] {getattr(response, 'end_date', 'N/A')}\n\n"
+                f"[dim]Description:[/dim]\n{getattr(response, 'description', 'No description')}\n\n"
+                f"[dim]Hypothesis:[/dim]\n{getattr(response, 'hypothesis', 'No hypothesis')}",
+                title="A/B Test Details",
+            )
+        )
+
+
+@ab_testing_app.command("create")
+@run_async
+async def create_ab_test(
+    name: str = typer.Option(..., help="Test name"),
+    test_type: str = typer.Option("prompt", help="Test type: prompt, model, workflow"),
+    description: str = typer.Option(None, help="Test description"),
+    hypothesis: str = typer.Option(None, help="Test hypothesis"),
+    config: str = typer.Option(None, help="Test configuration as JSON"),
+):
+    """Create a new A/B test."""
+    import json
+    from chatter_sdk.models.ab_test_create import ABTestCreate
+    
+    test_config = {}
+    if config:
+        try:
+            test_config = json.loads(config)
+        except json.JSONDecodeError as e:
+            console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
+            return
+    
+    async with get_client() as sdk_client:
+        test_data = ABTestCreate(
+            name=name,
+            test_type=test_type,
+            description=description,
+            hypothesis=hypothesis,
+            config=test_config,
+        )
+        
+        response = await sdk_client.ab_api.create_ab_test_api_v1_ab_tests_post(
+            ab_test_create=test_data
+        )
+
+        console.print(f"✅ [green]Created A/B test: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Status: {getattr(response, 'status', 'unknown')}[/dim]")
+
+
+@ab_testing_app.command("start")
+@run_async
+async def start_ab_test(
+    test_id: str = typer.Argument(..., help="A/B test ID to start"),
+):
+    """Start an A/B test."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.start_ab_test_api_v1_ab_tests_test_id_start_post(
+            test_id=test_id
+        )
+
+        console.print(f"✅ [green]Started A/B test {test_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@ab_testing_app.command("end")
+@run_async
+async def end_ab_test(
+    test_id: str = typer.Argument(..., help="A/B test ID to end"),
+    force: bool = typer.Option(False, help="Force end the test"),
+):
+    """End an A/B test."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.end_ab_test_api_v1_ab_tests_test_id_end_post(
+            test_id=test_id, force=force
+        )
+
+        console.print(f"✅ [green]Ended A/B test {test_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
+
+
+@ab_testing_app.command("results")
+@run_async
+async def show_ab_test_results(
+    test_id: str = typer.Argument(..., help="A/B test ID"),
+):
+    """Show A/B test results."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.get_ab_test_results_api_v1_ab_tests_test_id_results_get(
+            test_id=test_id
+        )
+
+        table = Table(title=f"A/B Test Results - {test_id}")
+        table.add_column("Variant", style="cyan")
+        table.add_column("Participants", style="green")
+        table.add_column("Success Rate", style="yellow")
+        table.add_column("Avg Score", style="magenta")
+        table.add_column("Statistical Significance", style="blue")
+
+        if hasattr(response, 'variants'):
+            for variant in response.variants:
+                table.add_row(
+                    variant.name,
+                    str(getattr(variant, 'participant_count', 0)),
+                    f"{getattr(variant, 'success_rate', 0):.1f}%",
+                    f"{getattr(variant, 'avg_score', 0):.2f}",
+                    "Yes" if getattr(variant, 'is_significant', False) else "No",
+                )
+
+        console.print(table)
+
+        # Show summary
+        if hasattr(response, 'summary'):
+            console.print(f"\n[bold]Summary:[/bold] {response.summary}")
+        if hasattr(response, 'recommendation'):
+            console.print(f"[bold]Recommendation:[/bold] {response.recommendation}")
+
+
+@ab_testing_app.command("metrics")
+@run_async
+async def show_ab_test_metrics(
+    test_id: str = typer.Argument(..., help="A/B test ID"),
+):
+    """Show detailed A/B test metrics."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.ab_api.get_ab_test_metrics_api_v1_ab_tests_test_id_metrics_get(
+            test_id=test_id
+        )
+
+        table = Table(title=f"A/B Test Metrics - {test_id}")
+        table.add_column("Metric", style="cyan")
+        table.add_column("Variant A", style="green")
+        table.add_column("Variant B", style="yellow")
+        table.add_column("Difference", style="magenta")
+
+        if hasattr(response, 'metrics'):
+            for metric in response.metrics:
+                difference = getattr(metric, 'difference', 'N/A')
+                if isinstance(difference, (int, float)):
+                    difference = f"{difference:+.2f}"
+                
+                table.add_row(
+                    metric.name,
+                    str(getattr(metric, 'variant_a_value', 'N/A')),
+                    str(getattr(metric, 'variant_b_value', 'N/A')),
+                    str(difference),
+                )
+
+        console.print(table)
+
+
+@ab_testing_app.command("delete")
+@run_async
+async def delete_ab_test(
+    test_id: str = typer.Argument(..., help="A/B test ID to delete"),
+    force: bool = typer.Option(False, help="Skip confirmation prompt"),
+):
+    """Delete an A/B test."""
+    if not force:
+        confirm = Prompt.ask(
+            f"Are you sure you want to delete A/B test {test_id}?",
+            choices=["y", "n"],
+        )
+        if confirm.lower() != "y":
+            console.print("Operation cancelled.")
+            return
+
+    async with get_client() as sdk_client:
+        await sdk_client.ab_api.delete_ab_test_api_v1_ab_tests_test_id_delete(
+            test_id=test_id
+        )
+
+        console.print(f"✅ [green]Deleted A/B test {test_id}[/green]")
 
 
 # Configuration and utility commands

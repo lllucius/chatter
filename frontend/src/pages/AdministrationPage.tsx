@@ -373,14 +373,15 @@ const AdministrationPage: React.FC = () => {
       }
 
       const operation = bulkOperationData.dryRun ? 'Preview' : 'Deleted';
+      const affectedCount = result?.data.successful_deletions || 0;
       showToast(
-        `${operation}: ${result?.data.affected_count || 0} ${bulkOperationData.operationType}`, 
+        `${operation}: ${affectedCount} ${bulkOperationData.operationType}`, 
         bulkOperationData.dryRun ? 'info' : 'success'
       );
 
       addNotification({
         title: 'Bulk Operation Complete',
-        message: `${operation} ${result?.data.affected_count || 0} ${bulkOperationData.operationType}`,
+        message: `${operation} ${affectedCount} ${bulkOperationData.operationType}`,
         type: bulkOperationData.dryRun ? 'info' : 'success'
       });
 

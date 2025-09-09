@@ -29,7 +29,7 @@ class TokenResponse(BaseModel):
     Schema for authentication token response.
     """ # noqa: E501
     access_token: StrictStr = Field(description="JWT access token")
-    refresh_token: StrictStr = Field(description="JWT refresh token")
+    refresh_token: Optional[StrictStr] = Field(default=None, description="JWT refresh token")
     token_type: Optional[StrictStr] = Field(default='bearer', description="Token type")
     expires_in: StrictInt = Field(description="Token expiration time in seconds")
     user: UserResponse

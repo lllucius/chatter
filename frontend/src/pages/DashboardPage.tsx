@@ -43,6 +43,7 @@ import {
   Settings,
   ShowChart,
   Computer,
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { getSDK } from "../services/auth-service";
 import { useApi } from '../hooks/useApi';
@@ -162,6 +163,37 @@ const DashboardPage: React.FC = () => {
     { immediate: true }
   );
 
+  // Show toasts for API errors
+  React.useEffect(() => {
+    if (performanceApi.error) {
+      toastService.warning('Performance metrics temporarily unavailable');
+    }
+  }, [performanceApi.error]);
+
+  React.useEffect(() => {
+    if (systemApi.error) {
+      toastService.warning('System analytics temporarily unavailable');
+    }
+  }, [systemApi.error]);
+
+  React.useEffect(() => {
+    if (usageApi.error) {
+      toastService.warning('Usage metrics temporarily unavailable');
+    }
+  }, [usageApi.error]);
+
+  React.useEffect(() => {
+    if (documentApi.error) {
+      toastService.warning('Document analytics temporarily unavailable');
+    }
+  }, [documentApi.error]);
+
+  React.useEffect(() => {
+    if (toolServerApi.error) {
+      toastService.warning('Tool server analytics temporarily unavailable');
+    }
+  }, [toolServerApi.error]);
+
   const data = dashboardApi.data?.data;
   const performanceData = performanceApi.data?.data;
   const systemData = systemApi.data?.data;
@@ -232,6 +264,16 @@ const DashboardPage: React.FC = () => {
     }
   };
 
+  // Helper function for refreshing all dashboard data
+  const handleRefresh = () => {
+    dashboardApi.execute();
+    performanceApi.execute();
+    systemApi.execute();
+    usageApi.execute();
+    documentApi.execute();
+    toolServerApi.execute();
+  };
+
   if (dashboardApi.loading) {
     return (
       <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
@@ -274,6 +316,14 @@ const DashboardPage: React.FC = () => {
     <>
       <Button
         variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={handleRefresh}
+        size="small"
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="outlined"
         startIcon={<GetApp />}
         onClick={() => handleExportAnalytics('json')}
         size="small"
@@ -299,20 +349,6 @@ const DashboardPage: React.FC = () => {
           Loading dashboard data...
         </Alert>
       )}
-      
-      {/* Show warning if some APIs failed but still show dashboard */}
-      {(!data || performanceApi.error || systemApi.error || usageApi.error || documentApi.error || toolServerApi.error) && !dashboardApi.loading && (
-        <Alert severity="warning" sx={{ mb: 2 }}>
-          Some dashboard data may be incomplete due to API issues. Showing available data.
-          {!data && (
-            <Box sx={{ mt: 1 }}>
-              <Button variant="outlined" size="small" onClick={dashboardApi.execute}>
-                Retry Dashboard API
-              </Button>
-            </Box>
-          )}
-        </Alert>
-      )}
 
       {/* Enhanced Navigation Tabs */}
       <Paper sx={{ mb: 3 }}>
@@ -322,11 +358,11 @@ const DashboardPage: React.FC = () => {
           variant="scrollable"
           scrollButtons="auto"
         >
-          <Tab icon={<Assessment />} label="Overview" />
-          <Tab icon={<ShowChart />} label="Performance" />
-          <Tab icon={<Computer />} label="System" />
-          <Tab icon={<Storage />} label="Documents" />
-          <Tab icon={<Settings />} label="Tools" />
+          <Tab icon={<Assessment />} iconPosition="start" label="Overview" />
+          <Tab icon={<ShowChart />} iconPosition="start" label="Performance" />
+          <Tab icon={<Computer />} iconPosition="start" label="System" />
+          <Tab icon={<Storage />} iconPosition="start" label="Documents" />
+          <Tab icon={<Settings />} iconPosition="start" label="Tools" />
         </Tabs>
       </Paper>
 

@@ -101,9 +101,7 @@ const ProfilesPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().profiles.deleteProfileApiV1ProfilesProfileId({
-        profileId: id,
-      });
+      await getSDK().profiles.deleteProfileApiV1ProfilesProfileId(id);
     },
   };
 

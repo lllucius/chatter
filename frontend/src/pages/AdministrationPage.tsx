@@ -582,7 +582,7 @@ const AdministrationPage: React.FC = () => {
             loadPlugins();
             break;
           case 'job':
-            await getSDK().jobs.cancelJobApiV1JobsJobIdCancel({ jobId: id });
+            await getSDK().jobs.cancelJobApiV1JobsJobIdCancel(id);
             showToast('Job cancelled successfully!', 'success');
             loadJobs();
             loadJobStats();

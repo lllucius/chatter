@@ -126,10 +126,10 @@ const ModelManagementPageRefactored: React.FC = () => {
               model_type: 'embedding' as any,
             } as DefaultProvider;
 
-            await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault({
-              providerId: provider.id,
-              defaultProvider: defaultProviderBody,
-            });
+            await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault(
+              provider.id,
+              defaultProviderBody
+            );
             toastService.success('Default provider updated');
           } catch {
             toastService.error('Failed to set default provider');
@@ -182,9 +182,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderId({
-        providerId: id,
-      });
+      await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderId(id);
       await loadProviders(); // Refresh providers for model form
     },
   };
@@ -258,9 +256,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       onClick: async (model) => {
         if (!model.isDefault) {
           try {
-            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault({
-              modelId: model.id,
-            });
+            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(model.id);
             toastService.success('Default model updated');
           } catch {
             toastService.error('Failed to set default model');
@@ -311,9 +307,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().modelRegistry.deleteModelApiV1ModelsModelsModelId({
-        modelId: id,
-      });
+      await getSDK().modelRegistry.deleteModelApiV1ModelsModelsModelId(id);
     },
   };
 

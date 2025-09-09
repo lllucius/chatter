@@ -164,10 +164,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (server) => {
         try {
           if (server.status === 'enabled') {
-            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisable({ serverId: server.id });
+            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisable(server.id);
             toastService.success('Server disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable({ serverId: server.id });
+            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable(server.id);
             toastService.success('Server enabled successfully');
           }
         } catch {
@@ -180,7 +180,7 @@ const ToolsPageRefactored: React.FC = () => {
       label: 'Refresh Tools',
       onClick: async (server) => {
         try {
-          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools({ serverId: server.id });
+          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools(server.id);
           toastService.success('Server tools refreshed successfully');
         } catch {
           toastService.error('Failed to refresh server tools');
@@ -226,9 +226,7 @@ const ToolsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerId({
-        serverId: id,
-      });
+      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerId(id);
     },
   };
 
@@ -274,10 +272,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (tool) => {
         try {
           if (tool.status === 'enabled') {
-            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisable({ toolId: tool.id });
+            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisable(tool.id);
             toastService.success('Tool disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable({ toolId: tool.id });
+            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable(tool.id);
             toastService.success('Tool enabled successfully');
           }
         } catch {

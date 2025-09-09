@@ -1,4 +1,4 @@
-import React, { useState, useMemo, lazy } from 'react';
+import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
@@ -10,6 +10,9 @@ import ErrorBoundary from './components/ErrorBoundary';
 import SuspenseWrapper from './components/SuspenseWrapper';
 import ThemedToastContainer from './components/ThemedToastContainer';
 import { SSEProvider } from './services/sse-context';
+
+// Initialize SDK at app startup
+import { initializeSDK } from './services/auth-service';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -39,6 +42,11 @@ export const ThemeContext = React.createContext<{
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
+
+  // Initialize SDK at app startup
+  useEffect(() => {
+    initializeSDK();
+  }, []);
 
   const toggleDarkMode = () => {
     setDarkMode(!darkMode);

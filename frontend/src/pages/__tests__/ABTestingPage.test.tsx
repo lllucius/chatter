@@ -5,9 +5,9 @@ import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ABTestingPage from '../ABTestingPage';
 
-// Mock the chatterClient
-vi.mock('../../services/chatter-sdk', () => ({
-  chatterClient: {
+// Mock the getSDK function and authService
+vi.mock('../../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     abTesting: {
       listAbTestsApiV1AbTestsGet: vi.fn().mockResolvedValue({
         data: {
@@ -15,6 +15,9 @@ vi.mock('../../services/chatter-sdk', () => ({
         }
       })
     }
+  })),
+  authService: {
+    isAuthenticated: vi.fn(() => true)
   }
 }));
 

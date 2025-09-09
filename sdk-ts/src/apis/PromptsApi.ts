@@ -1,0 +1,184 @@
+/**
+ * Generated API client for Prompts
+ */
+import { PromptCloneRequest, PromptCreate, PromptDeleteResponse, PromptListResponse, PromptResponse, PromptStatsResponse, PromptTestRequest, PromptTestResponse, PromptUpdate } from '../models/index';
+import { BaseAPI, Configuration, RequestOptions } from '../runtime';
+
+export class PromptsApi extends BaseAPI {
+  constructor(configuration?: Configuration) {
+    super(configuration);
+  }
+
+  /**Create Prompt
+   * Create a new prompt.
+
+Args:
+    prompt_data: Prompt creation data
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Created prompt information
+   */
+  public async createPromptApiV1Prompts(data: PromptCreate): Promise<PromptResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'POST',
+      body: data,
+    };
+
+    return this.request<PromptResponse>(`/api/v1/prompts/`, requestOptions);
+  }
+  /**Get Prompt Stats
+   * Get prompt statistics.
+
+Args:
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Prompt statistics
+   */
+  public async getPromptStatsApiV1PromptsStatsOverview(): Promise<PromptStatsResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'GET',
+    };
+
+    return this.request<PromptStatsResponse>(`/api/v1/prompts/stats/overview`, requestOptions);
+  }
+  /**List Prompts
+   * List user's prompts.
+
+Args:
+    prompt_type: Filter by prompt type
+    category: Filter by category
+    tags: Filter by tags
+    is_public: Filter by public status
+    is_chain: Filter by chain status
+    limit: Maximum number of results
+    offset: Number of results to skip
+    sort_by: Sort field
+    sort_order: Sort order (asc/desc)
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    List of prompts with pagination info
+   */
+  public async listPromptsApiV1Prompts(options?: RequestOptions): Promise<PromptListResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'GET',
+      headers: options?.headers,
+      query: {
+        'prompt_type': options?.promptType,
+        'category': options?.category,
+        'tags': options?.tags,
+        'is_public': options?.isPublic,
+        'is_chain': options?.isChain,
+        'limit': options?.limit,
+        'offset': options?.offset,
+        'sort_by': options?.sortBy,
+        'sort_order': options?.sortOrder,
+      },
+    };
+
+    return this.request<PromptListResponse>(`/api/v1/prompts`, requestOptions);
+  }
+  /**Get Prompt
+   * Get prompt details.
+
+Args:
+    prompt_id: Prompt ID
+    request: Get request parameters
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Prompt information
+   */
+  public async getPromptApiV1PromptsPromptId(promptId: string): Promise<PromptResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'GET',
+    };
+
+    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+  }
+  /**Update Prompt
+   * Update prompt.
+
+Args:
+    prompt_id: Prompt ID
+    update_data: Update data
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Updated prompt information
+   */
+  public async updatePromptApiV1PromptsPromptId(promptId: string, data: PromptUpdate): Promise<PromptResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'PUT',
+      body: data,
+    };
+
+    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+  }
+  /**Delete Prompt
+   * Delete prompt.
+
+Args:
+    prompt_id: Prompt ID
+    request: Delete request parameters
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Success message
+   */
+  public async deletePromptApiV1PromptsPromptId(promptId: string): Promise<PromptDeleteResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'DELETE',
+    };
+
+    return this.request<PromptDeleteResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+  }
+  /**Test Prompt
+   * Test prompt with given variables.
+
+Args:
+    prompt_id: Prompt ID
+    test_request: Test request
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Test results
+   */
+  public async testPromptApiV1PromptsPromptIdTest(promptId: string, data: PromptTestRequest): Promise<PromptTestResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'POST',
+      body: data,
+    };
+
+    return this.request<PromptTestResponse>(`/api/v1/prompts/${promptId}/test`, requestOptions);
+  }
+  /**Clone Prompt
+   * Clone an existing prompt.
+
+Args:
+    prompt_id: Source prompt ID
+    clone_request: Clone request
+    current_user: Current authenticated user
+    prompt_service: Prompt service
+
+Returns:
+    Cloned prompt information
+   */
+  public async clonePromptApiV1PromptsPromptIdClone(promptId: string, data: PromptCloneRequest): Promise<PromptResponse> {
+    const requestOptions: RequestOptions = {
+      method: 'POST',
+      body: data,
+    };
+
+    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}/clone`, requestOptions);
+  }
+}

@@ -3,7 +3,6 @@
  */
 import { OAuthConfigSchema } from './OAuthConfigSchema';
 
-
 export interface ToolServerUpdate {
   display_name?: string | null;
   description?: string | null;

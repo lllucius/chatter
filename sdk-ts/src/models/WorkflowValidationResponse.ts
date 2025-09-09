@@ -3,7 +3,6 @@
  */
 import { ValidationError } from './ValidationError';
 
-
 export interface WorkflowValidationResponse {
   /** Whether workflow is valid */
   is_valid: boolean;

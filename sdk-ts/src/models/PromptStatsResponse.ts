@@ -3,7 +3,6 @@
  */
 import { PromptResponse } from './PromptResponse';
 
-
 export interface PromptStatsResponse {
   /** Total number of prompts */
   total_prompts: number;

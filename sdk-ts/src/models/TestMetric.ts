@@ -3,7 +3,6 @@
  */
 import { MetricType } from './MetricType';
 
-
 export interface TestMetric {
   /** Type of metric */
   metric_type: MetricType;

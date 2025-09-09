@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: McpStatusResponse
  */
-
 export interface McpStatusResponse {
   /** MCP service status */
   status: string;

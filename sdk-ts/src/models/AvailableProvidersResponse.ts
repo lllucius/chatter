@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AvailableProvidersResponse
  */
-
 export interface AvailableProvidersResponse {
   /** Available LLM providers with their configurations */
   providers: Record<string, unknown>;

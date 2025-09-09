@@ -3,7 +3,6 @@
  */
 import { WorkflowEdgeData } from './WorkflowEdgeData';
 
-
 export interface WorkflowEdge {
   /** Unique edge identifier */
   id: string;

@@ -4,7 +4,6 @@
 import { DataFormat } from './DataFormat';
 import { ExportScope } from './ExportScope';
 
-
 export interface ExportDataRequest {
   /** Export scope */
   scope: ExportScope;

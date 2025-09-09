@@ -3,7 +3,6 @@
  */
 import { ReadinessStatus } from './ReadinessStatus';
 
-
 export interface ReadinessCheckResponse {
   /** Readiness status */
   status: ReadinessStatus;

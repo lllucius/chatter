@@ -3,7 +3,6 @@
  */
 import { TestStatus } from './TestStatus';
 
-
 export interface ABTestUpdateRequest {
   /** Test name */
   name?: string | null;

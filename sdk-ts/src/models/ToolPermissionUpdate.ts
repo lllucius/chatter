@@ -3,7 +3,6 @@
  */
 import { ToolAccessLevel } from './ToolAccessLevel';
 
-
 export interface ToolPermissionUpdate {
   access_level?: ToolAccessLevel | null;
   rate_limit_per_hour?: number | null;

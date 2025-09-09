@@ -2,7 +2,7 @@
  * Generated from OpenAPI schema: DocumentResponse
  */
 import { DocumentStatus } from './DocumentStatus';
-
+import { DocumentType } from './DocumentType';
 
 export interface DocumentResponse {
   /** Document title */

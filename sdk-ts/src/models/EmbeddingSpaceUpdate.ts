@@ -4,7 +4,6 @@
 import { DistanceMetric } from './DistanceMetric';
 import { ReductionStrategy } from './ReductionStrategy';
 
-
 export interface EmbeddingSpaceUpdate {
   display_name?: string | null;
   description?: string | null;

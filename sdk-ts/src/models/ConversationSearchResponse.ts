@@ -3,7 +3,6 @@
  */
 import { ConversationResponse } from './ConversationResponse';
 
-
 export interface ConversationSearchResponse {
   /** Conversations */
   conversations: ConversationResponse[];

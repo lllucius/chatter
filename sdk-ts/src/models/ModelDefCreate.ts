@@ -3,7 +3,6 @@
  */
 import { ModelType } from './ModelType';
 
-
 export interface ModelDefCreate {
   /** Model name */
   name: string;

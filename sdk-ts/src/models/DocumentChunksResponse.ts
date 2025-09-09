@@ -3,7 +3,6 @@
  */
 import { DocumentChunkResponse } from './DocumentChunkResponse';
 
-
 export interface DocumentChunksResponse {
   /** List of document chunks */
   chunks: DocumentChunkResponse[];

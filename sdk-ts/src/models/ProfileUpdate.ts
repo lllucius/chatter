@@ -3,7 +3,6 @@
  */
 import { ProfileType } from './ProfileType';
 
-
 export interface ProfileUpdate {
   /** Profile name */
   name?: string | null;

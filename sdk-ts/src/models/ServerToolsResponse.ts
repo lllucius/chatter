@@ -3,7 +3,6 @@
  */
 import { ServerToolResponse } from './ServerToolResponse';
 
-
 export interface ServerToolsResponse {
   /** List of server tools */
   tools: ServerToolResponse[];

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: TestVariant
  */
-
 export interface TestVariant {
   /** Variant name */
   name: string;

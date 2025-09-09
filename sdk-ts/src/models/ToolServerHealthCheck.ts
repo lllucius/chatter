@@ -3,7 +3,6 @@
  */
 import { ServerStatus } from './ServerStatus';
 
-
 export interface ToolServerHealthCheck {
   /** Server ID */
   server_id: string;

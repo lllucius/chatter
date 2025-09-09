@@ -3,7 +3,6 @@
  */
 import { ToolAccessLevel } from './ToolAccessLevel';
 
-
 export interface ToolPermissionCreate {
   /** User ID */
   user_id: string;

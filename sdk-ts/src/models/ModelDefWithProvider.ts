@@ -4,7 +4,6 @@
 import { ModelType } from './ModelType';
 import { Provider } from './Provider';
 
-
 export interface ModelDefWithProvider {
   /** Model name */
   name: string;

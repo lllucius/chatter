@@ -4,7 +4,6 @@
 import { AgentCapability } from './AgentCapability';
 import { AgentType } from './AgentType';
 
-
 export interface AgentCreateRequest {
   /** Agent name */
   name: string;

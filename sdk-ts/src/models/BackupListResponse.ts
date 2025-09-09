@@ -3,7 +3,6 @@
  */
 import { BackupResponse } from './BackupResponse';
 
-
 export interface BackupListResponse {
   /** List of backups */
   backups: BackupResponse[];

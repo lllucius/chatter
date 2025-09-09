@@ -3,7 +3,6 @@
  */
 import { WorkflowNodeData } from './WorkflowNodeData';
 
-
 export interface WorkflowNode {
   /** Unique node identifier */
   id: string;

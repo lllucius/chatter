@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PerformanceStatsResponse
  */
-
 export interface PerformanceStatsResponse {
   /** Total number of executions */
   total_executions: number;

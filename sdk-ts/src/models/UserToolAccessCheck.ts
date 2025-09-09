@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UserToolAccessCheck
  */
-
 export interface UserToolAccessCheck {
   /** User ID */
   user_id: string;

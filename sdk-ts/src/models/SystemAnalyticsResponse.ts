@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: SystemAnalyticsResponse
  */
-
 export interface SystemAnalyticsResponse {
   /** Total number of users */
   total_users: number;

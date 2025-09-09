@@ -3,7 +3,6 @@
  */
 import { UserResponse } from './UserResponse';
 
-
 export interface TokenResponse {
   /** JWT access token */
   access_token: string;

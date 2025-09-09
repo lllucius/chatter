@@ -3,7 +3,6 @@
  */
 import { AgentResponse } from './AgentResponse';
 
-
 export interface AgentBulkCreateResponse {
   /** Successfully created agents */
   created: AgentResponse[];

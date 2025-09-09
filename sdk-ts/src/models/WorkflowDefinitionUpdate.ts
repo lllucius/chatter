@@ -4,7 +4,6 @@
 import { WorkflowEdge } from './WorkflowEdge';
 import { WorkflowNode } from './WorkflowNode';
 
-
 export interface WorkflowDefinitionUpdate {
   /** Workflow name */
   name?: string | null;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: BulkOperationResult
  */
-
 export interface BulkOperationResult {
   /** Total servers requested */
   total_requested: number;

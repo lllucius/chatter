@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UserRole
  */
-
 export enum UserRole {
   guest = "guest",
   user = "user",

@@ -3,7 +3,6 @@
  */
 import { ProfileResponse } from './ProfileResponse';
 
-
 export interface ProfileStatsResponse {
   /** Total number of profiles */
   total_profiles: number;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: DocumentStatus
  */
-
 export enum DocumentStatus {
   pending = "pending",
   processing = "processing",

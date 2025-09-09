@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: OptimizationSuggestion
  */
-
 export interface OptimizationSuggestion {
   /** Suggestion type */
   type: string;

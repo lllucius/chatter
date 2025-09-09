@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: WorkflowTemplateCreate
  */
-
 export interface WorkflowTemplateCreate {
   /** Template name */
   name: string;

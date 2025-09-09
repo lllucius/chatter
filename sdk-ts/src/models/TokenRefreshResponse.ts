@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: TokenRefreshResponse
  */
-
 export interface TokenRefreshResponse {
   /** New access token */
   access_token: string;

@@ -3,7 +3,6 @@
  */
 import { DocumentStatus } from './DocumentStatus';
 
-
 export interface DocumentProcessingResponse {
   /** Document ID */
   document_id: string;

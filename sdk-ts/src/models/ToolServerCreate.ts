@@ -3,7 +3,6 @@
  */
 import { OAuthConfigSchema } from './OAuthConfigSchema';
 
-
 export interface ToolServerCreate {
   /** Server name */
   name: string;

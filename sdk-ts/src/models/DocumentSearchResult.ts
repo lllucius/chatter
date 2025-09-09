@@ -3,7 +3,6 @@
  */
 import { DocumentResponse } from './DocumentResponse';
 
-
 export interface DocumentSearchResult {
   /** Document ID */
   document_id: string;

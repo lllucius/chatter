@@ -3,7 +3,6 @@
  */
 import { ProviderType } from './ProviderType';
 
-
 export interface Provider {
   /** Unique provider name */
   name: string;

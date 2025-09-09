@@ -4,7 +4,6 @@
 import { AgentCapability } from './AgentCapability';
 import { AgentStatus } from './AgentStatus';
 
-
 export interface AgentUpdateRequest {
   /** Agent name */
   name?: string | null;

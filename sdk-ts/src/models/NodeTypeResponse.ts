@@ -3,7 +3,6 @@
  */
 import { NodePropertyDefinition } from './NodePropertyDefinition';
 
-
 export interface NodeTypeResponse {
   /** Node type identifier */
   type: string;

@@ -4,7 +4,6 @@
 import { ConversationResponse } from './ConversationResponse';
 import { MessageResponse } from './MessageResponse';
 
-
 export interface ChatResponse {
   /** Conversation ID */
   conversation_id: string;

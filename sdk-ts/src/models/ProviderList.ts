@@ -3,7 +3,6 @@
  */
 import { Provider } from './Provider';
 
-
 export interface ProviderList {
   providers: Provider[];
   total: number;

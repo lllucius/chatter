@@ -3,7 +3,6 @@
  */
 import { ToolAccessLevel } from './ToolAccessLevel';
 
-
 export interface ToolAccessResult {
   /** Whether access is allowed */
   allowed: boolean;

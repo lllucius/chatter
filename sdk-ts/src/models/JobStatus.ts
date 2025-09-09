@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: JobStatus
  */
-
 export enum JobStatus {
   pending = "pending",
   running = "running",

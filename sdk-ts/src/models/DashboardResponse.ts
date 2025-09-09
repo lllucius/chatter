@@ -7,7 +7,6 @@ import { PerformanceMetricsResponse } from './PerformanceMetricsResponse';
 import { SystemAnalyticsResponse } from './SystemAnalyticsResponse';
 import { UsageMetricsResponse } from './UsageMetricsResponse';
 
-
 export interface DashboardResponse {
   /** Conversation statistics */
   conversation_stats: ConversationStatsResponse;

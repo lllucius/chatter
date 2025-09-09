@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PromptCategory
  */
-
 export enum PromptCategory {
   general = "general",
   creative = "creative",

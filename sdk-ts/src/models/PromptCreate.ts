@@ -4,7 +4,6 @@
 import { PromptCategory } from './PromptCategory';
 import { PromptType } from './PromptType';
 
-
 export interface PromptCreate {
   /** Prompt name */
   name: string;

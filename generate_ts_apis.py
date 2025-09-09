@@ -279,21 +279,31 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
     
     imports = set()
     methods = []
+    uses_http_query = False
+    uses_http_headers = False
     
     for path, method, operation in operations:
         method_code = generate_method(path, method, operation)
         methods.append(method_code)
         
+        # Check if this method uses HTTPQuery or HTTPHeaders
+        params = get_parameters(operation)
+        if params["query"] or "query?: HTTPQuery" in method_code:
+            uses_http_query = True
+        if params["header"] or "headers?: HTTPHeaders" in method_code:
+            uses_http_headers = True
+        
         # Extract types used in this method
         response_type = get_response_type(operation)
         if response_type and not response_type.startswith("Record<"):
             # Extract type names from union types, arrays, etc.
-            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', response_type)
+            # Updated regex to handle complex names with double underscores
+            type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', response_type)
             imports.update(type_names)
         
         request_body_type = get_request_body_type(operation)
         if request_body_type and not request_body_type.startswith("Record<") and request_body_type not in ["FormData", "URLSearchParams"]:
-            type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', request_body_type)
+            type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', request_body_type)
             imports.update(type_names)
         
         # Also check parameter types
@@ -301,22 +311,34 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
         for param_list in params.values():
             for param in param_list:
                 param_type = typescript_type_from_schema(param.get("schema", {}))
-                type_names = re.findall(r'\b[A-Z][a-zA-Z0-9_]*\b', param_type)
+                type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', param_type)
                 imports.update(type_names)
     
     # Generate import statements
     import_statements = []
     if imports:
         # Filter out built-in TypeScript types and generic Record types
-        filtered_imports = [imp for imp in imports if imp not in ['Record', 'string', 'number', 'boolean', 'unknown', 'null']]
+        builtin_types = {
+            'Record', 'Array', 'Promise', 'Date', 'RegExp', 'Error', 'Object',
+            'String', 'Number', 'Boolean', 'Function', 'Map', 'Set', 'WeakMap', 'WeakSet',
+            'ReadonlyArray', 'Partial', 'Required', 'Pick', 'Omit', 'Exclude', 'Extract',
+            'string', 'number', 'boolean', 'unknown', 'null', 'undefined', 'void', 'any'
+        }
+        filtered_imports = [imp for imp in imports if imp not in builtin_types]
         if filtered_imports:
             import_list = ", ".join(sorted(filtered_imports))
             import_statements.append(f"import {{ {import_list} }} from '../models/index';")
     
-    import_statements.extend([
-        "import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';",
-        ""
-    ])
+    # Build runtime import - only include what's actually used
+    runtime_imports = ["BaseAPI", "Configuration"]
+    if uses_http_query:
+        runtime_imports.append("HTTPQuery")
+    if uses_http_headers:
+        runtime_imports.append("HTTPHeaders")
+    
+    runtime_import = f"import {{ {', '.join(runtime_imports)} }} from '../runtime';"
+    import_statements.append(runtime_import)
+    import_statements.append("")
     
     class_code = f"""/**
  * Generated API client for {tag}

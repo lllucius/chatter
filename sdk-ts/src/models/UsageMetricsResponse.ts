@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UsageMetricsResponse
  */
-
 export interface UsageMetricsResponse {
   /** Total prompt tokens */
   total_prompt_tokens: number;

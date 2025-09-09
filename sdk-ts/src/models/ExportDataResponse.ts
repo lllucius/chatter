@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: ExportDataResponse
  */
-
 export interface ExportDataResponse {
   /** Export ID */
   export_id: string;

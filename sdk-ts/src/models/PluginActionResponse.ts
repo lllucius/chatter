@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PluginActionResponse
  */
-
 export interface PluginActionResponse {
   /** Whether action was successful */
   success: boolean;

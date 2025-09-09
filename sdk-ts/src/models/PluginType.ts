@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PluginType
  */
-
 export enum PluginType {
   tool = "tool",
   workflow = "workflow",

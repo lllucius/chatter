@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: JobActionResponse
  */
-
 export interface JobActionResponse {
   /** Whether action was successful */
   success: boolean;

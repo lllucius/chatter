@@ -3,7 +3,6 @@
  */
 import { MessageRole } from './MessageRole';
 
-
 export interface MessageResponse {
   /** Message role */
   role: MessageRole;

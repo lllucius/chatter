@@ -3,7 +3,6 @@
  */
 import { AgentStatus } from './AgentStatus';
 
-
 export interface AgentHealthResponse {
   /** Agent ID */
   agent_id: string;

@@ -3,7 +3,6 @@
  */
 import { ProfileUpdate } from './ProfileUpdate';
 
-
 export interface ProfileCloneRequest {
   /** New profile name */
   name: string;

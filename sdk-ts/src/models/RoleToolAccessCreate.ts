@@ -4,7 +4,6 @@
 import { ToolAccessLevel } from './ToolAccessLevel';
 import { UserRole } from './UserRole';
 
-
 export interface RoleToolAccessCreate {
   /** User role */
   role: UserRole;

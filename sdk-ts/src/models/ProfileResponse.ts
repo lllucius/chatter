@@ -3,7 +3,6 @@
  */
 import { ProfileType } from './ProfileType';
 
-
 export interface ProfileResponse {
   /** Profile name */
   name: string;

@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: PromptCloneRequest
  */
-
 export interface PromptCloneRequest {
   /** New prompt name */
   name: string;

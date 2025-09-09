@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: MetricsResponse
  */
-
 export interface MetricsResponse {
   /** Metrics collection timestamp (ISO 8601) */
   timestamp: string;

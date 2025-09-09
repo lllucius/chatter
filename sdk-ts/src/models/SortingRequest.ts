@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: SortingRequest
  */
-
 export interface SortingRequest {
   /** Sort field */
   sort_by?: string;

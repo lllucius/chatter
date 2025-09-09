@@ -4,7 +4,6 @@
 import { JobPriority } from './JobPriority';
 import { JobStatus } from './JobStatus';
 
-
 export interface JobResponse {
   /** Job ID */
   id: string;

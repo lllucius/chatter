@@ -3,7 +3,6 @@
  */
 import { ModelDefWithProvider } from './ModelDefWithProvider';
 
-
 export interface ModelDefList {
   models: ModelDefWithProvider[];
   total: number;

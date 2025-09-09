@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: VariantAllocation
  */
-
 export enum VariantAllocation {
   equal = "equal",
   weighted = "weighted",

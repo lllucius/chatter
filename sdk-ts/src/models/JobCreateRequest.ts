@@ -3,7 +3,6 @@
  */
 import { JobPriority } from './JobPriority';
 
-
 export interface JobCreateRequest {
   /** Job name */
   name: string;

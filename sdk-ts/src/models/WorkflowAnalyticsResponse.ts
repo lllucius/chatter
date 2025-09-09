@@ -5,7 +5,6 @@ import { BottleneckInfo } from './BottleneckInfo';
 import { ComplexityMetrics } from './ComplexityMetrics';
 import { OptimizationSuggestion } from './OptimizationSuggestion';
 
-
 export interface WorkflowAnalyticsResponse {
   /** Complexity metrics */
   complexity: ComplexityMetrics;

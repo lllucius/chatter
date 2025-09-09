@@ -3,7 +3,6 @@
  */
 import { TestMetric } from './TestMetric';
 
-
 export interface ABTestMetricsResponse {
   /** Test ID */
   test_id: string;

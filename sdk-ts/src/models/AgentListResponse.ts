@@ -3,7 +3,6 @@
  */
 import { AgentResponse } from './AgentResponse';
 
-
 export interface AgentListResponse {
   /** List of agents */
   agents: AgentResponse[];

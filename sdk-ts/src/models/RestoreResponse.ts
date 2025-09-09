@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: RestoreResponse
  */
-
 export interface RestoreResponse {
   /** Restore operation ID */
   restore_id: string;

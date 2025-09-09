@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: UserResponse
  */
-
 export interface UserResponse {
   /** User email address */
   email: string;

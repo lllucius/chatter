@@ -4,7 +4,6 @@
 import { PluginStatus } from './PluginStatus';
 import { PluginType } from './PluginType';
 
-
 export interface PluginResponse {
   /** Plugin ID */
   id: string;

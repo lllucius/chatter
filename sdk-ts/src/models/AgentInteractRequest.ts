@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: AgentInteractRequest
  */
-
 export interface AgentInteractRequest {
   /** Message to send to the agent */
   message: string;

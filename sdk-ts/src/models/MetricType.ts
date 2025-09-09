@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: MetricType
  */
-
 export enum MetricType {
   response_time = "response_time",
   user_satisfaction = "user_satisfaction",

@@ -3,7 +3,6 @@
  */
 import { ABTestResponse } from './ABTestResponse';
 
-
 export interface ABTestListResponse {
   /** List of tests */
   tests: ABTestResponse[];

@@ -3,7 +3,6 @@
  */
 import { DocumentSearchResult } from './DocumentSearchResult';
 
-
 export interface DocumentSearchResponse {
   /** Search results */
   results: DocumentSearchResult[];

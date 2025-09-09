@@ -3,7 +3,6 @@
  */
 import { BackupType } from './BackupType';
 
-
 export interface BackupResponse {
   /** Backup ID */
   id: string;

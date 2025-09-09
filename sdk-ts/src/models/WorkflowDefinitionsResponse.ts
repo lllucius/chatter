@@ -3,7 +3,6 @@
  */
 import { WorkflowDefinitionResponse } from './WorkflowDefinitionResponse';
 
-
 export interface WorkflowDefinitionsResponse {
   /** Workflow definitions */
   definitions: WorkflowDefinitionResponse[];

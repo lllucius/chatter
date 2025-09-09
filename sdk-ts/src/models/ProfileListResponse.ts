@@ -3,7 +3,6 @@
  */
 import { ProfileResponse } from './ProfileResponse';
 
-
 export interface ProfileListResponse {
   /** List of profiles */
   profiles: ProfileResponse[];

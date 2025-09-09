@@ -3,7 +3,6 @@
  */
 import { ConversationStatus } from './ConversationStatus';
 
-
 export interface ConversationUpdate {
   /** Conversation title */
   title?: string | null;

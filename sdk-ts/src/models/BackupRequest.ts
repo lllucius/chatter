@@ -3,7 +3,6 @@
  */
 import { BackupType } from './BackupType';
 
-
 export interface BackupRequest {
   /** Backup type */
   backup_type?: BackupType;

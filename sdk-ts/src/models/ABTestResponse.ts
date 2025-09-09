@@ -7,7 +7,6 @@ import { TestType } from './TestType';
 import { TestVariant } from './TestVariant';
 import { VariantAllocation } from './VariantAllocation';
 
-
 export interface ABTestResponse {
   /** Test ID */
   id: string;

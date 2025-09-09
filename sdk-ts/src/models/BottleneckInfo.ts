@@ -1,7 +1,6 @@
 /**
  * Generated from OpenAPI schema: BottleneckInfo
  */
-
 export interface BottleneckInfo {
   /** Node ID with bottleneck */
   node_id: string;

@@ -3,7 +3,6 @@
  */
 import { ToolStatus } from './ToolStatus';
 
-
 export interface ServerToolResponse {
   /** Tool name */
   name: string;

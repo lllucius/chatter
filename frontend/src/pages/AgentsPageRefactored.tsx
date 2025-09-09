@@ -7,7 +7,7 @@ import {
   createBooleanSwitchRenderer,
   createDateRenderer 
 } from '../components/CrudRenderers';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from 'chatter-sdk';
 
 const AgentsPageRefactored: React.FC = () => {
@@ -62,7 +62,7 @@ const AgentsPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<AgentResponse, AgentCreateRequest, AgentUpdateRequest> = {
     list: async (page: number, pageSize: number) => {
-      const response = await chatterClient.agents.listAgentsApiV1AgentsGet({
+      const response = await getSDK().agents.listAgentsApiV1AgentsGet({
         page: page + 1,
         per_page: pageSize,
       });
@@ -73,14 +73,14 @@ const AgentsPageRefactored: React.FC = () => {
     },
 
     create: async (data: AgentCreateRequest) => {
-      const response = await chatterClient.agents.createAgentApiV1AgentsPost({
+      const response = await getSDK().agents.createAgentApiV1AgentsPost({
         agentCreateRequest: data,
       });
       return response.data;
     },
 
     update: async (id: string, data: AgentUpdateRequest) => {
-      const response = await chatterClient.agents.updateAgentApiV1AgentsAgentIdPut({
+      const response = await getSDK().agents.updateAgentApiV1AgentsAgentIdPut({
         agentId: id,
         agentUpdateRequest: data,
       });
@@ -88,7 +88,7 @@ const AgentsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.agents.deleteAgentApiV1AgentsAgentIdDelete({
+      await getSDK().agents.deleteAgentApiV1AgentsAgentIdDelete({
         agentId: id,
       });
     },

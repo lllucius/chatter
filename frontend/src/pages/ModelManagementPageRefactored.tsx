@@ -9,7 +9,7 @@ import {
   createTypeChipRenderer,
   createMonospaceTextRenderer
 } from '../components/CrudRenderers';
-import { chatterClient } from '../services/chatter-sdk';
+import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
 import {
   Provider,
@@ -49,7 +49,7 @@ const ModelManagementPageRefactored: React.FC = () => {
   // Load providers for model form
   const loadProviders = async () => {
     try {
-      const response = await chatterClient.modelRegistry.listProvidersApiV1ModelsProvidersGet({
+      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProvidersGet({
         activeOnly: false,
       });
       setProviders(response.providers || []);
@@ -126,7 +126,7 @@ const ModelManagementPageRefactored: React.FC = () => {
               model_type: 'embedding' as any,
             } as DefaultProvider;
 
-            await chatterClient.modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost({
+            await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefaultPost({
               providerId: provider.id,
               defaultProvider: defaultProviderBody,
             });
@@ -153,7 +153,7 @@ const ModelManagementPageRefactored: React.FC = () => {
 
   const providerService: CrudService<Provider, ProviderCreate, ProviderUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await chatterClient.modelRegistry.listProvidersApiV1ModelsProvidersGet({
+      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProvidersGet({
         activeOnly: false,
         page: page + 1,
         perPage: pageSize,
@@ -165,7 +165,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     create: async (data: ProviderCreate) => {
-      const response = await chatterClient.modelRegistry.createProviderApiV1ModelsProvidersPost({
+      const response = await getSDK().modelRegistry.createProviderApiV1ModelsProvidersPost({
         providerCreate: data,
       });
       await loadProviders(); // Refresh providers for model form
@@ -173,7 +173,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     update: async (id: string, data: ProviderUpdate) => {
-      const response = await chatterClient.modelRegistry.updateProviderApiV1ModelsProvidersProviderIdPut({
+      const response = await getSDK().modelRegistry.updateProviderApiV1ModelsProvidersProviderIdPut({
         providerId: id,
         providerUpdate: data,
       });
@@ -182,7 +182,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.modelRegistry.deleteProviderApiV1ModelsProvidersProviderIdDelete({
+      await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderIdDelete({
         providerId: id,
       });
       await loadProviders(); // Refresh providers for model form
@@ -258,7 +258,7 @@ const ModelManagementPageRefactored: React.FC = () => {
       onClick: async (model) => {
         if (!model.isDefault) {
           try {
-            await chatterClient.modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost({
+            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefaultPost({
               modelId: model.id,
             });
             toastService.success('Default model updated');
@@ -284,7 +284,7 @@ const ModelManagementPageRefactored: React.FC = () => {
 
   const modelService: CrudService<ModelDefWithProvider, ModelDefCreate, ModelDefUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await chatterClient.modelRegistry.listModelsApiV1ModelsModelsGet({
+      const response = await getSDK().modelRegistry.listModelsApiV1ModelsModelsGet({
         activeOnly: false,
         page: page + 1,
         perPage: pageSize,
@@ -296,14 +296,14 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     create: async (data: ModelDefCreate) => {
-      const response = await chatterClient.modelRegistry.createModelApiV1ModelsModelsPost({
+      const response = await getSDK().modelRegistry.createModelApiV1ModelsModelsPost({
         modelDefCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: ModelDefUpdate) => {
-      const response = await chatterClient.modelRegistry.updateModelApiV1ModelsModelsModelIdPut({
+      const response = await getSDK().modelRegistry.updateModelApiV1ModelsModelsModelIdPut({
         modelId: id,
         modelDefUpdate: data,
       });
@@ -311,7 +311,7 @@ const ModelManagementPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await chatterClient.modelRegistry.deleteModelApiV1ModelsModelsModelIdDelete({
+      await getSDK().modelRegistry.deleteModelApiV1ModelsModelsModelIdDelete({
         modelId: id,
       });
     },

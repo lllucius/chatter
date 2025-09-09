@@ -272,7 +272,7 @@ app.add_typer(auth_app, name="auth")
 @auth_app.command("login")
 @run_async
 async def login(
-    email: str = typer.Option(..., help="User email"),
+    username: str = typer.Option(..., help="Username"),
     password: str = typer.Option(
         None, help="User password (will prompt if not provided)"
     ),
@@ -282,7 +282,7 @@ async def login(
         password = Prompt.ask("Password", password=True)
 
     async with get_client() as sdk_client:
-        user_login = UserLogin(email=email, password=password)
+        user_login = UserLogin(username=username, password=password)
         response = (
             await sdk_client.auth_api.login_api_v1_auth_login_post(
                 user_login=user_login

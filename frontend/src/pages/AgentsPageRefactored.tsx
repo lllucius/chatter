@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@mui/material';
 import { 
   SmartToy as BotIcon,
@@ -6,7 +6,7 @@ import {
   Add as AddIcon
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
 import { 
   createNameWithDescriptionRenderer, 
   createBooleanSwitchRenderer,
@@ -16,6 +16,7 @@ import { getSDK } from "../services/auth-service";
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from 'chatter-sdk';
 
 const AgentsPageRefactored: React.FC = () => {
+  const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<AgentResponse>[] = [
     {
@@ -104,9 +105,7 @@ const AgentsPageRefactored: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => {
-          // The CRUD table handles its own refresh
-        }}
+        onClick={() => crudTableRef.current?.handleRefresh()}
         size="small"
       >
         Refresh
@@ -114,9 +113,7 @@ const AgentsPageRefactored: React.FC = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => {
-          // The CRUD table handles creation
-        }}
+        onClick={() => crudTableRef.current?.handleCreate()}
         size="small"
       >
         Add Agent
@@ -127,6 +124,7 @@ const AgentsPageRefactored: React.FC = () => {
   return (
     <PageLayout title="AI Agents" toolbar={toolbar}>
       <CrudDataTable
+        ref={crudTableRef}
         config={config}
         service={service}
         getItemId={getItemId}

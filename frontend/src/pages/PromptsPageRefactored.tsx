@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Button } from '@mui/material';
 import { 
   Code as CodeIcon,
@@ -6,7 +6,7 @@ import {
   Add as AddIcon
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
 import PromptForm from '../components/PromptForm';
 import { 
   createCategoryChipRenderer, 
@@ -17,6 +17,7 @@ import { getSDK } from "../services/auth-service";
 import { PromptResponse, PromptCreate, PromptUpdate } from 'chatter-sdk';
 
 const PromptsPageRefactored: React.FC = () => {
+  const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<PromptResponse>[] = [
     {
@@ -118,9 +119,7 @@ const PromptsPageRefactored: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => {
-          // The CRUD table handles its own refresh
-        }}
+        onClick={() => crudTableRef.current?.handleRefresh()}
         size="small"
       >
         Refresh
@@ -128,9 +127,7 @@ const PromptsPageRefactored: React.FC = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => {
-          // The CRUD table handles creation
-        }}
+        onClick={() => crudTableRef.current?.handleCreate()}
         size="small"
       >
         Add Prompt
@@ -141,6 +138,7 @@ const PromptsPageRefactored: React.FC = () => {
   return (
     <PageLayout title="Prompts" toolbar={toolbar}>
       <CrudDataTable
+        ref={crudTableRef}
         config={config}
         service={service}
         FormComponent={PromptForm}

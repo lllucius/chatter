@@ -369,7 +369,6 @@ const AdministrationPage: React.FC = () => {
           // For now, pass empty array to trigger validation error
           // TODO: Implement proper filter-based bulk delete API
           result = await getSDK().dataManagement.bulkDeletePromptsApiV1DataBulkDeletePrompts([]);
-          );
           break;
       }
 

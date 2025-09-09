@@ -78,7 +78,7 @@ const ProfilesPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<ProfileResponse, ProfileCreate, ProfileUpdate> = {
     list: async () => {
-      const response = await getSDK().profiles.listProfilesApiV1ProfilesGet({});
+      const response = await getSDK().profiles.listProfilesApiV1Profiles({});
       return {
         items: response.profiles || [],
         total: response.totalCount || 0,
@@ -86,14 +86,14 @@ const ProfilesPageRefactored: React.FC = () => {
     },
 
     create: async (data: ProfileCreate) => {
-      const response = await getSDK().profiles.createProfileApiV1ProfilesPost({
+      const response = await getSDK().profiles.createProfileApiV1Profiles({
         profileCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileIdPut({
+      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId({
         profileId: id,
         profileUpdate: data,
       });
@@ -101,7 +101,7 @@ const ProfilesPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().profiles.deleteProfileApiV1ProfilesProfileIdDelete({
+      await getSDK().profiles.deleteProfileApiV1ProfilesProfileId({
         profileId: id,
       });
     },

@@ -115,9 +115,9 @@ const ChatPage: React.FC = () => {
     try {
       const sdk = getSDK();
       const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
-        sdk.profiles.listProfilesApiV1ProfilesGet({}),
-        sdk.prompts.listPromptsApiV1PromptsGet({}),
-        sdk.documents.listDocumentsApiV1DocumentsGet({}),
+        sdk.profiles.listProfilesApiV1Profiles({}),
+        sdk.prompts.listPromptsApiV1Prompts({}),
+        sdk.documents.listDocumentsApiV1Documents({}),
       ]);
       setProfiles(profilesResponse.profiles);
       setPrompts(promptsResponse.prompts);
@@ -149,7 +149,7 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await getSDK().chat.createConversationApiV1ChatConversationsPost({
+      const response = await getSDK().chat.createConversationApiV1ChatConversations({
         conversationCreate: createRequest,
       });
       setCurrentConversation(response.data);
@@ -182,7 +182,7 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet({
+      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages({
         conversationId: conversation.id
       });
       
@@ -415,7 +415,7 @@ const ChatPage: React.FC = () => {
         await handleStreamingResponse(sendRequest);
       } else {
         // Use regular API
-        const response = await getSDK().chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatApiV1ChatChat({ chatRequest: sendRequest });
 
         // Narrow the SDK's loosely-typed response
         type ApiChatMessage = {
@@ -554,7 +554,7 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
         await handleStreamingResponse(sendRequest, assistantMessageId);
       } else {
-        const response = await getSDK().chat.chatApiV1ChatChatPost({ chatRequest: sendRequest });
+        const response = await getSDK().chat.chatApiV1ChatChat({ chatRequest: sendRequest });
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',

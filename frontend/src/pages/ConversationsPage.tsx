@@ -115,7 +115,7 @@ ConversationTableRow.displayName = 'ConversationTableRow';
 const ConversationsPage: React.FC = () => {
   // Use custom API hook for conversations
   const conversationsApi = useApi(
-    () => getSDK().chat.listConversationsApiV1ChatConversationsGet({}),
+    () => getSDK().chat.listConversationsApiV1ChatConversations({}),
     { immediate: true }
   );
 
@@ -140,7 +140,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const response =
-        await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessagesGet(
+        await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
           { conversationId: conversation.id }
         );
       const messages = response.data;
@@ -160,7 +160,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       // Use the available delete conversation API
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationIdDelete({
+      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId({
         conversationId: conversationId
       });
       

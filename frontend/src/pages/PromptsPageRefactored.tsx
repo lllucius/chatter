@@ -76,7 +76,7 @@ const PromptsPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<PromptResponse, PromptCreate, PromptUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().prompts.listPromptsApiV1PromptsGet({
+      const response = await getSDK().prompts.listPromptsApiV1Prompts({
         page: page + 1, // API is 1-based, component is 0-based
         per_page: pageSize,
       });
@@ -87,14 +87,14 @@ const PromptsPageRefactored: React.FC = () => {
     },
 
     create: async (data: PromptCreate) => {
-      const response = await getSDK().prompts.createPromptApiV1PromptsPost({
+      const response = await getSDK().prompts.createPromptApiV1Prompts({
         promptCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: PromptUpdate) => {
-      const response = await getSDK().prompts.updatePromptApiV1PromptsPromptIdPut({
+      const response = await getSDK().prompts.updatePromptApiV1PromptsPromptId({
         promptId: id,
         promptUpdate: data,
       });
@@ -102,7 +102,7 @@ const PromptsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().prompts.deletePromptApiV1PromptsPromptIdDelete({
+      await getSDK().prompts.deletePromptApiV1PromptsPromptId({
         promptId: id,
       });
     },

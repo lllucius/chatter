@@ -132,7 +132,7 @@ const WorkflowManagementPage: React.FC = () => {
   const loadWorkflowTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getSDK().chat.getWorkflowTemplatesApiV1ChatTemplatesGet();
+      const response = await getSDK().chat.getWorkflowTemplatesApiV1ChatTemplates();
       if (response.templates) {
         setTemplates(response.templates);
       }
@@ -146,7 +146,7 @@ const WorkflowManagementPage: React.FC = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      const response = await getSDK().chat.getAvailableToolsApiV1ChatToolsAvailableGet();
+      const response = await getSDK().chat.getAvailableToolsApiV1ChatToolsAvailable();
       setAvailableTools(response.data);
     } catch (error: any) {
       console.error('Failed to load available tools:', error);
@@ -180,7 +180,7 @@ const WorkflowManagementPage: React.FC = () => {
         workflow: 'full' as any,
       };
 
-      const response = await getSDK().chat.chatWithTemplateApiV1ChatTemplateTemplateNamePost(
+      const response = await getSDK().chat.chatWithTemplateApiV1ChatTemplateTemplateName(
         templateName,
         { chatRequest }
       );

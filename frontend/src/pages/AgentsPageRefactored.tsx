@@ -62,7 +62,7 @@ const AgentsPageRefactored: React.FC = () => {
   // Define service methods
   const service: CrudService<AgentResponse, AgentCreateRequest, AgentUpdateRequest> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().agents.listAgentsApiV1AgentsGet({
+      const response = await getSDK().agents.listAgentsApiV1Agents({
         page: page + 1,
         per_page: pageSize,
       });
@@ -73,14 +73,14 @@ const AgentsPageRefactored: React.FC = () => {
     },
 
     create: async (data: AgentCreateRequest) => {
-      const response = await getSDK().agents.createAgentApiV1AgentsPost({
+      const response = await getSDK().agents.createAgentApiV1Agents({
         agentCreateRequest: data,
       });
       return response.data;
     },
 
     update: async (id: string, data: AgentUpdateRequest) => {
-      const response = await getSDK().agents.updateAgentApiV1AgentsAgentIdPut({
+      const response = await getSDK().agents.updateAgentApiV1AgentsAgentId({
         agentId: id,
         agentUpdateRequest: data,
       });

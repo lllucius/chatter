@@ -62,13 +62,13 @@ class AuthService {
 
       const response = await this.baseSDK.auth.authLogin(loginData);
 
-      if (response.accessToken) {
-        this.token = response.accessToken;
-        localStorage.setItem('chatter_access_token', response.accessToken);
+      if (response.access_token) {
+        this.token = response.access_token;
+        localStorage.setItem('chatter_access_token', response.access_token);
         
         // Store refresh token if available
-        if (response.refreshToken) {
-          localStorage.setItem('chatter_refresh_token', response.refreshToken);
+        if (response.refresh_token) {
+          localStorage.setItem('chatter_refresh_token', response.refresh_token);
         }
       } else {
         throw new Error('No access token received');
@@ -91,8 +91,7 @@ class AuthService {
   public async logout(): Promise<void> {
     try {
       if (this.isAuthenticated()) {
-        const authenticatedSDK = this.getSDK();
-        await authenticatedSDK.auth.authLogout();
+        await getSDK().auth.authLogout();
       }
     } catch (error) {
       console.error('Logout API call failed:', error);
@@ -113,13 +112,13 @@ class AuthService {
         refreshToken: refreshToken,
       });
 
-      if (response.accessToken) {
-        this.token = response.accessToken;
-        localStorage.setItem('chatter_access_token', response.accessToken);
+      if (response.access_token) {
+        this.token = response.access_token;
+        localStorage.setItem('chatter_access_token', response.access_token);
         
         // Update refresh token if provided
-        if (response.refreshToken) {
-          localStorage.setItem('chatter_refresh_token', response.refreshToken);
+        if (response.refresh_token) {
+          localStorage.setItem('chatter_refresh_token', response.refresh_token);
         }
         
         return true;

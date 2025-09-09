@@ -133,32 +133,32 @@ const DashboardPage: React.FC = () => {
   
   // Use custom API hooks for various analytics data
   const dashboardApi = useApi(
-    () => getSDK().analytics.getDashboardApiV1AnalyticsDashboardGet(),
+    () => getSDK().analytics.getDashboardApiV1AnalyticsDashboard(),
     { immediate: true }
   );
 
   const performanceApi = useApi(
-    () => getSDK().analytics.getPerformanceMetricsApiV1AnalyticsPerformanceGet(),
+    () => getSDK().analytics.getPerformanceMetricsApiV1AnalyticsPerformance(),
     { immediate: true }
   );
 
   const systemApi = useApi(
-    () => getSDK().analytics.getSystemAnalyticsApiV1AnalyticsSystemGet(),
+    () => getSDK().analytics.getSystemAnalyticsApiV1AnalyticsSystem(),
     { immediate: true }
   );
 
   const usageApi = useApi(
-    () => getSDK().analytics.getUsageMetricsApiV1AnalyticsUsageGet(),
+    () => getSDK().analytics.getUsageMetricsApiV1AnalyticsUsage(),
     { immediate: true }
   );
 
   const documentApi = useApi(
-    () => getSDK().analytics.getDocumentAnalyticsApiV1AnalyticsDocumentsGet(),
+    () => getSDK().analytics.getDocumentAnalyticsApiV1AnalyticsDocuments(),
     { immediate: true }
   );
 
   const toolServerApi = useApi(
-    () => getSDK().analytics.getToolServerAnalyticsApiV1AnalyticsToolserversGet(),
+    () => getSDK().analytics.getToolServerAnalyticsApiV1AnalyticsToolservers(),
     { immediate: true }
   );
 
@@ -221,7 +221,7 @@ const DashboardPage: React.FC = () => {
   // Helper function for exporting analytics
   const handleExportAnalytics = async (format: 'json' | 'csv' | 'xlsx' = 'json') => {
     try {
-      await getSDK().analytics.exportAnalyticsApiV1AnalyticsExportPost({
+      await getSDK().analytics.exportAnalyticsApiV1AnalyticsExport({
         metrics: ['conversations', 'usage', 'performance'],
         format,
         period: '30d'

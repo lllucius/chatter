@@ -53,8 +53,8 @@ const HealthPage: React.FC = () => {
       setLoading(true);
       setError('');
       const [healthResponse, toolServerResponse] = await Promise.all([
-        getSDK().health.healthCheckEndpointHealthzGet(),
-        getSDK().toolServers.listToolServersApiV1ToolserversServersGet({}),
+        getSDK().health.healthCheckEndpointHealthz(),
+        getSDK().toolServers.listToolServersApiV1ToolserversServers({}),
       ]);
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);

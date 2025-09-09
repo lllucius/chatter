@@ -164,10 +164,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (server) => {
         try {
           if (server.status === 'enabled') {
-            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisablePost({ serverId: server.id });
+            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisable({ serverId: server.id });
             toastService.success('Server disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnablePost({ serverId: server.id });
+            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable({ serverId: server.id });
             toastService.success('Server enabled successfully');
           }
         } catch {
@@ -180,7 +180,7 @@ const ToolsPageRefactored: React.FC = () => {
       label: 'Refresh Tools',
       onClick: async (server) => {
         try {
-          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshToolsPost({ serverId: server.id });
+          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools({ serverId: server.id });
           toastService.success('Server tools refreshed successfully');
         } catch {
           toastService.error('Failed to refresh server tools');
@@ -203,7 +203,7 @@ const ToolsPageRefactored: React.FC = () => {
 
   const serverService: CrudService<RemoteServer, RemoteServerCreate, RemoteServerUpdate> = {
     list: async () => {
-      const response = await getSDK().toolServers.listToolServersApiV1ToolserversServersGet({});
+      const response = await getSDK().toolServers.listToolServersApiV1ToolserversServers({});
       return {
         items: response || [],
         total: response?.length || 0,
@@ -211,14 +211,14 @@ const ToolsPageRefactored: React.FC = () => {
     },
 
     create: async (data: RemoteServerCreate) => {
-      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServersPost({
+      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServers({
         toolServerCreate: data,
       });
       return response;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerIdPut({
+      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId({
         serverId: id,
         toolServerUpdate: data,
       });
@@ -226,7 +226,7 @@ const ToolsPageRefactored: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerIdDelete({
+      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerId({
         serverId: id,
       });
     },
@@ -274,10 +274,10 @@ const ToolsPageRefactored: React.FC = () => {
       onClick: async (tool) => {
         try {
           if (tool.status === 'enabled') {
-            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisablePost({ toolId: tool.id });
+            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisable({ toolId: tool.id });
             toastService.success('Tool disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnablePost({ toolId: tool.id });
+            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable({ toolId: tool.id });
             toastService.success('Tool enabled successfully');
           }
         } catch {
@@ -301,7 +301,7 @@ const ToolsPageRefactored: React.FC = () => {
 
   const toolService: CrudService<Tool, any, any> = {
     list: async () => {
-      const response = await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAllGet();
+      const response = await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
       return {
         items: response || [],
         total: response?.length || 0,

@@ -137,7 +137,7 @@ const ABTestingPage: React.FC = () => {
   const loadTests = async () => {
     try {
       setLoading(true);
-      const response = await getSDK().abTesting.listAbTestsApiV1AbTestsGet({});
+      const response = await getSDK().abTesting.listAbTestsApiV1AbTests({});
       const data = response.data;
       setTests(data.tests || []);
     } catch (err: any) {
@@ -151,10 +151,10 @@ const ABTestingPage: React.FC = () => {
     try {
       const [metricsResponse, resultsResponse, recommendationsResponse, performanceResponse] = 
         await Promise.allSettled([
-          getSDK().abTesting.getAbTestMetricsApiV1AbTestsTestIdMetricsGet({ testId: test.id }),
-          getSDK().abTesting.getAbTestResultsApiV1AbTestsTestIdResultsGet({ testId: test.id }),
-          getSDK().abTesting.getAbTestRecommendationsApiV1AbTestsTestIdRecommendationsGet({ testId: test.id }),
-          getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformanceGet({ testId: test.id }),
+          getSDK().abTesting.getAbTestMetricsApiV1AbTestsTestIdMetrics({ testId: test.id }),
+          getSDK().abTesting.getAbTestResultsApiV1AbTestsTestIdResults({ testId: test.id }),
+          getSDK().abTesting.getAbTestRecommendationsApiV1AbTestsTestIdRecommendations({ testId: test.id }),
+          getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformance({ testId: test.id }),
         ]);
 
       setTestMetrics(metricsResponse.status === 'fulfilled' ? metricsResponse.value.data : null);
@@ -245,13 +245,13 @@ const ABTestingPage: React.FC = () => {
       };
 
       if (editingTest) {
-        await getSDK().abTesting.updateAbTestApiV1AbTestsTestIdPut({
+        await getSDK().abTesting.updateAbTestApiV1AbTestsTestId({
           testId: editingTest.id,
           aBTestUpdateRequest: testData,
         });
         toastService.success('Test updated successfully');
       } else {
-        await getSDK().abTesting.createAbTestApiV1AbTestsPost({
+        await getSDK().abTesting.createAbTestApiV1AbTests({
           aBTestCreateRequest: testData,
         });
         toastService.success('Test created successfully');
@@ -272,7 +272,7 @@ const ABTestingPage: React.FC = () => {
     }
 
     try {
-      await getSDK().abTesting.deleteAbTestApiV1AbTestsTestIdDelete({ testId: test.id });
+      await getSDK().abTesting.deleteAbTestApiV1AbTestsTestId({ testId: test.id });
       toastService.success('Test deleted successfully');
       await loadTests();
     } catch (err: any) {
@@ -285,16 +285,16 @@ const ABTestingPage: React.FC = () => {
       let response;
       switch (action) {
         case 'start':
-          response = await getSDK().abTesting.startAbTestApiV1AbTestsTestIdStartPost({ testId: test.id });
+          response = await getSDK().abTesting.startAbTestApiV1AbTestsTestIdStart({ testId: test.id });
           break;
         case 'pause':
-          response = await getSDK().abTesting.pauseAbTestApiV1AbTestsTestIdPausePost({ testId: test.id });
+          response = await getSDK().abTesting.pauseAbTestApiV1AbTestsTestIdPause({ testId: test.id });
           break;
         case 'end':
-          response = await getSDK().abTesting.endAbTestApiV1AbTestsTestIdEndPost({ testId: test.id });
+          response = await getSDK().abTesting.endAbTestApiV1AbTestsTestIdEnd({ testId: test.id });
           break;
         case 'complete':
-          response = await getSDK().abTesting.completeAbTestApiV1AbTestsTestIdCompletePost({ testId: test.id });
+          response = await getSDK().abTesting.completeAbTestApiV1AbTestsTestIdComplete({ testId: test.id });
           break;
       }
       toastService.success(response.message);

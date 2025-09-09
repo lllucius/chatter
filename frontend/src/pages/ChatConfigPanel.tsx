@@ -96,7 +96,7 @@ const ChatConfigPanel: React.FC<Props> = ({
   const loadConversations = useCallback(async () => {
     setLoadingConversations(true);
     try {
-      const response = await getSDK().chat.listConversationsApiV1ChatConversationsGet({
+      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
         limit: 20,
         sortBy: 'updated_at',
         sortOrder: 'desc'

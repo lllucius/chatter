@@ -47,11 +47,11 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           }}
         >
           <Typography 
-            variant="h4" 
+            variant="h6" 
             component="h1" 
+            nowrap
             sx={{ 
               fontWeight: 'bold',
-              fontSize: { xs: '1.5rem', sm: '2rem' }
             }}
           >
             {title}

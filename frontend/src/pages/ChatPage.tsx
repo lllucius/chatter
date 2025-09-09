@@ -609,8 +609,6 @@ const ChatPage: React.FC = () => {
           <Switch
             checked={streamingEnabled}
             onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
-            icon={<SpeedIcon />}
-            checkedIcon={<StreamIcon />}
           />
         }
         label={streamingEnabled ? 'Streaming' : 'Standard'}

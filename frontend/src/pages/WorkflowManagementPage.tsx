@@ -221,9 +221,6 @@ const WorkflowManagementPage: React.FC = () => {
   const renderTemplatesTab = () => (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" component="h1">
-          Workflow Templates
-        </Typography>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -339,9 +336,6 @@ const WorkflowManagementPage: React.FC = () => {
   const renderBuilderTab = () => (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" component="h1">
-          Workflow Builder
-        </Typography>
         <Button
           variant="contained"
           startIcon={<AddIcon />}
@@ -464,9 +458,6 @@ const WorkflowManagementPage: React.FC = () => {
   const renderExecutionTab = () => (
     <Box>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Typography variant="h5" component="h1">
-          Workflow Executions
-        </Typography>
         <Button
           variant="outlined"
           startIcon={<RefreshIcon />}
@@ -540,10 +531,6 @@ const WorkflowManagementPage: React.FC = () => {
 
   const renderAnalyticsTab = () => (
     <Box>
-      <Typography variant="h5" component="h1" gutterBottom>
-        Workflow Analytics
-      </Typography>
-      
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
           <Card>
@@ -609,15 +596,7 @@ const WorkflowManagementPage: React.FC = () => {
 
   return (
     <PageLayout title="Workflow Management">
-      {/* Breadcrumbs */}
       <Box sx={{ mb: 3 }}>
-        <Breadcrumbs aria-label="breadcrumb" sx={{ mb: 2 }}>
-          <Link underline="hover" color="inherit" href="/dashboard">
-            Dashboard
-          </Link>
-          <Typography color="text.primary">Workflow Management</Typography>
-        </Breadcrumbs>
-        
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="workflow management tabs">
           <Tab label="Templates" icon={<WorkflowIcon />} />
           <Tab label="Builder" icon={<BuildIcon />} />

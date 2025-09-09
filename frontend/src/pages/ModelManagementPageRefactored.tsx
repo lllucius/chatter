@@ -340,6 +340,7 @@ const ModelManagementPageRefactored: React.FC = () => {
           onClick={() => {
             // The CRUD table handles creation
           }}
+          size="small"
         >
           Create Provider
         </Button>
@@ -352,6 +353,7 @@ const ModelManagementPageRefactored: React.FC = () => {
             // The CRUD table handles creation
           }}
           disabled={providers.length === 0}
+          size="small"
         >
           Create Model
         </Button>

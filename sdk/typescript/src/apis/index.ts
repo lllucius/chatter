@@ -1,6 +1,8 @@
-/* tslint:disable */
-/* eslint-disable */
-export * from './ABTestingApi';
+/**
+ * Generated TypeScript API clients from OpenAPI schema
+ */
+
+export * from './AbTestingApi';
 export * from './AgentsApi';
 export * from './AnalyticsApi';
 export * from './AuthenticationApi';

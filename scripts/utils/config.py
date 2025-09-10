@@ -75,7 +75,7 @@ def get_default_typescript_config(
     """Get default configuration for TypeScript SDK generation."""
     return TypeScriptSDKConfig(
         project_root=project_root,
-        output_dir=project_root / "frontend" / "src" / "sdk",
+        output_dir=project_root / "sdk" / "typescript",
         package_name="chatter_sdk",
         npm_name="chatter-sdk",
         package_version="0.1.0",

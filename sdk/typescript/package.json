@@ -1,43 +1,24 @@
 {
-  "name": "@chatter/sdk/typescript",
+  "name": "chatter-sdk",
   "version": "0.1.0",
-  "description": "Complete TypeScript SDK for Chatter API - Hand-crafted with full type safety",
+  "description": "OpenAPI client for chatter-sdk",
+  "author": "OpenAPI-Generator",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/GIT_USER_ID/GIT_REPO_ID.git"
+  },
   "main": "./dist/index.js",
+  "typings": "./dist/index.d.ts",
   "module": "./dist/esm/index.js",
-  "types": "./dist/index.d.ts",
   "sideEffects": false,
   "scripts": {
     "build": "tsc && tsc -p tsconfig.esm.json",
-    "build:cjs": "tsc",
-    "build:esm": "tsc -p tsconfig.esm.json",
-    "clean": "rm -rf dist",
-    "prepare": "npm run build",
-    "typecheck": "tsc --noEmit"
+    "prepare": "npm run build"
   },
-  "files": [
-    "dist/**/*",
-    "src/**/*",
-    "README.md"
-  ],
-  "keywords": [
-    "chatter",
-    "api",
-    "sdk",
-    "typescript",
-    "ai",
-    "chatbot"
-  ],
-  "author": "Chatter Team",
-  "license": "MIT",
   "devDependencies": {
-    "typescript": "^5.9.2"
+    "typescript": "^4.0 || ^5.0"
   },
-  "engines": {
-    "node": ">=16.0.0"
-  },
-  "repository": {
-    "type": "git",
-    "url": "https://github.com/lllucius/chatter.git",
-    "directory": "sdk/typescript"
+  "publishConfig": {
+    "registry": "https://github.com/lllucius/chatter"
   }
 }

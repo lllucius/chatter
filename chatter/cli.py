@@ -164,7 +164,7 @@ def run_async(async_func):
                     error_detail = error_data.get('detail')
                 except (json.JSONDecodeError, AttributeError):
                     pass
-            
+
             if e.status == 401:
                 console.print(
                     "❌ [red]Authentication failed. Please login first.[/red]"
@@ -291,7 +291,7 @@ async def get_metrics():
                         table = Table(show_header=False, box=None, padding=(0, 2))
                         table.add_column("Metric", style="dim")
                         table.add_column("Value", style="green")
-                        
+
                         for metric_key, metric_value in metrics.items():
                             # Format metric names nicely
                             formatted_key = metric_key.replace('_', ' ').title()
@@ -305,7 +305,7 @@ async def get_metrics():
                             else:
                                 formatted_value = str(metric_value)
                             table.add_row(formatted_key, formatted_value)
-                        
+
                         console.print(table)
                     else:
                         console.print(f"    {metrics}")
@@ -1299,32 +1299,31 @@ async def upload_document(
     is_public: bool = typer.Option(False, help="Whether document is public"),
 ):
     """Upload a document."""
-    import json
     from pathlib import Path
-    
+
     file_path_obj = Path(file_path)
     if not file_path_obj.exists():
         console.print(f"❌ [red]File not found: {file_path}[/red]")
         return
-    
+
     if not file_path_obj.is_file():
         console.print(f"❌ [red]Path is not a file: {file_path}[/red]")
         return
-    
+
     # Use file name as title if not provided
     if not title:
         title = file_path_obj.name
-    
+
     # Read the file
     try:
         file_content = file_path_obj.read_bytes()
     except Exception as e:
         console.print(f"❌ [red]Error reading file: {e}[/red]")
         return
-    
+
     # Prepare file tuple for upload (filename, content, content_type)
     file_tuple = (file_path_obj.name, file_content)
-    
+
     async with get_client() as sdk_client:
         try:
             response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
@@ -1359,25 +1358,25 @@ async def download_document(
 ):
     """Download a document."""
     from pathlib import Path
-    
+
     async with get_client() as sdk_client:
         try:
             # Get document info first to get the name
             doc_response = await sdk_client.documents_api.get_document_api_v1_documents_document_id_get(
                 document_id=document_id
             )
-            
+
             # Download the document
             download_response = await sdk_client.documents_api.download_document_api_v1_documents_document_id_download_get(
                 document_id=document_id
             )
-            
+
             # Determine output path
             if not output_path:
                 output_path = doc_response.name or f"document_{document_id}"
-            
+
             output_path_obj = Path(output_path)
-            
+
             # Write the file
             if hasattr(download_response, 'content'):
                 content = download_response.content
@@ -1386,12 +1385,12 @@ async def download_document(
             else:
                 # If response is bytes directly
                 content = download_response
-            
+
             if isinstance(content, str):
                 output_path_obj.write_text(content)
             else:
                 output_path_obj.write_bytes(content)
-            
+
             console.print("✅ [green]Document downloaded successfully![/green]")
             console.print(f"[dim]Saved to: {output_path_obj.absolute()}[/dim]")
             console.print(f"[dim]Size: {output_path_obj.stat().st_size:,} bytes[/dim]")
@@ -1415,7 +1414,7 @@ async def update_document(
 ):
     """Update document metadata."""
     from chatter_sdk.models.document_update import DocumentUpdate
-    
+
     # Build update data - only include fields that are provided
     update_data = {}
     if title is not None:
@@ -1426,11 +1425,11 @@ async def update_document(
         update_data["tags"] = tags
     if is_public is not None:
         update_data["is_public"] = is_public
-    
+
     if not update_data:
         console.print("❌ [red]No update fields provided. Use --help to see available options.[/red]")
         return
-    
+
     async with get_client() as sdk_client:
         try:
             document_update = DocumentUpdate(**update_data)
@@ -1850,7 +1849,7 @@ async def create_provider(
     """Create a new provider."""
     from chatter_sdk.models.provider_create import ProviderCreate
     from chatter_sdk.models.provider_type import ProviderType
-    
+
     try:
         # Validate provider_type
         provider_type_enum = ProviderType(provider_type.lower())
@@ -2002,7 +2001,7 @@ async def create_model(
     """Create a new model."""
     from chatter_sdk.models.model_def_create import ModelDefCreate
     from chatter_sdk.models.model_type import ModelType
-    
+
     try:
         # Validate model_type
         model_type_enum = ModelType(model_type.lower())
@@ -2154,6 +2153,8 @@ async def delete_model(
         )
 
         console.print(f"✅ [green]Deleted model: {model_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
 
 
 # Events Commands
@@ -2693,13 +2694,13 @@ async def install_plugin(
 ):
     """Install a plugin."""
     from chatter_sdk.models.plugin_install_request import PluginInstallRequest
-    
+
     async with get_client() as sdk_client:
         install_request = PluginInstallRequest(
             url=plugin_url,
             force=force,
         )
-        
+
         response = await sdk_client.plugins_api.install_plugin_api_v1_plugins_install_post(
             plugin_install_request=install_request
         )
@@ -2774,7 +2775,7 @@ async def bulk_enable_plugins(
 ):
     """Enable multiple plugins."""
     ids = [id.strip() for id in plugin_ids.split(',')]
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.plugins_api.bulk_enable_plugins_api_v1_plugins_bulk_enable_post(
             plugin_ids=ids
@@ -2793,7 +2794,7 @@ async def bulk_disable_plugins(
 ):
     """Disable multiple plugins."""
     ids = [id.strip() for id in plugin_ids.split(',')]
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.plugins_api.bulk_disable_plugins_api_v1_plugins_bulk_disable_post(
             plugin_ids=ids
@@ -2823,7 +2824,7 @@ async def check_plugins_health():
                     f"[{status_color}]{plugin_health.status}[/{status_color}]",
                     getattr(plugin_health, 'message', 'No message'),
                 )
-        
+
         console.print(table)
 
 
@@ -2935,7 +2936,7 @@ async def create_tool_server(
 ):
     """Create a new tool server."""
     from chatter_sdk.models.tool_server_create import ToolServerCreate
-    
+
     async with get_client() as sdk_client:
         server_data = ToolServerCreate(
             name=name,
@@ -2943,7 +2944,7 @@ async def create_tool_server(
             description=description,
             auth_token=token,
         )
-        
+
         response = await sdk_client.tools_api.create_tool_server_api_v1_toolservers_servers_post(
             tool_server_create=server_data
         )
@@ -3022,7 +3023,7 @@ async def check_tool_server_health(
 
         status_color = "green" if response.status == "healthy" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
-        
+
         if hasattr(response, 'details'):
             console.print(f"Details: {response.details}")
         if hasattr(response, 'response_time'):
@@ -3146,7 +3147,7 @@ async def create_ab_test(
     """Create a new A/B test."""
     import json
     from chatter_sdk.models.ab_test_create import ABTestCreate
-    
+
     test_config = {}
     if config:
         try:
@@ -3154,7 +3155,7 @@ async def create_ab_test(
         except json.JSONDecodeError as e:
             console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
             return
-    
+
     async with get_client() as sdk_client:
         test_data = ABTestCreate(
             name=name,
@@ -3163,7 +3164,7 @@ async def create_ab_test(
             hypothesis=hypothesis,
             config=test_config,
         )
-        
+
         response = await sdk_client.ab_api.create_ab_test_api_v1_ab_tests_post(
             ab_test_create=test_data
         )
@@ -3263,9 +3264,9 @@ async def show_ab_test_metrics(
         if hasattr(response, 'metrics'):
             for metric in response.metrics:
                 difference = getattr(metric, 'difference', 'N/A')
-                if isinstance(difference, (int, float)):
+                if isinstance(difference, int | float):
                     difference = f"{difference:+.2f}"
-                
+
                 table.add_row(
                     metric.name,
                     str(getattr(metric, 'variant_a_value', 'N/A')),

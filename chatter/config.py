@@ -582,8 +582,8 @@ class Settings(BaseSettings):
         extra="ignore",
     )
 
-    @model_validator(mode='after')
-    def validate_configuration(self) -> 'Settings':
+    @model_validator(mode="after")
+    def validate_configuration(self) -> "Settings":
         """Validate configuration for security and production readiness."""
         # In v2, 'self' is the instance
         database_url = self.database_url
@@ -615,7 +615,7 @@ class Settings(BaseSettings):
 
         return self
 
-    @field_validator('database_url')
+    @field_validator("database_url")
     @classmethod
     def validate_database_url(cls, v: str) -> str:
         """Validate database URL format."""

@@ -38,7 +38,7 @@ class TestHealthIntegration:
         """Test readiness check with database timeout simulation."""
         # Patch the health_check function to simulate timeout
         with patch(
-            'chatter.api.health.health_check'
+            "chatter.api.health.health_check"
         ) as mock_health_check:
             mock_health_check.side_effect = TimeoutError(
                 "Database timeout"
@@ -61,7 +61,7 @@ class TestHealthIntegration:
         """Test readiness check with database connection error."""
         # Patch the health_check function to simulate error
         with patch(
-            'chatter.api.health.health_check'
+            "chatter.api.health.health_check"
         ) as mock_health_check:
             mock_health_check.side_effect = Exception(
                 "Connection failed"

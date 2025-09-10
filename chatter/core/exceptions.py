@@ -76,10 +76,10 @@ class ChatterBaseException(Exception):
 
         name = self.__class__.__name__
         # Remove 'Error' suffix if present
-        if name.endswith('Error'):
+        if name.endswith("Error"):
             name = name[:-5]
         # Convert to uppercase with underscores
-        name = re.sub('([a-z0-9])([A-Z])', r'\1_\2', name).upper()
+        name = re.sub("([a-z0-9])([A-Z])", r"\1_\2", name).upper()
 
         # Special case mappings for specific error types
         error_code_mapping = {
@@ -195,12 +195,12 @@ class ChatterBaseException(Exception):
         """Get a human-readable error title."""
         # Convert class name to title case
         class_name = self.__class__.__name__
-        if class_name.endswith('Error'):
+        if class_name.endswith("Error"):
             class_name = class_name[:-5]
         # Add spaces before capitals
         import re
 
-        return re.sub(r'([a-z])([A-Z])', r'\1 \2', class_name)
+        return re.sub(r"([a-z])([A-Z])", r"\1 \2", class_name)
 
 
 # Alias for backward compatibility
@@ -254,7 +254,7 @@ class ValidationError(ChatterBaseException):
         messages = [error.message for error in errors]
         field_errors = {}
         for error in errors:
-            if hasattr(error, 'field_errors') and error.field_errors:
+            if hasattr(error, "field_errors") and error.field_errors:
                 field_errors.update(error.field_errors)
 
         return cls(
@@ -336,8 +336,8 @@ class ConfigurationError(ChatterBaseException):
         """Get a safe version of the error message without sensitive data."""
         # Remove sensitive values from message
         safe_message = self.message
-        if hasattr(self, 'config_value') and getattr(
-            self, 'config_value', None
+        if hasattr(self, "config_value") and getattr(
+            self, "config_value", None
         ):
             safe_message = safe_message.replace(
                 str(self.config_value), "***"

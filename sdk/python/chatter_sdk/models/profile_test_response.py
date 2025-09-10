@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,14 +13,15 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
+
 
 class ProfileTestResponse(BaseModel):
     """
@@ -30,11 +30,11 @@ class ProfileTestResponse(BaseModel):
     profile_id: StrictStr = Field(description="Profile ID")
     test_message: StrictStr = Field(description="Test message sent")
     response: StrictStr = Field(description="Generated response")
-    usage_info: Dict[str, Any] = Field(description="Token usage and cost information")
+    usage_info: dict[str, Any] = Field(description="Token usage and cost information")
     response_time_ms: StrictInt = Field(description="Response time in milliseconds")
-    retrieval_results: Optional[List[Dict[str, Any]]] = None
-    tools_used: Optional[List[StrictStr]] = None
-    __properties: ClassVar[List[str]] = ["profile_id", "test_message", "response", "usage_info", "response_time_ms", "retrieval_results", "tools_used"]
+    retrieval_results: list[dict[str, Any]] | None = None
+    tools_used: list[StrictStr] | None = None
+    __properties: ClassVar[list[str]] = ["profile_id", "test_message", "response", "usage_info", "response_time_ms", "retrieval_results", "tools_used"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +53,11 @@ class ProfileTestResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ProfileTestResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,7 +67,7 @@ class ProfileTestResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -78,17 +78,17 @@ class ProfileTestResponse(BaseModel):
         # set to None if retrieval_results (nullable) is None
         # and model_fields_set contains the field
         if self.retrieval_results is None and "retrieval_results" in self.model_fields_set:
-            _dict['retrieval_results'] = None
+            _dict["retrieval_results"] = None
 
         # set to None if tools_used (nullable) is None
         # and model_fields_set contains the field
         if self.tools_used is None and "tools_used" in self.model_fields_set:
-            _dict['tools_used'] = None
+            _dict["tools_used"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ProfileTestResponse from a dict"""
         if obj is None:
             return None

@@ -462,13 +462,13 @@ class PromptService:
                 )
             )
             template_variables_used = template_validation.get(
-                'variables', []
+                "variables", []
             )
 
             # Add security warnings
-            if template_validation.get('warnings'):
+            if template_validation.get("warnings"):
                 security_warnings.extend(
-                    template_validation['warnings']
+                    template_validation["warnings"]
                 )
 
             # Render prompt if validation passed and not validate-only
@@ -499,21 +499,21 @@ class PromptService:
 
                     if test_request.include_performance_metrics:
                         performance_metrics = {
-                            'render_time_ms': int(
+                            "render_time_ms": int(
                                 (
                                     render_end - render_start
                                 ).total_seconds()
                                 * 1000
                             ),
-                            'content_length': (
+                            "content_length": (
                                 len(rendered_content)
                                 if rendered_content
                                 else 0
                             ),
-                            'variable_count': len(
+                            "variable_count": len(
                                 test_request.variables
                             ),
-                            'template_complexity_score': self._calculate_template_complexity(
+                            "template_complexity_score": self._calculate_template_complexity(
                                 prompt.content
                             ),
                         }
@@ -603,10 +603,10 @@ class PromptService:
 
         # Basic complexity factors
         score += len(content) // 100  # Length factor
-        score += content.count('{')  # Variable count
-        score += content.count('{{')  # Mustache variables
-        score += content.count('{% ')  # Jinja2 control structures
-        score += content.count('{{ ')  # Jinja2 variables
+        score += content.count("{")  # Variable count
+        score += content.count("{{")  # Mustache variables
+        score += content.count("{% ")  # Jinja2 control structures
+        score += content.count("{{ ")  # Jinja2 variables
 
         return score
 

@@ -1,11 +1,15 @@
 """Configuration and utility commands for the CLI."""
 
 import os
+
 import typer
 from rich.table import Table
 
-from chatter.commands import console, ChatterSDKClient, DEFAULT_API_BASE_URL
-
+from chatter.commands import (
+    DEFAULT_API_BASE_URL,
+    ChatterSDKClient,
+    console,
+)
 
 # Create standalone commands (these are added directly to the main app)
 

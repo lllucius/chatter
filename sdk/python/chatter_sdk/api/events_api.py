@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,16 +12,21 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from typing import Any
-from chatter_sdk.models.sse_stats_response import SSEStatsResponse
-from chatter_sdk.models.test_event_response import TestEventResponse
+from pydantic import (
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    validate_call,
+)
+from typing import Annotated
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.sse_stats_response import SSEStatsResponse
+from chatter_sdk.models.test_event_response import TestEventResponse
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -42,17 +46,10 @@ class EventsApi:
     @validate_call
     async def admin_events_stream_api_v1_events_admin_stream_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Admin Events Stream
@@ -88,8 +85,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -105,17 +102,10 @@ class EventsApi:
     @validate_call
     async def admin_events_stream_api_v1_events_admin_stream_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
         """Admin Events Stream
@@ -151,8 +141,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -168,17 +158,10 @@ class EventsApi:
     @validate_call
     async def admin_events_stream_api_v1_events_admin_stream_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Admin Events Stream
@@ -214,8 +197,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -234,17 +217,17 @@ class EventsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -254,23 +237,23 @@ class EventsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json', 
-                    'text/event-stream'
+                    "application/json", 
+                    "text/event-stream"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/events/admin/stream',
+            method="GET",
+            resource_path="/api/v1/events/admin/stream",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -289,17 +272,10 @@ class EventsApi:
     @validate_call
     async def events_stream_api_v1_events_stream_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Events Stream
@@ -335,8 +311,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -352,17 +328,10 @@ class EventsApi:
     @validate_call
     async def events_stream_api_v1_events_stream_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
         """Events Stream
@@ -398,8 +367,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -415,17 +384,10 @@ class EventsApi:
     @validate_call
     async def events_stream_api_v1_events_stream_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Events Stream
@@ -461,8 +423,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -481,17 +443,17 @@ class EventsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -501,23 +463,23 @@ class EventsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json', 
-                    'text/event-stream'
+                    "application/json", 
+                    "text/event-stream"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/events/stream',
+            method="GET",
+            resource_path="/api/v1/events/stream",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -536,17 +498,10 @@ class EventsApi:
     @validate_call
     async def get_sse_stats_api_v1_events_stats_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> SSEStatsResponse:
         """Get Sse Stats
@@ -582,8 +537,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SSEStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SSEStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -599,17 +554,10 @@ class EventsApi:
     @validate_call
     async def get_sse_stats_api_v1_events_stats_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[SSEStatsResponse]:
         """Get Sse Stats
@@ -645,8 +593,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SSEStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SSEStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -662,17 +610,10 @@ class EventsApi:
     @validate_call
     async def get_sse_stats_api_v1_events_stats_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Sse Stats
@@ -708,8 +649,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SSEStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SSEStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -728,17 +669,17 @@ class EventsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -748,22 +689,22 @@ class EventsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/events/stats',
+            method="GET",
+            resource_path="/api/v1/events/stats",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -782,17 +723,10 @@ class EventsApi:
     @validate_call
     async def trigger_broadcast_test_api_v1_events_broadcast_test_post(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> TestEventResponse:
         """Trigger Broadcast Test
@@ -828,8 +762,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -845,17 +779,10 @@ class EventsApi:
     @validate_call
     async def trigger_broadcast_test_api_v1_events_broadcast_test_post_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[TestEventResponse]:
         """Trigger Broadcast Test
@@ -891,8 +818,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -908,17 +835,10 @@ class EventsApi:
     @validate_call
     async def trigger_broadcast_test_api_v1_events_broadcast_test_post_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Trigger Broadcast Test
@@ -954,8 +874,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -974,17 +894,17 @@ class EventsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -994,22 +914,22 @@ class EventsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/events/broadcast-test',
+            method="POST",
+            resource_path="/api/v1/events/broadcast-test",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1028,17 +948,10 @@ class EventsApi:
     @validate_call
     async def trigger_test_event_api_v1_events_test_event_post(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> TestEventResponse:
         """Trigger Test Event
@@ -1074,8 +987,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1091,17 +1004,10 @@ class EventsApi:
     @validate_call
     async def trigger_test_event_api_v1_events_test_event_post_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[TestEventResponse]:
         """Trigger Test Event
@@ -1137,8 +1043,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1154,17 +1060,10 @@ class EventsApi:
     @validate_call
     async def trigger_test_event_api_v1_events_test_event_post_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Trigger Test Event
@@ -1200,8 +1099,8 @@ class EventsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "TestEventResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "TestEventResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1220,17 +1119,17 @@ class EventsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1240,22 +1139,22 @@ class EventsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/events/test-event',
+            method="POST",
+            resource_path="/api/v1/events/test-event",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -105,24 +105,24 @@ def test_mcp_service_validation():
     from unittest.mock import MagicMock
 
     # Mock langchain modules
-    sys.modules['langchain_core'] = MagicMock()
-    sys.modules['langchain_core.tools'] = MagicMock()
-    sys.modules['langchain_mcp_adapters'] = MagicMock()
-    sys.modules['langchain_mcp_adapters.client'] = MagicMock()
-    sys.modules['langchain_mcp_adapters.sessions'] = MagicMock()
+    sys.modules["langchain_core"] = MagicMock()
+    sys.modules["langchain_core.tools"] = MagicMock()
+    sys.modules["langchain_mcp_adapters"] = MagicMock()
+    sys.modules["langchain_mcp_adapters.client"] = MagicMock()
+    sys.modules["langchain_mcp_adapters.sessions"] = MagicMock()
 
     # Import after mocking
     from chatter.services.mcp import MCPToolService
 
     # Mock settings
-    sys.modules['chatter.config'].settings = MockSettings()
+    sys.modules["chatter.config"].settings = MockSettings()
 
     service = MCPToolService()
 
     # Test argument sanitization
     try:
         service._sanitize_tool_arguments(
-            {'script': '<script>alert(1)</script>'}
+            {"script": "<script>alert(1)</script>"}
         )
         raise AssertionError("Should have caught dangerous content")
     except ValueError as e:
@@ -131,14 +131,14 @@ def test_mcp_service_validation():
     # Test large arguments
     try:
         service._sanitize_tool_arguments(
-            {'data': 'x' * (1024 * 1024 + 1)}
+            {"data": "x" * (1024 * 1024 + 1)}
         )
         raise AssertionError("Should have caught large arguments")
     except ValueError as e:
         assert "too large" in str(e).lower()
 
     # Test valid arguments
-    valid_args = {'param1': 'value1', 'param2': 123}
+    valid_args = {"param1": "value1", "param2": 123}
     sanitized = service._sanitize_tool_arguments(valid_args)
     assert sanitized == valid_args
 
@@ -153,23 +153,23 @@ def test_schema_validation():
 
     # Test valid server creation
     valid_data = {
-        'name': 'test-server',
-        'display_name': 'Test Server',
-        'base_url': 'https://api.example.com',
-        'transport_type': 'http',
+        "name": "test-server",
+        "display_name": "Test Server",
+        "base_url": "https://api.example.com",
+        "transport_type": "http",
     }
 
     server = ToolServerCreate(**valid_data)
-    assert server.name == 'test-server'
-    assert server.transport_type == 'http'
+    assert server.name == "test-server"
+    assert server.transport_type == "http"
 
     # Test invalid transport type
     try:
         ToolServerCreate(
-            name='test',
-            display_name='Test',
-            base_url='https://api.example.com',
-            transport_type='invalid',
+            name="test",
+            display_name="Test",
+            base_url="https://api.example.com",
+            transport_type="invalid",
         )
         raise AssertionError("Should have failed validation")
     except ValidationError:
@@ -177,14 +177,14 @@ def test_schema_validation():
 
     # Test OAuth validation
     oauth_data = valid_data.copy()
-    oauth_data['oauth_config'] = {
-        'client_id': 'test-id',
-        'client_secret': 'test-secret',
-        'token_url': 'https://auth.example.com/token',
+    oauth_data["oauth_config"] = {
+        "client_id": "test-id",
+        "client_secret": "test-secret",
+        "token_url": "https://auth.example.com/token",
     }
 
     server_with_oauth = ToolServerCreate(**oauth_data)
-    assert server_with_oauth.oauth_config.client_id == 'test-id'
+    assert server_with_oauth.oauth_config.client_id == "test-id"
 
     print("✓ Schema validation tests passed")
 

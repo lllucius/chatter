@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,25 +13,29 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, StrictInt
-from typing import Any, ClassVar, Dict, List
-from chatter_sdk.models.model_def_with_provider import ModelDefWithProvider
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
+
+from chatter_sdk.models.model_def_with_provider import (
+    ModelDefWithProvider,
+)
+
 
 class ModelDefList(BaseModel):
     """
     List of model definitions with pagination.
     """ # noqa: E501
-    models: List[ModelDefWithProvider]
+    models: list[ModelDefWithProvider]
     total: StrictInt
     page: StrictInt
     per_page: StrictInt
-    __properties: ClassVar[List[str]] = ["models", "total", "page", "per_page"]
+    __properties: ClassVar[list[str]] = ["models", "total", "page", "per_page"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -51,11 +54,11 @@ class ModelDefList(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ModelDefList from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -65,7 +68,7 @@ class ModelDefList(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -79,11 +82,11 @@ class ModelDefList(BaseModel):
             for _item_models in self.models:
                 if _item_models:
                     _items.append(_item_models.to_dict())
-            _dict['models'] = _items
+            _dict["models"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ModelDefList from a dict"""
         if obj is None:
             return None

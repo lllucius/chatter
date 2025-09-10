@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class AgentStatus(str, Enum):
@@ -27,11 +28,11 @@ class AgentStatus(str, Enum):
     """
     allowed enum values
     """
-    ACTIVE = 'active'
-    INACTIVE = 'inactive'
-    TRAINING = 'training'
-    ERROR = 'error'
-    MAINTENANCE = 'maintenance'
+    ACTIVE = "active"
+    INACTIVE = "inactive"
+    TRAINING = "training"
+    ERROR = "error"
+    MAINTENANCE = "maintenance"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

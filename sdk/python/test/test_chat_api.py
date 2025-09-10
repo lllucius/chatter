@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -119,5 +118,5 @@ class TestChatApi(unittest.IsolatedAsyncioTestCase):
         pass
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

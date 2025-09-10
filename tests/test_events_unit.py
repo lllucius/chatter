@@ -48,7 +48,7 @@ class TestEventsUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_events_stats_success(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -73,7 +73,7 @@ class TestEventsUnit:
         assert "connections_by_user" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_test_event_success(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -99,7 +99,7 @@ class TestEventsUnit:
         assert data["event_type"] == "test.message"
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_broadcast_test_success(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -160,7 +160,7 @@ class TestEventsUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.events.get_unified_rate_limiter')
+    @patch("chatter.api.events.get_unified_rate_limiter")
     async def test_events_stream_rate_limit(
         self,
         mock_get_rate_limiter,
@@ -188,7 +188,7 @@ class TestEventsUnit:
         assert response.status_code == 429  # Rate limit exceeded
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_events_stream_connection_limit(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -204,7 +204,7 @@ class TestEventsUnit:
         assert response.status_code == 503  # Service unavailable
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_events_stream_connection_not_found(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -227,7 +227,7 @@ class TestEventsUnit:
         )
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_admin_stream_requires_admin(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -239,7 +239,7 @@ class TestEventsUnit:
         assert response.status_code == 403  # Forbidden
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_events_stats_sse_service_error(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -254,7 +254,7 @@ class TestEventsUnit:
         assert response.status_code == 500  # Internal server error
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_test_event_sse_service_error(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):
@@ -277,7 +277,7 @@ class TestEventsUnit:
         assert response.status_code == 500  # Internal server error
 
     @pytest.mark.unit
-    @patch('chatter.api.events.sse_service')
+    @patch("chatter.api.events.sse_service")
     async def test_broadcast_test_sse_service_error(
         self, mock_sse_service, client: AsyncClient, auth_headers: dict
     ):

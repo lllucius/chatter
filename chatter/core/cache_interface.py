@@ -1,6 +1,7 @@
 """Unified cache interface for consistent caching across the application."""
 
 from abc import ABC, abstractmethod
+from collections.abc import Callable
 from dataclasses import dataclass
 from typing import Any
 
@@ -215,7 +216,7 @@ class CacheInterface(ABC):
 
     # Helper methods that can be overridden
 
-    def make_key(self, *parts: str, **kwargs) -> str:
+    def make_key(self, *parts: str, **kwargs: Any) -> str:
         """Create a consistent cache key.
 
         Args:
@@ -254,13 +255,13 @@ class CacheInterface(ABC):
             return False
 
         # Basic validation - no whitespace, reasonable length
-        if len(key) > 250 or ' ' in key or '\n' in key or '\t' in key:
+        if len(key) > 250 or " " in key or "\n" in key or "\t" in key:
             return False
 
         return True
 
     async def get_or_set(
-        self, key: str, callable_func, ttl: int | None = None
+        self, key: str, callable_func: Callable[[], Any], ttl: int | None = None
     ) -> Any:
         """Get value from cache or set it using the callable.
 
@@ -308,7 +309,7 @@ class CacheInterface(ABC):
 
     def _update_stats(
         self, hit: bool = False, miss: bool = False, error: bool = False
-    ):
+    ) -> None:
         """Update cache statistics.
 
         Args:

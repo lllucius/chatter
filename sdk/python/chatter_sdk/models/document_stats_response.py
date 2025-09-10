@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,14 +13,15 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
+
 
 class DocumentStatsResponse(BaseModel):
     """
@@ -30,10 +30,10 @@ class DocumentStatsResponse(BaseModel):
     total_documents: StrictInt = Field(description="Total number of documents")
     total_chunks: StrictInt = Field(description="Total number of chunks")
     total_size_bytes: StrictInt = Field(description="Total size in bytes")
-    documents_by_status: Dict[str, StrictInt] = Field(description="Documents grouped by status")
-    documents_by_type: Dict[str, StrictInt] = Field(description="Documents grouped by type")
-    processing_stats: Dict[str, Any] = Field(description="Processing statistics")
-    __properties: ClassVar[List[str]] = ["total_documents", "total_chunks", "total_size_bytes", "documents_by_status", "documents_by_type", "processing_stats"]
+    documents_by_status: dict[str, StrictInt] = Field(description="Documents grouped by status")
+    documents_by_type: dict[str, StrictInt] = Field(description="Documents grouped by type")
+    processing_stats: dict[str, Any] = Field(description="Processing statistics")
+    __properties: ClassVar[list[str]] = ["total_documents", "total_chunks", "total_size_bytes", "documents_by_status", "documents_by_type", "processing_stats"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +52,11 @@ class DocumentStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of DocumentStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +66,7 @@ class DocumentStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -77,7 +77,7 @@ class DocumentStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of DocumentStatsResponse from a dict"""
         if obj is None:
             return None

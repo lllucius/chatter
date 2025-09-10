@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,27 +13,29 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Self
+
 from chatter_sdk.models.prompt_response import PromptResponse
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class PromptStatsResponse(BaseModel):
     """
     Schema for prompt statistics response.
     """ # noqa: E501
     total_prompts: StrictInt = Field(description="Total number of prompts")
-    prompts_by_type: Dict[str, StrictInt] = Field(description="Prompts by type")
-    prompts_by_category: Dict[str, StrictInt] = Field(description="Prompts by category")
-    most_used_prompts: List[PromptResponse] = Field(description="Most used prompts")
-    recent_prompts: List[PromptResponse] = Field(description="Recently created prompts")
-    usage_stats: Dict[str, Any] = Field(description="Usage statistics")
-    __properties: ClassVar[List[str]] = ["total_prompts", "prompts_by_type", "prompts_by_category", "most_used_prompts", "recent_prompts", "usage_stats"]
+    prompts_by_type: dict[str, StrictInt] = Field(description="Prompts by type")
+    prompts_by_category: dict[str, StrictInt] = Field(description="Prompts by category")
+    most_used_prompts: list[PromptResponse] = Field(description="Most used prompts")
+    recent_prompts: list[PromptResponse] = Field(description="Recently created prompts")
+    usage_stats: dict[str, Any] = Field(description="Usage statistics")
+    __properties: ClassVar[list[str]] = ["total_prompts", "prompts_by_type", "prompts_by_category", "most_used_prompts", "recent_prompts", "usage_stats"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +54,11 @@ class PromptStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of PromptStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,7 +68,7 @@ class PromptStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -81,18 +82,18 @@ class PromptStatsResponse(BaseModel):
             for _item_most_used_prompts in self.most_used_prompts:
                 if _item_most_used_prompts:
                     _items.append(_item_most_used_prompts.to_dict())
-            _dict['most_used_prompts'] = _items
+            _dict["most_used_prompts"] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in recent_prompts (list)
         _items = []
         if self.recent_prompts:
             for _item_recent_prompts in self.recent_prompts:
                 if _item_recent_prompts:
                     _items.append(_item_recent_prompts.to_dict())
-            _dict['recent_prompts'] = _items
+            _dict["recent_prompts"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of PromptStatsResponse from a dict"""
         if obj is None:
             return None

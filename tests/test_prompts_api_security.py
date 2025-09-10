@@ -85,15 +85,15 @@ class TestSecureTemplateRenderer:
         result = SecureTemplateRenderer.validate_template_syntax(
             "Hello {name}!", "f-string"
         )
-        assert result['valid'] is True
-        assert "name" in result['variables']
+        assert result["valid"] is True
+        assert "name" in result["variables"]
 
         # Invalid variable name
         result = SecureTemplateRenderer.validate_template_syntax(
             "Hello {123invalid}!", "f-string"
         )
-        assert result['valid'] is False
-        assert "Invalid variable name" in str(result['errors'])
+        assert result["valid"] is False
+        assert "Invalid variable name" in str(result["errors"])
 
     @pytest.mark.skipif(
         not pytest.importorskip(
@@ -232,7 +232,7 @@ class TestPromptService:
         mock_session.commit = AsyncMock()
         mock_session.refresh = AsyncMock()
 
-        with patch('chatter.models.prompt.Prompt') as MockPrompt:
+        with patch("chatter.models.prompt.Prompt") as MockPrompt:
             mock_prompt_instance = MockPrompt.return_value
             mock_prompt_instance.id = "test-id"
             mock_prompt_instance.name = "Test Prompt"
@@ -336,7 +336,7 @@ class TestPromptModel:
         prompt.content = "Hello {name}!"
         prompt.template_format = "f-string"
 
-        with patch.object(prompt, 'render') as mock_render:
+        with patch.object(prompt, "render") as mock_render:
             mock_render.return_value = "Hello Alice!"
             result = prompt.render(name="Alice")
             assert result == "Hello Alice!"

@@ -34,11 +34,11 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_daily_message_limit_positive',
-            'check_monthly_message_limit_positive',
-            'check_max_file_size_positive',
-            'check_email_format',
-            'check_username_format',
+            "check_daily_message_limit_positive",
+            "check_monthly_message_limit_positive",
+            "check_max_file_size_positive",
+            "check_email_format",
+            "check_username_format",
         ]
 
         for constraint in expected_constraints:
@@ -55,15 +55,15 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_temperature_range',
-            'check_max_tokens_positive',
-            'check_context_window_positive',
-            'check_retrieval_limit_positive',
-            'check_retrieval_score_threshold_range',
-            'check_message_count_non_negative',
-            'check_total_tokens_non_negative',
-            'check_total_cost_non_negative',
-            'check_title_not_empty',
+            "check_temperature_range",
+            "check_max_tokens_positive",
+            "check_context_window_positive",
+            "check_retrieval_limit_positive",
+            "check_retrieval_score_threshold_range",
+            "check_message_count_non_negative",
+            "check_total_tokens_non_negative",
+            "check_total_cost_non_negative",
+            "check_title_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -80,15 +80,15 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_prompt_tokens_non_negative',
-            'check_completion_tokens_non_negative',
-            'check_total_tokens_non_negative',
-            'check_response_time_non_negative',
-            'check_cost_non_negative',
-            'check_retry_count_non_negative',
-            'check_sequence_number_non_negative',
-            'check_content_not_empty',
-            'uq_conversation_sequence',
+            "check_prompt_tokens_non_negative",
+            "check_completion_tokens_non_negative",
+            "check_total_tokens_non_negative",
+            "check_response_time_non_negative",
+            "check_cost_non_negative",
+            "check_retry_count_non_negative",
+            "check_sequence_number_non_negative",
+            "check_content_not_empty",
+            "uq_conversation_sequence",
         ]
 
         for constraint in expected_constraints:
@@ -102,16 +102,16 @@ class TestDatabaseModelIntegrity:
         user = User.__mapper__
 
         # Check that relationships exist
-        assert 'conversations' in user.relationships
-        assert 'documents' in user.relationships
-        assert 'profiles' in user.relationships
-        assert 'prompts' in user.relationships
+        assert "conversations" in user.relationships
+        assert "documents" in user.relationships
+        assert "profiles" in user.relationships
+        assert "prompts" in user.relationships
 
         # Check cascade settings
-        conversations_rel = user.relationships['conversations']
+        conversations_rel = user.relationships["conversations"]
         cascade_str = str(conversations_rel.cascade)
         assert (
-            'delete-orphan' in cascade_str and 'delete' in cascade_str
+            "delete-orphan" in cascade_str and "delete" in cascade_str
         )
 
     @pytest.mark.unit
@@ -123,21 +123,21 @@ class TestDatabaseModelIntegrity:
         ]
 
         # User should have foreign key to profiles for default_profile_id
-        assert 'profiles.id' in user_fks
+        assert "profiles.id" in user_fks
 
         # Test Conversation model foreign keys
         conversation_fks = [
             fk.target_fullname
             for fk in Conversation.__table__.foreign_keys
         ]
-        assert 'users.id' in conversation_fks
-        assert 'profiles.id' in conversation_fks
+        assert "users.id" in conversation_fks
+        assert "profiles.id" in conversation_fks
 
         # Test Message model foreign keys
         message_fks = [
             fk.target_fullname for fk in Message.__table__.foreign_keys
         ]
-        assert 'conversations.id' in message_fks
+        assert "conversations.id" in message_fks
 
     @pytest.mark.unit
     def test_model_fields_match_schema_requirements(self):
@@ -146,10 +146,10 @@ class TestDatabaseModelIntegrity:
         user_columns = [
             column.name for column in User.__table__.columns
         ]
-        assert 'phone_number' in user_columns
+        assert "phone_number" in user_columns
 
         # Check required fields exist
-        required_user_fields = ['email', 'username', 'hashed_password']
+        required_user_fields = ["email", "username", "hashed_password"]
         for field in required_user_fields:
             assert field in user_columns
 
@@ -166,16 +166,16 @@ class TestDatabaseModelIntegrity:
                 user_columns_with_indexes.append(column.name)
 
         # Important fields should be indexed
-        assert 'email' in user_columns_with_indexes
-        assert 'username' in user_columns_with_indexes
+        assert "email" in user_columns_with_indexes
+        assert "username" in user_columns_with_indexes
 
         # Check Conversation model indexes
         conversation_indexes = [
             idx.name for idx in Conversation.__table__.indexes
         ]
         expected_conversation_indexes = [
-            'idx_user_status',
-            'idx_user_created',
+            "idx_user_status",
+            "idx_user_created",
         ]
 
         for idx in expected_conversation_indexes:
@@ -194,12 +194,12 @@ class TestDatabaseModelIntegrity:
         conversation_columns = {
             col.name: col for col in Conversation.__table__.columns
         }
-        assert 'status' in conversation_columns
+        assert "status" in conversation_columns
 
         message_columns = {
             col.name: col for col in Message.__table__.columns
         }
-        assert 'role' in message_columns
+        assert "role" in message_columns
 
         # Verify enum values are reasonable
         assert (
@@ -222,16 +222,16 @@ class TestDatabaseModelIntegrity:
         conversation_columns = {
             col.name: col for col in Conversation.__table__.columns
         }
-        assert 'tags' in conversation_columns
-        assert 'extra_metadata' in conversation_columns
+        assert "tags" in conversation_columns
+        assert "extra_metadata" in conversation_columns
 
         # Check Message model JSON fields
         message_columns = {
             col.name: col for col in Message.__table__.columns
         }
-        assert 'tool_calls' in message_columns
-        assert 'retrieved_documents' in message_columns
-        assert 'extra_metadata' in message_columns
+        assert "tool_calls" in message_columns
+        assert "retrieved_documents" in message_columns
+        assert "extra_metadata" in message_columns
 
     @pytest.mark.unit
     def test_document_model_has_required_constraints(self):
@@ -242,13 +242,13 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_file_size_positive',
-            'check_chunk_size_positive',
-            'check_chunk_overlap_non_negative',
-            'check_chunk_count_non_negative',
-            'check_version_positive',
-            'check_view_count_non_negative',
-            'check_search_count_non_negative',
+            "check_file_size_positive",
+            "check_chunk_size_positive",
+            "check_chunk_overlap_non_negative",
+            "check_chunk_count_non_negative",
+            "check_version_positive",
+            "check_view_count_non_negative",
+            "check_search_count_non_negative",
         ]
 
         for constraint in expected_constraints:
@@ -265,12 +265,12 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_chunk_index_non_negative',
-            'check_start_char_non_negative',
-            'check_end_char_positive',
-            'check_end_char_greater_than_start',
-            'check_token_count_positive',
-            'check_content_not_empty',
+            "check_chunk_index_non_negative",
+            "check_start_char_non_negative",
+            "check_end_char_positive",
+            "check_end_char_greater_than_start",
+            "check_token_count_positive",
+            "check_content_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -287,17 +287,17 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_temperature_range',
-            'check_top_p_range',
-            'check_top_k_positive',
-            'check_max_tokens_positive',
-            'check_context_window_positive',
-            'check_retrieval_limit_positive',
-            'check_retrieval_score_threshold_range',
-            'check_usage_count_non_negative',
-            'check_total_tokens_used_non_negative',
-            'check_total_cost_non_negative',
-            'check_name_not_empty',
+            "check_temperature_range",
+            "check_top_p_range",
+            "check_top_k_positive",
+            "check_max_tokens_positive",
+            "check_context_window_positive",
+            "check_retrieval_limit_positive",
+            "check_retrieval_score_threshold_range",
+            "check_usage_count_non_negative",
+            "check_total_tokens_used_non_negative",
+            "check_total_cost_non_negative",
+            "check_name_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -314,19 +314,19 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_max_length_positive',
-            'check_min_length_non_negative',
-            'check_min_length_less_than_max',
-            'check_version_positive',
-            'check_rating_range',
-            'check_rating_count_non_negative',
-            'check_usage_count_non_negative',
-            'check_total_tokens_used_non_negative',
-            'check_total_cost_non_negative',
-            'check_success_rate_range',
-            'check_avg_response_time_ms_positive',
-            'check_content_not_empty',
-            'check_name_not_empty',
+            "check_max_length_positive",
+            "check_min_length_non_negative",
+            "check_min_length_less_than_max",
+            "check_version_positive",
+            "check_rating_range",
+            "check_rating_count_non_negative",
+            "check_usage_count_non_negative",
+            "check_total_tokens_used_non_negative",
+            "check_total_cost_non_negative",
+            "check_success_rate_range",
+            "check_avg_response_time_ms_positive",
+            "check_content_not_empty",
+            "check_name_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -343,8 +343,8 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_name_not_empty',
-            'check_display_name_not_empty',
+            "check_name_not_empty",
+            "check_display_name_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -361,14 +361,14 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_max_tokens_positive',
-            'check_context_length_positive',
-            'check_dimensions_positive',
-            'check_chunk_size_positive',
-            'check_max_batch_size_positive',
-            'check_name_not_empty',
-            'check_display_name_not_empty',
-            'check_model_name_not_empty',
+            "check_max_tokens_positive",
+            "check_context_length_positive",
+            "check_dimensions_positive",
+            "check_chunk_size_positive",
+            "check_max_batch_size_positive",
+            "check_name_not_empty",
+            "check_display_name_not_empty",
+            "check_model_name_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -385,12 +385,12 @@ class TestDatabaseModelIntegrity:
         ]
 
         expected_constraints = [
-            'check_base_dimensions_positive',
-            'check_effective_dimensions_positive',
-            'check_effective_dimensions_lte_base',
-            'check_name_not_empty',
-            'check_display_name_not_empty',
-            'check_table_name_not_empty',
+            "check_base_dimensions_positive",
+            "check_effective_dimensions_positive",
+            "check_effective_dimensions_lte_base",
+            "check_name_not_empty",
+            "check_display_name_not_empty",
+            "check_table_name_not_empty",
         ]
 
         for constraint in expected_constraints:
@@ -407,17 +407,17 @@ class TestDatabaseModelIntegrity:
             for constraint in ConversationStats.__table__.constraints
         ]
         expected_conversation_stats = [
-            'check_total_messages_non_negative',
-            'check_user_messages_non_negative',
-            'check_assistant_messages_non_negative',
-            'check_system_messages_non_negative',
-            'check_tool_messages_non_negative',
-            'check_total_tokens_non_negative',
-            'check_prompt_tokens_non_negative',
-            'check_completion_tokens_non_negative',
-            'check_total_cost_non_negative',
-            'check_error_count_non_negative',
-            'check_retry_count_non_negative',
+            "check_total_messages_non_negative",
+            "check_user_messages_non_negative",
+            "check_assistant_messages_non_negative",
+            "check_system_messages_non_negative",
+            "check_tool_messages_non_negative",
+            "check_total_tokens_non_negative",
+            "check_prompt_tokens_non_negative",
+            "check_completion_tokens_non_negative",
+            "check_total_cost_non_negative",
+            "check_error_count_non_negative",
+            "check_retry_count_non_negative",
         ]
 
         for constraint in expected_conversation_stats:
@@ -431,12 +431,12 @@ class TestDatabaseModelIntegrity:
             for constraint in DocumentStats.__table__.constraints
         ]
         expected_document_stats = [
-            'check_view_count_non_negative',
-            'check_search_count_non_negative',
-            'check_retrieval_count_non_negative',
-            'check_unique_users_non_negative',
-            'check_total_chunks_retrieved_non_negative',
-            'check_feedback_count_non_negative',
+            "check_view_count_non_negative",
+            "check_search_count_non_negative",
+            "check_retrieval_count_non_negative",
+            "check_unique_users_non_negative",
+            "check_total_chunks_retrieved_non_negative",
+            "check_feedback_count_non_negative",
         ]
 
         for constraint in expected_document_stats:
@@ -450,12 +450,12 @@ class TestDatabaseModelIntegrity:
             for constraint in PromptStats.__table__.constraints
         ]
         expected_prompt_stats = [
-            'check_usage_count_non_negative',
-            'check_success_count_non_negative',
-            'check_error_count_non_negative',
-            'check_total_tokens_used_non_negative',
-            'check_total_cost_non_negative',
-            'check_rating_count_non_negative',
+            "check_usage_count_non_negative",
+            "check_success_count_non_negative",
+            "check_error_count_non_negative",
+            "check_total_tokens_used_non_negative",
+            "check_total_cost_non_negative",
+            "check_rating_count_non_negative",
         ]
 
         for constraint in expected_prompt_stats:
@@ -469,11 +469,11 @@ class TestDatabaseModelIntegrity:
             for constraint in ProfileStats.__table__.constraints
         ]
         expected_profile_stats = [
-            'check_conversations_started_non_negative',
-            'check_messages_generated_non_negative',
-            'check_total_tokens_used_non_negative',
-            'check_total_cost_non_negative',
-            'check_feedback_count_non_negative',
+            "check_conversations_started_non_negative",
+            "check_messages_generated_non_negative",
+            "check_total_tokens_used_non_negative",
+            "check_total_cost_non_negative",
+            "check_feedback_count_non_negative",
         ]
 
         for constraint in expected_profile_stats:
@@ -490,11 +490,11 @@ class TestDatabaseModelIntegrity:
             for constraint in ToolServer.__table__.constraints
         ]
         expected_toolserver = [
-            'check_name_not_empty',
-            'check_display_name_not_empty',
-            'check_timeout_positive',
-            'check_consecutive_failures_non_negative',
-            'check_max_failures_positive',
+            "check_name_not_empty",
+            "check_display_name_not_empty",
+            "check_timeout_positive",
+            "check_consecutive_failures_non_negative",
+            "check_max_failures_positive",
         ]
 
         for constraint in expected_toolserver:
@@ -508,11 +508,11 @@ class TestDatabaseModelIntegrity:
             for constraint in ServerTool.__table__.constraints
         ]
         expected_servertool = [
-            'check_name_not_empty',
-            'check_display_name_not_empty',
-            'check_total_calls_non_negative',
-            'check_total_errors_non_negative',
-            'check_avg_response_time_non_negative',
+            "check_name_not_empty",
+            "check_display_name_not_empty",
+            "check_total_calls_non_negative",
+            "check_total_errors_non_negative",
+            "check_avg_response_time_non_negative",
         ]
 
         for constraint in expected_servertool:
@@ -526,8 +526,8 @@ class TestDatabaseModelIntegrity:
             for constraint in ToolUsage.__table__.constraints
         ]
         expected_toolusage = [
-            'check_tool_name_not_empty',
-            'check_response_time_non_negative',
+            "check_tool_name_not_empty",
+            "check_response_time_non_negative",
         ]
 
         for constraint in expected_toolusage:
@@ -541,9 +541,9 @@ class TestDatabaseModelIntegrity:
             for constraint in ToolPermission.__table__.constraints
         ]
         expected_toolpermission = [
-            'check_rate_limit_per_hour_positive',
-            'check_rate_limit_per_day_positive',
-            'check_usage_count_non_negative',
+            "check_rate_limit_per_hour_positive",
+            "check_rate_limit_per_day_positive",
+            "check_usage_count_non_negative",
         ]
 
         for constraint in expected_toolpermission:

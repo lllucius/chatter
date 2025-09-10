@@ -1,13 +1,13 @@
 """Authentication commands for the CLI."""
 
-import typer
 from pathlib import Path
+
+import typer
+from chatter_sdk import UserLogin
 from rich.prompt import Prompt
 from rich.table import Table
-from chatter_sdk import UserLogin
 
 from chatter.commands import console, get_client, run_async
-
 
 # Authentication Commands
 auth_app = typer.Typer(help="Authentication commands")

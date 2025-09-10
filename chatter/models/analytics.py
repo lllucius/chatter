@@ -31,48 +31,48 @@ class ConversationStats(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'total_messages >= 0',
-            name='check_total_messages_non_negative',
+            "total_messages >= 0",
+            name="check_total_messages_non_negative",
         ),
         CheckConstraint(
-            'user_messages >= 0',
-            name='check_user_messages_non_negative',
+            "user_messages >= 0",
+            name="check_user_messages_non_negative",
         ),
         CheckConstraint(
-            'assistant_messages >= 0',
-            name='check_assistant_messages_non_negative',
+            "assistant_messages >= 0",
+            name="check_assistant_messages_non_negative",
         ),
         CheckConstraint(
-            'system_messages >= 0',
-            name='check_system_messages_non_negative',
+            "system_messages >= 0",
+            name="check_system_messages_non_negative",
         ),
         CheckConstraint(
-            'tool_messages >= 0',
-            name='check_tool_messages_non_negative',
+            "tool_messages >= 0",
+            name="check_tool_messages_non_negative",
         ),
         CheckConstraint(
-            'total_tokens >= 0',
-            name='check_total_tokens_non_negative',
+            "total_tokens >= 0",
+            name="check_total_tokens_non_negative",
         ),
         CheckConstraint(
-            'prompt_tokens >= 0',
-            name='check_prompt_tokens_non_negative',
+            "prompt_tokens >= 0",
+            name="check_prompt_tokens_non_negative",
         ),
         CheckConstraint(
-            'completion_tokens >= 0',
-            name='check_completion_tokens_non_negative',
+            "completion_tokens >= 0",
+            name="check_completion_tokens_non_negative",
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative',
+            "total_cost >= 0.0",
+            name="check_total_cost_non_negative",
         ),
         CheckConstraint(
-            'error_count >= 0',
-            name='check_error_count_non_negative',
+            "error_count >= 0",
+            name="check_error_count_non_negative",
         ),
         CheckConstraint(
-            'retry_count >= 0',
-            name='check_retry_count_non_negative',
+            "retry_count >= 0",
+            name="check_retry_count_non_negative",
         ),
     )
 
@@ -197,28 +197,28 @@ class DocumentStats(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'view_count >= 0',
-            name='check_view_count_non_negative',
+            "view_count >= 0",
+            name="check_view_count_non_negative",
         ),
         CheckConstraint(
-            'search_count >= 0',
-            name='check_search_count_non_negative',
+            "search_count >= 0",
+            name="check_search_count_non_negative",
         ),
         CheckConstraint(
-            'retrieval_count >= 0',
-            name='check_retrieval_count_non_negative',
+            "retrieval_count >= 0",
+            name="check_retrieval_count_non_negative",
         ),
         CheckConstraint(
-            'unique_users >= 0',
-            name='check_unique_users_non_negative',
+            "unique_users >= 0",
+            name="check_unique_users_non_negative",
         ),
         CheckConstraint(
-            'total_chunks_retrieved >= 0',
-            name='check_total_chunks_retrieved_non_negative',
+            "total_chunks_retrieved >= 0",
+            name="check_total_chunks_retrieved_non_negative",
         ),
         CheckConstraint(
-            'feedback_count >= 0',
-            name='check_feedback_count_non_negative',
+            "feedback_count >= 0",
+            name="check_feedback_count_non_negative",
         ),
     )
 
@@ -305,28 +305,28 @@ class PromptStats(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'usage_count >= 0',
-            name='check_usage_count_non_negative',
+            "usage_count >= 0",
+            name="check_usage_count_non_negative",
         ),
         CheckConstraint(
-            'success_count >= 0',
-            name='check_success_count_non_negative',
+            "success_count >= 0",
+            name="check_success_count_non_negative",
         ),
         CheckConstraint(
-            'error_count >= 0',
-            name='check_error_count_non_negative',
+            "error_count >= 0",
+            name="check_error_count_non_negative",
         ),
         CheckConstraint(
-            'total_tokens_used >= 0',
-            name='check_total_tokens_used_non_negative',
+            "total_tokens_used >= 0",
+            name="check_total_tokens_used_non_negative",
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative',
+            "total_cost >= 0.0",
+            name="check_total_cost_non_negative",
         ),
         CheckConstraint(
-            'rating_count >= 0',
-            name='check_rating_count_non_negative',
+            "rating_count >= 0",
+            name="check_rating_count_non_negative",
         ),
     )
 
@@ -407,24 +407,24 @@ class ProfileStats(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'conversations_started >= 0',
-            name='check_conversations_started_non_negative',
+            "conversations_started >= 0",
+            name="check_conversations_started_non_negative",
         ),
         CheckConstraint(
-            'messages_generated >= 0',
-            name='check_messages_generated_non_negative',
+            "messages_generated >= 0",
+            name="check_messages_generated_non_negative",
         ),
         CheckConstraint(
-            'total_tokens_used >= 0',
-            name='check_total_tokens_used_non_negative',
+            "total_tokens_used >= 0",
+            name="check_total_tokens_used_non_negative",
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative',
+            "total_cost >= 0.0",
+            name="check_total_cost_non_negative",
         ),
         CheckConstraint(
-            'feedback_count >= 0',
-            name='check_feedback_count_non_negative',
+            "feedback_count >= 0",
+            name="check_feedback_count_non_negative",
         ),
     )
 

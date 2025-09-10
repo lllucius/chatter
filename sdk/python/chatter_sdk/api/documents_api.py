@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,28 +12,50 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictBytes, StrictInt, StrictStr, field_validator
-from typing import Any, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
-from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
-from chatter_sdk.models.document_list_response import DocumentListResponse
-from chatter_sdk.models.document_processing_request import DocumentProcessingRequest
-from chatter_sdk.models.document_processing_response import DocumentProcessingResponse
-from chatter_sdk.models.document_response import DocumentResponse
-from chatter_sdk.models.document_search_request import DocumentSearchRequest
-from chatter_sdk.models.document_search_response import DocumentSearchResponse
-from chatter_sdk.models.document_stats_response import DocumentStatsResponse
-from chatter_sdk.models.document_status import DocumentStatus
-from chatter_sdk.models.document_type import DocumentType
-from chatter_sdk.models.document_update import DocumentUpdate
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictBytes,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    validate_call,
+)
+from typing import Annotated
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.document_chunks_response import (
+    DocumentChunksResponse,
+)
+from chatter_sdk.models.document_delete_response import (
+    DocumentDeleteResponse,
+)
+from chatter_sdk.models.document_list_response import (
+    DocumentListResponse,
+)
+from chatter_sdk.models.document_processing_request import (
+    DocumentProcessingRequest,
+)
+from chatter_sdk.models.document_processing_response import (
+    DocumentProcessingResponse,
+)
+from chatter_sdk.models.document_response import DocumentResponse
+from chatter_sdk.models.document_search_request import (
+    DocumentSearchRequest,
+)
+from chatter_sdk.models.document_search_response import (
+    DocumentSearchResponse,
+)
+from chatter_sdk.models.document_stats_response import (
+    DocumentStatsResponse,
+)
+from chatter_sdk.models.document_status import DocumentStatus
+from chatter_sdk.models.document_type import DocumentType
+from chatter_sdk.models.document_update import DocumentUpdate
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -55,17 +76,10 @@ class DocumentsApi:
     async def delete_document_api_v1_documents_document_id_delete(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentDeleteResponse:
         """Delete Document
@@ -104,9 +118,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -123,17 +137,10 @@ class DocumentsApi:
     async def delete_document_api_v1_documents_document_id_delete_with_http_info(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentDeleteResponse]:
         """Delete Document
@@ -172,9 +179,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -191,17 +198,10 @@ class DocumentsApi:
     async def delete_document_api_v1_documents_document_id_delete_without_preload_content(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Document
@@ -240,9 +240,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -262,21 +262,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -284,22 +284,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/api/v1/documents/{document_id}',
+            method="DELETE",
+            resource_path="/api/v1/documents/{document_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -319,17 +319,10 @@ class DocumentsApi:
     async def download_document_api_v1_documents_document_id_download_get(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Download Document
@@ -368,9 +361,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -387,17 +380,10 @@ class DocumentsApi:
     async def download_document_api_v1_documents_document_id_download_get_with_http_info(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
         """Download Document
@@ -436,9 +422,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -455,17 +441,10 @@ class DocumentsApi:
     async def download_document_api_v1_documents_document_id_download_get_without_preload_content(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Download Document
@@ -504,9 +483,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -526,21 +505,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -548,22 +527,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents/{document_id}/download',
+            method="GET",
+            resource_path="/api/v1/documents/{document_id}/download",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -583,17 +562,10 @@ class DocumentsApi:
     async def get_document_api_v1_documents_document_id_get(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentResponse:
         """Get Document
@@ -632,12 +604,12 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "401": None,
+            "403": None,
+            "404": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -654,17 +626,10 @@ class DocumentsApi:
     async def get_document_api_v1_documents_document_id_get_with_http_info(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentResponse]:
         """Get Document
@@ -703,12 +668,12 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "401": None,
+            "403": None,
+            "404": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -725,17 +690,10 @@ class DocumentsApi:
     async def get_document_api_v1_documents_document_id_get_without_preload_content(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Document
@@ -774,12 +732,12 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "401": None,
+            "403": None,
+            "404": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -799,21 +757,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -821,22 +779,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents/{document_id}',
+            method="GET",
+            resource_path="/api/v1/documents/{document_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -856,19 +814,12 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentChunksResponse:
         """Get Document Chunks
@@ -913,9 +864,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentChunksResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -932,19 +883,12 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get_with_http_info(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentChunksResponse]:
         """Get Document Chunks
@@ -989,9 +933,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentChunksResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1008,19 +952,12 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get_without_preload_content(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Document Chunks
@@ -1065,9 +1002,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentChunksResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1089,29 +1026,29 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         if limit is not None:
             
-            _query_params.append(('limit', limit))
+            _query_params.append(("limit", limit))
             
         if offset is not None:
             
-            _query_params.append(('offset', offset))
+            _query_params.append(("offset", offset))
             
         # process the header parameters
         # process the form parameters
@@ -1119,22 +1056,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents/{document_id}/chunks',
+            method="GET",
+            resource_path="/api/v1/documents/{document_id}/chunks",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1153,17 +1090,10 @@ class DocumentsApi:
     @validate_call
     async def get_document_stats_api_v1_documents_stats_overview_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentStatsResponse:
         """Get Document Stats
@@ -1199,8 +1129,8 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1216,17 +1146,10 @@ class DocumentsApi:
     @validate_call
     async def get_document_stats_api_v1_documents_stats_overview_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentStatsResponse]:
         """Get Document Stats
@@ -1262,8 +1185,8 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1279,17 +1202,10 @@ class DocumentsApi:
     @validate_call
     async def get_document_stats_api_v1_documents_stats_overview_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Document Stats
@@ -1325,8 +1241,8 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1345,17 +1261,17 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1365,22 +1281,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents/stats/overview',
+            method="GET",
+            resource_path="/api/v1/documents/stats/overview",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1399,25 +1315,18 @@ class DocumentsApi:
     @validate_call
     async def list_documents_api_v1_documents_get(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: Annotated[DocumentStatus | None, Field(description="Filter by status")] = None,
+        document_type: Annotated[DocumentType | None, Field(description="Filter by document type")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        owner_id: Annotated[StrictStr | None, Field(description="Filter by owner (admin only)")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentListResponse:
         """List Documents
@@ -1477,11 +1386,11 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentListResponse",
+            "401": None,
+            "403": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1497,25 +1406,18 @@ class DocumentsApi:
     @validate_call
     async def list_documents_api_v1_documents_get_with_http_info(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: Annotated[DocumentStatus | None, Field(description="Filter by status")] = None,
+        document_type: Annotated[DocumentType | None, Field(description="Filter by document type")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        owner_id: Annotated[StrictStr | None, Field(description="Filter by owner (admin only)")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentListResponse]:
         """List Documents
@@ -1575,11 +1477,11 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentListResponse",
+            "401": None,
+            "403": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1595,25 +1497,18 @@ class DocumentsApi:
     @validate_call
     async def list_documents_api_v1_documents_get_without_preload_content(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: Annotated[DocumentStatus | None, Field(description="Filter by status")] = None,
+        document_type: Annotated[DocumentType | None, Field(description="Filter by document type")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        owner_id: Annotated[StrictStr | None, Field(description="Filter by owner (admin only)")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Documents
@@ -1673,11 +1568,11 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentListResponse",
+            "401": None,
+            "403": None,
+            "422": None,
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1704,52 +1599,52 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-            'tags': 'multi',
+        _collection_formats: dict[str, str] = {
+            "tags": "multi",
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if status is not None:
             
-            _query_params.append(('status', status.value))
+            _query_params.append(("status", status.value))
             
         if document_type is not None:
             
-            _query_params.append(('document_type', document_type.value))
+            _query_params.append(("document_type", document_type.value))
             
         if tags is not None:
             
-            _query_params.append(('tags', tags))
+            _query_params.append(("tags", tags))
             
         if owner_id is not None:
             
-            _query_params.append(('owner_id', owner_id))
+            _query_params.append(("owner_id", owner_id))
             
         if limit is not None:
             
-            _query_params.append(('limit', limit))
+            _query_params.append(("limit", limit))
             
         if offset is not None:
             
-            _query_params.append(('offset', offset))
+            _query_params.append(("offset", offset))
             
         if sort_by is not None:
             
-            _query_params.append(('sort_by', sort_by))
+            _query_params.append(("sort_by", sort_by))
             
         if sort_order is not None:
             
-            _query_params.append(('sort_order', sort_order))
+            _query_params.append(("sort_order", sort_order))
             
         # process the header parameters
         # process the form parameters
@@ -1757,22 +1652,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents',
+            method="GET",
+            resource_path="/api/v1/documents",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1793,17 +1688,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_processing_request: DocumentProcessingRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentProcessingResponse:
         """Process Document
@@ -1845,9 +1733,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1865,17 +1753,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_processing_request: DocumentProcessingRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentProcessingResponse]:
         """Process Document
@@ -1917,9 +1798,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1937,17 +1818,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_processing_request: DocumentProcessingRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Process Document
@@ -1989,9 +1863,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2012,21 +1886,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2036,35 +1910,35 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/documents/{document_id}/process',
+            method="POST",
+            resource_path="/api/v1/documents/{document_id}/process",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2084,17 +1958,10 @@ class DocumentsApi:
     async def reprocess_document_api_v1_documents_document_id_reprocess_post(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentProcessingResponse:
         """Reprocess Document
@@ -2133,9 +2000,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2152,17 +2019,10 @@ class DocumentsApi:
     async def reprocess_document_api_v1_documents_document_id_reprocess_post_with_http_info(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentProcessingResponse]:
         """Reprocess Document
@@ -2201,9 +2061,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2220,17 +2080,10 @@ class DocumentsApi:
     async def reprocess_document_api_v1_documents_document_id_reprocess_post_without_preload_content(
         self,
         document_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Reprocess Document
@@ -2269,9 +2122,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentProcessingResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2291,21 +2144,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2313,22 +2166,22 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/documents/{document_id}/reprocess',
+            method="POST",
+            resource_path="/api/v1/documents/{document_id}/reprocess",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2348,17 +2201,10 @@ class DocumentsApi:
     async def search_documents_api_v1_documents_search_post(
         self,
         document_search_request: DocumentSearchRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentSearchResponse:
         """Search Documents
@@ -2397,9 +2243,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2416,17 +2262,10 @@ class DocumentsApi:
     async def search_documents_api_v1_documents_search_post_with_http_info(
         self,
         document_search_request: DocumentSearchRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentSearchResponse]:
         """Search Documents
@@ -2465,9 +2304,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2484,17 +2323,10 @@ class DocumentsApi:
     async def search_documents_api_v1_documents_search_post_without_preload_content(
         self,
         document_search_request: DocumentSearchRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Search Documents
@@ -2533,9 +2365,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2555,17 +2387,17 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2577,35 +2409,35 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/documents/search',
+            method="POST",
+            resource_path="/api/v1/documents/search",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2626,17 +2458,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_update: DocumentUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentResponse:
         """Update Document
@@ -2678,9 +2503,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2698,17 +2523,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_update: DocumentUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentResponse]:
         """Update Document
@@ -2750,9 +2568,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2770,17 +2588,10 @@ class DocumentsApi:
         self,
         document_id: StrictStr,
         document_update: DocumentUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Document
@@ -2822,9 +2633,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2845,21 +2656,21 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if document_id is not None:
-            _path_params['document_id'] = document_id
+            _path_params["document_id"] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2869,35 +2680,35 @@ class DocumentsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='PUT',
-            resource_path='/api/v1/documents/{document_id}',
+            method="PUT",
+            resource_path="/api/v1/documents/{document_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2916,24 +2727,17 @@ class DocumentsApi:
     @validate_call
     async def upload_document_api_v1_documents_upload_post(
         self,
-        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        title: Optional[StrictStr] = None,
-        description: Optional[StrictStr] = None,
-        tags: Optional[StrictStr] = None,
-        chunk_size: Optional[StrictInt] = None,
-        chunk_overlap: Optional[StrictInt] = None,
-        is_public: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        file: StrictBytes | StrictStr | tuple[StrictStr, StrictBytes],
+        title: StrictStr | None = None,
+        description: StrictStr | None = None,
+        tags: StrictStr | None = None,
+        chunk_size: StrictInt | None = None,
+        chunk_overlap: StrictInt | None = None,
+        is_public: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentResponse:
         """Upload Document
@@ -2990,9 +2794,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3008,24 +2812,17 @@ class DocumentsApi:
     @validate_call
     async def upload_document_api_v1_documents_upload_post_with_http_info(
         self,
-        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        title: Optional[StrictStr] = None,
-        description: Optional[StrictStr] = None,
-        tags: Optional[StrictStr] = None,
-        chunk_size: Optional[StrictInt] = None,
-        chunk_overlap: Optional[StrictInt] = None,
-        is_public: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        file: StrictBytes | StrictStr | tuple[StrictStr, StrictBytes],
+        title: StrictStr | None = None,
+        description: StrictStr | None = None,
+        tags: StrictStr | None = None,
+        chunk_size: StrictInt | None = None,
+        chunk_overlap: StrictInt | None = None,
+        is_public: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentResponse]:
         """Upload Document
@@ -3082,9 +2879,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3100,24 +2897,17 @@ class DocumentsApi:
     @validate_call
     async def upload_document_api_v1_documents_upload_post_without_preload_content(
         self,
-        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
-        title: Optional[StrictStr] = None,
-        description: Optional[StrictStr] = None,
-        tags: Optional[StrictStr] = None,
-        chunk_size: Optional[StrictInt] = None,
-        chunk_overlap: Optional[StrictInt] = None,
-        is_public: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        file: StrictBytes | StrictStr | tuple[StrictStr, StrictBytes],
+        title: StrictStr | None = None,
+        description: StrictStr | None = None,
+        tags: StrictStr | None = None,
+        chunk_size: StrictInt | None = None,
+        chunk_overlap: StrictInt | None = None,
+        is_public: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Upload Document
@@ -3174,9 +2964,9 @@ class DocumentsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "DocumentResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3202,69 +2992,69 @@ class DocumentsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         # process the form parameters
         if file is not None:
-            _files['file'] = file
+            _files["file"] = file
         if title is not None:
-            _form_params.append(('title', title))
+            _form_params.append(("title", title))
         if description is not None:
-            _form_params.append(('description', description))
+            _form_params.append(("description", description))
         if tags is not None:
-            _form_params.append(('tags', tags))
+            _form_params.append(("tags", tags))
         if chunk_size is not None:
-            _form_params.append(('chunk_size', chunk_size))
+            _form_params.append(("chunk_size", chunk_size))
         if chunk_overlap is not None:
-            _form_params.append(('chunk_overlap', chunk_overlap))
+            _form_params.append(("chunk_overlap", chunk_overlap))
         if is_public is not None:
-            _form_params.append(('is_public', is_public))
+            _form_params.append(("is_public", is_public))
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'multipart/form-data'
+                        "multipart/form-data"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/documents/upload',
+            method="POST",
+            resource_path="/api/v1/documents/upload",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

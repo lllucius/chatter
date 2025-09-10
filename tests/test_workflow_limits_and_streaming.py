@@ -222,7 +222,7 @@ class TestWorkflowExecutionService:
     def teardown_method(self):
         """Clean up after each test."""
         # Clear any workflow state that might interfere with other tests
-        if hasattr(self.workflow_service, 'limit_manager'):
+        if hasattr(self.workflow_service, "limit_manager"):
             self.workflow_service.limit_manager.active_workflows.clear()
             self.workflow_service.limit_manager.user_workflow_counts.clear()
 
@@ -415,7 +415,7 @@ class TestWorkflowExecutionService:
 
         # Mock the workflow manager to avoid the 'str' object astream issue
         with patch(
-            'chatter.core.dependencies.get_workflow_manager'
+            "chatter.core.dependencies.get_workflow_manager"
         ) as mock_get_manager:
             mock_workflow_manager = AsyncMock()
             mock_get_manager.return_value = mock_workflow_manager
@@ -470,7 +470,7 @@ class TestWorkflowExecutionService:
         """Test streaming workflow timeout."""
         # Mock workflow manager to avoid the 'str' object astream issue
         with patch(
-            'chatter.core.dependencies.get_workflow_manager'
+            "chatter.core.dependencies.get_workflow_manager"
         ) as mock_get_manager:
             mock_workflow_manager = AsyncMock()
             mock_get_manager.return_value = mock_workflow_manager
@@ -531,7 +531,7 @@ class TestWorkflowExecutionService:
         """Test enhanced token streaming for all workflow types."""
         # Mock workflow manager
         with patch(
-            'chatter.core.dependencies.get_workflow_manager'
+            "chatter.core.dependencies.get_workflow_manager"
         ) as mock_get_manager:
             mock_workflow_manager = MagicMock()
             mock_get_manager.return_value = mock_workflow_manager

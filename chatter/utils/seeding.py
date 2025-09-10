@@ -207,7 +207,7 @@ class DatabaseSeeder:
 
     async def __aexit__(self, exc_type, exc_val, exc_tb):
         """Async context manager exit."""
-        if self._should_close_session and hasattr(self, 'db_manager'):
+        if self._should_close_session and hasattr(self, "db_manager"):
             await self.db_manager.__aexit__(exc_type, exc_val, exc_tb)
 
     async def seed_database(
@@ -424,7 +424,7 @@ class DatabaseSeeder:
                 return None
 
         # Generate secure random password
-        admin_password = ''.join(
+        admin_password = "".join(
             secrets.choice(
                 string.ascii_letters + string.digits + "!@#$%^&*"
             )

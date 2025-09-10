@@ -350,7 +350,7 @@ class ConversationalAgent(BaseAgent):
             response = await self.llm.ainvoke(messages)
             response_text = (
                 str(response.content)
-                if hasattr(response, 'content')
+                if hasattr(response, "content")
                 else str(response)
             )
 
@@ -441,7 +441,7 @@ class TaskOrientedAgent(BaseAgent):
                 last_message = result["messages"][-1]
                 response_text = (
                     str(last_message.content)
-                    if hasattr(last_message, 'content')
+                    if hasattr(last_message, "content")
                     else str(last_message)
                 )
 
@@ -893,7 +893,7 @@ class AgentManager:
                 profiles = [
                     p
                     for p in profiles
-                    if getattr(p, 'created_by', None) == user_id
+                    if getattr(p, "created_by", None) == user_id
                 ]
 
             total = len(profiles)
@@ -925,10 +925,10 @@ class AgentManager:
 
             # If LLM-related fields changed, recreate LLM
             llm_fields = {
-                'primary_llm',
-                'fallback_llm',
-                'temperature',
-                'max_tokens',
+                "primary_llm",
+                "fallback_llm",
+                "temperature",
+                "max_tokens",
             }
             if any(field in update_data for field in llm_fields):
                 new_llm = await self._create_default_llm(
@@ -1320,7 +1320,7 @@ class SpecializedAgent(BaseAgent):
         """
         super().__init__(profile, llm)
         self.specialization = getattr(
-            profile, 'specialization', 'general'
+            profile, "specialization", "general"
         )
         self.domain_knowledge: dict[str, Any] = {}
 
@@ -1373,7 +1373,7 @@ class SpecializedAgent(BaseAgent):
                 user_message=message,
                 agent_response=(
                     str(response.content)
-                    if hasattr(response, 'content')
+                    if hasattr(response, "content")
                     else str(response)
                 ),
                 tools_used=[],
@@ -1383,7 +1383,7 @@ class SpecializedAgent(BaseAgent):
 
             return (
                 str(response.content)
-                if hasattr(response, 'content')
+                if hasattr(response, "content")
                 else str(response)
             )
 

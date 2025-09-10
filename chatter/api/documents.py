@@ -617,7 +617,7 @@ async def download_document(
         return FileResponse(
             path=document.file_path,
             filename=f"document_{document_id}",
-            media_type='application/octet-stream',
+            media_type="application/octet-stream",
         )
 
     except ProblemException:

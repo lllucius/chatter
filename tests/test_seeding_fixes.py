@@ -16,16 +16,16 @@ class TestSeedingEnumFixes:
 
     def test_prompt_category_enums_exist(self):
         """Test that corrected enum values exist."""
-        assert hasattr(PromptCategory, 'CODING')
-        assert hasattr(PromptCategory, 'ANALYTICAL')
+        assert hasattr(PromptCategory, "CODING")
+        assert hasattr(PromptCategory, "ANALYTICAL")
         assert PromptCategory.CODING.value == "coding"
         assert PromptCategory.ANALYTICAL.value == "analytical"
 
     def test_profile_type_enums_exist(self):
         """Test that profile type enums exist."""
-        assert hasattr(ProfileType, 'ANALYTICAL')
-        assert hasattr(ProfileType, 'CREATIVE')
-        assert hasattr(ProfileType, 'CONVERSATIONAL')
+        assert hasattr(ProfileType, "ANALYTICAL")
+        assert hasattr(ProfileType, "CREATIVE")
+        assert hasattr(ProfileType, "CONVERSATIONAL")
 
 
 class TestDatabaseSeederBasics:

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,29 +13,30 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
+from typing import Any, ClassVar, Dict, List, Optional, Set
+
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Annotated, Self
+
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ToolPermissionUpdate(BaseModel):
     """
     Schema for updating tool permissions.
     """ # noqa: E501
-    access_level: Optional[ToolAccessLevel] = None
-    rate_limit_per_hour: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
-    rate_limit_per_day: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
-    allowed_hours: Optional[List[StrictInt]] = None
-    allowed_days: Optional[List[StrictInt]] = None
-    expires_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["access_level", "rate_limit_per_hour", "rate_limit_per_day", "allowed_hours", "allowed_days", "expires_at"]
+    access_level: ToolAccessLevel | None = None
+    rate_limit_per_hour: Annotated[int, Field(strict=True, ge=0)] | None = None
+    rate_limit_per_day: Annotated[int, Field(strict=True, ge=0)] | None = None
+    allowed_hours: list[StrictInt] | None = None
+    allowed_days: list[StrictInt] | None = None
+    expires_at: datetime | None = None
+    __properties: ClassVar[list[str]] = ["access_level", "rate_limit_per_hour", "rate_limit_per_day", "allowed_hours", "allowed_days", "expires_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,11 +55,11 @@ class ToolPermissionUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ToolPermissionUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -69,7 +69,7 @@ class ToolPermissionUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -80,37 +80,37 @@ class ToolPermissionUpdate(BaseModel):
         # set to None if access_level (nullable) is None
         # and model_fields_set contains the field
         if self.access_level is None and "access_level" in self.model_fields_set:
-            _dict['access_level'] = None
+            _dict["access_level"] = None
 
         # set to None if rate_limit_per_hour (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_per_hour is None and "rate_limit_per_hour" in self.model_fields_set:
-            _dict['rate_limit_per_hour'] = None
+            _dict["rate_limit_per_hour"] = None
 
         # set to None if rate_limit_per_day (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_per_day is None and "rate_limit_per_day" in self.model_fields_set:
-            _dict['rate_limit_per_day'] = None
+            _dict["rate_limit_per_day"] = None
 
         # set to None if allowed_hours (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_hours is None and "allowed_hours" in self.model_fields_set:
-            _dict['allowed_hours'] = None
+            _dict["allowed_hours"] = None
 
         # set to None if allowed_days (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_days is None and "allowed_days" in self.model_fields_set:
-            _dict['allowed_days'] = None
+            _dict["allowed_days"] = None
 
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
-            _dict['expires_at'] = None
+            _dict["expires_at"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ToolPermissionUpdate from a dict"""
         if obj is None:
             return None

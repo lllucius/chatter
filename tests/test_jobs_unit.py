@@ -61,7 +61,7 @@ class TestJobsUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_create_job_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -98,7 +98,7 @@ class TestJobsUnit:
         assert data["status"] == "pending"
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_create_job_invalid_function(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -134,7 +134,7 @@ class TestJobsUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_list_jobs_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -171,7 +171,7 @@ class TestJobsUnit:
         assert data["total"] == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_list_jobs_with_filters(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -195,7 +195,7 @@ class TestJobsUnit:
         assert "status" in call_args
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_get_job_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -224,7 +224,7 @@ class TestJobsUnit:
         assert data["result"] == "Job completed successfully"
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_get_job_not_found(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -250,7 +250,7 @@ class TestJobsUnit:
         assert response.status_code == 400
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_cancel_job_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -270,7 +270,7 @@ class TestJobsUnit:
         assert data["action"] == "cancel"
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_cancel_job_not_found(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -297,7 +297,7 @@ class TestJobsUnit:
         assert response.status_code == 400
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_get_job_stats_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -328,7 +328,7 @@ class TestJobsUnit:
         assert data["queue_size"] == 8
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_cleanup_jobs_success(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -348,7 +348,7 @@ class TestJobsUnit:
         assert data["remaining_count"] == 75
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_job_queue_error_handling(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):
@@ -368,7 +368,7 @@ class TestJobsUnit:
         assert response.status_code == 500
 
     @pytest.mark.unit
-    @patch('chatter.api.jobs.job_queue')
+    @patch("chatter.api.jobs.job_queue")
     async def test_list_jobs_pagination(
         self, mock_job_queue, client: AsyncClient, auth_headers: dict
     ):

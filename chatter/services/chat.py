@@ -16,15 +16,13 @@ from chatter.models.conversation import (
 )
 from chatter.schemas.chat import (
     ChatRequest,
+    StreamingChatChunk,
 )
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
-)
-from chatter.schemas.chat import (
-    StreamingChatChunk,
 )
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService
@@ -276,7 +274,7 @@ class ChatService:
     ) -> tuple[Conversation, Message]:
         """Process a synchronous chat request with performance monitoring."""
         correlation_id = get_correlation_id()
-        start_time = __import__('time').time()
+        start_time = __import__("time").time()
 
         async with self.performance_monitor.measure_query(
             "chat_sync_request"
@@ -352,7 +350,7 @@ class ChatService:
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Process a streaming chat request."""
         correlation_id = get_correlation_id()
-        start_time = __import__('time').time()
+        start_time = __import__("time").time()
 
         try:
             # Shared conversation setup logic
@@ -476,7 +474,7 @@ class ChatService:
         status_code: int,
     ) -> None:
         """Record request metrics."""
-        duration_ms = (__import__('time').time() - start_time) * 1000
+        duration_ms = (__import__("time").time() - start_time) * 1000
         record_request_metrics(
             method="POST",
             path="/chat",

@@ -6,17 +6,15 @@ import os
 import sys
 from contextlib import asynccontextmanager
 
-from rich.console import Console
-from chatter_sdk import ApiClient, Configuration
-from chatter_sdk.exceptions import ApiException
-
 # Import all the API classes that commands might need
 from chatter_sdk import (
     ABTestingApi,
     AgentsApi,
     AnalyticsApi,
+    ApiClient,
     AuthenticationApi,
     ChatApi,
+    Configuration,
     DataManagementApi,
     DocumentsApi,
     EventsApi,
@@ -28,6 +26,8 @@ from chatter_sdk import (
     PromptsApi,
     ToolServersApi,
 )
+from chatter_sdk.exceptions import ApiException
+from rich.console import Console
 
 # Initialize console
 console = Console()
@@ -154,18 +154,18 @@ def run_async(async_func):
             elif e.status == 404:
                 console.print("[red]Resource not found.[/red]")
                 console.print(f"[dim]Status: {e.status}[/dim]")
-                if hasattr(e, 'body') and e.body:
+                if hasattr(e, "body") and e.body:
                     console.print(f"[dim]Details: {e.body}[/dim]")
                 sys.exit(1)
             elif e.status >= 500:
                 console.print("[red]Server error occurred.[/red]")
                 console.print(f"[dim]Status: {e.status}[/dim]")
-                if hasattr(e, 'reason') and e.reason:
+                if hasattr(e, "reason") and e.reason:
                     console.print(f"[dim]Details: {e.reason}[/dim]")
                 sys.exit(1)
             else:
                 console.print(f"[red]API error: {e.status} - {e.reason}[/red]")
-                if hasattr(e, 'body') and e.body:
+                if hasattr(e, "body") and e.body:
                     console.print(f"[dim]Details: {e.body}[/dim]")
                 sys.exit(1)
         except Exception as e:

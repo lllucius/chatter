@@ -4,8 +4,11 @@ import json
 import subprocess
 from pathlib import Path
 
-from scripts.utils.config import TypeScriptSDKConfig, get_openapi_generator_config
-from scripts.utils.files import ensure_directory, clean_temp_files
+from scripts.utils.config import (
+    TypeScriptSDKConfig,
+    get_openapi_generator_config,
+)
+from scripts.utils.files import clean_temp_files, ensure_directory
 
 
 class TypeScriptSDKGenerator:
@@ -52,7 +55,7 @@ class TypeScriptSDKGenerator:
 
             # Create temporary config file
             config_file = self.config.output_dir / "generator-config.json"
-            with open(config_file, 'w') as f:
+            with open(config_file, "w") as f:
                 json.dump(generator_config, f, indent=2)
             self.temp_files.append(config_file)
 

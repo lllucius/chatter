@@ -401,10 +401,10 @@ class MCPToolService:
                 if any(
                     danger in value.lower()
                     for danger in [
-                        '<script',
-                        'javascript:',
-                        'data:',
-                        'vbscript:',
+                        "<script",
+                        "javascript:",
+                        "data:",
+                        "vbscript:",
                     ]
                 ):
                     raise ValueError(
@@ -780,7 +780,7 @@ class BuiltInTools:
         """Calculate a mathematical expression safely."""
         try:
             # Basic safety - only allow basic math operations
-            allowed_chars = set('0123456789+-*/().')
+            allowed_chars = set("0123456789+-*/().")
             if not all(
                 c in allowed_chars or c.isspace() for c in expression
             ):

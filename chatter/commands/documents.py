@@ -1,15 +1,15 @@
 """Document management commands for the CLI."""
 
 import json
-import typer
 from pathlib import Path
+
+import typer
 from rich.panel import Panel
-from rich.prompt import Prompt, Confirm
-from rich.table import Table
 from rich.progress import track
+from rich.prompt import Confirm, Prompt
+from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Documents Commands
 documents_app = typer.Typer(help="Document management commands")
@@ -41,12 +41,12 @@ async def list_documents(
         for doc in response.documents:
             table.add_row(
                 str(doc.id),
-                getattr(doc, 'filename', getattr(doc, 'name', 'Unknown')),
-                getattr(doc, 'content_type', 'unknown'),
-                getattr(doc, 'status', 'unknown'),
+                getattr(doc, "filename", getattr(doc, "name", "Unknown")),
+                getattr(doc, "content_type", "unknown"),
+                getattr(doc, "status", "unknown"),
                 (
                     f"{getattr(doc, 'size', 0):,} bytes"
-                    if hasattr(doc, 'size')
+                    if hasattr(doc, "size")
                     else "N/A"
                 ),
             )
@@ -95,15 +95,15 @@ async def upload_document(
         return
 
     async with get_client() as sdk_client:
-        with open(file_path_obj, 'rb') as f:
+        with open(file_path_obj, "rb") as f:
             file_content = f.read()
 
         # Create the upload request
         upload_data = {
-            'filename': file_path_obj.name,
-            'content_type': 'application/octet-stream',  # Default type
-            'description': description or '',
-            'tags': [tag.strip() for tag in tags.split(',')] if tags else [],
+            "filename": file_path_obj.name,
+            "content_type": "application/octet-stream",  # Default type
+            "description": description or "",
+            "tags": [tag.strip() for tag in tags.split(",")] if tags else [],
         }
 
         response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
@@ -138,10 +138,10 @@ async def download_document(
         if output_path:
             output_file = Path(output_path)
         else:
-            output_file = Path(getattr(doc_info, 'filename', f'document_{document_id}'))
+            output_file = Path(getattr(doc_info, "filename", f"document_{document_id}"))
 
         # Write to file
-        with open(output_file, 'wb') as f:
+        with open(output_file, "wb") as f:
             f.write(content)
 
         console.print(f"✅ [green]Downloaded to: {output_file}[/green]")
@@ -181,7 +181,9 @@ async def search_documents(
 ):
     """Search documents using vector similarity."""
     async with get_client() as sdk_client:
-        from chatter_sdk.models.document_search_request import DocumentSearchRequest
+        from chatter_sdk.models.document_search_request import (
+            DocumentSearchRequest,
+        )
 
         search_request = DocumentSearchRequest(
             query=query,
@@ -204,14 +206,14 @@ async def search_documents(
         table.add_column("Snippet", style="dim", max_width=50)
 
         for result in response.results:
-            score = getattr(result, 'similarity_score', 0.0)
-            snippet = getattr(result, 'snippet', 'No snippet available')
+            score = getattr(result, "similarity_score", 0.0)
+            snippet = getattr(result, "snippet", "No snippet available")
             if len(snippet) > 100:
                 snippet = snippet[:97] + "..."
 
             table.add_row(
                 str(result.document.id),
-                getattr(result.document, 'filename', 'Unknown'),
+                getattr(result.document, "filename", "Unknown"),
                 f"{score:.3f}",
                 snippet,
             )
@@ -229,8 +231,8 @@ async def process_document(
     """Process a document for content extraction and vectorization."""
     async with get_client() as sdk_client:
         process_request = {
-            'processor_type': processor,
-            'force_reprocess': force,
+            "processor_type": processor,
+            "force_reprocess": force,
         }
 
         response = await sdk_client.documents_api.process_document_api_v1_documents_document_id_process_post(
@@ -239,9 +241,9 @@ async def process_document(
         )
 
         console.print(f"✅ [green]Processing started for document {document_id}[/green]")
-        if hasattr(response, 'job_id'):
+        if hasattr(response, "job_id"):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
-        if hasattr(response, 'status'):
+        if hasattr(response, "status"):
             console.print(f"[dim]Status: {response.status}[/dim]")
 
 
@@ -268,12 +270,12 @@ async def list_document_chunks(
         table.add_column("Content Preview", style="dim", max_width=60)
 
         for i, chunk in enumerate(response.chunks):
-            content = getattr(chunk, 'content', 'No content')
+            content = getattr(chunk, "content", "No content")
             preview = content[:100] + "..." if len(content) > 100 else content
             
             table.add_row(
                 str(i),
-                getattr(chunk, 'chunk_type', 'text'),
+                getattr(chunk, "chunk_type", "text"),
                 f"{len(content)} chars",
                 preview,
             )
@@ -292,15 +294,15 @@ async def document_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_documents'):
+        if hasattr(response, "total_documents"):
             table.add_row("Total Documents", str(response.total_documents))
-        if hasattr(response, 'processed_documents'):
+        if hasattr(response, "processed_documents"):
             table.add_row("Processed Documents", str(response.processed_documents))
-        if hasattr(response, 'total_size'):
+        if hasattr(response, "total_size"):
             table.add_row("Total Size", f"{response.total_size:,} bytes")
-        if hasattr(response, 'total_chunks'):
+        if hasattr(response, "total_chunks"):
             table.add_row("Total Chunks", str(response.total_chunks))
-        if hasattr(response, 'avg_processing_time'):
+        if hasattr(response, "avg_processing_time"):
             table.add_row(
                 "Avg Processing Time",
                 f"{response.avg_processing_time:.2f}s",
@@ -341,7 +343,7 @@ async def batch_upload_documents(
         for file_path in track(files, description="Uploading files..."):
             try:
                 file_obj = Path(file_path)
-                with open(file_obj, 'rb') as f:
+                with open(file_obj, "rb") as f:
                     file_content = f.read()
 
                 response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
@@ -367,9 +369,9 @@ async def update_document(
     """Update document metadata."""
     update_data = {}
     if description:
-        update_data['description'] = description
+        update_data["description"] = description
     if tags:
-        update_data['tags'] = [tag.strip() for tag in tags.split(',')]
+        update_data["tags"] = [tag.strip() for tag in tags.split(",")]
 
     if not update_data:
         console.print("❌ [red]No updates specified. Use --description or --tags[/red]")

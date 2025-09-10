@@ -6,9 +6,10 @@ Script to generate TypeScript models from OpenAPI schema
 import json
 import re
 from pathlib import Path
-from typing import Dict, Any, List, Union, Optional
+from typing import Any, Dict, List, Optional, Union
 
-def typescript_type_from_schema(schema: Dict[str, Any], schema_name: str = "") -> str:
+
+def typescript_type_from_schema(schema: dict[str, Any], schema_name: str = "") -> str:
     """Convert OpenAPI schema to TypeScript type"""
     
     if "$ref" in schema:
@@ -83,7 +84,7 @@ def typescript_type_from_schema(schema: Dict[str, Any], schema_name: str = "") -
     
     return "unknown"
 
-def generate_inline_interface(schema: Dict[str, Any]) -> str:
+def generate_inline_interface(schema: dict[str, Any]) -> str:
     """Generate inline interface for object schema"""
     properties = schema.get("properties", {})
     required = schema.get("required", [])
@@ -94,7 +95,7 @@ def generate_inline_interface(schema: Dict[str, Any]) -> str:
         optional = "" if prop_name in required else "?"
         
         # Handle property names that need escaping
-        if re.match(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$', prop_name):
+        if re.match(r"^[a-zA-Z_$][a-zA-Z0-9_$]*$", prop_name):
             lines.append(f"  {prop_name}{optional}: {prop_type};")
         else:
             lines.append(f'  "{prop_name}"{optional}: {prop_type};')
@@ -102,7 +103,7 @@ def generate_inline_interface(schema: Dict[str, Any]) -> str:
     lines.append("}")
     return "\n".join(lines)
 
-def extract_type_references(typescript_content: str) -> List[str]:
+def extract_type_references(typescript_content: str) -> list[str]:
     """Extract all custom type references from TypeScript content"""
     # Find type references specifically in property type annotations
     # Look for patterns like "propertyName: TypeName" or "TypeName[]" or "TypeName | null" etc.
@@ -118,16 +119,16 @@ def extract_type_references(typescript_content: str) -> List[str]:
     
     # Built-in TypeScript types to exclude
     builtin_types = {
-        'Record', 'Array', 'Promise', 'Date', 'RegExp', 'Error', 'Object',
-        'String', 'Number', 'Boolean', 'Function', 'Map', 'Set', 'WeakMap', 'WeakSet',
-        'ReadonlyArray', 'Partial', 'Required', 'Pick', 'Omit', 'Exclude', 'Extract',
-        'string', 'number', 'boolean', 'null', 'undefined', 'unknown', 'any', 'void'
+        "Record", "Array", "Promise", "Date", "RegExp", "Error", "Object",
+        "String", "Number", "Boolean", "Function", "Map", "Set", "WeakMap", "WeakSet",
+        "ReadonlyArray", "Partial", "Required", "Pick", "Omit", "Exclude", "Extract",
+        "string", "number", "boolean", "null", "undefined", "unknown", "any", "void"
     }
     
     for property_type in property_matches:
         # Extract type names from the property type
         # Handle arrays, unions, optionals, etc.
-        type_pattern = r'\b[A-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b'
+        type_pattern = r"\b[A-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b"
         type_names = re.findall(type_pattern, property_type)
         
         for type_name in type_names:
@@ -137,7 +138,7 @@ def extract_type_references(typescript_content: str) -> List[str]:
     
     return custom_types
 
-def generate_typescript_interface(name: str, schema: Dict[str, Any]) -> tuple[str, List[str]]:
+def generate_typescript_interface(name: str, schema: dict[str, Any]) -> tuple[str, list[str]]:
     """Generate a TypeScript interface from OpenAPI schema and return imports needed"""
     
     # Handle enums
@@ -175,7 +176,7 @@ def generate_typescript_interface(name: str, schema: Dict[str, Any]) -> tuple[st
             lines.append(f"  /** {description} */")
         
         # Handle property names that need escaping
-        if re.match(r'^[a-zA-Z_$][a-zA-Z0-9_$]*$', prop_name):
+        if re.match(r"^[a-zA-Z_$][a-zA-Z0-9_$]*$", prop_name):
             lines.append(f"  {prop_name}{optional}: {prop_type};")
         else:
             lines.append(f'  "{prop_name}"{optional}: {prop_type};')

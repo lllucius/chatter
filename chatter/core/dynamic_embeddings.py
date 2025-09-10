@@ -33,10 +33,10 @@ def _to_name(name: str, dim: int) -> str:
     name = name.lower()
 
     # Replace invalid chars with underscore
-    name = re.sub(r'[^a-z0-9_]', '_', name)
+    name = re.sub(r"[^a-z0-9_]", "_", name)
 
     # Ensure it starts with a letter or underscore
-    if not re.match(r'^[a-z_]', name):
+    if not re.match(r"^[a-z_]", name):
         name = "_" + name
 
     # Combine and truncate to max Postgres identifier length

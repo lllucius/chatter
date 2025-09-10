@@ -158,7 +158,7 @@ class TestStreamingService:
         assert "last_activity" in stream_info
 
     @pytest.mark.asyncio
-    @patch('chatter.services.streaming.get_correlation_id')
+    @patch("chatter.services.streaming.get_correlation_id")
     async def test_create_stream_auto_correlation_id(
         self, mock_get_correlation_id
     ):
@@ -192,7 +192,7 @@ class TestStreamingService:
         assert metrics["error_count"] == 0
 
     @pytest.mark.asyncio
-    @patch('chatter.services.streaming.record_workflow_metrics')
+    @patch("chatter.services.streaming.record_workflow_metrics")
     async def test_end_stream(self, mock_record_metrics):
         """Test ending a stream and getting metrics."""
         stream_id = "end_test_stream"
@@ -287,7 +287,7 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, 'event_type')
+            if hasattr(e, "event_type")
             and e.event_type == StreamingEventType.TOKEN
         ]
         assert len(token_events) > 0
@@ -589,7 +589,7 @@ class TestStreamingService:
         # Simulate an error during streaming
         with patch.object(
             self.service,
-            'stream_event',
+            "stream_event",
             side_effect=StreamingError("Test error"),
         ):
             with pytest.raises(StreamingError):

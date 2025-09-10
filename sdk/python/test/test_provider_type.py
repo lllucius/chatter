@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -17,6 +16,7 @@ import unittest
 
 from chatter_sdk.models.provider_type import ProviderType
 
+
 class TestProviderType(unittest.TestCase):
     """ProviderType unit test stubs"""
 
@@ -30,5 +30,5 @@ class TestProviderType(unittest.TestCase):
         """Test ProviderType"""
         # inst = ProviderType()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

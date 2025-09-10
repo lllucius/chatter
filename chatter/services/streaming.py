@@ -422,7 +422,7 @@ class StreamingService:
 
     def _is_sentence_boundary(self, token: str) -> bool:
         """Check if token represents a sentence boundary."""
-        return token.strip() in {'.', '!', '?', '\n', '\n\n'}
+        return token.strip() in {".", "!", "?", "\n", "\n\n"}
 
     async def get_stream_status(
         self, stream_id: str

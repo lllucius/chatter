@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -17,6 +16,7 @@ import unittest
 
 from chatter_sdk.models.agent_status import AgentStatus
 
+
 class TestAgentStatus(unittest.TestCase):
     """AgentStatus unit test stubs"""
 
@@ -30,5 +30,5 @@ class TestAgentStatus(unittest.TestCase):
         """Test AgentStatus"""
         # inst = AgentStatus()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

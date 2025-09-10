@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,27 +12,38 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictStr, field_validator
-from typing import List, Optional
-from typing_extensions import Annotated
-from chatter_sdk.models.available_providers_response import AvailableProvidersResponse
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    validate_call,
+)
+from typing import Annotated
+
+from chatter_sdk.api_client import ApiClient, RequestSerialized
+from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.available_providers_response import (
+    AvailableProvidersResponse,
+)
 from chatter_sdk.models.profile_clone_request import ProfileCloneRequest
 from chatter_sdk.models.profile_create import ProfileCreate
-from chatter_sdk.models.profile_delete_response import ProfileDeleteResponse
+from chatter_sdk.models.profile_delete_response import (
+    ProfileDeleteResponse,
+)
 from chatter_sdk.models.profile_list_response import ProfileListResponse
 from chatter_sdk.models.profile_response import ProfileResponse
-from chatter_sdk.models.profile_stats_response import ProfileStatsResponse
+from chatter_sdk.models.profile_stats_response import (
+    ProfileStatsResponse,
+)
 from chatter_sdk.models.profile_test_request import ProfileTestRequest
 from chatter_sdk.models.profile_test_response import ProfileTestResponse
 from chatter_sdk.models.profile_type import ProfileType
 from chatter_sdk.models.profile_update import ProfileUpdate
-
-from chatter_sdk.api_client import ApiClient, RequestSerialized
-from chatter_sdk.api_response import ApiResponse
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -55,17 +65,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_clone_request: ProfileCloneRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileResponse:
         """Clone Profile
@@ -107,9 +110,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -127,17 +130,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_clone_request: ProfileCloneRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileResponse]:
         """Clone Profile
@@ -179,9 +175,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -199,17 +195,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_clone_request: ProfileCloneRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Clone Profile
@@ -251,9 +240,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -274,21 +263,21 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if profile_id is not None:
-            _path_params['profile_id'] = profile_id
+            _path_params["profile_id"] = profile_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -298,35 +287,35 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/profiles/{profile_id}/clone',
+            method="POST",
+            resource_path="/api/v1/profiles/{profile_id}/clone",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -346,17 +335,10 @@ class ProfilesApi:
     async def create_profile_api_v1_profiles_post(
         self,
         profile_create: ProfileCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileResponse:
         """Create Profile
@@ -395,9 +377,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -414,17 +396,10 @@ class ProfilesApi:
     async def create_profile_api_v1_profiles_post_with_http_info(
         self,
         profile_create: ProfileCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileResponse]:
         """Create Profile
@@ -463,9 +438,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -482,17 +457,10 @@ class ProfilesApi:
     async def create_profile_api_v1_profiles_post_without_preload_content(
         self,
         profile_create: ProfileCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Profile
@@ -531,9 +499,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -553,17 +521,17 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -575,35 +543,35 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/profiles/',
+            method="POST",
+            resource_path="/api/v1/profiles/",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -623,17 +591,10 @@ class ProfilesApi:
     async def delete_profile_api_v1_profiles_profile_id_delete(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileDeleteResponse:
         """Delete Profile
@@ -672,9 +633,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -691,17 +652,10 @@ class ProfilesApi:
     async def delete_profile_api_v1_profiles_profile_id_delete_with_http_info(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileDeleteResponse]:
         """Delete Profile
@@ -740,9 +694,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -759,17 +713,10 @@ class ProfilesApi:
     async def delete_profile_api_v1_profiles_profile_id_delete_without_preload_content(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Profile
@@ -808,9 +755,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -830,21 +777,21 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if profile_id is not None:
-            _path_params['profile_id'] = profile_id
+            _path_params["profile_id"] = profile_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -852,22 +799,22 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/api/v1/profiles/{profile_id}',
+            method="DELETE",
+            resource_path="/api/v1/profiles/{profile_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -886,17 +833,10 @@ class ProfilesApi:
     @validate_call
     async def get_available_providers_api_v1_profiles_providers_available_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> AvailableProvidersResponse:
         """Get Available Providers
@@ -932,8 +872,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableProvidersResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableProvidersResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -949,17 +889,10 @@ class ProfilesApi:
     @validate_call
     async def get_available_providers_api_v1_profiles_providers_available_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[AvailableProvidersResponse]:
         """Get Available Providers
@@ -995,8 +928,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableProvidersResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableProvidersResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1012,17 +945,10 @@ class ProfilesApi:
     @validate_call
     async def get_available_providers_api_v1_profiles_providers_available_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Available Providers
@@ -1058,8 +984,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableProvidersResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableProvidersResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1078,17 +1004,17 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1098,22 +1024,22 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/profiles/providers/available',
+            method="GET",
+            resource_path="/api/v1/profiles/providers/available",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1133,17 +1059,10 @@ class ProfilesApi:
     async def get_profile_api_v1_profiles_profile_id_get(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileResponse:
         """Get Profile
@@ -1182,9 +1101,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1201,17 +1120,10 @@ class ProfilesApi:
     async def get_profile_api_v1_profiles_profile_id_get_with_http_info(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileResponse]:
         """Get Profile
@@ -1250,9 +1162,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1269,17 +1181,10 @@ class ProfilesApi:
     async def get_profile_api_v1_profiles_profile_id_get_without_preload_content(
         self,
         profile_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Profile
@@ -1318,9 +1223,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1340,21 +1245,21 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if profile_id is not None:
-            _path_params['profile_id'] = profile_id
+            _path_params["profile_id"] = profile_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1362,22 +1267,22 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/profiles/{profile_id}',
+            method="GET",
+            resource_path="/api/v1/profiles/{profile_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1396,17 +1301,10 @@ class ProfilesApi:
     @validate_call
     async def get_profile_stats_api_v1_profiles_stats_overview_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileStatsResponse:
         """Get Profile Stats
@@ -1442,8 +1340,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1459,17 +1357,10 @@ class ProfilesApi:
     @validate_call
     async def get_profile_stats_api_v1_profiles_stats_overview_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileStatsResponse]:
         """Get Profile Stats
@@ -1505,8 +1396,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1522,17 +1413,10 @@ class ProfilesApi:
     @validate_call
     async def get_profile_stats_api_v1_profiles_stats_overview_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Profile Stats
@@ -1568,8 +1452,8 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1588,17 +1472,17 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1608,22 +1492,22 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/profiles/stats/overview',
+            method="GET",
+            resource_path="/api/v1/profiles/stats/overview",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1642,25 +1526,18 @@ class ProfilesApi:
     @validate_call
     async def list_profiles_api_v1_profiles_get(
         self,
-        profile_type: Annotated[Optional[ProfileType], Field(description="Filter by profile type")] = None,
-        llm_provider: Annotated[Optional[StrictStr], Field(description="Filter by LLM provider")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        profile_type: Annotated[ProfileType | None, Field(description="Filter by profile type")] = None,
+        llm_provider: Annotated[StrictStr | None, Field(description="Filter by LLM provider")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        is_public: Annotated[StrictBool | None, Field(description="Filter by public status")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileListResponse:
         """List Profiles
@@ -1720,9 +1597,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1738,25 +1615,18 @@ class ProfilesApi:
     @validate_call
     async def list_profiles_api_v1_profiles_get_with_http_info(
         self,
-        profile_type: Annotated[Optional[ProfileType], Field(description="Filter by profile type")] = None,
-        llm_provider: Annotated[Optional[StrictStr], Field(description="Filter by LLM provider")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        profile_type: Annotated[ProfileType | None, Field(description="Filter by profile type")] = None,
+        llm_provider: Annotated[StrictStr | None, Field(description="Filter by LLM provider")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        is_public: Annotated[StrictBool | None, Field(description="Filter by public status")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileListResponse]:
         """List Profiles
@@ -1816,9 +1686,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1834,25 +1704,18 @@ class ProfilesApi:
     @validate_call
     async def list_profiles_api_v1_profiles_get_without_preload_content(
         self,
-        profile_type: Annotated[Optional[ProfileType], Field(description="Filter by profile type")] = None,
-        llm_provider: Annotated[Optional[StrictStr], Field(description="Filter by LLM provider")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        is_public: Annotated[Optional[StrictBool], Field(description="Filter by public status")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        profile_type: Annotated[ProfileType | None, Field(description="Filter by profile type")] = None,
+        llm_provider: Annotated[StrictStr | None, Field(description="Filter by LLM provider")] = None,
+        tags: Annotated[list[StrictStr] | None, Field(description="Filter by tags")] = None,
+        is_public: Annotated[StrictBool | None, Field(description="Filter by public status")] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Maximum number of results")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[StrictStr | None, Field(description="Sort field")] = None,
+        sort_order: Annotated[Annotated[str, Field(strict=True)] | None, Field(description="Sort order")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Profiles
@@ -1912,9 +1775,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1941,52 +1804,52 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-            'tags': 'multi',
+        _collection_formats: dict[str, str] = {
+            "tags": "multi",
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if profile_type is not None:
             
-            _query_params.append(('profile_type', profile_type.value))
+            _query_params.append(("profile_type", profile_type.value))
             
         if llm_provider is not None:
             
-            _query_params.append(('llm_provider', llm_provider))
+            _query_params.append(("llm_provider", llm_provider))
             
         if tags is not None:
             
-            _query_params.append(('tags', tags))
+            _query_params.append(("tags", tags))
             
         if is_public is not None:
             
-            _query_params.append(('is_public', is_public))
+            _query_params.append(("is_public", is_public))
             
         if limit is not None:
             
-            _query_params.append(('limit', limit))
+            _query_params.append(("limit", limit))
             
         if offset is not None:
             
-            _query_params.append(('offset', offset))
+            _query_params.append(("offset", offset))
             
         if sort_by is not None:
             
-            _query_params.append(('sort_by', sort_by))
+            _query_params.append(("sort_by", sort_by))
             
         if sort_order is not None:
             
-            _query_params.append(('sort_order', sort_order))
+            _query_params.append(("sort_order", sort_order))
             
         # process the header parameters
         # process the form parameters
@@ -1994,22 +1857,22 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/profiles',
+            method="GET",
+            resource_path="/api/v1/profiles",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2030,17 +1893,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_test_request: ProfileTestRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileTestResponse:
         """Test Profile
@@ -2082,9 +1938,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileTestResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileTestResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2102,17 +1958,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_test_request: ProfileTestRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileTestResponse]:
         """Test Profile
@@ -2154,9 +2003,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileTestResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileTestResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2174,17 +2023,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_test_request: ProfileTestRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Test Profile
@@ -2226,9 +2068,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileTestResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileTestResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2249,21 +2091,21 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if profile_id is not None:
-            _path_params['profile_id'] = profile_id
+            _path_params["profile_id"] = profile_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2273,35 +2115,35 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/profiles/{profile_id}/test',
+            method="POST",
+            resource_path="/api/v1/profiles/{profile_id}/test",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2322,17 +2164,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_update: ProfileUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ProfileResponse:
         """Update Profile
@@ -2374,9 +2209,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2394,17 +2229,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_update: ProfileUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ProfileResponse]:
         """Update Profile
@@ -2446,9 +2274,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2466,17 +2294,10 @@ class ProfilesApi:
         self,
         profile_id: StrictStr,
         profile_update: ProfileUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Profile
@@ -2518,9 +2339,9 @@ class ProfilesApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ProfileResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ProfileResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2541,21 +2362,21 @@ class ProfilesApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if profile_id is not None:
-            _path_params['profile_id'] = profile_id
+            _path_params["profile_id"] = profile_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2565,35 +2386,35 @@ class ProfilesApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='PUT',
-            resource_path='/api/v1/profiles/{profile_id}',
+            method="PUT",
+            resource_path="/api/v1/profiles/{profile_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

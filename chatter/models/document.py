@@ -11,15 +11,13 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
-)
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
     Text,
     UniqueConstraint,
 )
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -60,35 +58,35 @@ class Document(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'file_size > 0',
-            name='check_file_size_positive',
+            "file_size > 0",
+            name="check_file_size_positive",
         ),
         CheckConstraint(
-            'chunk_size > 0',
-            name='check_chunk_size_positive',
+            "chunk_size > 0",
+            name="check_chunk_size_positive",
         ),
         CheckConstraint(
-            'chunk_overlap >= 0',
-            name='check_chunk_overlap_non_negative',
+            "chunk_overlap >= 0",
+            name="check_chunk_overlap_non_negative",
         ),
         CheckConstraint(
-            'chunk_count >= 0',
-            name='check_chunk_count_non_negative',
+            "chunk_count >= 0",
+            name="check_chunk_count_non_negative",
         ),
         CheckConstraint(
-            'version > 0',
-            name='check_version_positive',
+            "version > 0",
+            name="check_version_positive",
         ),
         CheckConstraint(
-            'view_count >= 0',
-            name='check_view_count_non_negative',
+            "view_count >= 0",
+            name="check_view_count_non_negative",
         ),
         CheckConstraint(
-            'search_count >= 0',
-            name='check_search_count_non_negative',
+            "search_count >= 0",
+            name="check_search_count_non_negative",
         ),
         UniqueConstraint(
-            'owner_id', 'file_hash', name='uq_document_owner_hash'
+            "owner_id", "file_hash", name="uq_document_owner_hash"
         ),
     )
 
@@ -279,27 +277,27 @@ class DocumentChunk(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'chunk_index >= 0',
-            name='check_chunk_index_non_negative',
+            "chunk_index >= 0",
+            name="check_chunk_index_non_negative",
         ),
         CheckConstraint(
-            'start_char IS NULL OR start_char >= 0',
-            name='check_start_char_non_negative',
+            "start_char IS NULL OR start_char >= 0",
+            name="check_start_char_non_negative",
         ),
         CheckConstraint(
-            'end_char IS NULL OR end_char > 0',
-            name='check_end_char_positive',
+            "end_char IS NULL OR end_char > 0",
+            name="check_end_char_positive",
         ),
         CheckConstraint(
-            'start_char IS NULL OR end_char IS NULL OR end_char > start_char',
-            name='check_end_char_greater_than_start',
+            "start_char IS NULL OR end_char IS NULL OR end_char > start_char",
+            name="check_end_char_greater_than_start",
         ),
         CheckConstraint(
-            'token_count IS NULL OR token_count > 0',
-            name='check_token_count_positive',
+            "token_count IS NULL OR token_count > 0",
+            name="check_token_count_positive",
         ),
         CheckConstraint(
-            "content != ''", name='check_content_not_empty'
+            "content != ''", name="check_content_not_empty"
         ),
     )
 

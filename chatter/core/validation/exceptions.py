@@ -31,8 +31,8 @@ class SecurityValidationError(ValidationError):
     """Security-related validation error."""
 
     def __init__(
-        self, message: str, threat_type: str | None = None, **kwargs
-    ):
+        self, message: str, threat_type: str | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(message, **kwargs)
         self.threat_type = threat_type
         self.code = self.code or "SECURITY_VIOLATION"
@@ -42,8 +42,8 @@ class BusinessValidationError(ValidationError):
     """Business logic validation error."""
 
     def __init__(
-        self, message: str, rule_name: str | None = None, **kwargs
-    ):
+        self, message: str, rule_name: str | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(message, **kwargs)
         self.rule_name = rule_name
         self.code = self.code or "BUSINESS_RULE_VIOLATION"
@@ -53,8 +53,8 @@ class ConfigurationValidationError(ValidationError):
     """Configuration validation error."""
 
     def __init__(
-        self, message: str, config_key: str | None = None, **kwargs
-    ):
+        self, message: str, config_key: str | None = None, **kwargs: Any
+    ) -> None:
         super().__init__(message, **kwargs)
         self.config_key = config_key
         self.code = self.code or "CONFIGURATION_ERROR"

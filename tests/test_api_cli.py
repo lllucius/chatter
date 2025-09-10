@@ -418,7 +418,7 @@ class TestCLICommands:
         for command in expected_commands:
             assert command in result.stdout
 
-    @patch('chatter.api_cli.get_client')
+    @patch("chatter.api_cli.get_client")
     def test_health_check_success(self, mock_get_client):
         """Test successful health check."""
         # Mock the SDK client and response
@@ -440,7 +440,7 @@ class TestCLICommands:
         assert result.exit_code == 0
         assert "Status: healthy" in result.stdout
 
-    @patch('chatter.api_cli.get_client')
+    @patch("chatter.api_cli.get_client")
     def test_config_with_environment_variables(self, mock_get_client):
         """Test config command shows environment variables."""
         env_vars = {
@@ -454,7 +454,7 @@ class TestCLICommands:
             assert "https://test.example.com" in result.stdout
             assert "Set" in result.stdout  # Token should show as "Set"
 
-    @patch('chatter.api_cli.ChatterSDKClient')
+    @patch("chatter.api_cli.ChatterSDKClient")
     def test_get_client_loads_token_from_config(
         self, mock_sdk_client_class
     ):
@@ -496,7 +496,7 @@ class TestErrorHandling:
         """Set up test fixtures."""
         self.runner = CliRunner()
 
-    @patch('chatter.api_cli.get_client')
+    @patch("chatter.api_cli.get_client")
     def test_api_exception_401(self, mock_get_client):
         """Test handling of 401 authentication errors."""
         from chatter_sdk.exceptions import ApiException
@@ -515,7 +515,7 @@ class TestErrorHandling:
         assert "Authentication failed" in result.stdout
         assert "chatter auth login" in result.stdout
 
-    @patch('chatter.api_cli.get_client')
+    @patch("chatter.api_cli.get_client")
     def test_api_exception_404(self, mock_get_client):
         """Test handling of 404 not found errors."""
         from chatter_sdk.exceptions import ApiException
@@ -533,7 +533,7 @@ class TestErrorHandling:
         assert result.exit_code == 1
         assert "Resource not found" in result.stdout
 
-    @patch('chatter.api_cli.get_client')
+    @patch("chatter.api_cli.get_client")
     def test_generic_exception(self, mock_get_client):
         """Test handling of generic exceptions."""
         mock_client = AsyncMock()

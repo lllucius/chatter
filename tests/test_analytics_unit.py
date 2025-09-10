@@ -98,7 +98,7 @@ class TestAnalyticsUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_conversation_stats_success(
         self,
         mock_analytics_service,
@@ -147,7 +147,7 @@ class TestAnalyticsUnit:
         assert len(data["top_conversation_topics"]) == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_usage_metrics_success(
         self,
         mock_analytics_service,
@@ -197,7 +197,7 @@ class TestAnalyticsUnit:
         assert len(data["usage_by_hour"]) == 12
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_performance_metrics_success(
         self,
         mock_analytics_service,
@@ -246,7 +246,7 @@ class TestAnalyticsUnit:
         assert len(data["slowest_endpoints"]) == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_document_analytics_success(
         self,
         mock_analytics_service,
@@ -283,7 +283,7 @@ class TestAnalyticsUnit:
         assert "documents_by_type" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_system_analytics_success(
         self,
         mock_analytics_service,
@@ -316,7 +316,7 @@ class TestAnalyticsUnit:
         assert data["system_health"] == "healthy"
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_dashboard_success(
         self,
         mock_analytics_service,
@@ -366,7 +366,7 @@ class TestAnalyticsUnit:
         assert len(data["alerts"]) == 1
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_user_analytics_success(
         self,
         mock_analytics_service,
@@ -404,7 +404,7 @@ class TestAnalyticsUnit:
         assert "activity_by_day" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_export_analytics_success(
         self,
         mock_analytics_service,
@@ -442,7 +442,7 @@ class TestAnalyticsUnit:
         assert data["records_count"] == 1000
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_analytics_service_error_handling(
         self,
         mock_analytics_service,
@@ -475,7 +475,7 @@ class TestAnalyticsUnit:
         assert response.status_code in [400, 404]
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_metrics_summary_success(
         self,
         mock_analytics_service,
@@ -507,7 +507,7 @@ class TestAnalyticsUnit:
         assert data["alerts_count"] == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.analytics.AnalyticsService')
+    @patch("chatter.api.analytics.AnalyticsService")
     async def test_get_health_success(
         self,
         mock_analytics_service,

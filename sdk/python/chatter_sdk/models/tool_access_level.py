@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class ToolAccessLevel(str, Enum):
@@ -27,10 +28,10 @@ class ToolAccessLevel(str, Enum):
     """
     allowed enum values
     """
-    NONE = 'none'
-    READ = 'read'
-    EXECUTE = 'execute'
-    ADMIN = 'admin'
+    NONE = "none"
+    READ = "read"
+    EXECUTE = "execute"
+    ADMIN = "admin"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

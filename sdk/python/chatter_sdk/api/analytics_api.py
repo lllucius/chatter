@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,23 +12,36 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-
 from datetime import datetime
-from pydantic import Field, StrictStr
-from typing import Any, Dict, List, Optional
-from typing_extensions import Annotated
-from chatter_sdk.models.conversation_stats_response import ConversationStatsResponse
-from chatter_sdk.models.dashboard_response import DashboardResponse
-from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
-from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
-from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse
-from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import (
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    validate_call,
+)
+from typing import Annotated
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.conversation_stats_response import (
+    ConversationStatsResponse,
+)
+from chatter_sdk.models.dashboard_response import DashboardResponse
+from chatter_sdk.models.document_analytics_response import (
+    DocumentAnalyticsResponse,
+)
+from chatter_sdk.models.performance_metrics_response import (
+    PerformanceMetricsResponse,
+)
+from chatter_sdk.models.system_analytics_response import (
+    SystemAnalyticsResponse,
+)
+from chatter_sdk.models.usage_metrics_response import (
+    UsageMetricsResponse,
+)
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -49,22 +61,15 @@ class AnalyticsApi:
     @validate_call
     async def export_analytics_api_v1_analytics_export_post(
         self,
-        metrics: Annotated[List[StrictStr], Field(description="List of metrics to export")],
-        format: Annotated[Optional[StrictStr], Field(description="Export format (json, csv, xlsx)")] = None,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        metrics: Annotated[list[StrictStr], Field(description="List of metrics to export")],
+        format: Annotated[StrictStr | None, Field(description="Export format (json, csv, xlsx)")] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Export Analytics
@@ -115,9 +120,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -133,22 +138,15 @@ class AnalyticsApi:
     @validate_call
     async def export_analytics_api_v1_analytics_export_post_with_http_info(
         self,
-        metrics: Annotated[List[StrictStr], Field(description="List of metrics to export")],
-        format: Annotated[Optional[StrictStr], Field(description="Export format (json, csv, xlsx)")] = None,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        metrics: Annotated[list[StrictStr], Field(description="List of metrics to export")],
+        format: Annotated[StrictStr | None, Field(description="Export format (json, csv, xlsx)")] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
         """Export Analytics
@@ -199,9 +197,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -217,22 +215,15 @@ class AnalyticsApi:
     @validate_call
     async def export_analytics_api_v1_analytics_export_post_without_preload_content(
         self,
-        metrics: Annotated[List[StrictStr], Field(description="List of metrics to export")],
-        format: Annotated[Optional[StrictStr], Field(description="Export format (json, csv, xlsx)")] = None,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        metrics: Annotated[list[StrictStr], Field(description="List of metrics to export")],
+        format: Annotated[StrictStr | None, Field(description="Export format (json, csv, xlsx)")] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Export Analytics
@@ -283,9 +274,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "object",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -309,58 +300,58 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-            'metrics': 'multi',
+        _collection_formats: dict[str, str] = {
+            "metrics": "multi",
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if format is not None:
             
-            _query_params.append(('format', format))
+            _query_params.append(("format", format))
             
         if metrics is not None:
             
-            _query_params.append(('metrics', metrics))
+            _query_params.append(("metrics", metrics))
             
         if start_date is not None:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -368,22 +359,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/analytics/export',
+            method="POST",
+            resource_path="/api/v1/analytics/export",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -402,19 +393,12 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_health_api_v1_analytics_health_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Get Analytics Health
 
         Get analytics system health status.  Returns:     Health check results for analytics system
@@ -448,8 +432,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -465,19 +449,12 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_health_api_v1_analytics_health_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[dict[str, object]]:
         """Get Analytics Health
 
         Get analytics system health status.  Returns:     Health check results for analytics system
@@ -511,8 +488,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -528,17 +505,10 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_health_api_v1_analytics_health_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Analytics Health
@@ -574,8 +544,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -594,17 +564,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -614,22 +584,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/health',
+            method="GET",
+            resource_path="/api/v1/analytics/health",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -648,19 +618,12 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Get Analytics Metrics Summary
 
         Get summary of key analytics metrics for monitoring.  Returns:     Summary of analytics metrics
@@ -694,8 +657,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -711,19 +674,12 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[dict[str, object]]:
         """Get Analytics Metrics Summary
 
         Get summary of key analytics metrics for monitoring.  Returns:     Summary of analytics metrics
@@ -757,8 +713,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -774,17 +730,10 @@ class AnalyticsApi:
     @validate_call
     async def get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Analytics Metrics Summary
@@ -820,8 +769,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -840,17 +789,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -860,22 +809,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/metrics/summary',
+            method="GET",
+            resource_path="/api/v1/analytics/metrics/summary",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -894,20 +843,13 @@ class AnalyticsApi:
     @validate_call
     async def get_conversation_stats_api_v1_analytics_conversations_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationStatsResponse:
         """Get Conversation Stats
@@ -952,9 +894,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationStatsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationStatsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -970,20 +912,13 @@ class AnalyticsApi:
     @validate_call
     async def get_conversation_stats_api_v1_analytics_conversations_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationStatsResponse]:
         """Get Conversation Stats
@@ -1028,9 +963,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationStatsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationStatsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1046,20 +981,13 @@ class AnalyticsApi:
     @validate_call
     async def get_conversation_stats_api_v1_analytics_conversations_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Conversation Stats
@@ -1104,9 +1032,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationStatsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationStatsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1128,17 +1056,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1146,31 +1074,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -1178,22 +1106,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/conversations',
+            method="GET",
+            resource_path="/api/v1/analytics/conversations",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1212,20 +1140,13 @@ class AnalyticsApi:
     @validate_call
     async def get_dashboard_api_v1_analytics_dashboard_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DashboardResponse:
         """Get Dashboard
@@ -1270,9 +1191,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DashboardResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DashboardResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1288,20 +1209,13 @@ class AnalyticsApi:
     @validate_call
     async def get_dashboard_api_v1_analytics_dashboard_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DashboardResponse]:
         """Get Dashboard
@@ -1346,9 +1260,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DashboardResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DashboardResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1364,20 +1278,13 @@ class AnalyticsApi:
     @validate_call
     async def get_dashboard_api_v1_analytics_dashboard_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Dashboard
@@ -1422,9 +1329,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DashboardResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DashboardResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1446,17 +1353,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1464,31 +1371,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -1496,22 +1403,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/dashboard',
+            method="GET",
+            resource_path="/api/v1/analytics/dashboard",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1530,20 +1437,13 @@ class AnalyticsApi:
     @validate_call
     async def get_document_analytics_api_v1_analytics_documents_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentAnalyticsResponse:
         """Get Document Analytics
@@ -1588,9 +1488,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentAnalyticsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentAnalyticsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1606,20 +1506,13 @@ class AnalyticsApi:
     @validate_call
     async def get_document_analytics_api_v1_analytics_documents_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentAnalyticsResponse]:
         """Get Document Analytics
@@ -1664,9 +1557,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentAnalyticsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentAnalyticsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1682,20 +1575,13 @@ class AnalyticsApi:
     @validate_call
     async def get_document_analytics_api_v1_analytics_documents_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Document Analytics
@@ -1740,9 +1626,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentAnalyticsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "DocumentAnalyticsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1764,17 +1650,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1782,31 +1668,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -1814,22 +1700,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/documents',
+            method="GET",
+            resource_path="/api/v1/analytics/documents",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1848,20 +1734,13 @@ class AnalyticsApi:
     @validate_call
     async def get_performance_metrics_api_v1_analytics_performance_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PerformanceMetricsResponse:
         """Get Performance Metrics
@@ -1906,9 +1785,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1924,20 +1803,13 @@ class AnalyticsApi:
     @validate_call
     async def get_performance_metrics_api_v1_analytics_performance_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PerformanceMetricsResponse]:
         """Get Performance Metrics
@@ -1982,9 +1854,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2000,20 +1872,13 @@ class AnalyticsApi:
     @validate_call
     async def get_performance_metrics_api_v1_analytics_performance_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Performance Metrics
@@ -2058,9 +1923,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2082,17 +1947,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2100,31 +1965,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -2132,22 +1997,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/performance',
+            method="GET",
+            resource_path="/api/v1/analytics/performance",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2166,17 +2031,10 @@ class AnalyticsApi:
     @validate_call
     async def get_system_analytics_api_v1_analytics_system_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> SystemAnalyticsResponse:
         """Get System Analytics
@@ -2212,8 +2070,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SystemAnalyticsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SystemAnalyticsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2229,17 +2087,10 @@ class AnalyticsApi:
     @validate_call
     async def get_system_analytics_api_v1_analytics_system_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[SystemAnalyticsResponse]:
         """Get System Analytics
@@ -2275,8 +2126,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SystemAnalyticsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SystemAnalyticsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2292,17 +2143,10 @@ class AnalyticsApi:
     @validate_call
     async def get_system_analytics_api_v1_analytics_system_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get System Analytics
@@ -2338,8 +2182,8 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "SystemAnalyticsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "SystemAnalyticsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2358,17 +2202,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2378,22 +2222,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/system',
+            method="GET",
+            resource_path="/api/v1/analytics/system",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2412,22 +2256,15 @@ class AnalyticsApi:
     @validate_call
     async def get_tool_server_analytics_api_v1_analytics_toolservers_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Get Tool Server Analytics
 
         Get tool server analytics.  Args:     request: Tool server analytics request parameters     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Tool server analytics data
@@ -2470,9 +2307,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2488,22 +2325,15 @@ class AnalyticsApi:
     @validate_call
     async def get_tool_server_analytics_api_v1_analytics_toolservers_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[dict[str, object]]:
         """Get Tool Server Analytics
 
         Get tool server analytics.  Args:     request: Tool server analytics request parameters     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Tool server analytics data
@@ -2546,9 +2376,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2564,20 +2394,13 @@ class AnalyticsApi:
     @validate_call
     async def get_tool_server_analytics_api_v1_analytics_toolservers_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Tool Server Analytics
@@ -2622,9 +2445,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2646,17 +2469,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2664,31 +2487,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -2696,22 +2519,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/toolservers',
+            method="GET",
+            resource_path="/api/v1/analytics/toolservers",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2730,20 +2553,13 @@ class AnalyticsApi:
     @validate_call
     async def get_usage_metrics_api_v1_analytics_usage_get(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> UsageMetricsResponse:
         """Get Usage Metrics
@@ -2788,9 +2604,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "UsageMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2806,20 +2622,13 @@ class AnalyticsApi:
     @validate_call
     async def get_usage_metrics_api_v1_analytics_usage_get_with_http_info(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[UsageMetricsResponse]:
         """Get Usage Metrics
@@ -2864,9 +2673,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "UsageMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2882,20 +2691,13 @@ class AnalyticsApi:
     @validate_call
     async def get_usage_metrics_api_v1_analytics_usage_get_without_preload_content(
         self,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Usage Metrics
@@ -2940,9 +2742,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "UsageMetricsResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "UsageMetricsResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2964,17 +2766,17 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2982,31 +2784,31 @@ class AnalyticsApi:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -3014,22 +2816,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/usage',
+            method="GET",
+            resource_path="/api/v1/analytics/usage",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3049,22 +2851,15 @@ class AnalyticsApi:
     async def get_user_analytics_api_v1_analytics_users_user_id_get(
         self,
         user_id: StrictStr,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Get User Analytics
 
         Get per-user analytics.  Args:     user_id: User ID     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     User-specific analytics
@@ -3110,9 +2905,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3129,22 +2924,15 @@ class AnalyticsApi:
     async def get_user_analytics_api_v1_analytics_users_user_id_get_with_http_info(
         self,
         user_id: StrictStr,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[dict[str, object]]:
         """Get User Analytics
 
         Get per-user analytics.  Args:     user_id: User ID     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     User-specific analytics
@@ -3190,9 +2978,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3209,20 +2997,13 @@ class AnalyticsApi:
     async def get_user_analytics_api_v1_analytics_users_user_id_get_without_preload_content(
         self,
         user_id: StrictStr,
-        start_date: Annotated[Optional[datetime], Field(description="Start date for analytics")] = None,
-        end_date: Annotated[Optional[datetime], Field(description="End date for analytics")] = None,
-        period: Annotated[Optional[StrictStr], Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        start_date: Annotated[datetime | None, Field(description="Start date for analytics")] = None,
+        end_date: Annotated[datetime | None, Field(description="End date for analytics")] = None,
+        period: Annotated[StrictStr | None, Field(description="Predefined period (1h, 24h, 7d, 30d, 90d)")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get User Analytics
@@ -3270,9 +3051,9 @@ class AnalyticsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3295,51 +3076,51 @@ class AnalyticsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if user_id is not None:
-            _path_params['user_id'] = user_id
+            _path_params["user_id"] = user_id
         # process the query parameters
         if start_date is not None:
             if isinstance(start_date, datetime):
                 _query_params.append(
                     (
-                        'start_date',
+                        "start_date",
                         start_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('start_date', start_date))
+                _query_params.append(("start_date", start_date))
             
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
                     (
-                        'end_date',
+                        "end_date",
                         end_date.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('end_date', end_date))
+                _query_params.append(("end_date", end_date))
             
         if period is not None:
             
-            _query_params.append(('period', period))
+            _query_params.append(("period", period))
             
         # process the header parameters
         # process the form parameters
@@ -3347,22 +3128,22 @@ class AnalyticsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/analytics/users/{user_id}',
+            method="GET",
+            resource_path="/api/v1/analytics/users/{user_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

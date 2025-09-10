@@ -291,9 +291,9 @@ class SecureTemplateRenderer:
                     env = Environment(
                         autoescape=select_autoescape(
                             enabled_extensions=(
-                                'html',
-                                'xml',
-                                'jinja2',
+                                "html",
+                                "xml",
+                                "jinja2",
                             ),
                             default_for_string=True,
                         )

@@ -57,7 +57,7 @@ class WorkflowValidationService:
         warnings = []
 
         # Basic structure validation
-        required_fields = ['name', 'nodes', 'edges']
+        required_fields = ["name", "nodes", "edges"]
         for field in required_fields:
             if field not in definition or not definition[field]:
                 errors.append(
@@ -65,8 +65,8 @@ class WorkflowValidationService:
                 )
 
         # Validate name
-        if 'name' in definition:
-            name = definition['name']
+        if "name" in definition:
+            name = definition["name"]
             if not isinstance(name, str) or len(name.strip()) == 0:
                 errors.append(
                     "Workflow name must be a non-empty string"
@@ -77,36 +77,36 @@ class WorkflowValidationService:
                 )
 
         # Validate nodes
-        if 'nodes' in definition:
-            nodes = definition['nodes']
+        if "nodes" in definition:
+            nodes = definition["nodes"]
             if not isinstance(nodes, list):
                 errors.append("Nodes must be a list")
             elif len(nodes) == 0:
                 warnings.append("Workflow has no nodes")
             else:
                 node_validation = self._validate_nodes(nodes)
-                errors.extend(node_validation.get('errors', []))
-                warnings.extend(node_validation.get('warnings', []))
+                errors.extend(node_validation.get("errors", []))
+                warnings.extend(node_validation.get("warnings", []))
 
         # Validate edges
-        if 'edges' in definition:
-            edges = definition['edges']
+        if "edges" in definition:
+            edges = definition["edges"]
             if not isinstance(edges, list):
                 errors.append("Edges must be a list")
             else:
                 edge_validation = self._validate_edges(
-                    edges, definition.get('nodes', [])
+                    edges, definition.get("nodes", [])
                 )
-                errors.extend(edge_validation.get('errors', []))
-                warnings.extend(edge_validation.get('warnings', []))
+                errors.extend(edge_validation.get("errors", []))
+                warnings.extend(edge_validation.get("warnings", []))
 
         # Validate workflow structure (connectivity, cycles, etc.)
-        if 'nodes' in definition and 'edges' in definition:
+        if "nodes" in definition and "edges" in definition:
             structure_validation = self._validate_workflow_structure(
-                definition['nodes'], definition['edges']
+                definition["nodes"], definition["edges"]
             )
-            errors.extend(structure_validation.get('errors', []))
-            warnings.extend(structure_validation.get('warnings', []))
+            errors.extend(structure_validation.get("errors", []))
+            warnings.extend(structure_validation.get("warnings", []))
 
         return ValidationResult(
             valid=len(errors) == 0,
@@ -146,8 +146,8 @@ class WorkflowValidationService:
             param_validation = self._validate_template_params(
                 template.default_params
             )
-            errors.extend(param_validation.get('errors', []))
-            warnings.extend(param_validation.get('warnings', []))
+            errors.extend(param_validation.get("errors", []))
+            warnings.extend(param_validation.get("warnings", []))
 
         return ValidationResult(
             valid=len(errors) == 0,
@@ -166,8 +166,8 @@ class WorkflowValidationService:
         warnings = []
 
         # Validate input data structure
-        if 'input_data' in request:
-            input_data = request['input_data']
+        if "input_data" in request:
+            input_data = request["input_data"]
             if not isinstance(input_data, dict):
                 errors.append("Input data must be a dictionary")
 
@@ -175,7 +175,7 @@ class WorkflowValidationService:
         start_nodes = [
             node
             for node in definition.nodes
-            if node.get('type') == 'start'
+            if node.get("type") == "start"
         ]
         if not start_nodes:
             errors.append("Workflow has no start node - cannot execute")
@@ -198,50 +198,50 @@ class WorkflowValidationService:
         node_types = set()
 
         valid_node_types = {
-            'start',
-            'model',
-            'tool',
-            'memory',
-            'retrieval',
-            'conditional',
-            'loop',
-            'variable',
-            'errorHandler',
-            'delay',
+            "start",
+            "model",
+            "tool",
+            "memory",
+            "retrieval",
+            "conditional",
+            "loop",
+            "variable",
+            "errorHandler",
+            "delay",
         }
 
         for i, node in enumerate(nodes):
             # Check required fields
-            if 'id' not in node:
+            if "id" not in node:
                 errors.append(f"Node {i} missing required field: id")
-            elif node['id'] in node_ids:
+            elif node["id"] in node_ids:
                 errors.append(f"Duplicate node ID: {node['id']}")
             else:
-                node_ids.add(node['id'])
+                node_ids.add(node["id"])
 
-            if 'type' not in node:
+            if "type" not in node:
                 errors.append(
                     f"Node {node.get('id', i)} missing required field: type"
                 )
-            elif node['type'] not in valid_node_types:
+            elif node["type"] not in valid_node_types:
                 errors.append(f"Invalid node type: {node['type']}")
             else:
-                node_types.add(node['type'])
+                node_types.add(node["type"])
 
-            if 'data' not in node:
+            if "data" not in node:
                 errors.append(
                     f"Node {node.get('id', i)} missing required field: data"
                 )
-            elif not isinstance(node['data'], dict):
+            elif not isinstance(node["data"], dict):
                 errors.append(
                     f"Node {node.get('id', i)} data must be a dictionary"
                 )
 
         # Check for start node
-        if 'start' not in node_types:
+        if "start" not in node_types:
             errors.append("Workflow must have at least one start node")
 
-        return {'errors': errors, 'warnings': warnings}
+        return {"errors": errors, "warnings": warnings}
 
     def _validate_edges(
         self, edges: list[dict[str, Any]], nodes: list[dict[str, Any]]
@@ -250,11 +250,11 @@ class WorkflowValidationService:
         errors = []
         warnings = []
 
-        node_ids = {node.get('id') for node in nodes if 'id' in node}
+        node_ids = {node.get("id") for node in nodes if "id" in node}
 
         for i, edge in enumerate(edges):
             # Check required fields
-            required_fields = ['id', 'source', 'target']
+            required_fields = ["id", "source", "target"]
             for field in required_fields:
                 if field not in edge:
                     errors.append(
@@ -262,17 +262,17 @@ class WorkflowValidationService:
                     )
 
             # Check if source and target nodes exist
-            if 'source' in edge and edge['source'] not in node_ids:
+            if "source" in edge and edge["source"] not in node_ids:
                 errors.append(
                     f"Edge {edge.get('id', i)} references non-existent source node: {edge['source']}"
                 )
 
-            if 'target' in edge and edge['target'] not in node_ids:
+            if "target" in edge and edge["target"] not in node_ids:
                 errors.append(
                     f"Edge {edge.get('id', i)} references non-existent target node: {edge['target']}"
                 )
 
-        return {'errors': errors, 'warnings': warnings}
+        return {"errors": errors, "warnings": warnings}
 
     def _validate_workflow_structure(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
@@ -283,19 +283,19 @@ class WorkflowValidationService:
 
         # Build adjacency list for graph analysis
         graph = {}
-        node_ids = {node['id'] for node in nodes}
+        node_ids = {node["id"] for node in nodes}
 
         for node_id in node_ids:
             graph[node_id] = []
 
         for edge in edges:
-            if edge.get('source') and edge.get('target'):
-                graph[edge['source']].append(edge['target'])
+            if edge.get("source") and edge.get("target"):
+                graph[edge["source"]].append(edge["target"])
 
         # Check for orphaned nodes (nodes with no connections)
         orphaned_nodes = []
         for node in nodes:
-            node_id = node['id']
+            node_id = node["id"]
             has_incoming = any(
                 node_id in targets for targets in graph.values()
             )
@@ -304,7 +304,7 @@ class WorkflowValidationService:
             if (
                 not has_incoming
                 and not has_outgoing
-                and node.get('type') != 'start'
+                and node.get("type") != "start"
             ):
                 orphaned_nodes.append(node_id)
 
@@ -315,7 +315,7 @@ class WorkflowValidationService:
 
         # Check for unreachable nodes
         start_nodes = [
-            node['id'] for node in nodes if node.get('type') == 'start'
+            node["id"] for node in nodes if node.get("type") == "start"
         ]
         if start_nodes:
             reachable = self._find_reachable_nodes(graph, start_nodes)
@@ -325,7 +325,7 @@ class WorkflowValidationService:
                     f"Unreachable nodes found: {', '.join(unreachable)}"
                 )
 
-        return {'errors': errors, 'warnings': warnings}
+        return {"errors": errors, "warnings": warnings}
 
     def _validate_template_params(
         self, params: dict[str, Any]
@@ -335,15 +335,15 @@ class WorkflowValidationService:
         warnings = []
 
         # Check common parameter types
-        if 'max_tool_calls' in params:
-            max_calls = params['max_tool_calls']
+        if "max_tool_calls" in params:
+            max_calls = params["max_tool_calls"]
             if not isinstance(max_calls, int) or max_calls <= 0:
                 errors.append(
                     "max_tool_calls must be a positive integer"
                 )
 
-        if 'temperature' in params:
-            temp = params['temperature']
+        if "temperature" in params:
+            temp = params["temperature"]
             if (
                 not isinstance(temp, int | float)
                 or temp < 0
@@ -353,17 +353,17 @@ class WorkflowValidationService:
                     "temperature must be a number between 0 and 2"
                 )
 
-        if 'max_tokens' in params:
-            tokens = params['max_tokens']
+        if "max_tokens" in params:
+            tokens = params["max_tokens"]
             if not isinstance(tokens, int) or tokens <= 0:
                 errors.append("max_tokens must be a positive integer")
 
-        if 'system_message' not in params:
+        if "system_message" not in params:
             warnings.append(
                 "No system message specified in template parameters"
             )
 
-        return {'errors': errors, 'warnings': warnings}
+        return {"errors": errors, "warnings": warnings}
 
     def _find_reachable_nodes(
         self, graph: dict[str, list[str]], start_nodes: list[str]

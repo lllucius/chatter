@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,33 +13,35 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from typing import Self
+
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.reduction_strategy import ReductionStrategy
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class EmbeddingSpaceUpdate(BaseModel):
     """
     Schema for updating an embedding space.
     """ # noqa: E501
-    display_name: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    reduction_strategy: Optional[ReductionStrategy] = None
-    reducer_path: Optional[StrictStr] = None
-    reducer_version: Optional[StrictStr] = None
-    normalize_vectors: Optional[StrictBool] = None
-    distance_metric: Optional[DistanceMetric] = None
-    index_type: Optional[StrictStr] = None
-    index_config: Optional[Dict[str, Any]] = None
-    is_active: Optional[StrictBool] = None
-    is_default: Optional[StrictBool] = None
-    __properties: ClassVar[List[str]] = ["display_name", "description", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "index_type", "index_config", "is_active", "is_default"]
+    display_name: StrictStr | None = None
+    description: StrictStr | None = None
+    reduction_strategy: ReductionStrategy | None = None
+    reducer_path: StrictStr | None = None
+    reducer_version: StrictStr | None = None
+    normalize_vectors: StrictBool | None = None
+    distance_metric: DistanceMetric | None = None
+    index_type: StrictStr | None = None
+    index_config: dict[str, Any] | None = None
+    is_active: StrictBool | None = None
+    is_default: StrictBool | None = None
+    __properties: ClassVar[list[str]] = ["display_name", "description", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "index_type", "index_config", "is_active", "is_default"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,11 +60,11 @@ class EmbeddingSpaceUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of EmbeddingSpaceUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,7 +74,7 @@ class EmbeddingSpaceUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -84,62 +85,62 @@ class EmbeddingSpaceUpdate(BaseModel):
         # set to None if display_name (nullable) is None
         # and model_fields_set contains the field
         if self.display_name is None and "display_name" in self.model_fields_set:
-            _dict['display_name'] = None
+            _dict["display_name"] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if reduction_strategy (nullable) is None
         # and model_fields_set contains the field
         if self.reduction_strategy is None and "reduction_strategy" in self.model_fields_set:
-            _dict['reduction_strategy'] = None
+            _dict["reduction_strategy"] = None
 
         # set to None if reducer_path (nullable) is None
         # and model_fields_set contains the field
         if self.reducer_path is None and "reducer_path" in self.model_fields_set:
-            _dict['reducer_path'] = None
+            _dict["reducer_path"] = None
 
         # set to None if reducer_version (nullable) is None
         # and model_fields_set contains the field
         if self.reducer_version is None and "reducer_version" in self.model_fields_set:
-            _dict['reducer_version'] = None
+            _dict["reducer_version"] = None
 
         # set to None if normalize_vectors (nullable) is None
         # and model_fields_set contains the field
         if self.normalize_vectors is None and "normalize_vectors" in self.model_fields_set:
-            _dict['normalize_vectors'] = None
+            _dict["normalize_vectors"] = None
 
         # set to None if distance_metric (nullable) is None
         # and model_fields_set contains the field
         if self.distance_metric is None and "distance_metric" in self.model_fields_set:
-            _dict['distance_metric'] = None
+            _dict["distance_metric"] = None
 
         # set to None if index_type (nullable) is None
         # and model_fields_set contains the field
         if self.index_type is None and "index_type" in self.model_fields_set:
-            _dict['index_type'] = None
+            _dict["index_type"] = None
 
         # set to None if index_config (nullable) is None
         # and model_fields_set contains the field
         if self.index_config is None and "index_config" in self.model_fields_set:
-            _dict['index_config'] = None
+            _dict["index_config"] = None
 
         # set to None if is_active (nullable) is None
         # and model_fields_set contains the field
         if self.is_active is None and "is_active" in self.model_fields_set:
-            _dict['is_active'] = None
+            _dict["is_active"] = None
 
         # set to None if is_default (nullable) is None
         # and model_fields_set contains the field
         if self.is_default is None and "is_default" in self.model_fields_set:
-            _dict['is_default'] = None
+            _dict["is_default"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of EmbeddingSpaceUpdate from a dict"""
         if obj is None:
             return None

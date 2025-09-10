@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,17 +13,18 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set, Union
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Annotated, Self
+
 from chatter_sdk.models.agent_capability import AgentCapability
 from chatter_sdk.models.agent_type import AgentType
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class AgentCreateRequest(BaseModel):
     """
@@ -34,24 +34,24 @@ class AgentCreateRequest(BaseModel):
     description: StrictStr = Field(description="Agent description")
     agent_type: AgentType
     system_prompt: StrictStr = Field(description="System prompt for the agent")
-    personality_traits: Optional[List[StrictStr]] = Field(default=None, description="Agent personality traits")
-    knowledge_domains: Optional[List[StrictStr]] = Field(default=None, description="Knowledge domains")
-    response_style: Optional[StrictStr] = Field(default='professional', description="Response style")
-    capabilities: Optional[List[AgentCapability]] = Field(default=None, description="Agent capabilities")
-    available_tools: Optional[List[StrictStr]] = Field(default=None, description="Available tools")
-    primary_llm: Optional[StrictStr] = Field(default='openai', description="Primary LLM provider")
-    fallback_llm: Optional[StrictStr] = Field(default='anthropic', description="Fallback LLM provider")
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = Field(default=0.7, description="Temperature for responses")
-    max_tokens: Optional[Annotated[int, Field(le=32000, strict=True, ge=1)]] = Field(default=4096, description="Maximum tokens")
-    max_conversation_length: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = Field(default=50, description="Maximum conversation length")
-    context_window_size: Optional[Annotated[int, Field(le=32000, strict=True, ge=100)]] = Field(default=4000, description="Context window size")
-    response_timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=1)]] = Field(default=30, description="Response timeout in seconds")
-    learning_enabled: Optional[StrictBool] = Field(default=True, description="Enable learning from feedback")
-    feedback_weight: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=0.1, description="Weight for feedback learning")
-    adaptation_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=0.8, description="Adaptation threshold")
-    tags: Optional[List[StrictStr]] = Field(default=None, description="Agent tags")
-    metadata: Optional[Dict[str, Any]] = Field(default=None, description="Additional metadata")
-    __properties: ClassVar[List[str]] = ["name", "description", "agent_type", "system_prompt", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
+    personality_traits: list[StrictStr] | None = Field(default=None, description="Agent personality traits")
+    knowledge_domains: list[StrictStr] | None = Field(default=None, description="Knowledge domains")
+    response_style: StrictStr | None = Field(default="professional", description="Response style")
+    capabilities: list[AgentCapability] | None = Field(default=None, description="Agent capabilities")
+    available_tools: list[StrictStr] | None = Field(default=None, description="Available tools")
+    primary_llm: StrictStr | None = Field(default="openai", description="Primary LLM provider")
+    fallback_llm: StrictStr | None = Field(default="anthropic", description="Fallback LLM provider")
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = Field(default=0.7, description="Temperature for responses")
+    max_tokens: Annotated[int, Field(le=32000, strict=True, ge=1)] | None = Field(default=4096, description="Maximum tokens")
+    max_conversation_length: Annotated[int, Field(le=1000, strict=True, ge=1)] | None = Field(default=50, description="Maximum conversation length")
+    context_window_size: Annotated[int, Field(le=32000, strict=True, ge=100)] | None = Field(default=4000, description="Context window size")
+    response_timeout: Annotated[int, Field(le=300, strict=True, ge=1)] | None = Field(default=30, description="Response timeout in seconds")
+    learning_enabled: StrictBool | None = Field(default=True, description="Enable learning from feedback")
+    feedback_weight: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = Field(default=0.1, description="Weight for feedback learning")
+    adaptation_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = Field(default=0.8, description="Adaptation threshold")
+    tags: list[StrictStr] | None = Field(default=None, description="Agent tags")
+    metadata: dict[str, Any] | None = Field(default=None, description="Additional metadata")
+    __properties: ClassVar[list[str]] = ["name", "description", "agent_type", "system_prompt", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,11 +70,11 @@ class AgentCreateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AgentCreateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,7 +84,7 @@ class AgentCreateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -95,7 +95,7 @@ class AgentCreateRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AgentCreateRequest from a dict"""
         if obj is None:
             return None
@@ -110,11 +110,11 @@ class AgentCreateRequest(BaseModel):
             "system_prompt": obj.get("system_prompt"),
             "personality_traits": obj.get("personality_traits"),
             "knowledge_domains": obj.get("knowledge_domains"),
-            "response_style": obj.get("response_style") if obj.get("response_style") is not None else 'professional',
+            "response_style": obj.get("response_style") if obj.get("response_style") is not None else "professional",
             "capabilities": obj.get("capabilities"),
             "available_tools": obj.get("available_tools"),
-            "primary_llm": obj.get("primary_llm") if obj.get("primary_llm") is not None else 'openai',
-            "fallback_llm": obj.get("fallback_llm") if obj.get("fallback_llm") is not None else 'anthropic',
+            "primary_llm": obj.get("primary_llm") if obj.get("primary_llm") is not None else "openai",
+            "fallback_llm": obj.get("fallback_llm") if obj.get("fallback_llm") is not None else "anthropic",
             "temperature": obj.get("temperature") if obj.get("temperature") is not None else 0.7,
             "max_tokens": obj.get("max_tokens") if obj.get("max_tokens") is not None else 4096,
             "max_conversation_length": obj.get("max_conversation_length") if obj.get("max_conversation_length") is not None else 50,

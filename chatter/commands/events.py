@@ -1,13 +1,12 @@
 """Event monitoring and streaming commands for the CLI."""
 
 import typer
-from rich.table import Table
-from rich.live import Live
 from rich.console import Group
+from rich.live import Live
 from rich.panel import Panel
+from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Events Commands  
 events_app = typer.Typer(help="Event monitoring and streaming commands")
@@ -21,7 +20,7 @@ async def listen_events(
 ):
     """Listen to real-time events."""
     async with get_client() as sdk_client:
-        filter_types = event_types.split(',') if event_types else None
+        filter_types = event_types.split(",") if event_types else None
         
         console.print(f"🔄 [yellow]Listening for events for {duration} seconds...[/yellow]")
         console.print("[dim]Press Ctrl+C to stop[/dim]\n")
@@ -32,9 +31,9 @@ async def listen_events(
                 event_types=filter_types, timeout=duration
             ):
                 events_received += 1
-                event_type = getattr(event, 'event_type', 'unknown')
-                timestamp = getattr(event, 'timestamp', 'N/A')
-                data = getattr(event, 'data', {})
+                event_type = getattr(event, "event_type", "unknown")
+                timestamp = getattr(event, "timestamp", "N/A")
+                data = getattr(event, "data", {})
                 
                 console.print(f"📨 [{event_type}] {timestamp}")
                 if data:
@@ -56,13 +55,13 @@ async def event_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_events'):
+        if hasattr(response, "total_events"):
             table.add_row("Total Events", f"{response.total_events:,}")
-        if hasattr(response, 'events_last_hour'):
+        if hasattr(response, "events_last_hour"):
             table.add_row("Events (Last Hour)", str(response.events_last_hour))
-        if hasattr(response, 'events_last_day'):
+        if hasattr(response, "events_last_day"):
             table.add_row("Events (Last Day)", str(response.events_last_day))
-        if hasattr(response, 'most_common_type'):
+        if hasattr(response, "most_common_type"):
             table.add_row("Most Common Type", response.most_common_type)
 
         console.print(table)
@@ -77,8 +76,8 @@ async def test_broadcast(
     """Broadcast a test event."""
     async with get_client() as sdk_client:
         event_data = {
-            'event_type': event_type,
-            'data': {'message': message},
+            "event_type": event_type,
+            "data": {"message": message},
         }
 
         response = await sdk_client.events_api.broadcast_event_api_v1_events_broadcast_post(
@@ -87,5 +86,5 @@ async def test_broadcast(
 
         console.print(f"✅ [green]Broadcasted test event: {event_type}[/green]")
         console.print(f"[dim]Message: {message}[/dim]")
-        if hasattr(response, 'event_id'):
+        if hasattr(response, "event_id"):
             console.print(f"[dim]Event ID: {response.event_id}[/dim]")

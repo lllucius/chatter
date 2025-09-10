@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,17 +13,27 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar, Dict, List, Optional, Set, Union
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
+from typing import Self
+
 from chatter_sdk.models.prompt_category import PromptCategory
 from chatter_sdk.models.prompt_type import PromptType
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class PromptResponse(BaseModel):
     """
@@ -33,46 +42,46 @@ class PromptResponse(BaseModel):
     id: StrictStr = Field(description="Prompt ID")
     owner_id: StrictStr = Field(description="Owner user ID")
     name: StrictStr = Field(description="Prompt name")
-    description: Optional[StrictStr] = None
+    description: StrictStr | None = None
     prompt_type: PromptType
     category: PromptCategory
     content: StrictStr = Field(description="Prompt content/template")
-    variables: Optional[List[StrictStr]] = None
+    variables: list[StrictStr] | None = None
     template_format: StrictStr = Field(description="Template format")
-    input_schema: Optional[Dict[str, Any]] = None
-    output_schema: Optional[Dict[str, Any]] = None
-    max_length: Optional[StrictInt] = None
-    min_length: Optional[StrictInt] = None
-    required_variables: Optional[List[StrictStr]] = None
-    examples: Optional[List[Dict[str, Any]]] = None
-    test_cases: Optional[List[Dict[str, Any]]] = None
-    suggested_temperature: Optional[Union[StrictFloat, StrictInt]] = None
-    suggested_max_tokens: Optional[StrictInt] = None
-    suggested_providers: Optional[List[StrictStr]] = None
+    input_schema: dict[str, Any] | None = None
+    output_schema: dict[str, Any] | None = None
+    max_length: StrictInt | None = None
+    min_length: StrictInt | None = None
+    required_variables: list[StrictStr] | None = None
+    examples: list[dict[str, Any]] | None = None
+    test_cases: list[dict[str, Any]] | None = None
+    suggested_temperature: StrictFloat | StrictInt | None = None
+    suggested_max_tokens: StrictInt | None = None
+    suggested_providers: list[StrictStr] | None = None
     is_chain: StrictBool = Field(description="Whether this is a chain prompt")
-    chain_steps: Optional[List[Dict[str, Any]]] = None
-    parent_prompt_id: Optional[StrictStr] = None
+    chain_steps: list[dict[str, Any]] | None = None
+    parent_prompt_id: StrictStr | None = None
     version: StrictInt = Field(description="Prompt version")
     is_latest: StrictBool = Field(description="Whether this is the latest version")
-    changelog: Optional[StrictStr] = None
+    changelog: StrictStr | None = None
     is_public: StrictBool = Field(description="Whether prompt is public")
-    rating: Optional[Union[StrictFloat, StrictInt]] = None
+    rating: StrictFloat | StrictInt | None = None
     rating_count: StrictInt = Field(description="Number of ratings")
     usage_count: StrictInt = Field(description="Usage count")
-    success_rate: Optional[Union[StrictFloat, StrictInt]] = None
-    avg_response_time_ms: Optional[StrictInt] = None
-    last_used_at: Optional[datetime] = None
+    success_rate: StrictFloat | StrictInt | None = None
+    avg_response_time_ms: StrictInt | None = None
+    last_used_at: datetime | None = None
     total_tokens_used: StrictInt = Field(description="Total tokens used")
-    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost")
-    avg_tokens_per_use: Optional[Union[StrictFloat, StrictInt]] = None
-    tags: Optional[List[StrictStr]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
+    total_cost: StrictFloat | StrictInt = Field(description="Total cost")
+    avg_tokens_per_use: StrictFloat | StrictInt | None = None
+    tags: list[StrictStr] | None = None
+    extra_metadata: dict[str, Any] | None = None
     content_hash: StrictStr = Field(description="Content hash")
-    estimated_tokens: Optional[StrictInt] = None
-    language: Optional[StrictStr] = None
+    estimated_tokens: StrictInt | None = None
+    language: StrictStr | None = None
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    __properties: ClassVar[List[str]] = ["id", "owner_id", "name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "version", "is_latest", "changelog", "is_public", "rating", "rating_count", "usage_count", "success_rate", "avg_response_time_ms", "last_used_at", "total_tokens_used", "total_cost", "avg_tokens_per_use", "tags", "extra_metadata", "content_hash", "estimated_tokens", "language", "created_at", "updated_at"]
+    __properties: ClassVar[list[str]] = ["id", "owner_id", "name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "version", "is_latest", "changelog", "is_public", "rating", "rating_count", "usage_count", "success_rate", "avg_response_time_ms", "last_used_at", "total_tokens_used", "total_cost", "avg_tokens_per_use", "tags", "extra_metadata", "content_hash", "estimated_tokens", "language", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -91,11 +100,11 @@ class PromptResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of PromptResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -105,7 +114,7 @@ class PromptResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -116,127 +125,127 @@ class PromptResponse(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if variables (nullable) is None
         # and model_fields_set contains the field
         if self.variables is None and "variables" in self.model_fields_set:
-            _dict['variables'] = None
+            _dict["variables"] = None
 
         # set to None if input_schema (nullable) is None
         # and model_fields_set contains the field
         if self.input_schema is None and "input_schema" in self.model_fields_set:
-            _dict['input_schema'] = None
+            _dict["input_schema"] = None
 
         # set to None if output_schema (nullable) is None
         # and model_fields_set contains the field
         if self.output_schema is None and "output_schema" in self.model_fields_set:
-            _dict['output_schema'] = None
+            _dict["output_schema"] = None
 
         # set to None if max_length (nullable) is None
         # and model_fields_set contains the field
         if self.max_length is None and "max_length" in self.model_fields_set:
-            _dict['max_length'] = None
+            _dict["max_length"] = None
 
         # set to None if min_length (nullable) is None
         # and model_fields_set contains the field
         if self.min_length is None and "min_length" in self.model_fields_set:
-            _dict['min_length'] = None
+            _dict["min_length"] = None
 
         # set to None if required_variables (nullable) is None
         # and model_fields_set contains the field
         if self.required_variables is None and "required_variables" in self.model_fields_set:
-            _dict['required_variables'] = None
+            _dict["required_variables"] = None
 
         # set to None if examples (nullable) is None
         # and model_fields_set contains the field
         if self.examples is None and "examples" in self.model_fields_set:
-            _dict['examples'] = None
+            _dict["examples"] = None
 
         # set to None if test_cases (nullable) is None
         # and model_fields_set contains the field
         if self.test_cases is None and "test_cases" in self.model_fields_set:
-            _dict['test_cases'] = None
+            _dict["test_cases"] = None
 
         # set to None if suggested_temperature (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_temperature is None and "suggested_temperature" in self.model_fields_set:
-            _dict['suggested_temperature'] = None
+            _dict["suggested_temperature"] = None
 
         # set to None if suggested_max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_max_tokens is None and "suggested_max_tokens" in self.model_fields_set:
-            _dict['suggested_max_tokens'] = None
+            _dict["suggested_max_tokens"] = None
 
         # set to None if suggested_providers (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_providers is None and "suggested_providers" in self.model_fields_set:
-            _dict['suggested_providers'] = None
+            _dict["suggested_providers"] = None
 
         # set to None if chain_steps (nullable) is None
         # and model_fields_set contains the field
         if self.chain_steps is None and "chain_steps" in self.model_fields_set:
-            _dict['chain_steps'] = None
+            _dict["chain_steps"] = None
 
         # set to None if parent_prompt_id (nullable) is None
         # and model_fields_set contains the field
         if self.parent_prompt_id is None and "parent_prompt_id" in self.model_fields_set:
-            _dict['parent_prompt_id'] = None
+            _dict["parent_prompt_id"] = None
 
         # set to None if changelog (nullable) is None
         # and model_fields_set contains the field
         if self.changelog is None and "changelog" in self.model_fields_set:
-            _dict['changelog'] = None
+            _dict["changelog"] = None
 
         # set to None if rating (nullable) is None
         # and model_fields_set contains the field
         if self.rating is None and "rating" in self.model_fields_set:
-            _dict['rating'] = None
+            _dict["rating"] = None
 
         # set to None if success_rate (nullable) is None
         # and model_fields_set contains the field
         if self.success_rate is None and "success_rate" in self.model_fields_set:
-            _dict['success_rate'] = None
+            _dict["success_rate"] = None
 
         # set to None if avg_response_time_ms (nullable) is None
         # and model_fields_set contains the field
         if self.avg_response_time_ms is None and "avg_response_time_ms" in self.model_fields_set:
-            _dict['avg_response_time_ms'] = None
+            _dict["avg_response_time_ms"] = None
 
         # set to None if last_used_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_used_at is None and "last_used_at" in self.model_fields_set:
-            _dict['last_used_at'] = None
+            _dict["last_used_at"] = None
 
         # set to None if avg_tokens_per_use (nullable) is None
         # and model_fields_set contains the field
         if self.avg_tokens_per_use is None and "avg_tokens_per_use" in self.model_fields_set:
-            _dict['avg_tokens_per_use'] = None
+            _dict["avg_tokens_per_use"] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict['tags'] = None
+            _dict["tags"] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict['extra_metadata'] = None
+            _dict["extra_metadata"] = None
 
         # set to None if estimated_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.estimated_tokens is None and "estimated_tokens" in self.model_fields_set:
-            _dict['estimated_tokens'] = None
+            _dict["estimated_tokens"] = None
 
         # set to None if language (nullable) is None
         # and model_fields_set contains the field
         if self.language is None and "language" in self.model_fields_set:
-            _dict['language'] = None
+            _dict["language"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of PromptResponse from a dict"""
         if obj is None:
             return None

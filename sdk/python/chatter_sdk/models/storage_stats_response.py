@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,15 +13,22 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
-from typing import Any, ClassVar, Dict, List, Union
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Any, ClassVar, Dict, List, Optional, Set, Union
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictFloat,
+    StrictInt,
+)
+from typing import Self
+
 
 class StorageStatsResponse(BaseModel):
     """
@@ -36,12 +42,12 @@ class StorageStatsResponse(BaseModel):
     total_records: StrictInt = Field(description="Total number of records")
     total_files: StrictInt = Field(description="Total number of files")
     total_backups: StrictInt = Field(description="Total number of backups")
-    storage_by_type: Dict[str, StrictInt] = Field(description="Storage usage by data type")
-    storage_by_user: Dict[str, StrictInt] = Field(description="Storage usage by user")
-    growth_rate_mb_per_day: Union[StrictFloat, StrictInt] = Field(description="Storage growth rate in MB per day")
+    storage_by_type: dict[str, StrictInt] = Field(description="Storage usage by data type")
+    storage_by_user: dict[str, StrictInt] = Field(description="Storage usage by user")
+    growth_rate_mb_per_day: StrictFloat | StrictInt = Field(description="Storage growth rate in MB per day")
     projected_size_30_days: StrictInt = Field(description="Projected size in 30 days")
     last_updated: datetime = Field(description="Statistics last updated timestamp")
-    __properties: ClassVar[List[str]] = ["total_size", "database_size", "files_size", "backups_size", "exports_size", "total_records", "total_files", "total_backups", "storage_by_type", "storage_by_user", "growth_rate_mb_per_day", "projected_size_30_days", "last_updated"]
+    __properties: ClassVar[list[str]] = ["total_size", "database_size", "files_size", "backups_size", "exports_size", "total_records", "total_files", "total_backups", "storage_by_type", "storage_by_user", "growth_rate_mb_per_day", "projected_size_30_days", "last_updated"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -60,11 +66,11 @@ class StorageStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of StorageStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -74,7 +80,7 @@ class StorageStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -85,7 +91,7 @@ class StorageStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of StorageStatsResponse from a dict"""
         if obj is None:
             return None

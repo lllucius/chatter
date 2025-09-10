@@ -2,12 +2,11 @@
 """OpenAPI specification generation for Chatter API."""
 
 import json
-import yaml
+import sys
 from pathlib import Path
 from typing import Any
 
-import sys
-from pathlib import Path
+import yaml
 
 # Add project root to Python path for imports
 project_root = Path(__file__).parent.parent.resolve()
@@ -79,7 +78,7 @@ def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         json.dump(spec, f, indent=2, ensure_ascii=False)
 
 
@@ -92,7 +91,7 @@ def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
     """
     output_path.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(output_path, 'w', encoding='utf-8') as f:
+    with open(output_path, "w", encoding="utf-8") as f:
         yaml.dump(spec, f, default_flow_style=False, allow_unicode=True)
 
 

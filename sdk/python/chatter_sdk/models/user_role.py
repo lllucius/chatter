@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class UserRole(str, Enum):
@@ -27,11 +28,11 @@ class UserRole(str, Enum):
     """
     allowed enum values
     """
-    GUEST = 'guest'
-    USER = 'user'
-    POWER_USER = 'power_user'
-    ADMIN = 'admin'
-    SUPER_ADMIN = 'super_admin'
+    GUEST = "guest"
+    USER = "user"
+    POWER_USER = "power_user"
+    ADMIN = "admin"
+    SUPER_ADMIN = "super_admin"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

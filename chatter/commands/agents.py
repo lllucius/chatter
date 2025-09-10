@@ -1,13 +1,13 @@
 """AI agent management commands for the CLI."""
 
 import json
+
 import typer
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Agents Commands
 agents_app = typer.Typer(help="AI agent management commands")
@@ -40,10 +40,10 @@ async def list_agents(
         for agent in response.agents:
             table.add_row(
                 str(agent.id),
-                getattr(agent, 'name', 'Unnamed'),
-                getattr(agent, 'agent_type', 'unknown'),
-                getattr(agent, 'status', 'unknown'),
-                str(getattr(agent, 'created_at', 'N/A'))[:19],
+                getattr(agent, "name", "Unnamed"),
+                getattr(agent, "agent_type", "unknown"),
+                getattr(agent, "status", "unknown"),
+                str(getattr(agent, "created_at", "N/A"))[:19],
             )
 
         console.print(table)
@@ -81,7 +81,9 @@ async def create_agent(
     config: str = typer.Option(None, help="Agent configuration as JSON"),
 ):
     """Create a new AI agent."""
-    from chatter_sdk.models.agent_create_request import AgentCreateRequest
+    from chatter_sdk.models.agent_create_request import (
+        AgentCreateRequest,
+    )
 
     agent_config = {}
     if config:
@@ -140,7 +142,7 @@ async def deploy_agent(
     """Deploy an agent to an environment."""
     async with get_client() as sdk_client:
         deploy_request = {
-            'environment': environment,
+            "environment": environment,
         }
 
         response = await sdk_client.agents_api.deploy_agent_api_v1_agents_agent_id_deploy_post(
@@ -148,7 +150,7 @@ async def deploy_agent(
         )
 
         console.print(f"✅ [green]Deployed agent {agent_id} to {environment}[/green]")
-        if hasattr(response, 'deployment_id'):
+        if hasattr(response, "deployment_id"):
             console.print(f"[dim]Deployment ID: {response.deployment_id}[/dim]")
 
 
@@ -167,12 +169,12 @@ async def execute_agent(
 
     async with get_client() as sdk_client:
         response = await sdk_client.agents_api.execute_agent_api_v1_agents_agent_id_execute_post(
-            agent_id=agent_id, execution_request={'input': execution_input}
+            agent_id=agent_id, execution_request={"input": execution_input}
         )
 
         console.print(f"✅ [green]Agent execution completed[/green]")
         console.print(f"[bold]Output:[/bold] {getattr(response, 'output', 'No output')}")
-        if hasattr(response, 'execution_time'):
+        if hasattr(response, "execution_time"):
             console.print(f"[dim]Execution Time: {response.execution_time}ms[/dim]")
 
 
@@ -188,7 +190,7 @@ async def show_agent_logs(
             agent_id=agent_id, limit=limit
         )
 
-        if not hasattr(response, 'logs') or not response.logs:
+        if not hasattr(response, "logs") or not response.logs:
             console.print("No logs found for this agent.")
             return
 
@@ -199,9 +201,9 @@ async def show_agent_logs(
 
         for log in response.logs:
             table.add_row(
-                str(getattr(log, 'timestamp', 'N/A'))[:19],
-                getattr(log, 'level', 'INFO'),
-                getattr(log, 'message', 'No message')[:100],
+                str(getattr(log, "timestamp", "N/A"))[:19],
+                getattr(log, "level", "INFO"),
+                getattr(log, "message", "No message")[:100],
             )
 
         console.print(table)
@@ -218,13 +220,13 @@ async def agent_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_agents'):
+        if hasattr(response, "total_agents"):
             table.add_row("Total Agents", str(response.total_agents))
-        if hasattr(response, 'active_agents'):
+        if hasattr(response, "active_agents"):
             table.add_row("Active Agents", str(response.active_agents))
-        if hasattr(response, 'total_executions'):
+        if hasattr(response, "total_executions"):
             table.add_row("Total Executions", f"{response.total_executions:,}")
-        if hasattr(response, 'avg_execution_time'):
+        if hasattr(response, "avg_execution_time"):
             table.add_row("Avg Execution Time", f"{response.avg_execution_time:.2f}ms")
 
         console.print(table)

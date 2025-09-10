@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,14 +12,22 @@
 """  # noqa: E501
 
 import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-
 from datetime import datetime
-from pydantic import Field, StrictBool, StrictStr, field_validator
-from typing import Any, Dict, List, Optional
-from typing_extensions import Annotated
+from typing import Any, Dict, List, Optional, Tuple, Union
+
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    field_validator,
+    validate_call,
+)
+from typing import Annotated
+
+from chatter_sdk.api_client import ApiClient, RequestSerialized
+from chatter_sdk.api_response import ApiResponse
 from chatter_sdk.models.job_action_response import JobActionResponse
 from chatter_sdk.models.job_create_request import JobCreateRequest
 from chatter_sdk.models.job_list_response import JobListResponse
@@ -28,9 +35,6 @@ from chatter_sdk.models.job_priority import JobPriority
 from chatter_sdk.models.job_response import JobResponse
 from chatter_sdk.models.job_stats_response import JobStatsResponse
 from chatter_sdk.models.job_status import JobStatus
-
-from chatter_sdk.api_client import ApiClient, RequestSerialized
-from chatter_sdk.api_response import ApiResponse
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -51,17 +55,10 @@ class JobsApi:
     async def cancel_job_api_v1_jobs_job_id_cancel_post(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> JobActionResponse:
         """Cancel Job
@@ -100,9 +97,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobActionResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobActionResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -119,17 +116,10 @@ class JobsApi:
     async def cancel_job_api_v1_jobs_job_id_cancel_post_with_http_info(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[JobActionResponse]:
         """Cancel Job
@@ -168,9 +158,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobActionResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobActionResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -187,17 +177,10 @@ class JobsApi:
     async def cancel_job_api_v1_jobs_job_id_cancel_post_without_preload_content(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Cancel Job
@@ -236,9 +219,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobActionResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobActionResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -258,21 +241,21 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if job_id is not None:
-            _path_params['job_id'] = job_id
+            _path_params["job_id"] = job_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -280,22 +263,22 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/jobs/{job_id}/cancel',
+            method="POST",
+            resource_path="/api/v1/jobs/{job_id}/cancel",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -314,20 +297,13 @@ class JobsApi:
     @validate_call
     async def cleanup_jobs_api_v1_jobs_cleanup_post(
         self,
-        force: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        force: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> dict[str, object]:
         """Cleanup Jobs
 
         Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
@@ -364,9 +340,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -382,20 +358,13 @@ class JobsApi:
     @validate_call
     async def cleanup_jobs_api_v1_jobs_cleanup_post_with_http_info(
         self,
-        force: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        force: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[dict[str, object]]:
         """Cleanup Jobs
 
         Clean up old completed jobs to free up memory.  Note: This is a system-wide cleanup operation that affects all users. Only completed, failed, or cancelled jobs older than 24 hours are removed.  Args:     force: If True, remove all completed/failed jobs regardless of age     current_user: Current authenticated user  Returns:     Cleanup statistics
@@ -432,9 +401,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -450,18 +419,11 @@ class JobsApi:
     @validate_call
     async def cleanup_jobs_api_v1_jobs_cleanup_post_without_preload_content(
         self,
-        force: Optional[StrictBool] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        force: StrictBool | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Cleanup Jobs
@@ -500,9 +462,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "Dict[str, object]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -522,23 +484,23 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if force is not None:
             
-            _query_params.append(('force', force))
+            _query_params.append(("force", force))
             
         # process the header parameters
         # process the form parameters
@@ -546,22 +508,22 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/jobs/cleanup',
+            method="POST",
+            resource_path="/api/v1/jobs/cleanup",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -581,17 +543,10 @@ class JobsApi:
     async def create_job_api_v1_jobs_post(
         self,
         job_create_request: JobCreateRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> JobResponse:
         """Create Job
@@ -630,9 +585,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -649,17 +604,10 @@ class JobsApi:
     async def create_job_api_v1_jobs_post_with_http_info(
         self,
         job_create_request: JobCreateRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[JobResponse]:
         """Create Job
@@ -698,9 +646,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -717,17 +665,10 @@ class JobsApi:
     async def create_job_api_v1_jobs_post_without_preload_content(
         self,
         job_create_request: JobCreateRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Job
@@ -766,9 +707,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -788,17 +729,17 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -810,35 +751,35 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/jobs/',
+            method="POST",
+            resource_path="/api/v1/jobs/",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -858,17 +799,10 @@ class JobsApi:
     async def get_job_api_v1_jobs_job_id_get(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> JobResponse:
         """Get Job
@@ -907,9 +841,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -926,17 +860,10 @@ class JobsApi:
     async def get_job_api_v1_jobs_job_id_get_with_http_info(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[JobResponse]:
         """Get Job
@@ -975,9 +902,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -994,17 +921,10 @@ class JobsApi:
     async def get_job_api_v1_jobs_job_id_get_without_preload_content(
         self,
         job_id: StrictStr,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Job
@@ -1043,9 +963,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1065,21 +985,21 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if job_id is not None:
-            _path_params['job_id'] = job_id
+            _path_params["job_id"] = job_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1087,22 +1007,22 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/jobs/{job_id}',
+            method="GET",
+            resource_path="/api/v1/jobs/{job_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1121,17 +1041,10 @@ class JobsApi:
     @validate_call
     async def get_job_stats_api_v1_jobs_stats_overview_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> JobStatsResponse:
         """Get Job Stats
@@ -1167,8 +1080,8 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1184,17 +1097,10 @@ class JobsApi:
     @validate_call
     async def get_job_stats_api_v1_jobs_stats_overview_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[JobStatsResponse]:
         """Get Job Stats
@@ -1230,8 +1136,8 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1247,17 +1153,10 @@ class JobsApi:
     @validate_call
     async def get_job_stats_api_v1_jobs_stats_overview_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Job Stats
@@ -1293,8 +1192,8 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1313,17 +1212,17 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1333,22 +1232,22 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/jobs/stats/overview',
+            method="GET",
+            resource_path="/api/v1/jobs/stats/overview",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1367,28 +1266,21 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: JobStatus | None = None,
+        priority: JobPriority | None = None,
+        function_name: StrictStr | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        search: StrictStr | None = None,
+        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
+        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
+        sort_by: StrictStr | None = None,
+        sort_order: Annotated[str, Field(strict=True)] | None = None,
+        request_body: list[StrictStr] | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> JobListResponse:
         """List Jobs
@@ -1457,9 +1349,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1475,28 +1367,21 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get_with_http_info(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: JobStatus | None = None,
+        priority: JobPriority | None = None,
+        function_name: StrictStr | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        search: StrictStr | None = None,
+        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
+        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
+        sort_by: StrictStr | None = None,
+        sort_order: Annotated[str, Field(strict=True)] | None = None,
+        request_body: list[StrictStr] | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[JobListResponse]:
         """List Jobs
@@ -1565,9 +1450,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1583,28 +1468,21 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get_without_preload_content(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        status: JobStatus | None = None,
+        priority: JobPriority | None = None,
+        function_name: StrictStr | None = None,
+        created_after: datetime | None = None,
+        created_before: datetime | None = None,
+        search: StrictStr | None = None,
+        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
+        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
+        sort_by: StrictStr | None = None,
+        sort_order: Annotated[str, Field(strict=True)] | None = None,
+        request_body: list[StrictStr] | None = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Jobs
@@ -1673,9 +1551,9 @@ class JobsApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "JobListResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "JobListResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1705,78 +1583,78 @@ class JobsApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
-            'request_body': '',
+        _collection_formats: dict[str, str] = {
+            "request_body": "",
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if status is not None:
             
-            _query_params.append(('status', status.value))
+            _query_params.append(("status", status.value))
             
         if priority is not None:
             
-            _query_params.append(('priority', priority.value))
+            _query_params.append(("priority", priority.value))
             
         if function_name is not None:
             
-            _query_params.append(('function_name', function_name))
+            _query_params.append(("function_name", function_name))
             
         if created_after is not None:
             if isinstance(created_after, datetime):
                 _query_params.append(
                     (
-                        'created_after',
+                        "created_after",
                         created_after.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('created_after', created_after))
+                _query_params.append(("created_after", created_after))
             
         if created_before is not None:
             if isinstance(created_before, datetime):
                 _query_params.append(
                     (
-                        'created_before',
+                        "created_before",
                         created_before.strftime(
                             self.api_client.configuration.datetime_format
                         )
                     )
                 )
             else:
-                _query_params.append(('created_before', created_before))
+                _query_params.append(("created_before", created_before))
             
         if search is not None:
             
-            _query_params.append(('search', search))
+            _query_params.append(("search", search))
             
         if limit is not None:
             
-            _query_params.append(('limit', limit))
+            _query_params.append(("limit", limit))
             
         if offset is not None:
             
-            _query_params.append(('offset', offset))
+            _query_params.append(("offset", offset))
             
         if sort_by is not None:
             
-            _query_params.append(('sort_by', sort_by))
+            _query_params.append(("sort_by", sort_by))
             
         if sort_order is not None:
             
-            _query_params.append(('sort_order', sort_order))
+            _query_params.append(("sort_order", sort_order))
             
         # process the header parameters
         # process the form parameters
@@ -1786,35 +1664,35 @@ class JobsApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/jobs/',
+            method="GET",
+            resource_path="/api/v1/jobs/",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

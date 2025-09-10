@@ -245,7 +245,7 @@ class WorkflowOptimizer:
                     logger.error(
                         f"Benchmark failed for variant {variant}: {e}"
                     )
-                    execution_times.append(float('inf'))
+                    execution_times.append(float("inf"))
 
             avg_time = sum(execution_times) / len(execution_times)
 

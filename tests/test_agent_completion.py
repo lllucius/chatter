@@ -21,12 +21,12 @@ class TestAgentFeatureCompletion:
 
         # Check template structure
         for template in templates:
-            assert 'id' in template
-            assert 'name' in template
-            assert 'description' in template
-            assert 'agent_type' in template
-            assert 'system_message' in template
-            assert isinstance(template['agent_type'], AgentType)
+            assert "id" in template
+            assert "name" in template
+            assert "description" in template
+            assert "agent_type" in template
+            assert "system_message" in template
+            assert isinstance(template["agent_type"], AgentType)
 
     @pytest.mark.asyncio
     async def test_agent_creation_with_fake_llm(self):
@@ -195,11 +195,11 @@ class TestAgentFeatureCompletion:
         stats = await manager.get_agent_stats()
 
         assert isinstance(stats, dict)
-        assert 'total_agents' in stats
-        assert 'active_agents' in stats
-        assert 'agent_types' in stats
-        assert 'total_interactions' in stats
-        assert stats['total_agents'] >= 1
+        assert "total_agents" in stats
+        assert "active_agents" in stats
+        assert "agent_types" in stats
+        assert "total_interactions" in stats
+        assert stats["total_agents"] >= 1
 
     @pytest.mark.asyncio
     async def test_nonexistent_agent_handling(self):
@@ -219,15 +219,15 @@ class TestAgentFeatureCompletion:
         executor = AgentExecutor()
 
         # Check that execute_agent_task method exists and has correct signature
-        assert hasattr(executor, 'execute_agent_task')
+        assert hasattr(executor, "execute_agent_task")
 
         sig = inspect.signature(executor.execute_agent_task)
         params = list(sig.parameters.keys())
 
         # Should have self, agent, task, context parameters
-        assert 'agent' in params
-        assert 'task' in params
-        assert 'context' in params
+        assert "agent" in params
+        assert "task" in params
+        assert "context" in params
 
     def test_agent_manager_class_mapping(self):
         """Test that agent manager has correct agent class mappings."""
@@ -241,8 +241,8 @@ class TestAgentFeatureCompletion:
         # Each mapping should be a class
         for _agent_type, agent_class in manager.agent_classes.items():
             assert isinstance(agent_class, type)
-            assert hasattr(agent_class, 'process_message')
-            assert hasattr(agent_class, 'get_capabilities')
+            assert hasattr(agent_class, "process_message")
+            assert hasattr(agent_class, "get_capabilities")
 
     def test_database_models_exist(self):
         """Test that database models exist and are properly defined."""
@@ -253,11 +253,11 @@ class TestAgentFeatureCompletion:
         assert AgentInteractionDB is not None
 
         # Check key fields exist
-        assert hasattr(AgentDB, 'name')
-        assert hasattr(AgentDB, 'agent_type')
-        assert hasattr(AgentDB, 'system_message')
-        assert hasattr(AgentDB, 'created_by')
+        assert hasattr(AgentDB, "name")
+        assert hasattr(AgentDB, "agent_type")
+        assert hasattr(AgentDB, "system_message")
+        assert hasattr(AgentDB, "created_by")
 
-        assert hasattr(AgentInteractionDB, 'agent_id')
-        assert hasattr(AgentInteractionDB, 'user_message')
-        assert hasattr(AgentInteractionDB, 'agent_response')
+        assert hasattr(AgentInteractionDB, "agent_id")
+        assert hasattr(AgentInteractionDB, "user_message")
+        assert hasattr(AgentInteractionDB, "agent_response")

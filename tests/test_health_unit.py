@@ -51,7 +51,7 @@ class TestHealthUnit:
 
     @pytest.mark.unit
     @patch(
-        'chatter.core.monitoring.get_monitoring_service',
+        "chatter.core.monitoring.get_monitoring_service",
         side_effect=ImportError("Monitoring not available"),
     )
     async def test_metrics_endpoint_without_monitoring(
@@ -91,7 +91,7 @@ class TestHealthUnit:
         assert data["requests"] == []
 
     @pytest.mark.unit
-    @patch('chatter.core.monitoring.get_monitoring_service')
+    @patch("chatter.core.monitoring.get_monitoring_service")
     async def test_metrics_endpoint_with_monitoring_success(
         self, mock_get_monitoring, client: AsyncClient
     ):
@@ -125,7 +125,7 @@ class TestHealthUnit:
         assert "/readyz" in data["endpoints"]
 
     @pytest.mark.unit
-    @patch('chatter.core.monitoring.get_monitoring_service')
+    @patch("chatter.core.monitoring.get_monitoring_service")
     async def test_metrics_endpoint_with_monitoring_error(
         self, mock_get_monitoring, client: AsyncClient
     ):
@@ -145,7 +145,7 @@ class TestHealthUnit:
         assert data["endpoints"] == {}
 
     @pytest.mark.unit
-    @patch('chatter.core.monitoring.get_monitoring_service')
+    @patch("chatter.core.monitoring.get_monitoring_service")
     async def test_correlation_trace_with_monitoring_success(
         self, mock_get_monitoring, client: AsyncClient
     ):
@@ -177,7 +177,7 @@ class TestHealthUnit:
         assert data["requests"] == mock_requests
 
     @pytest.mark.unit
-    @patch('chatter.core.monitoring.get_monitoring_service')
+    @patch("chatter.core.monitoring.get_monitoring_service")
     async def test_correlation_trace_with_monitoring_error(
         self, mock_get_monitoring, client: AsyncClient
     ):
@@ -209,7 +209,7 @@ class TestHealthUnit:
 
         # Should be able to parse as ISO format datetime
         timestamp = datetime.fromisoformat(
-            timestamp_str.replace('Z', '+00:00')
+            timestamp_str.replace("Z", "+00:00")
         )
         assert (
             timestamp.tzinfo is not None

@@ -15,7 +15,10 @@ if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
 from scripts.sdk import PythonSDKGenerator, TypeScriptSDKGenerator
-from scripts.utils.config import get_default_python_config, get_default_typescript_config
+from scripts.utils.config import (
+    get_default_python_config,
+    get_default_typescript_config,
+)
 
 
 def generate_python_sdk(project_root: Path, verbose: bool = False) -> bool:

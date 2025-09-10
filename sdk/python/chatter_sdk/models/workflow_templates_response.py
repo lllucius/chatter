@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,23 +13,27 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
-from chatter_sdk.models.workflow_template_info import WorkflowTemplateInfo
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Self
+
+from chatter_sdk.models.workflow_template_info import (
+    WorkflowTemplateInfo,
+)
+
 
 class WorkflowTemplatesResponse(BaseModel):
     """
     Schema for workflow templates response.
     """ # noqa: E501
-    templates: Dict[str, WorkflowTemplateInfo] = Field(description="Available templates")
+    templates: dict[str, WorkflowTemplateInfo] = Field(description="Available templates")
     total_count: StrictInt = Field(description="Total number of templates")
-    __properties: ClassVar[List[str]] = ["templates", "total_count"]
+    __properties: ClassVar[list[str]] = ["templates", "total_count"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +52,11 @@ class WorkflowTemplatesResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of WorkflowTemplatesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +66,7 @@ class WorkflowTemplatesResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -77,11 +80,11 @@ class WorkflowTemplatesResponse(BaseModel):
             for _key_templates in self.templates:
                 if self.templates[_key_templates]:
                     _field_dict[_key_templates] = self.templates[_key_templates].to_dict()
-            _dict['templates'] = _field_dict
+            _dict["templates"] = _field_dict
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of WorkflowTemplatesResponse from a dict"""
         if obj is None:
             return None

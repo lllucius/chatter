@@ -429,7 +429,7 @@ async def get_agent(
 
         # Check if user has access to this agent (basic ownership check)
         if (
-            hasattr(agent.profile, 'created_by')
+            hasattr(agent.profile, "created_by")
             and agent.profile.created_by != current_user.id
             and current_user.id != "system"
         ):
@@ -482,7 +482,7 @@ async def update_agent(
 
         # Check if user has permission to update this agent
         if (
-            hasattr(agent.profile, 'created_by')
+            hasattr(agent.profile, "created_by")
             and agent.profile.created_by != current_user.id
             and current_user.id != "system"
         ):
@@ -552,7 +552,7 @@ async def delete_agent(
 
         # Check if user has permission to delete this agent
         if (
-            hasattr(agent.profile, 'created_by')
+            hasattr(agent.profile, "created_by")
             and agent.profile.created_by != current_user.id
             and current_user.id != "system"
         ):
@@ -687,7 +687,7 @@ async def interact_with_agent(
 
         # Check if user has permission to interact with this agent
         if (
-            hasattr(agent.profile, 'created_by')
+            hasattr(agent.profile, "created_by")
             and agent.profile.created_by != current_user.id
             and current_user.id != "system"
         ):
@@ -768,7 +768,7 @@ async def get_agent_health(
 
         # Check if user has access to this agent
         if (
-            hasattr(agent.profile, 'created_by')
+            hasattr(agent.profile, "created_by")
             and agent.profile.created_by != current_user.id
             and current_user.id != "system"
         ):
@@ -921,7 +921,7 @@ async def bulk_create_agents(
                         {
                             "index": i,
                             "agent_name": getattr(
-                                agent_data, 'name', 'Unknown'
+                                agent_data, "name", "Unknown"
                             ),
                             "error": str(ve),
                         }
@@ -975,7 +975,7 @@ async def bulk_create_agents(
                     {
                         "index": i,
                         "name": getattr(
-                            agent_data, 'name', f'Agent {i}'
+                            agent_data, "name", f"Agent {i}"
                         ),
                         "error": str(e),
                     }
@@ -1082,7 +1082,7 @@ async def bulk_delete_agents(
 
                 # Check if user has permission to delete this agent
                 if (
-                    hasattr(agent.profile, 'created_by')
+                    hasattr(agent.profile, "created_by")
                     and agent.profile.created_by != current_user.id
                     and current_user.id != "system"
                 ):

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class JobStatus(str, Enum):
@@ -27,12 +28,12 @@ class JobStatus(str, Enum):
     """
     allowed enum values
     """
-    PENDING = 'pending'
-    RUNNING = 'running'
-    COMPLETED = 'completed'
-    FAILED = 'failed'
-    CANCELLED = 'cancelled'
-    RETRYING = 'retrying'
+    PENDING = "pending"
+    RUNNING = "running"
+    COMPLETED = "completed"
+    FAILED = "failed"
+    CANCELLED = "cancelled"
+    RETRYING = "retrying"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

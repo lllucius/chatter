@@ -1,3 +1,5 @@
+"""Database migrations configuration module."""
+
 import asyncio
 from logging.config import fileConfig
 
@@ -27,10 +29,7 @@ config.set_main_option("sqlalchemy.url", settings.database_url_for_env)
 # for 'autogenerate' support
 target_metadata = Base.metadata
 
-# other values from the config, defined by the needs of env.py,
-# can be acquired:
-# my_important_option = config.get_main_option("my_important_option")
-# ... etc.
+# Other configuration values can be acquired from the config as needed.
 
 
 def run_migrations_offline() -> None:
@@ -72,11 +71,14 @@ def do_run_migrations(connection: Connection) -> None:
         context.run_migrations()
 
 
+_DATABASE_URL_ERROR = "Database URL not found in configuration"
+
+
 async def run_async_migrations() -> None:
     """Run migrations in async mode."""
     database_url = config.get_main_option("sqlalchemy.url")
     if database_url is None:
-        raise ValueError("Database URL not found in configuration")
+        raise ValueError(_DATABASE_URL_ERROR)
 
     connectable = create_async_engine(
         database_url,

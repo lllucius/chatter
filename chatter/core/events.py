@@ -98,7 +98,7 @@ class UnifiedEvent:
         timestamp = data.get("timestamp")
         if isinstance(timestamp, str):
             timestamp = datetime.fromisoformat(
-                timestamp.replace('Z', '+00:00')
+                timestamp.replace("Z", "+00:00")
             )
         elif timestamp is None:
             timestamp = datetime.now(UTC)
@@ -404,15 +404,15 @@ def validate_event_structure(event: UnifiedEvent) -> bool:
         if not event.id or not event.event_type or not event.category:
             logger.warning(
                 "Event missing required fields",
-                event_id=getattr(event, 'id', None),
+                event_id=getattr(event, "id", None),
             )
             return False
 
         # Validate event type format (should not contain special characters)
         if (
-            not event.event_type.replace('.', '')
-            .replace('_', '')
-            .replace('-', '')
+            not event.event_type.replace(".", "")
+            .replace("_", "")
+            .replace("-", "")
             .isalnum()
         ):
             logger.warning(
@@ -464,7 +464,7 @@ def validate_event_structure(event: UnifiedEvent) -> bool:
     except Exception as e:
         logger.error(
             "Error validating event",
-            event_id=getattr(event, 'id', None),
+            event_id=getattr(event, "id", None),
             error=str(e),
         )
         return False

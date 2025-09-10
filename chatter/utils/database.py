@@ -155,7 +155,7 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
                     # Only attempt close if the session is not in an active transaction
                     # and we actually own the session lifecycle
                     if (
-                        hasattr(session, '_connection')
+                        hasattr(session, "_connection")
                         and session._connection is not None
                     ):
                         # Check if we're in a transaction - but be more defensive
@@ -332,7 +332,7 @@ class DatabaseManager:
 
         for _session_id, session_info in self.active_sessions.items():
             session_age = current_time - session_info.get(
-                'created_at', current_time
+                "created_at", current_time
             )
             if session_age > max_age_seconds:
                 leaked_sessions.append(session_info)

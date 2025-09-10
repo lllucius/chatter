@@ -75,26 +75,26 @@ class ConversationService:
                     raise ValueError("Invalid user ID format") from e
 
                 # Prepare metadata with workflow_config
-                metadata = kwargs.get('metadata', {})
-                if kwargs.get('workflow_config') is not None:
-                    metadata['workflow_config'] = kwargs.get(
-                        'workflow_config'
+                metadata = kwargs.get("metadata", {})
+                if kwargs.get("workflow_config") is not None:
+                    metadata["workflow_config"] = kwargs.get(
+                        "workflow_config"
                     )
 
                 conversation = Conversation(
                     title=title,
                     user_id=user_id,
                     status=ConversationStatus.ACTIVE,
-                    profile_id=kwargs.get('profile_id'),
-                    temperature=kwargs.get('temperature', 0.7),
-                    max_tokens=kwargs.get('max_tokens', 1000),
+                    profile_id=kwargs.get("profile_id"),
+                    temperature=kwargs.get("temperature", 0.7),
+                    max_tokens=kwargs.get("max_tokens", 1000),
                     extra_metadata=metadata,
                 )
             else:
                 # Prepare metadata with workflow_config
                 metadata = conversation_data.extra_metadata or {}
                 if conversation_data.workflow_config is not None:
-                    metadata['workflow_config'] = (
+                    metadata["workflow_config"] = (
                         conversation_data.workflow_config
                     )
 
@@ -246,17 +246,17 @@ class ConversationService:
             if update_data is None:
                 # Create update object from parameters
                 update_data = type(
-                    'UpdateData',
+                    "UpdateData",
                     (),
                     {
-                        'title': title,
-                        'status': kwargs.get('status'),
-                        'temperature': kwargs.get('temperature'),
-                        'max_tokens': kwargs.get('max_tokens'),
-                        'workflow_config': kwargs.get(
-                            'workflow_config'
+                        "title": title,
+                        "status": kwargs.get("status"),
+                        "temperature": kwargs.get("temperature"),
+                        "max_tokens": kwargs.get("max_tokens"),
+                        "workflow_config": kwargs.get(
+                            "workflow_config"
                         ),
-                        'metadata': kwargs.get('metadata'),
+                        "metadata": kwargs.get("metadata"),
                     },
                 )()
 
@@ -265,13 +265,13 @@ class ConversationService:
                 conversation.title = update_data.title
 
             if (
-                hasattr(update_data, 'status')
+                hasattr(update_data, "status")
                 and update_data.status is not None
             ):
                 conversation.status = update_data.status
 
             if (
-                hasattr(update_data, 'temperature')
+                hasattr(update_data, "temperature")
                 and update_data.temperature is not None
             ):
                 conversation.temperature = update_data.temperature
@@ -283,7 +283,7 @@ class ConversationService:
                 # Store workflow_config in extra_metadata
                 if conversation.extra_metadata is None:
                     conversation.extra_metadata = {}
-                conversation.extra_metadata['workflow_config'] = (
+                conversation.extra_metadata["workflow_config"] = (
                     update_data.workflow_config
                 )
 
@@ -624,12 +624,12 @@ class ConversationService:
                 conversation_id, user_id, include_messages=False
             )
             return {
-                'id': conversation.id,
-                'title': conversation.title,
-                'status': conversation.status,
-                'created_at': conversation.created_at,
-                'updated_at': conversation.updated_at,
-                'metadata': conversation.extra_metadata,
+                "id": conversation.id,
+                "title": conversation.title,
+                "status": conversation.status,
+                "created_at": conversation.created_at,
+                "updated_at": conversation.updated_at,
+                "metadata": conversation.extra_metadata,
             }
         except Exception as e:
             logger.error(f"Failed to get conversation metadata: {e}")

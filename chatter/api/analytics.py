@@ -562,7 +562,7 @@ async def get_user_analytics(
         # Authorization check: users can only access their own analytics
         # unless they are admin (assuming is_admin field exists)
         if current_user.id != user_id and not getattr(
-            current_user, 'is_admin', False
+            current_user, "is_admin", False
         ):
             from chatter.utils.problem import ForbiddenProblem
 

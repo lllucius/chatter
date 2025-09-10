@@ -1,12 +1,11 @@
 """Plugin management commands for the CLI."""
 
 import typer
-from rich.table import Table
 from rich.panel import Panel
 from rich.prompt import Prompt
+from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Plugins Commands
 plugins_app = typer.Typer(help="Plugin management commands")
@@ -36,10 +35,10 @@ async def list_plugins(
 
         for plugin in response.plugins:
             table.add_row(
-                getattr(plugin, 'name', 'Unknown'),
-                getattr(plugin, 'version', 'N/A'),
-                getattr(plugin, 'status', 'unknown'),
-                getattr(plugin, 'description', 'No description')[:50],
+                getattr(plugin, "name", "Unknown"),
+                getattr(plugin, "version", "N/A"),
+                getattr(plugin, "status", "unknown"),
+                getattr(plugin, "description", "No description")[:50],
             )
 
         console.print(table)
@@ -102,11 +101,11 @@ async def plugin_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_plugins'):
+        if hasattr(response, "total_plugins"):
             table.add_row("Total Plugins", str(response.total_plugins))
-        if hasattr(response, 'enabled_plugins'):
+        if hasattr(response, "enabled_plugins"):
             table.add_row("Enabled Plugins", str(response.enabled_plugins))
-        if hasattr(response, 'disabled_plugins'):
+        if hasattr(response, "disabled_plugins"):
             table.add_row("Disabled Plugins", str(response.disabled_plugins))
 
         console.print(table)

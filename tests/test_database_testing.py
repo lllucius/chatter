@@ -31,17 +31,17 @@ class TestDatabaseTesting:
             existing_tables = inspector.get_table_names()
 
             expected_tables = [
-                'users',
-                'chats',
-                'messages',
-                'documents',
-                'providers',
-                'models',
-                'embedding_spaces',
-                'agents',
-                'profiles',
-                'jobs',
-                'events',
+                "users",
+                "chats",
+                "messages",
+                "documents",
+                "providers",
+                "models",
+                "embedding_spaces",
+                "agents",
+                "profiles",
+                "jobs",
+                "events",
             ]
 
             existing_core_tables = [
@@ -56,10 +56,10 @@ class TestDatabaseTesting:
                 # Test table structure for existing tables
                 for table_name in existing_core_tables:
                     columns = inspector.get_columns(table_name)
-                    column_names = [col['name'] for col in columns]
+                    column_names = [col["name"] for col in columns]
 
                     # Basic validation - tables should have id column
-                    if 'id' not in column_names:
+                    if "id" not in column_names:
                         print(
                             f"Warning: Table {table_name} missing 'id' column"
                         )
@@ -68,7 +68,7 @@ class TestDatabaseTesting:
                     timestamp_cols = [
                         col
                         for col in column_names
-                        if col in ['created_at', 'updated_at']
+                        if col in ["created_at", "updated_at"]
                     ]
                     if not timestamp_cols:
                         print(
@@ -218,9 +218,9 @@ class TestDatabaseTesting:
                 try:
                     # Get table columns
                     columns = inspector.get_columns(table_name)
-                    column_names = [col['name'] for col in columns]
+                    column_names = [col["name"] for col in columns]
 
-                    if 'id' in column_names:
+                    if "id" in column_names:
                         # Test primary key index
                         query = (
                             f"SELECT * FROM {table_name} WHERE id = 1"
@@ -230,7 +230,7 @@ class TestDatabaseTesting:
                         )
                         explain_output = explain_result.fetchall()
 
-                        explain_text = ' '.join(
+                        explain_text = " ".join(
                             [str(row) for row in explain_output]
                         )
 
@@ -247,7 +247,7 @@ class TestDatabaseTesting:
                     timestamp_cols = [
                         col
                         for col in column_names
-                        if 'created_at' in col or 'updated_at' in col
+                        if "created_at" in col or "updated_at" in col
                     ]
                     if timestamp_cols:
                         col = timestamp_cols[0]
@@ -299,8 +299,8 @@ class TestDatabaseTesting:
 
                         # Test foreign key constraint by trying to insert invalid reference
                         for fk in foreign_keys:
-                            referenced_table = fk['referred_table']
-                            local_columns = fk['constrained_columns']
+                            referenced_table = fk["referred_table"]
+                            local_columns = fk["constrained_columns"]
 
                             if (
                                 local_columns
@@ -314,7 +314,7 @@ class TestDatabaseTesting:
                                         table_name
                                     )
                                     column_names = [
-                                        col['name'] for col in columns
+                                        col["name"] for col in columns
                                     ]
 
                                     # Skip this test if table structure is too complex
@@ -369,9 +369,9 @@ class TestDatabaseTesting:
                         # Test for NULL values in non-nullable columns
                         columns = inspector.get_columns(table_name)
                         non_nullable_cols = [
-                            col['name']
+                            col["name"]
                             for col in columns
-                            if not col['nullable']
+                            if not col["nullable"]
                         ]
 
                         for col in non_nullable_cols:
@@ -572,7 +572,7 @@ class TestDatabaseTesting:
                 wal_level = wal_result.scalar()
                 print(f"WAL level: {wal_level}")
 
-                if wal_level in ['replica', 'logical']:
+                if wal_level in ["replica", "logical"]:
                     print("Database configured for backup and recovery")
                 else:
                     print(

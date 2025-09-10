@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class MetricType(str, Enum):
@@ -27,14 +28,14 @@ class MetricType(str, Enum):
     """
     allowed enum values
     """
-    RESPONSE_TIME = 'response_time'
-    USER_SATISFACTION = 'user_satisfaction'
-    ACCURACY = 'accuracy'
-    ENGAGEMENT = 'engagement'
-    CONVERSION = 'conversion'
-    ERROR_RATE = 'error_rate'
-    TOKEN_USAGE = 'token_usage'
-    CUSTOM = 'custom'
+    RESPONSE_TIME = "response_time"
+    USER_SATISFACTION = "user_satisfaction"
+    ACCURACY = "accuracy"
+    ENGAGEMENT = "engagement"
+    CONVERSION = "conversion"
+    ERROR_RATE = "error_rate"
+    TOKEN_USAGE = "token_usage"
+    CUSTOM = "custom"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

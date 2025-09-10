@@ -76,18 +76,18 @@ class LLMService:
                     api_key=api_key or "dummy",
                     base_url=provider.base_url,
                     model=model_def.model_name,
-                    temperature=config.get('temperature', 0.7),
+                    temperature=config.get("temperature", 0.7),
                     max_tokens=model_def.max_tokens
-                    or config.get('max_tokens', 4096),
+                    or config.get("max_tokens", 4096),
                 )
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 return ChatAnthropic(
                     api_key=api_key or "dummy",
                     model=model_def.model_name,
-                    temperature=config.get('temperature', 0.7),
+                    temperature=config.get("temperature", 0.7),
                     max_tokens=model_def.max_tokens
-                    or config.get('max_tokens', 4096),
+                    or config.get("max_tokens", 4096),
                 )
 
             else:
@@ -431,7 +431,7 @@ class LLMService:
 
                 # Add usage info if available
                 if (
-                    hasattr(response, 'usage_metadata')
+                    hasattr(response, "usage_metadata")
                     and response.usage_metadata
                 ):
                     result["usage"] = {

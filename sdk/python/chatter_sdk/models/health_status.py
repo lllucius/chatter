@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class HealthStatus(str, Enum):
@@ -27,9 +28,9 @@ class HealthStatus(str, Enum):
     """
     allowed enum values
     """
-    HEALTHY = 'healthy'
-    ALIVE = 'alive'
-    UNHEALTHY = 'unhealthy'
+    HEALTHY = "healthy"
+    ALIVE = "alive"
+    UNHEALTHY = "unhealthy"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

@@ -27,7 +27,7 @@ class TestIntegrationWorkflows:
         try:
             # Step 1: Upload a document
             test_content = "This document discusses artificial intelligence, machine learning, and natural language processing technologies."
-            test_file = io.BytesIO(test_content.encode('utf-8'))
+            test_file = io.BytesIO(test_content.encode("utf-8"))
 
             files = {
                 "file": ("ai_knowledge.txt", test_file, "text/plain")
@@ -338,7 +338,7 @@ class TestIntegrationWorkflows:
             # Activity 1: Create documents
             for i in range(3):
                 content = f"Analytics test document {i+1} with sample content for analysis."
-                test_file = io.BytesIO(content.encode('utf-8'))
+                test_file = io.BytesIO(content.encode("utf-8"))
 
                 files = {
                     "file": (
@@ -1048,7 +1048,7 @@ class TestIntegrationWorkflows:
                         ],  # 401 means service exists but auth required
                         "status_code": response.status_code,
                         "response_time": getattr(
-                            response, 'elapsed', None
+                            response, "elapsed", None
                         ),
                     }
                 except Exception as e:
@@ -1170,9 +1170,9 @@ class TestIntegrationWorkflows:
                             if any(
                                 term in k.lower()
                                 for term in [
-                                    'service',
-                                    'dependency',
-                                    'component',
+                                    "service",
+                                    "dependency",
+                                    "component",
                                 ]
                             )
                         ]

@@ -140,13 +140,13 @@ class WorkflowExecutionService:
             "performance_monitor": performance_monitor.get_performance_stats(),
             "cache_stats": (
                 await workflow_cache.get_stats()
-                if hasattr(workflow_cache, 'get_stats')
+                if hasattr(workflow_cache, "get_stats")
                 else {}
             ),
             "template_stats": self.template_manager.get_stats(),
             "limit_manager_stats": (
                 self.limit_manager.get_stats()
-                if hasattr(self.limit_manager, 'get_stats')
+                if hasattr(self.limit_manager, "get_stats")
                 else {}
             ),
         }
@@ -612,9 +612,9 @@ class WorkflowExecutionService:
             # Safe condition evaluation - only allow basic boolean conditions
             try:
                 # For security, only allow literal boolean values or simple comparisons
-                if condition.lower() in ('true', '1', 'yes'):
+                if condition.lower() in ("true", "1", "yes"):
                     result = True
-                elif condition.lower() in ('false', '0', 'no'):
+                elif condition.lower() in ("false", "0", "no"):
                     result = False
                 else:
                     # For complex conditions, would need a proper expression parser
@@ -653,9 +653,9 @@ class WorkflowExecutionService:
             if condition:
                 # Safe condition evaluation - only allow basic boolean conditions
                 try:
-                    if condition.lower() in ('true', '1', 'yes'):
+                    if condition.lower() in ("true", "1", "yes"):
                         condition_result = True
-                    elif condition.lower() in ('false', '0', 'no'):
+                    elif condition.lower() in ("false", "0", "no"):
                         condition_result = False
                     else:
                         # For complex conditions, would need a proper expression parser
@@ -831,9 +831,9 @@ class WorkflowExecutionService:
 
         try:
             # Safe condition evaluation - only allow basic boolean conditions
-            if condition.lower() in ('true', '1', 'yes'):
+            if condition.lower() in ("true", "1", "yes"):
                 return True
-            elif condition.lower() in ('false', '0', 'no'):
+            elif condition.lower() in ("false", "0", "no"):
                 return False
             else:
                 # For complex conditions, would need a proper expression parser

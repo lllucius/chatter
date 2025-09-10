@@ -128,12 +128,12 @@ class UserLogin(BaseModel):
     password: str = Field(..., description="Password")
     remember_me: bool = Field(False, description="Remember login")
 
-    @model_validator(mode='after')
+    @model_validator(mode="after")
     def validate_email_or_username(self):
         """Ensure either email or username is provided."""
         if not self.email and not self.username:
             raise ValueError(
-                'Either email or username must be provided'
+                "Either email or username must be provided"
             )
         return self
 
@@ -226,35 +226,35 @@ class UserPreferences(BaseModel):
         True, description="Enable email notifications"
     )
 
-    @field_validator('language')
+    @field_validator("language")
     @classmethod
     def validate_language(cls, v):
         """Validate language code."""
         valid_languages = [
-            'en',
-            'es',
-            'fr',
-            'de',
-            'it',
-            'pt',
-            'ru',
-            'zh',
-            'ja',
-            'ko',
+            "en",
+            "es",
+            "fr",
+            "de",
+            "it",
+            "pt",
+            "ru",
+            "zh",
+            "ja",
+            "ko",
         ]
         if v not in valid_languages:
             raise ValueError(
-                f'Language must be one of: {valid_languages}'
+                f"Language must be one of: {valid_languages}"
             )
         return v
 
-    @field_validator('timezone')
+    @field_validator("timezone")
     @classmethod
     def validate_timezone(cls, v):
         """Validate timezone."""
         # Basic timezone validation
         if not v or len(v) < 3:
-            raise ValueError('Invalid timezone')
+            raise ValueError("Invalid timezone")
         return v
 
     # Remove duplicate UserRegistration class and clean up

@@ -5,36 +5,37 @@ Script to generate TypeScript API clients from OpenAPI schema
 
 import json
 import re
-from pathlib import Path
-from typing import Dict, Any, List, Union, Optional, Set
 from collections import defaultdict
+from pathlib import Path
+from typing import Any, Dict, List, Optional, Set, Union
+
 
 def camel_case(name: str) -> str:
     """Convert snake_case to camelCase"""
     # First clean the name of special characters and spaces
-    clean_name = re.sub(r'[^a-zA-Z0-9_\s]', '', name)
-    clean_name = re.sub(r'\s+', '_', clean_name)
-    components = clean_name.split('_')
+    clean_name = re.sub(r"[^a-zA-Z0-9_\s]", "", name)
+    clean_name = re.sub(r"\s+", "_", clean_name)
+    components = clean_name.split("_")
     components = [comp for comp in components if comp]  # Remove empty components
     if not components:
         return "unknown"
-    return components[0].lower() + ''.join(word.capitalize() for word in components[1:])
+    return components[0].lower() + "".join(word.capitalize() for word in components[1:])
 
 def pascal_case(name: str) -> str:
     """Convert snake_case to PascalCase"""
     # First clean the name of special characters and spaces
-    clean_name = re.sub(r'[^a-zA-Z0-9_\s]', '', name)
-    clean_name = re.sub(r'\s+', '_', clean_name)
-    return ''.join(word.capitalize() for word in clean_name.split('_') if word)
+    clean_name = re.sub(r"[^a-zA-Z0-9_\s]", "", name)
+    clean_name = re.sub(r"\s+", "_", clean_name)
+    return "".join(word.capitalize() for word in clean_name.split("_") if word)
 
-def get_operation_id(path: str, method: str, operation: Dict[str, Any]) -> str:
+def get_operation_id(path: str, method: str, operation: dict[str, Any]) -> str:
     """Generate operation ID from path and method"""
     if "operationId" in operation:
         # Use existing operationId but make it cleaner
         op_id = operation["operationId"]
         # Remove common prefixes and suffixes like api_v1_..._post
-        op_id = re.sub(r'^[^_]*_api_v\d+_', '', op_id)
-        op_id = re.sub(r'_(get|post|put|patch|delete|options|head)$', '', op_id)
+        op_id = re.sub(r"^[^_]*_api_v\d+_", "", op_id)
+        op_id = re.sub(r"_(get|post|put|patch|delete|options|head)$", "", op_id)
         # Convert to camelCase
         return camel_case(op_id)
     
@@ -47,16 +48,16 @@ def get_operation_id(path: str, method: str, operation: Dict[str, Any]) -> str:
         return f"{method.lower()}Root"
     
     # Convert path parameters to readable names
-    clean_path = re.sub(r'\{([^}]+)\}', r'By\1', clean_path)
+    clean_path = re.sub(r"\{([^}]+)\}", r"By\1", clean_path)
     # Replace slashes with underscores
-    clean_path = clean_path.replace('/', '_')
+    clean_path = clean_path.replace("/", "_")
     # Remove extra underscores and clean
-    clean_path = re.sub(r'[^a-zA-Z0-9_]', '_', clean_path)
-    clean_path = re.sub(r'_+', '_', clean_path).strip('_')
+    clean_path = re.sub(r"[^a-zA-Z0-9_]", "_", clean_path)
+    clean_path = re.sub(r"_+", "_", clean_path).strip("_")
     
     return camel_case(f"{method.lower()}_{clean_path}")
 
-def get_response_type(operation: Dict[str, Any]) -> str:
+def get_response_type(operation: dict[str, Any]) -> str:
     """Extract response type from operation"""
     responses = operation.get("responses", {})
     
@@ -79,7 +80,7 @@ def get_response_type(operation: Dict[str, Any]) -> str:
     
     return "unknown"
 
-def typescript_type_from_schema(schema: Dict[str, Any]) -> str:
+def typescript_type_from_schema(schema: dict[str, Any]) -> str:
     """Convert OpenAPI schema to TypeScript type - simplified version"""
     if "$ref" in schema:
         ref = schema["$ref"]
@@ -121,7 +122,7 @@ def typescript_type_from_schema(schema: Dict[str, Any]) -> str:
     
     return "unknown"
 
-def get_parameters(operation: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]:
+def get_parameters(operation: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
     """Extract parameters from operation"""
     params = {
         "path": [],
@@ -141,7 +142,7 @@ def get_parameters(operation: Dict[str, Any]) -> Dict[str, List[Dict[str, Any]]]
     
     return params
 
-def get_request_body_type(operation: Dict[str, Any]) -> Optional[str]:
+def get_request_body_type(operation: dict[str, Any]) -> str | None:
     """Extract request body type from operation"""
     request_body = operation.get("requestBody", {})
     if not request_body:
@@ -158,7 +159,7 @@ def get_request_body_type(operation: Dict[str, Any]) -> Optional[str]:
     
     return None
 
-def generate_method(path: str, method: str, operation: Dict[str, Any]) -> str:
+def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
     """Generate TypeScript method for an API operation"""
     operation_id = get_operation_id(path, method, operation)
     method_name = operation_id  # Already camelCase from get_operation_id
@@ -257,7 +258,7 @@ def generate_method(path: str, method: str, operation: Dict[str, Any]) -> str:
     
     return method_body
 
-def group_operations_by_tag(spec: Dict[str, Any]) -> Dict[str, List[tuple]]:
+def group_operations_by_tag(spec: dict[str, Any]) -> dict[str, list[tuple]]:
     """Group operations by their tags"""
     grouped = defaultdict(list)
     
@@ -273,7 +274,7 @@ def group_operations_by_tag(spec: Dict[str, Any]) -> Dict[str, List[tuple]]:
     
     return grouped
 
-def generate_api_class(tag: str, operations: List[tuple]) -> str:
+def generate_api_class(tag: str, operations: list[tuple]) -> str:
     """Generate API class for a tag"""
     class_name = f"{pascal_case(tag)}Api"
     
@@ -298,12 +299,12 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
         if response_type and not response_type.startswith("Record<"):
             # Extract type names from union types, arrays, etc.
             # Updated regex to handle complex names with double underscores
-            type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', response_type)
+            type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", response_type)
             imports.update(type_names)
         
         request_body_type = get_request_body_type(operation)
         if request_body_type and not request_body_type.startswith("Record<") and request_body_type not in ["FormData", "URLSearchParams"]:
-            type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', request_body_type)
+            type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", request_body_type)
             imports.update(type_names)
         
         # Also check parameter types
@@ -311,7 +312,7 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
         for param_list in params.values():
             for param in param_list:
                 param_type = typescript_type_from_schema(param.get("schema", {}))
-                type_names = re.findall(r'\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b', param_type)
+                type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", param_type)
                 imports.update(type_names)
     
     # Generate import statements
@@ -319,10 +320,10 @@ def generate_api_class(tag: str, operations: List[tuple]) -> str:
     if imports:
         # Filter out built-in TypeScript types and generic Record types
         builtin_types = {
-            'Record', 'Array', 'Promise', 'Date', 'RegExp', 'Error', 'Object',
-            'String', 'Number', 'Boolean', 'Function', 'Map', 'Set', 'WeakMap', 'WeakSet',
-            'ReadonlyArray', 'Partial', 'Required', 'Pick', 'Omit', 'Exclude', 'Extract',
-            'string', 'number', 'boolean', 'unknown', 'null', 'undefined', 'void', 'any'
+            "Record", "Array", "Promise", "Date", "RegExp", "Error", "Object",
+            "String", "Number", "Boolean", "Function", "Map", "Set", "WeakMap", "WeakSet",
+            "ReadonlyArray", "Partial", "Required", "Pick", "Omit", "Exclude", "Extract",
+            "string", "number", "boolean", "unknown", "null", "undefined", "void", "any"
         }
         filtered_imports = [imp for imp in imports if imp not in builtin_types]
         if filtered_imports:

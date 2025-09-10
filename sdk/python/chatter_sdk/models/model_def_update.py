@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,33 +13,33 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
-from typing import Optional, Set
-from typing_extensions import Self
+from typing import Annotated, Self
+
 
 class ModelDefUpdate(BaseModel):
     """
     Schema for updating a model definition.
     """ # noqa: E501
-    display_name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = None
-    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
-    model_name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=200)]] = None
-    max_tokens: Optional[Annotated[int, Field(le=1000000, strict=True)]] = None
-    context_length: Optional[Annotated[int, Field(le=10000000, strict=True)]] = None
-    dimensions: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    chunk_size: Optional[Annotated[int, Field(le=100000, strict=True)]] = None
-    supports_batch: Optional[StrictBool] = None
-    max_batch_size: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    default_config: Optional[Dict[str, Any]] = None
-    is_active: Optional[StrictBool] = None
-    is_default: Optional[StrictBool] = None
-    __properties: ClassVar[List[str]] = ["display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default"]
+    display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] | None = None
+    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
+    model_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] | None = None
+    max_tokens: Annotated[int, Field(le=1000000, strict=True)] | None = None
+    context_length: Annotated[int, Field(le=10000000, strict=True)] | None = None
+    dimensions: Annotated[int, Field(le=10000, strict=True)] | None = None
+    chunk_size: Annotated[int, Field(le=100000, strict=True)] | None = None
+    supports_batch: StrictBool | None = None
+    max_batch_size: Annotated[int, Field(le=10000, strict=True)] | None = None
+    default_config: dict[str, Any] | None = None
+    is_active: StrictBool | None = None
+    is_default: StrictBool | None = None
+    __properties: ClassVar[list[str]] = ["display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -59,11 +58,11 @@ class ModelDefUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ModelDefUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,7 +72,7 @@ class ModelDefUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -84,67 +83,67 @@ class ModelDefUpdate(BaseModel):
         # set to None if display_name (nullable) is None
         # and model_fields_set contains the field
         if self.display_name is None and "display_name" in self.model_fields_set:
-            _dict['display_name'] = None
+            _dict["display_name"] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if model_name (nullable) is None
         # and model_fields_set contains the field
         if self.model_name is None and "model_name" in self.model_fields_set:
-            _dict['model_name'] = None
+            _dict["model_name"] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict['max_tokens'] = None
+            _dict["max_tokens"] = None
 
         # set to None if context_length (nullable) is None
         # and model_fields_set contains the field
         if self.context_length is None and "context_length" in self.model_fields_set:
-            _dict['context_length'] = None
+            _dict["context_length"] = None
 
         # set to None if dimensions (nullable) is None
         # and model_fields_set contains the field
         if self.dimensions is None and "dimensions" in self.model_fields_set:
-            _dict['dimensions'] = None
+            _dict["dimensions"] = None
 
         # set to None if chunk_size (nullable) is None
         # and model_fields_set contains the field
         if self.chunk_size is None and "chunk_size" in self.model_fields_set:
-            _dict['chunk_size'] = None
+            _dict["chunk_size"] = None
 
         # set to None if supports_batch (nullable) is None
         # and model_fields_set contains the field
         if self.supports_batch is None and "supports_batch" in self.model_fields_set:
-            _dict['supports_batch'] = None
+            _dict["supports_batch"] = None
 
         # set to None if max_batch_size (nullable) is None
         # and model_fields_set contains the field
         if self.max_batch_size is None and "max_batch_size" in self.model_fields_set:
-            _dict['max_batch_size'] = None
+            _dict["max_batch_size"] = None
 
         # set to None if default_config (nullable) is None
         # and model_fields_set contains the field
         if self.default_config is None and "default_config" in self.model_fields_set:
-            _dict['default_config'] = None
+            _dict["default_config"] = None
 
         # set to None if is_active (nullable) is None
         # and model_fields_set contains the field
         if self.is_active is None and "is_active" in self.model_fields_set:
-            _dict['is_active'] = None
+            _dict["is_active"] = None
 
         # set to None if is_default (nullable) is None
         # and model_fields_set contains the field
         if self.is_default is None and "is_default" in self.model_fields_set:
-            _dict['is_default'] = None
+            _dict["is_default"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ModelDefUpdate from a dict"""
         if obj is None:
             return None

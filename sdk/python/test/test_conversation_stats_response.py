@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,10 @@
 
 import unittest
 
-from chatter_sdk.models.conversation_stats_response import ConversationStatsResponse
+from chatter_sdk.models.conversation_stats_response import (
+    ConversationStatsResponse,
+)
+
 
 class TestConversationStatsResponse(unittest.TestCase):
     """ConversationStatsResponse unit test stubs"""
@@ -95,5 +97,5 @@ class TestConversationStatsResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

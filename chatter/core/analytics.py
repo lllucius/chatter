@@ -87,7 +87,7 @@ class AnalyticsService:
                 for op in summary.keys()
                 if any(
                     term in op.lower()
-                    for term in ['embed', 'generate', 'encode']
+                    for term in ["embed", "generate", "encode"]
                 )
             ]
 
@@ -99,10 +99,10 @@ class AnalyticsService:
 
             for operation in embedding_operations:
                 op_data = summary[operation]
-                total_time += op_data.get('avg_ms', 0) * op_data.get(
-                    'count', 0
+                total_time += op_data.get("avg_ms", 0) * op_data.get(
+                    "count", 0
                 )
-                total_count += op_data.get('count', 0)
+                total_count += op_data.get("count", 0)
 
             return total_time / total_count if total_count > 0 else 0.0
 
@@ -119,9 +119,9 @@ class AnalyticsService:
             # This gives us an approximate size based on stored embeddings
             vector_count_result = await self.session.execute(
                 select(
-                    func.count(Document.id).label('doc_count'),
+                    func.count(Document.id).label("doc_count"),
                     func.sum(Document.chunk_count).label(
-                        'total_chunks'
+                        "total_chunks"
                     ),
                 ).where(Document.status == DocumentStatus.PROCESSED)
             )
@@ -151,14 +151,14 @@ class AnalyticsService:
         """Get cache hit rate from cache instance."""
         try:
             cache = self._get_cache_instance()
-            if cache and hasattr(cache, 'get_stats'):
+            if cache and hasattr(cache, "get_stats"):
                 stats = await cache.get_stats()
-                if stats and hasattr(stats, 'hit_rate'):
+                if stats and hasattr(stats, "hit_rate"):
                     return stats.hit_rate
                 elif (
                     stats
-                    and hasattr(stats, 'cache_hits')
-                    and hasattr(stats, 'total_requests')
+                    and hasattr(stats, "cache_hits")
+                    and hasattr(stats, "total_requests")
                 ):
                     # Calculate hit rate if not directly available
                     total_requests = stats.total_requests

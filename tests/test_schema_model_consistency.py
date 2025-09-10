@@ -141,7 +141,7 @@ class TestSchemaModelConsistency:
                 phone_number="+1234567890",
             )
             # If we get here, the field exists
-            assert hasattr(user, 'phone_number')
+            assert hasattr(user, "phone_number")
             assert user.phone_number == "+1234567890"
         except TypeError as e:
             pytest.fail(

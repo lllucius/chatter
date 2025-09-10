@@ -1,13 +1,13 @@
 """Prompt management commands for the CLI."""
 
 import json
+
 import typer
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Prompts Commands
 prompts_app = typer.Typer(help="Prompt management commands")
@@ -43,12 +43,12 @@ async def list_prompts(
                 prompt.name,
                 (
                     prompt.prompt_type.value
-                    if hasattr(prompt.prompt_type, 'value')
+                    if hasattr(prompt.prompt_type, "value")
                     else str(prompt.prompt_type)
                 ),
                 (
                     prompt.category.value
-                    if hasattr(prompt.category, 'value')
+                    if hasattr(prompt.category, "value")
                     else str(prompt.category)
                 ),
                 str(prompt.created_at)[:19],
@@ -200,15 +200,15 @@ async def prompt_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_prompts'):
+        if hasattr(response, "total_prompts"):
             table.add_row("Total Prompts", str(response.total_prompts))
-        if hasattr(response, 'active_prompts'):
+        if hasattr(response, "active_prompts"):
             table.add_row(
                 "Active Prompts", str(response.active_prompts)
             )
-        if hasattr(response, 'total_usage'):
+        if hasattr(response, "total_usage"):
             table.add_row("Total Usage", str(response.total_usage))
-        if hasattr(response, 'avg_template_length'):
+        if hasattr(response, "avg_template_length"):
             table.add_row(
                 "Avg Template Length",
                 f"{response.avg_template_length:.0f} chars",

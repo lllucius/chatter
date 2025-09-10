@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,7 +12,9 @@
 """  # noqa: E501
 
 from typing import Any, Optional
-from typing_extensions import Self
+
+from typing import Self
+
 
 class OpenApiException(Exception):
     """The base exception class for all OpenAPIExceptions"""
@@ -44,7 +45,7 @@ class ApiTypeError(OpenApiException, TypeError):
         self.key_type = key_type
         full_msg = msg
         if path_to_item:
-            full_msg = "{0} at {1}".format(msg, render_path(path_to_item))
+            full_msg = f"{msg} at {render_path(path_to_item)}"
         super(ApiTypeError, self).__init__(full_msg)
 
 
@@ -62,7 +63,7 @@ class ApiValueError(OpenApiException, ValueError):
         self.path_to_item = path_to_item
         full_msg = msg
         if path_to_item:
-            full_msg = "{0} at {1}".format(msg, render_path(path_to_item))
+            full_msg = f"{msg} at {render_path(path_to_item)}"
         super(ApiValueError, self).__init__(full_msg)
 
 
@@ -81,7 +82,7 @@ class ApiAttributeError(OpenApiException, AttributeError):
         self.path_to_item = path_to_item
         full_msg = msg
         if path_to_item:
-            full_msg = "{0} at {1}".format(msg, render_path(path_to_item))
+            full_msg = f"{msg} at {render_path(path_to_item)}"
         super(ApiAttributeError, self).__init__(full_msg)
 
 
@@ -98,7 +99,7 @@ class ApiKeyError(OpenApiException, KeyError):
         self.path_to_item = path_to_item
         full_msg = msg
         if path_to_item:
-            full_msg = "{0} at {1}".format(msg, render_path(path_to_item))
+            full_msg = f"{msg} at {render_path(path_to_item)}"
         super(ApiKeyError, self).__init__(full_msg)
 
 
@@ -110,8 +111,8 @@ class ApiException(OpenApiException):
         reason=None, 
         http_resp=None,
         *,
-        body: Optional[str] = None,
-        data: Optional[Any] = None,
+        body: str | None = None,
+        data: Any | None = None,
     ) -> None:
         self.status = status
         self.reason = reason
@@ -126,7 +127,7 @@ class ApiException(OpenApiException):
                 self.reason = http_resp.reason
             if self.body is None:
                 try:
-                    self.body = http_resp.data.decode('utf-8')
+                    self.body = http_resp.data.decode("utf-8")
                 except Exception:
                     pass
             self.headers = http_resp.getheaders()
@@ -136,8 +137,8 @@ class ApiException(OpenApiException):
         cls, 
         *, 
         http_resp, 
-        body: Optional[str], 
-        data: Optional[Any],
+        body: str | None, 
+        data: Any | None,
     ) -> Self:
         if http_resp.status == 400:
             raise BadRequestException(http_resp=http_resp, body=body, data=data)
@@ -164,14 +165,13 @@ class ApiException(OpenApiException):
 
     def __str__(self):
         """Custom error messages for exception"""
-        error_message = "({0})\n"\
-                        "Reason: {1}\n".format(self.status, self.reason)
+        error_message = f"({self.status})\n"\
+                        f"Reason: {self.reason}\n"
         if self.headers:
-            error_message += "HTTP response headers: {0}\n".format(
-                self.headers)
+            error_message += f"HTTP response headers: {self.headers}\n"
 
         if self.data or self.body:
-            error_message += "HTTP response body: {0}\n".format(self.data or self.body)
+            error_message += f"HTTP response body: {self.data or self.body}\n"
 
         return error_message
 
@@ -211,7 +211,7 @@ def render_path(path_to_item):
     result = ""
     for pth in path_to_item:
         if isinstance(pth, int):
-            result += "[{0}]".format(pth)
+            result += f"[{pth}]"
         else:
-            result += "['{0}']".format(pth)
+            result += f"['{pth}']"
     return result

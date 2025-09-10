@@ -5,7 +5,6 @@ from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
 
-
 # Health Commands
 health_app = typer.Typer(help="Health and monitoring commands")
 
@@ -27,7 +26,7 @@ async def health_check():
         )
         console.print(f"Timestamp: {response.timestamp}")
 
-        if hasattr(response, 'details') and response.details:
+        if hasattr(response, "details") and response.details:
             table = Table(title="Health Details")
             table.add_column("Service", style="cyan")
             table.add_column("Status", style="magenta")
@@ -62,7 +61,7 @@ async def get_metrics():
         console.print("[bold]System Metrics[/bold]")
 
         # Display health metrics
-        if hasattr(response, 'health') and response.health:
+        if hasattr(response, "health") and response.health:
             console.print("[cyan]Health Metrics:[/cyan]")
             if isinstance(response.health, dict):
                 for metric_name, metric_value in response.health.items():
@@ -71,7 +70,7 @@ async def get_metrics():
                 console.print(f"  Health: {response.health}")
 
         # Display performance metrics
-        if hasattr(response, 'performance') and response.performance:
+        if hasattr(response, "performance") and response.performance:
             console.print("[cyan]Performance Metrics:[/cyan]")
             if isinstance(response.performance, dict):
                 for metric_name, metric_value in response.performance.items():
@@ -80,7 +79,7 @@ async def get_metrics():
                 console.print(f"  Performance: {response.performance}")
 
         # Display endpoint metrics with proper formatting
-        if hasattr(response, 'endpoints') and response.endpoints:
+        if hasattr(response, "endpoints") and response.endpoints:
             console.print("[cyan]Endpoint Metrics:[/cyan]")
             if isinstance(response.endpoints, dict):
                 for endpoint, metrics in response.endpoints.items():
@@ -92,11 +91,11 @@ async def get_metrics():
 
                         for metric_key, metric_value in metrics.items():
                             # Format metric names nicely
-                            formatted_key = metric_key.replace('_', ' ').title()
+                            formatted_key = metric_key.replace("_", " ").title()
                             if isinstance(metric_value, float):
-                                if 'time' in metric_key.lower():
+                                if "time" in metric_key.lower():
                                     formatted_value = f"{metric_value:.2f}ms"
-                                elif 'rate' in metric_key.lower():
+                                elif "rate" in metric_key.lower():
                                     formatted_value = f"{metric_value:.1%}"
                                 else:
                                     formatted_value = f"{metric_value:.2f}"
@@ -112,6 +111,6 @@ async def get_metrics():
                 console.print(f"  Endpoints: {response.endpoints}")
 
         # If none of the expected fields are present, show the whole response
-        if not any(hasattr(response, attr) for attr in ['health', 'performance', 'endpoints']):
+        if not any(hasattr(response, attr) for attr in ["health", "performance", "endpoints"]):
             console.print("[yellow]Raw response (unexpected format):[/yellow]")
             console.print(str(response))

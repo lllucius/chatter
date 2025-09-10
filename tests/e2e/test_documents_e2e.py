@@ -26,7 +26,7 @@ class TestDocumentsE2E:
         try:
             # Step 1: Create a test document
             test_content = "This is a test document for E2E testing. It contains sample text for processing."
-            test_file = io.BytesIO(test_content.encode('utf-8'))
+            test_file = io.BytesIO(test_content.encode("utf-8"))
 
             # Step 2: Upload document
             files = {
@@ -112,7 +112,7 @@ class TestDocumentsE2E:
             document_ids = []
             for doc_data in documents_to_create:
                 test_file = io.BytesIO(
-                    doc_data["content"].encode('utf-8')
+                    doc_data["content"].encode("utf-8")
                 )
                 files = {
                     "file": (
@@ -197,7 +197,7 @@ class TestDocumentsE2E:
         try:
             # Step 1: Upload a document
             test_content = "This is a longer test document that may require processing time."
-            test_file = io.BytesIO(test_content.encode('utf-8'))
+            test_file = io.BytesIO(test_content.encode("utf-8"))
             files = {
                 "file": ("processing_test.txt", test_file, "text/plain")
             }
@@ -264,7 +264,7 @@ class TestDocumentsE2E:
         try:
             # Step 1: Upload a document
             test_content = "This document contains information about artificial intelligence and machine learning."
-            test_file = io.BytesIO(test_content.encode('utf-8'))
+            test_file = io.BytesIO(test_content.encode("utf-8"))
             files = {
                 "file": ("ai_document.txt", test_file, "text/plain")
             }
@@ -346,7 +346,7 @@ class TestDocumentsE2E:
             test_content = (
                 "This document will be deleted in the E2E test."
             )
-            test_file = io.BytesIO(test_content.encode('utf-8'))
+            test_file = io.BytesIO(test_content.encode("utf-8"))
             files = {
                 "file": ("delete_test.txt", test_file, "text/plain")
             }
@@ -406,7 +406,7 @@ class TestDocumentsE2E:
             large_content = (
                 "This is a test document with more content. " * 100
             )  # ~4KB
-            test_file = io.BytesIO(large_content.encode('utf-8'))
+            test_file = io.BytesIO(large_content.encode("utf-8"))
 
             files = {
                 "file": ("large_document.txt", test_file, "text/plain")

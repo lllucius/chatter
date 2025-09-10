@@ -466,12 +466,12 @@ class CacheWarmer:
             provider_list = []
             for provider in providers:
                 provider_dict = {
-                    'id': provider.id,
-                    'name': provider.name,
-                    'display_name': provider.display_name,
-                    'provider_type': provider.provider_type,
-                    'is_active': provider.is_active,
-                    'is_default': provider.is_default,
+                    "id": provider.id,
+                    "name": provider.name,
+                    "display_name": provider.display_name,
+                    "provider_type": provider.provider_type,
+                    "is_active": provider.is_active,
+                    "is_default": provider.is_default,
                 }
                 provider_list.append(provider_dict)
                 await self.cache.set_provider(
@@ -492,13 +492,13 @@ class CacheWarmer:
             model_list = []
             for model in models:
                 model_dict = {
-                    'id': model.id,
-                    'name': model.name,
-                    'display_name': model.display_name,
-                    'model_type': model.model_type,
-                    'provider_id': model.provider_id,
-                    'is_active': model.is_active,
-                    'is_default': model.is_default,
+                    "id": model.id,
+                    "name": model.name,
+                    "display_name": model.display_name,
+                    "model_type": model.model_type,
+                    "provider_id": model.provider_id,
+                    "is_active": model.is_active,
+                    "is_default": model.is_default,
                 }
                 model_list.append(model_dict)
                 await self.cache.set_model(model.id, model_dict)

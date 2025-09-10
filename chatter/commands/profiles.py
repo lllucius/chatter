@@ -7,7 +7,6 @@ from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
 
-
 # Profiles Commands
 profiles_app = typer.Typer(help="Profile management commands")
 
@@ -39,12 +38,12 @@ async def list_profiles(
             table.add_row(
                 str(profile.id),
                 profile.name,
-                getattr(profile, 'llm_provider', 'N/A'),
-                getattr(profile, 'llm_model', 'N/A'),
+                getattr(profile, "llm_provider", "N/A"),
+                getattr(profile, "llm_model", "N/A"),
                 (
                     str(profile.created_at)[:19]
-                    if hasattr(profile, 'created_at')
-                    else 'N/A'
+                    if hasattr(profile, "created_at")
+                    else "N/A"
                 ),
             )
 
@@ -207,16 +206,16 @@ async def list_providers():
         for provider in response.providers:
             models = (
                 ", ".join(provider.models[:3])
-                if hasattr(provider, 'models') and provider.models
+                if hasattr(provider, "models") and provider.models
                 else "N/A"
             )
-            if hasattr(provider, 'models') and len(provider.models) > 3:
+            if hasattr(provider, "models") and len(provider.models) > 3:
                 models += f" (+{len(provider.models) - 3} more)"
 
             table.add_row(
                 provider.name,
                 models,
-                getattr(provider, 'status', 'active'),
+                getattr(provider, "status", "active"),
             )
 
         console.print(table)
@@ -235,19 +234,19 @@ async def profile_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_profiles'):
+        if hasattr(response, "total_profiles"):
             table.add_row(
                 "Total Profiles", str(response.total_profiles)
             )
-        if hasattr(response, 'active_profiles'):
+        if hasattr(response, "active_profiles"):
             table.add_row(
                 "Active Profiles", str(response.active_profiles)
             )
-        if hasattr(response, 'total_conversations'):
+        if hasattr(response, "total_conversations"):
             table.add_row(
                 "Total Conversations", str(response.total_conversations)
             )
-        if hasattr(response, 'avg_tokens_per_conversation'):
+        if hasattr(response, "avg_tokens_per_conversation"):
             table.add_row(
                 "Avg Tokens/Conversation",
                 str(response.avg_tokens_per_conversation),

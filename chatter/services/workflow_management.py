@@ -43,11 +43,11 @@ class WorkflowManagementService:
         try:
             # Validate the workflow definition
             definition_data = {
-                'name': name,
-                'description': description,
-                'nodes': nodes,
-                'edges': edges,
-                'metadata': metadata or {},
+                "name": name,
+                "description": description,
+                "nodes": nodes,
+                "edges": edges,
+                "metadata": metadata or {},
             }
 
             validation_result = workflow_validation_service.validate_workflow_definition(
@@ -229,7 +229,7 @@ class WorkflowManagementService:
                 definition_id=definition_id,
                 owner_id=owner_id,
                 input_data=input_data or {},
-                status='pending',
+                status="pending",
             )
 
             self.session.add(execution)
@@ -321,10 +321,10 @@ class WorkflowManagementService:
             )
 
             return {
-                'valid': validation_result.valid,
-                'errors': validation_result.errors,
-                'warnings': validation_result.warnings,
-                'requirements_met': validation_result.requirements_met,
+                "valid": validation_result.valid,
+                "errors": validation_result.errors,
+                "warnings": validation_result.warnings,
+                "requirements_met": validation_result.requirements_met,
             }
 
         except Exception as e:
@@ -485,7 +485,7 @@ class WorkflowManagementService:
             template.version += 1
 
             # Regenerate config hash if params changed
-            if 'default_params' in updates:
+            if "default_params" in updates:
                 config_str = f"{template.name}:{template.workflow_type.value}:{str(template.default_params)}"
                 template.config_hash = hashlib.sha256(
                     config_str.encode("utf-8")

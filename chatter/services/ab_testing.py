@@ -653,8 +653,8 @@ class ABTestManager:
         sanitized = {}
         for key, value in criteria.items():
             # Sanitize key - only allow alphanumeric and underscore
-            clean_key = ''.join(
-                c for c in str(key) if c.isalnum() or c == '_'
+            clean_key = "".join(
+                c for c in str(key) if c.isalnum() or c == "_"
             )[:50]
             if not clean_key:
                 continue
@@ -665,18 +665,18 @@ class ABTestManager:
                 clean_value = str(value)[:200]
                 # Remove common injection patterns
                 dangerous_patterns = [
-                    '<',
-                    '>',
+                    "<",
+                    ">",
                     '"',
                     "'",
-                    '`',
-                    '\\',
-                    'script',
-                    'eval',
-                    'exec',
+                    "`",
+                    "\\",
+                    "script",
+                    "eval",
+                    "exec",
                 ]
                 for pattern in dangerous_patterns:
-                    clean_value = clean_value.replace(pattern, '')
+                    clean_value = clean_value.replace(pattern, "")
                 sanitized[clean_key] = clean_value
             elif isinstance(value, int | float | bool):
                 sanitized[clean_key] = value
@@ -686,8 +686,8 @@ class ABTestManager:
                 for item in value[:10]:  # Limit list size
                     if isinstance(item, str):
                         clean_item = str(item)[:100]
-                        for pattern in ['<', '>', '"', "'", '`', '\\']:
-                            clean_item = clean_item.replace(pattern, '')
+                        for pattern in ["<", ">", '"', "'", "`", "\\"]:
+                            clean_item = clean_item.replace(pattern, "")
                         clean_list.append(clean_item)
                     elif isinstance(item, int | float | bool):
                         clean_list.append(item)

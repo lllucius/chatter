@@ -1170,7 +1170,7 @@ class ToolServerService:
                 # Handle LangChain BaseTool objects instead of dicts
                 tool_name = (
                     tool_data.name
-                    if hasattr(tool_data, 'name')
+                    if hasattr(tool_data, "name")
                     else None
                 )
                 if not tool_name:
@@ -1181,11 +1181,11 @@ class ToolServerService:
                     tool = existing_tools[tool_name]
                     tool.description = (
                         tool_data.description
-                        if hasattr(tool_data, 'description')
+                        if hasattr(tool_data, "description")
                         else None
                     )
                     tool.args_schema = getattr(
-                        tool_data, 'args_schema', None
+                        tool_data, "args_schema", None
                     )
                     tool.is_available = True
                     tool.updated_at = datetime.now(UTC)
@@ -1199,11 +1199,11 @@ class ToolServerService:
                         ).title(),
                         description=(
                             tool_data.description
-                            if hasattr(tool_data, 'description')
+                            if hasattr(tool_data, "description")
                             else None
                         ),
                         args_schema=getattr(
-                            tool_data, 'args_schema', None
+                            tool_data, "args_schema", None
                         ),
                         status=ToolStatus.ENABLED,
                         is_available=True,
@@ -1214,7 +1214,7 @@ class ToolServerService:
             found_tool_names = {
                 tool_data.name
                 for tool_data in remote_tools
-                if hasattr(tool_data, 'name') and tool_data.name
+                if hasattr(tool_data, "name") and tool_data.name
             }
             for tool_name, tool in existing_tools.items():
                 if tool_name not in found_tool_names:

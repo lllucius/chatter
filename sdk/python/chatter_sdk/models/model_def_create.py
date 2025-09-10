@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,16 +13,24 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar, Dict, List, Optional, Set
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictStr,
+    field_validator,
+)
+from typing import Annotated, Self
+
 from chatter_sdk.models.model_type import ModelType
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ModelDefCreate(BaseModel):
     """
@@ -32,21 +39,21 @@ class ModelDefCreate(BaseModel):
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Model name")
     model_type: ModelType
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Human-readable name")
-    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
     model_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Actual model name for API calls")
-    max_tokens: Optional[Annotated[int, Field(le=1000000, strict=True)]] = None
-    context_length: Optional[Annotated[int, Field(le=10000000, strict=True)]] = None
-    dimensions: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    chunk_size: Optional[Annotated[int, Field(le=100000, strict=True)]] = None
-    supports_batch: Optional[StrictBool] = Field(default=False, description="Whether model supports batch operations")
-    max_batch_size: Optional[Annotated[int, Field(le=10000, strict=True)]] = None
-    default_config: Optional[Dict[str, Any]] = Field(default=None, description="Default configuration")
-    is_active: Optional[StrictBool] = Field(default=True, description="Whether model is active")
-    is_default: Optional[StrictBool] = Field(default=False, description="Whether this is the default model")
+    max_tokens: Annotated[int, Field(le=1000000, strict=True)] | None = None
+    context_length: Annotated[int, Field(le=10000000, strict=True)] | None = None
+    dimensions: Annotated[int, Field(le=10000, strict=True)] | None = None
+    chunk_size: Annotated[int, Field(le=100000, strict=True)] | None = None
+    supports_batch: StrictBool | None = Field(default=False, description="Whether model supports batch operations")
+    max_batch_size: Annotated[int, Field(le=10000, strict=True)] | None = None
+    default_config: dict[str, Any] | None = Field(default=None, description="Default configuration")
+    is_active: StrictBool | None = Field(default=True, description="Whether model is active")
+    is_default: StrictBool | None = Field(default=False, description="Whether this is the default model")
     provider_id: StrictStr = Field(description="Provider ID")
-    __properties: ClassVar[List[str]] = ["name", "model_type", "display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default", "provider_id"]
+    __properties: ClassVar[list[str]] = ["name", "model_type", "display_name", "description", "model_name", "max_tokens", "context_length", "dimensions", "chunk_size", "supports_batch", "max_batch_size", "default_config", "is_active", "is_default", "provider_id"]
 
-    @field_validator('name')
+    @field_validator("name")
     def name_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if not re.match(r"^[a-zA-Z0-9_-]+$", value):
@@ -70,11 +77,11 @@ class ModelDefCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ModelDefCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,7 +91,7 @@ class ModelDefCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -95,37 +102,37 @@ class ModelDefCreate(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict['max_tokens'] = None
+            _dict["max_tokens"] = None
 
         # set to None if context_length (nullable) is None
         # and model_fields_set contains the field
         if self.context_length is None and "context_length" in self.model_fields_set:
-            _dict['context_length'] = None
+            _dict["context_length"] = None
 
         # set to None if dimensions (nullable) is None
         # and model_fields_set contains the field
         if self.dimensions is None and "dimensions" in self.model_fields_set:
-            _dict['dimensions'] = None
+            _dict["dimensions"] = None
 
         # set to None if chunk_size (nullable) is None
         # and model_fields_set contains the field
         if self.chunk_size is None and "chunk_size" in self.model_fields_set:
-            _dict['chunk_size'] = None
+            _dict["chunk_size"] = None
 
         # set to None if max_batch_size (nullable) is None
         # and model_fields_set contains the field
         if self.max_batch_size is None and "max_batch_size" in self.model_fields_set:
-            _dict['max_batch_size'] = None
+            _dict["max_batch_size"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ModelDefCreate from a dict"""
         if obj is None:
             return None

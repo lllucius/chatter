@@ -120,7 +120,7 @@ dev = [
 ]
 
 [project.scripts]
-chatter = "chatter.cli:app"
+chatter = "chatter.api_cli:app"
 
 [project.urls]
 Homepage = "https://github.com/lllucius/chatter"

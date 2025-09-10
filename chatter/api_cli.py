@@ -215,28 +215,47 @@ app.add_typer(health_app, name="health")
 @health_app.command("check")
 @run_async
 async def health_check():
-    """Check API health status."""
-    async with get_client() as sdk_client:
-        response = (
-            await sdk_client.health_api.health_check_endpoint_healthz_get()
-        )
+    """Check API health status with detailed information."""
+    from rich.progress import Progress, SpinnerColumn, TextColumn, BarColumn
+    
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True
+    ) as progress:
+        task = progress.add_task("🔍 Checking API health...", total=None)
+        
+        async with get_client() as sdk_client:
+            response = (
+                await sdk_client.health_api.health_check_endpoint_healthz_get()
+            )
+        
+        progress.remove_task(task)
 
-        status_color = (
-            "green" if response.status == "healthy" else "red"
-        )
-        console.print(
-            f"[{status_color}]Status: {response.status}[/{status_color}]"
-        )
-        console.print(f"Timestamp: {response.timestamp}")
+    status_color = (
+        "green" if response.status == "healthy" else "red"
+    )
+    status_emoji = "✅" if response.status == "healthy" else "❌"
+    
+    console.print(
+        f"{status_emoji} [{status_color}]Status: {response.status.upper()}[/{status_color}]"
+    )
+    console.print(f"🕐 Timestamp: {response.timestamp}")
 
-        if hasattr(response, 'details') and response.details:
-            table = Table(title="Health Details")
-            table.add_column("Service", style="cyan")
-            table.add_column("Status", style="magenta")
+    if hasattr(response, 'details') and response.details:
+        table = Table(title="🔧 Service Health Details")
+        table.add_column("Service", style="cyan")
+        table.add_column("Status", style="magenta")
+        table.add_column("Indicator", justify="center")
 
-            for service, status in response.details.items():
-                table.add_row(service, status)
-            console.print(table)
+        for service, status in response.details.items():
+            indicator = "✅" if status.lower() == "healthy" else "❌"
+            table.add_row(service, status, indicator)
+        console.print(table)
+    
+    # Show helpful tip based on status
+    if response.status != "healthy":
+        console.print("\n💡 [yellow]Tip: If the API is unhealthy, try checking the logs or contacting support.[/yellow]")
 
 
 @health_app.command("ready")
@@ -327,30 +346,45 @@ app.add_typer(auth_app, name="auth")
 @auth_app.command("login")
 @run_async
 async def login(
-    username: str = typer.Option(..., help="Username"),
+    username: str = typer.Option(..., help="Username or email address"),
     password: str = typer.Option(
-        None, help="User password (will prompt if not provided)"
+        None, help="User password (will prompt securely if not provided)"
     ),
 ):
-    """Login to Chatter API."""
+    """Login to Chatter API and save authentication token."""
+    from rich.progress import Progress, SpinnerColumn, TextColumn
+    
     if not password:
-        password = Prompt.ask("Password", password=True)
+        password = Prompt.ask("🔐 Password", password=True)
 
-    async with get_client() as sdk_client:
-        user_login = UserLogin(username=username, password=password)
-        response = (
-            await sdk_client.auth_api.login_api_v1_auth_login_post(
-                user_login=user_login
+    with Progress(
+        SpinnerColumn(),
+        TextColumn("[progress.description]{task.description}"),
+        transient=True
+    ) as progress:
+        task = progress.add_task("🔑 Authenticating...", total=None)
+        
+        async with get_client() as sdk_client:
+            user_login = UserLogin(username=username, password=password)
+            response = (
+                await sdk_client.auth_api.login_api_v1_auth_login_post(
+                    user_login=user_login
+                )
             )
-        )
 
-        # Save token
-        sdk_client.save_token(response.access_token)
+            # Save token
+            sdk_client.save_token(response.access_token)
+        
+        progress.remove_task(task)
 
-        console.print("✅ [green]Successfully logged in![/green]")
-        console.print(
-            f"Access token expires in: {response.expires_in} seconds"
-        )
+    console.print("✅ [green]Successfully logged in![/green]")
+    console.print(f"⏰ Token expires in: {response.expires_in} seconds")
+    
+    # Show helpful next steps
+    console.print("\n💡 [dim]Next steps:[/dim]")
+    console.print("  • [yellow]chatter health check[/yellow] - Test your connection")
+    console.print("  • [yellow]chatter auth whoami[/yellow] - View your profile")
+    console.print("  • [yellow]chatter --help[/yellow] - Explore available commands")
 
 
 @auth_app.command("logout")
@@ -3304,34 +3338,107 @@ async def delete_ab_test(
 # Configuration and utility commands
 @app.command("config")
 def show_config():
-    """Show current configuration."""
-    table = Table(title="Configuration")
-    table.add_column("Setting", style="cyan")
+    """Show current configuration and connection status."""
+    from rich.panel import Panel
+    
+    table = Table(title="📋 Configuration")
+    table.add_column("Setting", style="cyan", no_wrap=True)
     table.add_column("Value", style="green")
+    table.add_column("Status", style="magenta")
 
+    base_url = os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL)
+    env_token = os.getenv("CHATTER_ACCESS_TOKEN")
+    
+    table.add_row("API Base URL", base_url, "✅ Active")
     table.add_row(
-        "API Base URL",
-        os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL),
-    )
-    table.add_row(
-        "Access Token",
-        "Set" if os.getenv("CHATTER_ACCESS_TOKEN") else "Not set",
+        "Environment Token",
+        "●●●●●●●●" if env_token else "Not set",
+        "✅ Set" if env_token else "❌ Not set"
     )
 
     # Check for local token
     temp_client = ChatterSDKClient()
     local_token = temp_client.load_token()
-    table.add_row("Local Token", "Set" if local_token else "Not set")
+    table.add_row(
+        "Local Token", 
+        "●●●●●●●●" if local_token else "Not set",
+        "✅ Set" if local_token else "❌ Not set"
+    )
 
     console.print(table)
+    
+    # Show authentication status
+    auth_status = "✅ Authenticated" if (env_token or local_token) else "❌ Not authenticated"
+    status_color = "green" if (env_token or local_token) else "red"
+    
+    console.print(f"\n[{status_color}]{auth_status}[/{status_color}]")
+    
+    if not (env_token or local_token):
+        console.print("\n💡 [dim]Tip: Run [yellow]chatter auth login[/yellow] to authenticate[/dim]")
+
+
+@app.command("welcome")
+def welcome():
+    """Show welcome message and getting started guide."""
+    from rich.panel import Panel
+    
+    welcome_text = """
+🎉 [bold]Welcome to Chatter API CLI![/bold]
+
+This CLI provides comprehensive access to the Chatter API platform.
+
+[cyan]Quick Start:[/cyan]
+  1. Configure your API endpoint: [yellow]chatter config[/yellow]
+  2. Login to authenticate: [yellow]chatter auth login[/yellow]
+  3. Check system health: [yellow]chatter health check[/yellow]
+  4. Explore available commands: [yellow]chatter --help[/yellow]
+
+[cyan]Popular Commands:[/cyan]
+  • [yellow]chatter chat send[/yellow] - Send a chat message
+  • [yellow]chatter documents list[/yellow] - List documents
+  • [yellow]chatter prompts list[/yellow] - List prompts
+  • [yellow]chatter analytics dashboard[/yellow] - View analytics
+
+[cyan]Need Help?[/cyan]
+  • Add [yellow]--help[/yellow] to any command for detailed usage
+  • Visit: https://github.com/lllucius/chatter
+    """
+    
+    panel = Panel(
+        welcome_text.strip(),
+        border_style="green",
+        padding=(1, 2)
+    )
+    
+    console.print(panel)
 
 
 @app.command("version")
 def show_version():
-    """Show CLI version."""
-    console.print("[bold]Chatter API CLI[/bold]")
-    console.print("Version: 0.1.0")
-    console.print("SDK Version: 0.1.0")
+    """Show CLI version and system information."""
+    from rich.panel import Panel
+    import platform
+    
+    # Create version info table
+    table = Table(show_header=False, box=None, padding=(0, 1))
+    table.add_column("Component", style="cyan", no_wrap=True)
+    table.add_column("Version", style="green")
+    
+    table.add_row("Chatter CLI", "0.1.0")
+    table.add_row("SDK Version", "0.1.0")
+    table.add_row("Python", platform.python_version())
+    table.add_row("Platform", platform.system())
+    
+    panel = Panel(
+        table,
+        title="🚀 [bold]Chatter API CLI[/bold]",
+        title_align="left",
+        border_style="blue"
+    )
+    
+    console.print(panel)
+    console.print("\n💡 [dim]For help with any command, add --help[/dim]")
+    console.print("📚 [dim]Documentation: https://github.com/lllucius/chatter[/dim]")
 
 
 # Main execution

@@ -16,19 +16,24 @@ class AuthService {
       basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
       credentials: 'include', // Include cookies for refresh token
     });
-    this.initialize();
+    // Don't call initialize() in constructor anymore - it's async now
   }
 
   /**
    * Initialize the auth service (automatically called in constructor)
    * Can be called explicitly if needed for testing or re-initialization
    */
-  public initialize(): void {
+  public async initialize(): Promise<void> {
     if (this.initialized) {
       return;
     }
     
-    // No longer load from localStorage - access tokens are memory-only
+    // Try to restore authentication state from refresh token cookie
+    if (!this.token) {
+      console.log('[AuthService] No access token in memory, attempting refresh...');
+      await this.refreshToken();
+    }
+    
     this.initialized = true;
     
     console.log('[AuthService] Initialized with base URL:', this.baseSDK.withConfig({}).basePath);
@@ -193,7 +198,7 @@ export const authService = new AuthService();
 export const getSDK = (): ChatterSDK => authService.getSDK();
 
 // Export initialization function for explicit app setup if needed
-export const initializeSDK = (): void => {
-  authService.initialize();
+export const initializeSDK = async (): Promise<void> => {
+  await authService.initialize();
   console.log('[SDK] Initialization complete:', authService.getSDKInfo());
 };

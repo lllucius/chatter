@@ -191,10 +191,16 @@ const LayoutFrame: React.FC = () => {
     handleProfileMenuClose();
   };
 
-  const handleLogout = () => {
-    authService.logout();
-    navigate('/login');
-    handleProfileMenuClose();
+  const handleLogout = async () => {
+    try {
+      await authService.logout();
+    } catch (error) {
+      console.error('Logout failed:', error);
+      // Still proceed with navigation even if logout API call fails
+    } finally {
+      navigate('/login', { replace: true });
+      handleProfileMenuClose();
+    }
   };
 
   const renderNavigation = (isMobile: boolean = false) => (

@@ -12,10 +12,12 @@ class MockReadableStream {
   private reader: MockStreamReader;
 
   constructor(messages: string[] = []) {
+    console.log('MockReadableStream created with messages:', messages.length);
     this.reader = new MockStreamReader(messages);
   }
 
   getReader(): MockStreamReader {
+    console.log('MockReadableStream.getReader() called');
     return this.reader;
   }
 }
@@ -27,6 +29,7 @@ class MockStreamReader {
   private pendingResolves: Array<(value: any) => void> = [];
 
   constructor(messages: string[] = []) {
+    console.log('MockStreamReader created with messages:', messages.length, messages);
     this.messages = [...messages];
   }
 
@@ -47,6 +50,8 @@ class MockStreamReader {
   }
 
   async read(): Promise<{ done: boolean; value?: Uint8Array }> {
+    console.log('MockStreamReader.read() called, closed:', this.closed, 'index:', this.index, 'messages length:', this.messages.length);
+    
     if (this.closed) {
       return { done: true };
     }
@@ -54,23 +59,19 @@ class MockStreamReader {
     if (this.index < this.messages.length) {
       const message = this.messages[this.index++];
       const encoder = new TextEncoder();
+      console.log('MockStreamReader returning message:', message);
       return {
         done: false,
         value: encoder.encode(message)
       };
     }
 
-    // If no messages available, return a promise that will be resolved when addMessage is called
+    // If no messages available, wait a bit and then return done to end the stream
+    console.log('MockStreamReader: No more messages, returning done');
     return new Promise((resolve) => {
-      this.pendingResolves.push(resolve);
-      // Also set a timeout to avoid hanging tests
       setTimeout(() => {
-        const index = this.pendingResolves.indexOf(resolve);
-        if (index >= 0) {
-          this.pendingResolves.splice(index, 1);
-          resolve({ done: true });
-        }
-      }, 100);
+        resolve({ done: true });
+      }, 50);
     });
   }
 
@@ -167,12 +168,13 @@ describe('SSEEventManager', () => {
     });
 
     test('should not create multiple connections', async () => {
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      
       sseManager.connect();
       
       // Wait longer for the first connection to establish state
       await new Promise(resolve => setTimeout(resolve, 50));
       
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
       sseManager.connect(); // Second call
       
       expect(consoleSpy).toHaveBeenCalledWith('SSE: Already connected or connecting');
@@ -249,19 +251,23 @@ describe('SSEEventManager', () => {
       
       const sseMessage = `data: ${JSON.stringify(eventData)}\n\n`;
       
-      // Simulate receiving the message through the stream
-      if (mockStreamReader) {
-        mockStreamReader.addMessage(sseMessage);
-        // Allow time for message processing
-        await new Promise(resolve => setTimeout(resolve, 50));
-      } else {
-        // Fallback: create a new mock if needed
-        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
-        if (mockStreamReader) {
-          mockStreamReader.addMessage(sseMessage);
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-      }
+      // Reset and setup the fetch mock BEFORE connecting
+      vi.clearAllMocks();
+      const messages = [sseMessage];
+      const mockStream = new MockReadableStream(messages);
+      const mockResponse = {
+        ok: true,
+        status: 200,
+        statusText: 'OK',
+        body: mockStream as any,
+      } as Response;
+      
+      (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+      
+      sseManager.connect();
+      
+      // Wait longer for the connection and message processing
+      await new Promise(resolve => setTimeout(resolve, 150));
       
       expect(listener).toHaveBeenCalledWith(eventData);
     });
@@ -284,17 +290,13 @@ describe('SSEEventManager', () => {
       
       const sseMessage = `data: ${JSON.stringify(eventData)}\n\n`;
       
-      if (mockStreamReader) {
-        mockStreamReader.addMessage(sseMessage);
-        await new Promise(resolve => setTimeout(resolve, 50));
-      } else {
-        // Fallback: create a new mock if needed
-        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
-        if (mockStreamReader) {
-          mockStreamReader.addMessage(sseMessage);
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-      }
+      // Create mock response with the SSE message
+      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse([sseMessage]));
+      
+      sseManager.connect();
+      
+      // Wait for the connection and message processing
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       expect(listener).toHaveBeenCalledWith(eventData);
     });
@@ -317,17 +319,13 @@ describe('SSEEventManager', () => {
       
       const sseMessage = `data: ${JSON.stringify(eventData)}\n\n`;
       
-      if (mockStreamReader) {
-        mockStreamReader.addMessage(sseMessage);
-        await new Promise(resolve => setTimeout(resolve, 50));
-      } else {
-        // Fallback: create a new mock if needed
-        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
-        if (mockStreamReader) {
-          mockStreamReader.addMessage(sseMessage);
-          await new Promise(resolve => setTimeout(resolve, 50));
-        }
-      }
+      // Create mock response with the SSE message
+      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse([sseMessage]));
+      
+      sseManager.connect();
+      
+      // Wait for the connection and message processing
+      await new Promise(resolve => setTimeout(resolve, 100));
       
       expect(listener).toHaveBeenCalledWith(eventData);
     });

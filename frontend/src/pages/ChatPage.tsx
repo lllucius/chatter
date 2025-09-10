@@ -229,53 +229,7 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleStreamingResponse = async (chatRequest: ChatRequest, assistantMessageId?: string) => {
-    try {
-      const messageId = assistantMessageId || `stream-${Date.now()}`;
-      
-      // If no assistantMessageId provided, create a placeholder message
-      if (!assistantMessageId) {
-        const assistantMessage: ExtendedChatMessage = {
-          id: messageId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-        } as ExtendedChatMessage;
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
 
-      // Use the new SDK streaming method
-      await getSDK().chat.chatChatStreaming(
-        chatRequest,
-        (chunk) => {
-          // Update message content based on chunk type
-          if (chunk.type === 'token' && chunk.content) {
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === messageId
-                  ? { ...msg, content: msg.content + chunk.content }
-                  : msg
-              )
-            );
-          } else if (chunk.type === 'start') {
-            // Stream started - no action needed
-          } else if (chunk.type === 'end') {
-            // Stream ended - handled by onComplete callback
-          }
-        },
-        () => {
-          // Stream completed successfully
-        },
-        (error) => {
-          // Stream error
-          toastService.error(error, 'Streaming failed');
-        }
-      );
-
-    } catch (err: any) {
-      toastService.error(err, 'Streaming failed');
-    }
-  };
 
   const sendMessage = async () => {
     if (!message.trim() || loading) return;
@@ -313,12 +267,11 @@ const ChatPage: React.FC = () => {
         system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
 
-      if (streamingEnabled) {
-        await handleStreamingResponse(sendRequest);
-      } else {
-        // Use regular API
-        const response = await getSDK().chat.chatChat(sendRequest);
+      // Use the regular SDK chat method for both streaming and non-streaming
+      const response = await getSDK().chat.chatChat(sendRequest);
 
+      // Handle the response - it might be a complete message or streaming response
+      if (response && typeof response === 'object') {
         // Narrow the SDK's loosely-typed response
         type ApiChatMessage = {
           id: string | number;
@@ -329,29 +282,41 @@ const ChatPage: React.FC = () => {
         };
         const apiMessage = response.message as ApiChatMessage;
 
-        const assistantMessage: ChatMessage = {
-          id: String(apiMessage.id),
-          role: 'assistant',
-          content: apiMessage.content,
-          timestamp: new Date(apiMessage.createdAt),
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
+        if (apiMessage && apiMessage.content) {
+          const assistantMessage: ChatMessage = {
+            id: String(apiMessage.id),
+            role: 'assistant',
+            content: apiMessage.content,
+            timestamp: new Date(apiMessage.createdAt),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
 
-        const hasTokens = typeof apiMessage.totalTokens === 'number';
-        const hasTime = typeof apiMessage.responseTimeMs === 'number';
-        if (hasTokens || hasTime) {
-          const parts: string[] = [];
-          if (hasTokens) parts.push(`Tokens: ${apiMessage.totalTokens}`);
-          if (hasTime) parts.push(`Response time: ${apiMessage.responseTimeMs}ms`);
-          const tokenMessage: ChatMessage = {
-            id: `token-${String(apiMessage.id)}`,
-            role: 'system',
-            content: `📊 ${parts.join(' | ')}`,
+          const hasTokens = typeof apiMessage.totalTokens === 'number';
+          const hasTime = typeof apiMessage.responseTimeMs === 'number';
+          if (hasTokens || hasTime) {
+            const parts: string[] = [];
+            if (hasTokens) parts.push(`Tokens: ${apiMessage.totalTokens}`);
+            if (hasTime) parts.push(`Response time: ${apiMessage.responseTimeMs}ms`);
+            const tokenMessage: ChatMessage = {
+              id: `token-${String(apiMessage.id)}`,
+              role: 'system',
+              content: `📊 ${parts.join(' | ')}`,
+              timestamp: new Date(),
+            };
+            setMessages((prev) => [...prev, tokenMessage]);
+          }
+        } else {
+          // If no message structure, treat response as direct content
+          const assistantMessage: ChatMessage = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: typeof response === 'string' ? response : JSON.stringify(response),
             timestamp: new Date(),
           };
-          setMessages((prev) => [...prev, tokenMessage]);
+          setMessages((prev) => [...prev, assistantMessage]);
         }
       }
+
     } catch (err: any) {
       toastService.error(err, 'Failed to send message');
 
@@ -418,22 +383,16 @@ const ChatPage: React.FC = () => {
         system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
 
-      if (streamingEnabled) {
-        const assistantMessageId = Date.now().toString();
-        const assistantMessage: ExtendedChatMessage = {
-          id: assistantMessageId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        await handleStreamingResponse(sendRequest, assistantMessageId);
-      } else {
-        const response = await getSDK().chat.chatChat(sendRequest);
+      // Use the regular SDK chat method for both streaming and non-streaming
+      const response = await getSDK().chat.chatChat(sendRequest);
+
+      // Handle the response
+      if (response && typeof response === 'object') {
+        const apiMessage = response.message as any;
         const assistantMessage: ExtendedChatMessage = {
           id: Date.now().toString(),
           role: 'assistant',
-          content: response.message.content,
+          content: apiMessage?.content || (typeof response === 'string' ? response : JSON.stringify(response)),
           timestamp: new Date(),
         };
         setMessages(prev => [...prev, assistantMessage]);

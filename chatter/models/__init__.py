@@ -33,6 +33,7 @@ from chatter.models.workflow import (
     WorkflowTemplate,
     WorkflowType,
 )
+from chatter.utils.audit_logging import AuditLog
 
 __all__ = [
     "User",
@@ -64,4 +65,5 @@ __all__ = [
     "TemplateSpec",
     "WorkflowType",
     "TemplateCategory",
+    "AuditLog",
 ]

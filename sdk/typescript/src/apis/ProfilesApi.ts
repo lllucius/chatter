@@ -2,7 +2,7 @@
  * Generated API client for Profiles
  */
 import { AvailableProvidersResponse, ProfileCloneRequest, ProfileCreate, ProfileDeleteResponse, ProfileListResponse, ProfileResponse, ProfileStatsResponse, ProfileTestRequest, ProfileTestResponse, ProfileType, ProfileUpdate } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ProfilesApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,12 +21,16 @@ Returns:
     Created profile information
    */
   public async createProfileApiV1Profiles(data: ProfileCreate): Promise<ProfileResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ProfileResponse>(`/api/v1/profiles/`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileResponse>;
   }
   /**List Profiles
    * List user's profiles.
@@ -47,9 +51,12 @@ Returns:
     List of profiles with pagination info
    */
   public async listProfilesApiV1Profiles(options?: { profileType?: ProfileType | null; llmProvider?: string | null; tags?: string[] | null; isPublic?: boolean | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ProfileListResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'profile_type': options?.profileType,
         'llm_provider': options?.llmProvider,
@@ -63,7 +70,8 @@ Returns:
       },
     };
 
-    return this.request<ProfileListResponse>(`/api/v1/profiles`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileListResponse>;
   }
   /**Get Profile
    * Get profile details.
@@ -77,11 +85,15 @@ Returns:
     Profile information
    */
   public async getProfileApiV1ProfilesProfileId(profileId: string): Promise<ProfileResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/${profileId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ProfileResponse>(`/api/v1/profiles/${profileId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileResponse>;
   }
   /**Update Profile
    * Update profile.
@@ -96,12 +108,16 @@ Returns:
     Updated profile information
    */
   public async updateProfileApiV1ProfilesProfileId(profileId: string, data: ProfileUpdate): Promise<ProfileResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/${profileId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ProfileResponse>(`/api/v1/profiles/${profileId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileResponse>;
   }
   /**Delete Profile
    * Delete profile.
@@ -116,11 +132,15 @@ Returns:
     Success message
    */
   public async deleteProfileApiV1ProfilesProfileId(profileId: string): Promise<ProfileDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/${profileId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ProfileDeleteResponse>(`/api/v1/profiles/${profileId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileDeleteResponse>;
   }
   /**Test Profile
    * Test profile with a sample message.
@@ -135,12 +155,16 @@ Returns:
     Test results
    */
   public async testProfileApiV1ProfilesProfileIdTest(profileId: string, data: ProfileTestRequest): Promise<ProfileTestResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/${profileId}/test`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ProfileTestResponse>(`/api/v1/profiles/${profileId}/test`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileTestResponse>;
   }
   /**Clone Profile
    * Clone an existing profile.
@@ -155,12 +179,16 @@ Returns:
     Cloned profile information
    */
   public async cloneProfileApiV1ProfilesProfileIdClone(profileId: string, data: ProfileCloneRequest): Promise<ProfileResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/${profileId}/clone`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ProfileResponse>(`/api/v1/profiles/${profileId}/clone`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileResponse>;
   }
   /**Get Profile Stats
    * Get profile statistics.
@@ -173,11 +201,15 @@ Returns:
     Profile statistics
    */
   public async getProfileStatsApiV1ProfilesStatsOverview(): Promise<ProfileStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/stats/overview`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ProfileStatsResponse>(`/api/v1/profiles/stats/overview`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ProfileStatsResponse>;
   }
   /**Get Available Providers
    * Get available LLM providers.
@@ -191,10 +223,14 @@ Returns:
     Available providers information
    */
   public async getAvailableProvidersApiV1ProfilesProvidersAvailable(): Promise<AvailableProvidersResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/profiles/providers/available`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<AvailableProvidersResponse>(`/api/v1/profiles/providers/available`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<AvailableProvidersResponse>;
   }
 }

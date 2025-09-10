@@ -2,7 +2,7 @@
  * Generated API client for Events
  */
 import { SSEStatsResponse, TestEventResponse } from '../models/index';
-import { BaseAPI, Configuration } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class EventsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -20,11 +20,15 @@ Returns:
     StreamingResponse with SSE format
    */
   public async eventsStreamApiV1EventsStream(): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/events/stream`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/events/stream`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Admin Events Stream
    * Stream all system events for admin users.
@@ -37,11 +41,15 @@ Returns:
     StreamingResponse with SSE format for all events
    */
   public async adminEventsStreamApiV1EventsAdminStream(): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/events/admin/stream`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/events/admin/stream`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Get Sse Stats
    * Get SSE service statistics.
@@ -53,11 +61,15 @@ Returns:
     SSE service statistics
    */
   public async getSseStatsApiV1EventsStats(): Promise<SSEStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/events/stats`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<SSEStatsResponse>(`/api/v1/events/stats`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<SSEStatsResponse>;
   }
   /**Trigger Test Event
    * Trigger a test event for the current user.
@@ -69,11 +81,15 @@ Returns:
     Success message with event ID
    */
   public async triggerTestEventApiV1EventsTestEvent(): Promise<TestEventResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/events/test-event`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<TestEventResponse>(`/api/v1/events/test-event`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<TestEventResponse>;
   }
   /**Trigger Broadcast Test
    * Trigger a broadcast test event for all users.
@@ -85,10 +101,14 @@ Returns:
     Success message with event ID
    */
   public async triggerBroadcastTestApiV1EventsBroadcastTest(): Promise<TestEventResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/events/broadcast-test`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<TestEventResponse>(`/api/v1/events/broadcast-test`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<TestEventResponse>;
   }
 }

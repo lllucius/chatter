@@ -2,7 +2,7 @@
  * Generated API client for Tool Servers
  */
 import { BulkOperationResult, BulkToolServerOperation, RoleToolAccessCreate, RoleToolAccessResponse, ServerStatus, ServerToolsResponse, ToolAccessResult, ToolOperationResponse, ToolPermissionCreate, ToolPermissionResponse, ToolPermissionUpdate, ToolServerCreate, ToolServerDeleteResponse, ToolServerHealthCheck, ToolServerMetrics, ToolServerOperationResponse, ToolServerResponse, ToolServerUpdate, UserToolAccessCheck } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ToolServersApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,12 +21,16 @@ Returns:
     Created server response
    */
   public async createToolServerApiV1ToolserversServers(data: ToolServerCreate): Promise<ToolServerResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ToolServerResponse>(`/api/v1/toolservers/servers`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerResponse>;
   }
   /**List Tool Servers
    * List tool servers with optional filtering.
@@ -40,9 +44,12 @@ Returns:
     List of server responses
    */
   public async listToolServersApiV1ToolserversServers(options?: { status?: ServerStatus | null; includeBuiltin?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ToolServerResponse[]> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'status': options?.status,
         'include_builtin': options?.includeBuiltin,
@@ -50,7 +57,8 @@ Returns:
       },
     };
 
-    return this.request<ToolServerResponse[]>(`/api/v1/toolservers/servers`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerResponse[]>;
   }
   /**Get Tool Server
    * Get a tool server by ID.
@@ -64,11 +72,15 @@ Returns:
     Server response
    */
   public async getToolServerApiV1ToolserversServersServerId(serverId: string): Promise<ToolServerResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerResponse>(`/api/v1/toolservers/servers/${serverId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerResponse>;
   }
   /**Update Tool Server
    * Update a tool server.
@@ -83,12 +95,16 @@ Returns:
     Updated server response
    */
   public async updateToolServerApiV1ToolserversServersServerId(serverId: string, data: ToolServerUpdate): Promise<ToolServerResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ToolServerResponse>(`/api/v1/toolservers/servers/${serverId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerResponse>;
   }
   /**Delete Tool Server
    * Delete a tool server.
@@ -102,11 +118,15 @@ Returns:
     Success message
    */
   public async deleteToolServerApiV1ToolserversServersServerId(serverId: string): Promise<ToolServerDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerDeleteResponse>(`/api/v1/toolservers/servers/${serverId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerDeleteResponse>;
   }
   /**Start Tool Server
    * Start a tool server.
@@ -120,11 +140,15 @@ Returns:
     Operation result
    */
   public async startToolServerApiV1ToolserversServersServerIdStart(serverId: string): Promise<ToolServerOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/start`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerOperationResponse>(`/api/v1/toolservers/servers/${serverId}/start`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerOperationResponse>;
   }
   /**Stop Tool Server
    * Stop a tool server.
@@ -138,11 +162,15 @@ Returns:
     Operation result
    */
   public async stopToolServerApiV1ToolserversServersServerIdStop(serverId: string): Promise<ToolServerOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/stop`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerOperationResponse>(`/api/v1/toolservers/servers/${serverId}/stop`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerOperationResponse>;
   }
   /**Restart Tool Server
    * Restart a tool server.
@@ -156,11 +184,15 @@ Returns:
     Operation result
    */
   public async restartToolServerApiV1ToolserversServersServerIdRestart(serverId: string): Promise<ToolServerOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/restart`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerOperationResponse>(`/api/v1/toolservers/servers/${serverId}/restart`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerOperationResponse>;
   }
   /**Enable Tool Server
    * Enable a tool server.
@@ -174,11 +206,15 @@ Returns:
     Operation result
    */
   public async enableToolServerApiV1ToolserversServersServerIdEnable(serverId: string): Promise<ToolServerOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/enable`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerOperationResponse>(`/api/v1/toolservers/servers/${serverId}/enable`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerOperationResponse>;
   }
   /**Disable Tool Server
    * Disable a tool server.
@@ -192,11 +228,15 @@ Returns:
     Operation result
    */
   public async disableToolServerApiV1ToolserversServersServerIdDisable(serverId: string): Promise<ToolServerOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/disable`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerOperationResponse>(`/api/v1/toolservers/servers/${serverId}/disable`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerOperationResponse>;
   }
   /**Get Server Tools
    * Get tools for a specific server.
@@ -211,9 +251,12 @@ Returns:
     List of server tools with pagination
    */
   public async getServerToolsApiV1ToolserversServersServerIdTools(serverId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ServerToolsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/tools`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
@@ -221,7 +264,8 @@ Returns:
       },
     };
 
-    return this.request<ServerToolsResponse>(`/api/v1/toolservers/servers/${serverId}/tools`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ServerToolsResponse>;
   }
   /**Enable Tool
    * Enable a specific tool.
@@ -235,11 +279,15 @@ Returns:
     Operation result
    */
   public async enableToolApiV1ToolserversToolsToolIdEnable(toolId: string): Promise<ToolOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/tools/${toolId}/enable`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolOperationResponse>(`/api/v1/toolservers/tools/${toolId}/enable`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolOperationResponse>;
   }
   /**Disable Tool
    * Disable a specific tool.
@@ -253,11 +301,15 @@ Returns:
     Operation result
    */
   public async disableToolApiV1ToolserversToolsToolIdDisable(toolId: string): Promise<ToolOperationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/tools/${toolId}/disable`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolOperationResponse>(`/api/v1/toolservers/tools/${toolId}/disable`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolOperationResponse>;
   }
   /**Get Server Metrics
    * Get analytics for a specific server.
@@ -271,11 +323,15 @@ Returns:
     Server metrics
    */
   public async getServerMetricsApiV1ToolserversServersServerIdMetrics(serverId: string): Promise<ToolServerMetrics> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/metrics`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerMetrics>(`/api/v1/toolservers/servers/${serverId}/metrics`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerMetrics>;
   }
   /**Check Server Health
    * Perform health check on a server.
@@ -289,11 +345,15 @@ Returns:
     Health check result
    */
   public async checkServerHealthApiV1ToolserversServersServerIdHealth(serverId: string): Promise<ToolServerHealthCheck> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/health`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolServerHealthCheck>(`/api/v1/toolservers/servers/${serverId}/health`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolServerHealthCheck>;
   }
   /**Bulk Server Operation
    * Perform bulk operations on multiple servers.
@@ -307,12 +367,16 @@ Returns:
     Bulk operation result
    */
   public async bulkServerOperationApiV1ToolserversServersBulk(data: BulkToolServerOperation): Promise<BulkOperationResult> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/bulk`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<BulkOperationResult>(`/api/v1/toolservers/servers/bulk`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<BulkOperationResult>;
   }
   /**List All Tools
    * List all tools across all servers.
@@ -325,11 +389,15 @@ Returns:
     List of all available tools across all servers
    */
   public async listAllToolsApiV1ToolserversToolsAll(): Promise<Record<string, unknown>[]> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/tools/all`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>[]>(`/api/v1/toolservers/tools/all`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>[]>;
   }
   /**Test Server Connectivity
    * Test connectivity to an external MCP server.
@@ -343,11 +411,15 @@ Returns:
     Connectivity test results
    */
   public async testServerConnectivityApiV1ToolserversServersServerIdTestConnectivity(serverId: string): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/test-connectivity`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/toolservers/servers/${serverId}/test-connectivity`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Grant Tool Permission
    * Grant tool permission to a user.
@@ -361,12 +433,16 @@ Returns:
     Created permission
    */
   public async grantToolPermissionApiV1ToolserversPermissions(data: ToolPermissionCreate): Promise<ToolPermissionResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/permissions`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ToolPermissionResponse>(`/api/v1/toolservers/permissions`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolPermissionResponse>;
   }
   /**Update Tool Permission
    * Update tool permission.
@@ -381,12 +457,16 @@ Returns:
     Updated permission
    */
   public async updateToolPermissionApiV1ToolserversPermissionsPermissionId(permissionId: string, data: ToolPermissionUpdate): Promise<ToolPermissionResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/permissions/${permissionId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ToolPermissionResponse>(`/api/v1/toolservers/permissions/${permissionId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolPermissionResponse>;
   }
   /**Revoke Tool Permission
    * Revoke tool permission.
@@ -400,11 +480,15 @@ Returns:
     Success message
    */
   public async revokeToolPermissionApiV1ToolserversPermissionsPermissionId(permissionId: string): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/permissions/${permissionId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/toolservers/permissions/${permissionId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Get User Permissions
    * Get all permissions for a user.
@@ -418,11 +502,15 @@ Returns:
     List of user permissions
    */
   public async getUserPermissionsApiV1ToolserversUsersUserIdPermissions(userId: string): Promise<ToolPermissionResponse[]> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/users/${userId}/permissions`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ToolPermissionResponse[]>(`/api/v1/toolservers/users/${userId}/permissions`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolPermissionResponse[]>;
   }
   /**Create Role Access Rule
    * Create role-based access rule.
@@ -436,12 +524,16 @@ Returns:
     Created rule
    */
   public async createRoleAccessRuleApiV1ToolserversRoleAccess(data: RoleToolAccessCreate): Promise<RoleToolAccessResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/role-access`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<RoleToolAccessResponse>(`/api/v1/toolservers/role-access`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<RoleToolAccessResponse>;
   }
   /**Get Role Access Rules
    * Get role-based access rules.
@@ -455,16 +547,20 @@ Returns:
     List of access rules
    */
   public async getRoleAccessRulesApiV1ToolserversRoleAccess(options?: { role?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<RoleToolAccessResponse[]> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/role-access`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'role': options?.role,
         ...options?.query
       },
     };
 
-    return this.request<RoleToolAccessResponse[]>(`/api/v1/toolservers/role-access`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<RoleToolAccessResponse[]>;
   }
   /**Check Tool Access
    * Check if user has access to a tool.
@@ -478,12 +574,16 @@ Returns:
     Access check result
    */
   public async checkToolAccessApiV1ToolserversAccessCheck(data: UserToolAccessCheck): Promise<ToolAccessResult> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/access-check`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ToolAccessResult>(`/api/v1/toolservers/access-check`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ToolAccessResult>;
   }
   /**Refresh Server Tools
    * Refresh tools for a remote server.
@@ -497,10 +597,14 @@ Returns:
     Refresh result
    */
   public async refreshServerToolsApiV1ToolserversServersServerIdRefreshTools(serverId: string): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/toolservers/servers/${serverId}/refresh-tools`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/toolservers/servers/${serverId}/refresh-tools`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
 }

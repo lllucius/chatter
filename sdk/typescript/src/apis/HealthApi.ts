@@ -2,7 +2,7 @@
  * Generated API client for Health
  */
 import { CorrelationTraceResponse, HealthCheckResponse, MetricsResponse, ReadinessCheckResponse } from '../models/index';
-import { BaseAPI, Configuration } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class HealthApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -16,11 +16,15 @@ Returns:
     Health status
    */
   public async healthCheckEndpointHealthz(): Promise<HealthCheckResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/healthz`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<HealthCheckResponse>(`/healthz`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<HealthCheckResponse>;
   }
   /**Readiness Check
    * Readiness check endpoint with database connectivity.
@@ -36,11 +40,15 @@ Returns:
     Returns 200 if ready, 503 if not ready.
    */
   public async readinessCheckReadyz(): Promise<ReadinessCheckResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/readyz`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ReadinessCheckResponse>(`/readyz`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ReadinessCheckResponse>;
   }
   /**Liveness Check
    * Liveness check endpoint for Kubernetes.
@@ -52,11 +60,15 @@ Returns:
     Health status indicating the application is alive
    */
   public async livenessCheckLive(): Promise<HealthCheckResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/live`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<HealthCheckResponse>(`/live`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<HealthCheckResponse>;
   }
   /**Get Metrics
    * Get application metrics and monitoring data.
@@ -65,11 +77,15 @@ Returns:
     Application metrics including performance and health data
    */
   public async getMetricsMetrics(): Promise<MetricsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/metrics`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<MetricsResponse>(`/metrics`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<MetricsResponse>;
   }
   /**Get Correlation Trace
    * Get trace of all requests for a correlation ID.
@@ -81,10 +97,14 @@ Returns:
     List of requests associated with the correlation ID
    */
   public async getCorrelationTraceTraceCorrelationId(correlationId: string): Promise<CorrelationTraceResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/trace/${correlationId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<CorrelationTraceResponse>(`/trace/${correlationId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<CorrelationTraceResponse>;
   }
 }

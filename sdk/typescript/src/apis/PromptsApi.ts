@@ -2,7 +2,7 @@
  * Generated API client for Prompts
  */
 import { PromptCategory, PromptCloneRequest, PromptCreate, PromptDeleteResponse, PromptListResponse, PromptResponse, PromptStatsResponse, PromptTestRequest, PromptTestResponse, PromptType, PromptUpdate } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class PromptsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,12 +21,16 @@ Returns:
     Created prompt information
    */
   public async createPromptApiV1Prompts(data: PromptCreate): Promise<PromptResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<PromptResponse>(`/api/v1/prompts/`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptResponse>;
   }
   /**Get Prompt Stats
    * Get prompt statistics.
@@ -39,11 +43,15 @@ Returns:
     Prompt statistics
    */
   public async getPromptStatsApiV1PromptsStatsOverview(): Promise<PromptStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/stats/overview`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<PromptStatsResponse>(`/api/v1/prompts/stats/overview`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptStatsResponse>;
   }
   /**List Prompts
    * List user's prompts.
@@ -65,9 +73,12 @@ Returns:
     List of prompts with pagination info
    */
   public async listPromptsApiV1Prompts(options?: { promptType?: PromptType | null; category?: PromptCategory | null; tags?: string[] | null; isPublic?: boolean | null; isChain?: boolean | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PromptListResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'prompt_type': options?.promptType,
         'category': options?.category,
@@ -82,7 +93,8 @@ Returns:
       },
     };
 
-    return this.request<PromptListResponse>(`/api/v1/prompts`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptListResponse>;
   }
   /**Get Prompt
    * Get prompt details.
@@ -97,11 +109,15 @@ Returns:
     Prompt information
    */
   public async getPromptApiV1PromptsPromptId(promptId: string): Promise<PromptResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/${promptId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptResponse>;
   }
   /**Update Prompt
    * Update prompt.
@@ -116,12 +132,16 @@ Returns:
     Updated prompt information
    */
   public async updatePromptApiV1PromptsPromptId(promptId: string, data: PromptUpdate): Promise<PromptResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/${promptId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptResponse>;
   }
   /**Delete Prompt
    * Delete prompt.
@@ -136,11 +156,15 @@ Returns:
     Success message
    */
   public async deletePromptApiV1PromptsPromptId(promptId: string): Promise<PromptDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/${promptId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<PromptDeleteResponse>(`/api/v1/prompts/${promptId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptDeleteResponse>;
   }
   /**Test Prompt
    * Test prompt with given variables.
@@ -155,12 +179,16 @@ Returns:
     Test results
    */
   public async testPromptApiV1PromptsPromptIdTest(promptId: string, data: PromptTestRequest): Promise<PromptTestResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/${promptId}/test`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<PromptTestResponse>(`/api/v1/prompts/${promptId}/test`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptTestResponse>;
   }
   /**Clone Prompt
    * Clone an existing prompt.
@@ -175,11 +203,15 @@ Returns:
     Cloned prompt information
    */
   public async clonePromptApiV1PromptsPromptIdClone(promptId: string, data: PromptCloneRequest): Promise<PromptResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/prompts/${promptId}/clone`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<PromptResponse>(`/api/v1/prompts/${promptId}/clone`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PromptResponse>;
   }
 }

@@ -2,7 +2,7 @@
  * Generated API client for Authentication
  */
 import { APIKeyCreate, APIKeyResponse, APIKeyRevokeResponse, AccountDeactivateResponse, LogoutResponse, PasswordChange, PasswordChangeResponse, PasswordResetConfirmResponse, PasswordResetRequestResponse, TokenRefreshResponse, TokenResponse, UserCreate, UserLogin, UserResponse, UserUpdate } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AuthenticationApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -21,12 +21,16 @@ Returns:
     User data and authentication tokens
    */
   public async authRegister(data: UserCreate): Promise<TokenResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/register`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<TokenResponse>(`/api/v1/auth/register`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<TokenResponse>;
   }
   /**Login
    * Authenticate user and return tokens with enhanced security.
@@ -41,12 +45,16 @@ Returns:
     User data and authentication tokens
    */
   public async authLogin(data: UserLogin): Promise<TokenResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/login`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<TokenResponse>(`/api/v1/auth/login`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<TokenResponse>;
   }
   /**Refresh Token
    * Refresh access token with enhanced security validation.
@@ -60,11 +68,15 @@ Returns:
     New access token (refresh token set in HttpOnly cookie)
    */
   public async refreshTokenApiV1AuthRefresh(): Promise<TokenRefreshResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/refresh`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<TokenRefreshResponse>(`/api/v1/auth/refresh`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<TokenRefreshResponse>;
   }
   /**Get Current User Info
    * Get current user information.
@@ -76,11 +88,15 @@ Returns:
     Current user data
    */
   public async getCurrentUserInfoApiV1AuthMe(): Promise<UserResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/me`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<UserResponse>(`/api/v1/auth/me`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<UserResponse>;
   }
   /**Update Profile
    * Update current user profile.
@@ -94,12 +110,16 @@ Returns:
     Updated user data
    */
   public async updateProfileApiV1AuthMe(data: UserUpdate): Promise<UserResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/me`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<UserResponse>(`/api/v1/auth/me`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<UserResponse>;
   }
   /**Change Password
    * Change user password with enhanced security logging.
@@ -114,12 +134,16 @@ Returns:
     Success message
    */
   public async changePasswordApiV1AuthChangePassword(data: PasswordChange): Promise<PasswordChangeResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/change-password`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<PasswordChangeResponse>(`/api/v1/auth/change-password`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PasswordChangeResponse>;
   }
   /**Create Api Key
    * Create API key for current user with enhanced security.
@@ -134,12 +158,16 @@ Returns:
     Created API key
    */
   public async createApiKeyApiV1AuthApiKey(data: APIKeyCreate): Promise<APIKeyResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/api-key`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<APIKeyResponse>(`/api/v1/auth/api-key`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<APIKeyResponse>;
   }
   /**Revoke Api Key
    * Revoke current user's API key with security logging.
@@ -153,11 +181,15 @@ Returns:
     Success message
    */
   public async revokeApiKeyApiV1AuthApiKey(): Promise<APIKeyRevokeResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/api-key`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<APIKeyRevokeResponse>(`/api/v1/auth/api-key`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<APIKeyRevokeResponse>;
   }
   /**List Api Keys
    * List user's API keys.
@@ -170,11 +202,15 @@ Returns:
     List of API keys
    */
   public async listApiKeysApiV1AuthApiKeys(): Promise<APIKeyResponse[]> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/api-keys`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<APIKeyResponse[]>(`/api/v1/auth/api-keys`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<APIKeyResponse[]>;
   }
   /**Logout
    * Logout and revoke current token with enhanced security.
@@ -189,11 +225,15 @@ Returns:
     Success message
    */
   public async authLogout(): Promise<LogoutResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/logout`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<LogoutResponse>(`/api/v1/auth/logout`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<LogoutResponse>;
   }
   /**Request Password Reset
    * Request password reset with enhanced security logging.
@@ -207,16 +247,20 @@ Returns:
     Success message
    */
   public async requestPasswordResetApiV1AuthPasswordResetRequest(options?: { email?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PasswordResetRequestResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/password-reset/request`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'email': options?.email,
         ...options?.query
       },
     };
 
-    return this.request<PasswordResetRequestResponse>(`/api/v1/auth/password-reset/request`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PasswordResetRequestResponse>;
   }
   /**Confirm Password Reset
    * Confirm password reset with enhanced security logging.
@@ -231,9 +275,12 @@ Returns:
     Success message
    */
   public async confirmPasswordResetApiV1AuthPasswordResetConfirm(options?: { token?: string; newPassword?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<PasswordResetConfirmResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/password-reset/confirm`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'token': options?.token,
         'new_password': options?.newPassword,
@@ -241,7 +288,8 @@ Returns:
       },
     };
 
-    return this.request<PasswordResetConfirmResponse>(`/api/v1/auth/password-reset/confirm`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PasswordResetConfirmResponse>;
   }
   /**Deactivate Account
    * Deactivate current user account with enhanced security logging.
@@ -255,10 +303,14 @@ Returns:
     Success message
    */
   public async deactivateAccountApiV1AuthAccount(): Promise<AccountDeactivateResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/auth/account`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<AccountDeactivateResponse>(`/api/v1/auth/account`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<AccountDeactivateResponse>;
   }
 }

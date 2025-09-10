@@ -211,23 +211,25 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
    * {operation.get('description', '').replace('*/', '')}
    */
   public async {method_name}({params_str}): Promise<{response_type}> {{
-    const requestOptions = {{
-      method: '{method.upper()}' as const,"""
+    const requestContext: RequestOpts = {{
+      path: `{path_with_params}`,
+      method: '{method.upper()}' as HTTPMethod,
+      headers: {{"""
 
     # Add headers from parameters
     if params["header"]:
-        method_body += """
-      headers: {
-        ...options?.headers,"""
         for header in params["header"]:
             header_name = header["name"]
             method_body += f"""
         '{header_name}': String(options?.{camel_case(header_name)} ?? ''),"""
         method_body += """
-      },"""
+        ...options?.headers,"""
     elif needs_options:
         method_body += """
-      headers: options?.headers,"""
+        ...options?.headers,"""
+
+    method_body += """
+      },"""
 
     # Add query parameters
     if params["query"]:
@@ -253,7 +255,8 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
     method_body += f"""
     }};
 
-    return this.request<{response_type}>(`{path_with_params}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<{response_type}>;
   }}"""
 
     return method_body
@@ -331,7 +334,7 @@ def generate_api_class(tag: str, operations: list[tuple]) -> str:
             import_statements.append(f"import {{ {import_list} }} from '../models/index';")
 
     # Build runtime import - only include what's actually used
-    runtime_imports = ["BaseAPI", "Configuration"]
+    runtime_imports = ["BaseAPI", "Configuration", "RequestOpts", "HTTPMethod"]
     if uses_http_query:
         runtime_imports.append("HTTPQuery")
     if uses_http_headers:

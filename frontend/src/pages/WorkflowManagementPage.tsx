@@ -220,17 +220,6 @@ const WorkflowManagementPage: React.FC = () => {
 
   const renderTemplatesTab = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={loadWorkflowTemplates}
-          disabled={loading}
-        >
-          Refresh
-        </Button>
-      </Box>
-
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
           <CircularProgress />
@@ -335,16 +324,6 @@ const WorkflowManagementPage: React.FC = () => {
 
   const renderBuilderTab = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setBuilderDialogOpen(true)}
-        >
-          Create Workflow
-        </Button>
-      </Box>
-
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
           <Card>
@@ -457,16 +436,6 @@ const WorkflowManagementPage: React.FC = () => {
 
   const renderExecutionTab = () => (
     <Box>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 3 }}>
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => {/* Refresh executions */}}
-        >
-          Refresh
-        </Button>
-      </Box>
-
       {executions.length === 0 ? (
         <Alert severity="info">
           No workflow executions yet. Execute a workflow template to see results here.
@@ -594,14 +563,50 @@ const WorkflowManagementPage: React.FC = () => {
     </Box>
   );
 
+  const toolbar = (
+    <>
+      {tabValue === 0 && (
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={loadWorkflowTemplates}
+          disabled={loading}
+          size="small"
+        >
+          Refresh
+        </Button>
+      )}
+      {tabValue === 1 && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => setBuilderDialogOpen(true)}
+          size="small"
+        >
+          Create Workflow
+        </Button>
+      )}
+      {tabValue === 2 && (
+        <Button
+          variant="outlined"
+          startIcon={<RefreshIcon />}
+          onClick={() => {/* Refresh executions */}}
+          size="small"
+        >
+          Refresh
+        </Button>
+      )}
+    </>
+  );
+
   return (
-    <PageLayout title="Workflow Management">
+    <PageLayout title="Workflow Management" toolbar={toolbar}>
       <Box sx={{ mb: 3 }}>
         <Tabs value={tabValue} onChange={handleTabChange} aria-label="workflow management tabs">
-          <Tab label="Templates" icon={<WorkflowIcon />} />
-          <Tab label="Builder" icon={<BuildIcon />} />
-          <Tab label="Executions" icon={<SpeedIcon />} />
-          <Tab label="Analytics" icon={<AnalyticsIcon />} />
+          <Tab label="Templates" icon={<WorkflowIcon />} iconPosition="start" />
+          <Tab label="Builder" icon={<BuildIcon />} iconPosition="start" />
+          <Tab label="Executions" icon={<SpeedIcon />} iconPosition="start" />
+          <Tab label="Analytics" icon={<AnalyticsIcon />} iconPosition="start" />
         </Tabs>
       </Box>
 

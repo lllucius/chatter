@@ -588,19 +588,79 @@ const AdministrationPage: React.FC = () => {
   };
 
   const toolbar = (
-    <Button
-      variant="outlined"
-      startIcon={<RefreshIcon />}
-      onClick={() => {
-        loadBackups();
-        loadPlugins();
-        loadJobs();
-        loadJobStats();
-      }}
-      disabled={loading}
-    >
-      Refresh
-    </Button>
+    <>
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={() => {
+          loadBackups();
+          loadPlugins();
+          loadJobs();
+          loadJobStats();
+        }}
+        disabled={loading}
+        size="small"
+      >
+        Refresh
+      </Button>
+      
+      {/* Backup tab controls */}
+      {activeTab === 'backups' && (
+        <>
+          <Button
+            variant="contained"
+            startIcon={<BackupIcon />}
+            onClick={() => openDialog('backup')}
+            size="small"
+          >
+            Create Backup
+          </Button>
+          <Button
+            variant="outlined"
+            startIcon={<UploadIcon />}
+            size="small"
+          >
+            Restore Backup
+          </Button>
+        </>
+      )}
+      
+      {/* Jobs tab controls */}
+      {activeTab === 'jobs' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openDialog('job')}
+          size="small"
+        >
+          Create Job
+        </Button>
+      )}
+      
+      {/* Plugins tab controls */}
+      {activeTab === 'plugins' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openDialog('plugin')}
+          size="small"
+        >
+          Install Plugin
+        </Button>
+      )}
+      
+      {/* Users tab controls */}
+      {activeTab === 'users' && (
+        <Button
+          variant="contained"
+          startIcon={<AddIcon />}
+          onClick={() => openDialog('user')}
+          size="small"
+        >
+          Add User
+        </Button>
+      )}
+    </>
   );
 
   return (
@@ -664,30 +724,6 @@ const AdministrationPage: React.FC = () => {
         <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={8}>
-                <Button
-                  variant="contained"
-                  startIcon={<BackupIcon />}
-                  onClick={() => openDialog('backup')}
-                  sx={{ mr: 1 }}
-                >
-                  Create Backup
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<UploadIcon />}
-                  sx={{ mr: 1 }}
-                >
-                  Restore Backup
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<SettingsIcon />}
-                  onClick={loadBackups}
-                >
-                  Refresh
-                </Button>
-              </Grid>
               <Grid item xs={12} sm={4}>
                 <FormControlLabel
                   control={<Switch defaultChecked />}
@@ -740,24 +776,7 @@ const AdministrationPage: React.FC = () => {
         <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={6}>
-                <Button
-                  variant="contained"
-                  startIcon={<AddIcon />}
-                  onClick={() => openDialog('job')}
-                  sx={{ mr: 1 }}
-                >
-                  Create Job
-                </Button>
-                <Button
-                  variant="outlined"
-                  startIcon={<SettingsIcon />}
-                  onClick={loadJobs}
-                >
-                  Refresh
-                </Button>
-              </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid item xs={12} sm={12}>
                 {jobStats && (
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="body2" color="text.secondary">
@@ -837,15 +856,6 @@ const AdministrationPage: React.FC = () => {
       {/* Plugins Tab */}
       {activeTab === 'plugins' && (
         <Box>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openDialog('plugin')}
-            >
-              Install Plugin
-            </Button>
-          </Box>
           <List>
             {plugins.length === 0 ? (
               <ListItem>
@@ -881,15 +891,6 @@ const AdministrationPage: React.FC = () => {
       {/* Users Tab */}
       {activeTab === 'users' && (
         <Box>
-          <Box sx={{ mb: 2 }}>
-            <Button
-              variant="contained"
-              startIcon={<AddIcon />}
-              onClick={() => openDialog('user')}
-            >
-              Add User
-            </Button>
-          </Box>
           <List>
             {users.map((user) => (
               <ListItem key={user.id}>

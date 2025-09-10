@@ -189,6 +189,7 @@ async def init_database() -> None:
     engine = get_engine()
 
     # Import all models to ensure they're registered
+    import chatter.models  # noqa: F401
 
     logger.info("Creating database tables")
 

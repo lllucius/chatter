@@ -9,15 +9,13 @@ from typing import Any
 from fastapi import Request
 from sqlalchemy import Column, DateTime, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession
-from sqlalchemy.ext.declarative import declarative_base
+from sqlalchemy.orm import Mapped, mapped_column
 
+from chatter.models.base import Base
 from chatter.utils.logging import get_logger
 from chatter.utils.security_enhanced import sanitize_log_data
 
 logger = get_logger(__name__)
-
-# Base for audit log models
-AuditBase = declarative_base()
 
 
 class AuditEventType(str, Enum):
@@ -71,31 +69,44 @@ class AuditResult(str, Enum):
     ERROR = "error"
 
 
-class AuditLog(AuditBase):
+class AuditLog(Base):
     """Audit log database model."""
 
     __tablename__ = "audit_logs"
 
-    id = Column(Integer, primary_key=True, autoincrement=True)
-    event_id = Column(
+    # Override the ULID id with an Integer for audit logs (traditional audit approach)
+    id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
+    
+    # Event identification
+    event_id: Mapped[str] = mapped_column(
         String(36), unique=True, nullable=False, index=True
     )
-    timestamp = Column(
+    timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
-    event_type = Column(String(50), nullable=False, index=True)
-    result = Column(String(20), nullable=False)
-    user_id = Column(String(36), nullable=True, index=True)
-    session_id = Column(String(100), nullable=True)
-    ip_address = Column(
-        String(45), nullable=True, index=True
-    )  # Support IPv6
-    user_agent = Column(String(500), nullable=True)
-    request_id = Column(String(36), nullable=True, index=True)
-    resource_type = Column(String(50), nullable=True)
-    resource_id = Column(String(36), nullable=True, index=True)
-    details = Column(Text, nullable=True)  # JSON serialized details
-    error_message = Column(Text, nullable=True)
+    
+    # Event details  
+    event_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
+    result: Mapped[str] = mapped_column(String(20), nullable=False)
+    
+    # User and session info
+    user_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    session_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    
+    # Request context
+    ip_address: Mapped[str | None] = mapped_column(
+        String(45), nullable=True, index=True  # Support IPv6
+    )
+    user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
+    request_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    
+    # Resource info  
+    resource_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
+    resource_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
+    
+    # Additional data
+    details: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON serialized details
+    error_message: Mapped[str | None] = mapped_column(Text, nullable=True)
 
 
 class AuditLogger:

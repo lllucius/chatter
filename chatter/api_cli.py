@@ -94,7 +94,7 @@ class ChatterSDKClient:
         self.jobs_api = JobsApi(self.api_client)
         self.data_api = DataManagementApi(self.api_client)
         self.events_api = EventsApi(self.api_client)
-        self.model_api = ModelRegistryApi(self.api_client)
+        self.model_registry_api = ModelRegistryApi(self.api_client)
         self.tools_api = ToolServersApi(self.api_client)
         self.ab_api = ABTestingApi(self.api_client)
 

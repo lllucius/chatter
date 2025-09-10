@@ -28,17 +28,16 @@ async def list_model_providers():
 
         table = Table(title="Model Providers")
         table.add_column("Name", style="cyan")
-        table.add_column("Status", style="green")
-        table.add_column("Models", style="yellow")
+        table.add_column("Type", style="green")
+        table.add_column("Active", style="yellow")
         table.add_column("Description", style="dim")
 
         for provider in response.providers:
-            model_count = len(getattr(provider, 'available_models', []))
             table.add_row(
-                provider.name,
-                getattr(provider, 'status', 'unknown'),
-                str(model_count),
-                getattr(provider, 'description', 'No description')[:50],
+                provider.display_name,
+                str(provider.provider_type),
+                "✓" if provider.is_active else "✗",
+                (provider.description or 'No description')[:50],
             )
 
         console.print(table)
@@ -47,34 +46,36 @@ async def list_model_providers():
 @models_app.command("list")
 @run_async
 async def list_models(
-    provider: str = typer.Option(None, help="Filter by provider"),
-    limit: int = typer.Option(10, help="Number of models to list"),
-    offset: int = typer.Option(0, help="Number of models to skip"),
+    provider_id: str = typer.Option(None, help="Filter by provider ID"),
+    model_type: str = typer.Option(None, help="Filter by model type"),
+    page: int = typer.Option(1, help="Page number"),
+    per_page: int = typer.Option(10, help="Items per page"),
+    active_only: bool = typer.Option(None, help="Show only active models"),
 ):
     """List available models."""
     async with get_client() as sdk_client:
-        response = await sdk_client.model_registry_api.list_models_api_v1_models_get(
-            provider=provider, limit=limit, offset=offset
+        response = await sdk_client.model_registry_api.list_models_api_v1_models_models_get(
+            provider_id=provider_id, model_type=model_type, page=page, per_page=per_page, active_only=active_only
         )
 
         if not response.models:
             console.print("No models found.")
             return
 
-        table = Table(title=f"Models ({response.total_count} total)")
+        table = Table(title=f"Models ({response.total} total)")
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Provider", style="yellow")
         table.add_column("Type", style="magenta")
-        table.add_column("Status", style="blue")
+        table.add_column("Active", style="blue")
 
         for model in response.models:
             table.add_row(
                 str(model.id),
-                getattr(model, 'name', 'Unknown'),
-                getattr(model, 'provider', 'unknown'),
-                getattr(model, 'model_type', 'unknown'),
-                getattr(model, 'status', 'unknown'),
+                model.display_name,
+                model.provider.name if model.provider else 'Unknown',
+                str(model.model_type),
+                "✓" if model.is_active else "✗",
             )
 
         console.print(table)
@@ -85,22 +86,24 @@ async def list_models(
 async def show_model(model_id: str = typer.Argument(..., help="Model ID")):
     """Show detailed model information."""
     async with get_client() as sdk_client:
-        response = await sdk_client.model_registry_api.get_model_api_v1_models_model_id_get(
+        response = await sdk_client.model_registry_api.get_model_api_v1_models_models_model_id_get(
             model_id=model_id
         )
 
         console.print(
             Panel.fit(
-                f"[bold]{getattr(response, 'name', 'Model')}[/bold]\n\n"
+                f"[bold]{response.display_name}[/bold]\n\n"
                 f"[dim]ID:[/dim] {response.id}\n"
-                f"[dim]Provider:[/dim] {getattr(response, 'provider', 'unknown')}\n"
-                f"[dim]Type:[/dim] {getattr(response, 'model_type', 'unknown')}\n"
-                f"[dim]Version:[/dim] {getattr(response, 'version', 'N/A')}\n"
-                f"[dim]Status:[/dim] {getattr(response, 'status', 'unknown')}\n"
-                f"[dim]Max Tokens:[/dim] {getattr(response, 'max_tokens', 'N/A')}\n"
-                f"[dim]Cost per Token:[/dim] ${getattr(response, 'cost_per_token', 0):.6f}\n"
-                f"[dim]Created:[/dim] {getattr(response, 'created_at', 'N/A')}\n\n"
-                f"[dim]Description:[/dim]\n{getattr(response, 'description', 'No description')}",
+                f"[dim]Name:[/dim] {response.name}\n"
+                f"[dim]Provider:[/dim] {response.provider.display_name if response.provider else 'Unknown'}\n"
+                f"[dim]Type:[/dim] {response.model_type}\n"
+                f"[dim]Model Name:[/dim] {response.model_name}\n"
+                f"[dim]Active:[/dim] {'Yes' if response.is_active else 'No'}\n"
+                f"[dim]Default:[/dim] {'Yes' if response.is_default else 'No'}\n"
+                f"[dim]Max Tokens:[/dim] {response.max_tokens or 'N/A'}\n"
+                f"[dim]Context Length:[/dim] {response.context_length or 'N/A'}\n"
+                f"[dim]Created:[/dim] {response.created_at}\n\n"
+                f"[dim]Description:[/dim]\n{response.description or 'No description'}",
                 title="Model Details",
             )
         )
@@ -118,28 +121,37 @@ async def register_model(
     cost_per_token: float = typer.Option(0.0, help="Cost per token"),
 ):
     """Register a new model."""
-    from chatter_sdk.models.model_register_request import ModelRegisterRequest
+    from chatter_sdk.models.model_def_create import ModelDefCreate
+    from chatter_sdk.models.model_type import ModelType
 
     async with get_client() as sdk_client:
-        model_data = ModelRegisterRequest(
+        # Convert string model_type to ModelType enum if needed
+        try:
+            model_type_enum = ModelType(model_type.lower()) if isinstance(model_type, str) else model_type
+        except ValueError:
+            console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
+            console.print("Valid types are: chat, embedding, text, completion")
+            return
+            
+        model_data = ModelDefCreate(
             name=name,
-            provider=provider,
-            provider_model_id=model_id,
-            model_type=model_type,
+            model_type=model_type_enum,
+            display_name=name,
             description=description,
+            model_name=model_id,
             max_tokens=max_tokens,
-            cost_per_token=cost_per_token,
+            provider_id=provider,
         )
 
-        response = await sdk_client.model_registry_api.register_model_api_v1_models_register_post(
+        response = await sdk_client.model_registry_api.create_model_api_v1_models_models_post(
             model_register_request=model_data
         )
 
-        console.print(f"✅ [green]Registered model: {response.name}[/green]")
+        console.print(f"✅ [green]Registered model: {response.display_name}[/green]")
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
-@models_app.command("test")
+@models_app.command("test", hidden=True)  # Temporarily disabled - API method not available
 @run_async
 async def test_model(
     model_id: str = typer.Argument(..., help="Model ID to test"),
@@ -149,21 +161,24 @@ async def test_model(
     max_tokens: int = typer.Option(100, help="Maximum tokens to generate"),
 ):
     """Test a model with a sample prompt."""
-    async with get_client() as sdk_client:
-        test_request = {
-            'prompt': prompt,
-            'max_tokens': max_tokens,
-        }
+    console.print("❌ [red]Test functionality not yet available in the API[/red]")
+    return
 
-        response = await sdk_client.model_registry_api.test_model_api_v1_models_model_id_test_post(
-            model_id=model_id, test_request=test_request
-        )
-
-        console.print("✅ [green]Model test successful[/green]")
-        console.print(f"[bold]Prompt:[/bold] {prompt}")
-        console.print(f"[bold]Response:[/bold] {getattr(response, 'response', 'No response')}")
-        console.print(f"[dim]Tokens Used: {getattr(response, 'tokens_used', 'N/A')}[/dim]")
-        console.print(f"[dim]Response Time: {getattr(response, 'response_time', 'N/A')}ms[/dim]")
+    # async with get_client() as sdk_client:
+    #     test_request = {
+    #         'prompt': prompt,
+    #         'max_tokens': max_tokens,
+    #     }
+    #
+    #     response = await sdk_client.model_registry_api.test_model_api_v1_models_model_id_test_post(
+    #         model_id=model_id, test_request=test_request
+    #     )
+    #
+    #     console.print("✅ [green]Model test successful[/green]")
+    #     console.print(f"[bold]Prompt:[/bold] {prompt}")
+    #     console.print(f"[bold]Response:[/bold] {getattr(response, 'response', 'No response')}")
+    #     console.print(f"[dim]Tokens Used: {getattr(response, 'tokens_used', 'N/A')}[/dim]")
+    #     console.print(f"[dim]Response Time: {getattr(response, 'response_time', 'N/A')}ms[/dim]")
 
 
 @models_app.command("update")
@@ -194,11 +209,11 @@ async def update_model(
         return
 
     async with get_client() as sdk_client:
-        response = await sdk_client.model_registry_api.update_model_api_v1_models_model_id_put(
+        response = await sdk_client.model_registry_api.update_model_api_v1_models_models_model_id_put(
             model_id=model_id, model_update=update_data
         )
 
-        console.print(f"✅ [green]Updated model: {response.name}[/green]")
+        console.print(f"✅ [green]Updated model: {response.display_name}[/green]")
 
 
 @models_app.command("delete")
@@ -218,46 +233,25 @@ async def delete_model(
             return
 
     async with get_client() as sdk_client:
-        await sdk_client.model_registry_api.delete_model_api_v1_models_model_id_delete(
+        await sdk_client.model_registry_api.delete_model_api_v1_models_models_model_id_delete(
             model_id=model_id
         )
 
         console.print(f"✅ [green]Deleted model {model_id}[/green]")
 
 
-@models_app.command("usage")
+@models_app.command("usage", hidden=True)  # Temporarily disabled - API method not available
 @run_async
 async def model_usage(
     model_id: str = typer.Option(None, help="Filter by specific model"),
     days: int = typer.Option(7, help="Number of days to analyze"),
 ):
     """Show model usage statistics."""
-    async with get_client() as sdk_client:
-        response = await sdk_client.model_registry_api.get_model_usage_api_v1_models_usage_get(
-            model_id=model_id, days=days
-        )
-
-        table = Table(title=f"Model Usage (Last {days} days)")
-        table.add_column("Model", style="cyan")
-        table.add_column("Requests", style="green")
-        table.add_column("Tokens", style="yellow")
-        table.add_column("Cost", style="magenta")
-        table.add_column("Avg Response Time", style="blue")
-
-        if hasattr(response, 'usage_stats'):
-            for stat in response.usage_stats:
-                table.add_row(
-                    getattr(stat, 'model_name', 'Unknown'),
-                    str(getattr(stat, 'request_count', 0)),
-                    f"{getattr(stat, 'token_count', 0):,}",
-                    f"${getattr(stat, 'total_cost', 0):.4f}",
-                    f"{getattr(stat, 'avg_response_time', 0):.0f}ms",
-                )
-        
-        console.print(table)
+    console.print("❌ [red]Usage statistics not yet available in the API[/red]")
+    return
 
 
-@models_app.command("benchmark")
+@models_app.command("benchmark", hidden=True)  # Temporarily disabled - API method not available
 @run_async
 async def benchmark_model(
     model_id: str = typer.Argument(..., help="Model ID to benchmark"),
@@ -268,73 +262,13 @@ async def benchmark_model(
     ),
 ):
     """Benchmark a model's performance."""
-    import time
-    from statistics import mean, stdev
-    
-    async with get_client() as sdk_client:
-        console.print(f"🔄 [yellow]Running benchmark with {test_count} requests...[/yellow]")
-        
-        response_times = []
-        token_counts = []
-        
-        for i in range(test_count):
-            start_time = time.time()
-            
-            try:
-                response = await sdk_client.model_registry_api.test_model_api_v1_models_model_id_test_post(
-                    model_id=model_id,
-                    test_request={'prompt': prompt, 'max_tokens': 100}
-                )
-                
-                end_time = time.time()
-                response_time = (end_time - start_time) * 1000  # Convert to ms
-                response_times.append(response_time)
-                
-                tokens = getattr(response, 'tokens_used', 0)
-                if tokens:
-                    token_counts.append(tokens)
-                    
-                console.print(f"  Test {i+1}/{test_count}: {response_time:.0f}ms")
-                
-            except Exception as e:
-                console.print(f"  Test {i+1}/{test_count}: Failed - {e}")
-
-        if response_times:
-            avg_time = mean(response_times)
-            std_time = stdev(response_times) if len(response_times) > 1 else 0
-            avg_tokens = mean(token_counts) if token_counts else 0
-            
-            console.print("\n📊 [bold]Benchmark Results:[/bold]")
-            console.print(f"Average Response Time: {avg_time:.1f}ms ± {std_time:.1f}ms")
-            console.print(f"Min Response Time: {min(response_times):.1f}ms")
-            console.print(f"Max Response Time: {max(response_times):.1f}ms")
-            if avg_tokens:
-                console.print(f"Average Tokens Generated: {avg_tokens:.1f}")
-                console.print(f"Tokens per Second: {avg_tokens / (avg_time / 1000):.1f}")
+    console.print("❌ [red]Benchmark functionality not yet available in the API[/red]")
+    return
 
 
-@models_app.command("stats")
+@models_app.command("stats", hidden=True)  # Temporarily disabled - API method not available  
 @run_async
 async def model_stats():
     """Show overall model registry statistics."""
-    async with get_client() as sdk_client:
-        response = await sdk_client.model_registry_api.get_model_stats_api_v1_models_stats_overview_get()
-
-        table = Table(title="Model Registry Statistics")
-        table.add_column("Metric", style="cyan")
-        table.add_column("Value", style="green")
-
-        if hasattr(response, 'total_models'):
-            table.add_row("Total Models", str(response.total_models))
-        if hasattr(response, 'active_models'):
-            table.add_row("Active Models", str(response.active_models))
-        if hasattr(response, 'total_providers'):
-            table.add_row("Providers", str(response.total_providers))
-        if hasattr(response, 'total_requests'):
-            table.add_row("Total Requests", f"{response.total_requests:,}")
-        if hasattr(response, 'total_tokens'):
-            table.add_row("Total Tokens", f"{response.total_tokens:,}")
-        if hasattr(response, 'total_cost'):
-            table.add_row("Total Cost", f"${response.total_cost:.2f}")
-
-        console.print(table)
+    console.print("❌ [red]Model statistics not yet available in the API[/red]")
+    return

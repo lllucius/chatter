@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,27 +14,25 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Self
-
+from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.pagination_request import PaginationRequest
 from chatter_sdk.models.sorting_request import SortingRequest
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class BodyListAgentsApiV1AgentsGet(BaseModel):
     """
     BodyListAgentsApiV1AgentsGet
     """ # noqa: E501
-    pagination: PaginationRequest | None = None
-    sorting: SortingRequest | None = None
-    tags: list[StrictStr] | None = None
-    __properties: ClassVar[list[str]] = ["pagination", "sorting", "tags"]
+    pagination: Optional[PaginationRequest] = None
+    sorting: Optional[SortingRequest] = None
+    tags: Optional[List[StrictStr]] = None
+    __properties: ClassVar[List[str]] = ["pagination", "sorting", "tags"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +51,11 @@ class BodyListAgentsApiV1AgentsGet(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of BodyListAgentsApiV1AgentsGet from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +65,7 @@ class BodyListAgentsApiV1AgentsGet(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -76,19 +75,19 @@ class BodyListAgentsApiV1AgentsGet(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of pagination
         if self.pagination:
-            _dict["pagination"] = self.pagination.to_dict()
+            _dict['pagination'] = self.pagination.to_dict()
         # override the default output from pydantic by calling `to_dict()` of sorting
         if self.sorting:
-            _dict["sorting"] = self.sorting.to_dict()
+            _dict['sorting'] = self.sorting.to_dict()
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict["tags"] = None
+            _dict['tags'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of BodyListAgentsApiV1AgentsGet from a dict"""
         if obj is None:
             return None

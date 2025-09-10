@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,19 +14,18 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.job_priority import JobPriority
 from chatter_sdk.models.job_status import JobStatus
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class JobResponse(BaseModel):
     """
@@ -37,16 +37,16 @@ class JobResponse(BaseModel):
     priority: JobPriority
     status: JobStatus
     created_at: datetime = Field(description="Creation timestamp")
-    started_at: datetime | None = None
-    completed_at: datetime | None = None
-    scheduled_at: datetime | None = None
+    started_at: Optional[datetime] = None
+    completed_at: Optional[datetime] = None
+    scheduled_at: Optional[datetime] = None
     retry_count: StrictInt = Field(description="Number of retry attempts")
     max_retries: StrictInt = Field(description="Maximum retry attempts")
-    error_message: StrictStr | None = None
-    result: Any | None = Field(default=None, description="Job result if completed")
-    progress: Annotated[int, Field(le=100, strict=True, ge=0)] | None = Field(default=0, description="Job progress percentage")
-    progress_message: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["id", "name", "function_name", "priority", "status", "created_at", "started_at", "completed_at", "scheduled_at", "retry_count", "max_retries", "error_message", "result", "progress", "progress_message"]
+    error_message: Optional[StrictStr] = None
+    result: Optional[Any] = Field(default=None, description="Job result if completed")
+    progress: Optional[Annotated[int, Field(le=100, strict=True, ge=0)]] = Field(default=0, description="Job progress percentage")
+    progress_message: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["id", "name", "function_name", "priority", "status", "created_at", "started_at", "completed_at", "scheduled_at", "retry_count", "max_retries", "error_message", "result", "progress", "progress_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -65,11 +65,11 @@ class JobResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of JobResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -79,7 +79,7 @@ class JobResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -89,41 +89,41 @@ class JobResponse(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of result
         if self.result:
-            _dict["result"] = self.result.to_dict()
+            _dict['result'] = self.result.to_dict()
         # set to None if started_at (nullable) is None
         # and model_fields_set contains the field
         if self.started_at is None and "started_at" in self.model_fields_set:
-            _dict["started_at"] = None
+            _dict['started_at'] = None
 
         # set to None if completed_at (nullable) is None
         # and model_fields_set contains the field
         if self.completed_at is None and "completed_at" in self.model_fields_set:
-            _dict["completed_at"] = None
+            _dict['completed_at'] = None
 
         # set to None if scheduled_at (nullable) is None
         # and model_fields_set contains the field
         if self.scheduled_at is None and "scheduled_at" in self.model_fields_set:
-            _dict["scheduled_at"] = None
+            _dict['scheduled_at'] = None
 
         # set to None if error_message (nullable) is None
         # and model_fields_set contains the field
         if self.error_message is None and "error_message" in self.model_fields_set:
-            _dict["error_message"] = None
+            _dict['error_message'] = None
 
         # set to None if result (nullable) is None
         # and model_fields_set contains the field
         if self.result is None and "result" in self.model_fields_set:
-            _dict["result"] = None
+            _dict['result'] = None
 
         # set to None if progress_message (nullable) is None
         # and model_fields_set contains the field
         if self.progress_message is None and "progress_message" in self.model_fields_set:
-            _dict["progress_message"] = None
+            _dict['progress_message'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of JobResponse from a dict"""
         if obj is None:
             return None

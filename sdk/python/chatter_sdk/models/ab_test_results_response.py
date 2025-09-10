@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,27 +14,17 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from chatter_sdk.models.test_metric import TestMetric
 from chatter_sdk.models.test_status import TestStatus
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ABTestResultsResponse(BaseModel):
     """
@@ -42,15 +33,15 @@ class ABTestResultsResponse(BaseModel):
     test_id: StrictStr = Field(description="Test ID")
     test_name: StrictStr = Field(description="Test name")
     status: TestStatus
-    metrics: list[TestMetric] = Field(description="Metric results by variant")
-    statistical_significance: dict[str, StrictBool] = Field(description="Statistical significance by metric")
-    confidence_intervals: dict[str, dict[str, list[StrictFloat | StrictInt]]] = Field(description="Confidence intervals")
-    winning_variant: StrictStr | None = None
+    metrics: List[TestMetric] = Field(description="Metric results by variant")
+    statistical_significance: Dict[str, StrictBool] = Field(description="Statistical significance by metric")
+    confidence_intervals: Dict[str, Dict[str, List[Union[StrictFloat, StrictInt]]]] = Field(description="Confidence intervals")
+    winning_variant: Optional[StrictStr] = None
     recommendation: StrictStr = Field(description="Action recommendation")
     generated_at: datetime = Field(description="Results generation timestamp")
     sample_size: StrictInt = Field(description="Total sample size")
     duration_days: StrictInt = Field(description="Test duration so far")
-    __properties: ClassVar[list[str]] = ["test_id", "test_name", "status", "metrics", "statistical_significance", "confidence_intervals", "winning_variant", "recommendation", "generated_at", "sample_size", "duration_days"]
+    __properties: ClassVar[List[str]] = ["test_id", "test_name", "status", "metrics", "statistical_significance", "confidence_intervals", "winning_variant", "recommendation", "generated_at", "sample_size", "duration_days"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -69,11 +60,11 @@ class ABTestResultsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ABTestResultsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -83,7 +74,7 @@ class ABTestResultsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -97,16 +88,16 @@ class ABTestResultsResponse(BaseModel):
             for _item_metrics in self.metrics:
                 if _item_metrics:
                     _items.append(_item_metrics.to_dict())
-            _dict["metrics"] = _items
+            _dict['metrics'] = _items
         # set to None if winning_variant (nullable) is None
         # and model_fields_set contains the field
         if self.winning_variant is None and "winning_variant" in self.model_fields_set:
-            _dict["winning_variant"] = None
+            _dict['winning_variant'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ABTestResultsResponse from a dict"""
         if obj is None:
             return None

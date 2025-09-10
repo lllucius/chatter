@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,29 +14,28 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.document_type import DocumentType
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentSearchRequest(BaseModel):
     """
     Schema for document search request.
     """ # noqa: E501
     query: Annotated[str, Field(min_length=1, strict=True, max_length=1000)] = Field(description="Search query")
-    limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = Field(default=10, description="Maximum number of results")
-    score_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = Field(default=0.5, description="Minimum similarity score")
-    document_types: list[DocumentType] | None = None
-    tags: list[StrictStr] | None = None
-    include_content: StrictBool | None = Field(default=False, description="Include document content in results")
-    __properties: ClassVar[list[str]] = ["query", "limit", "score_threshold", "document_types", "tags", "include_content"]
+    limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = Field(default=10, description="Maximum number of results")
+    score_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=0.5, description="Minimum similarity score")
+    document_types: Optional[List[DocumentType]] = None
+    tags: Optional[List[StrictStr]] = None
+    include_content: Optional[StrictBool] = Field(default=False, description="Include document content in results")
+    __properties: ClassVar[List[str]] = ["query", "limit", "score_threshold", "document_types", "tags", "include_content"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,11 +54,11 @@ class DocumentSearchRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentSearchRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -68,7 +68,7 @@ class DocumentSearchRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -79,17 +79,17 @@ class DocumentSearchRequest(BaseModel):
         # set to None if document_types (nullable) is None
         # and model_fields_set contains the field
         if self.document_types is None and "document_types" in self.model_fields_set:
-            _dict["document_types"] = None
+            _dict['document_types'] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict["tags"] = None
+            _dict['tags'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentSearchRequest from a dict"""
         if obj is None:
             return None

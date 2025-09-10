@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class PluginType(str, Enum):
@@ -28,12 +27,12 @@ class PluginType(str, Enum):
     """
     allowed enum values
     """
-    TOOL = "tool"
-    WORKFLOW = "workflow"
-    INTEGRATION = "integration"
-    MIDDLEWARE = "middleware"
-    HANDLER = "handler"
-    EXTENSION = "extension"
+    TOOL = 'tool'
+    WORKFLOW = 'workflow'
+    INTEGRATION = 'integration'
+    MIDDLEWARE = 'middleware'
+    HANDLER = 'handler'
+    EXTENSION = 'extension'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

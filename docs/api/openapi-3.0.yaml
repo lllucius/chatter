@@ -1044,7 +1044,7 @@ components:
       - creative
       - research
       - support
-      - specialist
+      - specialized
       title: AgentType
       type: string
     AgentUpdateRequest:
@@ -1657,7 +1657,8 @@ components:
           title: Provider
         stream:
           default: false
-          description: Enable streaming response
+          description: '[DEPRECATED] Use /streaming endpoint instead. This field is
+            ignored in the new API design.'
           title: Stream
           type: boolean
         system_prompt_override:
@@ -7673,17 +7674,6 @@ components:
       - configuration
       title: TestVariant
       type: object
-    TokenRefresh:
-      description: Schema for token refresh request.
-      properties:
-        refresh_token:
-          description: Refresh token
-          title: Refresh Token
-          type: string
-      required:
-      - refresh_token
-      title: TokenRefresh
-      type: object
     TokenRefreshResponse:
       description: Schema for token refresh response.
       properties:
@@ -7696,9 +7686,11 @@ components:
           title: Expires In
           type: integer
         refresh_token:
-          description: New refresh token
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: New refresh token (may be sent as HttpOnly cookie)
           title: Refresh Token
-          type: string
         token_type:
           default: bearer
           description: Token type
@@ -7706,7 +7698,6 @@ components:
           type: string
       required:
       - access_token
-      - refresh_token
       - expires_in
       title: TokenRefreshResponse
       type: object
@@ -7722,9 +7713,11 @@ components:
           title: Expires In
           type: integer
         refresh_token:
+          anyOf:
+          - type: string
+          - type: 'null'
           description: JWT refresh token
           title: Refresh Token
-          type: string
         token_type:
           default: bearer
           description: Token type
@@ -7735,7 +7728,6 @@ components:
           description: User information
       required:
       - access_token
-      - refresh_token
       - expires_in
       - user
       title: TokenResponse
@@ -12197,8 +12189,8 @@ paths:
     post:
       description: "Authenticate user and return tokens with enhanced security.\n\n\
         Args:\n    user_data: User login data\n    request: HTTP request for security\
-        \ logging\n    auth_service: Authentication service\n\nReturns:\n    User\
-        \ data and authentication tokens"
+        \ logging\n    response: HTTP response for cookie setting\n    auth_service:\
+        \ Authentication service\n\nReturns:\n    User data and authentication tokens"
       operationId: login_api_v1_auth_login_post
       requestBody:
         content:
@@ -12245,9 +12237,9 @@ paths:
   /api/v1/auth/logout:
     post:
       description: "Logout and revoke current token with enhanced security.\n\nArgs:\n\
-        \    request: HTTP request for security logging\n    current_user: Current\
-        \ authenticated user\n    auth_service: Authentication service\n\nReturns:\n\
-        \    Success message"
+        \    request: HTTP request for security logging\n    response: HTTP response\
+        \ for cookie clearing\n    current_user: Current authenticated user\n    auth_service:\
+        \ Authentication service\n\nReturns:\n    Success message"
       operationId: logout_api_v1_auth_logout_post
       responses:
         '200':
@@ -12423,16 +12415,11 @@ paths:
   /api/v1/auth/refresh:
     post:
       description: "Refresh access token with enhanced security validation.\n\nArgs:\n\
-        \    token_data: Refresh token data\n    request: HTTP request for security\
-        \ logging\n    auth_service: Authentication service\n\nReturns:\n    New access\
-        \ and refresh tokens"
+        \    request: HTTP request for security logging and cookie reading\n    response:\
+        \ HTTP response for setting new refresh token cookie\n    auth_service: Authentication\
+        \ service\n\nReturns:\n    New access token (refresh token set in HttpOnly\
+        \ cookie)"
       operationId: refresh_token_api_v1_auth_refresh_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/TokenRefresh'
-        required: true
       responses:
         '200':
           content:
@@ -12440,18 +12427,6 @@ paths:
               schema:
                 $ref: '#/components/schemas/TokenRefreshResponse'
           description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
           headers:
             X-RateLimit-Limit-Hour: *id001
             X-RateLimit-Limit-Minute: *id002
@@ -12517,15 +12492,15 @@ paths:
       - Authentication
   /api/v1/chat/chat:
     post:
-      description: "Unified chat endpoint supporting all workflow types with optional\
-        \ streaming.\n## Workflow Types\n\nThis endpoint supports multiple workflow\
-        \ types through the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic\
-        \ conversation without tools or retrieval.\n```json\n{\n    \"message\": \"\
-        Hello, how are you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow\
-        \ (`rag`)\nRetrieval-Augmented Generation with document search.\n```json\n\
-        {\n    \"message\": \"What are the latest sales figures?\",\n    \"workflow\"\
-        : \"rag\",\n    \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\n\
-        Function calling with available tools.\n```json\n{\n    \"message\": \"Calculate\
+      description: "Non-streaming chat endpoint supporting all workflow types.\n##\
+        \ Workflow Types\n\nThis endpoint supports multiple workflow types through\
+        \ the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation\
+        \ without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are\
+        \ you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\n\
+        Retrieval-Augmented Generation with document search.\n```json\n{\n    \"message\"\
+        : \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n  \
+        \  \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction\
+        \ calling with available tools.\n```json\n{\n    \"message\": \"Calculate\
         \ the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full\
         \ Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n\
         {\n    \"message\": \"Find recent customer feedback and create a summary report\"\
@@ -12566,286 +12541,8 @@ paths:
                   type: token
                 event: token
               schema:
-                $defs:
-                  ConversationResponse:
-                    description: Schema for conversation response.
-                    properties:
-                      context_window:
-                        description: Context window size
-                        title: Context Window
-                        type: integer
-                      created_at:
-                        description: Creation timestamp
-                        format: date-time
-                        title: Created At
-                        type: string
-                      description:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Conversation description
-                        title: Description
-                      enable_retrieval:
-                        description: Retrieval enabled
-                        title: Enable Retrieval
-                        type: boolean
-                      extra_metadata:
-                        anyOf:
-                        - additionalProperties: true
-                          type: object
-                        - type: 'null'
-                        description: Extra metadata
-                        title: Extra Metadata
-                      id:
-                        description: Conversation ID
-                        title: Id
-                        type: string
-                      last_message_at:
-                        anyOf:
-                        - format: date-time
-                          type: string
-                        - type: 'null'
-                        description: Last message timestamp
-                        title: Last Message At
-                      llm_model:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: LLM model
-                        title: Llm Model
-                      llm_provider:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: LLM provider
-                        title: Llm Provider
-                      max_tokens:
-                        anyOf:
-                        - type: integer
-                        - type: 'null'
-                        description: Max tokens setting
-                        title: Max Tokens
-                      memory_enabled:
-                        description: Memory enabled
-                        title: Memory Enabled
-                        type: boolean
-                      memory_strategy:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Memory strategy
-                        title: Memory Strategy
-                      message_count:
-                        description: Number of messages
-                        title: Message Count
-                        type: integer
-                      profile_id:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Profile ID
-                        title: Profile Id
-                      retrieval_limit:
-                        description: Retrieval limit
-                        title: Retrieval Limit
-                        type: integer
-                      retrieval_score_threshold:
-                        description: Retrieval score threshold
-                        title: Retrieval Score Threshold
-                        type: number
-                      status:
-                        $ref: '#/components/schemas/ConversationStatus'
-                        description: Conversation status
-                      system_prompt:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: System prompt
-                        title: System Prompt
-                      tags:
-                        anyOf:
-                        - items:
-                            type: string
-                          type: array
-                        - type: 'null'
-                        description: Conversation tags
-                        title: Tags
-                      temperature:
-                        anyOf:
-                        - type: number
-                        - type: 'null'
-                        description: Temperature setting
-                        title: Temperature
-                      title:
-                        description: Conversation title
-                        title: Title
-                        type: string
-                      total_cost:
-                        description: Total cost
-                        title: Total Cost
-                        type: number
-                      total_tokens:
-                        description: Total tokens used
-                        title: Total Tokens
-                        type: integer
-                      updated_at:
-                        description: Last update timestamp
-                        format: date-time
-                        title: Updated At
-                        type: string
-                      user_id:
-                        description: User ID
-                        title: User Id
-                        type: string
-                      workflow_config:
-                        anyOf:
-                        - additionalProperties: true
-                          type: object
-                        - type: 'null'
-                        description: Workflow configuration
-                        title: Workflow Config
-                    required:
-                    - title
-                    - id
-                    - user_id
-                    - status
-                    - enable_retrieval
-                    - message_count
-                    - total_tokens
-                    - total_cost
-                    - context_window
-                    - memory_enabled
-                    - retrieval_limit
-                    - retrieval_score_threshold
-                    - created_at
-                    - updated_at
-                    title: ConversationResponse
-                    type: object
-                  ConversationStatus:
-                    description: Enumeration for conversation status.
-                    enum:
-                    - active
-                    - archived
-                    - deleted
-                    title: ConversationStatus
-                    type: string
-                  MessageResponse:
-                    description: Schema for message response.
-                    properties:
-                      completion_tokens:
-                        anyOf:
-                        - type: integer
-                        - type: 'null'
-                        description: Completion tokens used
-                        title: Completion Tokens
-                      content:
-                        description: Message content
-                        minLength: 1
-                        title: Content
-                        type: string
-                      conversation_id:
-                        description: Conversation ID
-                        title: Conversation Id
-                        type: string
-                      cost:
-                        anyOf:
-                        - type: number
-                        - type: 'null'
-                        description: Cost of the message
-                        title: Cost
-                      created_at:
-                        description: Creation timestamp
-                        format: date-time
-                        title: Created At
-                        type: string
-                      finish_reason:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Reason for completion
-                        title: Finish Reason
-                      id:
-                        description: Message ID
-                        title: Id
-                        type: string
-                      model_used:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Model used for generation
-                        title: Model Used
-                      prompt_tokens:
-                        anyOf:
-                        - type: integer
-                        - type: 'null'
-                        description: Prompt tokens used
-                        title: Prompt Tokens
-                      provider_used:
-                        anyOf:
-                        - type: string
-                        - type: 'null'
-                        description: Provider used
-                        title: Provider Used
-                      response_time_ms:
-                        anyOf:
-                        - type: integer
-                        - type: 'null'
-                        description: Response time in milliseconds
-                        title: Response Time Ms
-                      role:
-                        $ref: '#/components/schemas/MessageRole'
-                        description: Message role
-                      sequence_number:
-                        description: Message sequence number
-                        title: Sequence Number
-                        type: integer
-                      total_tokens:
-                        anyOf:
-                        - type: integer
-                        - type: 'null'
-                        description: Total tokens used
-                        title: Total Tokens
-                    required:
-                    - role
-                    - content
-                    - id
-                    - conversation_id
-                    - sequence_number
-                    - created_at
-                    title: MessageResponse
-                    type: object
-                  MessageRole:
-                    description: Enumeration for message roles.
-                    enum:
-                    - user
-                    - assistant
-                    - system
-                    - tool
-                    title: MessageRole
-                    type: string
-                description: Schema for chat response.
-                properties:
-                  conversation:
-                    $ref: '#/components/schemas/ConversationResponse'
-                    description: Updated conversation
-                  conversation_id:
-                    description: Conversation ID
-                    title: Conversation Id
-                    type: string
-                  message:
-                    $ref: '#/components/schemas/MessageResponse'
-                    description: Assistant response message
-                required:
-                - conversation_id
-                - message
-                - conversation
-                title: ChatResponse
-                type: object
-            text/event-stream:
-              example: *id008
-              schema:
-                type: string
-          description: Chat response as JSON or streaming SSE when stream=true
+                $ref: '#/components/schemas/ChatResponse'
+          description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
             X-RateLimit-Limit-Minute: *id002
@@ -13326,6 +13023,73 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Get Performance Stats
+      tags:
+      - Chat
+  /api/v1/chat/streaming:
+    post:
+      description: "Streaming chat endpoint supporting all workflow types.\n## Workflow\
+        \ Types\n\nThis endpoint supports multiple workflow types through the `workflow`\
+        \ parameter:\n\n### Plain Chat (`plain`)\nBasic conversation without tools\
+        \ or retrieval.\n```json\n{\n    \"message\": \"Hello, how are you?\",\n \
+        \   \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented\
+        \ Generation with document search.\n```json\n{\n    \"message\": \"What are\
+        \ the latest sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\"\
+        : true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available\
+        \ tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\"\
+        ,\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination\
+        \ of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find\
+        \ recent customer feedback and create a summary report\",\n    \"workflow\"\
+        : \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet\
+        \ `stream: true` to receive real-time responses:\n```json\n{\n    \"message\"\
+        : \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n\
+        }\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event\
+        \ types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n\
+        - `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n\
+        - `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates\
+        \ for common scenarios:\n```json\n{\n    \"message\": \"I need help with my\
+        \ order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable\
+        \ templates:\n- `customer_support`: Customer service with knowledge base\n\
+        - `code_assistant`: Programming help with code tools\n- `research_assistant`:\
+        \ Document research and analysis\n- `general_chat`: General conversation\n\
+        - `document_qa`: Document question answering\n- `data_analyst`: Data analysis\
+        \ with computation tools\n"
+      operationId: streaming_chat_api_v1_chat_streaming_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ChatRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema: {}
+            text/event-stream:
+              schema:
+                type: string
+          description: Streaming chat response using Server-Sent Events
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Streaming Chat
       tags:
       - Chat
   /api/v1/chat/template/{template_name}:

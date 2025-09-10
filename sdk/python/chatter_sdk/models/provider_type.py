@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class ProviderType(str, Enum):
@@ -28,11 +27,11 @@ class ProviderType(str, Enum):
     """
     allowed enum values
     """
-    OPENAI = "openai"
-    ANTHROPIC = "anthropic"
-    GOOGLE = "google"
-    COHERE = "cohere"
-    MISTRAL = "mistral"
+    OPENAI = 'openai'
+    ANTHROPIC = 'anthropic'
+    GOOGLE = 'google'
+    COHERE = 'cohere'
+    MISTRAL = 'mistral'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

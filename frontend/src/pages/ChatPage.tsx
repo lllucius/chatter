@@ -293,7 +293,7 @@ const ChatPage: React.FC = () => {
       const headers = config.headers || {};
       
       // Make streaming request with SDK-based configuration
-      const response = await fetch(`${basePath}/api/v1/chat`, {
+      const response = await fetch(`${basePath}/api/v1/chat/streaming`, {
         method: 'POST',
         headers: {
           'Content-Type': 'application/json',
@@ -304,7 +304,7 @@ const ChatPage: React.FC = () => {
         credentials: config.credentials || 'include',
         body: JSON.stringify({
           ...chatRequest,
-          stream: true, // Ensure streaming is enabled
+          // Note: stream field is deprecated and not needed for streaming endpoint
         }),
       });
 

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,25 +14,23 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Self
-
+from typing import Any, ClassVar, Dict, List
 from chatter_sdk.models.plugin_response import PluginResponse
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PluginListResponse(BaseModel):
     """
     Response schema for plugin list.
     """ # noqa: E501
-    plugins: list[PluginResponse] = Field(description="List of plugins")
+    plugins: List[PluginResponse] = Field(description="List of plugins")
     total: StrictInt = Field(description="Total number of plugins")
-    __properties: ClassVar[list[str]] = ["plugins", "total"]
+    __properties: ClassVar[List[str]] = ["plugins", "total"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +49,11 @@ class PluginListResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PluginListResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +63,7 @@ class PluginListResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -78,11 +77,11 @@ class PluginListResponse(BaseModel):
             for _item_plugins in self.plugins:
                 if _item_plugins:
                     _items.append(_item_plugins.to_dict())
-            _dict["plugins"] = _items
+            _dict['plugins'] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PluginListResponse from a dict"""
         if obj is None:
             return None

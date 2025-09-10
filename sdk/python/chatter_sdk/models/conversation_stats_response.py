@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,39 +14,32 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ConversationStatsResponse(BaseModel):
     """
     Schema for conversation statistics response.
     """ # noqa: E501
     total_conversations: StrictInt = Field(description="Total number of conversations")
-    conversations_by_status: dict[str, StrictInt] = Field(description="Conversations grouped by status")
+    conversations_by_status: Dict[str, StrictInt] = Field(description="Conversations grouped by status")
     total_messages: StrictInt = Field(description="Total number of messages")
-    messages_by_role: dict[str, StrictInt] = Field(description="Messages grouped by role")
-    avg_messages_per_conversation: StrictFloat | StrictInt = Field(description="Average messages per conversation")
+    messages_by_role: Dict[str, StrictInt] = Field(description="Messages grouped by role")
+    avg_messages_per_conversation: Union[StrictFloat, StrictInt] = Field(description="Average messages per conversation")
     total_tokens_used: StrictInt = Field(description="Total tokens used")
-    total_cost: StrictFloat | StrictInt = Field(description="Total cost incurred")
-    avg_response_time_ms: StrictFloat | StrictInt = Field(description="Average response time in milliseconds")
-    conversations_by_date: dict[str, StrictInt] = Field(description="Conversations by date")
-    most_active_hours: dict[str, StrictInt] = Field(description="Most active hours")
-    popular_models: dict[str, StrictInt] = Field(description="Popular LLM models")
-    popular_providers: dict[str, StrictInt] = Field(description="Popular LLM providers")
-    __properties: ClassVar[list[str]] = ["total_conversations", "conversations_by_status", "total_messages", "messages_by_role", "avg_messages_per_conversation", "total_tokens_used", "total_cost", "avg_response_time_ms", "conversations_by_date", "most_active_hours", "popular_models", "popular_providers"]
+    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost incurred")
+    avg_response_time_ms: Union[StrictFloat, StrictInt] = Field(description="Average response time in milliseconds")
+    conversations_by_date: Dict[str, StrictInt] = Field(description="Conversations by date")
+    most_active_hours: Dict[str, StrictInt] = Field(description="Most active hours")
+    popular_models: Dict[str, StrictInt] = Field(description="Popular LLM models")
+    popular_providers: Dict[str, StrictInt] = Field(description="Popular LLM providers")
+    __properties: ClassVar[List[str]] = ["total_conversations", "conversations_by_status", "total_messages", "messages_by_role", "avg_messages_per_conversation", "total_tokens_used", "total_cost", "avg_response_time_ms", "conversations_by_date", "most_active_hours", "popular_models", "popular_providers"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -64,11 +58,11 @@ class ConversationStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ConversationStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -78,7 +72,7 @@ class ConversationStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -89,7 +83,7 @@ class ConversationStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ConversationStatsResponse from a dict"""
         if obj is None:
             return None

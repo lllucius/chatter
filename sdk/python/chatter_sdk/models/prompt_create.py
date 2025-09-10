@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,47 +14,46 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.prompt_category import PromptCategory
 from chatter_sdk.models.prompt_type import PromptType
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PromptCreate(BaseModel):
     """
     Schema for creating a prompt.
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Prompt name")
-    description: StrictStr | None = None
-    prompt_type: PromptType | None = None
-    category: PromptCategory | None = None
+    description: Optional[StrictStr] = None
+    prompt_type: Optional[PromptType] = None
+    category: Optional[PromptCategory] = None
     content: Annotated[str, Field(min_length=1, strict=True)] = Field(description="Prompt content/template")
-    variables: list[StrictStr] | None = None
-    template_format: StrictStr | None = Field(default="f-string", description="Template format (f-string, jinja2, mustache)")
-    input_schema: dict[str, Any] | None = None
-    output_schema: dict[str, Any] | None = None
-    max_length: Annotated[int, Field(strict=True, ge=1)] | None = None
-    min_length: Annotated[int, Field(strict=True, ge=1)] | None = None
-    required_variables: list[StrictStr] | None = None
-    examples: list[dict[str, Any]] | None = None
-    test_cases: list[dict[str, Any]] | None = None
-    suggested_temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    suggested_max_tokens: Annotated[int, Field(strict=True, ge=1)] | None = None
-    suggested_providers: list[StrictStr] | None = None
-    is_chain: StrictBool | None = Field(default=False, description="Whether this is a chain prompt")
-    chain_steps: list[dict[str, Any]] | None = None
-    parent_prompt_id: StrictStr | None = None
-    is_public: StrictBool | None = Field(default=False, description="Whether prompt is public")
-    tags: list[StrictStr] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "is_public", "tags", "extra_metadata"]
+    variables: Optional[List[StrictStr]] = None
+    template_format: Optional[StrictStr] = Field(default='f-string', description="Template format (f-string, jinja2, mustache)")
+    input_schema: Optional[Dict[str, Any]] = None
+    output_schema: Optional[Dict[str, Any]] = None
+    max_length: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    min_length: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    required_variables: Optional[List[StrictStr]] = None
+    examples: Optional[List[Dict[str, Any]]] = None
+    test_cases: Optional[List[Dict[str, Any]]] = None
+    suggested_temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    suggested_max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    suggested_providers: Optional[List[StrictStr]] = None
+    is_chain: Optional[StrictBool] = Field(default=False, description="Whether this is a chain prompt")
+    chain_steps: Optional[List[Dict[str, Any]]] = None
+    parent_prompt_id: Optional[StrictStr] = None
+    is_public: Optional[StrictBool] = Field(default=False, description="Whether prompt is public")
+    tags: Optional[List[StrictStr]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["name", "description", "prompt_type", "category", "content", "variables", "template_format", "input_schema", "output_schema", "max_length", "min_length", "required_variables", "examples", "test_cases", "suggested_temperature", "suggested_max_tokens", "suggested_providers", "is_chain", "chain_steps", "parent_prompt_id", "is_public", "tags", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -72,11 +72,11 @@ class PromptCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PromptCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -86,7 +86,7 @@ class PromptCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -97,87 +97,87 @@ class PromptCreate(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if variables (nullable) is None
         # and model_fields_set contains the field
         if self.variables is None and "variables" in self.model_fields_set:
-            _dict["variables"] = None
+            _dict['variables'] = None
 
         # set to None if input_schema (nullable) is None
         # and model_fields_set contains the field
         if self.input_schema is None and "input_schema" in self.model_fields_set:
-            _dict["input_schema"] = None
+            _dict['input_schema'] = None
 
         # set to None if output_schema (nullable) is None
         # and model_fields_set contains the field
         if self.output_schema is None and "output_schema" in self.model_fields_set:
-            _dict["output_schema"] = None
+            _dict['output_schema'] = None
 
         # set to None if max_length (nullable) is None
         # and model_fields_set contains the field
         if self.max_length is None and "max_length" in self.model_fields_set:
-            _dict["max_length"] = None
+            _dict['max_length'] = None
 
         # set to None if min_length (nullable) is None
         # and model_fields_set contains the field
         if self.min_length is None and "min_length" in self.model_fields_set:
-            _dict["min_length"] = None
+            _dict['min_length'] = None
 
         # set to None if required_variables (nullable) is None
         # and model_fields_set contains the field
         if self.required_variables is None and "required_variables" in self.model_fields_set:
-            _dict["required_variables"] = None
+            _dict['required_variables'] = None
 
         # set to None if examples (nullable) is None
         # and model_fields_set contains the field
         if self.examples is None and "examples" in self.model_fields_set:
-            _dict["examples"] = None
+            _dict['examples'] = None
 
         # set to None if test_cases (nullable) is None
         # and model_fields_set contains the field
         if self.test_cases is None and "test_cases" in self.model_fields_set:
-            _dict["test_cases"] = None
+            _dict['test_cases'] = None
 
         # set to None if suggested_temperature (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_temperature is None and "suggested_temperature" in self.model_fields_set:
-            _dict["suggested_temperature"] = None
+            _dict['suggested_temperature'] = None
 
         # set to None if suggested_max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_max_tokens is None and "suggested_max_tokens" in self.model_fields_set:
-            _dict["suggested_max_tokens"] = None
+            _dict['suggested_max_tokens'] = None
 
         # set to None if suggested_providers (nullable) is None
         # and model_fields_set contains the field
         if self.suggested_providers is None and "suggested_providers" in self.model_fields_set:
-            _dict["suggested_providers"] = None
+            _dict['suggested_providers'] = None
 
         # set to None if chain_steps (nullable) is None
         # and model_fields_set contains the field
         if self.chain_steps is None and "chain_steps" in self.model_fields_set:
-            _dict["chain_steps"] = None
+            _dict['chain_steps'] = None
 
         # set to None if parent_prompt_id (nullable) is None
         # and model_fields_set contains the field
         if self.parent_prompt_id is None and "parent_prompt_id" in self.model_fields_set:
-            _dict["parent_prompt_id"] = None
+            _dict['parent_prompt_id'] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict["tags"] = None
+            _dict['tags'] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict["extra_metadata"] = None
+            _dict['extra_metadata'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PromptCreate from a dict"""
         if obj is None:
             return None
@@ -192,7 +192,7 @@ class PromptCreate(BaseModel):
             "category": obj.get("category"),
             "content": obj.get("content"),
             "variables": obj.get("variables"),
-            "template_format": obj.get("template_format") if obj.get("template_format") is not None else "f-string",
+            "template_format": obj.get("template_format") if obj.get("template_format") is not None else 'f-string',
             "input_schema": obj.get("input_schema"),
             "output_schema": obj.get("output_schema"),
             "max_length": obj.get("max_length"),

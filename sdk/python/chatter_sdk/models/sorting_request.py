@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,31 +14,25 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictStr,
-    field_validator,
-)
-from typing import Annotated, Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class SortingRequest(BaseModel):
     """
     Common sorting request schema.
     """ # noqa: E501
-    sort_by: StrictStr | None = Field(default="created_at", description="Sort field")
-    sort_order: Annotated[str, Field(strict=True)] | None = Field(default="desc", description="Sort order")
-    __properties: ClassVar[list[str]] = ["sort_by", "sort_order"]
+    sort_by: Optional[StrictStr] = Field(default='created_at', description="Sort field")
+    sort_order: Optional[Annotated[str, Field(strict=True)]] = Field(default='desc', description="Sort order")
+    __properties: ClassVar[List[str]] = ["sort_by", "sort_order"]
 
-    @field_validator("sort_order")
+    @field_validator('sort_order')
     def sort_order_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if value is None:
@@ -64,11 +59,11 @@ class SortingRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of SortingRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -78,7 +73,7 @@ class SortingRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -89,7 +84,7 @@ class SortingRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of SortingRequest from a dict"""
         if obj is None:
             return None
@@ -98,8 +93,8 @@ class SortingRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "sort_by": obj.get("sort_by") if obj.get("sort_by") is not None else "created_at",
-            "sort_order": obj.get("sort_order") if obj.get("sort_order") is not None else "desc"
+            "sort_by": obj.get("sort_by") if obj.get("sort_by") is not None else 'created_at',
+            "sort_order": obj.get("sort_order") if obj.get("sort_order") is not None else 'desc'
         })
         return _obj
 

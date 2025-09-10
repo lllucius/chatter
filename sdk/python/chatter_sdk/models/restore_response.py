@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,16 +14,16 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class RestoreResponse(BaseModel):
     """
@@ -31,12 +32,12 @@ class RestoreResponse(BaseModel):
     restore_id: StrictStr = Field(description="Restore operation ID")
     backup_id: StrictStr = Field(description="Source backup ID")
     status: StrictStr = Field(description="Restore status")
-    progress: Annotated[int, Field(le=100, strict=True, ge=0)] | None = Field(default=0, description="Restore progress percentage")
-    records_restored: StrictInt | None = Field(default=0, description="Number of records restored")
+    progress: Optional[Annotated[int, Field(le=100, strict=True, ge=0)]] = Field(default=0, description="Restore progress percentage")
+    records_restored: Optional[StrictInt] = Field(default=0, description="Number of records restored")
     started_at: datetime = Field(description="Restore start timestamp")
-    completed_at: datetime | None = None
-    error_message: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["restore_id", "backup_id", "status", "progress", "records_restored", "started_at", "completed_at", "error_message"]
+    completed_at: Optional[datetime] = None
+    error_message: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["restore_id", "backup_id", "status", "progress", "records_restored", "started_at", "completed_at", "error_message"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,11 +56,11 @@ class RestoreResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of RestoreResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -69,7 +70,7 @@ class RestoreResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -80,17 +81,17 @@ class RestoreResponse(BaseModel):
         # set to None if completed_at (nullable) is None
         # and model_fields_set contains the field
         if self.completed_at is None and "completed_at" in self.model_fields_set:
-            _dict["completed_at"] = None
+            _dict['completed_at'] = None
 
         # set to None if error_message (nullable) is None
         # and model_fields_set contains the field
         if self.error_message is None and "error_message" in self.model_fields_set:
-            _dict["error_message"] = None
+            _dict['error_message'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of RestoreResponse from a dict"""
         if obj is None:
             return None

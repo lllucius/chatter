@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -11,47 +12,31 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-from typing import Any
+import warnings
+from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
+from typing import Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Annotated
 
-from pydantic import (
-    Field,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-    validate_call,
-)
-from typing import Annotated
-
-from chatter_sdk.api_client import ApiClient, RequestSerialized
-from chatter_sdk.api_response import ApiResponse
-from chatter_sdk.models.account_deactivate_response import (
-    AccountDeactivateResponse,
-)
+from pydantic import StrictStr
+from typing import List
 from chatter_sdk.models.api_key_create import APIKeyCreate
 from chatter_sdk.models.api_key_response import APIKeyResponse
-from chatter_sdk.models.api_key_revoke_response import (
-    APIKeyRevokeResponse,
-)
+from chatter_sdk.models.api_key_revoke_response import APIKeyRevokeResponse
+from chatter_sdk.models.account_deactivate_response import AccountDeactivateResponse
 from chatter_sdk.models.logout_response import LogoutResponse
 from chatter_sdk.models.password_change import PasswordChange
-from chatter_sdk.models.password_change_response import (
-    PasswordChangeResponse,
-)
-from chatter_sdk.models.password_reset_confirm_response import (
-    PasswordResetConfirmResponse,
-)
-from chatter_sdk.models.password_reset_request_response import (
-    PasswordResetRequestResponse,
-)
-from chatter_sdk.models.token_refresh import TokenRefresh
-from chatter_sdk.models.token_refresh_response import (
-    TokenRefreshResponse,
-)
+from chatter_sdk.models.password_change_response import PasswordChangeResponse
+from chatter_sdk.models.password_reset_confirm_response import PasswordResetConfirmResponse
+from chatter_sdk.models.password_reset_request_response import PasswordResetRequestResponse
+from chatter_sdk.models.token_refresh_response import TokenRefreshResponse
 from chatter_sdk.models.token_response import TokenResponse
 from chatter_sdk.models.user_create import UserCreate
 from chatter_sdk.models.user_login import UserLogin
 from chatter_sdk.models.user_response import UserResponse
 from chatter_sdk.models.user_update import UserUpdate
+
+from chatter_sdk.api_client import ApiClient, RequestSerialized
+from chatter_sdk.api_response import ApiResponse
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -72,10 +57,17 @@ class AuthenticationApi:
     async def change_password_api_v1_auth_change_password_post(
         self,
         password_change: PasswordChange,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PasswordChangeResponse:
         """Change Password
@@ -114,9 +106,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordChangeResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordChangeResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -133,10 +125,17 @@ class AuthenticationApi:
     async def change_password_api_v1_auth_change_password_post_with_http_info(
         self,
         password_change: PasswordChange,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PasswordChangeResponse]:
         """Change Password
@@ -175,9 +174,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordChangeResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordChangeResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -194,10 +193,17 @@ class AuthenticationApi:
     async def change_password_api_v1_auth_change_password_post_without_preload_content(
         self,
         password_change: PasswordChange,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Change Password
@@ -236,9 +242,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordChangeResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordChangeResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -258,17 +264,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -280,35 +286,35 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/change-password",
+            method='POST',
+            resource_path='/api/v1/auth/change-password',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -329,10 +335,17 @@ class AuthenticationApi:
         self,
         token: StrictStr,
         new_password: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PasswordResetConfirmResponse:
         """Confirm Password Reset
@@ -374,9 +387,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetConfirmResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetConfirmResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -394,10 +407,17 @@ class AuthenticationApi:
         self,
         token: StrictStr,
         new_password: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PasswordResetConfirmResponse]:
         """Confirm Password Reset
@@ -439,9 +459,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetConfirmResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetConfirmResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -459,10 +479,17 @@ class AuthenticationApi:
         self,
         token: StrictStr,
         new_password: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Confirm Password Reset
@@ -504,9 +531,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetConfirmResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetConfirmResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -527,49 +554,49 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if token is not None:
-
-            _query_params.append(("token", token))
-
+            
+            _query_params.append(('token', token))
+            
         if new_password is not None:
-
-            _query_params.append(("new_password", new_password))
-
+            
+            _query_params.append(('new_password', new_password))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/password-reset/confirm",
+            method='POST',
+            resource_path='/api/v1/auth/password-reset/confirm',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -589,10 +616,17 @@ class AuthenticationApi:
     async def create_api_key_api_v1_auth_api_key_post(
         self,
         api_key_create: APIKeyCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> APIKeyResponse:
         """Create Api Key
@@ -631,9 +665,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -650,10 +684,17 @@ class AuthenticationApi:
     async def create_api_key_api_v1_auth_api_key_post_with_http_info(
         self,
         api_key_create: APIKeyCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[APIKeyResponse]:
         """Create Api Key
@@ -692,9 +733,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -711,10 +752,17 @@ class AuthenticationApi:
     async def create_api_key_api_v1_auth_api_key_post_without_preload_content(
         self,
         api_key_create: APIKeyCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Api Key
@@ -753,9 +801,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -775,17 +823,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -797,35 +845,35 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/api-key",
+            method='POST',
+            resource_path='/api/v1/auth/api-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -844,10 +892,17 @@ class AuthenticationApi:
     @validate_call
     async def deactivate_account_api_v1_auth_account_delete(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> AccountDeactivateResponse:
         """Deactivate Account
@@ -883,8 +938,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "AccountDeactivateResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "AccountDeactivateResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -900,10 +955,17 @@ class AuthenticationApi:
     @validate_call
     async def deactivate_account_api_v1_auth_account_delete_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[AccountDeactivateResponse]:
         """Deactivate Account
@@ -939,8 +1001,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "AccountDeactivateResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "AccountDeactivateResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -956,10 +1018,17 @@ class AuthenticationApi:
     @validate_call
     async def deactivate_account_api_v1_auth_account_delete_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Deactivate Account
@@ -995,8 +1064,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "AccountDeactivateResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "AccountDeactivateResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1015,17 +1084,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1035,22 +1104,22 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/api/v1/auth/account",
+            method='DELETE',
+            resource_path='/api/v1/auth/account',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1069,10 +1138,17 @@ class AuthenticationApi:
     @validate_call
     async def get_current_user_info_api_v1_auth_me_get(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> UserResponse:
         """Get Current User Info
@@ -1108,8 +1184,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1125,10 +1201,17 @@ class AuthenticationApi:
     @validate_call
     async def get_current_user_info_api_v1_auth_me_get_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[UserResponse]:
         """Get Current User Info
@@ -1164,8 +1247,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1181,10 +1264,17 @@ class AuthenticationApi:
     @validate_call
     async def get_current_user_info_api_v1_auth_me_get_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Current User Info
@@ -1220,8 +1310,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1240,17 +1330,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1260,22 +1350,22 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/auth/me",
+            method='GET',
+            resource_path='/api/v1/auth/me',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1294,12 +1384,19 @@ class AuthenticationApi:
     @validate_call
     async def list_api_keys_api_v1_auth_api_keys_get(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> list[APIKeyResponse]:
+    ) -> List[APIKeyResponse]:
         """List Api Keys
 
         List user's API keys.  Args:     current_user: Current authenticated user     auth_service: Authentication service  Returns:     List of API keys
@@ -1333,8 +1430,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[APIKeyResponse]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[APIKeyResponse]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1350,12 +1447,19 @@ class AuthenticationApi:
     @validate_call
     async def list_api_keys_api_v1_auth_api_keys_get_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[list[APIKeyResponse]]:
+    ) -> ApiResponse[List[APIKeyResponse]]:
         """List Api Keys
 
         List user's API keys.  Args:     current_user: Current authenticated user     auth_service: Authentication service  Returns:     List of API keys
@@ -1389,8 +1493,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[APIKeyResponse]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[APIKeyResponse]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1406,10 +1510,17 @@ class AuthenticationApi:
     @validate_call
     async def list_api_keys_api_v1_auth_api_keys_get_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Api Keys
@@ -1445,8 +1556,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[APIKeyResponse]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[APIKeyResponse]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1465,17 +1576,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1485,22 +1596,22 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/auth/api-keys",
+            method='GET',
+            resource_path='/api/v1/auth/api-keys',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1520,15 +1631,22 @@ class AuthenticationApi:
     async def login_api_v1_auth_login_post(
         self,
         user_login: UserLogin,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> TokenResponse:
         """Login
 
-        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     User data and authentication tokens
+        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     response: HTTP response for cookie setting     auth_service: Authentication service  Returns:     User data and authentication tokens
 
         :param user_login: (required)
         :type user_login: UserLogin
@@ -1562,9 +1680,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1581,15 +1699,22 @@ class AuthenticationApi:
     async def login_api_v1_auth_login_post_with_http_info(
         self,
         user_login: UserLogin,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[TokenResponse]:
         """Login
 
-        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     User data and authentication tokens
+        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     response: HTTP response for cookie setting     auth_service: Authentication service  Returns:     User data and authentication tokens
 
         :param user_login: (required)
         :type user_login: UserLogin
@@ -1623,9 +1748,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1642,15 +1767,22 @@ class AuthenticationApi:
     async def login_api_v1_auth_login_post_without_preload_content(
         self,
         user_login: UserLogin,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Login
 
-        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     User data and authentication tokens
+        Authenticate user and return tokens with enhanced security.  Args:     user_data: User login data     request: HTTP request for security logging     response: HTTP response for cookie setting     auth_service: Authentication service  Returns:     User data and authentication tokens
 
         :param user_login: (required)
         :type user_login: UserLogin
@@ -1684,9 +1816,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1706,17 +1838,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1728,34 +1860,34 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/login",
+            method='POST',
+            resource_path='/api/v1/auth/login',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1774,15 +1906,22 @@ class AuthenticationApi:
     @validate_call
     async def logout_api_v1_auth_logout_post(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> LogoutResponse:
         """Logout
 
-        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
+        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     response: HTTP response for cookie clearing     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1813,8 +1952,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "LogoutResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "LogoutResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1830,15 +1969,22 @@ class AuthenticationApi:
     @validate_call
     async def logout_api_v1_auth_logout_post_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[LogoutResponse]:
         """Logout
 
-        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
+        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     response: HTTP response for cookie clearing     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1869,8 +2015,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "LogoutResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "LogoutResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1886,15 +2032,22 @@ class AuthenticationApi:
     @validate_call
     async def logout_api_v1_auth_logout_post_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Logout
 
-        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
+        Logout and revoke current token with enhanced security.  Args:     request: HTTP request for security logging     response: HTTP response for cookie clearing     current_user: Current authenticated user     auth_service: Authentication service  Returns:     Success message
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1925,8 +2078,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "LogoutResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "LogoutResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1945,17 +2098,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1965,22 +2118,22 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/logout",
+            method='POST',
+            resource_path='/api/v1/auth/logout',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1999,19 +2152,23 @@ class AuthenticationApi:
     @validate_call
     async def refresh_token_api_v1_auth_refresh_post(
         self,
-        token_refresh: TokenRefresh,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> TokenRefreshResponse:
         """Refresh Token
 
-        Refresh access token with enhanced security validation.  Args:     token_data: Refresh token data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     New access and refresh tokens
+        Refresh access token with enhanced security validation.  Args:     request: HTTP request for security logging and cookie reading     response: HTTP response for setting new refresh token cookie     auth_service: Authentication service  Returns:     New access token (refresh token set in HttpOnly cookie)
 
-        :param token_refresh: (required)
-        :type token_refresh: TokenRefresh
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2035,16 +2192,14 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._refresh_token_api_v1_auth_refresh_post_serialize(
-            token_refresh=token_refresh,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenRefreshResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenRefreshResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2060,19 +2215,23 @@ class AuthenticationApi:
     @validate_call
     async def refresh_token_api_v1_auth_refresh_post_with_http_info(
         self,
-        token_refresh: TokenRefresh,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[TokenRefreshResponse]:
         """Refresh Token
 
-        Refresh access token with enhanced security validation.  Args:     token_data: Refresh token data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     New access and refresh tokens
+        Refresh access token with enhanced security validation.  Args:     request: HTTP request for security logging and cookie reading     response: HTTP response for setting new refresh token cookie     auth_service: Authentication service  Returns:     New access token (refresh token set in HttpOnly cookie)
 
-        :param token_refresh: (required)
-        :type token_refresh: TokenRefresh
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2096,16 +2255,14 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._refresh_token_api_v1_auth_refresh_post_serialize(
-            token_refresh=token_refresh,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenRefreshResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenRefreshResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2121,19 +2278,23 @@ class AuthenticationApi:
     @validate_call
     async def refresh_token_api_v1_auth_refresh_post_without_preload_content(
         self,
-        token_refresh: TokenRefresh,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Refresh Token
 
-        Refresh access token with enhanced security validation.  Args:     token_data: Refresh token data     request: HTTP request for security logging     auth_service: Authentication service  Returns:     New access and refresh tokens
+        Refresh access token with enhanced security validation.  Args:     request: HTTP request for security logging and cookie reading     response: HTTP response for setting new refresh token cookie     auth_service: Authentication service  Returns:     New access token (refresh token set in HttpOnly cookie)
 
-        :param token_refresh: (required)
-        :type token_refresh: TokenRefresh
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2157,16 +2318,14 @@ class AuthenticationApi:
         """ # noqa: E501
 
         _param = self._refresh_token_api_v1_auth_refresh_post_serialize(
-            token_refresh=token_refresh,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "TokenRefreshResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "TokenRefreshResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2177,7 +2336,6 @@ class AuthenticationApi:
 
     def _refresh_token_api_v1_auth_refresh_post_serialize(
         self,
-        token_refresh,
         _request_auth,
         _content_type,
         _headers,
@@ -2186,56 +2344,41 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if token_refresh is not None:
-            _body_params = token_refresh
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params["Content-Type"] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        "application/json"
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/refresh",
+            method='POST',
+            resource_path='/api/v1/auth/refresh',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2255,10 +2398,17 @@ class AuthenticationApi:
     async def register_api_v1_auth_register_post(
         self,
         user_create: UserCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> TokenResponse:
         """Register
@@ -2297,9 +2447,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2316,10 +2466,17 @@ class AuthenticationApi:
     async def register_api_v1_auth_register_post_with_http_info(
         self,
         user_create: UserCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[TokenResponse]:
         """Register
@@ -2358,9 +2515,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2377,10 +2534,17 @@ class AuthenticationApi:
     async def register_api_v1_auth_register_post_without_preload_content(
         self,
         user_create: UserCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Register
@@ -2419,9 +2583,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "TokenResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "TokenResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2441,17 +2605,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -2463,34 +2627,34 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/register",
+            method='POST',
+            resource_path='/api/v1/auth/register',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2510,10 +2674,17 @@ class AuthenticationApi:
     async def request_password_reset_api_v1_auth_password_reset_request_post(
         self,
         email: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PasswordResetRequestResponse:
         """Request Password Reset
@@ -2552,9 +2723,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetRequestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetRequestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2571,10 +2742,17 @@ class AuthenticationApi:
     async def request_password_reset_api_v1_auth_password_reset_request_post_with_http_info(
         self,
         email: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PasswordResetRequestResponse]:
         """Request Password Reset
@@ -2613,9 +2791,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetRequestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetRequestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2632,10 +2810,17 @@ class AuthenticationApi:
     async def request_password_reset_api_v1_auth_password_reset_request_post_without_preload_content(
         self,
         email: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Request Password Reset
@@ -2674,9 +2859,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "PasswordResetRequestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "PasswordResetRequestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2696,45 +2881,45 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if email is not None:
-
-            _query_params.append(("email", email))
-
+            
+            _query_params.append(('email', email))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/auth/password-reset/request",
+            method='POST',
+            resource_path='/api/v1/auth/password-reset/request',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2753,10 +2938,17 @@ class AuthenticationApi:
     @validate_call
     async def revoke_api_key_api_v1_auth_api_key_delete(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> APIKeyRevokeResponse:
         """Revoke Api Key
@@ -2792,8 +2984,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyRevokeResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyRevokeResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2809,10 +3001,17 @@ class AuthenticationApi:
     @validate_call
     async def revoke_api_key_api_v1_auth_api_key_delete_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[APIKeyRevokeResponse]:
         """Revoke Api Key
@@ -2848,8 +3047,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyRevokeResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyRevokeResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2865,10 +3064,17 @@ class AuthenticationApi:
     @validate_call
     async def revoke_api_key_api_v1_auth_api_key_delete_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Revoke Api Key
@@ -2904,8 +3110,8 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "APIKeyRevokeResponse",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "APIKeyRevokeResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2924,17 +3130,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -2944,22 +3150,22 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/api/v1/auth/api-key",
+            method='DELETE',
+            resource_path='/api/v1/auth/api-key',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2979,10 +3185,17 @@ class AuthenticationApi:
     async def update_profile_api_v1_auth_me_put(
         self,
         user_update: UserUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> UserResponse:
         """Update Profile
@@ -3021,9 +3234,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3040,10 +3253,17 @@ class AuthenticationApi:
     async def update_profile_api_v1_auth_me_put_with_http_info(
         self,
         user_update: UserUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[UserResponse]:
         """Update Profile
@@ -3082,9 +3302,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3101,10 +3321,17 @@ class AuthenticationApi:
     async def update_profile_api_v1_auth_me_put_without_preload_content(
         self,
         user_update: UserUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Profile
@@ -3143,9 +3370,9 @@ class AuthenticationApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "UserResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "UserResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3165,17 +3392,17 @@ class AuthenticationApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -3187,35 +3414,35 @@ class AuthenticationApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="PUT",
-            resource_path="/api/v1/auth/me",
+            method='PUT',
+            resource_path='/api/v1/auth/me',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

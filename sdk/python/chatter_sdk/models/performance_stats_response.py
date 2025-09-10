@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,21 +14,14 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PerformanceStatsResponse(BaseModel):
     """
@@ -37,12 +31,12 @@ class PerformanceStatsResponse(BaseModel):
     avg_execution_time_ms: StrictInt = Field(description="Average execution time in milliseconds")
     min_execution_time_ms: StrictInt = Field(description="Minimum execution time in milliseconds")
     max_execution_time_ms: StrictInt = Field(description="Maximum execution time in milliseconds")
-    workflow_types: dict[str, StrictInt] = Field(description="Execution count by workflow type")
-    error_counts: dict[str, StrictInt] = Field(description="Error count by type")
-    cache_stats: dict[str, Any] = Field(description="Cache statistics")
-    tool_stats: dict[str, Any] = Field(description="Tool usage statistics")
-    timestamp: StrictFloat | StrictInt = Field(description="Statistics timestamp")
-    __properties: ClassVar[list[str]] = ["total_executions", "avg_execution_time_ms", "min_execution_time_ms", "max_execution_time_ms", "workflow_types", "error_counts", "cache_stats", "tool_stats", "timestamp"]
+    workflow_types: Dict[str, StrictInt] = Field(description="Execution count by workflow type")
+    error_counts: Dict[str, StrictInt] = Field(description="Error count by type")
+    cache_stats: Dict[str, Any] = Field(description="Cache statistics")
+    tool_stats: Dict[str, Any] = Field(description="Tool usage statistics")
+    timestamp: Union[StrictFloat, StrictInt] = Field(description="Statistics timestamp")
+    __properties: ClassVar[List[str]] = ["total_executions", "avg_execution_time_ms", "min_execution_time_ms", "max_execution_time_ms", "workflow_types", "error_counts", "cache_stats", "tool_stats", "timestamp"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -61,11 +55,11 @@ class PerformanceStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PerformanceStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -75,7 +69,7 @@ class PerformanceStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -86,7 +80,7 @@ class PerformanceStatsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PerformanceStatsResponse from a dict"""
         if obj is None:
             return None

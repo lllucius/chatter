@@ -240,6 +240,10 @@ class Settings(BaseSettings):
         default="auto",
         description="Cache backend: 'memory', 'redis', 'multi_tier', or 'auto'",
     )
+    cache_disable_all: bool = Field(
+        default=False,
+        description="Completely disable all caching (both in-memory and Redis)",
+    )
     cache_model_registry_ttl: int = Field(
         default=1800,
         description="Model registry cache TTL (30 minutes)",

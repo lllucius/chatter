@@ -47,6 +47,7 @@ class CacheFactory:
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="model_registry",
                 enable_stats=True,
+                disabled=settings.cache_disable_all,
             ),
             CacheType.WORKFLOW: CacheConfig(
                 default_ttl=settings.cache_workflow_ttl,
@@ -54,6 +55,7 @@ class CacheFactory:
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="workflow",
                 enable_stats=True,
+                disabled=settings.cache_disable_all,
             ),
             CacheType.TOOL: CacheConfig(
                 default_ttl=settings.cache_tool_ttl,
@@ -61,6 +63,7 @@ class CacheFactory:
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="tool",
                 enable_stats=True,
+                disabled=settings.cache_disable_all,
             ),
             CacheType.GENERAL: CacheConfig(
                 default_ttl=settings.cache_ttl,
@@ -68,6 +71,7 @@ class CacheFactory:
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="general",
                 enable_stats=True,
+                disabled=settings.cache_disable_all,
             ),
             CacheType.SESSION: CacheConfig(
                 default_ttl=settings.cache_session_ttl,
@@ -75,6 +79,7 @@ class CacheFactory:
                 eviction_policy="ttl",
                 key_prefix="session",
                 enable_stats=True,
+                disabled=settings.cache_disable_all,
             ),
         }
         return configs.get(cache_type, configs[CacheType.GENERAL])

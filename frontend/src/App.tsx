@@ -2,6 +2,7 @@ import React, { useState, useMemo, lazy, useEffect } from 'react';
 import { BrowserRouter as Router, Routes, Route, Navigate } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import CssBaseline from '@mui/material/CssBaseline';
+import { Box, CircularProgress, Typography } from '@mui/material';
 
 // Components
 import Layout from './components/Layout';
@@ -42,10 +43,20 @@ export const ThemeContext = React.createContext<{
 
 function App() {
   const [darkMode, setDarkMode] = useState(true);
+  const [authInitialized, setAuthInitialized] = useState(false);
 
   // Initialize SDK at app startup
   useEffect(() => {
-    initializeSDK();
+    const initAuth = async () => {
+      try {
+        await initializeSDK();
+      } catch (error) {
+        console.error('Failed to initialize SDK:', error);
+      } finally {
+        setAuthInitialized(true);
+      }
+    };
+    initAuth();
   }, []);
 
   const toggleDarkMode = () => {
@@ -99,6 +110,32 @@ function App() {
       },
     },
   }), [darkMode]);
+
+  // Show loading screen while authentication is being initialized
+  if (!authInitialized) {
+    return (
+      <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
+        <ThemeProvider theme={theme}>
+          <CssBaseline />
+          <Box 
+            sx={{ 
+              display: 'flex', 
+              justifyContent: 'center', 
+              alignItems: 'center', 
+              height: '100vh',
+              flexDirection: 'column',
+              gap: 2
+            }}
+          >
+            <CircularProgress size={60} />
+            <Typography variant="h6" color="text.secondary">
+              Initializing...
+            </Typography>
+          </Box>
+        </ThemeProvider>
+      </ThemeContext.Provider>
+    );
+  }
 
   return (
     <ErrorBoundary>

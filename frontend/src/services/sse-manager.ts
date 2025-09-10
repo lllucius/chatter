@@ -51,6 +51,7 @@ export class SSEEventManager {
   public disconnect(): void {
     this.isManuallyDisconnected = true;
     this.isConnected = false;
+    this.connectionStartTime = null;
     this.reconnectAttempts = 0;
     this.stopHealthCheck();
 
@@ -139,6 +140,7 @@ export class SSEEventManager {
 
     } catch (error) {
       console.error('SSE: Failed to create connection:', error);
+      this.connectionStartTime = null;
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
       }
@@ -215,6 +217,7 @@ export class SSEEventManager {
 
     } catch (error) {
       this.isConnected = false;
+      this.connectionStartTime = null;
       console.error('SSE: Connection error', error);
       
       if (!this.isManuallyDisconnected) {
@@ -251,6 +254,7 @@ export class SSEEventManager {
       console.error('SSE: Stream processing error:', error);
     } finally {
       this.isConnected = false;
+      this.connectionStartTime = null;
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
       }

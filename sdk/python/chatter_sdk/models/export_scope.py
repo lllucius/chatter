@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class ExportScope(str, Enum):
@@ -28,12 +27,12 @@ class ExportScope(str, Enum):
     """
     allowed enum values
     """
-    USER = "user"
-    CONVERSATION = "conversation"
-    DOCUMENT = "document"
-    ANALYTICS = "analytics"
-    FULL = "full"
-    CUSTOM = "custom"
+    USER = 'user'
+    CONVERSATION = 'conversation'
+    DOCUMENT = 'document'
+    ANALYTICS = 'analytics'
+    FULL = 'full'
+    CUSTOM = 'custom'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

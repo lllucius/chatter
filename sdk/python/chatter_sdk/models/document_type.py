@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class DocumentType(str, Enum):
@@ -28,18 +27,18 @@ class DocumentType(str, Enum):
     """
     allowed enum values
     """
-    PDF = "pdf"
-    TEXT = "text"
-    MARKDOWN = "markdown"
-    HTML = "html"
-    DOC = "doc"
-    DOCX = "docx"
-    RTF = "rtf"
-    ODT = "odt"
-    CSV = "csv"
-    JSON = "json"
-    XML = "xml"
-    OTHER = "other"
+    PDF = 'pdf'
+    TEXT = 'text'
+    MARKDOWN = 'markdown'
+    HTML = 'html'
+    DOC = 'doc'
+    DOCX = 'docx'
+    RTF = 'rtf'
+    ODT = 'odt'
+    CSV = 'csv'
+    JSON = 'json'
+    XML = 'xml'
+    OTHER = 'other'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

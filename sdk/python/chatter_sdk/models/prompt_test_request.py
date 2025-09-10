@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,25 +14,25 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class PromptTestRequest(BaseModel):
     """
     Schema for prompt test request.
     """ # noqa: E501
-    variables: dict[str, Any] = Field(description="Variables to test with")
-    validate_only: StrictBool | None = Field(default=False, description="Only validate, don't render")
-    include_performance_metrics: StrictBool | None = Field(default=False, description="Include detailed performance metrics")
-    timeout_ms: Annotated[int, Field(le=60000, strict=True, ge=1000)] | None = Field(default=30000, description="Test timeout in milliseconds")
-    __properties: ClassVar[list[str]] = ["variables", "validate_only", "include_performance_metrics", "timeout_ms"]
+    variables: Dict[str, Any] = Field(description="Variables to test with")
+    validate_only: Optional[StrictBool] = Field(default=False, description="Only validate, don't render")
+    include_performance_metrics: Optional[StrictBool] = Field(default=False, description="Include detailed performance metrics")
+    timeout_ms: Optional[Annotated[int, Field(le=60000, strict=True, ge=1000)]] = Field(default=30000, description="Test timeout in milliseconds")
+    __properties: ClassVar[List[str]] = ["variables", "validate_only", "include_performance_metrics", "timeout_ms"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +51,11 @@ class PromptTestRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of PromptTestRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +65,7 @@ class PromptTestRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -75,7 +76,7 @@ class PromptTestRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of PromptTestRequest from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,28 +14,28 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class UserUpdate(BaseModel):
     """
     Schema for user profile updates.
     """ # noqa: E501
-    email: StrictStr | None = None
-    full_name: Annotated[str, Field(strict=True, max_length=255)] | None = None
-    bio: Annotated[str, Field(strict=True, max_length=1000)] | None = None
-    avatar_url: Annotated[str, Field(strict=True, max_length=500)] | None = None
-    phone_number: Annotated[str, Field(strict=True, max_length=20)] | None = None
-    default_llm_provider: StrictStr | None = None
-    default_profile_id: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["email", "full_name", "bio", "avatar_url", "phone_number", "default_llm_provider", "default_profile_id"]
+    email: Optional[StrictStr] = None
+    full_name: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None
+    bio: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    avatar_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
+    phone_number: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
+    default_llm_provider: Optional[StrictStr] = None
+    default_profile_id: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["email", "full_name", "bio", "avatar_url", "phone_number", "default_llm_provider", "default_profile_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +54,11 @@ class UserUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of UserUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,7 +68,7 @@ class UserUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -78,42 +79,42 @@ class UserUpdate(BaseModel):
         # set to None if email (nullable) is None
         # and model_fields_set contains the field
         if self.email is None and "email" in self.model_fields_set:
-            _dict["email"] = None
+            _dict['email'] = None
 
         # set to None if full_name (nullable) is None
         # and model_fields_set contains the field
         if self.full_name is None and "full_name" in self.model_fields_set:
-            _dict["full_name"] = None
+            _dict['full_name'] = None
 
         # set to None if bio (nullable) is None
         # and model_fields_set contains the field
         if self.bio is None and "bio" in self.model_fields_set:
-            _dict["bio"] = None
+            _dict['bio'] = None
 
         # set to None if avatar_url (nullable) is None
         # and model_fields_set contains the field
         if self.avatar_url is None and "avatar_url" in self.model_fields_set:
-            _dict["avatar_url"] = None
+            _dict['avatar_url'] = None
 
         # set to None if phone_number (nullable) is None
         # and model_fields_set contains the field
         if self.phone_number is None and "phone_number" in self.model_fields_set:
-            _dict["phone_number"] = None
+            _dict['phone_number'] = None
 
         # set to None if default_llm_provider (nullable) is None
         # and model_fields_set contains the field
         if self.default_llm_provider is None and "default_llm_provider" in self.model_fields_set:
-            _dict["default_llm_provider"] = None
+            _dict['default_llm_provider'] = None
 
         # set to None if default_profile_id (nullable) is None
         # and model_fields_set contains the field
         if self.default_profile_id is None and "default_profile_id" in self.model_fields_set:
-            _dict["default_profile_id"] = None
+            _dict['default_profile_id'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of UserUpdate from a dict"""
         if obj is None:
             return None

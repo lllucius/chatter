@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class VariantAllocation(str, Enum):
@@ -28,10 +27,10 @@ class VariantAllocation(str, Enum):
     """
     allowed enum values
     """
-    EQUAL = "equal"
-    WEIGHTED = "weighted"
-    GRADUAL_ROLLOUT = "gradual_rollout"
-    USER_ATTRIBUTE = "user_attribute"
+    EQUAL = 'equal'
+    WEIGHTED = 'weighted'
+    GRADUAL_ROLLOUT = 'gradual_rollout'
+    USER_ATTRIBUTE = 'user_attribute'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

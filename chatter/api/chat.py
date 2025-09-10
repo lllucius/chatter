@@ -217,58 +217,17 @@ async def delete_message(
 
 @router.post(
     "/chat",
-    response_model=None,  # Disable response model generation to support JSON or SSE
-    responses={
-        200: {
-            "content": {
-                "application/json": {
-                    "schema": ChatResponse.model_json_schema()
-                },
-                "text/event-stream": {"schema": {"type": "string"}},
-            },
-            "description": "Chat response as JSON or streaming SSE when stream=true",
-        }
-    },
+    response_model=ChatResponse,
 )
 async def chat(
     chat_request: ChatRequest,
-    request: Request,
     current_user: User = Depends(get_current_user),
     chat_service: ChatService = Depends(get_chat_service),
-):
-    """Unified chat endpoint supporting all workflow types with optional streaming."""
+) -> ChatResponse:
+    """Non-streaming chat endpoint supporting all workflow types."""
     workflow_type = _map_workflow_type(chat_request.workflow)
     chat_request.workflow_type = workflow_type
 
-    if chat_request.stream:
-        # Streaming mode
-        async def generate_stream():
-            try:
-                async for chunk in chat_service.chat_streaming(
-                    current_user.id, chat_request
-                ):
-                    if await request.is_disconnected():
-                        logger.info(
-                            "Client disconnected during streaming"
-                        )
-                        break
-                    yield f"data: {json.dumps(chunk.model_dump())}\n\n"
-            except (NotFoundError, ChatServiceError) as e:
-                error_chunk = {"type": "error", "error": str(e)}
-                yield f"data: {json.dumps(error_chunk)}\n\n"
-            finally:
-                yield "data: [DONE]\n\n"
-
-        return StreamingResponse(
-            generate_stream(),
-            media_type="text/event-stream",
-            headers={
-                "Cache-Control": "no-cache",
-                "Connection": "keep-alive",
-            },
-        )
-
-    # Non-streaming mode
     try:
         conversation, assistant_message = await chat_service.chat(
             current_user.id, chat_request
@@ -282,6 +241,56 @@ async def chat(
         )
     except (NotFoundError, ChatServiceError) as e:
         raise BadRequestProblem(detail=str(e)) from e
+
+
+@router.post(
+    "/streaming",
+    response_model=None,  # Disable response model generation for SSE
+    responses={
+        200: {
+            "content": {
+                "text/event-stream": {"schema": {"type": "string"}},
+            },
+            "description": "Streaming chat response using Server-Sent Events",
+        }
+    },
+)
+async def streaming_chat(
+    chat_request: ChatRequest,
+    request: Request,
+    current_user: User = Depends(get_current_user),
+    chat_service: ChatService = Depends(get_chat_service),
+):
+    """Streaming chat endpoint supporting all workflow types."""
+    workflow_type = _map_workflow_type(chat_request.workflow)
+    chat_request.workflow_type = workflow_type
+
+    # Streaming mode
+    async def generate_stream():
+        try:
+            async for chunk in chat_service.chat_streaming(
+                current_user.id, chat_request
+            ):
+                if await request.is_disconnected():
+                    logger.info(
+                        "Client disconnected during streaming"
+                    )
+                    break
+                yield f"data: {json.dumps(chunk.model_dump())}\n\n"
+        except (NotFoundError, ChatServiceError) as e:
+            error_chunk = {"type": "error", "error": str(e)}
+            yield f"data: {json.dumps(error_chunk)}\n\n"
+        finally:
+            yield "data: [DONE]\n\n"
+
+    return StreamingResponse(
+        generate_stream(),
+        media_type="text/event-stream",
+        headers={
+            "Cache-Control": "no-cache",
+            "Connection": "keep-alive",
+        },
+    )
 
 
 # Utility Endpoints

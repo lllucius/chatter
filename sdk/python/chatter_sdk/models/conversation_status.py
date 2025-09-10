@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class ConversationStatus(str, Enum):
@@ -28,9 +27,9 @@ class ConversationStatus(str, Enum):
     """
     allowed enum values
     """
-    ACTIVE = "active"
-    ARCHIVED = "archived"
-    DELETED = "deleted"
+    ACTIVE = 'active'
+    ARCHIVED = 'archived'
+    DELETED = 'deleted'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

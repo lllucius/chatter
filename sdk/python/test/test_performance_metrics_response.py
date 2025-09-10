@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,10 +15,7 @@
 
 import unittest
 
-from chatter_sdk.models.performance_metrics_response import (
-    PerformanceMetricsResponse,
-)
-
+from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
 
 class TestPerformanceMetricsResponse(unittest.TestCase):
     """PerformanceMetricsResponse unit test stubs"""
@@ -97,5 +95,5 @@ class TestPerformanceMetricsResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

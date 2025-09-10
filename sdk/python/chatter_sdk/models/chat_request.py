@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,50 +14,43 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictStr,
-    field_validator,
-)
-from typing import Annotated, Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ChatRequest(BaseModel):
     """
     Schema for chat request.
     """ # noqa: E501
     message: StrictStr = Field(description="User message")
-    conversation_id: StrictStr | None = None
-    profile_id: StrictStr | None = None
-    stream: StrictBool | None = Field(default=False, description="Enable streaming response")
-    workflow: StrictStr | None = Field(default="plain", description="Workflow type: plain, rag, tools, or full (rag + tools)")
-    provider: StrictStr | None = None
-    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    max_tokens: Annotated[int, Field(le=8192, strict=True, ge=1)] | None = None
-    context_limit: Annotated[int, Field(strict=True, ge=1)] | None = None
-    enable_retrieval: StrictBool | None = None
-    document_ids: list[StrictStr] | None = None
-    system_prompt_override: StrictStr | None = None
-    workflow_config: dict[str, Any] | None = None
-    workflow_type: StrictStr | None = None
-    __properties: ClassVar[list[str]] = ["message", "conversation_id", "profile_id", "stream", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "system_prompt_override", "workflow_config", "workflow_type"]
+    conversation_id: Optional[StrictStr] = None
+    profile_id: Optional[StrictStr] = None
+    stream: Optional[StrictBool] = Field(default=False, description="[DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design.")
+    workflow: Optional[StrictStr] = Field(default='plain', description="Workflow type: plain, rag, tools, or full (rag + tools)")
+    provider: Optional[StrictStr] = None
+    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    max_tokens: Optional[Annotated[int, Field(le=8192, strict=True, ge=1)]] = None
+    context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    enable_retrieval: Optional[StrictBool] = None
+    document_ids: Optional[List[StrictStr]] = None
+    system_prompt_override: Optional[StrictStr] = None
+    workflow_config: Optional[Dict[str, Any]] = None
+    workflow_type: Optional[StrictStr] = None
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "profile_id", "stream", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "system_prompt_override", "workflow_config", "workflow_type"]
 
-    @field_validator("workflow")
+    @field_validator('workflow')
     def workflow_validate_enum(cls, value):
         """Validates the enum"""
         if value is None:
             return value
 
-        if value not in set(["plain", "rag", "tools", "full"]):
+        if value not in set(['plain', 'rag', 'tools', 'full']):
             raise ValueError("must be one of enum values ('plain', 'rag', 'tools', 'full')")
         return value
 
@@ -77,11 +71,11 @@ class ChatRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ChatRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -91,7 +85,7 @@ class ChatRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -102,62 +96,62 @@ class ChatRequest(BaseModel):
         # set to None if conversation_id (nullable) is None
         # and model_fields_set contains the field
         if self.conversation_id is None and "conversation_id" in self.model_fields_set:
-            _dict["conversation_id"] = None
+            _dict['conversation_id'] = None
 
         # set to None if profile_id (nullable) is None
         # and model_fields_set contains the field
         if self.profile_id is None and "profile_id" in self.model_fields_set:
-            _dict["profile_id"] = None
+            _dict['profile_id'] = None
 
         # set to None if provider (nullable) is None
         # and model_fields_set contains the field
         if self.provider is None and "provider" in self.model_fields_set:
-            _dict["provider"] = None
+            _dict['provider'] = None
 
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
-            _dict["temperature"] = None
+            _dict['temperature'] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict["max_tokens"] = None
+            _dict['max_tokens'] = None
 
         # set to None if context_limit (nullable) is None
         # and model_fields_set contains the field
         if self.context_limit is None and "context_limit" in self.model_fields_set:
-            _dict["context_limit"] = None
+            _dict['context_limit'] = None
 
         # set to None if enable_retrieval (nullable) is None
         # and model_fields_set contains the field
         if self.enable_retrieval is None and "enable_retrieval" in self.model_fields_set:
-            _dict["enable_retrieval"] = None
+            _dict['enable_retrieval'] = None
 
         # set to None if document_ids (nullable) is None
         # and model_fields_set contains the field
         if self.document_ids is None and "document_ids" in self.model_fields_set:
-            _dict["document_ids"] = None
+            _dict['document_ids'] = None
 
         # set to None if system_prompt_override (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt_override is None and "system_prompt_override" in self.model_fields_set:
-            _dict["system_prompt_override"] = None
+            _dict['system_prompt_override'] = None
 
         # set to None if workflow_config (nullable) is None
         # and model_fields_set contains the field
         if self.workflow_config is None and "workflow_config" in self.model_fields_set:
-            _dict["workflow_config"] = None
+            _dict['workflow_config'] = None
 
         # set to None if workflow_type (nullable) is None
         # and model_fields_set contains the field
         if self.workflow_type is None and "workflow_type" in self.model_fields_set:
-            _dict["workflow_type"] = None
+            _dict['workflow_type'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ChatRequest from a dict"""
         if obj is None:
             return None
@@ -170,7 +164,7 @@ class ChatRequest(BaseModel):
             "conversation_id": obj.get("conversation_id"),
             "profile_id": obj.get("profile_id"),
             "stream": obj.get("stream") if obj.get("stream") is not None else False,
-            "workflow": obj.get("workflow") if obj.get("workflow") is not None else "plain",
+            "workflow": obj.get("workflow") if obj.get("workflow") is not None else 'plain',
             "provider": obj.get("provider"),
             "temperature": obj.get("temperature"),
             "max_tokens": obj.get("max_tokens"),

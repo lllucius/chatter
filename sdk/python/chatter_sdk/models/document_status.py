@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class DocumentStatus(str, Enum):
@@ -28,11 +27,11 @@ class DocumentStatus(str, Enum):
     """
     allowed enum values
     """
-    PENDING = "pending"
-    PROCESSING = "processing"
-    PROCESSED = "processed"
-    FAILED = "failed"
-    ARCHIVED = "archived"
+    PENDING = 'pending'
+    PROCESSING = 'processing'
+    PROCESSED = 'processed'
+    FAILED = 'failed'
+    ARCHIVED = 'archived'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

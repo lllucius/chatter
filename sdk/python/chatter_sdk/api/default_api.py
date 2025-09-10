@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -11,16 +12,12 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-from typing import Any
+import warnings
+from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
+from typing import Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Annotated
 
-from pydantic import (
-    Field,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-    validate_call,
-)
-from typing import Annotated
+from typing import Any
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
@@ -43,10 +40,17 @@ class DefaultApi:
     @validate_call
     async def root_get(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> object:
         """Root
@@ -82,8 +86,8 @@ class DefaultApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "object",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -99,10 +103,17 @@ class DefaultApi:
     @validate_call
     async def root_get_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[object]:
         """Root
@@ -138,8 +149,8 @@ class DefaultApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "object",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -155,10 +166,17 @@ class DefaultApi:
     @validate_call
     async def root_get_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Root
@@ -194,8 +212,8 @@ class DefaultApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "object",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "object",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -214,17 +232,17 @@ class DefaultApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -234,21 +252,21 @@ class DefaultApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
+        _auth_settings: List[str] = [
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/",
+            method='GET',
+            resource_path='/',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

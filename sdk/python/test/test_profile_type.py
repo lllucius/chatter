@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.profile_type import ProfileType
 
 class TestProfileType(unittest.TestCase):
     """ProfileType unit test stubs"""
@@ -29,5 +30,5 @@ class TestProfileType(unittest.TestCase):
         """Test ProfileType"""
         # inst = ProfileType()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

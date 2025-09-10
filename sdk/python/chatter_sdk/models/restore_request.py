@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,25 +14,24 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing import Optional, Set
+from typing_extensions import Self
 
 class RestoreRequest(BaseModel):
     """
     Request schema for restoring from backup.
     """ # noqa: E501
     backup_id: StrictStr = Field(description="Backup ID to restore from")
-    restore_options: dict[str, Any] | None = Field(default=None, description="Restore options")
-    create_backup_before_restore: StrictBool | None = Field(default=True, description="Create backup before restore")
-    verify_integrity: StrictBool | None = Field(default=True, description="Verify backup integrity before restore")
-    __properties: ClassVar[list[str]] = ["backup_id", "restore_options", "create_backup_before_restore", "verify_integrity"]
+    restore_options: Optional[Dict[str, Any]] = Field(default=None, description="Restore options")
+    create_backup_before_restore: Optional[StrictBool] = Field(default=True, description="Create backup before restore")
+    verify_integrity: Optional[StrictBool] = Field(default=True, description="Verify backup integrity before restore")
+    __properties: ClassVar[List[str]] = ["backup_id", "restore_options", "create_backup_before_restore", "verify_integrity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +50,11 @@ class RestoreRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of RestoreRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +64,7 @@ class RestoreRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -75,7 +75,7 @@ class RestoreRequest(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of RestoreRequest from a dict"""
         if obj is None:
             return None

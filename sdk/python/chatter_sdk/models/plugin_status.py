@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class PluginStatus(str, Enum):
@@ -28,11 +27,11 @@ class PluginStatus(str, Enum):
     """
     allowed enum values
     """
-    INSTALLED = "installed"
-    ACTIVE = "active"
-    INACTIVE = "inactive"
-    ERROR = "error"
-    UPDATING = "updating"
+    INSTALLED = 'installed'
+    ACTIVE = 'active'
+    INACTIVE = 'inactive'
+    ERROR = 'error'
+    UPDATING = 'updating'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

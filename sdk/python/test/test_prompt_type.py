@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.prompt_type import PromptType
 
 class TestPromptType(unittest.TestCase):
     """PromptType unit test stubs"""
@@ -29,5 +30,5 @@ class TestPromptType(unittest.TestCase):
         """Test PromptType"""
         # inst = PromptType()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

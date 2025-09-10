@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.metric_type import MetricType
 
 class TestMetricType(unittest.TestCase):
     """MetricType unit test stubs"""
@@ -29,5 +30,5 @@ class TestMetricType(unittest.TestCase):
         """Test MetricType"""
         # inst = MetricType()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

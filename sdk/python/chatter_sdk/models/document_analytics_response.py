@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,43 +14,36 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentAnalyticsResponse(BaseModel):
     """
     Schema for document analytics response.
     """ # noqa: E501
     total_documents: StrictInt = Field(description="Total number of documents")
-    documents_by_status: dict[str, StrictInt] = Field(description="Documents by processing status")
-    documents_by_type: dict[str, StrictInt] = Field(description="Documents by file type")
-    avg_processing_time_seconds: StrictFloat | StrictInt = Field(description="Average processing time")
-    processing_success_rate: StrictFloat | StrictInt = Field(description="Processing success rate")
+    documents_by_status: Dict[str, StrictInt] = Field(description="Documents by processing status")
+    documents_by_type: Dict[str, StrictInt] = Field(description="Documents by file type")
+    avg_processing_time_seconds: Union[StrictFloat, StrictInt] = Field(description="Average processing time")
+    processing_success_rate: Union[StrictFloat, StrictInt] = Field(description="Processing success rate")
     total_chunks: StrictInt = Field(description="Total number of chunks")
-    avg_chunks_per_document: StrictFloat | StrictInt = Field(description="Average chunks per document")
+    avg_chunks_per_document: Union[StrictFloat, StrictInt] = Field(description="Average chunks per document")
     total_storage_bytes: StrictInt = Field(description="Total storage used")
-    avg_document_size_bytes: StrictFloat | StrictInt = Field(description="Average document size")
-    storage_by_type: dict[str, StrictInt] = Field(description="Storage usage by document type")
+    avg_document_size_bytes: Union[StrictFloat, StrictInt] = Field(description="Average document size")
+    storage_by_type: Dict[str, StrictInt] = Field(description="Storage usage by document type")
     total_searches: StrictInt = Field(description="Total number of searches")
-    avg_search_results: StrictFloat | StrictInt = Field(description="Average search results returned")
-    popular_search_terms: dict[str, StrictInt] = Field(description="Popular search terms")
+    avg_search_results: Union[StrictFloat, StrictInt] = Field(description="Average search results returned")
+    popular_search_terms: Dict[str, StrictInt] = Field(description="Popular search terms")
     total_views: StrictInt = Field(description="Total document views")
-    most_viewed_documents: list[dict[str, Any]] = Field(description="Most viewed documents")
-    documents_by_access_level: dict[str, StrictInt] = Field(description="Documents by access level")
-    __properties: ClassVar[list[str]] = ["total_documents", "documents_by_status", "documents_by_type", "avg_processing_time_seconds", "processing_success_rate", "total_chunks", "avg_chunks_per_document", "total_storage_bytes", "avg_document_size_bytes", "storage_by_type", "total_searches", "avg_search_results", "popular_search_terms", "total_views", "most_viewed_documents", "documents_by_access_level"]
+    most_viewed_documents: List[Dict[str, Any]] = Field(description="Most viewed documents")
+    documents_by_access_level: Dict[str, StrictInt] = Field(description="Documents by access level")
+    __properties: ClassVar[List[str]] = ["total_documents", "documents_by_status", "documents_by_type", "avg_processing_time_seconds", "processing_success_rate", "total_chunks", "avg_chunks_per_document", "total_storage_bytes", "avg_document_size_bytes", "storage_by_type", "total_searches", "avg_search_results", "popular_search_terms", "total_views", "most_viewed_documents", "documents_by_access_level"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -68,11 +62,11 @@ class DocumentAnalyticsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentAnalyticsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -82,7 +76,7 @@ class DocumentAnalyticsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -93,7 +87,7 @@ class DocumentAnalyticsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentAnalyticsResponse from a dict"""
         if obj is None:
             return None

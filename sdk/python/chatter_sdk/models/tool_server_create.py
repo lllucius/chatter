@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,24 +14,16 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictStr,
-    field_validator,
-)
-from typing import Annotated, Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.o_auth_config_schema import OAuthConfigSchema
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ToolServerCreate(BaseModel):
     """
@@ -38,18 +31,18 @@ class ToolServerCreate(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Server name")
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Display name")
-    description: StrictStr | None = None
-    base_url: Annotated[str, Field(min_length=1, strict=True, max_length=2083)] | None = None
-    transport_type: Annotated[str, Field(strict=True)] | None = Field(default="http", description="Transport type: http, sse, stdio, or websocket")
-    oauth_config: OAuthConfigSchema | None = None
-    headers: dict[str, StrictStr] | None = None
-    timeout: Annotated[int, Field(le=300, strict=True, ge=5)] | None = Field(default=30, description="Request timeout in seconds")
-    auto_start: StrictBool | None = Field(default=True, description="Auto-connect to server on system startup")
-    auto_update: StrictBool | None = Field(default=True, description="Auto-update server capabilities")
-    max_failures: Annotated[int, Field(le=10, strict=True, ge=1)] | None = Field(default=3, description="Maximum consecutive failures before disabling")
-    __properties: ClassVar[list[str]] = ["name", "display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
+    description: Optional[StrictStr] = None
+    base_url: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=2083)]] = None
+    transport_type: Optional[Annotated[str, Field(strict=True)]] = Field(default='http', description="Transport type: http, sse, stdio, or websocket")
+    oauth_config: Optional[OAuthConfigSchema] = None
+    headers: Optional[Dict[str, StrictStr]] = None
+    timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=5)]] = Field(default=30, description="Request timeout in seconds")
+    auto_start: Optional[StrictBool] = Field(default=True, description="Auto-connect to server on system startup")
+    auto_update: Optional[StrictBool] = Field(default=True, description="Auto-update server capabilities")
+    max_failures: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = Field(default=3, description="Maximum consecutive failures before disabling")
+    __properties: ClassVar[List[str]] = ["name", "display_name", "description", "base_url", "transport_type", "oauth_config", "headers", "timeout", "auto_start", "auto_update", "max_failures"]
 
-    @field_validator("transport_type")
+    @field_validator('transport_type')
     def transport_type_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if value is None:
@@ -76,11 +69,11 @@ class ToolServerCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ToolServerCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -90,7 +83,7 @@ class ToolServerCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -100,31 +93,31 @@ class ToolServerCreate(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of oauth_config
         if self.oauth_config:
-            _dict["oauth_config"] = self.oauth_config.to_dict()
+            _dict['oauth_config'] = self.oauth_config.to_dict()
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if base_url (nullable) is None
         # and model_fields_set contains the field
         if self.base_url is None and "base_url" in self.model_fields_set:
-            _dict["base_url"] = None
+            _dict['base_url'] = None
 
         # set to None if oauth_config (nullable) is None
         # and model_fields_set contains the field
         if self.oauth_config is None and "oauth_config" in self.model_fields_set:
-            _dict["oauth_config"] = None
+            _dict['oauth_config'] = None
 
         # set to None if headers (nullable) is None
         # and model_fields_set contains the field
         if self.headers is None and "headers" in self.model_fields_set:
-            _dict["headers"] = None
+            _dict['headers'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ToolServerCreate from a dict"""
         if obj is None:
             return None
@@ -137,7 +130,7 @@ class ToolServerCreate(BaseModel):
             "display_name": obj.get("display_name"),
             "description": obj.get("description"),
             "base_url": obj.get("base_url"),
-            "transport_type": obj.get("transport_type") if obj.get("transport_type") is not None else "http",
+            "transport_type": obj.get("transport_type") if obj.get("transport_type") is not None else 'http',
             "oauth_config": OAuthConfigSchema.from_dict(obj["oauth_config"]) if obj.get("oauth_config") is not None else None,
             "headers": obj.get("headers"),
             "timeout": obj.get("timeout") if obj.get("timeout") is not None else 30,

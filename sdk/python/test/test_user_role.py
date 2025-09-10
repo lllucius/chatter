@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.user_role import UserRole
 
 class TestUserRole(unittest.TestCase):
     """UserRole unit test stubs"""
@@ -29,5 +30,5 @@ class TestUserRole(unittest.TestCase):
         """Test UserRole"""
         # inst = UserRole()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

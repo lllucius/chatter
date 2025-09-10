@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.tool_access_level import ToolAccessLevel
 
 class TestToolAccessLevel(unittest.TestCase):
     """ToolAccessLevel unit test stubs"""
@@ -29,5 +30,5 @@ class TestToolAccessLevel(unittest.TestCase):
         """Test ToolAccessLevel"""
         # inst = ToolAccessLevel()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

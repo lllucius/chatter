@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,24 +14,15 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional, Union
 from chatter_sdk.models.document_response import DocumentResponse
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentSearchResult(BaseModel):
     """
@@ -38,11 +30,11 @@ class DocumentSearchResult(BaseModel):
     """ # noqa: E501
     document_id: StrictStr = Field(description="Document ID")
     chunk_id: StrictStr = Field(description="Chunk ID")
-    score: StrictFloat | StrictInt = Field(description="Similarity score")
+    score: Union[StrictFloat, StrictInt] = Field(description="Similarity score")
     content: StrictStr = Field(description="Matching content")
-    metadata: dict[str, Any] | None = None
+    metadata: Optional[Dict[str, Any]] = None
     document: DocumentResponse
-    __properties: ClassVar[list[str]] = ["document_id", "chunk_id", "score", "content", "metadata", "document"]
+    __properties: ClassVar[List[str]] = ["document_id", "chunk_id", "score", "content", "metadata", "document"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -61,11 +53,11 @@ class DocumentSearchResult(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentSearchResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -75,7 +67,7 @@ class DocumentSearchResult(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -85,16 +77,16 @@ class DocumentSearchResult(BaseModel):
         )
         # override the default output from pydantic by calling `to_dict()` of document
         if self.document:
-            _dict["document"] = self.document.to_dict()
+            _dict['document'] = self.document.to_dict()
         # set to None if metadata (nullable) is None
         # and model_fields_set contains the field
         if self.metadata is None and "metadata" in self.model_fields_set:
-            _dict["metadata"] = None
+            _dict['metadata'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentSearchResult from a dict"""
         if obj is None:
             return None

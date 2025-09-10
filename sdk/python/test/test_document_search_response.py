@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,10 +15,7 @@
 
 import unittest
 
-from chatter_sdk.models.document_search_response import (
-    DocumentSearchResponse,
-)
-
+from chatter_sdk.models.document_search_response import DocumentSearchResponse
 
 class TestDocumentSearchResponse(unittest.TestCase):
     """DocumentSearchResponse unit test stubs"""
@@ -131,5 +129,5 @@ class TestDocumentSearchResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

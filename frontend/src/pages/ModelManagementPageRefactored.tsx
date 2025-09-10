@@ -147,6 +147,18 @@ const ModelManagementPageRefactored: React.FC = () => {
       ),
     },
     {
+      id: 'api_key_required',
+      label: 'API Key',
+      render: (value: boolean) => (
+        <Chip
+          size="small"
+          label={value ? 'Required' : 'Optional'}
+          color={value ? 'warning' : 'default'}
+          variant="outlined"
+        />
+      ),
+    },
+    {
       id: 'description',
       label: 'Description',
       render: (value: string) => (

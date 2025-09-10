@@ -163,10 +163,29 @@ class ModelRegistryService:
         self, provider_data: ProviderCreate
     ) -> Provider:
         """Create a new provider."""
+        # Defensive logging to help debug field saving issues
+        logger.debug(
+            "Creating provider",
+            name=provider_data.name,
+            description=provider_data.description,
+            api_key_required=provider_data.api_key_required,
+            is_active=provider_data.is_active,
+        )
+        
         provider = Provider(**provider_data.model_dump())
         self.session.add(provider)
         await self.session.commit()
         await self.session.refresh(provider)
+        
+        # Log the created provider to verify fields were saved
+        logger.debug(
+            "Provider created successfully",
+            id=provider.id,
+            description=provider.description,
+            api_key_required=provider.api_key_required,
+            is_active=provider.is_active,
+        )
+        
         return provider
 
     async def update_provider(
@@ -178,6 +197,16 @@ class ModelRegistryService:
             return None
 
         update_data = provider_data.model_dump(exclude_unset=True)
+        
+        # Defensive logging to help debug field saving issues
+        logger.debug(
+            "Updating provider",
+            provider_id=provider_id,
+            update_fields=list(update_data.keys()),
+            description=update_data.get("description"),
+            api_key_required=update_data.get("api_key_required"),
+            is_active=update_data.get("is_active"),
+        )
 
         # Validate that we're not trying to update critical read-only fields
         if 'name' in update_data or 'provider_type' in update_data:
@@ -192,6 +221,16 @@ class ModelRegistryService:
 
         await self.session.commit()
         await self.session.refresh(provider)
+        
+        # Log the updated provider to verify fields were saved
+        logger.debug(
+            "Provider updated successfully",
+            id=provider.id,
+            description=provider.description,
+            api_key_required=provider.api_key_required,
+            is_active=provider.is_active,
+        )
+        
         return provider
 
     async def delete_provider(self, provider_id: str) -> bool:

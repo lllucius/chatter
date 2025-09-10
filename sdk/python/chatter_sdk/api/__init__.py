@@ -16,6 +16,8 @@ from chatter_sdk.api.plugins_api import PluginsApi
 from chatter_sdk.api.profiles_api import ProfilesApi
 from chatter_sdk.api.prompts_api import PromptsApi
 from chatter_sdk.api.tool_servers_api import ToolServersApi
+from chatter_sdk.api.workflows_api import WorkflowsApi
 from chatter_sdk.api.agents_api import AgentsApi
 from chatter_sdk.api.default_api import DefaultApi
+from chatter_sdk.api.workflows_api import WorkflowsApi
 

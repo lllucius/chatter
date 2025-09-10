@@ -88,11 +88,32 @@ class PythonSDKGenerator:
                 return False
 
             print("✅ Python SDK generation completed")
+            
+            # Fix license issue in pyproject.toml
+            self._fix_pyproject_toml()
+            
             return True
 
         except Exception as e:
             print(f"❌ Python SDK generation failed: {e}")
             return False
+
+    def _fix_pyproject_toml(self) -> None:
+        """Fix issues in the generated pyproject.toml file."""
+        pyproject_path = self.config.output_dir / "pyproject.toml"
+        if pyproject_path.exists():
+            try:
+                # Read the file
+                content = pyproject_path.read_text()
+                
+                # Replace NoLicense with MIT
+                content = content.replace('license = "NoLicense"', 'license = "MIT"')
+                
+                # Write back
+                pyproject_path.write_text(content)
+                print("🔧 Fixed license in pyproject.toml")
+            except Exception as e:
+                print(f"⚠️  Could not fix pyproject.toml: {e}")
 
     def validate(self) -> bool:
         """Validate that the generated Python SDK is complete and functional.

@@ -7,7 +7,7 @@ Schema for authentication token response.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **access_token** | **str** | JWT access token | 
-**refresh_token** | **str** | JWT refresh token | [optional] 
+**refresh_token** | **str** | JWT refresh token | 
 **token_type** | **str** | Token type | [optional] [default to 'bearer']
 **expires_in** | **int** | Token expiration time in seconds | 
 **user** | [**UserResponse**](UserResponse.md) |  | 

@@ -65,19 +65,25 @@ cd chatter
 pip install -e .
 ```
 
-3. Set up environment variables:
+3. Generate and install the Python SDK (required for CLI):
+```bash
+python scripts/generate_sdks.py --python
+pip install -e sdk/python/
+```
+
+4. Set up environment variables:
 ```bash
 cp .env.example .env
 # Edit .env with your configuration
 ```
 
-4. Initialize the database:
+5. Initialize the database:
 ```bash
 chatter db init
 chatter db migrate
 ```
 
-5. Start the development server:
+6. Start the development server:
 ```bash
 chatter serve --reload
 ```

@@ -102,6 +102,7 @@ def get_openapi_generator_config(config: Any) -> dict[str, Any]:
             "infoEmail": config.author_email,
             "library": "asyncio" if config.use_asyncio else "urllib3",
             "useAsyncio": config.use_asyncio,
+            "packageLicense": "MIT",
         }
 
     elif isinstance(config, TypeScriptSDKConfig):

@@ -15,10 +15,10 @@
 
 import unittest
 
-from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse
+from chatter_sdk.models.chatter_schemas_chat_workflow_templates_response import ChatterSchemasChatWorkflowTemplatesResponse
 
-class TestWorkflowTemplatesResponse(unittest.TestCase):
-    """WorkflowTemplatesResponse unit test stubs"""
+class TestChatterSchemasChatWorkflowTemplatesResponse(unittest.TestCase):
+    """ChatterSchemasChatWorkflowTemplatesResponse unit test stubs"""
 
     def setUp(self):
         pass
@@ -26,16 +26,16 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> WorkflowTemplatesResponse:
-        """Test WorkflowTemplatesResponse
+    def make_instance(self, include_optional) -> ChatterSchemasChatWorkflowTemplatesResponse:
+        """Test ChatterSchemasChatWorkflowTemplatesResponse
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `WorkflowTemplatesResponse`
+        # uncomment below to create an instance of `ChatterSchemasChatWorkflowTemplatesResponse`
         """
-        model = WorkflowTemplatesResponse()
+        model = ChatterSchemasChatWorkflowTemplatesResponse()
         if include_optional:
-            return WorkflowTemplatesResponse(
+            return ChatterSchemasChatWorkflowTemplatesResponse(
                 templates = {
                     'key' : chatter_sdk.models.workflow_template_info.WorkflowTemplateInfo(
                         name = '', 
@@ -52,7 +52,7 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
                 total_count = 56
             )
         else:
-            return WorkflowTemplatesResponse(
+            return ChatterSchemasChatWorkflowTemplatesResponse(
                 templates = {
                     'key' : chatter_sdk.models.workflow_template_info.WorkflowTemplateInfo(
                         name = '', 
@@ -70,8 +70,8 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
         )
         """
 
-    def testWorkflowTemplatesResponse(self):
-        """Test WorkflowTemplatesResponse"""
+    def testChatterSchemasChatWorkflowTemplatesResponse(self):
+        """Test ChatterSchemasChatWorkflowTemplatesResponse"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

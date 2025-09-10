@@ -49,16 +49,18 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
   useEffect(() => {
     if (open) {
       if (mode === 'edit' && initialData) {
+        // Defensive programming: Ensure all fields are properly extracted from initialData
         setFormData({
           name: initialData.name || '',
           provider_type: initialData.provider_type || 'openai',
           display_name: initialData.display_name || '',
-          description: initialData.description || '',
-          api_key_required: initialData.api_key_required ?? true,
+          description: initialData.description ?? '',  // Use nullish coalescing for description
+          api_key_required: initialData.api_key_required ?? true,  // Proper boolean handling
           base_url: initialData.base_url || '',
-          is_active: initialData.is_active ?? true,
+          is_active: initialData.is_active ?? true,  // Proper boolean handling
         });
       } else {
+        // Reset to default values for create mode
         setFormData({
           name: '',
           provider_type: 'openai',
@@ -75,7 +77,18 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
   const handleSubmit = async () => {
     try {
       setSaving(true);
-      await onSubmit(formData);
+      
+      // Defensive programming: Ensure all fields are properly defined
+      const safeFormData = {
+        ...formData,
+        // Ensure description is always a string (empty string if null/undefined)
+        description: formData.description ?? '',
+        // Ensure boolean fields are properly typed (preserve false values)
+        api_key_required: formData.api_key_required ?? true,
+        is_active: formData.is_active ?? true,
+      };
+      
+      await onSubmit(safeFormData);
     } finally {
       setSaving(false);
     }

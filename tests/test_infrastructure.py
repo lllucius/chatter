@@ -54,7 +54,7 @@ class TestDatabaseFixtures:
     async def test_app_fixture(self, app):
         """Verify FastAPI app fixture is working."""
         assert app is not None
-        assert hasattr(app, 'dependency_overrides')
+        assert hasattr(app, "dependency_overrides")
 
     @pytest.mark.integration
     async def test_client_fixture(self, client):

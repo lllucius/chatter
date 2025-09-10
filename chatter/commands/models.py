@@ -1,13 +1,12 @@
 """Model registry and management commands for the CLI."""
 
-import json
+
 import typer
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Model Registry Commands
 models_app = typer.Typer(help="Model registry and management commands")
@@ -37,7 +36,7 @@ async def list_model_providers():
                 provider.display_name,
                 str(provider.provider_type),
                 "✓" if provider.is_active else "✗",
-                (provider.description or 'No description')[:50],
+                (provider.description or "No description")[:50],
             )
 
         console.print(table)
@@ -67,7 +66,7 @@ async def create_provider(
             console.print(f"❌ [red]Invalid provider type: {provider_type}[/red]")
             console.print("Valid types are: openai, anthropic, google, cohere, mistral")
             return
-            
+
         provider_data = ProviderCreate(
             name=name,
             provider_type=provider_type_enum,
@@ -130,17 +129,17 @@ async def update_provider(
 
     update_data = {}
     if display_name:
-        update_data['display_name'] = display_name
+        update_data["display_name"] = display_name
     if description is not None:  # Allow empty string to clear description
-        update_data['description'] = description
+        update_data["description"] = description
     if api_key_required is not None:
-        update_data['api_key_required'] = api_key_required
+        update_data["api_key_required"] = api_key_required
     if base_url is not None:  # Allow empty string to clear base_url
-        update_data['base_url'] = base_url
+        update_data["base_url"] = base_url
     if is_active is not None:
-        update_data['is_active'] = is_active
+        update_data["is_active"] = is_active
     if is_default is not None:
-        update_data['is_default'] = is_default
+        update_data["is_default"] = is_default
 
     if not update_data:
         console.print("❌ [red]No updates specified[/red]")
@@ -209,7 +208,7 @@ async def list_models(
             table.add_row(
                 str(model.id),
                 model.display_name,
-                model.provider.name if model.provider else 'Unknown',
+                model.provider.name if model.provider else "Unknown",
                 str(model.model_type),
                 "✓" if model.is_active else "✗",
             )
@@ -268,7 +267,7 @@ async def register_model(
             console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
             console.print("Valid types are: chat, embedding, text, completion")
             return
-            
+
         model_data = ModelDefCreate(
             name=name,
             model_type=model_type_enum,
@@ -330,15 +329,15 @@ async def update_model(
     """Update a model's information."""
     update_data = {}
     if name:
-        update_data['name'] = name
+        update_data["name"] = name
     if description:
-        update_data['description'] = description
+        update_data["description"] = description
     if status:
-        update_data['status'] = status
+        update_data["status"] = status
     if max_tokens:
-        update_data['max_tokens'] = max_tokens
+        update_data["max_tokens"] = max_tokens
     if cost_per_token is not None:
-        update_data['cost_per_token'] = cost_per_token
+        update_data["cost_per_token"] = cost_per_token
 
     if not update_data:
         console.print("❌ [red]No updates specified[/red]")
@@ -399,7 +398,7 @@ async def create_model(
             console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
             console.print("Valid types are: chat, embedding, text, completion")
             return
-            
+
         model_data = ModelDefCreate(
             name=name,
             model_type=model_type_enum,
@@ -459,15 +458,15 @@ async def update_model_detailed(
     """Update a model."""
     update_data = {}
     if name:
-        update_data['name'] = name
+        update_data["name"] = name
     if description:
-        update_data['description'] = description
+        update_data["description"] = description
     if status:
-        update_data['status'] = status
+        update_data["status"] = status
     if max_tokens:
-        update_data['max_tokens'] = max_tokens
+        update_data["max_tokens"] = max_tokens
     if cost_per_token is not None:
-        update_data['cost_per_token'] = cost_per_token
+        update_data["cost_per_token"] = cost_per_token
 
     if not update_data:
         console.print("❌ [red]No updates specified[/red]")
@@ -528,10 +527,10 @@ async def list_embedding_spaces():
         for space in response.spaces:
             table.add_row(
                 space.name,
-                space.model.display_name if space.model else 'Unknown',
+                space.model.display_name if space.model else "Unknown",
                 str(space.dimensions),
                 "✓" if space.is_default else "✗",
-                (space.description or 'No description')[:50],
+                (space.description or "No description")[:50],
             )
 
         console.print(table)
@@ -547,7 +546,9 @@ async def create_embedding_space(
     is_default: bool = typer.Option(False, help="Whether this is the default embedding space"),
 ):
     """Create a new embedding space."""
-    from chatter_sdk.models.embedding_space_create import EmbeddingSpaceCreate
+    from chatter_sdk.models.embedding_space_create import (
+        EmbeddingSpaceCreate,
+    )
 
     async with get_client() as sdk_client:
         space_data = EmbeddingSpaceCreate(
@@ -599,15 +600,17 @@ async def update_embedding_space(
     is_default: bool = typer.Option(None, help="Whether this is the default embedding space"),
 ):
     """Update an embedding space."""
-    from chatter_sdk.models.embedding_space_update import EmbeddingSpaceUpdate
+    from chatter_sdk.models.embedding_space_update import (
+        EmbeddingSpaceUpdate,
+    )
 
     update_data = {}
     if name:
-        update_data['name'] = name
+        update_data["name"] = name
     if description is not None:  # Allow empty string to clear description
-        update_data['description'] = description
+        update_data["description"] = description
     if is_default is not None:
-        update_data['is_default'] = is_default
+        update_data["is_default"] = is_default
 
     if not update_data:
         console.print("❌ [red]No updates specified[/red]")

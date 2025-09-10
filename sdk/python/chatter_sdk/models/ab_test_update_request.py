@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,31 +13,32 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Annotated, Self
+
 from chatter_sdk.models.test_status import TestStatus
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ABTestUpdateRequest(BaseModel):
     """
     Request schema for updating an A/B test.
     """ # noqa: E501
-    name: Optional[StrictStr] = None
-    description: Optional[StrictStr] = None
-    status: Optional[TestStatus] = None
-    duration_days: Optional[Annotated[int, Field(le=365, strict=True, ge=1)]] = None
-    min_sample_size: Optional[Annotated[int, Field(strict=True, ge=10)]] = None
-    confidence_level: Optional[Union[Annotated[float, Field(le=0.99, strict=True, ge=0.5)], Annotated[int, Field(le=0, strict=True, ge=1)]]] = None
-    traffic_percentage: Optional[Union[Annotated[float, Field(le=100.0, strict=True, ge=0.1)], Annotated[int, Field(le=100, strict=True, ge=1)]]] = None
-    tags: Optional[List[StrictStr]] = None
-    metadata: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "status", "duration_days", "min_sample_size", "confidence_level", "traffic_percentage", "tags", "metadata"]
+    name: StrictStr | None = None
+    description: StrictStr | None = None
+    status: TestStatus | None = None
+    duration_days: Annotated[int, Field(le=365, strict=True, ge=1)] | None = None
+    min_sample_size: Annotated[int, Field(strict=True, ge=10)] | None = None
+    confidence_level: Annotated[float, Field(le=0.99, strict=True, ge=0.5)] | Annotated[int, Field(le=0, strict=True, ge=1)] | None = None
+    traffic_percentage: Annotated[float, Field(le=100.0, strict=True, ge=0.1)] | Annotated[int, Field(le=100, strict=True, ge=1)] | None = None
+    tags: list[StrictStr] | None = None
+    metadata: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["name", "description", "status", "duration_days", "min_sample_size", "confidence_level", "traffic_percentage", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -57,11 +57,11 @@ class ABTestUpdateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ABTestUpdateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -71,7 +71,7 @@ class ABTestUpdateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -82,52 +82,52 @@ class ABTestUpdateRequest(BaseModel):
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
         if self.name is None and "name" in self.model_fields_set:
-            _dict['name'] = None
+            _dict["name"] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if status (nullable) is None
         # and model_fields_set contains the field
         if self.status is None and "status" in self.model_fields_set:
-            _dict['status'] = None
+            _dict["status"] = None
 
         # set to None if duration_days (nullable) is None
         # and model_fields_set contains the field
         if self.duration_days is None and "duration_days" in self.model_fields_set:
-            _dict['duration_days'] = None
+            _dict["duration_days"] = None
 
         # set to None if min_sample_size (nullable) is None
         # and model_fields_set contains the field
         if self.min_sample_size is None and "min_sample_size" in self.model_fields_set:
-            _dict['min_sample_size'] = None
+            _dict["min_sample_size"] = None
 
         # set to None if confidence_level (nullable) is None
         # and model_fields_set contains the field
         if self.confidence_level is None and "confidence_level" in self.model_fields_set:
-            _dict['confidence_level'] = None
+            _dict["confidence_level"] = None
 
         # set to None if traffic_percentage (nullable) is None
         # and model_fields_set contains the field
         if self.traffic_percentage is None and "traffic_percentage" in self.model_fields_set:
-            _dict['traffic_percentage'] = None
+            _dict["traffic_percentage"] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict['tags'] = None
+            _dict["tags"] = None
 
         # set to None if metadata (nullable) is None
         # and model_fields_set contains the field
         if self.metadata is None and "metadata" in self.model_fields_set:
-            _dict['metadata'] = None
+            _dict["metadata"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ABTestUpdateRequest from a dict"""
         if obj is None:
             return None

@@ -22,16 +22,16 @@ class ValidationResult:
         self.warnings = warnings or []
         self.metadata = metadata or {}
 
-    def add_error(self, error: ValidationError):
+    def add_error(self, error: ValidationError) -> None:
         """Add a validation error."""
         self.errors.append(error)
         self.is_valid = False
 
-    def add_warning(self, warning: str):
+    def add_warning(self, warning: str) -> None:
         """Add a validation warning."""
         self.warnings.append(warning)
 
-    def merge(self, other: 'ValidationResult'):
+    def merge(self, other: "ValidationResult") -> None:
         """Merge another validation result into this one."""
         if not other.is_valid:
             self.is_valid = False

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -13,7 +12,7 @@
 """  # noqa: E501
 
 
-from setuptools import setup, find_packages  # noqa: H301
+from setuptools import find_packages, setup  # noqa: H301
 
 # To install the library, run the following
 #
@@ -44,7 +43,7 @@ setup(
     install_requires=REQUIRES,
     packages=find_packages(exclude=["test", "tests"]),
     include_package_data=True,
-    long_description_content_type='text/markdown',
+    long_description_content_type="text/markdown",
     long_description="""\
     Advanced AI Chatbot Backend API Platform
     """,  # noqa: E501

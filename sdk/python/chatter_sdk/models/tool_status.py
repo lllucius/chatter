@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class ToolStatus(str, Enum):
@@ -27,10 +28,10 @@ class ToolStatus(str, Enum):
     """
     allowed enum values
     """
-    ENABLED = 'enabled'
-    DISABLED = 'disabled'
-    UNAVAILABLE = 'unavailable'
-    ERROR = 'error'
+    ENABLED = "enabled"
+    DISABLED = "disabled"
+    UNAVAILABLE = "unavailable"
+    ERROR = "error"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

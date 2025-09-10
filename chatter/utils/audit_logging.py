@@ -7,7 +7,7 @@ from enum import Enum
 from typing import Any
 
 from fastapi import Request
-from sqlalchemy import Column, DateTime, Integer, String, Text
+from sqlalchemy import DateTime, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
@@ -76,7 +76,7 @@ class AuditLog(Base):
 
     # Override the ULID id with an Integer for audit logs (traditional audit approach)
     id: Mapped[int] = mapped_column(Integer, primary_key=True, autoincrement=True)
-    
+
     # Event identification
     event_id: Mapped[str] = mapped_column(
         String(36), unique=True, nullable=False, index=True
@@ -84,26 +84,26 @@ class AuditLog(Base):
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
     )
-    
+
     # Event details  
     event_type: Mapped[str] = mapped_column(String(50), nullable=False, index=True)
     result: Mapped[str] = mapped_column(String(20), nullable=False)
-    
+
     # User and session info
     user_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
     session_id: Mapped[str | None] = mapped_column(String(100), nullable=True)
-    
+
     # Request context
     ip_address: Mapped[str | None] = mapped_column(
         String(45), nullable=True, index=True  # Support IPv6
     )
     user_agent: Mapped[str | None] = mapped_column(String(500), nullable=True)
     request_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    
+
     # Resource info  
     resource_type: Mapped[str | None] = mapped_column(String(50), nullable=True)
     resource_id: Mapped[str | None] = mapped_column(String(36), nullable=True, index=True)
-    
+
     # Additional data
     details: Mapped[str | None] = mapped_column(Text, nullable=True)  # JSON serialized details
     error_message: Mapped[str | None] = mapped_column(Text, nullable=True)

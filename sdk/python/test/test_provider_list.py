@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -16,6 +15,7 @@
 import unittest
 
 from chatter_sdk.models.provider_list import ProviderList
+
 
 class TestProviderList(unittest.TestCase):
     """ProviderList unit test stubs"""
@@ -83,5 +83,5 @@ class TestProviderList(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

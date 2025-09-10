@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,48 +13,58 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
+from typing import Self
+
 from chatter_sdk.models.conversation_status import ConversationStatus
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ConversationResponse(BaseModel):
     """
     Schema for conversation response.
     """ # noqa: E501
     title: StrictStr = Field(description="Conversation title")
-    description: Optional[StrictStr] = None
+    description: StrictStr | None = None
     id: StrictStr = Field(description="Conversation ID")
     user_id: StrictStr = Field(description="User ID")
-    profile_id: Optional[StrictStr] = None
+    profile_id: StrictStr | None = None
     status: ConversationStatus
-    llm_provider: Optional[StrictStr] = None
-    llm_model: Optional[StrictStr] = None
-    temperature: Optional[Union[StrictFloat, StrictInt]] = None
-    max_tokens: Optional[StrictInt] = None
+    llm_provider: StrictStr | None = None
+    llm_model: StrictStr | None = None
+    temperature: StrictFloat | StrictInt | None = None
+    max_tokens: StrictInt | None = None
     enable_retrieval: StrictBool = Field(description="Retrieval enabled")
     message_count: StrictInt = Field(description="Number of messages")
     total_tokens: StrictInt = Field(description="Total tokens used")
-    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost")
-    system_prompt: Optional[StrictStr] = None
+    total_cost: StrictFloat | StrictInt = Field(description="Total cost")
+    system_prompt: StrictStr | None = None
     context_window: StrictInt = Field(description="Context window size")
     memory_enabled: StrictBool = Field(description="Memory enabled")
-    memory_strategy: Optional[StrictStr] = None
+    memory_strategy: StrictStr | None = None
     retrieval_limit: StrictInt = Field(description="Retrieval limit")
-    retrieval_score_threshold: Union[StrictFloat, StrictInt] = Field(description="Retrieval score threshold")
-    tags: Optional[List[StrictStr]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
-    workflow_config: Optional[Dict[str, Any]] = None
+    retrieval_score_threshold: StrictFloat | StrictInt = Field(description="Retrieval score threshold")
+    tags: list[StrictStr] | None = None
+    extra_metadata: dict[str, Any] | None = None
+    workflow_config: dict[str, Any] | None = None
     created_at: datetime = Field(description="Creation timestamp")
     updated_at: datetime = Field(description="Last update timestamp")
-    last_message_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["title", "description", "id", "user_id", "profile_id", "status", "llm_provider", "llm_model", "temperature", "max_tokens", "enable_retrieval", "message_count", "total_tokens", "total_cost", "system_prompt", "context_window", "memory_enabled", "memory_strategy", "retrieval_limit", "retrieval_score_threshold", "tags", "extra_metadata", "workflow_config", "created_at", "updated_at", "last_message_at"]
+    last_message_at: datetime | None = None
+    __properties: ClassVar[list[str]] = ["title", "description", "id", "user_id", "profile_id", "status", "llm_provider", "llm_model", "temperature", "max_tokens", "enable_retrieval", "message_count", "total_tokens", "total_cost", "system_prompt", "context_window", "memory_enabled", "memory_strategy", "retrieval_limit", "retrieval_score_threshold", "tags", "extra_metadata", "workflow_config", "created_at", "updated_at", "last_message_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -74,11 +83,11 @@ class ConversationResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ConversationResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -88,7 +97,7 @@ class ConversationResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -99,67 +108,67 @@ class ConversationResponse(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if profile_id (nullable) is None
         # and model_fields_set contains the field
         if self.profile_id is None and "profile_id" in self.model_fields_set:
-            _dict['profile_id'] = None
+            _dict["profile_id"] = None
 
         # set to None if llm_provider (nullable) is None
         # and model_fields_set contains the field
         if self.llm_provider is None and "llm_provider" in self.model_fields_set:
-            _dict['llm_provider'] = None
+            _dict["llm_provider"] = None
 
         # set to None if llm_model (nullable) is None
         # and model_fields_set contains the field
         if self.llm_model is None and "llm_model" in self.model_fields_set:
-            _dict['llm_model'] = None
+            _dict["llm_model"] = None
 
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
-            _dict['temperature'] = None
+            _dict["temperature"] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict['max_tokens'] = None
+            _dict["max_tokens"] = None
 
         # set to None if system_prompt (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt is None and "system_prompt" in self.model_fields_set:
-            _dict['system_prompt'] = None
+            _dict["system_prompt"] = None
 
         # set to None if memory_strategy (nullable) is None
         # and model_fields_set contains the field
         if self.memory_strategy is None and "memory_strategy" in self.model_fields_set:
-            _dict['memory_strategy'] = None
+            _dict["memory_strategy"] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict['tags'] = None
+            _dict["tags"] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict['extra_metadata'] = None
+            _dict["extra_metadata"] = None
 
         # set to None if workflow_config (nullable) is None
         # and model_fields_set contains the field
         if self.workflow_config is None and "workflow_config" in self.model_fields_set:
-            _dict['workflow_config'] = None
+            _dict["workflow_config"] = None
 
         # set to None if last_message_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_message_at is None and "last_message_at" in self.model_fields_set:
-            _dict['last_message_at'] = None
+            _dict["last_message_at"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ConversationResponse from a dict"""
         if obj is None:
             return None

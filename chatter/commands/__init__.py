@@ -6,17 +6,15 @@ import os
 import sys
 from contextlib import asynccontextmanager
 
-from rich.console import Console
-from chatter_sdk import ApiClient, Configuration
-from chatter_sdk.exceptions import ApiException
-
 # Import all the API classes that commands might need
 from chatter_sdk import (
     ABTestingApi,
     AgentsApi,
     AnalyticsApi,
+    ApiClient,
     AuthenticationApi,
     ChatApi,
+    Configuration,
     DataManagementApi,
     DocumentsApi,
     EventsApi,
@@ -28,6 +26,8 @@ from chatter_sdk import (
     PromptsApi,
     ToolServersApi,
 )
+from chatter_sdk.exceptions import ApiException
+from rich.console import Console
 
 # Initialize console
 console = Console()
@@ -90,18 +90,18 @@ class ChatterSDKClient:
         """Save authentication token to config file."""
         import json
         from pathlib import Path
-        
+
         config_dir = Path.home() / ".chatter"
         config_dir.mkdir(exist_ok=True)
         config_file = config_dir / "config.json"
-        
+
         config = {}
         if config_file.exists():
             try:
                 config = json.loads(config_file.read_text())
             except (json.JSONDecodeError, FileNotFoundError):
                 config = {}
-        
+
         config["access_token"] = token
         config_file.write_text(json.dumps(config, indent=2))
 
@@ -109,16 +109,16 @@ class ChatterSDKClient:
         """Load authentication token from config file."""
         import json
         from pathlib import Path
-        
+
         config_file = Path.home() / ".chatter" / "config.json"
-        
+
         if config_file.exists():
             try:
                 config = json.loads(config_file.read_text())
                 return config.get("access_token")
             except (json.JSONDecodeError, FileNotFoundError):
                 pass
-        
+
         return None
 
 
@@ -126,14 +126,14 @@ class ChatterSDKClient:
 async def get_client() -> ChatterSDKClient:
     """Get client instance with token loading."""
     client = ChatterSDKClient()
-    
+
     # Try to load token from config if not provided via env
     if not client.access_token:
         stored_token = client.load_token()
         if stored_token:
             client.access_token = stored_token
             client.configuration.access_token = stored_token
-    
+
     try:
         yield client
     finally:
@@ -154,22 +154,22 @@ def run_async(async_func):
             elif e.status == 404:
                 console.print("[red]Resource not found.[/red]")
                 console.print(f"[dim]Status: {e.status}[/dim]")
-                if hasattr(e, 'body') and e.body:
+                if hasattr(e, "body") and e.body:
                     console.print(f"[dim]Details: {e.body}[/dim]")
                 sys.exit(1)
             elif e.status >= 500:
                 console.print("[red]Server error occurred.[/red]")
                 console.print(f"[dim]Status: {e.status}[/dim]")
-                if hasattr(e, 'reason') and e.reason:
+                if hasattr(e, "reason") and e.reason:
                     console.print(f"[dim]Details: {e.reason}[/dim]")
                 sys.exit(1)
             else:
                 console.print(f"[red]API error: {e.status} - {e.reason}[/red]")
-                if hasattr(e, 'body') and e.body:
+                if hasattr(e, "body") and e.body:
                     console.print(f"[dim]Details: {e.body}[/dim]")
                 sys.exit(1)
         except Exception as e:
             console.print(f"[red]Unexpected error: {e}[/red]")
             sys.exit(1)
-    
+
     return wrapper

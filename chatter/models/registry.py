@@ -61,11 +61,11 @@ class Provider(Base):
     __table_args__ = (
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "display_name != ''",
-            name='check_display_name_not_empty',
+            name="check_display_name_not_empty",
         ),
     )
 
@@ -110,39 +110,39 @@ class ModelDef(Base):
     # Constraints
     __table_args__ = (
         CheckConstraint(
-            'max_tokens IS NULL OR max_tokens > 0',
-            name='check_max_tokens_positive',
+            "max_tokens IS NULL OR max_tokens > 0",
+            name="check_max_tokens_positive",
         ),
         CheckConstraint(
-            'context_length IS NULL OR context_length > 0',
-            name='check_context_length_positive',
+            "context_length IS NULL OR context_length > 0",
+            name="check_context_length_positive",
         ),
         CheckConstraint(
-            'dimensions IS NULL OR dimensions > 0',
-            name='check_dimensions_positive',
+            "dimensions IS NULL OR dimensions > 0",
+            name="check_dimensions_positive",
         ),
         CheckConstraint(
-            'chunk_size IS NULL OR chunk_size > 0',
-            name='check_chunk_size_positive',
+            "chunk_size IS NULL OR chunk_size > 0",
+            name="check_chunk_size_positive",
         ),
         CheckConstraint(
-            'max_batch_size IS NULL OR max_batch_size > 0',
-            name='check_max_batch_size_positive',
+            "max_batch_size IS NULL OR max_batch_size > 0",
+            name="check_max_batch_size_positive",
         ),
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "display_name != ''",
-            name='check_display_name_not_empty',
+            name="check_display_name_not_empty",
         ),
         CheckConstraint(
             "model_name != ''",
-            name='check_model_name_not_empty',
+            name="check_model_name_not_empty",
         ),
         UniqueConstraint(
-            'provider_id', 'name', name='uq_provider_model_name'
+            "provider_id", "name", name="uq_provider_model_name"
         ),
     )
 
@@ -201,28 +201,28 @@ class EmbeddingSpace(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'base_dimensions > 0',
-            name='check_base_dimensions_positive',
+            "base_dimensions > 0",
+            name="check_base_dimensions_positive",
         ),
         CheckConstraint(
-            'effective_dimensions > 0',
-            name='check_effective_dimensions_positive',
+            "effective_dimensions > 0",
+            name="check_effective_dimensions_positive",
         ),
         CheckConstraint(
-            'effective_dimensions <= base_dimensions',
-            name='check_effective_dimensions_lte_base',
+            "effective_dimensions <= base_dimensions",
+            name="check_effective_dimensions_lte_base",
         ),
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "display_name != ''",
-            name='check_display_name_not_empty',
+            name="check_display_name_not_empty",
         ),
         CheckConstraint(
             "table_name != ''",
-            name='check_table_name_not_empty',
+            name="check_table_name_not_empty",
         ),
     )
 

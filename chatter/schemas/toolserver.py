@@ -82,8 +82,8 @@ class ToolServerBase(BaseModel):
 class ToolServerCreate(ToolServerBase):
     """Schema for creating a tool server."""
 
-    @model_validator(mode='after')
-    def validate_server_config(self) -> 'ToolServerCreate':
+    @model_validator(mode="after")
+    def validate_server_config(self) -> "ToolServerCreate":
         """Validate server configuration based on transport type."""
         if self.transport_type == "stdio":
             if not self.base_url:

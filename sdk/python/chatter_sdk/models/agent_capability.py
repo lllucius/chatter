@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class AgentCapability(str, Enum):
@@ -27,14 +28,14 @@ class AgentCapability(str, Enum):
     """
     allowed enum values
     """
-    NATURAL_LANGUAGE = 'natural_language'
-    MEMORY = 'memory'
-    CODE_GENERATION = 'code_generation'
-    TOOL_USE = 'tool_use'
-    ANALYTICAL = 'analytical'
-    CREATIVE = 'creative'
-    RESEARCH = 'research'
-    SUPPORT = 'support'
+    NATURAL_LANGUAGE = "natural_language"
+    MEMORY = "memory"
+    CODE_GENERATION = "code_generation"
+    TOOL_USE = "tool_use"
+    ANALYTICAL = "analytical"
+    CREATIVE = "creative"
+    RESEARCH = "research"
+    SUPPORT = "support"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

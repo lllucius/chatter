@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,7 @@
 
 import unittest
 
-from chatter_sdk.models.reduction_strategy import ReductionStrategy
+
 
 class TestReductionStrategy(unittest.TestCase):
     """ReductionStrategy unit test stubs"""
@@ -30,5 +29,5 @@ class TestReductionStrategy(unittest.TestCase):
         """Test ReductionStrategy"""
         # inst = ReductionStrategy()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

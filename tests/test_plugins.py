@@ -52,7 +52,7 @@ class TestBasePlugin:
         plugin = TestPlugin(config)
 
         assert plugin.config == config
-        assert hasattr(plugin, 'logger')
+        assert hasattr(plugin, "logger")
         assert plugin.logger is not None
 
     def test_base_plugin_default_config(self):
@@ -75,7 +75,7 @@ class TestBasePlugin:
 
         assert plugin.config == {}
         # Remove reference to nonexistent 'enabled' attribute
-        assert hasattr(plugin, 'logger')
+        assert hasattr(plugin, "logger")
         assert plugin.logger is not None
 
     @pytest.mark.asyncio
@@ -375,7 +375,7 @@ class TestPluginManager:
     def test_get_plugin_directory_custom(self):
         """Test getting custom plugin directory."""
         with patch(
-            'chatter.services.plugins.settings'
+            "chatter.services.plugins.settings"
         ) as mock_settings:
             mock_settings.plugins_directory = "/custom/plugins"
 
@@ -409,7 +409,7 @@ plugin_class = TestFilePlugin
 '''
 
         with tempfile.NamedTemporaryFile(
-            mode='w', suffix='.py', delete=False
+            mode="w", suffix=".py", delete=False
         ) as f:
             f.write(plugin_code)
             plugin_file = Path(f.name)
@@ -453,7 +453,7 @@ class TestFilePlugin(ToolPlugin):
 '''
 
         with tempfile.NamedTemporaryFile(
-            mode='w', suffix='.py', delete=False
+            mode="w", suffix=".py", delete=False
         ) as f:
             f.write(plugin_code)
             plugin_file = Path(f.name)
@@ -884,7 +884,7 @@ plugin_class = LifecycleTestPlugin
 '''
 
         with tempfile.NamedTemporaryFile(
-            mode='w', suffix='.py', delete=False
+            mode="w", suffix=".py", delete=False
         ) as f:
             f.write(plugin_code)
             plugin_file = Path(f.name)
@@ -977,7 +977,7 @@ plugin_class = Plugin2
             # Create and load plugins
             for plugin_name, plugin_code in plugin_codes.items():
                 with tempfile.NamedTemporaryFile(
-                    mode='w', suffix='.py', delete=False
+                    mode="w", suffix=".py", delete=False
                 ) as f:
                     f.write(plugin_code)
                     plugin_file = Path(f.name)
@@ -1056,15 +1056,15 @@ class TestPluginInstallValidation:
     @pytest.mark.asyncio
     async def test_install_plugin_empty_path(self):
         """Test that install_plugin rejects empty plugin paths."""
-        
+
         # Test empty string
         with pytest.raises(ValueError, match="Plugin path cannot be empty"):
             await self.plugin_manager.install_plugin("")
-            
+
         # Test None
         with pytest.raises(ValueError, match="Plugin path cannot be empty"):
             await self.plugin_manager.install_plugin(None)
-            
+
         # Test whitespace only
         with pytest.raises(ValueError, match="Plugin path cannot be empty"):
             await self.plugin_manager.install_plugin("   ")
@@ -1072,6 +1072,6 @@ class TestPluginInstallValidation:
     @pytest.mark.asyncio
     async def test_install_plugin_nonexistent_path(self):
         """Test that install_plugin rejects non-existent paths."""
-        
+
         with pytest.raises(ValueError, match="Plugin path does not exist"):
             await self.plugin_manager.install_plugin("/nonexistent/path")

@@ -99,7 +99,7 @@ class TestABTestingUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_create_ab_test_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -173,7 +173,7 @@ class TestABTestingUnit:
         assert data["status"] == "draft"
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_create_ab_test_invalid_data(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -190,7 +190,7 @@ class TestABTestingUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_create_ab_test_invalid_allocation(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -217,7 +217,7 @@ class TestABTestingUnit:
         assert response.status_code == 400
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_list_ab_tests_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -254,7 +254,7 @@ class TestABTestingUnit:
         assert data["total"] == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_get_ab_test_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -284,7 +284,7 @@ class TestABTestingUnit:
         assert data["status"] == "running"
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_get_ab_test_not_found(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -299,7 +299,7 @@ class TestABTestingUnit:
         assert response.status_code == 404
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_start_ab_test_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -329,7 +329,7 @@ class TestABTestingUnit:
         assert data["action"] == "start"
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_start_ab_test_invalid_status(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -354,7 +354,7 @@ class TestABTestingUnit:
         assert response.status_code == 400
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_delete_running_test_forbidden(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -379,7 +379,7 @@ class TestABTestingUnit:
         assert response.status_code == 400
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_access_other_user_test_forbidden(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -404,7 +404,7 @@ class TestABTestingUnit:
         assert response.status_code == 403
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_get_results_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):
@@ -451,7 +451,7 @@ class TestABTestingUnit:
         assert data["confidence"] == 95.0
 
     @pytest.mark.unit
-    @patch('chatter.api.ab_testing.get_ab_test_manager')
+    @patch("chatter.api.ab_testing.get_ab_test_manager")
     async def test_get_metrics_success(
         self, mock_get_manager, client: AsyncClient, auth_headers: dict
     ):

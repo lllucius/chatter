@@ -1,12 +1,12 @@
 """Job management commands for the CLI."""
 
 import json
+
 import typer
 from rich.panel import Panel
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
-
 
 # Jobs Commands
 jobs_app = typer.Typer(help="Job management commands")
@@ -43,18 +43,18 @@ async def list_jobs(
         for job in response.jobs:
             progress = (
                 f"{getattr(job, 'progress', 0)}%"
-                if hasattr(job, 'progress')
+                if hasattr(job, "progress")
                 else "N/A"
             )
             table.add_row(
                 str(job.id),
-                getattr(job, 'job_type', 'unknown'),
-                getattr(job, 'status', 'unknown'),
+                getattr(job, "job_type", "unknown"),
+                getattr(job, "status", "unknown"),
                 progress,
                 (
-                    str(getattr(job, 'created_at', 'N/A'))[:19]
-                    if hasattr(job, 'created_at')
-                    else 'N/A'
+                    str(getattr(job, "created_at", "N/A"))[:19]
+                    if hasattr(job, "created_at")
+                    else "N/A"
                 ),
             )
 
@@ -74,13 +74,13 @@ async def show_job(job_id: str = typer.Argument(..., help="Job ID")):
 
         progress = (
             f"{getattr(response, 'progress', 0)}%"
-            if hasattr(response, 'progress')
+            if hasattr(response, "progress")
             else "N/A"
         )
         error_msg = (
-            getattr(response, 'error_message', 'No errors')
-            if hasattr(response, 'error_message')
-            else 'No errors'
+            getattr(response, "error_message", "No errors")
+            if hasattr(response, "error_message")
+            else "No errors"
         )
 
         console.print(
@@ -157,7 +157,7 @@ async def cancel_job(
         )
 
         console.print(f"✅ [green]Cancelled job {job_id}[/green]")
-        if hasattr(response, 'message'):
+        if hasattr(response, "message"):
             console.print(f"[dim]{response.message}[/dim]")
 
 
@@ -175,8 +175,8 @@ async def cleanup_jobs(
         )
 
         cleaned_count = (
-            getattr(response, 'cleaned_count', 0)
-            if hasattr(response, 'cleaned_count')
+            getattr(response, "cleaned_count", 0)
+            if hasattr(response, "cleaned_count")
             else 0
         )
         console.print(
@@ -197,17 +197,17 @@ async def job_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_jobs'):
+        if hasattr(response, "total_jobs"):
             table.add_row("Total Jobs", str(response.total_jobs))
-        if hasattr(response, 'running_jobs'):
+        if hasattr(response, "running_jobs"):
             table.add_row("Running Jobs", str(response.running_jobs))
-        if hasattr(response, 'completed_jobs'):
+        if hasattr(response, "completed_jobs"):
             table.add_row(
                 "Completed Jobs", str(response.completed_jobs)
             )
-        if hasattr(response, 'failed_jobs'):
+        if hasattr(response, "failed_jobs"):
             table.add_row("Failed Jobs", str(response.failed_jobs))
-        if hasattr(response, 'avg_execution_time'):
+        if hasattr(response, "avg_execution_time"):
             table.add_row(
                 "Avg Execution Time",
                 f"{response.avg_execution_time:.2f}s",

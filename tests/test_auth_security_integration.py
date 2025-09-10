@@ -122,7 +122,7 @@ class TestCompleteAuthSecurityIntegration:
         }
 
         with patch(
-            'chatter.api.auth.log_login_success'
+            "chatter.api.auth.log_login_success"
         ) as mock_success:
             response = await client.post(
                 "/api/v1/auth/login", json=login_data
@@ -137,7 +137,7 @@ class TestCompleteAuthSecurityIntegration:
         }
 
         with patch(
-            'chatter.api.auth.log_login_failure'
+            "chatter.api.auth.log_login_failure"
         ) as mock_failure:
             response = await client.post(
                 "/api/v1/auth/login", json=failed_login_data
@@ -167,7 +167,7 @@ class TestCompleteAuthSecurityIntegration:
 
         # Create API key
         with patch(
-            'chatter.api.auth.log_api_key_created'
+            "chatter.api.auth.log_api_key_created"
         ) as mock_created:
             api_key_response = await client.post(
                 "/api/v1/auth/api-key",
@@ -273,7 +273,7 @@ class TestCompleteAuthSecurityIntegration:
         }
 
         with patch(
-            'chatter.api.auth.log_password_change'
+            "chatter.api.auth.log_password_change"
         ) as mock_change:
             response = await client.post(
                 "/api/v1/auth/change-password",
@@ -372,7 +372,7 @@ class TestCompleteAuthSecurityIntegration:
     @pytest.mark.integration
     @pytest.mark.security
     @pytest.mark.skip(reason="Security monitor module not implemented")
-    @patch('chatter.core.monitoring.get_cache_service')
+    @patch("chatter.core.monitoring.get_cache_service")
     async def test_security_monitoring_integration(
         self, mock_cache_service, client: AsyncClient
     ):
@@ -583,7 +583,7 @@ class TestSecurityPerformanceIntegration:
         successful_registrations = 0
         for response in responses:
             if (
-                hasattr(response, 'status_code')
+                hasattr(response, "status_code")
                 and response.status_code == 201
             ):
                 successful_registrations += 1

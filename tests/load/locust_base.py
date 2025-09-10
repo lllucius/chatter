@@ -32,7 +32,7 @@ class BaseChatterUser(HttpUser):
         """Register a new user and login to get auth token."""
         try:
             # Generate unique user data
-            random_suffix = ''.join(
+            random_suffix = "".join(
                 random.choices(
                     string.ascii_lowercase + string.digits, k=8
                 )

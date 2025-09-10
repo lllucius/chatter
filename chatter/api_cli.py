@@ -14,9 +14,6 @@ from pathlib import Path
 
 import typer
 from rich.console import Console
-from rich.panel import Panel
-from rich.prompt import Prompt
-from rich.table import Table
 
 # Import the Chatter SDK
 try:
@@ -157,11 +154,11 @@ def run_async(async_func):
         except ApiException as e:
             # Try to extract detail from Problem response
             error_detail = None
-            if hasattr(e, 'body') and e.body:
+            if hasattr(e, "body") and e.body:
                 try:
                     import json
                     error_data = json.loads(e.body)
-                    error_detail = error_data.get('detail')
+                    error_detail = error_data.get("detail")
                 except (json.JSONDecodeError, AttributeError):
                     pass
 
@@ -208,19 +205,23 @@ app = typer.Typer(
 
 
 # Import modular command groups
-from chatter.commands.health import health_app
-from chatter.commands.auth import auth_app
-from chatter.commands.config import config_command, version_command, welcome_command
-from chatter.commands.prompts import prompts_app
-from chatter.commands.profiles import profiles_app
-from chatter.commands.jobs import jobs_app
-from chatter.commands.documents import documents_app
-from chatter.commands.chat import chat_app
-from chatter.commands.models import models_app
-from chatter.commands.events import events_app
 from chatter.commands.agents import agents_app
 from chatter.commands.analytics import analytics_app
+from chatter.commands.auth import auth_app
+from chatter.commands.chat import chat_app
+from chatter.commands.config import (
+    config_command,
+    version_command,
+    welcome_command,
+)
+from chatter.commands.documents import documents_app
+from chatter.commands.events import events_app
+from chatter.commands.health import health_app
+from chatter.commands.jobs import jobs_app
+from chatter.commands.models import models_app
 from chatter.commands.plugins import plugins_app
+from chatter.commands.profiles import profiles_app
+from chatter.commands.prompts import prompts_app
 
 # Add all command groups to the main app
 app.add_typer(health_app, name="health")

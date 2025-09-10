@@ -89,7 +89,7 @@ class ModelRegistryService:
             for provider_dict in cached_result[0]:
                 # Create Provider-like object from dict
                 # In production, you'd use proper deserialization
-                provider = type('Provider', (), provider_dict)()
+                provider = type("Provider", (), provider_dict)()
                 providers.append(provider)
             return providers, cached_result[1]
 
@@ -122,15 +122,15 @@ class ModelRegistryService:
             provider_dicts = []
             for provider in providers:
                 provider_dict = {
-                    'id': provider.id,
-                    'name': provider.name,
-                    'display_name': provider.display_name,
-                    'description': provider.description,
-                    'provider_type': provider.provider_type,
-                    'is_active': provider.is_active,
-                    'is_default': provider.is_default,
-                    'created_at': provider.created_at,
-                    'updated_at': provider.updated_at,
+                    "id": provider.id,
+                    "name": provider.name,
+                    "display_name": provider.display_name,
+                    "description": provider.description,
+                    "provider_type": provider.provider_type,
+                    "is_active": provider.is_active,
+                    "is_default": provider.is_default,
+                    "created_at": provider.created_at,
+                    "updated_at": provider.updated_at,
                 }
                 provider_dicts.append(provider_dict)
 
@@ -171,12 +171,12 @@ class ModelRegistryService:
             api_key_required=provider_data.api_key_required,
             is_active=provider_data.is_active,
         )
-        
+
         provider = Provider(**provider_data.model_dump())
         self.session.add(provider)
         await self.session.commit()
         await self.session.refresh(provider)
-        
+
         # Log the created provider to verify fields were saved
         logger.debug(
             "Provider created successfully",
@@ -185,7 +185,7 @@ class ModelRegistryService:
             api_key_required=provider.api_key_required,
             is_active=provider.is_active,
         )
-        
+
         return provider
 
     async def update_provider(
@@ -197,7 +197,7 @@ class ModelRegistryService:
             return None
 
         update_data = provider_data.model_dump(exclude_unset=True)
-        
+
         # Defensive logging to help debug field saving issues
         logger.debug(
             "Updating provider",
@@ -209,7 +209,7 @@ class ModelRegistryService:
         )
 
         # Validate that we're not trying to update critical read-only fields
-        if 'name' in update_data or 'provider_type' in update_data:
+        if "name" in update_data or "provider_type" in update_data:
             from chatter.core.exceptions import ValidationError
 
             raise ValidationError(
@@ -221,7 +221,7 @@ class ModelRegistryService:
 
         await self.session.commit()
         await self.session.refresh(provider)
-        
+
         # Log the updated provider to verify fields were saved
         logger.debug(
             "Provider updated successfully",
@@ -230,7 +230,7 @@ class ModelRegistryService:
             api_key_required=provider.api_key_required,
             is_active=provider.is_active,
         )
-        
+
         return provider
 
     async def delete_provider(self, provider_id: str) -> bool:
@@ -460,9 +460,9 @@ class ModelRegistryService:
 
         # Validate that we're not trying to update critical read-only fields
         if (
-            'name' in update_data
-            or 'model_type' in update_data
-            or 'provider_id' in update_data
+            "name" in update_data
+            or "model_type" in update_data
+            or "provider_id" in update_data
         ):
             from chatter.core.exceptions import ValidationError
 
@@ -472,7 +472,7 @@ class ModelRegistryService:
 
         # Validate dimension changes for embedding models
         if (
-            'dimensions' in update_data
+            "dimensions" in update_data
             and model.model_type == ModelType.EMBEDDING
         ):
             # Check if there are existing embedding spaces using this model
@@ -490,7 +490,7 @@ class ModelRegistryService:
                 )
 
         # Validate if trying to deactivate the model
-        if 'is_active' in update_data and not update_data['is_active']:
+        if "is_active" in update_data and not update_data["is_active"]:
             await self._validate_deactivation_allowed(model)
 
         for field, value in update_data.items():

@@ -1,11 +1,11 @@
 """Tests for cache disable functionality."""
 
 import pytest
+
 from chatter.core.cache_interface import CacheConfig, CacheStats
 from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
 from chatter.core.enhanced_redis_cache import EnhancedRedisCache
 from chatter.core.multi_tier_cache import MultiTierCache
-from chatter.core.cache_factory import CacheFactory, CacheType
 
 
 class TestCacheDisableFunctionality:

@@ -359,7 +359,7 @@ def validate_event_data(
                     value = value[:2000]
                 # Remove control characters except newlines and tabs
                 value = re.sub(
-                    r'[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]', '', value
+                    r"[\x00-\x08\x0b\x0c\x0e-\x1f\x7f]", "", value
                 )
             sanitized_data[key] = value
 

@@ -28,24 +28,24 @@ class User(Base):
     # Add table constraints
     __table_args__ = (
         CheckConstraint(
-            'daily_message_limit IS NULL OR daily_message_limit > 0',
-            name='check_daily_message_limit_positive',
+            "daily_message_limit IS NULL OR daily_message_limit > 0",
+            name="check_daily_message_limit_positive",
         ),
         CheckConstraint(
-            'monthly_message_limit IS NULL OR monthly_message_limit > 0',
-            name='check_monthly_message_limit_positive',
+            "monthly_message_limit IS NULL OR monthly_message_limit > 0",
+            name="check_monthly_message_limit_positive",
         ),
         CheckConstraint(
-            'max_file_size_mb IS NULL OR max_file_size_mb > 0',
-            name='check_max_file_size_positive',
+            "max_file_size_mb IS NULL OR max_file_size_mb > 0",
+            name="check_max_file_size_positive",
         ),
         CheckConstraint(
             "email ~ '^[A-Za-z0-9._%+-]+@[A-Za-z0-9.-]+\\.[A-Za-z]{2,}$'",
-            name='check_email_format',
+            name="check_email_format",
         ),
         CheckConstraint(
             "username ~ '^[a-zA-Z0-9_-]{3,50}$'",
-            name='check_username_format',
+            name="check_username_format",
         ),
     )
 

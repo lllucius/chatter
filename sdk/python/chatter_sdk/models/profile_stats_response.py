@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,27 +13,29 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, StrictInt
-from typing import Any, ClassVar, Dict, List
+from typing import Self
+
 from chatter_sdk.models.profile_response import ProfileResponse
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ProfileStatsResponse(BaseModel):
     """
     Schema for profile statistics response.
     """ # noqa: E501
     total_profiles: StrictInt = Field(description="Total number of profiles")
-    profiles_by_type: Dict[str, StrictInt] = Field(description="Profiles grouped by type")
-    profiles_by_provider: Dict[str, StrictInt] = Field(description="Profiles grouped by LLM provider")
-    most_used_profiles: List[ProfileResponse] = Field(description="Most frequently used profiles")
-    recent_profiles: List[ProfileResponse] = Field(description="Recently created profiles")
-    usage_stats: Dict[str, Any] = Field(description="Usage statistics")
-    __properties: ClassVar[List[str]] = ["total_profiles", "profiles_by_type", "profiles_by_provider", "most_used_profiles", "recent_profiles", "usage_stats"]
+    profiles_by_type: dict[str, StrictInt] = Field(description="Profiles grouped by type")
+    profiles_by_provider: dict[str, StrictInt] = Field(description="Profiles grouped by LLM provider")
+    most_used_profiles: list[ProfileResponse] = Field(description="Most frequently used profiles")
+    recent_profiles: list[ProfileResponse] = Field(description="Recently created profiles")
+    usage_stats: dict[str, Any] = Field(description="Usage statistics")
+    __properties: ClassVar[list[str]] = ["total_profiles", "profiles_by_type", "profiles_by_provider", "most_used_profiles", "recent_profiles", "usage_stats"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,11 +54,11 @@ class ProfileStatsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ProfileStatsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -67,7 +68,7 @@ class ProfileStatsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -81,18 +82,18 @@ class ProfileStatsResponse(BaseModel):
             for _item_most_used_profiles in self.most_used_profiles:
                 if _item_most_used_profiles:
                     _items.append(_item_most_used_profiles.to_dict())
-            _dict['most_used_profiles'] = _items
+            _dict["most_used_profiles"] = _items
         # override the default output from pydantic by calling `to_dict()` of each item in recent_profiles (list)
         _items = []
         if self.recent_profiles:
             for _item_recent_profiles in self.recent_profiles:
                 if _item_recent_profiles:
                     _items.append(_item_recent_profiles.to_dict())
-            _dict['recent_profiles'] = _items
+            _dict["recent_profiles"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ProfileStatsResponse from a dict"""
         if obj is None:
             return None

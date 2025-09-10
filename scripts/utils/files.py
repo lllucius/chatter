@@ -65,12 +65,12 @@ def verify_files_exist(
 
         if full_path.exists():
             if full_path.is_file():
-                if file_path.endswith('.py') or file_path.endswith(
-                    '.ts'
+                if file_path.endswith(".py") or file_path.endswith(
+                    ".ts"
                 ):
                     # Count lines for code files
                     try:
-                        with open(full_path, encoding='utf-8') as f:
+                        with open(full_path, encoding="utf-8") as f:
                             lines = len(f.readlines())
                         print(f"   ✅ {file_path} ({lines} lines)")
                     except Exception:

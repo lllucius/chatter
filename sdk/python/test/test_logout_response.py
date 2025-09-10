@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -16,6 +15,7 @@
 import unittest
 
 from chatter_sdk.models.logout_response import LogoutResponse
+
 
 class TestLogoutResponse(unittest.TestCase):
     """LogoutResponse unit test stubs"""
@@ -49,5 +49,5 @@ class TestLogoutResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

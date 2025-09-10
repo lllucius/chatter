@@ -406,7 +406,7 @@ class SecurityComplianceChecker:
         # This would check the actual secret key strength
         secret_length = (
             len(settings.secret_key)
-            if hasattr(settings, 'secret_key')
+            if hasattr(settings, "secret_key")
             else 0
         )
         if secret_length >= 32:
@@ -420,10 +420,10 @@ class SecurityComplianceChecker:
         """Check token expiration configuration."""
         # Check if token expiration times are reasonable
         access_expire = getattr(
-            settings, 'access_token_expire_minutes', 30
+            settings, "access_token_expire_minutes", 30
         )
         refresh_expire = getattr(
-            settings, 'refresh_token_expire_days', 7
+            settings, "refresh_token_expire_days", 7
         )
 
         if access_expire <= 60 and refresh_expire <= 30:
@@ -436,7 +436,7 @@ class SecurityComplianceChecker:
     def _check_secure_transport(self) -> ComplianceLevel:
         """Check secure transport configuration."""
         # This would check if HTTPS is enforced
-        force_https = getattr(settings, 'force_https', False)
+        force_https = getattr(settings, "force_https", False)
         return (
             ComplianceLevel.COMPLIANT
             if force_https
@@ -627,24 +627,24 @@ async def generate_security_report(
         )
         output.append("")
 
-        if report['critical_issues']:
+        if report["critical_issues"]:
             output.append("🚨 CRITICAL ISSUES:")
-            for issue in report['critical_issues']:
+            for issue in report["critical_issues"]:
                 output.append(f"  • {issue}")
             output.append("")
 
-        if report['recommendations']:
+        if report["recommendations"]:
             output.append("💡 RECOMMENDATIONS:")
-            for rec in report['recommendations'][:5]:  # Top 5
+            for rec in report["recommendations"][:5]:  # Top 5
                 output.append(f"  • {rec}")
-            if len(report['recommendations']) > 5:
+            if len(report["recommendations"]) > 5:
                 output.append(
                     f"  ... and {len(report['recommendations']) - 5} more"
                 )
             output.append("")
 
         output.append("📊 DETAILED SCORES:")
-        for _std_name, std_data in report['standards'].items():
+        for _std_name, std_data in report["standards"].items():
             output.append(
                 f"  {std_data['category']}: {std_data['score']:.1f}% ({std_data['level']})"
             )

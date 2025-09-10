@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,15 +13,17 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Self
+
 from chatter_sdk.models.readiness_status import ReadinessStatus
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ReadinessCheckResponse(BaseModel):
     """
@@ -32,8 +33,8 @@ class ReadinessCheckResponse(BaseModel):
     service: StrictStr = Field(description="Service name")
     version: StrictStr = Field(description="Service version")
     environment: StrictStr = Field(description="Environment")
-    checks: Dict[str, Any] = Field(description="Health check results")
-    __properties: ClassVar[List[str]] = ["status", "service", "version", "environment", "checks"]
+    checks: dict[str, Any] = Field(description="Health check results")
+    __properties: ClassVar[list[str]] = ["status", "service", "version", "environment", "checks"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +53,11 @@ class ReadinessCheckResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ReadinessCheckResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +67,7 @@ class ReadinessCheckResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -77,7 +78,7 @@ class ReadinessCheckResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ReadinessCheckResponse from a dict"""
         if obj is None:
             return None

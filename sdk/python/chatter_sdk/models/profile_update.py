@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,55 +13,64 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
+from typing import Annotated, Self
+
 from chatter_sdk.models.profile_type import ProfileType
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ProfileUpdate(BaseModel):
     """
     Schema for updating a profile.
     """ # noqa: E501
-    name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=255)]] = None
-    description: Optional[StrictStr] = None
-    profile_type: Optional[ProfileType] = None
-    llm_provider: Optional[StrictStr] = None
-    llm_model: Optional[StrictStr] = None
-    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
-    top_p: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    top_k: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
-    max_tokens: Optional[Annotated[int, Field(le=100000, strict=True, ge=1)]] = None
-    presence_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    frequency_penalty: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=-2.0)], Annotated[int, Field(le=2, strict=True, ge=-2)]]] = None
-    context_window: Optional[Annotated[int, Field(le=200000, strict=True, ge=1)]] = None
-    system_prompt: Optional[StrictStr] = None
-    memory_enabled: Optional[StrictBool] = None
-    memory_strategy: Optional[StrictStr] = None
-    enable_retrieval: Optional[StrictBool] = None
-    retrieval_limit: Optional[Annotated[int, Field(le=50, strict=True, ge=1)]] = None
-    retrieval_score_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
-    enable_tools: Optional[StrictBool] = None
-    available_tools: Optional[List[StrictStr]] = None
-    tool_choice: Optional[StrictStr] = None
-    content_filter_enabled: Optional[StrictBool] = None
-    safety_level: Optional[StrictStr] = None
-    response_format: Optional[StrictStr] = None
-    stream_response: Optional[StrictBool] = None
-    seed: Optional[StrictInt] = None
-    stop_sequences: Optional[List[StrictStr]] = None
-    logit_bias: Optional[Dict[str, Union[StrictFloat, StrictInt]]] = None
-    embedding_provider: Optional[StrictStr] = None
-    embedding_model: Optional[StrictStr] = None
-    is_public: Optional[StrictBool] = None
-    tags: Optional[List[StrictStr]] = None
-    extra_metadata: Optional[Dict[str, Any]] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata"]
+    name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] | None = None
+    description: StrictStr | None = None
+    profile_type: ProfileType | None = None
+    llm_provider: StrictStr | None = None
+    llm_model: StrictStr | None = None
+    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
+    top_p: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    top_k: Annotated[int, Field(strict=True, ge=1)] | None = None
+    max_tokens: Annotated[int, Field(le=100000, strict=True, ge=1)] | None = None
+    presence_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    frequency_penalty: Annotated[float, Field(le=2.0, strict=True, ge=-2.0)] | Annotated[int, Field(le=2, strict=True, ge=-2)] | None = None
+    context_window: Annotated[int, Field(le=200000, strict=True, ge=1)] | None = None
+    system_prompt: StrictStr | None = None
+    memory_enabled: StrictBool | None = None
+    memory_strategy: StrictStr | None = None
+    enable_retrieval: StrictBool | None = None
+    retrieval_limit: Annotated[int, Field(le=50, strict=True, ge=1)] | None = None
+    retrieval_score_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
+    enable_tools: StrictBool | None = None
+    available_tools: list[StrictStr] | None = None
+    tool_choice: StrictStr | None = None
+    content_filter_enabled: StrictBool | None = None
+    safety_level: StrictStr | None = None
+    response_format: StrictStr | None = None
+    stream_response: StrictBool | None = None
+    seed: StrictInt | None = None
+    stop_sequences: list[StrictStr] | None = None
+    logit_bias: dict[str, StrictFloat | StrictInt] | None = None
+    embedding_provider: StrictStr | None = None
+    embedding_model: StrictStr | None = None
+    is_public: StrictBool | None = None
+    tags: list[StrictStr] | None = None
+    extra_metadata: dict[str, Any] | None = None
+    __properties: ClassVar[list[str]] = ["name", "description", "profile_type", "llm_provider", "llm_model", "temperature", "top_p", "top_k", "max_tokens", "presence_penalty", "frequency_penalty", "context_window", "system_prompt", "memory_enabled", "memory_strategy", "enable_retrieval", "retrieval_limit", "retrieval_score_threshold", "enable_tools", "available_tools", "tool_choice", "content_filter_enabled", "safety_level", "response_format", "stream_response", "seed", "stop_sequences", "logit_bias", "embedding_provider", "embedding_model", "is_public", "tags", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -81,11 +89,11 @@ class ProfileUpdate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ProfileUpdate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -95,7 +103,7 @@ class ProfileUpdate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -106,172 +114,172 @@ class ProfileUpdate(BaseModel):
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
         if self.name is None and "name" in self.model_fields_set:
-            _dict['name'] = None
+            _dict["name"] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if profile_type (nullable) is None
         # and model_fields_set contains the field
         if self.profile_type is None and "profile_type" in self.model_fields_set:
-            _dict['profile_type'] = None
+            _dict["profile_type"] = None
 
         # set to None if llm_provider (nullable) is None
         # and model_fields_set contains the field
         if self.llm_provider is None and "llm_provider" in self.model_fields_set:
-            _dict['llm_provider'] = None
+            _dict["llm_provider"] = None
 
         # set to None if llm_model (nullable) is None
         # and model_fields_set contains the field
         if self.llm_model is None and "llm_model" in self.model_fields_set:
-            _dict['llm_model'] = None
+            _dict["llm_model"] = None
 
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
-            _dict['temperature'] = None
+            _dict["temperature"] = None
 
         # set to None if top_p (nullable) is None
         # and model_fields_set contains the field
         if self.top_p is None and "top_p" in self.model_fields_set:
-            _dict['top_p'] = None
+            _dict["top_p"] = None
 
         # set to None if top_k (nullable) is None
         # and model_fields_set contains the field
         if self.top_k is None and "top_k" in self.model_fields_set:
-            _dict['top_k'] = None
+            _dict["top_k"] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict['max_tokens'] = None
+            _dict["max_tokens"] = None
 
         # set to None if presence_penalty (nullable) is None
         # and model_fields_set contains the field
         if self.presence_penalty is None and "presence_penalty" in self.model_fields_set:
-            _dict['presence_penalty'] = None
+            _dict["presence_penalty"] = None
 
         # set to None if frequency_penalty (nullable) is None
         # and model_fields_set contains the field
         if self.frequency_penalty is None and "frequency_penalty" in self.model_fields_set:
-            _dict['frequency_penalty'] = None
+            _dict["frequency_penalty"] = None
 
         # set to None if context_window (nullable) is None
         # and model_fields_set contains the field
         if self.context_window is None and "context_window" in self.model_fields_set:
-            _dict['context_window'] = None
+            _dict["context_window"] = None
 
         # set to None if system_prompt (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt is None and "system_prompt" in self.model_fields_set:
-            _dict['system_prompt'] = None
+            _dict["system_prompt"] = None
 
         # set to None if memory_enabled (nullable) is None
         # and model_fields_set contains the field
         if self.memory_enabled is None and "memory_enabled" in self.model_fields_set:
-            _dict['memory_enabled'] = None
+            _dict["memory_enabled"] = None
 
         # set to None if memory_strategy (nullable) is None
         # and model_fields_set contains the field
         if self.memory_strategy is None and "memory_strategy" in self.model_fields_set:
-            _dict['memory_strategy'] = None
+            _dict["memory_strategy"] = None
 
         # set to None if enable_retrieval (nullable) is None
         # and model_fields_set contains the field
         if self.enable_retrieval is None and "enable_retrieval" in self.model_fields_set:
-            _dict['enable_retrieval'] = None
+            _dict["enable_retrieval"] = None
 
         # set to None if retrieval_limit (nullable) is None
         # and model_fields_set contains the field
         if self.retrieval_limit is None and "retrieval_limit" in self.model_fields_set:
-            _dict['retrieval_limit'] = None
+            _dict["retrieval_limit"] = None
 
         # set to None if retrieval_score_threshold (nullable) is None
         # and model_fields_set contains the field
         if self.retrieval_score_threshold is None and "retrieval_score_threshold" in self.model_fields_set:
-            _dict['retrieval_score_threshold'] = None
+            _dict["retrieval_score_threshold"] = None
 
         # set to None if enable_tools (nullable) is None
         # and model_fields_set contains the field
         if self.enable_tools is None and "enable_tools" in self.model_fields_set:
-            _dict['enable_tools'] = None
+            _dict["enable_tools"] = None
 
         # set to None if available_tools (nullable) is None
         # and model_fields_set contains the field
         if self.available_tools is None and "available_tools" in self.model_fields_set:
-            _dict['available_tools'] = None
+            _dict["available_tools"] = None
 
         # set to None if tool_choice (nullable) is None
         # and model_fields_set contains the field
         if self.tool_choice is None and "tool_choice" in self.model_fields_set:
-            _dict['tool_choice'] = None
+            _dict["tool_choice"] = None
 
         # set to None if content_filter_enabled (nullable) is None
         # and model_fields_set contains the field
         if self.content_filter_enabled is None and "content_filter_enabled" in self.model_fields_set:
-            _dict['content_filter_enabled'] = None
+            _dict["content_filter_enabled"] = None
 
         # set to None if safety_level (nullable) is None
         # and model_fields_set contains the field
         if self.safety_level is None and "safety_level" in self.model_fields_set:
-            _dict['safety_level'] = None
+            _dict["safety_level"] = None
 
         # set to None if response_format (nullable) is None
         # and model_fields_set contains the field
         if self.response_format is None and "response_format" in self.model_fields_set:
-            _dict['response_format'] = None
+            _dict["response_format"] = None
 
         # set to None if stream_response (nullable) is None
         # and model_fields_set contains the field
         if self.stream_response is None and "stream_response" in self.model_fields_set:
-            _dict['stream_response'] = None
+            _dict["stream_response"] = None
 
         # set to None if seed (nullable) is None
         # and model_fields_set contains the field
         if self.seed is None and "seed" in self.model_fields_set:
-            _dict['seed'] = None
+            _dict["seed"] = None
 
         # set to None if stop_sequences (nullable) is None
         # and model_fields_set contains the field
         if self.stop_sequences is None and "stop_sequences" in self.model_fields_set:
-            _dict['stop_sequences'] = None
+            _dict["stop_sequences"] = None
 
         # set to None if logit_bias (nullable) is None
         # and model_fields_set contains the field
         if self.logit_bias is None and "logit_bias" in self.model_fields_set:
-            _dict['logit_bias'] = None
+            _dict["logit_bias"] = None
 
         # set to None if embedding_provider (nullable) is None
         # and model_fields_set contains the field
         if self.embedding_provider is None and "embedding_provider" in self.model_fields_set:
-            _dict['embedding_provider'] = None
+            _dict["embedding_provider"] = None
 
         # set to None if embedding_model (nullable) is None
         # and model_fields_set contains the field
         if self.embedding_model is None and "embedding_model" in self.model_fields_set:
-            _dict['embedding_model'] = None
+            _dict["embedding_model"] = None
 
         # set to None if is_public (nullable) is None
         # and model_fields_set contains the field
         if self.is_public is None and "is_public" in self.model_fields_set:
-            _dict['is_public'] = None
+            _dict["is_public"] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict['tags'] = None
+            _dict["tags"] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict['extra_metadata'] = None
+            _dict["extra_metadata"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ProfileUpdate from a dict"""
         if obj is None:
             return None

@@ -28,22 +28,22 @@ class TestAnalyticsTodoImplementations:
         """Create analytics service with mocked dependencies."""
         with (
             patch(
-                'chatter.utils.performance.get_performance_monitor'
+                "chatter.utils.performance.get_performance_monitor"
             ) as mock_perf,
             patch(
-                'chatter.core.cache_factory.CacheFactory'
+                "chatter.core.cache_factory.CacheFactory"
             ) as mock_cache_factory,
         ):
 
             # Mock performance monitor
             mock_perf.return_value = Mock()
             mock_perf.return_value.get_performance_summary.return_value = {
-                'get_conversation_stats': {'avg_ms': 50.0, 'count': 10},
-                'vector_search_operation': {
-                    'avg_ms': 100.0,
-                    'count': 5,
+                "get_conversation_stats": {"avg_ms": 50.0, "count": 10},
+                "vector_search_operation": {
+                    "avg_ms": 100.0,
+                    "count": 5,
                 },
-                'embedding_generation': {'avg_ms': 200.0, 'count': 3},
+                "embedding_generation": {"avg_ms": 200.0, "count": 3},
             }
 
             # Mock cache factory and cache instance
@@ -132,17 +132,17 @@ class TestAnalyticsTodoImplementations:
         with (
             patch.object(
                 analytics_service,
-                '_get_database_response_time',
+                "_get_database_response_time",
                 return_value=25.5,
             ) as mock_db,
             patch.object(
                 analytics_service,
-                '_get_vector_search_time',
+                "_get_vector_search_time",
                 return_value=75.2,
             ) as mock_vector,
             patch.object(
                 analytics_service,
-                '_get_embedding_generation_time',
+                "_get_embedding_generation_time",
                 return_value=150.8,
             ) as mock_embed,
         ):
@@ -173,12 +173,12 @@ class TestAnalyticsTodoImplementations:
         with (
             patch.object(
                 analytics_service,
-                '_get_vector_database_size',
+                "_get_vector_database_size",
                 return_value=1000000,
             ) as mock_size,
             patch.object(
                 analytics_service,
-                '_get_cache_hit_rate',
+                "_get_cache_hit_rate",
                 return_value=0.92,
             ) as mock_cache,
         ):

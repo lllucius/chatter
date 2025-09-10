@@ -19,7 +19,7 @@ def correlation_id_processor(
 
         correlation_id = get_correlation_id()
         if correlation_id:
-            event_dict['correlation_id'] = correlation_id
+            event_dict["correlation_id"] = correlation_id
     except ImportError:
         # Correlation module not available during startup
         pass

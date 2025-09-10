@@ -5,9 +5,18 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -49,56 +58,56 @@ class Prompt(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'max_length IS NULL OR max_length > 0',
-            name='check_max_length_positive',
+            "max_length IS NULL OR max_length > 0",
+            name="check_max_length_positive",
         ),
         CheckConstraint(
-            'min_length IS NULL OR min_length >= 0',
-            name='check_min_length_non_negative',
+            "min_length IS NULL OR min_length >= 0",
+            name="check_min_length_non_negative",
         ),
         CheckConstraint(
-            'min_length IS NULL OR max_length IS NULL OR min_length < max_length',
-            name='check_min_length_less_than_max',
+            "min_length IS NULL OR max_length IS NULL OR min_length < max_length",
+            name="check_min_length_less_than_max",
         ),
         CheckConstraint(
-            'version > 0',
-            name='check_version_positive',
+            "version > 0",
+            name="check_version_positive",
         ),
         CheckConstraint(
-            'rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)',
-            name='check_rating_range',
+            "rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)",
+            name="check_rating_range",
         ),
         CheckConstraint(
-            'rating_count >= 0',
-            name='check_rating_count_non_negative',
+            "rating_count >= 0",
+            name="check_rating_count_non_negative",
         ),
         CheckConstraint(
-            'usage_count >= 0',
-            name='check_usage_count_non_negative',
+            "usage_count >= 0",
+            name="check_usage_count_non_negative",
         ),
         CheckConstraint(
-            'total_tokens_used >= 0',
-            name='check_total_tokens_used_non_negative',
+            "total_tokens_used >= 0",
+            name="check_total_tokens_used_non_negative",
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative',
+            "total_cost >= 0.0",
+            name="check_total_cost_non_negative",
         ),
         CheckConstraint(
-            'success_rate IS NULL OR (success_rate >= 0.0 AND success_rate <= 1.0)',
-            name='check_success_rate_range',
+            "success_rate IS NULL OR (success_rate >= 0.0 AND success_rate <= 1.0)",
+            name="check_success_rate_range",
         ),
         CheckConstraint(
-            'avg_response_time_ms IS NULL OR avg_response_time_ms > 0',
-            name='check_avg_response_time_ms_positive',
+            "avg_response_time_ms IS NULL OR avg_response_time_ms > 0",
+            name="check_avg_response_time_ms_positive",
         ),
         CheckConstraint(
             "content != ''",
-            name='check_content_not_empty',
+            name="check_content_not_empty",
         ),
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
     )
 
@@ -339,19 +348,19 @@ class Prompt(Base):
             )
 
             # If template syntax is invalid, return early
-            if not template_validation['valid']:
-                result['valid'] = False
-                result['errors'].extend(template_validation['errors'])
+            if not template_validation["valid"]:
+                result["valid"] = False
+                result["errors"].extend(template_validation["errors"])
                 return result
 
-            expected_variables = set(template_validation['variables'])
+            expected_variables = set(template_validation["variables"])
 
             # Validate variable names and values using secure renderer
             try:
                 SecureTemplateRenderer._sanitize_variables(kwargs)
             except ValueError as e:
-                result['valid'] = False
-                result['errors'].append(str(e))
+                result["valid"] = False
+                result["errors"].append(str(e))
                 return result
 
             # Check required variables

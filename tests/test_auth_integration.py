@@ -327,7 +327,7 @@ class TestAuthIntegration:
         user = result.scalar_one()
 
         # This test assumes there's an 'is_active' field - adjust based on actual model
-        assert hasattr(user, 'is_active') and not user.is_active
+        assert hasattr(user, "is_active") and not user.is_active
 
     @pytest.mark.integration
     async def test_multiple_users_isolation(self, client: AsyncClient):

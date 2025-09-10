@@ -147,7 +147,7 @@ class ProfileBase(BaseModel):
         None, description="Additional metadata"
     )
 
-    @field_validator('name', 'description')
+    @field_validator("name", "description")
     @classmethod
     def validate_text_fields(cls, v: str | None) -> str | None:
         """Validate text fields for security threats."""
@@ -167,7 +167,7 @@ class ProfileBase(BaseModel):
                 )
         return v
 
-    @field_validator('system_prompt')
+    @field_validator("system_prompt")
     @classmethod
     def validate_system_prompt(cls, v: str | None) -> str | None:
         """Validate system prompt - less strict than other text fields."""
@@ -188,10 +188,10 @@ class ProfileBase(BaseModel):
         return v
 
     @field_validator(
-        'llm_provider',
-        'llm_model',
-        'embedding_provider',
-        'embedding_model',
+        "llm_provider",
+        "llm_model",
+        "embedding_provider",
+        "embedding_model",
     )
     @classmethod
     def validate_provider_model(cls, v: str | None) -> str | None:
@@ -199,9 +199,9 @@ class ProfileBase(BaseModel):
         if v:
             # Basic validation for provider/model names
             if (
-                not v.replace('-', '')
-                .replace('_', '')
-                .replace('.', '')
+                not v.replace("-", "")
+                .replace("_", "")
+                .replace(".", "")
                 .isalnum()
             ):
                 raise ValueError(
@@ -222,7 +222,7 @@ class ProfileBase(BaseModel):
                 )
         return v
 
-    @field_validator('tags')
+    @field_validator("tags")
     @classmethod
     def validate_tags(cls, v: list[str] | None) -> list[str] | None:
         """Validate tags for security."""
@@ -246,7 +246,7 @@ class ProfileBase(BaseModel):
                     )
         return v
 
-    @field_validator('available_tools')
+    @field_validator("available_tools")
     @classmethod
     def validate_tools(cls, v: list[str] | None) -> list[str] | None:
         """Validate available tools."""
@@ -270,7 +270,7 @@ class ProfileBase(BaseModel):
                     )
         return v
 
-    @field_validator('stop_sequences')
+    @field_validator("stop_sequences")
     @classmethod
     def validate_stop_sequences(
         cls, v: list[str] | None
@@ -296,7 +296,7 @@ class ProfileBase(BaseModel):
                     )
         return v
 
-    @field_validator('temperature')
+    @field_validator("temperature")
     @classmethod
     def validate_temperature(cls, v: float) -> float:
         """Validate temperature is not too extreme."""
@@ -306,7 +306,7 @@ class ProfileBase(BaseModel):
             )
         return v
 
-    @field_validator('max_tokens')
+    @field_validator("max_tokens")
     @classmethod
     def validate_max_tokens(cls, v: int) -> int:
         """Validate max tokens is reasonable."""
@@ -324,7 +324,7 @@ class ProfileCreate(ProfileBase):
     # For now, it inherits all validation from ProfileBase, but this allows
     # for future customization of creation-specific validation rules
 
-    @field_validator('llm_provider', 'llm_model')
+    @field_validator("llm_provider", "llm_model")
     @classmethod
     def validate_required_llm_fields(cls, v: str) -> str:
         """Ensure LLM provider and model are provided for new profiles."""
@@ -566,7 +566,7 @@ class ProfileTestRequest(BaseModel):
         False, description="Include tools in test"
     )
 
-    @field_validator('test_message')
+    @field_validator("test_message")
     @classmethod
     def validate_test_message(cls, v: str) -> str:
         """Validate test message for security threats."""

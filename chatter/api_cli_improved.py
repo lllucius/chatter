@@ -9,10 +9,11 @@ This modular version organizes commands into separate modules for better maintai
 
 import typer
 
-# Import command modules
-from chatter.commands.health import health_app
 from chatter.commands.auth import auth_app
 from chatter.commands.config import config_command, version_command
+
+# Import command modules
+from chatter.commands.health import health_app
 
 # Try to import the chatter_sdk
 try:

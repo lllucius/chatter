@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,16 +13,25 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing import Any, ClassVar
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
+from typing import Self
+
 from chatter_sdk.models.agent_status import AgentStatus
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class AgentHealthResponse(BaseModel):
     """
@@ -32,10 +40,10 @@ class AgentHealthResponse(BaseModel):
     agent_id: StrictStr = Field(description="Agent ID")
     status: AgentStatus
     health: StrictStr = Field(description="Health status (healthy/unhealthy/unknown)")
-    last_interaction: Optional[datetime] = None
-    response_time_avg: Optional[Union[StrictFloat, StrictInt]] = None
-    error_rate: Optional[Union[StrictFloat, StrictInt]] = None
-    __properties: ClassVar[List[str]] = ["agent_id", "status", "health", "last_interaction", "response_time_avg", "error_rate"]
+    last_interaction: datetime | None = None
+    response_time_avg: StrictFloat | StrictInt | None = None
+    error_rate: StrictFloat | StrictInt | None = None
+    __properties: ClassVar[list[str]] = ["agent_id", "status", "health", "last_interaction", "response_time_avg", "error_rate"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -54,11 +62,11 @@ class AgentHealthResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AgentHealthResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -68,7 +76,7 @@ class AgentHealthResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -79,22 +87,22 @@ class AgentHealthResponse(BaseModel):
         # set to None if last_interaction (nullable) is None
         # and model_fields_set contains the field
         if self.last_interaction is None and "last_interaction" in self.model_fields_set:
-            _dict['last_interaction'] = None
+            _dict["last_interaction"] = None
 
         # set to None if response_time_avg (nullable) is None
         # and model_fields_set contains the field
         if self.response_time_avg is None and "response_time_avg" in self.model_fields_set:
-            _dict['response_time_avg'] = None
+            _dict["response_time_avg"] = None
 
         # set to None if error_rate (nullable) is None
         # and model_fields_set contains the field
         if self.error_rate is None and "error_rate" in self.model_fields_set:
-            _dict['error_rate'] = None
+            _dict["error_rate"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AgentHealthResponse from a dict"""
         if obj is None:
             return None

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class PromptCategory(str, Enum):
@@ -27,14 +28,14 @@ class PromptCategory(str, Enum):
     """
     allowed enum values
     """
-    GENERAL = 'general'
-    CREATIVE = 'creative'
-    ANALYTICAL = 'analytical'
-    TECHNICAL = 'technical'
-    EDUCATIONAL = 'educational'
-    BUSINESS = 'business'
-    CODING = 'coding'
-    CUSTOM = 'custom'
+    GENERAL = "general"
+    CREATIVE = "creative"
+    ANALYTICAL = "analytical"
+    TECHNICAL = "technical"
+    EDUCATIONAL = "educational"
+    BUSINESS = "business"
+    CODING = "coding"
+    CUSTOM = "custom"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

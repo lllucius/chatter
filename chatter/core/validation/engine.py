@@ -12,12 +12,12 @@ from .validators import BaseValidator
 class ValidationEngine:
     """Core validation engine that orchestrates all validation operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._validators: dict[str, BaseValidator] = {}
         self._rules: dict[str, dict[str, Any]] = {}
         self._initialize_default_validators()
 
-    def _initialize_default_validators(self):
+    def _initialize_default_validators(self) -> None:
         """Initialize default validators."""
         # Import here to avoid circular imports
         from .validators import (
@@ -37,11 +37,11 @@ class ValidationEngine:
         self.register_validator("workflow", WorkflowValidator())
         self.register_validator("agent", AgentValidator())
 
-    def register_validator(self, name: str, validator: BaseValidator):
+    def register_validator(self, name: str, validator: BaseValidator) -> None:
         """Register a validator with the engine."""
         self._validators[name] = validator
 
-    def unregister_validator(self, name: str):
+    def unregister_validator(self, name: str) -> None:
         """Unregister a validator from the engine."""
         if name in self._validators:
             del self._validators[name]
@@ -201,7 +201,7 @@ class ValidationEngine:
         validator = self._validators[validator_name]
 
         # Check if validator supports async
-        if hasattr(validator, 'validate_async'):
+        if hasattr(validator, "validate_async"):
             return await validator.validate_async(value, rule, context)
         else:
             # Fall back to sync validation in executor
@@ -260,10 +260,10 @@ class ValidationEngine:
             summary["validator_details"][name] = {
                 "class": validator.__class__.__name__,
                 "supported_rules": getattr(
-                    validator, 'supported_rules', []
+                    validator, "supported_rules", []
                 ),
                 "description": getattr(
-                    validator, 'description', "No description available"
+                    validator, "description", "No description available"
                 ),
             }
 

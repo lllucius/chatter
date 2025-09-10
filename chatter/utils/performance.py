@@ -183,12 +183,12 @@ class QueryOptimizer:
 
         # Extract tables from FROM clause
         tables = []
-        from_match = re.search(r'\bfrom\s+(\w+)', query_lower)
+        from_match = re.search(r"\bfrom\s+(\w+)", query_lower)
         if from_match:
             tables.append(from_match.group(1))
 
         # Check for JOIN clauses to find additional tables
-        join_matches = re.findall(r'\bjoin\s+(\w+)', query_lower)
+        join_matches = re.findall(r"\bjoin\s+(\w+)", query_lower)
         tables.extend(join_matches)
 
         # Analyze query characteristics
@@ -340,12 +340,12 @@ class QueryOptimizer:
 
         # Suggest indexes for WHERE conditions
         where_match = re.search(
-            r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+            r"\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)",
             query_lower,
         )
         if where_match:
             where_clause = where_match.group(1)
-            column_matches = re.findall(r'\b(\w+)\s*=', where_clause)
+            column_matches = re.findall(r"\b(\w+)\s*=", where_clause)
             if column_matches:
                 suggestions.append(
                     f"Consider adding indexes on columns: {', '.join(set(column_matches))}"
@@ -595,7 +595,7 @@ class QueryOptimizer:
             select(
                 ModelDef.provider_id,
                 ModelDef.model_type,
-                func.count(ModelDef.id).label('count'),
+                func.count(ModelDef.id).label("count"),
             )
             .where(
                 ModelDef.provider_id.in_(provider_ids),
@@ -641,14 +641,14 @@ class QueryOptimizer:
             query_lower = query.lower()
 
             # Extract table from FROM clause
-            from_match = re.search(r'\bfrom\s+(\w+)', query_lower)
+            from_match = re.search(r"\bfrom\s+(\w+)", query_lower)
             if not from_match:
                 continue
             table = from_match.group(1)
 
             # Extract WHERE clause columns
             where_match = re.search(
-                r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+                r"\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)",
                 query_lower,
             )
             if where_match:
@@ -656,7 +656,7 @@ class QueryOptimizer:
 
                 # Find column references in WHERE clause
                 column_matches = re.findall(
-                    r'\b(\w+)\s*=', where_clause
+                    r"\b(\w+)\s*=", where_clause
                 )
                 for column in column_matches:
                     if table not in table_columns:
@@ -783,16 +783,16 @@ class PerformanceMonitor:
             )
 
             summary[operation] = {
-                'count': self.query_counts[operation],
-                'avg_ms': round(avg_ms, 2),
-                'min_ms': round(min_ms, 2),
-                'max_ms': round(max_ms, 2),
-                'p50_ms': round(p50_ms, 2),
-                'p95_ms': round(p95_ms, 2),
-                'p99_ms': round(p99_ms, 2),
-                'slow_queries': slow_queries,
-                'performance_grade': performance_grade,
-                'throughput_per_sec': (
+                "count": self.query_counts[operation],
+                "avg_ms": round(avg_ms, 2),
+                "min_ms": round(min_ms, 2),
+                "max_ms": round(max_ms, 2),
+                "p50_ms": round(p50_ms, 2),
+                "p95_ms": round(p95_ms, 2),
+                "p99_ms": round(p99_ms, 2),
+                "slow_queries": slow_queries,
+                "performance_grade": performance_grade,
+                "throughput_per_sec": (
                     round(count / (sum(times) / 1000), 2)
                     if times
                     else 0
@@ -843,26 +843,26 @@ class PerformanceMonitor:
                 )
                 slow_operations.append(
                     {
-                        'operation': operation,
-                        'slow_query_count': slow_count,
-                        'avg_slow_time_ms': round(avg_slow_time, 2),
-                        'slow_query_ratio': round(
+                        "operation": operation,
+                        "slow_query_count": slow_count,
+                        "avg_slow_time_ms": round(avg_slow_time, 2),
+                        "slow_query_ratio": round(
                             slow_count / len(times), 3
                         ),
-                        'recommendations': self._get_optimization_recommendations(
+                        "recommendations": self._get_optimization_recommendations(
                             operation, avg_slow_time
                         ),
                     }
                 )
 
         return {
-            'slow_operations': sorted(
+            "slow_operations": sorted(
                 slow_operations,
-                key=lambda x: x['avg_slow_time_ms'],
+                key=lambda x: x["avg_slow_time_ms"],
                 reverse=True,
             ),
-            'total_slow_queries': sum(
-                op['slow_query_count'] for op in slow_operations
+            "total_slow_queries": sum(
+                op["slow_query_count"] for op in slow_operations
             ),
         }
 
@@ -929,10 +929,10 @@ class PerformanceMonitor:
         for operation in db_operations:
             if operation in summary:
                 op_data = summary[operation]
-                total_time += op_data.get('avg_ms', 0) * op_data.get(
-                    'count', 0
+                total_time += op_data.get("avg_ms", 0) * op_data.get(
+                    "count", 0
                 )
-                total_count += op_data.get('count', 0)
+                total_count += op_data.get("count", 0)
 
         return total_time / total_count if total_count > 0 else 0.0
 
@@ -951,10 +951,10 @@ class PerformanceMonitor:
             if any(
                 term in op.lower()
                 for term in [
-                    'vector',
-                    'search',
-                    'similarity',
-                    'embedding',
+                    "vector",
+                    "search",
+                    "similarity",
+                    "embedding",
                 ]
             )
         ]
@@ -967,10 +967,10 @@ class PerformanceMonitor:
 
         for operation in vector_operations:
             op_data = summary[operation]
-            total_time += op_data.get('avg_ms', 0) * op_data.get(
-                'count', 0
+            total_time += op_data.get("avg_ms", 0) * op_data.get(
+                "count", 0
             )
-            total_count += op_data.get('count', 0)
+            total_count += op_data.get("count", 0)
 
         return total_time / total_count if total_count > 0 else 0.0
 
@@ -1201,7 +1201,7 @@ class DatabaseIndexManager:
             for index_sql in indexes:
                 try:
                     # Extract index name for logging
-                    index_name_match = re.search(r'idx_\w+', index_sql)
+                    index_name_match = re.search(r"idx_\w+", index_sql)
                     index_name = (
                         index_name_match.group(0)
                         if index_name_match
@@ -1233,7 +1233,7 @@ class DatabaseIndexManager:
                         {
                             "name": (
                                 index_name
-                                if 'index_name' in locals()
+                                if "index_name" in locals()
                                 else "unknown"
                             ),
                             "error": str(e),
@@ -1268,7 +1268,7 @@ class DatabaseIndexManager:
         query_lower = query.lower()
 
         # Extract table and conditions
-        table_match = re.search(r'\bfrom\s+(\w+)', query_lower)
+        table_match = re.search(r"\bfrom\s+(\w+)", query_lower)
         if not table_match:
             return recommendations
 
@@ -1276,20 +1276,20 @@ class DatabaseIndexManager:
 
         # Analyze WHERE conditions
         where_match = re.search(
-            r'\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)',
+            r"\bwhere\s+(.+?)(?:\s+(?:order\s+by|group\s+by|limit)|$)",
             query_lower,
         )
         if where_match:
             where_clause = where_match.group(1)
 
             # Find equality conditions
-            eq_columns = re.findall(r'\b(\w+)\s*=', where_clause)
+            eq_columns = re.findall(r"\b(\w+)\s*=", where_clause)
 
             # Find range conditions
-            range_columns = re.findall(r'\b(\w+)\s*[<>]', where_clause)
+            range_columns = re.findall(r"\b(\w+)\s*[<>]", where_clause)
 
             # Find IN conditions
-            in_columns = re.findall(r'\b(\w+)\s+in\s*\(', where_clause)
+            in_columns = re.findall(r"\b(\w+)\s+in\s*\(", where_clause)
 
             all_columns = list(
                 set(eq_columns + range_columns + in_columns)
@@ -1312,12 +1312,12 @@ class DatabaseIndexManager:
 
         # Analyze ORDER BY
         order_match = re.search(
-            r'\border\s+by\s+([^)]+?)(?:\s+(?:limit|group\s+by)|$)',
+            r"\border\s+by\s+([^)]+?)(?:\s+(?:limit|group\s+by)|$)",
             query_lower,
         )
         if order_match:
             order_clause = order_match.group(1)
-            order_columns = re.findall(r'\b(\w+)', order_clause)
+            order_columns = re.findall(r"\b(\w+)", order_clause)
 
             if order_columns:
                 recommendations.append(
@@ -1411,7 +1411,7 @@ class ConversationQueryService:
             # Manually assign messages to avoid additional query and lazy loading
             from sqlalchemy.orm.attributes import set_committed_value
 
-            set_committed_value(conversation, 'messages', messages)
+            set_committed_value(conversation, "messages", messages)
 
             return conversation
 
@@ -1501,11 +1501,11 @@ class ConversationQueryService:
                     if conv.id in recent_messages:
                         # Set messages without triggering lazy loading
                         set_committed_value(
-                            conv, 'messages', [recent_messages[conv.id]]
+                            conv, "messages", [recent_messages[conv.id]]
                         )
                     else:
                         # Set empty messages without triggering lazy loading
-                        set_committed_value(conv, 'messages', [])
+                        set_committed_value(conv, "messages", [])
 
             return conversations
 

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,24 +13,26 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Self
+
 from chatter_sdk.models.location_inner import LocationInner
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ValidationError(BaseModel):
     """
     ValidationError
     """ # noqa: E501
-    loc: List[LocationInner]
+    loc: list[LocationInner]
     msg: StrictStr
     type: StrictStr
-    __properties: ClassVar[List[str]] = ["loc", "msg", "type"]
+    __properties: ClassVar[list[str]] = ["loc", "msg", "type"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +51,11 @@ class ValidationError(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ValidationError from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +65,7 @@ class ValidationError(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -78,11 +79,11 @@ class ValidationError(BaseModel):
             for _item_loc in self.loc:
                 if _item_loc:
                     _items.append(_item_loc.to_dict())
-            _dict['loc'] = _items
+            _dict["loc"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ValidationError from a dict"""
         if obj is None:
             return None

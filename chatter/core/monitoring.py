@@ -237,7 +237,7 @@ class PerformanceStats:
     """Performance statistics."""
 
     avg_response_time: float = 0.0
-    min_response_time: float = float('inf')
+    min_response_time: float = float("inf")
     max_response_time: float = 0.0
     p95_response_time: float = 0.0
     p99_response_time: float = 0.0
@@ -674,7 +674,7 @@ class MonitoringService:
             corr_id
             for corr_id, items in self.correlation_tracking.items()
             if items
-            and hasattr(items[-1], 'timestamp')
+            and hasattr(items[-1], "timestamp")
             and items[-1].timestamp < cutoff_time
         ]
         for corr_id in expired_ids:
@@ -745,7 +745,7 @@ class MonitoringService:
             stats.rate_limited_count += 1
 
         # Update cache hit rate
-        if hasattr(metrics, 'cache_hit'):
+        if hasattr(metrics, "cache_hit"):
             cache_requests = stats.total_requests
             cache_hits = (
                 stats.cache_hit_rate / 100 * (cache_requests - 1)
@@ -1289,12 +1289,12 @@ def monitor_llm_request(provider: str, model: str):
                 # Extract token count if available in result
                 input_tokens = 0
                 output_tokens = 0
-                if hasattr(result, 'usage'):
-                    if hasattr(result.usage, 'prompt_tokens'):
+                if hasattr(result, "usage"):
+                    if hasattr(result.usage, "prompt_tokens"):
                         input_tokens = result.usage.prompt_tokens
-                    if hasattr(result.usage, 'completion_tokens'):
+                    if hasattr(result.usage, "completion_tokens"):
                         output_tokens = result.usage.completion_tokens
-                    elif hasattr(result.usage, 'total_tokens'):
+                    elif hasattr(result.usage, "total_tokens"):
                         # If only total is available, estimate split
                         total = result.usage.total_tokens
                         input_tokens = int(

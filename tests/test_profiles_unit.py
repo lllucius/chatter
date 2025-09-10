@@ -98,7 +98,7 @@ class TestProfilesUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_create_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -153,7 +153,7 @@ class TestProfilesUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_unified_rate_limiter')
+    @patch("chatter.api.profiles.get_unified_rate_limiter")
     async def test_create_profile_rate_limit(
         self,
         mock_get_rate_limiter,
@@ -187,7 +187,7 @@ class TestProfilesUnit:
         assert response.status_code == 429  # Rate limit exceeded
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_list_profiles_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -228,7 +228,7 @@ class TestProfilesUnit:
         assert data["total"] == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_get_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -258,7 +258,7 @@ class TestProfilesUnit:
         assert data["temperature"] == 0.7
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_get_profile_not_found(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -277,7 +277,7 @@ class TestProfilesUnit:
         )  # ProfileError maps to BadRequest
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_update_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -309,7 +309,7 @@ class TestProfilesUnit:
         assert data["temperature"] == 0.8
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_delete_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -328,7 +328,7 @@ class TestProfilesUnit:
         assert data["profile_id"] == "profile-123"
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_test_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -362,7 +362,7 @@ class TestProfilesUnit:
         assert data["response_time"] == 1.25
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_clone_profile_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -396,7 +396,7 @@ class TestProfilesUnit:
         assert data["name"] == "Cloned Profile"
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_get_profile_stats_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -427,7 +427,7 @@ class TestProfilesUnit:
         assert "profiles_by_provider" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_get_available_providers_success(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -466,7 +466,7 @@ class TestProfilesUnit:
         assert len(data["openai"]["models"]) == 3
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_profile_service_error_handling(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -489,7 +489,7 @@ class TestProfilesUnit:
         assert response.status_code == 500
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_profile_validation_errors(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -523,7 +523,7 @@ class TestProfilesUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_list_profiles_filtering(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):
@@ -549,7 +549,7 @@ class TestProfilesUnit:
         assert "provider" in call_kwargs
 
     @pytest.mark.unit
-    @patch('chatter.api.profiles.get_profile_service')
+    @patch("chatter.api.profiles.get_profile_service")
     async def test_test_profile_rate_limit(
         self, mock_get_service, client: AsyncClient, auth_headers: dict
     ):

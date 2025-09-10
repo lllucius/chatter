@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,7 @@
 
 import unittest
 
-from chatter_sdk.models.document_status import DocumentStatus
+
 
 class TestDocumentStatus(unittest.TestCase):
     """DocumentStatus unit test stubs"""
@@ -30,5 +29,5 @@ class TestDocumentStatus(unittest.TestCase):
         """Test DocumentStatus"""
         # inst = DocumentStatus()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

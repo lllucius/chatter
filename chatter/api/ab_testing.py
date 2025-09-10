@@ -56,10 +56,10 @@ def _check_test_access(
     # In a production system, you'd implement proper RBAC here
     if test.created_by != current_user.username:
         # Allow admins to access all tests (assuming admin role exists)
-        user_roles = getattr(current_user, 'roles', [])
+        user_roles = getattr(current_user, "roles", [])
         if (
-            'admin' not in user_roles
-            and 'ab_testing_admin' not in user_roles
+            "admin" not in user_roles
+            and "ab_testing_admin" not in user_roles
         ):
             raise ForbiddenProblem(
                 detail="You don't have permission to access this A/B test"

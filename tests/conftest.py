@@ -394,15 +394,15 @@ async def auth_headers(client) -> dict[str, str]:
 
     # Generate a more username-friendly unique identifier
     # Use only lowercase letters to avoid sequential pattern validation
-    unique_base = str(uuid.uuid4()).replace('-', '')
+    unique_base = str(uuid.uuid4()).replace("-", "")
     # Filter out numbers and use only letters to avoid validation issues
-    safe_chars = ''.join(c for c in unique_base if c.isalpha()).lower()[
+    safe_chars = "".join(c for c in unique_base if c.isalpha()).lower()[
         :8
     ]
     # Ensure we have enough characters, pad with random letters if needed
     while len(safe_chars) < 6:
         safe_chars += random.choice(string.ascii_lowercase)
-    safe_id = 'testuser' + safe_chars[:6]
+    safe_id = "testuser" + safe_chars[:6]
 
     user_data = {
         "username": safe_id,
@@ -471,12 +471,12 @@ def setup_test_environment():
     config_modules = [
         name
         for name in sys.modules.keys()
-        if name and name.startswith('chatter.config')
+        if name and name.startswith("chatter.config")
     ]
     for module_name in config_modules:
         module = sys.modules[module_name]
         # Force reload of settings if present
-        if hasattr(module, 'settings'):
+        if hasattr(module, "settings"):
             # Clear the cached settings to force recreation
             try:
                 # Create new settings with current environment

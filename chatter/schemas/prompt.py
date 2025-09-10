@@ -145,18 +145,18 @@ class PromptCreate(PromptBase):
         validation = SecureTemplateRenderer.validate_template_syntax(
             self.content, self.template_format
         )
-        if not validation['valid']:
+        if not validation["valid"]:
             raise ValueError(
                 f"Invalid template syntax: {'; '.join(validation['errors'])}"
             )
 
         # Auto-extract variables from template if not provided
         if self.variables is None:
-            self.variables = validation['variables']
+            self.variables = validation["variables"]
 
         # Validate required variables against template variables
         if self.required_variables is not None:
-            template_vars = set(validation['variables'])
+            template_vars = set(validation["variables"])
             required_vars = set(self.required_variables)
             missing_vars = required_vars - template_vars
             if missing_vars:
@@ -347,7 +347,7 @@ class PromptUpdate(BaseModel):
                     self.content, self.template_format
                 )
             )
-            if not validation['valid']:
+            if not validation["valid"]:
                 raise ValueError(
                     f"Invalid template syntax: {'; '.join(validation['errors'])}"
                 )

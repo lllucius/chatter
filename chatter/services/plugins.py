@@ -147,7 +147,7 @@ class BasePlugin(ABC):
         """
         try:
             # Check required fields
-            required = schema.get('required', [])
+            required = schema.get("required", [])
             for field in required:
                 if field not in config:
                     self.logger.error(
@@ -156,39 +156,39 @@ class BasePlugin(ABC):
                     return False
 
             # Check property types
-            properties = schema.get('properties', {})
+            properties = schema.get("properties", {})
             for field, value in config.items():
                 if field in properties:
-                    expected_type = properties[field].get('type')
-                    if expected_type == 'string' and not isinstance(
+                    expected_type = properties[field].get("type")
+                    if expected_type == "string" and not isinstance(
                         value, str
                     ):
                         self.logger.error(
                             f"Configuration field '{field}' must be a string"
                         )
                         return False
-                    elif expected_type == 'number' and not isinstance(
+                    elif expected_type == "number" and not isinstance(
                         value, int | float
                     ):
                         self.logger.error(
                             f"Configuration field '{field}' must be a number"
                         )
                         return False
-                    elif expected_type == 'object' and not isinstance(
+                    elif expected_type == "object" and not isinstance(
                         value, dict
                     ):
                         self.logger.error(
                             f"Configuration field '{field}' must be an object"
                         )
                         return False
-                    elif expected_type == 'array' and not isinstance(
+                    elif expected_type == "array" and not isinstance(
                         value, list
                     ):
                         self.logger.error(
                             f"Configuration field '{field}' must be an array"
                         )
                         return False
-                    elif expected_type == 'boolean' and not isinstance(
+                    elif expected_type == "boolean" and not isinstance(
                         value, bool
                     ):
                         self.logger.error(
@@ -315,7 +315,7 @@ class PluginManager:
             # Validate plugin_path is not empty or None
             if not plugin_path or str(plugin_path).strip() == "":
                 raise ValueError("Plugin path cannot be empty")
-            
+
             plugin_path = Path(plugin_path)
 
             if not plugin_path.exists():
@@ -331,7 +331,7 @@ class PluginManager:
                 )
 
             try:
-                with open(manifest_path, encoding='utf-8') as f:
+                with open(manifest_path, encoding="utf-8") as f:
                     manifest_data = json.load(f)
 
                 manifest = PluginManifest(**manifest_data)
@@ -511,7 +511,7 @@ class PluginManager:
                     finally:
                         # Clean up temporary plugin if created
                         if temp_plugin and hasattr(
-                            temp_plugin, 'shutdown'
+                            temp_plugin, "shutdown"
                         ):
                             try:
                                 await temp_plugin.shutdown()
@@ -1177,18 +1177,18 @@ class PluginManager:
             raise ImportError(f"Cannot access plugin file: {e}") from e
         # Create a restricted module namespace
         restricted_builtins = {
-            '__builtins__': (
+            "__builtins__": (
                 {
                     k: v
                     for k, v in __builtins__.items()
                     if k
                     not in [
-                        'eval',
-                        'exec',
-                        '__import__',
-                        'open',
-                        'input',
-                        'compile',
+                        "eval",
+                        "exec",
+                        "__import__",
+                        "open",
+                        "input",
+                        "compile",
                     ]
                 }
                 if isinstance(__builtins__, dict)
@@ -1197,12 +1197,12 @@ class PluginManager:
                     for k in dir(__builtins__)
                     if k
                     not in [
-                        'eval',
-                        'exec',
-                        '__import__',
-                        'open',
-                        'input',
-                        'compile',
+                        "eval",
+                        "exec",
+                        "__import__",
+                        "open",
+                        "input",
+                        "compile",
                     ]
                 }
             )
@@ -1237,7 +1237,7 @@ class PluginManager:
                     ) from None
 
                 # Only use signal-based timeout on Unix systems
-                if platform.system() != 'Windows':
+                if platform.system() != "Windows":
                     old_handler = signal.signal(
                         signal.SIGALRM, timeout_handler
                     )
@@ -1279,7 +1279,7 @@ class PluginManager:
                 and issubclass(obj, BasePlugin)
                 and obj
                 not in valid_base_classes  # Exclude base classes
-                and not name.startswith('_')  # Exclude private classes
+                and not name.startswith("_")  # Exclude private classes
             ):
                 if plugin_class is not None:
                     # Multiple plugin classes found, be more specific
@@ -1296,9 +1296,9 @@ class PluginManager:
 
         # Validate plugin class has required methods
         required_methods = [
-            'initialize',
-            'shutdown',
-            'get_capabilities',
+            "initialize",
+            "shutdown",
+            "get_capabilities",
         ]
         for method in required_methods:
             if not hasattr(plugin_class, method):

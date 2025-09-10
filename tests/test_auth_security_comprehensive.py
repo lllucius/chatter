@@ -382,7 +382,7 @@ class TestAuthServiceSecurity:
         )
         await auth_service.create_user(user_data)
 
-        with patch('chatter.core.auth.logger') as mock_logger:
+        with patch("chatter.core.auth.logger") as mock_logger:
             # Test successful authentication logging
             result = await auth_service.authenticate_user(
                 "testuser", "ValidPass123!"
@@ -550,7 +550,7 @@ class TestSecurityCompliance:
         hashed = hash_password(password)
 
         # Should use bcrypt (starts with $2a$, $2b$, or $2y$)
-        assert hashed.startswith(('$2a$', '$2b$', '$2y$'))
+        assert hashed.startswith(("$2a$", "$2b$", "$2y$"))
         assert len(hashed) >= 60  # bcrypt hashes are 60 chars
         assert hashed != password  # Should be hashed, not plaintext
 

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,7 @@
 
 import unittest
 
-from chatter_sdk.models.plugin_type import PluginType
+
 
 class TestPluginType(unittest.TestCase):
     """PluginType unit test stubs"""
@@ -30,5 +29,5 @@ class TestPluginType(unittest.TestCase):
         """Test PluginType"""
         # inst = PluginType()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

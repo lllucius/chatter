@@ -312,7 +312,7 @@ class ToolAccessService:
 
         # Check role-based access
         user_role = getattr(
-            user, 'role', UserRole.USER
+            user, "role", UserRole.USER
         )  # Default to USER role
         role_access = await self._get_role_access(
             user_role, tool_name, server_name
@@ -500,7 +500,7 @@ class ToolAccessService:
             return False
 
         # Simple wildcard pattern matching
-        pattern = pattern.replace('*', '.*')
+        pattern = pattern.replace("*", ".*")
         return bool(re.match(f"^{pattern}$", name))
 
     async def _check_permission_access(

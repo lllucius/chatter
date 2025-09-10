@@ -7,15 +7,15 @@ from ulid import ULID
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
-from chatter.schemas.jobs import JobPriority  # Add JobPriority import
-from chatter.schemas.jobs import JobStatus  # Add JobStatus import
 from chatter.schemas.jobs import (
     JobActionResponse,
     JobCreateRequest,
     JobListRequest,
     JobListResponse,
+    JobPriority,  # Add JobPriority import
     JobResponse,
     JobStatsResponse,
+    JobStatus,  # Add JobStatus import
 )
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger

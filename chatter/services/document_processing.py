@@ -1023,7 +1023,7 @@ class DocumentProcessingService:
 
             # Simple text search in filename and extracted text
             search_condition = Document.filename.ilike(f"%{query}%")
-            if hasattr(Document, 'extracted_text'):
+            if hasattr(Document, "extracted_text"):
                 search_condition = (
                     search_condition
                     | Document.extracted_text.ilike(f"%{query}%")

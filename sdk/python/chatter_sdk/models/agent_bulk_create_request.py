@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,23 +13,24 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
 from pydantic import BaseModel, ConfigDict, Field
-from typing import Any, ClassVar, Dict, List
-from typing_extensions import Annotated
+from typing import Annotated, Self
+
 from chatter_sdk.models.agent_create_request import AgentCreateRequest
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class AgentBulkCreateRequest(BaseModel):
     """
     Request schema for bulk agent creation.
     """ # noqa: E501
-    agents: Annotated[List[AgentCreateRequest], Field(min_length=1, max_length=10)] = Field(description="List of agents to create (max 10)")
-    __properties: ClassVar[List[str]] = ["agents"]
+    agents: Annotated[list[AgentCreateRequest], Field(min_length=1, max_length=10)] = Field(description="List of agents to create (max 10)")
+    __properties: ClassVar[list[str]] = ["agents"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -49,11 +49,11 @@ class AgentBulkCreateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of AgentBulkCreateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -63,7 +63,7 @@ class AgentBulkCreateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -77,11 +77,11 @@ class AgentBulkCreateRequest(BaseModel):
             for _item_agents in self.agents:
                 if _item_agents:
                     _items.append(_item_agents.to_dict())
-            _dict['agents'] = _items
+            _dict["agents"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of AgentBulkCreateRequest from a dict"""
         if obj is None:
             return None

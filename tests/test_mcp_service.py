@@ -107,7 +107,7 @@ class TestMCPToolService:
         assert self.service._client is None
         assert self.service._max_retries == 3
 
-    @patch('chatter.services.mcp.MultiServerMCPClient')
+    @patch("chatter.services.mcp.MultiServerMCPClient")
     def test_get_client(self, mock_client_class):
         """Test getting MCP client."""
         mock_client = MagicMock()
@@ -200,7 +200,7 @@ class TestMCPToolService:
             "success",
         ]
 
-        with patch('asyncio.sleep') as mock_sleep:
+        with patch("asyncio.sleep") as mock_sleep:
             result = await self.service._retry_with_backoff(
                 mock_operation, "test_server"
             )
@@ -220,7 +220,7 @@ class TestMCPToolService:
             side_effect=Exception("Persistent failure")
         )
 
-        with patch('asyncio.sleep'):
+        with patch("asyncio.sleep"):
             with pytest.raises(
                 MCPServiceError,
                 match="Operation failed after 3 retries",
@@ -260,10 +260,10 @@ class TestMCPToolService:
         )
 
         with patch.object(
-            self.service, '_convert_server_to_connection'
+            self.service, "_convert_server_to_connection"
         ) as mock_convert:
             with patch.object(
-                self.service, '_update_client'
+                self.service, "_update_client"
             ) as mock_update:
                 mock_convert.return_value = MagicMock(spec=Connection)
 
@@ -321,7 +321,7 @@ class TestMCPToolService:
         self.service.tools_cache["test_server"] = []
 
         with patch.object(
-            self.service, '_update_client'
+            self.service, "_update_client"
         ) as mock_update:
             result = await self.service.remove_server("test_server")
 
@@ -335,7 +335,7 @@ class TestMCPToolService:
     async def test_remove_nonexistent_server(self):
         """Test removing a server that doesn't exist."""
         with patch.object(
-            self.service, '_update_client'
+            self.service, "_update_client"
         ) as mock_update:
             result = await self.service.remove_server(
                 "nonexistent_server"
@@ -363,7 +363,7 @@ class TestMCPToolService:
         mock_client.get_tools = AsyncMock(return_value=[mock_tool])
 
         with patch.object(
-            self.service, '_get_client', return_value=mock_client
+            self.service, "_get_client", return_value=mock_client
         ):
             tools = await self.service.discover_tools("test_server")
 
@@ -420,7 +420,7 @@ class TestMCPToolService:
         )
 
         with patch.object(
-            self.service, '_get_client', return_value=mock_client
+            self.service, "_get_client", return_value=mock_client
         ):
             tools = await self.service.get_tools()
 
@@ -445,7 +445,7 @@ class TestMCPToolService:
         ]
 
         with patch.object(
-            self.service, '_get_client', return_value=mock_client
+            self.service, "_get_client", return_value=mock_client
         ):
             tools = await self.service.get_tools(["server1", "server2"])
 
@@ -478,7 +478,7 @@ class TestMCPToolService:
         )
 
         with patch.object(
-            self.service, '_get_client', return_value=mock_client
+            self.service, "_get_client", return_value=mock_client
         ):
             result = await self.service.call_tool(
                 "test_tool", {"param": "value"}
@@ -579,7 +579,7 @@ class TestMCPToolService:
         # This method would be implemented to handle different transport types
         # For now, we test that it would be called correctly
         with patch.object(
-            self.service, '_convert_server_to_connection'
+            self.service, "_convert_server_to_connection"
         ) as mock_convert:
             mock_convert.return_value = MagicMock(spec=Connection)
 
@@ -621,12 +621,12 @@ class TestMCPServiceIntegration:
         )
 
         with patch.object(
-            self.service, '_get_client', return_value=mock_client
+            self.service, "_get_client", return_value=mock_client
         ):
             with patch.object(
-                self.service, '_convert_server_to_connection'
+                self.service, "_convert_server_to_connection"
             ) as mock_convert:
-                with patch.object(self.service, '_update_client'):
+                with patch.object(self.service, "_update_client"):
                     mock_convert.return_value = MagicMock(
                         spec=Connection
                     )
@@ -680,9 +680,9 @@ class TestMCPServiceIntegration:
         )
 
         with patch.object(
-            self.service, '_convert_server_to_connection'
+            self.service, "_convert_server_to_connection"
         ) as mock_convert:
-            with patch.object(self.service, '_update_client'):
+            with patch.object(self.service, "_update_client"):
                 mock_convert.return_value = MagicMock(spec=Connection)
 
                 # Add both servers
@@ -715,9 +715,9 @@ class TestMCPServiceIntegration:
         )
 
         with patch.object(
-            self.service, '_convert_server_to_connection'
+            self.service, "_convert_server_to_connection"
         ):
-            with patch.object(self.service, '_update_client'):
+            with patch.object(self.service, "_update_client"):
                 # Add server successfully
                 assert (
                     await self.service.add_server(server_config) is True

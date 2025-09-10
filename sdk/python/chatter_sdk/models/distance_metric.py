@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,9 +13,11 @@
 
 
 from __future__ import annotations
+
 import json
 from enum import Enum
-from typing_extensions import Self
+
+from typing import Self
 
 
 class DistanceMetric(str, Enum):
@@ -27,9 +28,9 @@ class DistanceMetric(str, Enum):
     """
     allowed enum values
     """
-    COSINE = 'cosine'
-    L2 = 'l2'
-    IP = 'ip'
+    COSINE = "cosine"
+    L2 = "l2"
+    IP = "ip"
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

@@ -10,7 +10,7 @@ from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-T = TypeVar('T')
+T = TypeVar("T")
 
 
 class DependencyContainer:
@@ -350,7 +350,7 @@ class ServiceLifecycleManager:
         """
         if name in self.services:
             service = self.services[name]
-            if hasattr(service, 'start'):
+            if hasattr(service, "start"):
                 service.start()
             self._trigger_lifecycle_event(name, "started")
 
@@ -362,7 +362,7 @@ class ServiceLifecycleManager:
         """
         if name in self.services:
             service = self.services[name]
-            if hasattr(service, 'stop'):
+            if hasattr(service, "stop"):
                 service.stop()
             self._trigger_lifecycle_event(name, "stopped")
 

@@ -5,9 +5,18 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+    Float,
+    ForeignKey,
+    Integer,
+    String,
+    Text,
+)
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -49,44 +58,44 @@ class WorkflowTemplate(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'version > 0',
-            name='check_version_positive',
+            "version > 0",
+            name="check_version_positive",
         ),
         CheckConstraint(
-            'rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)',
-            name='check_rating_range',
+            "rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)",
+            name="check_rating_range",
         ),
         CheckConstraint(
-            'rating_count >= 0',
-            name='check_rating_count_non_negative',
+            "rating_count >= 0",
+            name="check_rating_count_non_negative",
         ),
         CheckConstraint(
-            'usage_count >= 0',
-            name='check_usage_count_non_negative',
+            "usage_count >= 0",
+            name="check_usage_count_non_negative",
         ),
         CheckConstraint(
-            'total_tokens_used >= 0',
-            name='check_total_tokens_used_non_negative',
+            "total_tokens_used >= 0",
+            name="check_total_tokens_used_non_negative",
         ),
         CheckConstraint(
-            'total_cost >= 0.0',
-            name='check_total_cost_non_negative',
+            "total_cost >= 0.0",
+            name="check_total_cost_non_negative",
         ),
         CheckConstraint(
-            'success_rate IS NULL OR (success_rate >= 0.0 AND success_rate <= 1.0)',
-            name='check_success_rate_range',
+            "success_rate IS NULL OR (success_rate >= 0.0 AND success_rate <= 1.0)",
+            name="check_success_rate_range",
         ),
         CheckConstraint(
-            'avg_response_time_ms IS NULL OR avg_response_time_ms > 0',
-            name='check_avg_response_time_ms_positive',
+            "avg_response_time_ms IS NULL OR avg_response_time_ms > 0",
+            name="check_avg_response_time_ms_positive",
         ),
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "description != ''",
-            name='check_description_not_empty',
+            name="check_description_not_empty",
         ),
     )
 
@@ -285,15 +294,15 @@ class TemplateSpec(Base):
     __table_args__ = (
         CheckConstraint(
             "name != ''",
-            name='check_spec_name_not_empty',
+            name="check_spec_name_not_empty",
         ),
         CheckConstraint(
             "description != ''",
-            name='check_spec_description_not_empty',
+            name="check_spec_description_not_empty",
         ),
         CheckConstraint(
-            'usage_count >= 0',
-            name='check_spec_usage_count_non_negative',
+            "usage_count >= 0",
+            name="check_spec_usage_count_non_negative",
         ),
     )
 
@@ -384,12 +393,12 @@ class WorkflowDefinition(Base):
 
     __table_args__ = (
         CheckConstraint(
-            'version > 0',
-            name='check_workflow_version_positive',
+            "version > 0",
+            name="check_workflow_version_positive",
         ),
         CheckConstraint(
             "name != ''",
-            name='check_workflow_name_not_empty',
+            name="check_workflow_name_not_empty",
         ),
     )
 
@@ -480,19 +489,19 @@ class WorkflowExecution(Base):
     __table_args__ = (
         CheckConstraint(
             "status IN ('pending', 'running', 'completed', 'failed', 'cancelled')",
-            name='check_execution_status_valid',
+            name="check_execution_status_valid",
         ),
         CheckConstraint(
-            'execution_time_ms IS NULL OR execution_time_ms > 0',
-            name='check_execution_time_positive',
+            "execution_time_ms IS NULL OR execution_time_ms > 0",
+            name="check_execution_time_positive",
         ),
         CheckConstraint(
-            'tokens_used >= 0',
-            name='check_tokens_used_non_negative',
+            "tokens_used >= 0",
+            name="check_tokens_used_non_negative",
         ),
         CheckConstraint(
-            'cost >= 0.0',
-            name='check_cost_non_negative',
+            "cost >= 0.0",
+            name="check_cost_non_negative",
         ),
     )
 
@@ -509,7 +518,7 @@ class WorkflowExecution(Base):
 
     # Execution metadata
     status: Mapped[str] = mapped_column(
-        String(20), nullable=False, index=True, default='pending'
+        String(20), nullable=False, index=True, default="pending"
     )
     started_at: Mapped[datetime | None] = mapped_column(
         DateTime(timezone=True), nullable=True

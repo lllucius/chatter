@@ -200,7 +200,7 @@ class TestSecurityTesting:
                         "status_code": response.status_code,
                         "response_time": (
                             response.elapsed.total_seconds()
-                            if hasattr(response, 'elapsed')
+                            if hasattr(response, "elapsed")
                             else 0
                         ),
                     }
@@ -464,7 +464,7 @@ class TestSecurityTesting:
                         assert not any(
                             ord(c) < 32
                             for c in stored_name
-                            if c != '\n' and c != '\t'
+                            if c != "\n" and c != "\t"
                         ), "Control characters not sanitized"
 
                     # Extremely long strings should be truncated
@@ -495,7 +495,7 @@ class TestSecurityTesting:
                             assert not any(
                                 ord(c) < 32
                                 for c in stored_title
-                                if c != '\n' and c != '\t'
+                                if c != "\n" and c != "\t"
                             ), "Control characters not sanitized in chat title"
 
             print("Input validation and sanitization: PASSED")

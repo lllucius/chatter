@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,7 @@
 
 import unittest
 
-from chatter_sdk.models.export_scope import ExportScope
+
 
 class TestExportScope(unittest.TestCase):
     """ExportScope unit test stubs"""
@@ -30,5 +29,5 @@ class TestExportScope(unittest.TestCase):
         """Test ExportScope"""
         # inst = ExportScope()
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

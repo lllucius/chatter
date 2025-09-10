@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,17 +13,25 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
-from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional, Union
-from typing_extensions import Annotated
+from typing import Any, ClassVar
+
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+)
+from typing import Annotated, Self
+
 from chatter_sdk.models.message_role import MessageRole
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class MessageResponse(BaseModel):
     """
@@ -35,16 +42,16 @@ class MessageResponse(BaseModel):
     id: StrictStr = Field(description="Message ID")
     conversation_id: StrictStr = Field(description="Conversation ID")
     sequence_number: StrictInt = Field(description="Message sequence number")
-    prompt_tokens: Optional[StrictInt] = None
-    completion_tokens: Optional[StrictInt] = None
-    total_tokens: Optional[StrictInt] = None
-    model_used: Optional[StrictStr] = None
-    provider_used: Optional[StrictStr] = None
-    response_time_ms: Optional[StrictInt] = None
-    cost: Optional[Union[StrictFloat, StrictInt]] = None
-    finish_reason: Optional[StrictStr] = None
+    prompt_tokens: StrictInt | None = None
+    completion_tokens: StrictInt | None = None
+    total_tokens: StrictInt | None = None
+    model_used: StrictStr | None = None
+    provider_used: StrictStr | None = None
+    response_time_ms: StrictInt | None = None
+    cost: StrictFloat | StrictInt | None = None
+    finish_reason: StrictStr | None = None
     created_at: datetime = Field(description="Creation timestamp")
-    __properties: ClassVar[List[str]] = ["role", "content", "id", "conversation_id", "sequence_number", "prompt_tokens", "completion_tokens", "total_tokens", "model_used", "provider_used", "response_time_ms", "cost", "finish_reason", "created_at"]
+    __properties: ClassVar[list[str]] = ["role", "content", "id", "conversation_id", "sequence_number", "prompt_tokens", "completion_tokens", "total_tokens", "model_used", "provider_used", "response_time_ms", "cost", "finish_reason", "created_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -63,11 +70,11 @@ class MessageResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of MessageResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -77,7 +84,7 @@ class MessageResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -88,47 +95,47 @@ class MessageResponse(BaseModel):
         # set to None if prompt_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.prompt_tokens is None and "prompt_tokens" in self.model_fields_set:
-            _dict['prompt_tokens'] = None
+            _dict["prompt_tokens"] = None
 
         # set to None if completion_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.completion_tokens is None and "completion_tokens" in self.model_fields_set:
-            _dict['completion_tokens'] = None
+            _dict["completion_tokens"] = None
 
         # set to None if total_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.total_tokens is None and "total_tokens" in self.model_fields_set:
-            _dict['total_tokens'] = None
+            _dict["total_tokens"] = None
 
         # set to None if model_used (nullable) is None
         # and model_fields_set contains the field
         if self.model_used is None and "model_used" in self.model_fields_set:
-            _dict['model_used'] = None
+            _dict["model_used"] = None
 
         # set to None if provider_used (nullable) is None
         # and model_fields_set contains the field
         if self.provider_used is None and "provider_used" in self.model_fields_set:
-            _dict['provider_used'] = None
+            _dict["provider_used"] = None
 
         # set to None if response_time_ms (nullable) is None
         # and model_fields_set contains the field
         if self.response_time_ms is None and "response_time_ms" in self.model_fields_set:
-            _dict['response_time_ms'] = None
+            _dict["response_time_ms"] = None
 
         # set to None if cost (nullable) is None
         # and model_fields_set contains the field
         if self.cost is None and "cost" in self.model_fields_set:
-            _dict['cost'] = None
+            _dict["cost"] = None
 
         # set to None if finish_reason (nullable) is None
         # and model_fields_set contains the field
         if self.finish_reason is None and "finish_reason" in self.model_fields_set:
-            _dict['finish_reason'] = None
+            _dict["finish_reason"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of MessageResponse from a dict"""
         if obj is None:
             return None

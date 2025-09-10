@@ -1,15 +1,13 @@
 """Chat and conversation management commands for the CLI."""
 
 import json
+
 import typer
 from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
-from rich.live import Live
-from rich.spinner import Spinner
 
 from chatter.commands import console, get_client, run_async
-
 
 # Chat Commands
 chat_app = typer.Typer(help="Chat and conversation management commands")
@@ -49,23 +47,23 @@ async def send_message(
             console.print(f"💬 [dim]Sending message...[/dim]")
             console.print(f"[bold]User:[/bold] {message}")
             console.print(f"[bold]Assistant:[/bold]", end=" ")
-            
+
             async for chunk in sdk_client.chat_api.send_message_stream_api_v1_chat_stream_post(
                 chat_message=chat_request
             ):
-                if hasattr(chunk, 'content'):
+                if hasattr(chunk, "content"):
                     console.print(chunk.content, end="")
             console.print("")  # New line after streaming
         else:
             response = await sdk_client.chat_api.send_message_api_v1_chat_send_post(
                 chat_message=chat_request
             )
-            
+
             console.print(f"💬 [green]Message sent successfully[/green]")
             console.print(f"[bold]User:[/bold] {message}")
             console.print(f"[bold]Assistant:[/bold] {response.content}")
-            
-            if hasattr(response, 'conversation_id'):
+
+            if hasattr(response, "conversation_id"):
                 console.print(f"[dim]Conversation ID: {response.conversation_id}[/dim]")
 
 
@@ -94,9 +92,9 @@ async def list_conversations(
         for conv in response.conversations:
             table.add_row(
                 str(conv.id)[:8] + "...",
-                getattr(conv, 'title', 'Untitled')[:30],
-                str(getattr(conv, 'message_count', 0)),
-                str(getattr(conv, 'last_message_at', 'N/A'))[:19],
+                getattr(conv, "title", "Untitled")[:30],
+                str(getattr(conv, "message_count", 0)),
+                str(getattr(conv, "last_message_at", "N/A"))[:19],
             )
 
         console.print(table)
@@ -125,13 +123,13 @@ async def show_conversation(
             )
         )
 
-        if hasattr(response, 'messages') and response.messages:
+        if hasattr(response, "messages") and response.messages:
             console.print("\n[bold]Messages:[/bold]")
             for msg in response.messages:
-                role = getattr(msg, 'role', 'unknown')
-                content = getattr(msg, 'content', 'No content')
-                timestamp = getattr(msg, 'created_at', 'N/A')
-                
+                role = getattr(msg, "role", "unknown")
+                content = getattr(msg, "content", "No content")
+                timestamp = getattr(msg, "created_at", "N/A")
+
                 role_style = "blue" if role == "user" else "green"
                 console.print(f"[{role_style}]{role.upper()}:[/{role_style}] {content[:200]}")
                 console.print(f"[dim]{timestamp}[/dim]\n")
@@ -199,14 +197,14 @@ async def export_conversation(
         )
 
         if output_file:
-            with open(output_file, 'w') as f:
-                if format_type == 'json':
+            with open(output_file, "w") as f:
+                if format_type == "json":
                     json.dump(response.data, f, indent=2)
                 else:
                     f.write(response.content)
             console.print(f"✅ [green]Exported to: {output_file}[/green]")
         else:
-            console.print(response.content if hasattr(response, 'content') else str(response))
+            console.print(response.content if hasattr(response, "content") else str(response))
 
 
 @chat_app.command("stats")
@@ -220,16 +218,16 @@ async def chat_stats():
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_conversations'):
+        if hasattr(response, "total_conversations"):
             table.add_row("Total Conversations", str(response.total_conversations))
-        if hasattr(response, 'total_messages'):
+        if hasattr(response, "total_messages"):
             table.add_row("Total Messages", str(response.total_messages))
-        if hasattr(response, 'avg_messages_per_conversation'):
+        if hasattr(response, "avg_messages_per_conversation"):
             table.add_row(
                 "Avg Messages/Conversation",
                 f"{response.avg_messages_per_conversation:.1f}",
             )
-        if hasattr(response, 'total_tokens_used'):
+        if hasattr(response, "total_tokens_used"):
             table.add_row("Total Tokens Used", f"{response.total_tokens_used:,}")
 
         console.print(table)

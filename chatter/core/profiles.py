@@ -778,7 +778,7 @@ class ProfileService:
             result = {
                 "providers": providers,
                 "default_provider": getattr(
-                    settings, 'default_llm_provider', 'openai'
+                    settings, "default_llm_provider", "openai"
                 ),
             }
 

@@ -2,10 +2,8 @@
 
 import typer
 from rich.table import Table
-from rich.panel import Panel
 
 from chatter.commands import console, get_client, run_async
-
 
 # Analytics Commands
 analytics_app = typer.Typer(help="Analytics and metrics commands")
@@ -26,13 +24,13 @@ async def analytics_overview(
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
-        if hasattr(response, 'total_requests'):
+        if hasattr(response, "total_requests"):
             table.add_row("Total Requests", f"{response.total_requests:,}")
-        if hasattr(response, 'total_users'):
+        if hasattr(response, "total_users"):
             table.add_row("Total Users", str(response.total_users))
-        if hasattr(response, 'total_conversations'):
+        if hasattr(response, "total_conversations"):
             table.add_row("Total Conversations", str(response.total_conversations))
-        if hasattr(response, 'avg_response_time'):
+        if hasattr(response, "avg_response_time"):
             table.add_row("Avg Response Time", f"{response.avg_response_time:.2f}ms")
 
         console.print(table)
@@ -56,13 +54,13 @@ async def usage_stats(
         table.add_column("Users", style="yellow")
         table.add_column("Conversations", style="magenta")
 
-        if hasattr(response, 'usage_data'):
+        if hasattr(response, "usage_data"):
             for data in response.usage_data:
                 table.add_row(
-                    getattr(data, 'period', 'N/A'),
-                    str(getattr(data, 'requests', 0)),
-                    str(getattr(data, 'users', 0)),
-                    str(getattr(data, 'conversations', 0)),
+                    getattr(data, "period", "N/A"),
+                    str(getattr(data, "requests", 0)),
+                    str(getattr(data, "users", 0)),
+                    str(getattr(data, "conversations", 0)),
                 )
 
         console.print(table)
@@ -83,7 +81,7 @@ async def export_analytics(
         )
 
         if output_file:
-            with open(output_file, 'w') as f:
+            with open(output_file, "w") as f:
                 f.write(response.data)
             console.print(f"✅ [green]Analytics exported to: {output_file}[/green]")
         else:

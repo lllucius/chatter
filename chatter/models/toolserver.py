@@ -9,9 +9,6 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
-)
-from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
     Float,
     ForeignKey,
     Integer,
@@ -19,6 +16,7 @@ from sqlalchemy import (
     Text,
     UniqueConstraint,
 )
+from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys
@@ -49,23 +47,23 @@ class ToolServer(Base):
     __table_args__ = (
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "display_name != ''",
-            name='check_display_name_not_empty',
+            name="check_display_name_not_empty",
         ),
         CheckConstraint(
-            'timeout > 0',
-            name='check_timeout_positive',
+            "timeout > 0",
+            name="check_timeout_positive",
         ),
         CheckConstraint(
-            'consecutive_failures >= 0',
-            name='check_consecutive_failures_non_negative',
+            "consecutive_failures >= 0",
+            name="check_consecutive_failures_non_negative",
         ),
         CheckConstraint(
-            'max_failures > 0',
-            name='check_max_failures_positive',
+            "max_failures > 0",
+            name="check_max_failures_positive",
         ),
     )
 
@@ -176,23 +174,23 @@ class ServerTool(Base):
     __table_args__ = (
         CheckConstraint(
             "name != ''",
-            name='check_name_not_empty',
+            name="check_name_not_empty",
         ),
         CheckConstraint(
             "display_name != ''",
-            name='check_display_name_not_empty',
+            name="check_display_name_not_empty",
         ),
         CheckConstraint(
-            'total_calls >= 0',
-            name='check_total_calls_non_negative',
+            "total_calls >= 0",
+            name="check_total_calls_non_negative",
         ),
         CheckConstraint(
-            'total_errors >= 0',
-            name='check_total_errors_non_negative',
+            "total_errors >= 0",
+            name="check_total_errors_non_negative",
         ),
         CheckConstraint(
-            'avg_response_time_ms IS NULL OR avg_response_time_ms >= 0.0',
-            name='check_avg_response_time_non_negative',
+            "avg_response_time_ms IS NULL OR avg_response_time_ms >= 0.0",
+            name="check_avg_response_time_non_negative",
         ),
         UniqueConstraint(
             "server_id", "name", name="uix_server_tool_name"
@@ -265,11 +263,11 @@ class ToolUsage(Base):
     __table_args__ = (
         CheckConstraint(
             "tool_name != ''",
-            name='check_tool_name_not_empty',
+            name="check_tool_name_not_empty",
         ),
         CheckConstraint(
-            'response_time_ms IS NULL OR response_time_ms >= 0.0',
-            name='check_response_time_non_negative',
+            "response_time_ms IS NULL OR response_time_ms >= 0.0",
+            name="check_response_time_non_negative",
         ),
     )
 
@@ -350,16 +348,16 @@ class ToolPermission(Base):
     # Constraints - either tool_id or server_id must be set
     __table_args__ = (
         CheckConstraint(
-            'rate_limit_per_hour IS NULL OR rate_limit_per_hour > 0',
-            name='check_rate_limit_per_hour_positive',
+            "rate_limit_per_hour IS NULL OR rate_limit_per_hour > 0",
+            name="check_rate_limit_per_hour_positive",
         ),
         CheckConstraint(
-            'rate_limit_per_day IS NULL OR rate_limit_per_day > 0',
-            name='check_rate_limit_per_day_positive',
+            "rate_limit_per_day IS NULL OR rate_limit_per_day > 0",
+            name="check_rate_limit_per_day_positive",
         ),
         CheckConstraint(
-            'usage_count >= 0',
-            name='check_usage_count_non_negative',
+            "usage_count >= 0",
+            name="check_usage_count_non_negative",
         ),
         UniqueConstraint(
             "user_id", "tool_id", name="uix_user_tool_permission"
@@ -448,12 +446,12 @@ class RoleToolAccess(Base):
     # Constraints
     __table_args__ = (
         CheckConstraint(
-            'default_rate_limit_per_hour IS NULL OR default_rate_limit_per_hour > 0',
-            name='check_default_rate_limit_per_hour_positive',
+            "default_rate_limit_per_hour IS NULL OR default_rate_limit_per_hour > 0",
+            name="check_default_rate_limit_per_hour_positive",
         ),
         CheckConstraint(
-            'default_rate_limit_per_day IS NULL OR default_rate_limit_per_day > 0',
-            name='check_default_rate_limit_per_day_positive',
+            "default_rate_limit_per_day IS NULL OR default_rate_limit_per_day > 0",
+            name="check_default_rate_limit_per_day_positive",
         ),
         UniqueConstraint(
             "role",

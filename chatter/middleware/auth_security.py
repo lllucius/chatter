@@ -45,7 +45,7 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
             try:
                 await self._apply_auth_rate_limiting(request)
             except Exception as e:
-                if hasattr(e, 'status_code') and e.status_code == 429:
+                if hasattr(e, "status_code") and e.status_code == 429:
                     return self._create_rate_limit_response(e)
                 # Log error but don't block request if rate limiting fails
                 logger.error(f"Rate limiting error: {e}")
@@ -185,17 +185,17 @@ class AuthRateLimitMiddleware(BaseHTTPMiddleware):
                 "status": 429,
                 "detail": "Too many requests. Please try again later.",
                 "instance": f"/auth/rate-limit/{datetime.now(UTC).isoformat()}",
-                "retry_after": getattr(exception, 'retry_after', 60),
+                "retry_after": getattr(exception, "retry_after", 60),
             },
             headers={
                 "Retry-After": str(
-                    getattr(exception, 'retry_after', 60)
+                    getattr(exception, "retry_after", 60)
                 ),
                 "X-RateLimit-Limit": str(
-                    getattr(exception, 'limit', 'unknown')
+                    getattr(exception, "limit", "unknown")
                 ),
                 "X-RateLimit-Remaining": str(
-                    getattr(exception, 'remaining', 0)
+                    getattr(exception, "remaining", 0)
                 ),
                 "X-RateLimit-Reset": str(
                     int(

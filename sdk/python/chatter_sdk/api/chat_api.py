@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -12,32 +11,51 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
-from typing import Any, Dict, List, Optional, Tuple, Union
-from typing_extensions import Annotated
+from typing import Any
 
-from pydantic import Field, StrictBool, StrictStr
-from typing import List, Optional
-from typing_extensions import Annotated
-from chatter_sdk.models.available_tools_response import AvailableToolsResponse
+from pydantic import (
+    Field,
+    StrictBool,
+    StrictFloat,
+    StrictInt,
+    StrictStr,
+    validate_call,
+)
+from typing import Annotated
+
+from chatter_sdk.api_client import ApiClient, RequestSerialized
+from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.available_tools_response import (
+    AvailableToolsResponse,
+)
 from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chat_response1 import ChatResponse1
 from chatter_sdk.models.conversation_create import ConversationCreate
-from chatter_sdk.models.conversation_delete_response import ConversationDeleteResponse
-from chatter_sdk.models.conversation_response import ConversationResponse
-from chatter_sdk.models.conversation_search_response import ConversationSearchResponse
+from chatter_sdk.models.conversation_delete_response import (
+    ConversationDeleteResponse,
+)
+from chatter_sdk.models.conversation_response import (
+    ConversationResponse,
+)
+from chatter_sdk.models.conversation_search_response import (
+    ConversationSearchResponse,
+)
 from chatter_sdk.models.conversation_update import ConversationUpdate
-from chatter_sdk.models.conversation_with_messages import ConversationWithMessages
+from chatter_sdk.models.conversation_with_messages import (
+    ConversationWithMessages,
+)
 from chatter_sdk.models.mcp_status_response import McpStatusResponse
-from chatter_sdk.models.message_delete_response import MessageDeleteResponse
+from chatter_sdk.models.message_delete_response import (
+    MessageDeleteResponse,
+)
 from chatter_sdk.models.message_response import MessageResponse
-from chatter_sdk.models.performance_stats_response import PerformanceStatsResponse
-from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse
-
-from chatter_sdk.api_client import ApiClient, RequestSerialized
-from chatter_sdk.api_response import ApiResponse
+from chatter_sdk.models.performance_stats_response import (
+    PerformanceStatsResponse,
+)
+from chatter_sdk.models.workflow_templates_response import (
+    WorkflowTemplatesResponse,
+)
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -58,17 +76,10 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ChatResponse1:
         """Chat
@@ -107,9 +118,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse1",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse1",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -126,17 +137,10 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post_with_http_info(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ChatResponse1]:
         """Chat
@@ -175,9 +179,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse1",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse1",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -194,17 +198,10 @@ class ChatApi:
     async def chat_api_v1_chat_chat_post_without_preload_content(
         self,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Chat
@@ -243,9 +240,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse1",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse1",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -265,17 +262,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -287,36 +284,36 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json', 
-                    'text/event-stream'
+                    "application/json", 
+                    "text/event-stream"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/chat/chat',
+            method="POST",
+            resource_path="/api/v1/chat/chat",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -337,17 +334,10 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ChatResponse:
         """Chat With Template
@@ -389,9 +379,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -409,17 +399,10 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ChatResponse]:
         """Chat With Template
@@ -461,9 +444,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -481,17 +464,10 @@ class ChatApi:
         self,
         template_name: StrictStr,
         chat_request: ChatRequest,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Chat With Template
@@ -533,9 +509,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ChatResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -556,21 +532,21 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if template_name is not None:
-            _path_params['template_name'] = template_name
+            _path_params["template_name"] = template_name
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -580,35 +556,35 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/chat/template/{template_name}',
+            method="POST",
+            resource_path="/api/v1/chat/template/{template_name}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -628,17 +604,10 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationResponse:
         """Create Conversation
@@ -677,9 +646,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -696,17 +665,10 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post_with_http_info(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationResponse]:
         """Create Conversation
@@ -745,9 +707,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -764,17 +726,10 @@ class ChatApi:
     async def create_conversation_api_v1_chat_conversations_post_without_preload_content(
         self,
         conversation_create: ConversationCreate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Conversation
@@ -813,9 +768,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '201': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "201": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -835,17 +790,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -857,35 +812,35 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='POST',
-            resource_path='/api/v1/chat/conversations',
+            method="POST",
+            resource_path="/api/v1/chat/conversations",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -905,17 +860,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationDeleteResponse:
         """Delete Conversation
@@ -954,9 +902,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -973,17 +921,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationDeleteResponse]:
         """Delete Conversation
@@ -1022,9 +963,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1041,17 +982,10 @@ class ChatApi:
     async def delete_conversation_api_v1_chat_conversations_conversation_id_delete_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Conversation
@@ -1090,9 +1024,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1112,21 +1046,21 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
-            _path_params['conversation_id'] = conversation_id
+            _path_params["conversation_id"] = conversation_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1134,22 +1068,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/api/v1/chat/conversations/{conversation_id}',
+            method="DELETE",
+            resource_path="/api/v1/chat/conversations/{conversation_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1170,17 +1104,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> MessageDeleteResponse:
         """Delete Message
@@ -1222,9 +1149,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MessageDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "MessageDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1242,17 +1169,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[MessageDeleteResponse]:
         """Delete Message
@@ -1294,9 +1214,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MessageDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "MessageDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1314,17 +1234,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         message_id: Annotated[str, Field(min_length=1, strict=True, description="Message ID")],
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Message
@@ -1366,9 +1279,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "MessageDeleteResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "MessageDeleteResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1389,23 +1302,23 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
-            _path_params['conversation_id'] = conversation_id
+            _path_params["conversation_id"] = conversation_id
         if message_id is not None:
-            _path_params['message_id'] = message_id
+            _path_params["message_id"] = message_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1413,22 +1326,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='DELETE',
-            resource_path='/api/v1/chat/conversations/{conversation_id}/messages/{message_id}',
+            method="DELETE",
+            resource_path="/api/v1/chat/conversations/{conversation_id}/messages/{message_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1447,17 +1360,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> AvailableToolsResponse:
         """Get Available Tools
@@ -1493,8 +1399,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableToolsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1510,17 +1416,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[AvailableToolsResponse]:
         """Get Available Tools
@@ -1556,8 +1455,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableToolsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1573,17 +1472,10 @@ class ChatApi:
     @validate_call
     async def get_available_tools_api_v1_chat_tools_available_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Available Tools
@@ -1619,8 +1511,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "AvailableToolsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "AvailableToolsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1639,17 +1531,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -1659,22 +1551,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/tools/available',
+            method="GET",
+            resource_path="/api/v1/chat/tools/available",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1694,18 +1586,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationWithMessages:
         """Get Conversation
@@ -1747,9 +1632,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationWithMessages",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationWithMessages",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1766,18 +1651,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationWithMessages]:
         """Get Conversation
@@ -1819,9 +1697,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationWithMessages",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationWithMessages",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1838,18 +1716,11 @@ class ChatApi:
     async def get_conversation_api_v1_chat_conversations_conversation_id_get_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        include_messages: Annotated[Optional[StrictBool], Field(description="Include messages in response")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        include_messages: Annotated[StrictBool | None, Field(description="Include messages in response")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Conversation
@@ -1891,9 +1762,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationWithMessages",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationWithMessages",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1914,48 +1785,48 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
-            _path_params['conversation_id'] = conversation_id
+            _path_params["conversation_id"] = conversation_id
         # process the query parameters
         if include_messages is not None:
-            
-            _query_params.append(('include_messages', include_messages))
-            
+
+            _query_params.append(("include_messages", include_messages))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/conversations/{conversation_id}',
+            method="GET",
+            resource_path="/api/v1/chat/conversations/{conversation_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1975,21 +1846,14 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> List[MessageResponse]:
+    ) -> list[MessageResponse]:
         """Get Conversation Messages
 
         Get messages from a conversation.
@@ -2032,9 +1896,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[MessageResponse]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "List[MessageResponse]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2051,21 +1915,14 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[List[MessageResponse]]:
+    ) -> ApiResponse[list[MessageResponse]]:
         """Get Conversation Messages
 
         Get messages from a conversation.
@@ -2108,9 +1965,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[MessageResponse]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "List[MessageResponse]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2127,19 +1984,12 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Conversation Messages
@@ -2184,9 +2034,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "List[MessageResponse]",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "List[MessageResponse]",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2208,52 +2058,52 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
-            _path_params['conversation_id'] = conversation_id
+            _path_params["conversation_id"] = conversation_id
         # process the query parameters
         if limit is not None:
-            
-            _query_params.append(('limit', limit))
-            
+
+            _query_params.append(("limit", limit))
+
         if offset is not None:
-            
-            _query_params.append(('offset', offset))
-            
+
+            _query_params.append(("offset", offset))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/conversations/{conversation_id}/messages',
+            method="GET",
+            resource_path="/api/v1/chat/conversations/{conversation_id}/messages",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2272,17 +2122,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> McpStatusResponse:
         """Get Mcp Status
@@ -2318,8 +2161,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "McpStatusResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2335,17 +2178,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[McpStatusResponse]:
         """Get Mcp Status
@@ -2381,8 +2217,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "McpStatusResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2398,17 +2234,10 @@ class ChatApi:
     @validate_call
     async def get_mcp_status_api_v1_chat_mcp_status_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Mcp Status
@@ -2444,8 +2273,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "McpStatusResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "McpStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2464,17 +2293,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2484,22 +2313,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/mcp/status',
+            method="GET",
+            resource_path="/api/v1/chat/mcp/status",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2518,17 +2347,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> PerformanceStatsResponse:
         """Get Performance Stats
@@ -2564,8 +2386,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2581,17 +2403,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[PerformanceStatsResponse]:
         """Get Performance Stats
@@ -2627,8 +2442,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2644,17 +2459,10 @@ class ChatApi:
     @validate_call
     async def get_performance_stats_api_v1_chat_performance_stats_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Performance Stats
@@ -2690,8 +2498,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "PerformanceStatsResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "PerformanceStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2710,17 +2518,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2730,22 +2538,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/performance/stats',
+            method="GET",
+            resource_path="/api/v1/chat/performance/stats",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2764,17 +2572,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> WorkflowTemplatesResponse:
         """Get Workflow Templates
@@ -2810,8 +2611,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkflowTemplatesResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2827,17 +2628,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get_with_http_info(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[WorkflowTemplatesResponse]:
         """Get Workflow Templates
@@ -2873,8 +2667,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkflowTemplatesResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2890,17 +2684,10 @@ class ChatApi:
     @validate_call
     async def get_workflow_templates_api_v1_chat_templates_get_without_preload_content(
         self,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Workflow Templates
@@ -2936,8 +2723,8 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "WorkflowTemplatesResponse",
+        _response_types_map: dict[str, str | None] = {
+            "200": "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2956,17 +2743,17 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
@@ -2976,22 +2763,22 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/templates',
+            method="GET",
+            resource_path="/api/v1/chat/templates",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3010,19 +2797,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationSearchResponse:
         """List Conversations
@@ -3064,9 +2844,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3082,19 +2862,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_with_http_info(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationSearchResponse]:
         """List Conversations
@@ -3136,9 +2909,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3154,19 +2927,12 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_without_preload_content(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        limit: Annotated[Annotated[int, Field(le=100, strict=True, ge=1)] | None, Field(description="Number of results per page")] = None,
+        offset: Annotated[Annotated[int, Field(strict=True, ge=0)] | None, Field(description="Number of results to skip")] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Conversations
@@ -3208,9 +2974,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationSearchResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationSearchResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3231,50 +2997,50 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         # process the query parameters
         if limit is not None:
-            
-            _query_params.append(('limit', limit))
-            
+
+            _query_params.append(("limit", limit))
+
         if offset is not None:
-            
-            _query_params.append(('offset', offset))
-            
+
+            _query_params.append(("offset", offset))
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/chat/conversations',
+            method="GET",
+            resource_path="/api/v1/chat/conversations",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3295,17 +3061,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ConversationResponse:
         """Update Conversation
@@ -3347,9 +3106,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3367,17 +3126,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ConversationResponse]:
         """Update Conversation
@@ -3419,9 +3171,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3439,17 +3191,10 @@ class ChatApi:
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
         conversation_update: ConversationUpdate,
-        _request_timeout: Union[
-            None,
-            Annotated[StrictFloat, Field(gt=0)],
-            Tuple[
-                Annotated[StrictFloat, Field(gt=0)],
-                Annotated[StrictFloat, Field(gt=0)]
-            ]
-        ] = None,
-        _request_auth: Optional[Dict[StrictStr, Any]] = None,
-        _content_type: Optional[StrictStr] = None,
-        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
+        _request_auth: dict[StrictStr, Any] | None = None,
+        _content_type: StrictStr | None = None,
+        _headers: dict[StrictStr, Any] | None = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Conversation
@@ -3491,9 +3236,9 @@ class ChatApi:
             _host_index=_host_index
         )
 
-        _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ConversationResponse",
-            '422': "HTTPValidationError",
+        _response_types_map: dict[str, str | None] = {
+            "200": "ConversationResponse",
+            "422": "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3514,21 +3259,21 @@ class ChatApi:
 
         _host = None
 
-        _collection_formats: Dict[str, str] = {
+        _collection_formats: dict[str, str] = {
         }
 
-        _path_params: Dict[str, str] = {}
-        _query_params: List[Tuple[str, str]] = []
-        _header_params: Dict[str, Optional[str]] = _headers or {}
-        _form_params: List[Tuple[str, str]] = []
-        _files: Dict[
-            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        _path_params: dict[str, str] = {}
+        _query_params: list[tuple[str, str]] = []
+        _header_params: dict[str, str | None] = _headers or {}
+        _form_params: list[tuple[str, str]] = []
+        _files: dict[
+            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
         ] = {}
-        _body_params: Optional[bytes] = None
+        _body_params: bytes | None = None
 
         # process the path parameters
         if conversation_id is not None:
-            _path_params['conversation_id'] = conversation_id
+            _path_params["conversation_id"] = conversation_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3538,35 +3283,35 @@ class ChatApi:
 
 
         # set the HTTP header `Accept`
-        if 'Accept' not in _header_params:
-            _header_params['Accept'] = self.api_client.select_header_accept(
+        if "Accept" not in _header_params:
+            _header_params["Accept"] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    "application/json"
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params['Content-Type'] = _content_type
+            _header_params["Content-Type"] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        'application/json'
+                        "application/json"
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
+                _header_params["Content-Type"] = _default_content_type
 
         # authentication setting
-        _auth_settings: List[str] = [
-            'CustomHTTPBearer'
+        _auth_settings: list[str] = [
+            "CustomHTTPBearer"
         ]
 
         return self.api_client.param_serialize(
-            method='PUT',
-            resource_path='/api/v1/chat/conversations/{conversation_id}',
+            method="PUT",
+            resource_path="/api/v1/chat/conversations/{conversation_id}",
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,17 +13,25 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
+from typing import Any, ClassVar
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr, field_validator
-from typing import Any, ClassVar, Dict, List, Optional
-from typing_extensions import Annotated
+from pydantic import (
+    BaseModel,
+    ConfigDict,
+    Field,
+    StrictBool,
+    StrictStr,
+    field_validator,
+)
+from typing import Annotated, Self
+
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.reduction_strategy import ReductionStrategy
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class EmbeddingSpaceCreate(BaseModel):
     """
@@ -32,30 +39,30 @@ class EmbeddingSpaceCreate(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Unique space name")
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Human-readable name")
-    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
     base_dimensions: Annotated[int, Field(le=10000, strict=True)] = Field(description="Original model dimensions")
     effective_dimensions: Annotated[int, Field(le=10000, strict=True)] = Field(description="Effective dimensions after reduction")
-    reduction_strategy: Optional[ReductionStrategy] = None
-    reducer_path: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
-    reducer_version: Optional[Annotated[str, Field(strict=True, max_length=100)]] = None
-    normalize_vectors: Optional[StrictBool] = Field(default=True, description="Whether to normalize vectors")
-    distance_metric: Optional[DistanceMetric] = None
+    reduction_strategy: ReductionStrategy | None = None
+    reducer_path: Annotated[str, Field(strict=True, max_length=500)] | None = None
+    reducer_version: Annotated[str, Field(strict=True, max_length=100)] | None = None
+    normalize_vectors: StrictBool | None = Field(default=True, description="Whether to normalize vectors")
+    distance_metric: DistanceMetric | None = None
     table_name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Database table name")
-    index_type: Optional[Annotated[str, Field(strict=True, max_length=50)]] = Field(default='hnsw', description="Index type")
-    index_config: Optional[Dict[str, Any]] = Field(default=None, description="Index configuration")
-    is_active: Optional[StrictBool] = Field(default=True, description="Whether space is active")
-    is_default: Optional[StrictBool] = Field(default=False, description="Whether this is the default space")
+    index_type: Annotated[str, Field(strict=True, max_length=50)] | None = Field(default="hnsw", description="Index type")
+    index_config: dict[str, Any] | None = Field(default=None, description="Index configuration")
+    is_active: StrictBool | None = Field(default=True, description="Whether space is active")
+    is_default: StrictBool | None = Field(default=False, description="Whether this is the default space")
     model_id: StrictStr = Field(description="Model ID")
-    __properties: ClassVar[List[str]] = ["name", "display_name", "description", "base_dimensions", "effective_dimensions", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "table_name", "index_type", "index_config", "is_active", "is_default", "model_id"]
+    __properties: ClassVar[list[str]] = ["name", "display_name", "description", "base_dimensions", "effective_dimensions", "reduction_strategy", "reducer_path", "reducer_version", "normalize_vectors", "distance_metric", "table_name", "index_type", "index_config", "is_active", "is_default", "model_id"]
 
-    @field_validator('name')
+    @field_validator("name")
     def name_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if not re.match(r"^[a-zA-Z0-9_-]+$", value):
             raise ValueError(r"must validate the regular expression /^[a-zA-Z0-9_-]+$/")
         return value
 
-    @field_validator('table_name')
+    @field_validator("table_name")
     def table_name_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if not re.match(r"^[a-zA-Z0-9_]+$", value):
@@ -79,11 +86,11 @@ class EmbeddingSpaceCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of EmbeddingSpaceCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -93,7 +100,7 @@ class EmbeddingSpaceCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -104,22 +111,22 @@ class EmbeddingSpaceCreate(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict['description'] = None
+            _dict["description"] = None
 
         # set to None if reducer_path (nullable) is None
         # and model_fields_set contains the field
         if self.reducer_path is None and "reducer_path" in self.model_fields_set:
-            _dict['reducer_path'] = None
+            _dict["reducer_path"] = None
 
         # set to None if reducer_version (nullable) is None
         # and model_fields_set contains the field
         if self.reducer_version is None and "reducer_version" in self.model_fields_set:
-            _dict['reducer_version'] = None
+            _dict["reducer_version"] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of EmbeddingSpaceCreate from a dict"""
         if obj is None:
             return None
@@ -139,7 +146,7 @@ class EmbeddingSpaceCreate(BaseModel):
             "normalize_vectors": obj.get("normalize_vectors") if obj.get("normalize_vectors") is not None else True,
             "distance_metric": obj.get("distance_metric"),
             "table_name": obj.get("table_name"),
-            "index_type": obj.get("index_type") if obj.get("index_type") is not None else 'hnsw',
+            "index_type": obj.get("index_type") if obj.get("index_type") is not None else "hnsw",
             "index_config": obj.get("index_config"),
             "is_active": obj.get("is_active") if obj.get("is_active") is not None else True,
             "is_default": obj.get("is_default") if obj.get("is_default") is not None else False,

@@ -98,7 +98,7 @@ class TestAgentsUnit:
         assert response.status_code == 401
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_create_agent_success(
         self,
         mock_agent_service,
@@ -159,7 +159,7 @@ class TestAgentsUnit:
         assert response.status_code == 422  # Validation error
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_list_agents_success(
         self,
         mock_agent_service,
@@ -203,7 +203,7 @@ class TestAgentsUnit:
         assert data["total"] == 2
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_get_agent_templates_success(
         self,
         mock_agent_service,
@@ -245,7 +245,7 @@ class TestAgentsUnit:
         assert data[0]["name"] == "Chat Assistant Template"
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_get_agent_success(
         self,
         mock_agent_service,
@@ -282,7 +282,7 @@ class TestAgentsUnit:
         assert data["status"] == "active"
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_get_agent_not_found(
         self,
         mock_agent_service,
@@ -300,7 +300,7 @@ class TestAgentsUnit:
         assert response.status_code == 404
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_update_agent_success(
         self,
         mock_agent_service,
@@ -338,7 +338,7 @@ class TestAgentsUnit:
         assert data["description"] == "Updated description"
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_delete_agent_success(
         self,
         mock_agent_service,
@@ -360,7 +360,7 @@ class TestAgentsUnit:
         assert data["agent_id"] == "agent-123"
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_test_agent_success(
         self,
         mock_agent_service,
@@ -399,7 +399,7 @@ class TestAgentsUnit:
         assert "metadata" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_get_agent_health_success(
         self,
         mock_agent_service,
@@ -436,7 +436,7 @@ class TestAgentsUnit:
         assert "checks" in data
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_bulk_create_agents_success(
         self,
         mock_agent_service,
@@ -490,7 +490,7 @@ class TestAgentsUnit:
         assert len(data["created_agents"]) == 3
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_bulk_delete_agents_success(
         self,
         mock_agent_service,
@@ -531,7 +531,7 @@ class TestAgentsUnit:
         assert len(data["errors"]) == 1
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_agent_service_error_handling(
         self,
         mock_agent_service,
@@ -557,7 +557,7 @@ class TestAgentsUnit:
         assert response.status_code == 500
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_list_agents_with_filters(
         self,
         mock_agent_service,
@@ -586,7 +586,7 @@ class TestAgentsUnit:
         assert "agent_type" in call_kwargs
 
     @pytest.mark.unit
-    @patch('chatter.api.agents.AgentService')
+    @patch("chatter.api.agents.AgentService")
     async def test_agent_test_with_invalid_input(
         self,
         mock_agent_service,

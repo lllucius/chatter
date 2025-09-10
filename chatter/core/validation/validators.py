@@ -49,7 +49,7 @@ class ValidationRule:
         allowed_chars: str | None = None,
         forbidden_patterns: list[str] | None = None,
         sanitize: bool = False,
-        custom_validator: Callable | None = None,
+        custom_validator: Callable[[Any], bool] | None = None,
     ):
         self.name = name
         self.pattern = pattern
@@ -65,7 +65,7 @@ class ValidationRule:
 class InputValidator(BaseValidator):
     """Validates and sanitizes user input."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "input",
             "Validates user input according to predefined rules",
@@ -74,7 +74,7 @@ class InputValidator(BaseValidator):
         self._setup_default_rules()
         self.supported_rules = list(self.rules.keys())
 
-    def _setup_default_rules(self):
+    def _setup_default_rules(self) -> None:
         """Setup default validation rules."""
         self.rules.update(
             {
@@ -251,20 +251,20 @@ class InputValidator(BaseValidator):
     def _sanitize_value(self, value: str) -> str:
         """Sanitize input value."""
         # Remove HTML tags
-        value = re.sub(r'<[^>]+>', '', value)
+        value = re.sub(r"<[^>]+>", "", value)
         # Remove null bytes
-        value = value.replace('\x00', '')
+        value = value.replace("\x00", "")
         # Remove control characters except newlines and tabs
-        value = re.sub(r'[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]', '', value)
+        value = re.sub(r"[\x01-\x08\x0B\x0C\x0E-\x1F\x7F]", "", value)
         # Normalize whitespace
-        value = re.sub(r'\s+', ' ', value).strip()
+        value = re.sub(r"\s+", " ", value).strip()
         return value
 
 
 class SecurityValidator(BaseValidator):
     """Validates input for security threats."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "security", "Validates input for security threats"
         )
@@ -338,7 +338,10 @@ class SecurityValidator(BaseValidator):
                 )
 
         if errors:
-            return ValidationResult(is_valid=False, errors=errors)
+            # Cast to base ValidationError list type
+            return ValidationResult(
+                is_valid=False, errors=list(errors)
+            )
 
         # Sanitize if enabled
         sanitized_value = value
@@ -372,31 +375,31 @@ class SecurityValidator(BaseValidator):
         """Remove security threats from input."""
         # Remove script tags
         value = re.sub(
-            r'<script[^>]*>.*?</script>',
-            '',
+            r"<script[^>]*>.*?</script>",
+            "",
             value,
             flags=re.IGNORECASE | re.DOTALL,
         )
         # Remove javascript: URLs
         value = re.sub(
-            r'javascript\s*:', '', value, flags=re.IGNORECASE
+            r"javascript\s*:", "", value, flags=re.IGNORECASE
         )
         # Remove event handlers
         value = re.sub(
             r'on\w+\s*=\s*["\'][^"\']*["\']',
-            '',
+            "",
             value,
             flags=re.IGNORECASE,
         )
         # Remove path traversal
-        value = re.sub(r'\.\./', '', value)
+        value = re.sub(r"\.\./", "", value)
         return value
 
 
 class BusinessValidator(BaseValidator):
     """Validates business logic rules."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("business", "Validates business logic rules")
         self.supported_rules = [
             "model_consistency",
@@ -587,7 +590,7 @@ class BusinessValidator(BaseValidator):
 class ConfigValidator(BaseValidator):
     """Validates configuration settings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("config", "Validates configuration settings")
         self.supported_rules = [
             "database_config",
@@ -615,7 +618,7 @@ class ConfigValidator(BaseValidator):
         """Validate database configuration."""
 
         errors = []
-        database_url = config.get('DATABASE_URL', '')
+        database_url = config.get("DATABASE_URL", "")
 
         if not database_url:
             errors.append(ValidationError("DATABASE_URL is required"))
@@ -646,7 +649,7 @@ class ConfigValidator(BaseValidator):
 
         errors = []
 
-        for key_name in ['OPENAI_API_KEY', 'ANTHROPIC_API_KEY']:
+        for key_name in ["OPENAI_API_KEY", "ANTHROPIC_API_KEY"]:
             if key_name in config:
                 api_key = config[key_name]
                 if not api_key or len(api_key) < 10:
@@ -670,7 +673,7 @@ class ConfigValidator(BaseValidator):
         """Validate security configuration."""
 
         errors = []
-        secret_key = config.get('SECRET_KEY', '')
+        secret_key = config.get("SECRET_KEY", "")
 
         if len(secret_key) < 32:
             errors.append(
@@ -687,7 +690,7 @@ class ConfigValidator(BaseValidator):
 class WorkflowValidator(BaseValidator):
     """Validates workflow configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "workflow", "Validates workflow configurations"
         )
@@ -730,7 +733,7 @@ class WorkflowValidator(BaseValidator):
                 )
         else:
             # Handle full workflow configuration validation
-            required_fields = ['id', 'name', 'steps']
+            required_fields = ["id", "name", "steps"]
 
             for field in required_fields:
                 if field not in config:
@@ -750,7 +753,7 @@ class WorkflowValidator(BaseValidator):
         """Validate workflow request."""
 
         errors = []
-        message = request.get('message', '')
+        message = request.get("message", "")
 
         if not message or not message.strip():
             errors.append(ValidationError("Message cannot be empty"))
@@ -774,8 +777,8 @@ class WorkflowValidator(BaseValidator):
         errors = []
 
         # Validate temperature
-        if 'temperature' in params:
-            temp = params['temperature']
+        if "temperature" in params:
+            temp = params["temperature"]
             if (
                 not isinstance(temp, int | float)
                 or temp < 0.0
@@ -788,8 +791,8 @@ class WorkflowValidator(BaseValidator):
                 )
 
         # Validate max_tokens
-        if 'max_tokens' in params:
-            tokens = params['max_tokens']
+        if "max_tokens" in params:
+            tokens = params["max_tokens"]
             if not isinstance(tokens, int) or tokens < 1:
                 errors.append(
                     ValidationError(
@@ -805,7 +808,7 @@ class WorkflowValidator(BaseValidator):
 class AgentValidator(BaseValidator):
     """Validates agent-specific input."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("agent", "Validates agent-specific input")
         self.supported_rules = [
             "agent_input",
@@ -914,13 +917,13 @@ class AgentValidator(BaseValidator):
 
         errors = []
 
-        if 'agent_id' in data:
-            result = self._validate_agent_id(data['agent_id'], context)
+        if "agent_id" in data:
+            result = self._validate_agent_id(data["agent_id"], context)
             if not result.is_valid:
                 errors.extend(result.errors)
 
-        if 'name' in data:
-            result = self._validate_agent_name(data['name'], context)
+        if "name" in data:
+            result = self._validate_agent_name(data["name"], context)
             if not result.is_valid:
                 errors.extend(result.errors)
 

@@ -123,10 +123,10 @@ class CacheFactory:
             return self._cache_instances[instance_key]
 
         # Create multi-tier cache by default (best performance)
-        redis_url = kwargs.get('redis_url')
-        l1_config = kwargs.get('l1_config')
+        redis_url = kwargs.get("redis_url")
+        l1_config = kwargs.get("l1_config")
         l1_size_ratio = kwargs.get(
-            'l1_size_ratio', settings.cache_l1_size_ratio
+            "l1_size_ratio", settings.cache_l1_size_ratio
         )
         cache_instance = MultiTierCache(
             config, l1_config, redis_url, l1_size_ratio

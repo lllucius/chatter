@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -14,26 +13,28 @@
 
 
 from __future__ import annotations
+
+import json
 import pprint
 import re  # noqa: F401
-import json
-
 from datetime import datetime
+from typing import Any, ClassVar
+
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Any, ClassVar, Dict, List
+from typing import Self
+
 from chatter_sdk.models.test_metric import TestMetric
-from typing import Optional, Set
-from typing_extensions import Self
+
 
 class ABTestMetricsResponse(BaseModel):
     """
     Response schema for A/B test metrics.
     """ # noqa: E501
     test_id: StrictStr = Field(description="Test ID")
-    metrics: List[TestMetric] = Field(description="Current metrics")
+    metrics: list[TestMetric] = Field(description="Current metrics")
     participant_count: StrictInt = Field(description="Current participant count")
     last_updated: datetime = Field(description="Last metrics update")
-    __properties: ClassVar[List[str]] = ["test_id", "metrics", "participant_count", "last_updated"]
+    __properties: ClassVar[list[str]] = ["test_id", "metrics", "participant_count", "last_updated"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +53,11 @@ class ABTestMetricsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Optional[Self]:
+    def from_json(cls, json_str: str) -> Self | None:
         """Create an instance of ABTestMetricsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +67,7 @@ class ABTestMetricsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: Set[str] = set([
+        excluded_fields: set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -80,11 +81,11 @@ class ABTestMetricsResponse(BaseModel):
             for _item_metrics in self.metrics:
                 if _item_metrics:
                     _items.append(_item_metrics.to_dict())
-            _dict['metrics'] = _items
+            _dict["metrics"] = _items
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
+    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
         """Create an instance of ABTestMetricsResponse from a dict"""
         if obj is None:
             return None

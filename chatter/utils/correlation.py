@@ -10,7 +10,7 @@ from starlette.responses import Response
 
 # Context variable to store correlation ID for the current request
 correlation_id_var: ContextVar[str | None] = ContextVar(
-    'correlation_id', default=None
+    "correlation_id", default=None
 )
 
 
@@ -62,7 +62,7 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         # Handle case-insensitive header lookup
         correlation_id = None
         for header_name, header_value in request.headers.items():
-            if header_name.lower() == 'x-correlation-id':
+            if header_name.lower() == "x-correlation-id":
                 correlation_id = header_value
                 break
 
@@ -76,6 +76,6 @@ class CorrelationIdMiddleware(BaseHTTPMiddleware):
         response = await call_next(request)
 
         # Add correlation ID to response headers (using lowercase as standard)
-        response.headers['x-correlation-id'] = correlation_id
+        response.headers["x-correlation-id"] = correlation_id
 
         return response

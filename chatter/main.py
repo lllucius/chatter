@@ -77,7 +77,7 @@ class LoggingMiddleware(BaseHTTPMiddleware):
 
         # Get correlation ID for metrics
         correlation_id = response.headers.get(
-            'x-correlation-id', 'unknown'
+            "x-correlation-id", "unknown"
         )
 
         # Check if request was rate limited

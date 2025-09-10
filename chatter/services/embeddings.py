@@ -180,7 +180,7 @@ class EmbeddingService:
                     base_url=provider.base_url,
                     model=model_def.model_name,
                     chunk_size=model_def.chunk_size
-                    or config.get('chunk_size', 1000),
+                    or config.get("chunk_size", 1000),
                 )
 
                 # Apply dimensional reduction if configured for this model

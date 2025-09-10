@@ -1,4 +1,3 @@
-# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +14,10 @@
 
 import unittest
 
-from chatter_sdk.models.ab_test_delete_response import ABTestDeleteResponse
+from chatter_sdk.models.ab_test_delete_response import (
+    ABTestDeleteResponse,
+)
+
 
 class TestABTestDeleteResponse(unittest.TestCase):
     """ABTestDeleteResponse unit test stubs"""
@@ -51,5 +53,5 @@ class TestABTestDeleteResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     unittest.main()

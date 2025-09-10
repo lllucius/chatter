@@ -5,7 +5,7 @@ import os
 import pytest
 
 # Set environment variable for testing
-os.environ['DATABASE_URL'] = 'sqlite:///./test.db'
+os.environ["DATABASE_URL"] = "sqlite:///./test.db"
 
 from chatter.models.conversation import Conversation
 from chatter.models.document import Document
@@ -46,7 +46,7 @@ class TestComprehensiveSchemaModelConsistency:
 
     def get_model_fields(self, model_class) -> set[str]:
         """Get field names from a SQLAlchemy model, excluding auto-generated fields."""
-        if not hasattr(model_class, '__table__'):
+        if not hasattr(model_class, "__table__"):
             return set()
 
         fields = set()
@@ -54,15 +54,15 @@ class TestComprehensiveSchemaModelConsistency:
             fields.add(column.name)
 
         # Remove auto-generated fields that don't need to be in schemas
-        fields.discard('id')
-        fields.discard('created_at')
-        fields.discard('updated_at')
+        fields.discard("id")
+        fields.discard("created_at")
+        fields.discard("updated_at")
 
         return fields
 
     def get_schema_fields(self, schema_class) -> set[str]:
         """Get field names from a Pydantic schema."""
-        if not hasattr(schema_class, 'model_fields'):
+        if not hasattr(schema_class, "model_fields"):
             return set()
 
         return set(schema_class.model_fields.keys())
@@ -78,9 +78,9 @@ class TestComprehensiveSchemaModelConsistency:
         # Check for fields in schema but missing in model
         missing_in_model = []
         for field in registration_fields:
-            if field == 'password':
+            if field == "password":
                 # password maps to hashed_password in model
-                if 'hashed_password' not in model_fields:
+                if "hashed_password" not in model_fields:
                     missing_in_model.append(field)
             elif field not in model_fields:
                 missing_in_model.append(field)
@@ -102,22 +102,22 @@ class TestComprehensiveSchemaModelConsistency:
         response_fields = self.get_schema_fields(UserResponse)
         # These are the fields that SHOULD be in response (excluding sensitive ones)
         expected_in_response = {
-            'email',
-            'username',
-            'full_name',
-            'bio',
-            'avatar_url',
-            'phone_number',
-            'is_active',
-            'is_verified',
-            'is_superuser',
-            'default_llm_provider',
-            'default_profile_id',
-            'daily_message_limit',
-            'monthly_message_limit',
-            'max_file_size_mb',
-            'api_key_name',
-            'last_login_at',
+            "email",
+            "username",
+            "full_name",
+            "bio",
+            "avatar_url",
+            "phone_number",
+            "is_active",
+            "is_verified",
+            "is_superuser",
+            "default_llm_provider",
+            "default_profile_id",
+            "daily_message_limit",
+            "monthly_message_limit",
+            "max_file_size_mb",
+            "api_key_name",
+            "last_login_at",
         }
 
         missing_important = expected_in_response - response_fields
@@ -152,29 +152,29 @@ class TestComprehensiveSchemaModelConsistency:
         response_fields = self.get_schema_fields(ConversationResponse)
         # These fields should be in the response
         expected_in_response = {
-            'title',
-            'description',
-            'user_id',
-            'profile_id',
-            'status',
-            'llm_provider',
-            'llm_model',
-            'temperature',
-            'max_tokens',
-            'enable_retrieval',
-            'message_count',
-            'total_tokens',
-            'total_cost',
-            'system_prompt',
-            'context_window',
-            'memory_enabled',
-            'memory_strategy',
-            'retrieval_limit',
-            'retrieval_score_threshold',
-            'tags',
-            'extra_metadata',
-            'workflow_config',
-            'last_message_at',
+            "title",
+            "description",
+            "user_id",
+            "profile_id",
+            "status",
+            "llm_provider",
+            "llm_model",
+            "temperature",
+            "max_tokens",
+            "enable_retrieval",
+            "message_count",
+            "total_tokens",
+            "total_cost",
+            "system_prompt",
+            "context_window",
+            "memory_enabled",
+            "memory_strategy",
+            "retrieval_limit",
+            "retrieval_score_threshold",
+            "tags",
+            "extra_metadata",
+            "workflow_config",
+            "last_message_at",
         }
 
         missing_important = expected_in_response - response_fields
@@ -210,9 +210,9 @@ class TestComprehensiveSchemaModelConsistency:
 
         # file_path, content, extracted_text are intentionally excluded for security
         excluded_sensitive_fields = {
-            'file_path',
-            'content',
-            'extracted_text',
+            "file_path",
+            "content",
+            "extracted_text",
         }
 
         expected_in_response = model_fields - excluded_sensitive_fields
@@ -249,17 +249,17 @@ class TestComprehensiveSchemaModelConsistency:
 
         # Most profile fields should be in response (profiles are user-owned configurations)
         expected_in_response = model_fields - {
-            'owner_id'
+            "owner_id"
         }  # owner_id might be excluded
         expected_in_response - response_fields
 
         # For now, just ensure no critical fields are missing - full check might be too strict
         critical_fields = {
-            'name',
-            'description',
-            'profile_type',
-            'llm_provider',
-            'llm_model',
+            "name",
+            "description",
+            "profile_type",
+            "llm_provider",
+            "llm_model",
         }
         missing_critical = critical_fields - response_fields
         assert (
@@ -333,7 +333,7 @@ class TestComprehensiveSchemaModelConsistency:
     @pytest.mark.unit
     def test_no_reserved_field_names(self):
         """Test that models don't use SQLAlchemy reserved field names."""
-        reserved_names = {'metadata'}  # SQLAlchemy reserved names
+        reserved_names = {"metadata"}  # SQLAlchemy reserved names
 
         models_to_check = [
             User,
@@ -347,7 +347,7 @@ class TestComprehensiveSchemaModelConsistency:
         ]
 
         for model in models_to_check:
-            if hasattr(model, '__table__'):
+            if hasattr(model, "__table__"):
                 model_fields = {
                     column.name for column in model.__table__.columns
                 }
@@ -363,36 +363,36 @@ class TestComprehensiveSchemaModelConsistency:
             (
                 User,
                 UserRegistration,
-                {'hashed_password': 'password'},
+                {"hashed_password": "password"},
             ),  # Maps password to hashed_password
             (
                 Conversation,
                 ConversationCreate,
-                {'user_id': None},
+                {"user_id": None},
             ),  # user_id comes from auth context
             (
                 Document,
                 DocumentCreate,
                 {
                     # Document fields that come from file processing, not user input
-                    'owner_id': None,
-                    'filename': None,
-                    'original_filename': None,
-                    'file_size': None,
-                    'file_hash': None,
-                    'mime_type': None,
-                    'document_type': None,
+                    "owner_id": None,
+                    "filename": None,
+                    "original_filename": None,
+                    "file_size": None,
+                    "file_hash": None,
+                    "mime_type": None,
+                    "document_type": None,
                 },
             ),
             (
                 Profile,
                 ProfileCreate,
-                {'owner_id': None},
+                {"owner_id": None},
             ),  # owner_id comes from auth context
             (
                 Prompt,
                 PromptCreate,
-                {'owner_id': None, 'content_hash': None},
+                {"owner_id": None, "content_hash": None},
             ),  # owner_id comes from auth, content_hash is derived
             (Provider, ProviderCreate, {}),
             (ModelDef, ModelDefCreate, {}),
@@ -404,14 +404,14 @@ class TestComprehensiveSchemaModelConsistency:
             create_schema_class,
             field_mappings,
         ) in test_cases:
-            if not hasattr(model_class, '__table__'):
+            if not hasattr(model_class, "__table__"):
                 continue
 
             # Get required fields (non-nullable, no default)
             required_fields = []
             for column in model_class.__table__.columns:
                 # Skip auto-generated fields
-                if column.name in ['id', 'created_at', 'updated_at']:
+                if column.name in ["id", "created_at", "updated_at"]:
                     continue
 
                 if (

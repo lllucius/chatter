@@ -216,7 +216,7 @@ class TestAuthRateLimitMiddleware:
         async def other_endpoint():
             return {"message": "other endpoint"}
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_middleware_initialization(self, mock_get_limiter):
         """Test middleware initialization."""
         mock_limiter = MagicMock()
@@ -230,7 +230,7 @@ class TestAuthRateLimitMiddleware:
         assert "password_reset" in middleware.rate_limits
         assert "refresh" in middleware.rate_limits
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_rate_limit_configuration(self, mock_get_limiter):
         """Test rate limit configurations."""
         mock_limiter = MagicMock()
@@ -256,7 +256,7 @@ class TestAuthRateLimitMiddleware:
         assert reset_limits["per_hour"] == 5
         assert reset_limits["per_day"] == 10
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_login_endpoint_rate_limiting(self, mock_get_limiter):
         """Test rate limiting on login endpoint."""
         mock_limiter = MagicMock()
@@ -273,7 +273,7 @@ class TestAuthRateLimitMiddleware:
         assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
         assert "rate limit" in response.json()["detail"].lower()
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_register_endpoint_rate_limiting(
         self, mock_get_limiter
     ):
@@ -293,7 +293,7 @@ class TestAuthRateLimitMiddleware:
         assert "Retry-After" in response.headers
         assert response.headers["Retry-After"] == "120"
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_password_reset_endpoint_rate_limiting(
         self, mock_get_limiter
     ):
@@ -311,7 +311,7 @@ class TestAuthRateLimitMiddleware:
 
         assert response.status_code == status.HTTP_429_TOO_MANY_REQUESTS
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_non_auth_endpoint_not_rate_limited(
         self, mock_get_limiter
     ):
@@ -330,7 +330,7 @@ class TestAuthRateLimitMiddleware:
         assert response.status_code == 200
         mock_limiter.is_allowed.assert_not_called()
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_rate_limit_allowed_request(self, mock_get_limiter):
         """Test request allowed by rate limiter."""
         mock_limiter = MagicMock()
@@ -345,7 +345,7 @@ class TestAuthRateLimitMiddleware:
         assert response.status_code == 200
         assert response.json()["message"] == "login successful"
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_client_ip_identification(self, mock_get_limiter):
         """Test client IP identification for rate limiting."""
         mock_limiter = MagicMock()
@@ -365,7 +365,7 @@ class TestAuthRateLimitMiddleware:
         # Verify that rate limiter was called with client IP
         mock_limiter.is_allowed.assert_called_once()
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_rate_limit_with_user_agent_tracking(
         self, mock_get_limiter
     ):
@@ -385,7 +385,7 @@ class TestAuthRateLimitMiddleware:
         # Verify rate limiter was called
         mock_limiter.is_allowed.assert_called_once()
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_rate_limit_error_handling(self, mock_get_limiter):
         """Test error handling in rate limiting."""
         mock_limiter = MagicMock()
@@ -403,7 +403,7 @@ class TestAuthRateLimitMiddleware:
         # Request should be allowed when rate limiter fails
         assert response.status_code == 200
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     async def test_different_auth_endpoints_have_different_limits(
         self, mock_get_limiter
     ):
@@ -491,7 +491,7 @@ class TestMiddlewareIntegration:
 
         self.client = TestClient(self.app)
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_both_middleware_applied(self, mock_get_limiter):
         """Test that both security and rate limiting middleware are applied."""
         mock_limiter = MagicMock()
@@ -509,7 +509,7 @@ class TestMiddlewareIntegration:
         # Check rate limiting was applied (method called)
         mock_limiter.is_allowed.assert_called_once()
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_security_headers_on_rate_limited_response(
         self, mock_get_limiter
     ):
@@ -538,7 +538,7 @@ class TestMiddlewareIntegration:
         assert "X-Frame-Options" in response.headers
         assert "Content-Security-Policy" in response.headers
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_middleware_order_matters(self, mock_get_limiter):
         """Test that middleware order affects behavior."""
         # This test verifies that security headers are applied
@@ -608,7 +608,7 @@ class TestMiddlewareEdgeCases:
         assert response.status_code == 404
         assert "X-Frame-Options" in response.headers
 
-    @patch('chatter.middleware.auth_security.get_unified_rate_limiter')
+    @patch("chatter.middleware.auth_security.get_unified_rate_limiter")
     def test_rate_limit_middleware_with_none_client(
         self, mock_get_limiter
     ):

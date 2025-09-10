@@ -306,9 +306,9 @@ async def get_available_tools(
         for tool in mcp_tools:
             args_schema = getattr(tool, "args_schema", {})
             # Convert Pydantic model to dict if needed
-            if hasattr(args_schema, 'model_json_schema'):
+            if hasattr(args_schema, "model_json_schema"):
                 args_schema = args_schema.model_json_schema()
-            elif hasattr(args_schema, '__dict__') and not isinstance(
+            elif hasattr(args_schema, "__dict__") and not isinstance(
                 args_schema, dict
             ):
                 args_schema = {}
@@ -326,9 +326,9 @@ async def get_available_tools(
         for tool in builtin_tools:
             args_schema = getattr(tool, "args_schema", {})
             # Convert Pydantic model to dict if needed
-            if hasattr(args_schema, 'model_json_schema'):
+            if hasattr(args_schema, "model_json_schema"):
                 args_schema = args_schema.model_json_schema()
-            elif hasattr(args_schema, '__dict__') and not isinstance(
+            elif hasattr(args_schema, "__dict__") and not isinstance(
                 args_schema, dict
             ):
                 args_schema = {}
@@ -425,7 +425,7 @@ async def get_performance_stats(
     try:
         stats = chat_service.get_performance_stats()
         return PerformanceStatsResponse(
-            **stats, timestamp=__import__('time').time()
+            **stats, timestamp=__import__("time").time()
         )
     except Exception as e:
         raise InternalServerProblem(

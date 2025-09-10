@@ -164,7 +164,7 @@ def run_async(async_func):
                     error_detail = error_data.get('detail')
                 except (json.JSONDecodeError, AttributeError):
                     pass
-            
+
             if e.status == 401:
                 console.print(
                     "❌ [red]Authentication failed. Please login first.[/red]"
@@ -291,7 +291,7 @@ async def get_metrics():
                         table = Table(show_header=False, box=None, padding=(0, 2))
                         table.add_column("Metric", style="dim")
                         table.add_column("Value", style="green")
-                        
+
                         for metric_key, metric_value in metrics.items():
                             # Format metric names nicely
                             formatted_key = metric_key.replace('_', ' ').title()
@@ -305,7 +305,7 @@ async def get_metrics():
                             else:
                                 formatted_value = str(metric_value)
                             table.add_row(formatted_key, formatted_value)
-                        
+
                         console.print(table)
                     else:
                         console.print(f"    {metrics}")
@@ -1299,32 +1299,31 @@ async def upload_document(
     is_public: bool = typer.Option(False, help="Whether document is public"),
 ):
     """Upload a document."""
-    import json
     from pathlib import Path
-    
+
     file_path_obj = Path(file_path)
     if not file_path_obj.exists():
         console.print(f"❌ [red]File not found: {file_path}[/red]")
         return
-    
+
     if not file_path_obj.is_file():
         console.print(f"❌ [red]Path is not a file: {file_path}[/red]")
         return
-    
+
     # Use file name as title if not provided
     if not title:
         title = file_path_obj.name
-    
+
     # Read the file
     try:
         file_content = file_path_obj.read_bytes()
     except Exception as e:
         console.print(f"❌ [red]Error reading file: {e}[/red]")
         return
-    
+
     # Prepare file tuple for upload (filename, content, content_type)
     file_tuple = (file_path_obj.name, file_content)
-    
+
     async with get_client() as sdk_client:
         try:
             response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
@@ -1359,25 +1358,25 @@ async def download_document(
 ):
     """Download a document."""
     from pathlib import Path
-    
+
     async with get_client() as sdk_client:
         try:
             # Get document info first to get the name
             doc_response = await sdk_client.documents_api.get_document_api_v1_documents_document_id_get(
                 document_id=document_id
             )
-            
+
             # Download the document
             download_response = await sdk_client.documents_api.download_document_api_v1_documents_document_id_download_get(
                 document_id=document_id
             )
-            
+
             # Determine output path
             if not output_path:
                 output_path = doc_response.name or f"document_{document_id}"
-            
+
             output_path_obj = Path(output_path)
-            
+
             # Write the file
             if hasattr(download_response, 'content'):
                 content = download_response.content
@@ -1386,12 +1385,12 @@ async def download_document(
             else:
                 # If response is bytes directly
                 content = download_response
-            
+
             if isinstance(content, str):
                 output_path_obj.write_text(content)
             else:
                 output_path_obj.write_bytes(content)
-            
+
             console.print("✅ [green]Document downloaded successfully![/green]")
             console.print(f"[dim]Saved to: {output_path_obj.absolute()}[/dim]")
             console.print(f"[dim]Size: {output_path_obj.stat().st_size:,} bytes[/dim]")
@@ -1415,7 +1414,7 @@ async def update_document(
 ):
     """Update document metadata."""
     from chatter_sdk.models.document_update import DocumentUpdate
-    
+
     # Build update data - only include fields that are provided
     update_data = {}
     if title is not None:
@@ -1426,11 +1425,11 @@ async def update_document(
         update_data["tags"] = tags
     if is_public is not None:
         update_data["is_public"] = is_public
-    
+
     if not update_data:
         console.print("❌ [red]No update fields provided. Use --help to see available options.[/red]")
         return
-    
+
     async with get_client() as sdk_client:
         try:
             document_update = DocumentUpdate(**update_data)
@@ -1833,6 +1832,329 @@ async def list_embedding_spaces():
             )
 
         console.print(table)
+
+
+@models_app.command("provider-create")
+@run_async
+async def create_provider(
+    name: str = typer.Option(..., help="Unique provider name"),
+    provider_type: str = typer.Option(..., help="Provider type (openai, anthropic, google, cohere, mistral)"),
+    display_name: str = typer.Option(..., help="Human-readable display name"),
+    description: str = typer.Option(None, help="Provider description"),
+    api_key_required: bool = typer.Option(True, help="Whether API key is required"),
+    base_url: str = typer.Option(None, help="Base URL for API calls"),
+    is_active: bool = typer.Option(True, help="Whether provider is active"),
+    is_default: bool = typer.Option(False, help="Whether this is the default provider"),
+):
+    """Create a new provider."""
+    from chatter_sdk.models.provider_create import ProviderCreate
+    from chatter_sdk.models.provider_type import ProviderType
+
+    try:
+        # Validate provider_type
+        provider_type_enum = ProviderType(provider_type.lower())
+    except ValueError:
+        console.print(f"❌ [red]Invalid provider type: {provider_type}[/red]")
+        console.print(f"[yellow]Valid types: {', '.join([t.value for t in ProviderType])}[/yellow]")
+        return
+
+    provider_data = ProviderCreate(
+        name=name,
+        provider_type=provider_type_enum,
+        display_name=display_name,
+        description=description,
+        api_key_required=api_key_required,
+        base_url=base_url,
+        is_active=is_active,
+        is_default=is_default,
+    )
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.create_provider_api_v1_models_providers_post(
+            provider_create=provider_data
+        )
+
+        console.print(f"✅ [green]Created provider: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Type: {response.provider_type}[/dim]")
+        console.print(f"[dim]Display Name: {response.display_name}[/dim]")
+
+
+@models_app.command("provider-show")
+@run_async
+async def show_provider(
+    provider_id: str = typer.Argument(..., help="Provider ID to show")
+):
+    """Show detailed provider information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.get_provider_api_v1_models_providers_provider_id_get(
+            provider_id=provider_id
+        )
+
+        table = Table(title=f"Provider Details: {response.name}")
+        table.add_column("Field", style="cyan")
+        table.add_column("Value", style="green")
+
+        table.add_row("ID", str(response.id))
+        table.add_row("Name", response.name)
+        table.add_row("Display Name", response.display_name)
+        table.add_row("Type", getattr(response, 'provider_type', 'unknown'))
+        table.add_row("Description", getattr(response, 'description', 'N/A') or 'N/A')
+        table.add_row("API Key Required", str(getattr(response, 'api_key_required', 'N/A')))
+        table.add_row("Base URL", getattr(response, 'base_url', 'N/A') or 'N/A')
+        table.add_row("Active", str(getattr(response, 'is_active', 'N/A')))
+        table.add_row("Default", str(getattr(response, 'is_default', 'N/A')))
+
+        console.print(table)
+
+
+@models_app.command("provider-update")
+@run_async
+async def update_provider(
+    provider_id: str = typer.Argument(..., help="Provider ID to update"),
+    display_name: str = typer.Option(None, help="Update display name"),
+    description: str = typer.Option(None, help="Update description"),
+    api_key_required: bool = typer.Option(None, help="Update API key requirement"),
+    base_url: str = typer.Option(None, help="Update base URL"),
+    is_active: bool = typer.Option(None, help="Update active status"),
+    is_default: bool = typer.Option(None, help="Update default status"),
+):
+    """Update a provider."""
+    from chatter_sdk.models.provider_update import ProviderUpdate
+
+    # Build update data with only specified fields
+    update_data = {}
+    if display_name is not None:
+        update_data['display_name'] = display_name
+    if description is not None:
+        update_data['description'] = description
+    if api_key_required is not None:
+        update_data['api_key_required'] = api_key_required
+    if base_url is not None:
+        update_data['base_url'] = base_url
+    if is_active is not None:
+        update_data['is_active'] = is_active
+    if is_default is not None:
+        update_data['is_default'] = is_default
+
+    if not update_data:
+        console.print("❌ [red]No fields specified for update[/red]")
+        return
+
+    provider_data = ProviderUpdate(**update_data)
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.update_provider_api_v1_models_providers_provider_id_put(
+            provider_id=provider_id,
+            provider_update=provider_data
+        )
+
+        console.print(f"✅ [green]Updated provider: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Display Name: {response.display_name}[/dim]")
+
+
+@models_app.command("provider-delete")
+@run_async
+async def delete_provider(
+    provider_id: str = typer.Argument(..., help="Provider ID to delete"),
+    confirm: bool = typer.Option(False, "--yes", help="Skip confirmation prompt"),
+):
+    """Delete a provider and all its dependent models."""
+    if not confirm:
+        console.print(f"[yellow]⚠️  This will delete provider {provider_id} and all its dependent models and embedding spaces.[/yellow]")
+        confirm_input = Prompt.ask("Are you sure? [y/N]", default="n")
+        if confirm_input.lower() not in ["y", "yes"]:
+            console.print("Cancelled.")
+            return
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.delete_provider_api_v1_models_providers_provider_id_delete(
+            provider_id=provider_id
+        )
+
+        console.print(f"✅ [green]Deleted provider: {provider_id}[/green]")
+        if hasattr(response, 'deleted_models_count'):
+            console.print(f"[dim]Deleted models: {response.deleted_models_count}[/dim]")
+        if hasattr(response, 'deleted_embedding_spaces_count'):
+            console.print(f"[dim]Deleted embedding spaces: {response.deleted_embedding_spaces_count}[/dim]")
+
+
+@models_app.command("model-create")
+@run_async
+async def create_model(
+    name: str = typer.Option(..., help="Unique model name"),
+    model_type: str = typer.Option(..., help="Model type (llm, embedding, reranker)"),
+    display_name: str = typer.Option(..., help="Human-readable display name"),
+    provider_id: str = typer.Option(..., help="Provider ID"),
+    model_name: str = typer.Option(..., help="Actual model name for API calls"),
+    description: str = typer.Option(None, help="Model description"),
+    max_tokens: int = typer.Option(None, help="Maximum tokens"),
+    context_length: int = typer.Option(None, help="Context length"),
+    dimensions: int = typer.Option(None, help="Embedding dimensions (for embedding models)"),
+    chunk_size: int = typer.Option(None, help="Chunk size"),
+    supports_batch: bool = typer.Option(False, help="Whether model supports batch operations"),
+    max_batch_size: int = typer.Option(None, help="Maximum batch size"),
+    is_active: bool = typer.Option(True, help="Whether model is active"),
+    is_default: bool = typer.Option(False, help="Whether this is the default model"),
+):
+    """Create a new model."""
+    from chatter_sdk.models.model_def_create import ModelDefCreate
+    from chatter_sdk.models.model_type import ModelType
+
+    try:
+        # Validate model_type
+        model_type_enum = ModelType(model_type.lower())
+    except ValueError:
+        console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
+        console.print(f"[yellow]Valid types: {', '.join([t.value for t in ModelType])}[/yellow]")
+        return
+
+    model_data = ModelDefCreate(
+        name=name,
+        model_type=model_type_enum,
+        display_name=display_name,
+        provider_id=provider_id,
+        model_name=model_name,
+        description=description,
+        max_tokens=max_tokens,
+        context_length=context_length,
+        dimensions=dimensions,
+        chunk_size=chunk_size,
+        supports_batch=supports_batch,
+        max_batch_size=max_batch_size,
+        is_active=is_active,
+        is_default=is_default,
+    )
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.create_model_api_v1_models_models_post(
+            model_def_create=model_data
+        )
+
+        console.print(f"✅ [green]Created model: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Type: {response.model_type}[/dim]")
+        console.print(f"[dim]Provider: {getattr(response, 'provider_name', 'unknown')}[/dim]")
+
+
+@models_app.command("model-show")
+@run_async
+async def show_model(
+    model_id: str = typer.Argument(..., help="Model ID to show")
+):
+    """Show detailed model information."""
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.get_model_api_v1_models_models_model_id_get(
+            model_id=model_id
+        )
+
+        table = Table(title=f"Model Details: {response.name}")
+        table.add_column("Field", style="cyan")
+        table.add_column("Value", style="green")
+
+        table.add_row("ID", str(response.id))
+        table.add_row("Name", response.name)
+        table.add_row("Display Name", response.display_name)
+        table.add_row("Type", getattr(response, 'model_type', 'unknown'))
+        table.add_row("Model Name", response.model_name)
+        table.add_row("Provider", getattr(response, 'provider_name', 'unknown'))
+        table.add_row("Description", getattr(response, 'description', 'N/A') or 'N/A')
+        table.add_row("Max Tokens", str(getattr(response, 'max_tokens', 'N/A') or 'N/A'))
+        table.add_row("Context Length", str(getattr(response, 'context_length', 'N/A') or 'N/A'))
+        table.add_row("Dimensions", str(getattr(response, 'dimensions', 'N/A') or 'N/A'))
+        table.add_row("Chunk Size", str(getattr(response, 'chunk_size', 'N/A') or 'N/A'))
+        table.add_row("Supports Batch", str(getattr(response, 'supports_batch', 'N/A')))
+        table.add_row("Max Batch Size", str(getattr(response, 'max_batch_size', 'N/A') or 'N/A'))
+        table.add_row("Active", str(getattr(response, 'is_active', 'N/A')))
+        table.add_row("Default", str(getattr(response, 'is_default', 'N/A')))
+
+        console.print(table)
+
+
+@models_app.command("model-update")
+@run_async
+async def update_model(
+    model_id: str = typer.Argument(..., help="Model ID to update"),
+    display_name: str = typer.Option(None, help="Update display name"),
+    description: str = typer.Option(None, help="Update description"),
+    model_name: str = typer.Option(None, help="Update model name for API calls"),
+    max_tokens: int = typer.Option(None, help="Update maximum tokens"),
+    context_length: int = typer.Option(None, help="Update context length"),
+    dimensions: int = typer.Option(None, help="Update embedding dimensions"),
+    chunk_size: int = typer.Option(None, help="Update chunk size"),
+    supports_batch: bool = typer.Option(None, help="Update batch support"),
+    max_batch_size: int = typer.Option(None, help="Update maximum batch size"),
+    is_active: bool = typer.Option(None, help="Update active status"),
+    is_default: bool = typer.Option(None, help="Update default status"),
+):
+    """Update a model."""
+    from chatter_sdk.models.model_def_update import ModelDefUpdate
+
+    # Build update data with only specified fields
+    update_data = {}
+    if display_name is not None:
+        update_data['display_name'] = display_name
+    if description is not None:
+        update_data['description'] = description
+    if model_name is not None:
+        update_data['model_name'] = model_name
+    if max_tokens is not None:
+        update_data['max_tokens'] = max_tokens
+    if context_length is not None:
+        update_data['context_length'] = context_length
+    if dimensions is not None:
+        update_data['dimensions'] = dimensions
+    if chunk_size is not None:
+        update_data['chunk_size'] = chunk_size
+    if supports_batch is not None:
+        update_data['supports_batch'] = supports_batch
+    if max_batch_size is not None:
+        update_data['max_batch_size'] = max_batch_size
+    if is_active is not None:
+        update_data['is_active'] = is_active
+    if is_default is not None:
+        update_data['is_default'] = is_default
+
+    if not update_data:
+        console.print("❌ [red]No fields specified for update[/red]")
+        return
+
+    model_data = ModelDefUpdate(**update_data)
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.update_model_api_v1_models_models_model_id_put(
+            model_id=model_id,
+            model_def_update=model_data
+        )
+
+        console.print(f"✅ [green]Updated model: {response.name}[/green]")
+        console.print(f"[dim]ID: {response.id}[/dim]")
+        console.print(f"[dim]Display Name: {response.display_name}[/dim]")
+
+
+@models_app.command("model-delete")
+@run_async
+async def delete_model(
+    model_id: str = typer.Argument(..., help="Model ID to delete"),
+    confirm: bool = typer.Option(False, "--yes", help="Skip confirmation prompt"),
+):
+    """Delete a model."""
+    if not confirm:
+        console.print(f"[yellow]⚠️  This will delete model {model_id}.[/yellow]")
+        confirm_input = Prompt.ask("Are you sure? [y/N]", default="n")
+        if confirm_input.lower() not in ["y", "yes"]:
+            console.print("Cancelled.")
+            return
+
+    async with get_client() as sdk_client:
+        response = await sdk_client.model_api.delete_model_api_v1_models_models_model_id_delete(
+            model_id=model_id
+        )
+
+        console.print(f"✅ [green]Deleted model: {model_id}[/green]")
+        if hasattr(response, 'message'):
+            console.print(f"[dim]{response.message}[/dim]")
 
 
 # Events Commands
@@ -2372,13 +2694,13 @@ async def install_plugin(
 ):
     """Install a plugin."""
     from chatter_sdk.models.plugin_install_request import PluginInstallRequest
-    
+
     async with get_client() as sdk_client:
         install_request = PluginInstallRequest(
             url=plugin_url,
             force=force,
         )
-        
+
         response = await sdk_client.plugins_api.install_plugin_api_v1_plugins_install_post(
             plugin_install_request=install_request
         )
@@ -2453,7 +2775,7 @@ async def bulk_enable_plugins(
 ):
     """Enable multiple plugins."""
     ids = [id.strip() for id in plugin_ids.split(',')]
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.plugins_api.bulk_enable_plugins_api_v1_plugins_bulk_enable_post(
             plugin_ids=ids
@@ -2472,7 +2794,7 @@ async def bulk_disable_plugins(
 ):
     """Disable multiple plugins."""
     ids = [id.strip() for id in plugin_ids.split(',')]
-    
+
     async with get_client() as sdk_client:
         response = await sdk_client.plugins_api.bulk_disable_plugins_api_v1_plugins_bulk_disable_post(
             plugin_ids=ids
@@ -2502,7 +2824,7 @@ async def check_plugins_health():
                     f"[{status_color}]{plugin_health.status}[/{status_color}]",
                     getattr(plugin_health, 'message', 'No message'),
                 )
-        
+
         console.print(table)
 
 
@@ -2614,7 +2936,7 @@ async def create_tool_server(
 ):
     """Create a new tool server."""
     from chatter_sdk.models.tool_server_create import ToolServerCreate
-    
+
     async with get_client() as sdk_client:
         server_data = ToolServerCreate(
             name=name,
@@ -2622,7 +2944,7 @@ async def create_tool_server(
             description=description,
             auth_token=token,
         )
-        
+
         response = await sdk_client.tools_api.create_tool_server_api_v1_toolservers_servers_post(
             tool_server_create=server_data
         )
@@ -2701,7 +3023,7 @@ async def check_tool_server_health(
 
         status_color = "green" if response.status == "healthy" else "red"
         console.print(f"[{status_color}]Status: {response.status}[/{status_color}]")
-        
+
         if hasattr(response, 'details'):
             console.print(f"Details: {response.details}")
         if hasattr(response, 'response_time'):
@@ -2825,7 +3147,7 @@ async def create_ab_test(
     """Create a new A/B test."""
     import json
     from chatter_sdk.models.ab_test_create import ABTestCreate
-    
+
     test_config = {}
     if config:
         try:
@@ -2833,7 +3155,7 @@ async def create_ab_test(
         except json.JSONDecodeError as e:
             console.print(f"❌ [red]Invalid JSON configuration: {e}[/red]")
             return
-    
+
     async with get_client() as sdk_client:
         test_data = ABTestCreate(
             name=name,
@@ -2842,7 +3164,7 @@ async def create_ab_test(
             hypothesis=hypothesis,
             config=test_config,
         )
-        
+
         response = await sdk_client.ab_api.create_ab_test_api_v1_ab_tests_post(
             ab_test_create=test_data
         )
@@ -2942,9 +3264,9 @@ async def show_ab_test_metrics(
         if hasattr(response, 'metrics'):
             for metric in response.metrics:
                 difference = getattr(metric, 'difference', 'N/A')
-                if isinstance(difference, (int, float)):
+                if isinstance(difference, int | float):
                     difference = f"{difference:+.2f}"
-                
+
                 table.add_row(
                     metric.name,
                     str(getattr(metric, 'variant_a_value', 'N/A')),

@@ -221,6 +221,69 @@ class TestCLICommands:
         assert "providers" in result.stdout
         assert "list" in result.stdout
         assert "embedding-spaces" in result.stdout
+        # Test new CRUD commands
+        assert "provider-create" in result.stdout
+        assert "provider-show" in result.stdout
+        assert "provider-update" in result.stdout
+        assert "provider-delete" in result.stdout
+        assert "model-create" in result.stdout
+        assert "model-show" in result.stdout
+        assert "model-update" in result.stdout
+        assert "model-delete" in result.stdout
+
+    def test_models_provider_create_help(self):
+        """Test models provider-create subcommand help."""
+        result = self.runner.invoke(app, ["models", "provider-create", "--help"])
+        assert result.exit_code == 0
+        assert "Create a new provider" in result.stdout
+        assert "name" in result.stdout
+        assert "provider" in result.stdout
+        assert "display" in result.stdout
+
+    def test_models_provider_show_help(self):
+        """Test models provider-show subcommand help."""
+        result = self.runner.invoke(app, ["models", "provider-show", "--help"])
+        assert result.exit_code == 0
+        assert "Show detailed provider information" in result.stdout
+
+    def test_models_provider_update_help(self):
+        """Test models provider-update subcommand help."""
+        result = self.runner.invoke(app, ["models", "provider-update", "--help"])
+        assert result.exit_code == 0
+        assert "Update a provider" in result.stdout
+
+    def test_models_provider_delete_help(self):
+        """Test models provider-delete subcommand help."""
+        result = self.runner.invoke(app, ["models", "provider-delete", "--help"])
+        assert result.exit_code == 0
+        assert "Delete a provider" in result.stdout
+
+    def test_models_model_create_help(self):
+        """Test models model-create subcommand help."""
+        result = self.runner.invoke(app, ["models", "model-create", "--help"])
+        assert result.exit_code == 0
+        assert "Create a new model" in result.stdout
+        assert "name" in result.stdout
+        assert "model" in result.stdout
+        assert "provider" in result.stdout
+
+    def test_models_model_show_help(self):
+        """Test models model-show subcommand help."""
+        result = self.runner.invoke(app, ["models", "model-show", "--help"])
+        assert result.exit_code == 0
+        assert "Show detailed model information" in result.stdout
+
+    def test_models_model_update_help(self):
+        """Test models model-update subcommand help."""
+        result = self.runner.invoke(app, ["models", "model-update", "--help"])
+        assert result.exit_code == 0
+        assert "Update a model" in result.stdout
+
+    def test_models_model_delete_help(self):
+        """Test models model-delete subcommand help."""
+        result = self.runner.invoke(app, ["models", "model-delete", "--help"])
+        assert result.exit_code == 0
+        assert "Delete a model" in result.stdout
 
     def test_events_help(self):
         """Test events subcommand help."""

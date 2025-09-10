@@ -12,6 +12,11 @@ import {
   Tabs,
   Tab,
   Paper,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
@@ -131,6 +136,9 @@ function safeToFixed(n: number | undefined | null, digits: number): string {
 
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx'>('json');
+  const [fileName, setFileName] = useState('analytics_export');
   
   // Use custom API hooks for various analytics data
   const dashboardApi = useApi(
@@ -250,16 +258,64 @@ const DashboardPage: React.FC = () => {
     };
   }, [data, performanceData, systemData, usageData]);
 
-  // Helper function for exporting analytics
-  const handleExportAnalytics = async (format: 'json' | 'csv' | 'xlsx' = 'json') => {
+  // Helper function for opening export dialog
+  const openExportDialog = (format: 'json' | 'csv' | 'xlsx') => {
+    setExportFormat(format);
+    setFileName(`analytics_export_${new Date().toISOString().split('T')[0]}`);
+    setExportDialogOpen(true);
+  };
+
+  // Helper function for exporting analytics with file name
+  const handleExportAnalytics = async () => {
     try {
-      await getSDK().analytics.exportAnalyticsApiV1AnalyticsExport({
+      const response = await getSDK().analytics.exportAnalyticsApiV1AnalyticsExport({
         metrics: ['conversations', 'usage', 'performance'],
-        format,
+        format: exportFormat,
         period: '30d'
       });
-      toastService.success(`Analytics exported as ${format.toUpperCase()}`);
-    } catch {
+      
+      // If the API returns file data (like CSV or XLSX), trigger download
+      if (response && typeof response === 'object') {
+        // Create a downloadable file
+        let blob;
+        let mimeType;
+        let fileExtension = exportFormat;
+        
+        switch (exportFormat) {
+          case 'json':
+            blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+            mimeType = 'application/json';
+            break;
+          case 'csv':
+            // If response is already CSV string
+            blob = new Blob([typeof response === 'string' ? response : JSON.stringify(response)], { type: 'text/csv' });
+            mimeType = 'text/csv';
+            break;
+          case 'xlsx':
+            // This would need proper handling if the API returns binary data
+            blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
+            mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            break;
+          default:
+            blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+            mimeType = 'application/json';
+        }
+        
+        // Create download link
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement('a');
+        link.href = url;
+        link.download = `${fileName}.${fileExtension}`;
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        window.URL.revokeObjectURL(url);
+      }
+      
+      setExportDialogOpen(false);
+      toastService.success(`Analytics exported as ${fileName}.${exportFormat}`);
+    } catch (error) {
+      console.error('Export failed:', error);
       toastService.error('Failed to export analytics');
     }
   };
@@ -325,7 +381,7 @@ const DashboardPage: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<GetApp />}
-        onClick={() => handleExportAnalytics('json')}
+        onClick={() => openExportDialog('json')}
         size="small"
       >
         Export JSON
@@ -333,7 +389,7 @@ const DashboardPage: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<GetApp />}
-        onClick={() => handleExportAnalytics('csv')}
+        onClick={() => openExportDialog('csv')}
         size="small"
       >
         Export CSV
@@ -700,6 +756,31 @@ const DashboardPage: React.FC = () => {
           </Box>
         </CardContent>
       </Card>
+
+      {/* Export Dialog */}
+      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)} maxWidth="sm" fullWidth>
+        <DialogTitle>Export Analytics</DialogTitle>
+        <DialogContent>
+          <TextField
+            autoFocus
+            margin="dense"
+            label="File Name"
+            fullWidth
+            variant="outlined"
+            value={fileName}
+            onChange={(e) => setFileName(e.target.value)}
+            helperText={`File will be saved as ${fileName}.${exportFormat}`}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setExportDialogOpen(false)}>
+            Cancel
+          </Button>
+          <Button onClick={handleExportAnalytics} variant="contained" disabled={!fileName.trim()}>
+            Export {exportFormat.toUpperCase()}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageLayout>
   );
 

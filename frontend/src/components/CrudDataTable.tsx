@@ -1,4 +1,4 @@
-import React, { useState, useEffect, ReactNode, useCallback } from 'react';
+import React, { useState, useEffect, ReactNode, useCallback, useImperativeHandle, forwardRef } from 'react';
 import {
   Box,
   Card,
@@ -74,6 +74,11 @@ export interface CrudFormProps<TCreate, TUpdate> {
   onSubmit: (data: TCreate | TUpdate) => Promise<void>;
 }
 
+export interface CrudDataTableRef {
+  handleCreate: () => void;
+  handleRefresh: () => void;
+}
+
 interface CrudDataTableProps<T, TCreate, TUpdate> {
   config: CrudConfig<T>;
   service: CrudService<T, TCreate, TUpdate>;
@@ -83,14 +88,14 @@ interface CrudDataTableProps<T, TCreate, TUpdate> {
   onExternalDialogClose?: () => void;
 }
 
-export function CrudDataTable<T, TCreate, TUpdate>({
+export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any, any, any>>(function CrudDataTable<T, TCreate, TUpdate>({
   config,
   service,
   FormComponent,
   getItemId,
   externalDialogOpen,
   onExternalDialogClose,
-}: CrudDataTableProps<T, TCreate, TUpdate>) {
+}: CrudDataTableProps<T, TCreate, TUpdate>, ref) {
   // State management
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -146,6 +151,12 @@ export function CrudDataTable<T, TCreate, TUpdate>({
       setInternalDialogOpen(true);
     }
   };
+
+  // Expose methods to parent component via ref
+  useImperativeHandle(ref, () => ({
+    handleCreate,
+    handleRefresh: loadData,
+  }));
 
   const handleEdit = (item: T) => {
     setDialogMode('edit');
@@ -360,6 +371,6 @@ export function CrudDataTable<T, TCreate, TUpdate>({
       )}
     </Box>
   );
-}
+});
 
 export default CrudDataTable;

@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useRef } from 'react';
 import { Box, Tabs, Tab, Typography, Chip, Button } from '@mui/material';
 import { Star as DefaultIcon, Refresh as RefreshIcon, Add as AddIcon } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction } from '../components/CrudDataTable';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
 import { 
@@ -45,6 +45,8 @@ function TabPanel(props: TabPanelProps) {
 const ModelManagementPageRefactored: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [providers, setProviders] = useState<Provider[]>([]);
+  const providerCrudRef = useRef<CrudDataTableRef>(null);
+  const modelCrudRef = useRef<CrudDataTableRef>(null);
 
   // Load providers for model form
   const loadProviders = async () => {
@@ -74,7 +76,11 @@ const ModelManagementPageRefactored: React.FC = () => {
         startIcon={<RefreshIcon />}
         onClick={() => {
           loadProviders();
-          // The CRUD table handles its own refresh
+          if (activeTab === 0) {
+            providerCrudRef.current?.handleRefresh();
+          } else {
+            modelCrudRef.current?.handleRefresh();
+          }
         }}
         size="small"
       >
@@ -84,24 +90,20 @@ const ModelManagementPageRefactored: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation via the "Create Provider" button in the toolbar
-          }}
+          onClick={() => providerCrudRef.current?.handleCreate()}
           size="small"
         >
-          Create Provider
+          Add Provider
         </Button>
       ) : (
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation via the "Create Model" button in the toolbar
-          }}
+          onClick={() => modelCrudRef.current?.handleCreate()}
           disabled={providers.length === 0}
           size="small"
         >
-          Create Model
+          Add Model
         </Button>
       )}
     </>
@@ -375,6 +377,7 @@ const ModelManagementPageRefactored: React.FC = () => {
 
       <TabPanel value={activeTab} index={0}>
         <CrudDataTable
+          ref={providerCrudRef}
           config={providerConfig}
           service={providerService}
           FormComponent={ProviderForm}
@@ -384,6 +387,7 @@ const ModelManagementPageRefactored: React.FC = () => {
 
       <TabPanel value={activeTab} index={1}>
         <CrudDataTable
+          ref={modelCrudRef}
           config={modelConfig}
           service={modelService}
           FormComponent={EnhancedModelForm}

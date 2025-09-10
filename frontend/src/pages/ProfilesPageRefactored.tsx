@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useRef } from 'react';
 import { Typography, Button } from '@mui/material';
 import { 
   Refresh as RefreshIcon,
@@ -6,7 +6,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
 import ProfileForm from '../components/ProfileForm';
 import { 
   createNameWithDescriptionRenderer, 
@@ -17,6 +17,7 @@ import { getSDK } from "../services/auth-service";
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 
 const ProfilesPageRefactored: React.FC = () => {
+  const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<ProfileResponse>[] = [
     {
@@ -116,9 +117,7 @@ const ProfilesPageRefactored: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => {
-          // The CRUD table handles its own refresh
-        }}
+        onClick={() => crudTableRef.current?.handleRefresh()}
         size="small"
       >
         Refresh
@@ -126,9 +125,7 @@ const ProfilesPageRefactored: React.FC = () => {
       <Button
         variant="contained"
         startIcon={<AddIcon />}
-        onClick={() => {
-          // The CRUD table handles creation
-        }}
+        onClick={() => crudTableRef.current?.handleCreate()}
         size="small"
       >
         Add Profile
@@ -139,6 +136,7 @@ const ProfilesPageRefactored: React.FC = () => {
   return (
     <PageLayout title="Profile Management" toolbar={toolbar}>
       <CrudDataTable
+        ref={crudTableRef}
         config={config}
         service={service}
         FormComponent={ProfileForm}

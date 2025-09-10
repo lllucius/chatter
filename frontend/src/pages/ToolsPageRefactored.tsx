@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useRef } from 'react';
 import { Box, Tabs, Tab, Chip, Button } from '@mui/material';
 import { 
   Refresh as RefreshIcon, 
@@ -8,7 +8,7 @@ import {
   PowerSettingsNew as ToggleIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction } from '../components/CrudDataTable';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
 import RemoteServerForm from '../components/RemoteServerForm';
 import { 
   createNameWithDescriptionRenderer, 
@@ -114,6 +114,8 @@ interface RemoteServerUpdate {
 
 const ToolsPageRefactored: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
+  const serverCrudRef = useRef<CrudDataTableRef>(null);
+  const toolCrudRef = useRef<CrudDataTableRef>(null);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setActiveTab(newValue);
@@ -170,6 +172,8 @@ const ToolsPageRefactored: React.FC = () => {
             await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable(server.id);
             toastService.success('Server enabled successfully');
           }
+          // Refresh the data after toggle
+          serverCrudRef.current?.handleRefresh();
         } catch {
           toastService.error('Failed to toggle server status');
         }
@@ -182,6 +186,8 @@ const ToolsPageRefactored: React.FC = () => {
         try {
           await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools(server.id);
           toastService.success('Server tools refreshed successfully');
+          // Refresh the data after refreshing tools
+          serverCrudRef.current?.handleRefresh();
         } catch {
           toastService.error('Failed to refresh server tools');
         }
@@ -278,6 +284,8 @@ const ToolsPageRefactored: React.FC = () => {
             await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable(tool.id);
             toastService.success('Tool enabled successfully');
           }
+          // Refresh the data after toggle
+          toolCrudRef.current?.handleRefresh();
         } catch {
           toastService.error('Failed to toggle tool status');
         }
@@ -316,7 +324,11 @@ const ToolsPageRefactored: React.FC = () => {
         variant="outlined"
         startIcon={<RefreshIcon />}
         onClick={() => {
-          // The CRUD table handles its own refresh
+          if (activeTab === 0) {
+            serverCrudRef.current?.handleRefresh();
+          } else {
+            toolCrudRef.current?.handleRefresh();
+          }
         }}
         size="small"
       >
@@ -326,9 +338,7 @@ const ToolsPageRefactored: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation
-          }}
+          onClick={() => serverCrudRef.current?.handleCreate()}
           size="small"
         >
           Add Remote Server
@@ -338,9 +348,7 @@ const ToolsPageRefactored: React.FC = () => {
         <Button
           variant="contained"
           startIcon={<AddIcon />}
-          onClick={() => {
-            // The CRUD table handles creation for tools
-          }}
+          onClick={() => toolCrudRef.current?.handleCreate()}
           size="small"
         >
           Add Tool
@@ -368,6 +376,7 @@ const ToolsPageRefactored: React.FC = () => {
 
       <TabPanel value={activeTab} index={0}>
         <CrudDataTable
+          ref={serverCrudRef}
           config={serverConfig}
           service={serverService}
           FormComponent={RemoteServerForm}
@@ -377,6 +386,7 @@ const ToolsPageRefactored: React.FC = () => {
 
       <TabPanel value={activeTab} index={1}>
         <CrudDataTable
+          ref={toolCrudRef}
           config={toolConfig}
           service={toolService}
           getItemId={getToolId}

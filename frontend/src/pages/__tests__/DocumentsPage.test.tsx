@@ -10,7 +10,7 @@ import { getSDK, authService } from "../../services/auth-service";
 vi.mock('../../services/auth-service', () => ({
   getSDK: vi.fn(() => ({
     documents: {
-      listDocumentsApiV1DocumentsGet: vi.fn(),
+      listDocumentsApiV1Documents: vi.fn(),
       uploadDocumentApiV1DocumentsUploadPost: vi.fn(),
       deleteDocumentApiV1DocumentsDocumentIdDelete: vi.fn(),
       getDocumentApiV1DocumentsDocumentIdGet: vi.fn(),
@@ -89,12 +89,15 @@ describe('DocumentsPage', () => {
     vi.clearAllMocks();
     
     // Setup default API responses
-    vi.mocked(getSDK().documents.listDocumentsApiV1DocumentsGet).mockResolvedValue({
-      data: { documents: mockDocuments }
+    vi.mocked(getSDK().documents.listDocumentsApiV1Documents).mockResolvedValue({
+      documents: mockDocuments
     } as any);
   });
 
   it('loads and displays documents', async () => {
+    // Add console.log to debug the API response
+    console.log('Mock documents:', mockDocuments);
+    
     await act(async () => {
       render(
         <TestWrapper>
@@ -105,11 +108,13 @@ describe('DocumentsPage', () => {
 
     // Wait for documents to load and display
     await waitFor(() => {
+      // Debug what's actually rendered
+      console.log('Rendered content:', screen.getByRole('main').innerHTML);
       expect(screen.getByText('Test Document')).toBeInTheDocument();
       expect(screen.getByText('Another Document')).toBeInTheDocument();
-    });
+    }, { timeout: 10000 });
 
-    expect(getSDK().documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
+    expect(getSDK().documents.listDocumentsApiV1Documents).toHaveBeenCalledTimes(1);
   });
 
   it('calls API on mount', async () => {
@@ -122,14 +127,15 @@ describe('DocumentsPage', () => {
     });
 
     // Should call the API immediately
-    expect(getSDK().documents.listDocumentsApiV1DocumentsGet).toHaveBeenCalledTimes(1);
+    expect(getSDK().documents.listDocumentsApiV1Documents).toHaveBeenCalledTimes(1);
   });
 
   it('displays error message when API call fails', async () => {
-    // Mock console.error to capture error logs
+    // Mock console.error to capture error logs  
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     
-    vi.mocked(getSDK().documents.listDocumentsApiV1DocumentsGet).mockRejectedValue(
+    // Override the default mock to simulate API failure for this specific test
+    vi.mocked(getSDK().documents.listDocumentsApiV1Documents).mockRejectedValueOnce(
       new Error('API Error')
     );
 

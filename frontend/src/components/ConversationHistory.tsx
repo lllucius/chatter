@@ -60,8 +60,12 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     try {
       setLoading(true);
       setError('');
-      const response = await getSDK().conversations.listConversationsApiV1ConversationsGet({});
-      setConversations(response.data.conversations || []);
+      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
+        limit: 20,
+        sortBy: 'updated_at',
+        sortOrder: 'desc'
+      });
+      setConversations(response.conversations || []);
     } catch {
       setError('Failed to load conversation history');
     } finally {
@@ -95,7 +99,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     if (!actionConversation) return;
     
     try {
-      await getSDK().conversations.deleteConversationApiV1ConversationsConversationIdDelete({
+      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId({
         conversationId: actionConversation.id
       });
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));

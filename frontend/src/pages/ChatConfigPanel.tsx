@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Typography,
@@ -15,22 +15,15 @@ import {
   Chip,
   Tooltip,
   IconButton,
-  List,
-  ListItem,
-  ListItemButton,
-  ListItemText,
-  CircularProgress,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-  Chat as ConversationIcon,
 } from '@mui/icons-material';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import { getSDK, authService } from "../services/auth-service";
 
 interface Props {
   profiles: ProfileResponse[];
@@ -81,10 +74,8 @@ const ChatConfigPanel: React.FC<Props> = ({
   const { collapsed, setCollapsed } = useRightSidebar();
   const [expandedPanel, setExpandedPanel] = useState<string>(() => {
     const saved = localStorage.getItem('chatter_expandedPanel');
-    return saved ? saved : 'conversations';
+    return saved ? saved : 'profile';
   });
-  const [conversations, setConversations] = useState<ConversationResponse[]>([]);
-  const [loadingConversations, setLoadingConversations] = useState(false);
 
   const handlePanelChange =
     (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
@@ -93,47 +84,9 @@ const ChatConfigPanel: React.FC<Props> = ({
       localStorage.setItem('chatter_expandedPanel', newPanel);
     };
 
-  const loadConversations = useCallback(async () => {
-    setLoadingConversations(true);
-    try {
-      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
-        limit: 20,
-        sortBy: 'updated_at',
-        sortOrder: 'desc'
-      });
-      setConversations(response.conversations || []);
-    } catch (error) {
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.error('Failed to load conversations:', error);
-      }
-      // Set empty array on error to prevent infinite loading
-      setConversations([]);
-    } finally {
-      setLoadingConversations(false);
-    }
-  }, []);
-
-  useEffect(() => {
-    loadConversations();
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally empty deps to run only once on mount
-
   if (collapsed) {
     return (
       <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
-        <Tooltip title="Conversations" placement="left">
-          <IconButton
-            onClick={() => {
-              setCollapsed(false);
-              const savedPanel = localStorage.getItem('chatter_expandedPanel') || 'conversations';
-              setExpandedPanel(savedPanel);
-            }}
-            sx={{ borderRadius: 1 }}
-          >
-            <ConversationIcon />
-          </IconButton>
-        </Tooltip>
         <Tooltip title="Profile Settings" placement="left">
           <IconButton
             onClick={() => {
@@ -177,49 +130,6 @@ const ChatConfigPanel: React.FC<Props> = ({
 
   return (
     <Box>
-
-      {/* Conversations */}
-      <Accordion expanded={expandedPanel === 'conversations'} onChange={handlePanelChange('conversations')}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <ConversationIcon sx={{ mr: 1 }} />
-          <Typography>Conversations</Typography>
-        </AccordionSummary>
-        <AccordionDetails>
-          {loadingConversations ? (
-            <Box sx={{ display: 'flex', justifyContent: 'center', py: 2 }}>
-              <CircularProgress size={24} />
-            </Box>
-          ) : conversations.length === 0 ? (
-            <Typography variant="body2" color="text.secondary" sx={{ py: 1 }}>
-              No conversations found
-            </Typography>
-          ) : (
-            <List dense sx={{ p: 0 }}>
-              {conversations.map((conversation) => (
-                <ListItem key={conversation.id} disablePadding>
-                  <ListItemButton 
-                    onClick={() => onSelectConversation(conversation)}
-                    selected={currentConversation?.id === conversation.id}
-                    sx={{ borderRadius: 1, mb: 0.5 }}
-                  >
-                    <ListItemText 
-                      primary={conversation.title}
-                      secondary={new Date(conversation.updated_at).toLocaleDateString()}
-                      primaryTypographyProps={{ 
-                        variant: 'body2',
-                        noWrap: true 
-                      }}
-                      secondaryTypographyProps={{ 
-                        variant: 'caption'
-                      }}
-                    />
-                  </ListItemButton>
-                </ListItem>
-              ))}
-            </List>
-          )}
-        </AccordionDetails>
-      </Accordion>
 
       {/* Profile */}
       <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>

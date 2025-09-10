@@ -3,14 +3,14 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { vi, describe, test, expect } from 'vitest';
-import ProfilesPageRefactored from '../ProfilesPageRefactored';
+import PromptsPage from '../PromptsPage';
 
 // Mock the getSDK function and authService
 vi.mock('../../services/auth-service', () => ({
   getSDK: vi.fn(() => ({
-    profiles: {
-      listProfilesApiV1Profiles: vi.fn().mockResolvedValue({
-        profiles: [],
+    prompts: {
+      listPromptsApiV1Prompts: vi.fn().mockResolvedValue({
+        prompts: [],
         totalCount: 0
       })
     }
@@ -30,31 +30,31 @@ vi.mock('../../services/toast-service', () => ({
 
 const theme = createTheme();
 
-const renderProfilesPage = () => {
+const renderPromptsPage = () => {
   return render(
     <BrowserRouter>
       <ThemeProvider theme={theme}>
-        <ProfilesPageRefactored />
+        <PromptsPage />
       </ThemeProvider>
     </BrowserRouter>
   );
 };
 
-describe('ProfilesPageRefactored', () => {
-  test('renders Profile Management page title', async () => {
-    renderProfilesPage();
+describe('PromptsPage', () => {
+  test('renders Prompts page title', async () => {
+    renderPromptsPage();
     
-    expect(await screen.findByText('Profile Management')).toBeInTheDocument();
+    expect(await screen.findByText('Prompts')).toBeInTheDocument();
   });
 
-  test('renders toolbar with Add Profile button', async () => {
-    renderProfilesPage();
+  test('renders toolbar with Add Prompt button', async () => {
+    renderPromptsPage();
     
-    expect(await screen.findByText('Add Profile')).toBeInTheDocument();
+    expect(await screen.findByText('Add Prompt')).toBeInTheDocument();
   });
 
   test('renders toolbar with Refresh button', async () => {
-    renderProfilesPage();
+    renderPromptsPage();
     
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });

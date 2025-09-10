@@ -3,7 +3,7 @@ import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { vi, describe, test, expect } from 'vitest';
-import AgentsPageRefactored from '../AgentsPageRefactored';
+import AgentsPage from '../AgentsPage';
 
 // Mock the getSDK function and authService
 vi.mock('../../services/auth-service', () => ({
@@ -33,13 +33,13 @@ const renderAgentsPage = () => {
   return render(
     <BrowserRouter>
       <ThemeProvider theme={theme}>
-        <AgentsPageRefactored />
+        <AgentsPage />
       </ThemeProvider>
     </BrowserRouter>
   );
 };
 
-describe('AgentsPageRefactored', () => {
+describe('AgentsPage', () => {
   test('renders AI Agents page title', async () => {
     renderAgentsPage();
     

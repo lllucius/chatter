@@ -16,7 +16,7 @@ import {
 import { getSDK } from "../services/auth-service";
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 
-const ProfilesPageRefactored: React.FC = () => {
+const ProfilesPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<ProfileResponse>[] = [
@@ -146,4 +146,4 @@ const ProfilesPageRefactored: React.FC = () => {
   );
 };
 
-export default ProfilesPageRefactored;
+export default ProfilesPage;

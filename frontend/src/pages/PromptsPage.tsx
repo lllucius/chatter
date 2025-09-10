@@ -16,7 +16,7 @@ import {
 import { getSDK } from "../services/auth-service";
 import { PromptResponse, PromptCreate, PromptUpdate } from 'chatter-sdk';
 
-const PromptsPageRefactored: React.FC = () => {
+const PromptsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<PromptResponse>[] = [
@@ -148,4 +148,4 @@ const PromptsPageRefactored: React.FC = () => {
   );
 };
 
-export default PromptsPageRefactored;
+export default PromptsPage;

@@ -4,7 +4,7 @@ import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import { vi, describe, test, expect, beforeEach } from 'vitest';
 import { fireEvent } from '@testing-library/react';
-import ToolsPageRefactored from '../ToolsPageRefactored';
+import ToolsPage from '../ToolsPage';
 
 // Mock the getSDK function and authService
 vi.mock('../../services/auth-service', () => ({
@@ -33,13 +33,13 @@ const renderToolsPage = () => {
   return render(
     <BrowserRouter>
       <ThemeProvider theme={theme}>
-        <ToolsPageRefactored />
+        <ToolsPage />
       </ThemeProvider>
     </BrowserRouter>
   );
 };
 
-describe('ToolsPageRefactored', () => {
+describe('ToolsPage', () => {
   test('renders Tool Server Management page title', async () => {
     renderToolsPage();
     

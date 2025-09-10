@@ -15,7 +15,7 @@ import {
 import { getSDK } from "../services/auth-service";
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest } from 'chatter-sdk';
 
-const AgentsPageRefactored: React.FC = () => {
+const AgentsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
   // Define columns
   const columns: CrudColumn<AgentResponse>[] = [
@@ -134,4 +134,4 @@ const AgentsPageRefactored: React.FC = () => {
   );
 };
 
-export default AgentsPageRefactored;
+export default AgentsPage;

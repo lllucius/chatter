@@ -112,7 +112,7 @@ interface RemoteServerUpdate {
   headers?: Record<string, string>;
 }
 
-const ToolsPageRefactored: React.FC = () => {
+const ToolsPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const serverCrudRef = useRef<CrudDataTableRef>(null);
   const toolCrudRef = useRef<CrudDataTableRef>(null);
@@ -396,4 +396,4 @@ const ToolsPageRefactored: React.FC = () => {
   );
 };
 
-export default ToolsPageRefactored;
+export default ToolsPage;

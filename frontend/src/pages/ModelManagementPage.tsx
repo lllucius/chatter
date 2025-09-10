@@ -42,7 +42,7 @@ function TabPanel(props: TabPanelProps) {
   );
 }
 
-const ModelManagementPageRefactored: React.FC = () => {
+const ModelManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [providers, setProviders] = useState<Provider[]>([]);
   const providerCrudRef = useRef<CrudDataTableRef>(null);
@@ -400,4 +400,4 @@ const ModelManagementPageRefactored: React.FC = () => {
   );
 };
 
-export default ModelManagementPageRefactored;
+export default ModelManagementPage;

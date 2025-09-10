@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,23 +14,16 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    field_validator,
-)
-from typing import Annotated, Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, field_validator
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.provider_type import ProviderType
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ProviderCreate(BaseModel):
     """
@@ -38,15 +32,15 @@ class ProviderCreate(BaseModel):
     name: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="Unique provider name")
     provider_type: ProviderType
     display_name: Annotated[str, Field(min_length=1, strict=True, max_length=200)] = Field(description="Human-readable name")
-    description: Annotated[str, Field(strict=True, max_length=1000)] | None = None
-    api_key_required: StrictBool | None = Field(default=True, description="Whether API key is required")
-    base_url: Annotated[str, Field(strict=True, max_length=500)] | None = None
-    default_config: dict[str, Any] | None = Field(default=None, description="Default configuration")
-    is_active: StrictBool | None = Field(default=True, description="Whether provider is active")
-    is_default: StrictBool | None = Field(default=False, description="Whether this is the default provider")
-    __properties: ClassVar[list[str]] = ["name", "provider_type", "display_name", "description", "api_key_required", "base_url", "default_config", "is_active", "is_default"]
+    description: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    api_key_required: Optional[StrictBool] = Field(default=True, description="Whether API key is required")
+    base_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
+    default_config: Optional[Dict[str, Any]] = Field(default=None, description="Default configuration")
+    is_active: Optional[StrictBool] = Field(default=True, description="Whether provider is active")
+    is_default: Optional[StrictBool] = Field(default=False, description="Whether this is the default provider")
+    __properties: ClassVar[List[str]] = ["name", "provider_type", "display_name", "description", "api_key_required", "base_url", "default_config", "is_active", "is_default"]
 
-    @field_validator("name")
+    @field_validator('name')
     def name_validate_regular_expression(cls, value):
         """Validates the regular expression"""
         if not re.match(r"^[a-zA-Z0-9_-]+$", value):
@@ -70,11 +64,11 @@ class ProviderCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ProviderCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,7 +78,7 @@ class ProviderCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -95,17 +89,17 @@ class ProviderCreate(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if base_url (nullable) is None
         # and model_fields_set contains the field
         if self.base_url is None and "base_url" in self.model_fields_set:
-            _dict["base_url"] = None
+            _dict['base_url'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ProviderCreate from a dict"""
         if obj is None:
             return None

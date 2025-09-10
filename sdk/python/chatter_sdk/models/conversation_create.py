@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,30 +14,30 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ConversationCreate(BaseModel):
     """
     Schema for creating a conversation.
     """ # noqa: E501
     title: StrictStr = Field(description="Conversation title")
-    description: StrictStr | None = None
-    profile_id: StrictStr | None = None
-    system_prompt: StrictStr | None = None
-    enable_retrieval: StrictBool | None = Field(default=False, description="Enable document retrieval")
-    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    max_tokens: Annotated[int, Field(strict=True, ge=1)] | None = None
-    workflow_config: dict[str, Any] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["title", "description", "profile_id", "system_prompt", "enable_retrieval", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
+    description: Optional[StrictStr] = None
+    profile_id: Optional[StrictStr] = None
+    system_prompt: Optional[StrictStr] = None
+    enable_retrieval: Optional[StrictBool] = Field(default=False, description="Enable document retrieval")
+    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    max_tokens: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
+    workflow_config: Optional[Dict[str, Any]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["title", "description", "profile_id", "system_prompt", "enable_retrieval", "temperature", "max_tokens", "workflow_config", "extra_metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -55,11 +56,11 @@ class ConversationCreate(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ConversationCreate from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -69,7 +70,7 @@ class ConversationCreate(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -80,42 +81,42 @@ class ConversationCreate(BaseModel):
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if profile_id (nullable) is None
         # and model_fields_set contains the field
         if self.profile_id is None and "profile_id" in self.model_fields_set:
-            _dict["profile_id"] = None
+            _dict['profile_id'] = None
 
         # set to None if system_prompt (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt is None and "system_prompt" in self.model_fields_set:
-            _dict["system_prompt"] = None
+            _dict['system_prompt'] = None
 
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
-            _dict["temperature"] = None
+            _dict['temperature'] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict["max_tokens"] = None
+            _dict['max_tokens'] = None
 
         # set to None if workflow_config (nullable) is None
         # and model_fields_set contains the field
         if self.workflow_config is None and "workflow_config" in self.model_fields_set:
-            _dict["workflow_config"] = None
+            _dict['workflow_config'] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict["extra_metadata"] = None
+            _dict['extra_metadata'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ConversationCreate from a dict"""
         if obj is None:
             return None

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,10 +15,7 @@
 
 import unittest
 
-from chatter_sdk.models.plugin_health_check_response import (
-    PluginHealthCheckResponse,
-)
-
+from chatter_sdk.models.plugin_health_check_response import PluginHealthCheckResponse
 
 class TestPluginHealthCheckResponse(unittest.TestCase):
     """PluginHealthCheckResponse unit test stubs"""
@@ -57,5 +55,5 @@ class TestPluginHealthCheckResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

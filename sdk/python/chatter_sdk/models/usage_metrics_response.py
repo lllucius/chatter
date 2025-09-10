@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,21 +14,14 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictFloat,
-    StrictInt,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt
+from typing import Any, ClassVar, Dict, List, Union
+from typing import Optional, Set
+from typing_extensions import Self
 
 class UsageMetricsResponse(BaseModel):
     """
@@ -36,19 +30,19 @@ class UsageMetricsResponse(BaseModel):
     total_prompt_tokens: StrictInt = Field(description="Total prompt tokens")
     total_completion_tokens: StrictInt = Field(description="Total completion tokens")
     total_tokens: StrictInt = Field(description="Total tokens used")
-    tokens_by_model: dict[str, StrictInt] = Field(description="Token usage by model")
-    tokens_by_provider: dict[str, StrictInt] = Field(description="Token usage by provider")
-    total_cost: StrictFloat | StrictInt = Field(description="Total cost")
-    cost_by_model: dict[str, StrictFloat | StrictInt] = Field(description="Cost by model")
-    cost_by_provider: dict[str, StrictFloat | StrictInt] = Field(description="Cost by provider")
-    daily_usage: dict[str, StrictInt] = Field(description="Daily token usage")
-    daily_cost: dict[str, StrictFloat | StrictInt] = Field(description="Daily cost")
-    avg_response_time: StrictFloat | StrictInt = Field(description="Average response time")
-    response_times_by_model: dict[str, StrictFloat | StrictInt] = Field(description="Response times by model")
+    tokens_by_model: Dict[str, StrictInt] = Field(description="Token usage by model")
+    tokens_by_provider: Dict[str, StrictInt] = Field(description="Token usage by provider")
+    total_cost: Union[StrictFloat, StrictInt] = Field(description="Total cost")
+    cost_by_model: Dict[str, Union[StrictFloat, StrictInt]] = Field(description="Cost by model")
+    cost_by_provider: Dict[str, Union[StrictFloat, StrictInt]] = Field(description="Cost by provider")
+    daily_usage: Dict[str, StrictInt] = Field(description="Daily token usage")
+    daily_cost: Dict[str, Union[StrictFloat, StrictInt]] = Field(description="Daily cost")
+    avg_response_time: Union[StrictFloat, StrictInt] = Field(description="Average response time")
+    response_times_by_model: Dict[str, Union[StrictFloat, StrictInt]] = Field(description="Response times by model")
     active_days: StrictInt = Field(description="Number of active days")
     peak_usage_hour: StrictInt = Field(description="Peak usage hour")
-    conversations_per_day: StrictFloat | StrictInt = Field(description="Average conversations per day")
-    __properties: ClassVar[list[str]] = ["total_prompt_tokens", "total_completion_tokens", "total_tokens", "tokens_by_model", "tokens_by_provider", "total_cost", "cost_by_model", "cost_by_provider", "daily_usage", "daily_cost", "avg_response_time", "response_times_by_model", "active_days", "peak_usage_hour", "conversations_per_day"]
+    conversations_per_day: Union[StrictFloat, StrictInt] = Field(description="Average conversations per day")
+    __properties: ClassVar[List[str]] = ["total_prompt_tokens", "total_completion_tokens", "total_tokens", "tokens_by_model", "tokens_by_provider", "total_cost", "cost_by_model", "cost_by_provider", "daily_usage", "daily_cost", "avg_response_time", "response_times_by_model", "active_days", "peak_usage_hour", "conversations_per_day"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -67,11 +61,11 @@ class UsageMetricsResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of UsageMetricsResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -81,7 +75,7 @@ class UsageMetricsResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -92,7 +86,7 @@ class UsageMetricsResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of UsageMetricsResponse from a dict"""
         if obj is None:
             return None

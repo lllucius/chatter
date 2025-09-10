@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,11 +14,9 @@
 
 
 from __future__ import annotations
-
 import json
 from enum import Enum
-
-from typing import Self
+from typing_extensions import Self
 
 
 class JobPriority(str, Enum):
@@ -28,10 +27,10 @@ class JobPriority(str, Enum):
     """
     allowed enum values
     """
-    LOW = "low"
-    NORMAL = "normal"
-    HIGH = "high"
-    CRITICAL = "critical"
+    LOW = 'low'
+    NORMAL = 'normal'
+    HIGH = 'high'
+    CRITICAL = 'critical'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,17 +14,15 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Self
-
+from typing import Any, ClassVar, Dict, List
 from chatter_sdk.models.test_status import TestStatus
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ABTestActionResponse(BaseModel):
     """
@@ -33,7 +32,7 @@ class ABTestActionResponse(BaseModel):
     message: StrictStr = Field(description="Action result message")
     test_id: StrictStr = Field(description="Test ID")
     new_status: TestStatus
-    __properties: ClassVar[list[str]] = ["success", "message", "test_id", "new_status"]
+    __properties: ClassVar[List[str]] = ["success", "message", "test_id", "new_status"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -52,11 +51,11 @@ class ABTestActionResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ABTestActionResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -66,7 +65,7 @@ class ABTestActionResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -77,7 +76,7 @@ class ABTestActionResponse(BaseModel):
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ABTestActionResponse from a dict"""
         if obj is None:
             return None

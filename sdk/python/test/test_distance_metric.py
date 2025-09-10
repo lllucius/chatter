@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.distance_metric import DistanceMetric
 
 class TestDistanceMetric(unittest.TestCase):
     """DistanceMetric unit test stubs"""
@@ -29,5 +30,5 @@ class TestDistanceMetric(unittest.TestCase):
         """Test DistanceMetric"""
         # inst = DistanceMetric()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

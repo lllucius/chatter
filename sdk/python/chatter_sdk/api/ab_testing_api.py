@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -11,41 +12,26 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-from typing import Any
+import warnings
+from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
+from typing import Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Annotated
 
-from pydantic import (
-    Field,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-    validate_call,
-)
-from typing import Annotated
+from pydantic import StrictStr
+from typing import Any, Dict, List, Optional
+from chatter_sdk.models.ab_test_action_response import ABTestActionResponse
+from chatter_sdk.models.ab_test_create_request import ABTestCreateRequest
+from chatter_sdk.models.ab_test_delete_response import ABTestDeleteResponse
+from chatter_sdk.models.ab_test_list_response import ABTestListResponse
+from chatter_sdk.models.ab_test_metrics_response import ABTestMetricsResponse
+from chatter_sdk.models.ab_test_response import ABTestResponse
+from chatter_sdk.models.ab_test_results_response import ABTestResultsResponse
+from chatter_sdk.models.ab_test_update_request import ABTestUpdateRequest
+from chatter_sdk.models.test_status import TestStatus
+from chatter_sdk.models.test_type import TestType
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
-from chatter_sdk.models.ab_test_action_response import (
-    ABTestActionResponse,
-)
-from chatter_sdk.models.ab_test_create_request import (
-    ABTestCreateRequest,
-)
-from chatter_sdk.models.ab_test_delete_response import (
-    ABTestDeleteResponse,
-)
-from chatter_sdk.models.ab_test_list_response import ABTestListResponse
-from chatter_sdk.models.ab_test_metrics_response import (
-    ABTestMetricsResponse,
-)
-from chatter_sdk.models.ab_test_response import ABTestResponse
-from chatter_sdk.models.ab_test_results_response import (
-    ABTestResultsResponse,
-)
-from chatter_sdk.models.ab_test_update_request import (
-    ABTestUpdateRequest,
-)
-from chatter_sdk.models.test_status import TestStatus
-from chatter_sdk.models.test_type import TestType
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -66,10 +52,17 @@ class ABTestingApi:
     async def complete_ab_test_api_v1_ab_tests_test_id_complete_post(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestActionResponse:
         """Complete Ab Test
@@ -108,9 +101,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -127,10 +120,17 @@ class ABTestingApi:
     async def complete_ab_test_api_v1_ab_tests_test_id_complete_post_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestActionResponse]:
         """Complete Ab Test
@@ -169,9 +169,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -188,10 +188,17 @@ class ABTestingApi:
     async def complete_ab_test_api_v1_ab_tests_test_id_complete_post_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Complete Ab Test
@@ -230,9 +237,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -252,21 +259,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -274,22 +281,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/ab-tests/{test_id}/complete",
+            method='POST',
+            resource_path='/api/v1/ab-tests/{test_id}/complete',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -309,10 +316,17 @@ class ABTestingApi:
     async def create_ab_test_api_v1_ab_tests_post(
         self,
         ab_test_create_request: ABTestCreateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestResponse:
         """Create Ab Test
@@ -351,9 +365,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -370,10 +384,17 @@ class ABTestingApi:
     async def create_ab_test_api_v1_ab_tests_post_with_http_info(
         self,
         ab_test_create_request: ABTestCreateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestResponse]:
         """Create Ab Test
@@ -412,9 +433,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -431,10 +452,17 @@ class ABTestingApi:
     async def create_ab_test_api_v1_ab_tests_post_without_preload_content(
         self,
         ab_test_create_request: ABTestCreateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Ab Test
@@ -473,9 +501,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -495,17 +523,17 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -517,35 +545,35 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/ab-tests/",
+            method='POST',
+            resource_path='/api/v1/ab-tests/',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -565,10 +593,17 @@ class ABTestingApi:
     async def delete_ab_test_api_v1_ab_tests_test_id_delete(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestDeleteResponse:
         """Delete Ab Test
@@ -607,9 +642,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -626,10 +661,17 @@ class ABTestingApi:
     async def delete_ab_test_api_v1_ab_tests_test_id_delete_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestDeleteResponse]:
         """Delete Ab Test
@@ -668,9 +710,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -687,10 +729,17 @@ class ABTestingApi:
     async def delete_ab_test_api_v1_ab_tests_test_id_delete_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Ab Test
@@ -729,9 +778,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -751,21 +800,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -773,22 +822,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/api/v1/ab-tests/{test_id}",
+            method='DELETE',
+            resource_path='/api/v1/ab-tests/{test_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -809,10 +858,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         winner_variant: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestActionResponse:
         """End Ab Test
@@ -854,9 +910,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -874,10 +930,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         winner_variant: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestActionResponse]:
         """End Ab Test
@@ -919,9 +982,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -939,10 +1002,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         winner_variant: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """End Ab Test
@@ -984,9 +1054,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1007,48 +1077,48 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         if winner_variant is not None:
-
-            _query_params.append(("winner_variant", winner_variant))
-
+            
+            _query_params.append(('winner_variant', winner_variant))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/ab-tests/{test_id}/end",
+            method='POST',
+            resource_path='/api/v1/ab-tests/{test_id}/end',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1068,10 +1138,17 @@ class ABTestingApi:
     async def get_ab_test_api_v1_ab_tests_test_id_get(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestResponse:
         """Get Ab Test
@@ -1110,9 +1187,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1129,10 +1206,17 @@ class ABTestingApi:
     async def get_ab_test_api_v1_ab_tests_test_id_get_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestResponse]:
         """Get Ab Test
@@ -1171,9 +1255,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1190,10 +1274,17 @@ class ABTestingApi:
     async def get_ab_test_api_v1_ab_tests_test_id_get_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Ab Test
@@ -1232,9 +1323,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1254,21 +1345,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1276,22 +1367,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/{test_id}",
+            method='GET',
+            resource_path='/api/v1/ab-tests/{test_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1311,10 +1402,17 @@ class ABTestingApi:
     async def get_ab_test_metrics_api_v1_ab_tests_test_id_metrics_get(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestMetricsResponse:
         """Get Ab Test Metrics
@@ -1353,9 +1451,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestMetricsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestMetricsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1372,10 +1470,17 @@ class ABTestingApi:
     async def get_ab_test_metrics_api_v1_ab_tests_test_id_metrics_get_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestMetricsResponse]:
         """Get Ab Test Metrics
@@ -1414,9 +1519,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestMetricsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestMetricsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1433,10 +1538,17 @@ class ABTestingApi:
     async def get_ab_test_metrics_api_v1_ab_tests_test_id_metrics_get_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Ab Test Metrics
@@ -1475,9 +1587,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestMetricsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestMetricsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1497,21 +1609,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1519,22 +1631,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/{test_id}/metrics",
+            method='GET',
+            resource_path='/api/v1/ab-tests/{test_id}/metrics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1554,12 +1666,19 @@ class ABTestingApi:
     async def get_ab_test_performance_api_v1_ab_tests_test_id_performance_get(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         """Get Ab Test Performance
 
         Get A/B test performance results by variant.  Args:     test_id: A/B test ID     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     Performance results per variant
@@ -1596,9 +1715,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1615,12 +1734,19 @@ class ABTestingApi:
     async def get_ab_test_performance_api_v1_ab_tests_test_id_performance_get_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[dict[str, object]]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Get Ab Test Performance
 
         Get A/B test performance results by variant.  Args:     test_id: A/B test ID     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     Performance results per variant
@@ -1657,9 +1783,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1676,10 +1802,17 @@ class ABTestingApi:
     async def get_ab_test_performance_api_v1_ab_tests_test_id_performance_get_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Ab Test Performance
@@ -1718,9 +1851,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1740,21 +1873,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1762,22 +1895,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/{test_id}/performance",
+            method='GET',
+            resource_path='/api/v1/ab-tests/{test_id}/performance',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1797,12 +1930,19 @@ class ABTestingApi:
     async def get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         """Get Ab Test Recommendations
 
         Get comprehensive recommendations for an A/B test.  Args:     test_id: A/B test ID     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     Recommendations and insights for the test
@@ -1839,9 +1979,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1858,12 +1998,19 @@ class ABTestingApi:
     async def get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[dict[str, object]]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Get Ab Test Recommendations
 
         Get comprehensive recommendations for an A/B test.  Args:     test_id: A/B test ID     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     Recommendations and insights for the test
@@ -1900,9 +2047,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1919,10 +2066,17 @@ class ABTestingApi:
     async def get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Ab Test Recommendations
@@ -1961,9 +2115,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1983,21 +2137,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2005,22 +2159,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/{test_id}/recommendations",
+            method='GET',
+            resource_path='/api/v1/ab-tests/{test_id}/recommendations',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2040,10 +2194,17 @@ class ABTestingApi:
     async def get_ab_test_results_api_v1_ab_tests_test_id_results_get(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestResultsResponse:
         """Get Ab Test Results
@@ -2082,9 +2243,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResultsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResultsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2101,10 +2262,17 @@ class ABTestingApi:
     async def get_ab_test_results_api_v1_ab_tests_test_id_results_get_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestResultsResponse]:
         """Get Ab Test Results
@@ -2143,9 +2311,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResultsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResultsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2162,10 +2330,17 @@ class ABTestingApi:
     async def get_ab_test_results_api_v1_ab_tests_test_id_results_get_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Ab Test Results
@@ -2204,9 +2379,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResultsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResultsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2226,21 +2401,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2248,22 +2423,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/{test_id}/results",
+            method='GET',
+            resource_path='/api/v1/ab-tests/{test_id}/results',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2282,13 +2457,20 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get(
         self,
-        status: TestStatus | None = None,
-        test_type: TestType | None = None,
-        request_body: list[StrictStr] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[TestStatus] = None,
+        test_type: Optional[TestType] = None,
+        request_body: Optional[List[StrictStr]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestListResponse:
         """List Ab Tests
@@ -2333,9 +2515,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestListResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestListResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2351,13 +2533,20 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get_with_http_info(
         self,
-        status: TestStatus | None = None,
-        test_type: TestType | None = None,
-        request_body: list[StrictStr] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[TestStatus] = None,
+        test_type: Optional[TestType] = None,
+        request_body: Optional[List[StrictStr]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestListResponse]:
         """List Ab Tests
@@ -2402,9 +2591,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestListResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestListResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2420,13 +2609,20 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get_without_preload_content(
         self,
-        status: TestStatus | None = None,
-        test_type: TestType | None = None,
-        request_body: list[StrictStr] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[TestStatus] = None,
+        test_type: Optional[TestType] = None,
+        request_body: Optional[List[StrictStr]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Ab Tests
@@ -2471,9 +2667,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestListResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestListResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2495,29 +2691,29 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
-            "request_body": "",
+        _collection_formats: Dict[str, str] = {
+            'request_body': '',
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if status is not None:
-
-            _query_params.append(("status", status.value))
-
+            
+            _query_params.append(('status', status.value))
+            
         if test_type is not None:
-
-            _query_params.append(("test_type", test_type.value))
-
+            
+            _query_params.append(('test_type', test_type.value))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2526,35 +2722,35 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/ab-tests/",
+            method='GET',
+            resource_path='/api/v1/ab-tests/',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2574,10 +2770,17 @@ class ABTestingApi:
     async def pause_ab_test_api_v1_ab_tests_test_id_pause_post(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestActionResponse:
         """Pause Ab Test
@@ -2616,9 +2819,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2635,10 +2838,17 @@ class ABTestingApi:
     async def pause_ab_test_api_v1_ab_tests_test_id_pause_post_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestActionResponse]:
         """Pause Ab Test
@@ -2677,9 +2887,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2696,10 +2906,17 @@ class ABTestingApi:
     async def pause_ab_test_api_v1_ab_tests_test_id_pause_post_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Pause Ab Test
@@ -2738,9 +2955,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2760,21 +2977,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2782,22 +2999,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/ab-tests/{test_id}/pause",
+            method='POST',
+            resource_path='/api/v1/ab-tests/{test_id}/pause',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2817,10 +3034,17 @@ class ABTestingApi:
     async def start_ab_test_api_v1_ab_tests_test_id_start_post(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestActionResponse:
         """Start Ab Test
@@ -2859,9 +3083,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2878,10 +3102,17 @@ class ABTestingApi:
     async def start_ab_test_api_v1_ab_tests_test_id_start_post_with_http_info(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestActionResponse]:
         """Start Ab Test
@@ -2920,9 +3151,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2939,10 +3170,17 @@ class ABTestingApi:
     async def start_ab_test_api_v1_ab_tests_test_id_start_post_without_preload_content(
         self,
         test_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Start Ab Test
@@ -2981,9 +3219,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestActionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestActionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3003,21 +3241,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3025,22 +3263,22 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/ab-tests/{test_id}/start",
+            method='POST',
+            resource_path='/api/v1/ab-tests/{test_id}/start',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3061,10 +3299,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         ab_test_update_request: ABTestUpdateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ABTestResponse:
         """Update Ab Test
@@ -3106,9 +3351,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3126,10 +3371,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         ab_test_update_request: ABTestUpdateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ABTestResponse]:
         """Update Ab Test
@@ -3171,9 +3423,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3191,10 +3443,17 @@ class ABTestingApi:
         self,
         test_id: StrictStr,
         ab_test_update_request: ABTestUpdateRequest,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Ab Test
@@ -3236,9 +3495,9 @@ class ABTestingApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ABTestResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ABTestResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3259,21 +3518,21 @@ class ABTestingApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if test_id is not None:
-            _path_params["test_id"] = test_id
+            _path_params['test_id'] = test_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3283,35 +3542,35 @@ class ABTestingApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="PUT",
-            resource_path="/api/v1/ab-tests/{test_id}",
+            method='PUT',
+            resource_path='/api/v1/ab-tests/{test_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -15,25 +16,21 @@
 import copy
 import http.client as httplib
 import logging
-import sys
 from logging import FileHandler
-from typing import (
-    Any,
-    ClassVar,
-    Literal,
-    TypedDict,
-)
+import sys
+from typing import Any, ClassVar, Dict, List, Literal, Optional, TypedDict, Union
+from typing_extensions import NotRequired, Self
 
 import urllib3
-from typing import NotRequired, Self
+
 
 JSON_SCHEMA_VALIDATION_KEYWORDS = {
-    "multipleOf", "maximum", "exclusiveMaximum",
-    "minimum", "exclusiveMinimum", "maxLength",
-    "minLength", "pattern", "maxItems", "minItems"
+    'multipleOf', 'maximum', 'exclusiveMaximum',
+    'minimum', 'exclusiveMinimum', 'maxLength',
+    'minLength', 'pattern', 'maxItems', 'minItems'
 }
 
-ServerVariablesT = dict[str, str]
+ServerVariablesT = Dict[str, str]
 
 GenericAuthSetting = TypedDict(
     "GenericAuthSetting",
@@ -63,7 +60,7 @@ APIKeyAuthSetting = TypedDict(
         "type": Literal["api_key"],
         "in": str,
         "key": str,
-        "value": str | None,
+        "value": Optional[str],
     },
 )
 
@@ -74,7 +71,7 @@ BasicAuthSetting = TypedDict(
         "type": Literal["basic"],
         "in": Literal["header"],
         "key": Literal["Authorization"],
-        "value": str | None,
+        "value": Optional[str],
     },
 )
 
@@ -113,20 +110,25 @@ HTTPSignatureAuthSetting = TypedDict(
 )
 
 
-class AuthSettings(TypedDict, total=False):
-    CustomHTTPBearer: BearerAuthSetting
+AuthSettings = TypedDict(
+    "AuthSettings",
+    {
+        "CustomHTTPBearer": BearerAuthSetting,
+    },
+    total=False,
+)
 
 
 class HostSettingVariable(TypedDict):
     description: str
     default_value: str
-    enum_values: list[str]
+    enum_values: List[str]
 
 
 class HostSetting(TypedDict):
     url: str
     description: str
-    variables: NotRequired[dict[str, HostSettingVariable]]
+    variables: NotRequired[Dict[str, HostSettingVariable]]
 
 
 class Configuration:
@@ -165,30 +167,30 @@ class Configuration:
     :Example:
     """
 
-    _default: ClassVar[Self | None] = None
+    _default: ClassVar[Optional[Self]] = None
 
     def __init__(
         self,
-        host: str | None=None,
-        api_key: dict[str, str] | None=None,
-        api_key_prefix: dict[str, str] | None=None,
-        username: str | None=None,
-        password: str | None=None,
-        access_token: str | None=None,
-        server_index: int | None=None,
-        server_variables: ServerVariablesT | None=None,
-        server_operation_index: dict[int, int] | None=None,
-        server_operation_variables: dict[int, ServerVariablesT] | None=None,
+        host: Optional[str]=None,
+        api_key: Optional[Dict[str, str]]=None,
+        api_key_prefix: Optional[Dict[str, str]]=None,
+        username: Optional[str]=None,
+        password: Optional[str]=None,
+        access_token: Optional[str]=None,
+        server_index: Optional[int]=None,
+        server_variables: Optional[ServerVariablesT]=None,
+        server_operation_index: Optional[Dict[int, int]]=None,
+        server_operation_variables: Optional[Dict[int, ServerVariablesT]]=None,
         ignore_operation_servers: bool=False,
-        ssl_ca_cert: str | None=None,
-        retries: int | None = None,
-        ca_cert_data: str | bytes | None = None,
+        ssl_ca_cert: Optional[str]=None,
+        retries: Optional[int] = None,
+        ca_cert_data: Optional[Union[str, bytes]] = None,
         *,
-        debug: bool | None = None,
+        debug: Optional[bool] = None,
     ) -> None:
         """Constructor
         """
-        self._base_path = "http://localhost" if host is None else host
+        self._base_path = "http://localhost:8000" if host is None else host
         """Default Base url
         """
         self.server_index = 0 if server_index is None and host is None else server_index
@@ -233,13 +235,13 @@ class Configuration:
         """
         self.logger["package_logger"] = logging.getLogger("chatter_sdk")
         self.logger["urllib3_logger"] = logging.getLogger("urllib3")
-        self.logger_format = "%(asctime)s %(levelname)s %(message)s"
+        self.logger_format = '%(asctime)s %(levelname)s %(message)s'
         """Log format
         """
         self.logger_stream_handler = None
         """Log stream handler
         """
-        self.logger_file_handler: FileHandler | None = None
+        self.logger_file_handler: Optional[FileHandler] = None
         """Log file handler
         """
         self.logger_file = None
@@ -283,13 +285,13 @@ class Configuration:
            Default values is 100, None means no-limit.
         """
 
-        self.proxy: str | None = None
+        self.proxy: Optional[str] = None
         """Proxy URL
         """
         self.proxy_headers = None
         """Proxy headers
         """
-        self.safe_chars_for_path_param = ""
+        self.safe_chars_for_path_param = ''
         """Safe chars for path_param
         """
         self.retries = retries
@@ -310,12 +312,12 @@ class Configuration:
         """date format
         """
 
-    def __deepcopy__(self, memo:  dict[int, Any]) -> Self:
+    def __deepcopy__(self, memo:  Dict[int, Any]) -> Self:
         cls = self.__class__
         result = cls.__new__(cls)
         memo[id(self)] = result
         for k, v in self.__dict__.items():
-            if k not in ("logger", "logger_file_handler"):
+            if k not in ('logger', 'logger_file_handler'):
                 setattr(result, k, copy.deepcopy(v, memo))
         # shallow copy of loggers
         result.logger = copy.copy(self.logger)
@@ -328,7 +330,7 @@ class Configuration:
         object.__setattr__(self, name, value)
 
     @classmethod
-    def set_default(cls, default: Self | None) -> None:
+    def set_default(cls, default: Optional[Self]) -> None:
         """Set default instance of configuration.
 
         It stores default configuration, which can be
@@ -363,7 +365,7 @@ class Configuration:
         return cls._default
 
     @property
-    def logger_file(self) -> str | None:
+    def logger_file(self) -> Optional[str]:
         """The logger file.
 
         If the logger_file is None, then add stream handler and remove file
@@ -375,7 +377,7 @@ class Configuration:
         return self.__logger_file
 
     @logger_file.setter
-    def logger_file(self, value: str | None) -> None:
+    def logger_file(self, value: Optional[str]) -> None:
         """The logger file.
 
         If the logger_file is None, then add stream handler and remove file
@@ -447,7 +449,7 @@ class Configuration:
         self.__logger_format = value
         self.logger_formatter = logging.Formatter(self.__logger_format)
 
-    def get_api_key_with_prefix(self, identifier: str, alias: str | None=None) -> str | None:
+    def get_api_key_with_prefix(self, identifier: str, alias: Optional[str]=None) -> Optional[str]:
         """Gets API key (with prefix if set).
 
         :param identifier: The identifier of apiKey.
@@ -466,7 +468,7 @@ class Configuration:
 
         return None
 
-    def get_basic_auth_token(self) -> str | None:
+    def get_basic_auth_token(self) -> Optional[str]:
         """Gets HTTP basic authentication header (string).
 
         :return: The token for basic HTTP authentication.
@@ -478,8 +480,8 @@ class Configuration:
         if self.password is not None:
             password = self.password
         return urllib3.util.make_headers(
-            basic_auth=username + ":" + password
-        ).get("authorization")
+            basic_auth=username + ':' + password
+        ).get('authorization')
 
     def auth_settings(self)-> AuthSettings:
         """Gets Auth Settings dict for api client.
@@ -488,11 +490,11 @@ class Configuration:
         """
         auth: AuthSettings = {}
         if self.access_token is not None:
-            auth["CustomHTTPBearer"] = {
-                "type": "bearer",
-                "in": "header",
-                "key": "Authorization",
-                "value": "Bearer " + self.access_token
+            auth['CustomHTTPBearer'] = {
+                'type': 'bearer',
+                'in': 'header',
+                'key': 'Authorization',
+                'value': 'Bearer ' + self.access_token
             }
         return auth
 
@@ -502,28 +504,29 @@ class Configuration:
         :return: The report for debugging.
         """
         return "Python SDK Debug Report:\n"\
-               f"OS: {sys.platform}\n"\
-               f"Python Version: {sys.version}\n"\
+               "OS: {env}\n"\
+               "Python Version: {pyversion}\n"\
                "Version of the API: 0.1.0\n"\
-               "SDK Package Version: 0.1.0"
+               "SDK Package Version: 0.1.0".\
+               format(env=sys.platform, pyversion=sys.version)
 
-    def get_host_settings(self) -> list[HostSetting]:
+    def get_host_settings(self) -> List[HostSetting]:
         """Gets an array of host settings
 
         :return: An array of host settings
         """
         return [
             {
-                "url": "",
-                "description": "No description provided",
+                'url': "http://localhost:8000",
+                'description': "Main server",
             }
         ]
 
     def get_host_from_settings(
         self,
-        index: int | None,
-        variables: ServerVariablesT | None=None,
-        servers: list[HostSetting] | None=None,
+        index: Optional[int],
+        variables: Optional[ServerVariablesT]=None,
+        servers: Optional[List[HostSetting]]=None,
     ) -> str:
         """Gets host URL based on the index and variables
         :param index: array index of the host settings
@@ -541,23 +544,23 @@ class Configuration:
             server = servers[index]
         except IndexError:
             raise ValueError(
-                f"Invalid index {index} when selecting the host settings. "
-                f"Must be less than {len(servers)}")
+                "Invalid index {0} when selecting the host settings. "
+                "Must be less than {1}".format(index, len(servers)))
 
-        url = server["url"]
+        url = server['url']
 
         # go through variables and replace placeholders
-        for variable_name, variable in server.get("variables", {}).items():
+        for variable_name, variable in server.get('variables', {}).items():
             used_value = variables.get(
-                variable_name, variable["default_value"])
+                variable_name, variable['default_value'])
 
-            if "enum_values" in variable \
-                    and used_value not in variable["enum_values"]:
+            if 'enum_values' in variable \
+                    and used_value not in variable['enum_values']:
                 raise ValueError(
                     "The variable `{0}` in the host URL has invalid value "
                     "{1}. Must be {2}.".format(
                         variable_name, variables[variable_name],
-                        variable["enum_values"]))
+                        variable['enum_values']))
 
             url = url.replace("{" + variable_name + "}", used_value)
 

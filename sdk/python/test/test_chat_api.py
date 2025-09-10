@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -110,6 +111,13 @@ class TestChatApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_streaming_chat_api_v1_chat_streaming_post(self) -> None:
+        """Test case for streaming_chat_api_v1_chat_streaming_post
+
+        Streaming Chat
+        """
+        pass
+
     async def test_update_conversation_api_v1_chat_conversations_conversation_id_put(self) -> None:
         """Test case for update_conversation_api_v1_chat_conversations_conversation_id_put
 
@@ -118,5 +126,5 @@ class TestChatApi(unittest.IsolatedAsyncioTestCase):
         pass
 
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

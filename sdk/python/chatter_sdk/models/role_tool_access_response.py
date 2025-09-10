@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,36 +14,35 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
 from chatter_sdk.models.user_role import UserRole
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class RoleToolAccessResponse(BaseModel):
     """
     Schema for role-based tool access response.
     """ # noqa: E501
     role: UserRole
-    tool_pattern: StrictStr | None = None
-    server_pattern: StrictStr | None = None
+    tool_pattern: Optional[StrictStr] = None
+    server_pattern: Optional[StrictStr] = None
     access_level: ToolAccessLevel
-    default_rate_limit_per_hour: Annotated[int, Field(strict=True, ge=0)] | None = None
-    default_rate_limit_per_day: Annotated[int, Field(strict=True, ge=0)] | None = None
-    allowed_hours: list[StrictInt] | None = None
-    allowed_days: list[StrictInt] | None = None
+    default_rate_limit_per_hour: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    default_rate_limit_per_day: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    allowed_hours: Optional[List[StrictInt]] = None
+    allowed_days: Optional[List[StrictInt]] = None
     id: StrictStr = Field(description="Access rule ID")
     created_by: StrictStr = Field(description="Creator user ID")
     created_at: datetime = Field(description="Creation timestamp")
-    __properties: ClassVar[list[str]] = ["role", "tool_pattern", "server_pattern", "access_level", "default_rate_limit_per_hour", "default_rate_limit_per_day", "allowed_hours", "allowed_days", "id", "created_by", "created_at"]
+    __properties: ClassVar[List[str]] = ["role", "tool_pattern", "server_pattern", "access_level", "default_rate_limit_per_hour", "default_rate_limit_per_day", "allowed_hours", "allowed_days", "id", "created_by", "created_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -61,11 +61,11 @@ class RoleToolAccessResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of RoleToolAccessResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -75,7 +75,7 @@ class RoleToolAccessResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -86,37 +86,37 @@ class RoleToolAccessResponse(BaseModel):
         # set to None if tool_pattern (nullable) is None
         # and model_fields_set contains the field
         if self.tool_pattern is None and "tool_pattern" in self.model_fields_set:
-            _dict["tool_pattern"] = None
+            _dict['tool_pattern'] = None
 
         # set to None if server_pattern (nullable) is None
         # and model_fields_set contains the field
         if self.server_pattern is None and "server_pattern" in self.model_fields_set:
-            _dict["server_pattern"] = None
+            _dict['server_pattern'] = None
 
         # set to None if default_rate_limit_per_hour (nullable) is None
         # and model_fields_set contains the field
         if self.default_rate_limit_per_hour is None and "default_rate_limit_per_hour" in self.model_fields_set:
-            _dict["default_rate_limit_per_hour"] = None
+            _dict['default_rate_limit_per_hour'] = None
 
         # set to None if default_rate_limit_per_day (nullable) is None
         # and model_fields_set contains the field
         if self.default_rate_limit_per_day is None and "default_rate_limit_per_day" in self.model_fields_set:
-            _dict["default_rate_limit_per_day"] = None
+            _dict['default_rate_limit_per_day'] = None
 
         # set to None if allowed_hours (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_hours is None and "allowed_hours" in self.model_fields_set:
-            _dict["allowed_hours"] = None
+            _dict['allowed_hours'] = None
 
         # set to None if allowed_days (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_days is None and "allowed_days" in self.model_fields_set:
-            _dict["allowed_days"] = None
+            _dict['allowed_days'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of RoleToolAccessResponse from a dict"""
         if obj is None:
             return None

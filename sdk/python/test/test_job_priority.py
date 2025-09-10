@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,7 +15,7 @@
 
 import unittest
 
-
+from chatter_sdk.models.job_priority import JobPriority
 
 class TestJobPriority(unittest.TestCase):
     """JobPriority unit test stubs"""
@@ -29,5 +30,5 @@ class TestJobPriority(unittest.TestCase):
         """Test JobPriority"""
         # inst = JobPriority()
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

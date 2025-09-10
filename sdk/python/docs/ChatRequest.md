@@ -9,7 +9,7 @@ Name | Type | Description | Notes
 **message** | **str** | User message | 
 **conversation_id** | **str** |  | [optional] 
 **profile_id** | **str** |  | [optional] 
-**stream** | **bool** | Enable streaming response | [optional] [default to False]
+**stream** | **bool** | [DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design. | [optional] [default to False]
 **workflow** | **str** | Workflow type: plain, rag, tools, or full (rag + tools) | [optional] [default to 'plain']
 **provider** | **str** |  | [optional] 
 **temperature** | **float** |  | [optional] 

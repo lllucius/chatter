@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,38 +14,37 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
 from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ToolPermissionResponse(BaseModel):
     """
     Schema for tool permission response.
     """ # noqa: E501
     user_id: StrictStr = Field(description="User ID")
-    tool_id: StrictStr | None = None
-    server_id: StrictStr | None = None
+    tool_id: Optional[StrictStr] = None
+    server_id: Optional[StrictStr] = None
     access_level: ToolAccessLevel
-    rate_limit_per_hour: Annotated[int, Field(strict=True, ge=0)] | None = None
-    rate_limit_per_day: Annotated[int, Field(strict=True, ge=0)] | None = None
-    allowed_hours: list[StrictInt] | None = None
-    allowed_days: list[StrictInt] | None = None
-    expires_at: datetime | None = None
+    rate_limit_per_hour: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    rate_limit_per_day: Optional[Annotated[int, Field(strict=True, ge=0)]] = None
+    allowed_hours: Optional[List[StrictInt]] = None
+    allowed_days: Optional[List[StrictInt]] = None
+    expires_at: Optional[datetime] = None
     id: StrictStr = Field(description="Permission ID")
     granted_by: StrictStr = Field(description="Granter user ID")
     granted_at: datetime = Field(description="Grant timestamp")
     usage_count: StrictInt = Field(description="Usage count")
-    last_used: datetime | None = None
-    __properties: ClassVar[list[str]] = ["user_id", "tool_id", "server_id", "access_level", "rate_limit_per_hour", "rate_limit_per_day", "allowed_hours", "allowed_days", "expires_at", "id", "granted_by", "granted_at", "usage_count", "last_used"]
+    last_used: Optional[datetime] = None
+    __properties: ClassVar[List[str]] = ["user_id", "tool_id", "server_id", "access_level", "rate_limit_per_hour", "rate_limit_per_day", "allowed_hours", "allowed_days", "expires_at", "id", "granted_by", "granted_at", "usage_count", "last_used"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -63,11 +63,11 @@ class ToolPermissionResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ToolPermissionResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -77,7 +77,7 @@ class ToolPermissionResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -88,47 +88,47 @@ class ToolPermissionResponse(BaseModel):
         # set to None if tool_id (nullable) is None
         # and model_fields_set contains the field
         if self.tool_id is None and "tool_id" in self.model_fields_set:
-            _dict["tool_id"] = None
+            _dict['tool_id'] = None
 
         # set to None if server_id (nullable) is None
         # and model_fields_set contains the field
         if self.server_id is None and "server_id" in self.model_fields_set:
-            _dict["server_id"] = None
+            _dict['server_id'] = None
 
         # set to None if rate_limit_per_hour (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_per_hour is None and "rate_limit_per_hour" in self.model_fields_set:
-            _dict["rate_limit_per_hour"] = None
+            _dict['rate_limit_per_hour'] = None
 
         # set to None if rate_limit_per_day (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_per_day is None and "rate_limit_per_day" in self.model_fields_set:
-            _dict["rate_limit_per_day"] = None
+            _dict['rate_limit_per_day'] = None
 
         # set to None if allowed_hours (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_hours is None and "allowed_hours" in self.model_fields_set:
-            _dict["allowed_hours"] = None
+            _dict['allowed_hours'] = None
 
         # set to None if allowed_days (nullable) is None
         # and model_fields_set contains the field
         if self.allowed_days is None and "allowed_days" in self.model_fields_set:
-            _dict["allowed_days"] = None
+            _dict['allowed_days'] = None
 
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
-            _dict["expires_at"] = None
+            _dict['expires_at'] = None
 
         # set to None if last_used (nullable) is None
         # and model_fields_set contains the field
         if self.last_used is None and "last_used" in self.model_fields_set:
-            _dict["last_used"] = None
+            _dict['last_used'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ToolPermissionResponse from a dict"""
         if obj is None:
             return None

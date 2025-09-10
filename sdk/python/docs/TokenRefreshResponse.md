@@ -7,7 +7,7 @@ Schema for token refresh response.
 Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **access_token** | **str** | New access token | 
-**refresh_token** | **str** | New refresh token | 
+**refresh_token** | **str** |  | [optional] 
 **token_type** | **str** | Token type | [optional] [default to 'bearer']
 **expires_in** | **int** | Token expiration time in seconds | 
 

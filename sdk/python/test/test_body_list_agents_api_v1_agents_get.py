@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,10 +15,7 @@
 
 import unittest
 
-from chatter_sdk.models.body_list_agents_api_v1_agents_get import (
-    BodyListAgentsApiV1AgentsGet,
-)
-
+from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 
 class TestBodyListAgentsApiV1AgentsGet(unittest.TestCase):
     """BodyListAgentsApiV1AgentsGet unit test stubs"""
@@ -58,5 +56,5 @@ class TestBodyListAgentsApiV1AgentsGet(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

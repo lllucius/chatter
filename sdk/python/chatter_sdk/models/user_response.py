@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,23 +14,16 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictInt,
-    StrictStr,
-)
-from typing import Annotated, Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class UserResponse(BaseModel):
     """
@@ -37,24 +31,24 @@ class UserResponse(BaseModel):
     """ # noqa: E501
     email: StrictStr = Field(description="User email address")
     username: Annotated[str, Field(min_length=3, strict=True, max_length=50)] = Field(description="Username")
-    full_name: Annotated[str, Field(strict=True, max_length=255)] | None = None
-    bio: Annotated[str, Field(strict=True, max_length=1000)] | None = None
-    avatar_url: Annotated[str, Field(strict=True, max_length=500)] | None = None
-    phone_number: Annotated[str, Field(strict=True, max_length=20)] | None = None
+    full_name: Optional[Annotated[str, Field(strict=True, max_length=255)]] = None
+    bio: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
+    avatar_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
+    phone_number: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
     id: StrictStr = Field(description="User ID")
     is_active: StrictBool = Field(description="Is user active")
     is_verified: StrictBool = Field(description="Is user email verified")
     is_superuser: StrictBool = Field(description="Is user a superuser")
-    default_llm_provider: StrictStr | None = None
-    default_profile_id: StrictStr | None = None
-    daily_message_limit: StrictInt | None = None
-    monthly_message_limit: StrictInt | None = None
-    max_file_size_mb: StrictInt | None = None
-    api_key_name: StrictStr | None = None
+    default_llm_provider: Optional[StrictStr] = None
+    default_profile_id: Optional[StrictStr] = None
+    daily_message_limit: Optional[StrictInt] = None
+    monthly_message_limit: Optional[StrictInt] = None
+    max_file_size_mb: Optional[StrictInt] = None
+    api_key_name: Optional[StrictStr] = None
     created_at: datetime = Field(description="Account creation date")
     updated_at: datetime = Field(description="Last update date")
-    last_login_at: datetime | None = None
-    __properties: ClassVar[list[str]] = ["email", "username", "full_name", "bio", "avatar_url", "phone_number", "id", "is_active", "is_verified", "is_superuser", "default_llm_provider", "default_profile_id", "daily_message_limit", "monthly_message_limit", "max_file_size_mb", "api_key_name", "created_at", "updated_at", "last_login_at"]
+    last_login_at: Optional[datetime] = None
+    __properties: ClassVar[List[str]] = ["email", "username", "full_name", "bio", "avatar_url", "phone_number", "id", "is_active", "is_verified", "is_superuser", "default_llm_provider", "default_profile_id", "daily_message_limit", "monthly_message_limit", "max_file_size_mb", "api_key_name", "created_at", "updated_at", "last_login_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -73,11 +67,11 @@ class UserResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of UserResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -87,7 +81,7 @@ class UserResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -98,62 +92,62 @@ class UserResponse(BaseModel):
         # set to None if full_name (nullable) is None
         # and model_fields_set contains the field
         if self.full_name is None and "full_name" in self.model_fields_set:
-            _dict["full_name"] = None
+            _dict['full_name'] = None
 
         # set to None if bio (nullable) is None
         # and model_fields_set contains the field
         if self.bio is None and "bio" in self.model_fields_set:
-            _dict["bio"] = None
+            _dict['bio'] = None
 
         # set to None if avatar_url (nullable) is None
         # and model_fields_set contains the field
         if self.avatar_url is None and "avatar_url" in self.model_fields_set:
-            _dict["avatar_url"] = None
+            _dict['avatar_url'] = None
 
         # set to None if phone_number (nullable) is None
         # and model_fields_set contains the field
         if self.phone_number is None and "phone_number" in self.model_fields_set:
-            _dict["phone_number"] = None
+            _dict['phone_number'] = None
 
         # set to None if default_llm_provider (nullable) is None
         # and model_fields_set contains the field
         if self.default_llm_provider is None and "default_llm_provider" in self.model_fields_set:
-            _dict["default_llm_provider"] = None
+            _dict['default_llm_provider'] = None
 
         # set to None if default_profile_id (nullable) is None
         # and model_fields_set contains the field
         if self.default_profile_id is None and "default_profile_id" in self.model_fields_set:
-            _dict["default_profile_id"] = None
+            _dict['default_profile_id'] = None
 
         # set to None if daily_message_limit (nullable) is None
         # and model_fields_set contains the field
         if self.daily_message_limit is None and "daily_message_limit" in self.model_fields_set:
-            _dict["daily_message_limit"] = None
+            _dict['daily_message_limit'] = None
 
         # set to None if monthly_message_limit (nullable) is None
         # and model_fields_set contains the field
         if self.monthly_message_limit is None and "monthly_message_limit" in self.model_fields_set:
-            _dict["monthly_message_limit"] = None
+            _dict['monthly_message_limit'] = None
 
         # set to None if max_file_size_mb (nullable) is None
         # and model_fields_set contains the field
         if self.max_file_size_mb is None and "max_file_size_mb" in self.model_fields_set:
-            _dict["max_file_size_mb"] = None
+            _dict['max_file_size_mb'] = None
 
         # set to None if api_key_name (nullable) is None
         # and model_fields_set contains the field
         if self.api_key_name is None and "api_key_name" in self.model_fields_set:
-            _dict["api_key_name"] = None
+            _dict['api_key_name'] = None
 
         # set to None if last_login_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_login_at is None and "last_login_at" in self.model_fields_set:
-            _dict["last_login_at"] = None
+            _dict['last_login_at'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of UserResponse from a dict"""
         if obj is None:
             return None

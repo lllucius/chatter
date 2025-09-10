@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,25 +14,25 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional
+from typing_extensions import Annotated
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentProcessingRequest(BaseModel):
     """
     Schema for document processing request.
     """ # noqa: E501
-    reprocess: StrictBool | None = Field(default=False, description="Force reprocessing")
-    chunk_size: Annotated[int, Field(le=10000, strict=True, ge=100)] | None = None
-    chunk_overlap: Annotated[int, Field(le=2000, strict=True, ge=0)] | None = None
-    generate_embeddings: StrictBool | None = Field(default=True, description="Generate embeddings for chunks")
-    __properties: ClassVar[list[str]] = ["reprocess", "chunk_size", "chunk_overlap", "generate_embeddings"]
+    reprocess: Optional[StrictBool] = Field(default=False, description="Force reprocessing")
+    chunk_size: Optional[Annotated[int, Field(le=10000, strict=True, ge=100)]] = None
+    chunk_overlap: Optional[Annotated[int, Field(le=2000, strict=True, ge=0)]] = None
+    generate_embeddings: Optional[StrictBool] = Field(default=True, description="Generate embeddings for chunks")
+    __properties: ClassVar[List[str]] = ["reprocess", "chunk_size", "chunk_overlap", "generate_embeddings"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,11 +51,11 @@ class DocumentProcessingRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentProcessingRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -64,7 +65,7 @@ class DocumentProcessingRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -75,17 +76,17 @@ class DocumentProcessingRequest(BaseModel):
         # set to None if chunk_size (nullable) is None
         # and model_fields_set contains the field
         if self.chunk_size is None and "chunk_size" in self.model_fields_set:
-            _dict["chunk_size"] = None
+            _dict['chunk_size'] = None
 
         # set to None if chunk_overlap (nullable) is None
         # and model_fields_set contains the field
         if self.chunk_overlap is None and "chunk_overlap" in self.model_fields_set:
-            _dict["chunk_overlap"] = None
+            _dict['chunk_overlap'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentProcessingRequest from a dict"""
         if obj is None:
             return None

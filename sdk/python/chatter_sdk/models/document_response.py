@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,36 +14,27 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictInt,
-    StrictStr,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.document_status import DocumentStatus
 from chatter_sdk.models.document_type import DocumentType
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class DocumentResponse(BaseModel):
     """
     Schema for document response.
     """ # noqa: E501
-    title: StrictStr | None = None
-    description: StrictStr | None = None
-    tags: list[StrictStr] | None = None
-    extra_metadata: dict[str, Any] | None = None
-    is_public: StrictBool | None = Field(default=False, description="Whether document is public")
+    title: Optional[StrictStr] = None
+    description: Optional[StrictStr] = None
+    tags: Optional[List[StrictStr]] = None
+    extra_metadata: Optional[Dict[str, Any]] = None
+    is_public: Optional[StrictBool] = Field(default=False, description="Whether document is public")
     id: StrictStr = Field(description="Document ID")
     owner_id: StrictStr = Field(description="Owner user ID")
     filename: StrictStr = Field(description="Document filename")
@@ -52,20 +44,20 @@ class DocumentResponse(BaseModel):
     mime_type: StrictStr = Field(description="MIME type")
     document_type: DocumentType
     status: DocumentStatus
-    processing_started_at: datetime | None = None
-    processing_completed_at: datetime | None = None
-    processing_error: StrictStr | None = None
+    processing_started_at: Optional[datetime] = None
+    processing_completed_at: Optional[datetime] = None
+    processing_error: Optional[StrictStr] = None
     chunk_size: StrictInt = Field(description="Chunk size")
     chunk_overlap: StrictInt = Field(description="Chunk overlap")
     chunk_count: StrictInt = Field(description="Number of chunks")
     version: StrictInt = Field(description="Document version")
-    parent_document_id: StrictStr | None = None
+    parent_document_id: Optional[StrictStr] = None
     view_count: StrictInt = Field(description="View count")
     search_count: StrictInt = Field(description="Search count")
-    last_accessed_at: datetime | None = None
+    last_accessed_at: Optional[datetime] = None
     created_at: datetime = Field(description="Creation time")
     updated_at: datetime = Field(description="Last update time")
-    __properties: ClassVar[list[str]] = ["title", "description", "tags", "extra_metadata", "is_public", "id", "owner_id", "filename", "original_filename", "file_size", "file_hash", "mime_type", "document_type", "status", "processing_started_at", "processing_completed_at", "processing_error", "chunk_size", "chunk_overlap", "chunk_count", "version", "parent_document_id", "view_count", "search_count", "last_accessed_at", "created_at", "updated_at"]
+    __properties: ClassVar[List[str]] = ["title", "description", "tags", "extra_metadata", "is_public", "id", "owner_id", "filename", "original_filename", "file_size", "file_hash", "mime_type", "document_type", "status", "processing_started_at", "processing_completed_at", "processing_error", "chunk_size", "chunk_overlap", "chunk_count", "version", "parent_document_id", "view_count", "search_count", "last_accessed_at", "created_at", "updated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -84,11 +76,11 @@ class DocumentResponse(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of DocumentResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -98,7 +90,7 @@ class DocumentResponse(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -109,52 +101,52 @@ class DocumentResponse(BaseModel):
         # set to None if title (nullable) is None
         # and model_fields_set contains the field
         if self.title is None and "title" in self.model_fields_set:
-            _dict["title"] = None
+            _dict['title'] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict["tags"] = None
+            _dict['tags'] = None
 
         # set to None if extra_metadata (nullable) is None
         # and model_fields_set contains the field
         if self.extra_metadata is None and "extra_metadata" in self.model_fields_set:
-            _dict["extra_metadata"] = None
+            _dict['extra_metadata'] = None
 
         # set to None if processing_started_at (nullable) is None
         # and model_fields_set contains the field
         if self.processing_started_at is None and "processing_started_at" in self.model_fields_set:
-            _dict["processing_started_at"] = None
+            _dict['processing_started_at'] = None
 
         # set to None if processing_completed_at (nullable) is None
         # and model_fields_set contains the field
         if self.processing_completed_at is None and "processing_completed_at" in self.model_fields_set:
-            _dict["processing_completed_at"] = None
+            _dict['processing_completed_at'] = None
 
         # set to None if processing_error (nullable) is None
         # and model_fields_set contains the field
         if self.processing_error is None and "processing_error" in self.model_fields_set:
-            _dict["processing_error"] = None
+            _dict['processing_error'] = None
 
         # set to None if parent_document_id (nullable) is None
         # and model_fields_set contains the field
         if self.parent_document_id is None and "parent_document_id" in self.model_fields_set:
-            _dict["parent_document_id"] = None
+            _dict['parent_document_id'] = None
 
         # set to None if last_accessed_at (nullable) is None
         # and model_fields_set contains the field
         if self.last_accessed_at is None and "last_accessed_at" in self.model_fields_set:
-            _dict["last_accessed_at"] = None
+            _dict['last_accessed_at'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of DocumentResponse from a dict"""
         if obj is None:
             return None

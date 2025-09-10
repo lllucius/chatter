@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -15,7 +16,6 @@
 import unittest
 
 from chatter_sdk.models.prompt_clone_request import PromptCloneRequest
-
 
 class TestPromptCloneRequest(unittest.TestCase):
     """PromptCloneRequest unit test stubs"""
@@ -51,5 +51,5 @@ class TestPromptCloneRequest(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -14,10 +15,7 @@
 
 import unittest
 
-from chatter_sdk.models.token_refresh_response import (
-    TokenRefreshResponse,
-)
-
+from chatter_sdk.models.token_refresh_response import TokenRefreshResponse
 
 class TestTokenRefreshResponse(unittest.TestCase):
     """TokenRefreshResponse unit test stubs"""
@@ -46,7 +44,6 @@ class TestTokenRefreshResponse(unittest.TestCase):
         else:
             return TokenRefreshResponse(
                 access_token = '',
-                refresh_token = '',
                 expires_in = 56,
         )
         """
@@ -56,5 +53,5 @@ class TestTokenRefreshResponse(unittest.TestCase):
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 
-if __name__ == "__main__":
+if __name__ == '__main__':
     unittest.main()

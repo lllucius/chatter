@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,25 +14,16 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
+import json
+
 from datetime import datetime
-from typing import Any, ClassVar
-
-from pydantic import (
-    BaseModel,
-    ConfigDict,
-    Field,
-    StrictBool,
-    StrictInt,
-    StrictStr,
-)
-from typing import Self
-
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictInt, StrictStr
+from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class ToolAccessResult(BaseModel):
     """
@@ -39,11 +31,11 @@ class ToolAccessResult(BaseModel):
     """ # noqa: E501
     allowed: StrictBool = Field(description="Whether access is allowed")
     access_level: ToolAccessLevel
-    rate_limit_remaining_hour: StrictInt | None = None
-    rate_limit_remaining_day: StrictInt | None = None
-    restriction_reason: StrictStr | None = None
-    expires_at: datetime | None = None
-    __properties: ClassVar[list[str]] = ["allowed", "access_level", "rate_limit_remaining_hour", "rate_limit_remaining_day", "restriction_reason", "expires_at"]
+    rate_limit_remaining_hour: Optional[StrictInt] = None
+    rate_limit_remaining_day: Optional[StrictInt] = None
+    restriction_reason: Optional[StrictStr] = None
+    expires_at: Optional[datetime] = None
+    __properties: ClassVar[List[str]] = ["allowed", "access_level", "rate_limit_remaining_hour", "rate_limit_remaining_day", "restriction_reason", "expires_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -62,11 +54,11 @@ class ToolAccessResult(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of ToolAccessResult from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -76,7 +68,7 @@ class ToolAccessResult(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -87,27 +79,27 @@ class ToolAccessResult(BaseModel):
         # set to None if rate_limit_remaining_hour (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_remaining_hour is None and "rate_limit_remaining_hour" in self.model_fields_set:
-            _dict["rate_limit_remaining_hour"] = None
+            _dict['rate_limit_remaining_hour'] = None
 
         # set to None if rate_limit_remaining_day (nullable) is None
         # and model_fields_set contains the field
         if self.rate_limit_remaining_day is None and "rate_limit_remaining_day" in self.model_fields_set:
-            _dict["rate_limit_remaining_day"] = None
+            _dict['rate_limit_remaining_day'] = None
 
         # set to None if restriction_reason (nullable) is None
         # and model_fields_set contains the field
         if self.restriction_reason is None and "restriction_reason" in self.model_fields_set:
-            _dict["restriction_reason"] = None
+            _dict['restriction_reason'] = None
 
         # set to None if expires_at (nullable) is None
         # and model_fields_set contains the field
         if self.expires_at is None and "expires_at" in self.model_fields_set:
-            _dict["expires_at"] = None
+            _dict['expires_at'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of ToolAccessResult from a dict"""
         if obj is None:
             return None

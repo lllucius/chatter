@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -11,61 +12,36 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-from typing import Any
+import warnings
+from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
+from typing import Any, Dict, List, Optional, Tuple, Union
+from typing_extensions import Annotated
 
-from pydantic import (
-    Field,
-    StrictBool,
-    StrictFloat,
-    StrictInt,
-    StrictStr,
-    validate_call,
-)
-from typing import Annotated
-
-from chatter_sdk.api_client import ApiClient, RequestSerialized
-from chatter_sdk.api_response import ApiResponse
+from pydantic import Field, StrictBool, StrictStr
+from typing import Any, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.bulk_operation_result import BulkOperationResult
-from chatter_sdk.models.bulk_tool_server_operation import (
-    BulkToolServerOperation,
-)
-from chatter_sdk.models.role_tool_access_create import (
-    RoleToolAccessCreate,
-)
-from chatter_sdk.models.role_tool_access_response import (
-    RoleToolAccessResponse,
-)
+from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperation
+from chatter_sdk.models.role_tool_access_create import RoleToolAccessCreate
+from chatter_sdk.models.role_tool_access_response import RoleToolAccessResponse
 from chatter_sdk.models.server_status import ServerStatus
 from chatter_sdk.models.server_tools_response import ServerToolsResponse
 from chatter_sdk.models.tool_access_result import ToolAccessResult
-from chatter_sdk.models.tool_operation_response import (
-    ToolOperationResponse,
-)
-from chatter_sdk.models.tool_permission_create import (
-    ToolPermissionCreate,
-)
-from chatter_sdk.models.tool_permission_response import (
-    ToolPermissionResponse,
-)
-from chatter_sdk.models.tool_permission_update import (
-    ToolPermissionUpdate,
-)
+from chatter_sdk.models.tool_operation_response import ToolOperationResponse
+from chatter_sdk.models.tool_permission_create import ToolPermissionCreate
+from chatter_sdk.models.tool_permission_response import ToolPermissionResponse
+from chatter_sdk.models.tool_permission_update import ToolPermissionUpdate
 from chatter_sdk.models.tool_server_create import ToolServerCreate
-from chatter_sdk.models.tool_server_delete_response import (
-    ToolServerDeleteResponse,
-)
-from chatter_sdk.models.tool_server_health_check import (
-    ToolServerHealthCheck,
-)
+from chatter_sdk.models.tool_server_delete_response import ToolServerDeleteResponse
+from chatter_sdk.models.tool_server_health_check import ToolServerHealthCheck
 from chatter_sdk.models.tool_server_metrics import ToolServerMetrics
-from chatter_sdk.models.tool_server_operation_response import (
-    ToolServerOperationResponse,
-)
+from chatter_sdk.models.tool_server_operation_response import ToolServerOperationResponse
 from chatter_sdk.models.tool_server_response import ToolServerResponse
 from chatter_sdk.models.tool_server_update import ToolServerUpdate
-from chatter_sdk.models.user_tool_access_check import (
-    UserToolAccessCheck,
-)
+from chatter_sdk.models.user_tool_access_check import UserToolAccessCheck
+
+from chatter_sdk.api_client import ApiClient, RequestSerialized
+from chatter_sdk.api_response import ApiResponse
 from chatter_sdk.rest import RESTResponseType
 
 
@@ -86,10 +62,17 @@ class ToolServersApi:
     async def bulk_server_operation_api_v1_toolservers_servers_bulk_post(
         self,
         bulk_tool_server_operation: BulkToolServerOperation,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> BulkOperationResult:
         """Bulk Server Operation
@@ -128,9 +111,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "BulkOperationResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "BulkOperationResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -147,10 +130,17 @@ class ToolServersApi:
     async def bulk_server_operation_api_v1_toolservers_servers_bulk_post_with_http_info(
         self,
         bulk_tool_server_operation: BulkToolServerOperation,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[BulkOperationResult]:
         """Bulk Server Operation
@@ -189,9 +179,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "BulkOperationResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "BulkOperationResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -208,10 +198,17 @@ class ToolServersApi:
     async def bulk_server_operation_api_v1_toolservers_servers_bulk_post_without_preload_content(
         self,
         bulk_tool_server_operation: BulkToolServerOperation,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Bulk Server Operation
@@ -250,9 +247,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "BulkOperationResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "BulkOperationResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -272,17 +269,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -294,35 +291,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/bulk",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/bulk',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -342,10 +339,17 @@ class ToolServersApi:
     async def check_server_health_api_v1_toolservers_servers_server_id_health_get(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerHealthCheck:
         """Check Server Health
@@ -384,9 +388,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerHealthCheck",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerHealthCheck",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -403,10 +407,17 @@ class ToolServersApi:
     async def check_server_health_api_v1_toolservers_servers_server_id_health_get_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerHealthCheck]:
         """Check Server Health
@@ -445,9 +456,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerHealthCheck",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerHealthCheck",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -464,10 +475,17 @@ class ToolServersApi:
     async def check_server_health_api_v1_toolservers_servers_server_id_health_get_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Check Server Health
@@ -506,9 +524,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerHealthCheck",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerHealthCheck",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -528,21 +546,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -550,22 +568,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/servers/{server_id}/health",
+            method='GET',
+            resource_path='/api/v1/toolservers/servers/{server_id}/health',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -585,10 +603,17 @@ class ToolServersApi:
     async def check_tool_access_api_v1_toolservers_access_check_post(
         self,
         user_tool_access_check: UserToolAccessCheck,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolAccessResult:
         """Check Tool Access
@@ -627,9 +652,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolAccessResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolAccessResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -646,10 +671,17 @@ class ToolServersApi:
     async def check_tool_access_api_v1_toolservers_access_check_post_with_http_info(
         self,
         user_tool_access_check: UserToolAccessCheck,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolAccessResult]:
         """Check Tool Access
@@ -688,9 +720,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolAccessResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolAccessResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -707,10 +739,17 @@ class ToolServersApi:
     async def check_tool_access_api_v1_toolservers_access_check_post_without_preload_content(
         self,
         user_tool_access_check: UserToolAccessCheck,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Check Tool Access
@@ -749,9 +788,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolAccessResult",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolAccessResult",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -771,17 +810,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -793,35 +832,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/access-check",
+            method='POST',
+            resource_path='/api/v1/toolservers/access-check',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -841,10 +880,17 @@ class ToolServersApi:
     async def create_role_access_rule_api_v1_toolservers_role_access_post(
         self,
         role_tool_access_create: RoleToolAccessCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RoleToolAccessResponse:
         """Create Role Access Rule
@@ -883,9 +929,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "RoleToolAccessResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "RoleToolAccessResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -902,10 +948,17 @@ class ToolServersApi:
     async def create_role_access_rule_api_v1_toolservers_role_access_post_with_http_info(
         self,
         role_tool_access_create: RoleToolAccessCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[RoleToolAccessResponse]:
         """Create Role Access Rule
@@ -944,9 +997,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "RoleToolAccessResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "RoleToolAccessResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -963,10 +1016,17 @@ class ToolServersApi:
     async def create_role_access_rule_api_v1_toolservers_role_access_post_without_preload_content(
         self,
         role_tool_access_create: RoleToolAccessCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Role Access Rule
@@ -1005,9 +1065,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "RoleToolAccessResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "RoleToolAccessResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1027,17 +1087,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1049,35 +1109,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/role-access",
+            method='POST',
+            resource_path='/api/v1/toolservers/role-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1097,10 +1157,17 @@ class ToolServersApi:
     async def create_tool_server_api_v1_toolservers_servers_post(
         self,
         tool_server_create: ToolServerCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerResponse:
         """Create Tool Server
@@ -1139,9 +1206,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1158,10 +1225,17 @@ class ToolServersApi:
     async def create_tool_server_api_v1_toolservers_servers_post_with_http_info(
         self,
         tool_server_create: ToolServerCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerResponse]:
         """Create Tool Server
@@ -1200,9 +1274,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1219,10 +1293,17 @@ class ToolServersApi:
     async def create_tool_server_api_v1_toolservers_servers_post_without_preload_content(
         self,
         tool_server_create: ToolServerCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Create Tool Server
@@ -1261,9 +1342,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "201": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '201': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1283,17 +1364,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -1305,35 +1386,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1353,10 +1434,17 @@ class ToolServersApi:
     async def delete_tool_server_api_v1_toolservers_servers_server_id_delete(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerDeleteResponse:
         """Delete Tool Server
@@ -1395,9 +1483,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1414,10 +1502,17 @@ class ToolServersApi:
     async def delete_tool_server_api_v1_toolservers_servers_server_id_delete_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerDeleteResponse]:
         """Delete Tool Server
@@ -1456,9 +1551,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1475,10 +1570,17 @@ class ToolServersApi:
     async def delete_tool_server_api_v1_toolservers_servers_server_id_delete_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Delete Tool Server
@@ -1517,9 +1619,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerDeleteResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerDeleteResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1539,21 +1641,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1561,22 +1663,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/api/v1/toolservers/servers/{server_id}",
+            method='DELETE',
+            resource_path='/api/v1/toolservers/servers/{server_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1596,10 +1698,17 @@ class ToolServersApi:
     async def disable_tool_api_v1_toolservers_tools_tool_id_disable_post(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolOperationResponse:
         """Disable Tool
@@ -1638,9 +1747,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1657,10 +1766,17 @@ class ToolServersApi:
     async def disable_tool_api_v1_toolservers_tools_tool_id_disable_post_with_http_info(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolOperationResponse]:
         """Disable Tool
@@ -1699,9 +1815,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1718,10 +1834,17 @@ class ToolServersApi:
     async def disable_tool_api_v1_toolservers_tools_tool_id_disable_post_without_preload_content(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Disable Tool
@@ -1760,9 +1883,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1782,21 +1905,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if tool_id is not None:
-            _path_params["tool_id"] = tool_id
+            _path_params['tool_id'] = tool_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -1804,22 +1927,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/tools/{tool_id}/disable",
+            method='POST',
+            resource_path='/api/v1/toolservers/tools/{tool_id}/disable',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1839,10 +1962,17 @@ class ToolServersApi:
     async def disable_tool_server_api_v1_toolservers_servers_server_id_disable_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerOperationResponse:
         """Disable Tool Server
@@ -1881,9 +2011,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1900,10 +2030,17 @@ class ToolServersApi:
     async def disable_tool_server_api_v1_toolservers_servers_server_id_disable_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerOperationResponse]:
         """Disable Tool Server
@@ -1942,9 +2079,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1961,10 +2098,17 @@ class ToolServersApi:
     async def disable_tool_server_api_v1_toolservers_servers_server_id_disable_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Disable Tool Server
@@ -2003,9 +2147,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2025,21 +2169,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2047,22 +2191,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/disable",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/disable',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2082,10 +2226,17 @@ class ToolServersApi:
     async def enable_tool_api_v1_toolservers_tools_tool_id_enable_post(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolOperationResponse:
         """Enable Tool
@@ -2124,9 +2275,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2143,10 +2294,17 @@ class ToolServersApi:
     async def enable_tool_api_v1_toolservers_tools_tool_id_enable_post_with_http_info(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolOperationResponse]:
         """Enable Tool
@@ -2185,9 +2343,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2204,10 +2362,17 @@ class ToolServersApi:
     async def enable_tool_api_v1_toolservers_tools_tool_id_enable_post_without_preload_content(
         self,
         tool_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Enable Tool
@@ -2246,9 +2411,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2268,21 +2433,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if tool_id is not None:
-            _path_params["tool_id"] = tool_id
+            _path_params['tool_id'] = tool_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2290,22 +2455,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/tools/{tool_id}/enable",
+            method='POST',
+            resource_path='/api/v1/toolservers/tools/{tool_id}/enable',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2325,10 +2490,17 @@ class ToolServersApi:
     async def enable_tool_server_api_v1_toolservers_servers_server_id_enable_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerOperationResponse:
         """Enable Tool Server
@@ -2367,9 +2539,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2386,10 +2558,17 @@ class ToolServersApi:
     async def enable_tool_server_api_v1_toolservers_servers_server_id_enable_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerOperationResponse]:
         """Enable Tool Server
@@ -2428,9 +2607,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2447,10 +2626,17 @@ class ToolServersApi:
     async def enable_tool_server_api_v1_toolservers_servers_server_id_enable_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Enable Tool Server
@@ -2489,9 +2675,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2511,21 +2697,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -2533,22 +2719,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/enable",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/enable',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2567,13 +2753,20 @@ class ToolServersApi:
     @validate_call
     async def get_role_access_rules_api_v1_toolservers_role_access_get(
         self,
-        role: StrictStr | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        role: Optional[StrictStr] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> list[RoleToolAccessResponse]:
+    ) -> List[RoleToolAccessResponse]:
         """Get Role Access Rules
 
         Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
@@ -2610,9 +2803,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[RoleToolAccessResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[RoleToolAccessResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2628,13 +2821,20 @@ class ToolServersApi:
     @validate_call
     async def get_role_access_rules_api_v1_toolservers_role_access_get_with_http_info(
         self,
-        role: StrictStr | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        role: Optional[StrictStr] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[list[RoleToolAccessResponse]]:
+    ) -> ApiResponse[List[RoleToolAccessResponse]]:
         """Get Role Access Rules
 
         Get role-based access rules.  Args:     role: Optional role filter     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of access rules
@@ -2671,9 +2871,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[RoleToolAccessResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[RoleToolAccessResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2689,11 +2889,18 @@ class ToolServersApi:
     @validate_call
     async def get_role_access_rules_api_v1_toolservers_role_access_get_without_preload_content(
         self,
-        role: StrictStr | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        role: Optional[StrictStr] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Role Access Rules
@@ -2732,9 +2939,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[RoleToolAccessResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[RoleToolAccessResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2754,46 +2961,46 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if role is not None:
-
-            _query_params.append(("role", role))
-
+            
+            _query_params.append(('role', role))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/role-access",
+            method='GET',
+            resource_path='/api/v1/toolservers/role-access',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2813,10 +3020,17 @@ class ToolServersApi:
     async def get_server_metrics_api_v1_toolservers_servers_server_id_metrics_get(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerMetrics:
         """Get Server Metrics
@@ -2855,9 +3069,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerMetrics",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerMetrics",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2874,10 +3088,17 @@ class ToolServersApi:
     async def get_server_metrics_api_v1_toolservers_servers_server_id_metrics_get_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerMetrics]:
         """Get Server Metrics
@@ -2916,9 +3137,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerMetrics",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerMetrics",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2935,10 +3156,17 @@ class ToolServersApi:
     async def get_server_metrics_api_v1_toolservers_servers_server_id_metrics_get_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Server Metrics
@@ -2977,9 +3205,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerMetrics",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerMetrics",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2999,21 +3227,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3021,22 +3249,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/servers/{server_id}/metrics",
+            method='GET',
+            resource_path='/api/v1/toolservers/servers/{server_id}/metrics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3056,12 +3284,19 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get(
         self,
         server_id: StrictStr,
-        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
-        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ServerToolsResponse:
         """Get Server Tools
@@ -3106,9 +3341,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ServerToolsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ServerToolsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3125,12 +3360,19 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_with_http_info(
         self,
         server_id: StrictStr,
-        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
-        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ServerToolsResponse]:
         """Get Server Tools
@@ -3175,9 +3417,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ServerToolsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ServerToolsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3194,12 +3436,19 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_without_preload_content(
         self,
         server_id: StrictStr,
-        limit: Annotated[int, Field(le=100, strict=True, ge=1)] | None = None,
-        offset: Annotated[int, Field(strict=True, ge=0)] | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Server Tools
@@ -3244,9 +3493,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ServerToolsResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ServerToolsResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3268,52 +3517,52 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         if limit is not None:
-
-            _query_params.append(("limit", limit))
-
+            
+            _query_params.append(('limit', limit))
+            
         if offset is not None:
-
-            _query_params.append(("offset", offset))
-
+            
+            _query_params.append(('offset', offset))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/servers/{server_id}/tools",
+            method='GET',
+            resource_path='/api/v1/toolservers/servers/{server_id}/tools',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3333,10 +3582,17 @@ class ToolServersApi:
     async def get_tool_server_api_v1_toolservers_servers_server_id_get(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerResponse:
         """Get Tool Server
@@ -3375,9 +3631,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3394,10 +3650,17 @@ class ToolServersApi:
     async def get_tool_server_api_v1_toolservers_servers_server_id_get_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerResponse]:
         """Get Tool Server
@@ -3436,9 +3699,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3455,10 +3718,17 @@ class ToolServersApi:
     async def get_tool_server_api_v1_toolservers_servers_server_id_get_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get Tool Server
@@ -3497,9 +3767,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3519,21 +3789,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3541,22 +3811,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/servers/{server_id}",
+            method='GET',
+            resource_path='/api/v1/toolservers/servers/{server_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3576,12 +3846,19 @@ class ToolServersApi:
     async def get_user_permissions_api_v1_toolservers_users_user_id_permissions_get(
         self,
         user_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> list[ToolPermissionResponse]:
+    ) -> List[ToolPermissionResponse]:
         """Get User Permissions
 
         Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
@@ -3618,9 +3895,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolPermissionResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolPermissionResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3637,12 +3914,19 @@ class ToolServersApi:
     async def get_user_permissions_api_v1_toolservers_users_user_id_permissions_get_with_http_info(
         self,
         user_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[list[ToolPermissionResponse]]:
+    ) -> ApiResponse[List[ToolPermissionResponse]]:
         """Get User Permissions
 
         Get all permissions for a user.  Args:     user_id: User ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     List of user permissions
@@ -3679,9 +3963,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolPermissionResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolPermissionResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3698,10 +3982,17 @@ class ToolServersApi:
     async def get_user_permissions_api_v1_toolservers_users_user_id_permissions_get_without_preload_content(
         self,
         user_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Get User Permissions
@@ -3740,9 +4031,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolPermissionResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolPermissionResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3762,21 +4053,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if user_id is not None:
-            _path_params["user_id"] = user_id
+            _path_params['user_id'] = user_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -3784,22 +4075,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/users/{user_id}/permissions",
+            method='GET',
+            resource_path='/api/v1/toolservers/users/{user_id}/permissions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3819,10 +4110,17 @@ class ToolServersApi:
     async def grant_tool_permission_api_v1_toolservers_permissions_post(
         self,
         tool_permission_create: ToolPermissionCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolPermissionResponse:
         """Grant Tool Permission
@@ -3861,9 +4159,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3880,10 +4178,17 @@ class ToolServersApi:
     async def grant_tool_permission_api_v1_toolservers_permissions_post_with_http_info(
         self,
         tool_permission_create: ToolPermissionCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolPermissionResponse]:
         """Grant Tool Permission
@@ -3922,9 +4227,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3941,10 +4246,17 @@ class ToolServersApi:
     async def grant_tool_permission_api_v1_toolservers_permissions_post_without_preload_content(
         self,
         tool_permission_create: ToolPermissionCreate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Grant Tool Permission
@@ -3983,9 +4295,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4005,17 +4317,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -4027,35 +4339,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/permissions",
+            method='POST',
+            resource_path='/api/v1/toolservers/permissions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4074,12 +4386,19 @@ class ToolServersApi:
     @validate_call
     async def list_all_tools_api_v1_toolservers_tools_all_get(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> list[dict[str, object]]:
+    ) -> List[Dict[str, object]]:
         """List All Tools
 
         List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
@@ -4113,8 +4432,8 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[Dict[str, object]]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Dict[str, object]]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4130,12 +4449,19 @@ class ToolServersApi:
     @validate_call
     async def list_all_tools_api_v1_toolservers_tools_all_get_with_http_info(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[list[dict[str, object]]]:
+    ) -> ApiResponse[List[Dict[str, object]]]:
         """List All Tools
 
         List all tools across all servers.  Args:     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     List of all available tools across all servers
@@ -4169,8 +4495,8 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[Dict[str, object]]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Dict[str, object]]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4186,10 +4512,17 @@ class ToolServersApi:
     @validate_call
     async def list_all_tools_api_v1_toolservers_tools_all_get_without_preload_content(
         self,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List All Tools
@@ -4225,8 +4558,8 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[Dict[str, object]]",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[Dict[str, object]]",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4245,17 +4578,17 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
@@ -4265,22 +4598,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/tools/all",
+            method='GET',
+            resource_path='/api/v1/toolservers/tools/all',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4299,14 +4632,21 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get(
         self,
-        status: ServerStatus | None = None,
-        include_builtin: StrictBool | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[ServerStatus] = None,
+        include_builtin: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> list[ToolServerResponse]:
+    ) -> List[ToolServerResponse]:
         """List Tool Servers
 
         List tool servers with optional filtering.  Args:     request: List request with filter parameters     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
@@ -4346,9 +4686,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolServerResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolServerResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4364,14 +4704,21 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get_with_http_info(
         self,
-        status: ServerStatus | None = None,
-        include_builtin: StrictBool | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[ServerStatus] = None,
+        include_builtin: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[list[ToolServerResponse]]:
+    ) -> ApiResponse[List[ToolServerResponse]]:
         """List Tool Servers
 
         List tool servers with optional filtering.  Args:     request: List request with filter parameters     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
@@ -4411,9 +4758,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolServerResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolServerResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4429,12 +4776,19 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get_without_preload_content(
         self,
-        status: ServerStatus | None = None,
-        include_builtin: StrictBool | None = None,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        status: Optional[ServerStatus] = None,
+        include_builtin: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """List Tool Servers
@@ -4476,9 +4830,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "List[ToolServerResponse]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "List[ToolServerResponse]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4499,50 +4853,50 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         # process the query parameters
         if status is not None:
-
-            _query_params.append(("status", status.value))
-
+            
+            _query_params.append(('status', status.value))
+            
         if include_builtin is not None:
-
-            _query_params.append(("include_builtin", include_builtin))
-
+            
+            _query_params.append(('include_builtin', include_builtin))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="GET",
-            resource_path="/api/v1/toolservers/servers",
+            method='GET',
+            resource_path='/api/v1/toolservers/servers',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4562,12 +4916,19 @@ class ToolServersApi:
     async def refresh_server_tools_api_v1_toolservers_servers_server_id_refresh_tools_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         """Refresh Server Tools
 
         Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
@@ -4604,9 +4965,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4623,12 +4984,19 @@ class ToolServersApi:
     async def refresh_server_tools_api_v1_toolservers_servers_server_id_refresh_tools_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[dict[str, object]]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Refresh Server Tools
 
         Refresh tools for a remote server.  Args:     server_id: Server ID     current_user: Current authenticated user     service: Tool server service  Returns:     Refresh result
@@ -4665,9 +5033,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4684,10 +5052,17 @@ class ToolServersApi:
     async def refresh_server_tools_api_v1_toolservers_servers_server_id_refresh_tools_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Refresh Server Tools
@@ -4726,9 +5101,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4748,21 +5123,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -4770,22 +5145,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/refresh-tools",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/refresh-tools',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -4805,10 +5180,17 @@ class ToolServersApi:
     async def restart_tool_server_api_v1_toolservers_servers_server_id_restart_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerOperationResponse:
         """Restart Tool Server
@@ -4847,9 +5229,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4866,10 +5248,17 @@ class ToolServersApi:
     async def restart_tool_server_api_v1_toolservers_servers_server_id_restart_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerOperationResponse]:
         """Restart Tool Server
@@ -4908,9 +5297,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4927,10 +5316,17 @@ class ToolServersApi:
     async def restart_tool_server_api_v1_toolservers_servers_server_id_restart_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Restart Tool Server
@@ -4969,9 +5365,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4991,21 +5387,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -5013,22 +5409,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/restart",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/restart',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5048,12 +5444,19 @@ class ToolServersApi:
     async def revoke_tool_permission_api_v1_toolservers_permissions_permission_id_delete(
         self,
         permission_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         """Revoke Tool Permission
 
         Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
@@ -5090,9 +5493,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5109,12 +5512,19 @@ class ToolServersApi:
     async def revoke_tool_permission_api_v1_toolservers_permissions_permission_id_delete_with_http_info(
         self,
         permission_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[dict[str, object]]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Revoke Tool Permission
 
         Revoke tool permission.  Args:     permission_id: Permission ID     current_user: Current authenticated user     access_service: Tool access service  Returns:     Success message
@@ -5151,9 +5561,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5170,10 +5580,17 @@ class ToolServersApi:
     async def revoke_tool_permission_api_v1_toolservers_permissions_permission_id_delete_without_preload_content(
         self,
         permission_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Revoke Tool Permission
@@ -5212,9 +5629,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5234,21 +5651,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if permission_id is not None:
-            _path_params["permission_id"] = permission_id
+            _path_params['permission_id'] = permission_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -5256,22 +5673,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="DELETE",
-            resource_path="/api/v1/toolservers/permissions/{permission_id}",
+            method='DELETE',
+            resource_path='/api/v1/toolservers/permissions/{permission_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5291,10 +5708,17 @@ class ToolServersApi:
     async def start_tool_server_api_v1_toolservers_servers_server_id_start_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerOperationResponse:
         """Start Tool Server
@@ -5333,9 +5757,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5352,10 +5776,17 @@ class ToolServersApi:
     async def start_tool_server_api_v1_toolservers_servers_server_id_start_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerOperationResponse]:
         """Start Tool Server
@@ -5394,9 +5825,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5413,10 +5844,17 @@ class ToolServersApi:
     async def start_tool_server_api_v1_toolservers_servers_server_id_start_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Start Tool Server
@@ -5455,9 +5893,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5477,21 +5915,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -5499,22 +5937,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/start",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/start',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5534,10 +5972,17 @@ class ToolServersApi:
     async def stop_tool_server_api_v1_toolservers_servers_server_id_stop_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerOperationResponse:
         """Stop Tool Server
@@ -5576,9 +6021,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5595,10 +6040,17 @@ class ToolServersApi:
     async def stop_tool_server_api_v1_toolservers_servers_server_id_stop_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerOperationResponse]:
         """Stop Tool Server
@@ -5637,9 +6089,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5656,10 +6108,17 @@ class ToolServersApi:
     async def stop_tool_server_api_v1_toolservers_servers_server_id_stop_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Stop Tool Server
@@ -5698,9 +6157,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerOperationResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerOperationResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5720,21 +6179,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -5742,22 +6201,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/stop",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/stop',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -5777,12 +6236,19 @@ class ToolServersApi:
     async def test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> dict[str, object]:
+    ) -> Dict[str, object]:
         """Test Server Connectivity
 
         Test connectivity to an external MCP server.  Args:     server_id: Tool server ID     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     Connectivity test results
@@ -5819,9 +6285,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5838,12 +6304,19 @@ class ToolServersApi:
     async def test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post_with_http_info(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[dict[str, object]]:
+    ) -> ApiResponse[Dict[str, object]]:
         """Test Server Connectivity
 
         Test connectivity to an external MCP server.  Args:     server_id: Tool server ID     current_user: Current authenticated user     tool_server_service: Tool server service  Returns:     Connectivity test results
@@ -5880,9 +6353,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5899,10 +6372,17 @@ class ToolServersApi:
     async def test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post_without_preload_content(
         self,
         server_id: StrictStr,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Test Server Connectivity
@@ -5941,9 +6421,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "Dict[str, object]",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -5963,21 +6443,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -5985,22 +6465,22 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="POST",
-            resource_path="/api/v1/toolservers/servers/{server_id}/test-connectivity",
+            method='POST',
+            resource_path='/api/v1/toolservers/servers/{server_id}/test-connectivity',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6021,10 +6501,17 @@ class ToolServersApi:
         self,
         permission_id: StrictStr,
         tool_permission_update: ToolPermissionUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolPermissionResponse:
         """Update Tool Permission
@@ -6066,9 +6553,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6086,10 +6573,17 @@ class ToolServersApi:
         self,
         permission_id: StrictStr,
         tool_permission_update: ToolPermissionUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolPermissionResponse]:
         """Update Tool Permission
@@ -6131,9 +6625,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6151,10 +6645,17 @@ class ToolServersApi:
         self,
         permission_id: StrictStr,
         tool_permission_update: ToolPermissionUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Tool Permission
@@ -6196,9 +6697,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolPermissionResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolPermissionResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6219,21 +6720,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if permission_id is not None:
-            _path_params["permission_id"] = permission_id
+            _path_params['permission_id'] = permission_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -6243,35 +6744,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="PUT",
-            resource_path="/api/v1/toolservers/permissions/{permission_id}",
+            method='PUT',
+            resource_path='/api/v1/toolservers/permissions/{permission_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -6292,10 +6793,17 @@ class ToolServersApi:
         self,
         server_id: StrictStr,
         tool_server_update: ToolServerUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ToolServerResponse:
         """Update Tool Server
@@ -6337,9 +6845,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6357,10 +6865,17 @@ class ToolServersApi:
         self,
         server_id: StrictStr,
         tool_server_update: ToolServerUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[ToolServerResponse]:
         """Update Tool Server
@@ -6402,9 +6917,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6422,10 +6937,17 @@ class ToolServersApi:
         self,
         server_id: StrictStr,
         tool_server_update: ToolServerUpdate,
-        _request_timeout: None | Annotated[StrictFloat, Field(gt=0)] | tuple[Annotated[StrictFloat, Field(gt=0)], Annotated[StrictFloat, Field(gt=0)]] = None,
-        _request_auth: dict[StrictStr, Any] | None = None,
-        _content_type: StrictStr | None = None,
-        _headers: dict[StrictStr, Any] | None = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
         """Update Tool Server
@@ -6467,9 +6989,9 @@ class ToolServersApi:
             _host_index=_host_index
         )
 
-        _response_types_map: dict[str, str | None] = {
-            "200": "ToolServerResponse",
-            "422": "HTTPValidationError",
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "ToolServerResponse",
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6490,21 +7012,21 @@ class ToolServersApi:
 
         _host = None
 
-        _collection_formats: dict[str, str] = {
+        _collection_formats: Dict[str, str] = {
         }
 
-        _path_params: dict[str, str] = {}
-        _query_params: list[tuple[str, str]] = []
-        _header_params: dict[str, str | None] = _headers or {}
-        _form_params: list[tuple[str, str]] = []
-        _files: dict[
-            str, str | bytes | list[str] | list[bytes] | list[tuple[str, bytes]]
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
         ] = {}
-        _body_params: bytes | None = None
+        _body_params: Optional[bytes] = None
 
         # process the path parameters
         if server_id is not None:
-            _path_params["server_id"] = server_id
+            _path_params['server_id'] = server_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
@@ -6514,35 +7036,35 @@ class ToolServersApi:
 
 
         # set the HTTP header `Accept`
-        if "Accept" not in _header_params:
-            _header_params["Accept"] = self.api_client.select_header_accept(
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    "application/json"
+                    'application/json'
                 ]
             )
 
         # set the HTTP header `Content-Type`
         if _content_type:
-            _header_params["Content-Type"] = _content_type
+            _header_params['Content-Type'] = _content_type
         else:
             _default_content_type = (
                 self.api_client.select_header_content_type(
                     [
-                        "application/json"
+                        'application/json'
                     ]
                 )
             )
             if _default_content_type is not None:
-                _header_params["Content-Type"] = _default_content_type
+                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
-        _auth_settings: list[str] = [
-            "CustomHTTPBearer"
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
         ]
 
         return self.api_client.param_serialize(
-            method="PUT",
-            resource_path="/api/v1/toolservers/servers/{server_id}",
+            method='PUT',
+            resource_path='/api/v1/toolservers/servers/{server_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

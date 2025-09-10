@@ -1,3 +1,4 @@
+# coding: utf-8
 
 """
     Chatter API
@@ -13,45 +14,44 @@
 
 
 from __future__ import annotations
-
-import json
 import pprint
 import re  # noqa: F401
-from typing import Any, ClassVar
+import json
 
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Annotated, Self
-
+from typing import Any, ClassVar, Dict, List, Optional, Union
+from typing_extensions import Annotated
 from chatter_sdk.models.agent_capability import AgentCapability
 from chatter_sdk.models.agent_status import AgentStatus
-
+from typing import Optional, Set
+from typing_extensions import Self
 
 class AgentUpdateRequest(BaseModel):
     """
     Request schema for updating an agent.
     """ # noqa: E501
-    name: StrictStr | None = None
-    description: StrictStr | None = None
-    system_prompt: StrictStr | None = None
-    status: AgentStatus | None = None
-    personality_traits: list[StrictStr] | None = None
-    knowledge_domains: list[StrictStr] | None = None
-    response_style: StrictStr | None = None
-    capabilities: list[AgentCapability] | None = None
-    available_tools: list[StrictStr] | None = None
-    primary_llm: StrictStr | None = None
-    fallback_llm: StrictStr | None = None
-    temperature: Annotated[float, Field(le=2.0, strict=True, ge=0.0)] | Annotated[int, Field(le=2, strict=True, ge=0)] | None = None
-    max_tokens: Annotated[int, Field(le=32000, strict=True, ge=1)] | None = None
-    max_conversation_length: Annotated[int, Field(le=1000, strict=True, ge=1)] | None = None
-    context_window_size: Annotated[int, Field(le=32000, strict=True, ge=100)] | None = None
-    response_timeout: Annotated[int, Field(le=300, strict=True, ge=1)] | None = None
-    learning_enabled: StrictBool | None = None
-    feedback_weight: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
-    adaptation_threshold: Annotated[float, Field(le=1.0, strict=True, ge=0.0)] | Annotated[int, Field(le=1, strict=True, ge=0)] | None = None
-    tags: list[StrictStr] | None = None
-    metadata: dict[str, Any] | None = None
-    __properties: ClassVar[list[str]] = ["name", "description", "system_prompt", "status", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
+    name: Optional[StrictStr] = None
+    description: Optional[StrictStr] = None
+    system_prompt: Optional[StrictStr] = None
+    status: Optional[AgentStatus] = None
+    personality_traits: Optional[List[StrictStr]] = None
+    knowledge_domains: Optional[List[StrictStr]] = None
+    response_style: Optional[StrictStr] = None
+    capabilities: Optional[List[AgentCapability]] = None
+    available_tools: Optional[List[StrictStr]] = None
+    primary_llm: Optional[StrictStr] = None
+    fallback_llm: Optional[StrictStr] = None
+    temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
+    max_tokens: Optional[Annotated[int, Field(le=32000, strict=True, ge=1)]] = None
+    max_conversation_length: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None
+    context_window_size: Optional[Annotated[int, Field(le=32000, strict=True, ge=100)]] = None
+    response_timeout: Optional[Annotated[int, Field(le=300, strict=True, ge=1)]] = None
+    learning_enabled: Optional[StrictBool] = None
+    feedback_weight: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
+    adaptation_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
+    tags: Optional[List[StrictStr]] = None
+    metadata: Optional[Dict[str, Any]] = None
+    __properties: ClassVar[List[str]] = ["name", "description", "system_prompt", "status", "personality_traits", "knowledge_domains", "response_style", "capabilities", "available_tools", "primary_llm", "fallback_llm", "temperature", "max_tokens", "max_conversation_length", "context_window_size", "response_timeout", "learning_enabled", "feedback_weight", "adaptation_threshold", "tags", "metadata"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -70,11 +70,11 @@ class AgentUpdateRequest(BaseModel):
         return json.dumps(self.to_dict())
 
     @classmethod
-    def from_json(cls, json_str: str) -> Self | None:
+    def from_json(cls, json_str: str) -> Optional[Self]:
         """Create an instance of AgentUpdateRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
-    def to_dict(self) -> dict[str, Any]:
+    def to_dict(self) -> Dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -84,7 +84,7 @@ class AgentUpdateRequest(BaseModel):
           were set at model initialization. Other fields with value `None`
           are ignored.
         """
-        excluded_fields: set[str] = set([
+        excluded_fields: Set[str] = set([
         ])
 
         _dict = self.model_dump(
@@ -95,112 +95,112 @@ class AgentUpdateRequest(BaseModel):
         # set to None if name (nullable) is None
         # and model_fields_set contains the field
         if self.name is None and "name" in self.model_fields_set:
-            _dict["name"] = None
+            _dict['name'] = None
 
         # set to None if description (nullable) is None
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
-            _dict["description"] = None
+            _dict['description'] = None
 
         # set to None if system_prompt (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt is None and "system_prompt" in self.model_fields_set:
-            _dict["system_prompt"] = None
+            _dict['system_prompt'] = None
 
         # set to None if status (nullable) is None
         # and model_fields_set contains the field
         if self.status is None and "status" in self.model_fields_set:
-            _dict["status"] = None
+            _dict['status'] = None
 
         # set to None if personality_traits (nullable) is None
         # and model_fields_set contains the field
         if self.personality_traits is None and "personality_traits" in self.model_fields_set:
-            _dict["personality_traits"] = None
+            _dict['personality_traits'] = None
 
         # set to None if knowledge_domains (nullable) is None
         # and model_fields_set contains the field
         if self.knowledge_domains is None and "knowledge_domains" in self.model_fields_set:
-            _dict["knowledge_domains"] = None
+            _dict['knowledge_domains'] = None
 
         # set to None if response_style (nullable) is None
         # and model_fields_set contains the field
         if self.response_style is None and "response_style" in self.model_fields_set:
-            _dict["response_style"] = None
+            _dict['response_style'] = None
 
         # set to None if capabilities (nullable) is None
         # and model_fields_set contains the field
         if self.capabilities is None and "capabilities" in self.model_fields_set:
-            _dict["capabilities"] = None
+            _dict['capabilities'] = None
 
         # set to None if available_tools (nullable) is None
         # and model_fields_set contains the field
         if self.available_tools is None and "available_tools" in self.model_fields_set:
-            _dict["available_tools"] = None
+            _dict['available_tools'] = None
 
         # set to None if primary_llm (nullable) is None
         # and model_fields_set contains the field
         if self.primary_llm is None and "primary_llm" in self.model_fields_set:
-            _dict["primary_llm"] = None
+            _dict['primary_llm'] = None
 
         # set to None if fallback_llm (nullable) is None
         # and model_fields_set contains the field
         if self.fallback_llm is None and "fallback_llm" in self.model_fields_set:
-            _dict["fallback_llm"] = None
+            _dict['fallback_llm'] = None
 
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
-            _dict["temperature"] = None
+            _dict['temperature'] = None
 
         # set to None if max_tokens (nullable) is None
         # and model_fields_set contains the field
         if self.max_tokens is None and "max_tokens" in self.model_fields_set:
-            _dict["max_tokens"] = None
+            _dict['max_tokens'] = None
 
         # set to None if max_conversation_length (nullable) is None
         # and model_fields_set contains the field
         if self.max_conversation_length is None and "max_conversation_length" in self.model_fields_set:
-            _dict["max_conversation_length"] = None
+            _dict['max_conversation_length'] = None
 
         # set to None if context_window_size (nullable) is None
         # and model_fields_set contains the field
         if self.context_window_size is None and "context_window_size" in self.model_fields_set:
-            _dict["context_window_size"] = None
+            _dict['context_window_size'] = None
 
         # set to None if response_timeout (nullable) is None
         # and model_fields_set contains the field
         if self.response_timeout is None and "response_timeout" in self.model_fields_set:
-            _dict["response_timeout"] = None
+            _dict['response_timeout'] = None
 
         # set to None if learning_enabled (nullable) is None
         # and model_fields_set contains the field
         if self.learning_enabled is None and "learning_enabled" in self.model_fields_set:
-            _dict["learning_enabled"] = None
+            _dict['learning_enabled'] = None
 
         # set to None if feedback_weight (nullable) is None
         # and model_fields_set contains the field
         if self.feedback_weight is None and "feedback_weight" in self.model_fields_set:
-            _dict["feedback_weight"] = None
+            _dict['feedback_weight'] = None
 
         # set to None if adaptation_threshold (nullable) is None
         # and model_fields_set contains the field
         if self.adaptation_threshold is None and "adaptation_threshold" in self.model_fields_set:
-            _dict["adaptation_threshold"] = None
+            _dict['adaptation_threshold'] = None
 
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:
-            _dict["tags"] = None
+            _dict['tags'] = None
 
         # set to None if metadata (nullable) is None
         # and model_fields_set contains the field
         if self.metadata is None and "metadata" in self.model_fields_set:
-            _dict["metadata"] = None
+            _dict['metadata'] = None
 
         return _dict
 
     @classmethod
-    def from_dict(cls, obj: dict[str, Any] | None) -> Self | None:
+    def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
         """Create an instance of AgentUpdateRequest from a dict"""
         if obj is None:
             return None

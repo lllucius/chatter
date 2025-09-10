@@ -1,12 +1,11 @@
 """Document management commands for the CLI."""
 
-import json
 from pathlib import Path
 
 import typer
 from rich.panel import Panel
 from rich.progress import track
-from rich.prompt import Confirm, Prompt
+from rich.prompt import Prompt
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
@@ -272,7 +271,7 @@ async def list_document_chunks(
         for i, chunk in enumerate(response.chunks):
             content = getattr(chunk, "content", "No content")
             preview = content[:100] + "..." if len(content) > 100 else content
-            
+
             table.add_row(
                 str(i),
                 getattr(chunk, "chunk_type", "text"),
@@ -320,7 +319,7 @@ async def batch_upload_documents(
 ):
     """Batch upload documents from a directory."""
     from glob import glob
-    
+
     dir_path = Path(directory)
     if not dir_path.exists() or not dir_path.is_dir():
         console.print(f"❌ [red]Directory not found: {directory}[/red]")
@@ -329,17 +328,17 @@ async def batch_upload_documents(
     # Find files matching pattern
     pattern_path = dir_path / pattern
     files = glob(str(pattern_path))
-    
+
     if not files:
         console.print(f"No files found matching pattern: {pattern}")
         return
 
     console.print(f"Found {len(files)} files to upload")
-    
+
     async with get_client() as sdk_client:
         successful = 0
         failed = 0
-        
+
         for file_path in track(files, description="Uploading files..."):
             try:
                 file_obj = Path(file_path)
@@ -351,7 +350,7 @@ async def batch_upload_documents(
                     description=description or f"Batch upload: {file_obj.name}",
                 )
                 successful += 1
-                
+
             except Exception as e:
                 console.print(f"❌ Failed to upload {file_path}: {e}")
                 failed += 1

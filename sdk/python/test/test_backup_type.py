@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.backup_type import BackupType
 
 
 class TestBackupType(unittest.TestCase):

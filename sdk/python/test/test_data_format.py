@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.data_format import DataFormat
 
 
 class TestDataFormat(unittest.TestCase):

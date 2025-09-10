@@ -16,7 +16,6 @@ import io
 import json
 import re
 import ssl
-from typing import Optional, Union
 
 import aiohttp
 import aiohttp_retry

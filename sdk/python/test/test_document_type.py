@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.document_type import DocumentType
 
 
 class TestDocumentType(unittest.TestCase):

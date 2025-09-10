@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -20,7 +19,6 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
-    field_validator,
     validate_call,
 )
 from typing import Annotated
@@ -1604,41 +1602,41 @@ class PromptsApi:
         # process the path parameters
         # process the query parameters
         if prompt_type is not None:
-            
+
             _query_params.append(("prompt_type", prompt_type.value))
-            
+
         if category is not None:
-            
+
             _query_params.append(("category", category.value))
-            
+
         if tags is not None:
-            
+
             _query_params.append(("tags", tags))
-            
+
         if is_public is not None:
-            
+
             _query_params.append(("is_public", is_public))
-            
+
         if is_chain is not None:
-            
+
             _query_params.append(("is_chain", is_chain))
-            
+
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         if sort_by is not None:
-            
+
             _query_params.append(("sort_by", sort_by))
-            
+
         if sort_order is not None:
-            
+
             _query_params.append(("sort_order", sort_order))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

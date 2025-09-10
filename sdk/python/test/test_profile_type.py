@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.profile_type import ProfileType
 
 
 class TestProfileType(unittest.TestCase):

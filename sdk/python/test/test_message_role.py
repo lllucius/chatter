@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.message_role import MessageRole
 
 
 class TestMessageRole(unittest.TestCase):

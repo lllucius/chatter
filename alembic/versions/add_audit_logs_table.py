@@ -5,11 +5,9 @@ Revises: ef29b1af6dfe
 Create Date: 2025-09-10 00:00:00.000000
 
 """
-from typing import Union
 from collections.abc import Sequence
 
 import sqlalchemy as sa
-from sqlalchemy import DateTime
 
 from alembic import op
 
@@ -42,7 +40,7 @@ def upgrade() -> None:
         sa.Column("error_message", sa.Text(), nullable=True),
         sa.PrimaryKeyConstraint("id")
     )
-    
+
     # Create indexes for performance
     op.create_index(op.f("ix_audit_logs_event_id"), "audit_logs", ["event_id"], unique=True)
     op.create_index(op.f("ix_audit_logs_timestamp"), "audit_logs", ["timestamp"], unique=False)

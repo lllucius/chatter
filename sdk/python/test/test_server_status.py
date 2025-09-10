@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.server_status import ServerStatus
 
 
 class TestServerStatus(unittest.TestCase):

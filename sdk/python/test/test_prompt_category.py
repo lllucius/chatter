@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.prompt_category import PromptCategory
 
 
 class TestPromptCategory(unittest.TestCase):

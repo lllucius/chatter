@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -2770,9 +2769,9 @@ class ToolServersApi:
         # process the path parameters
         # process the query parameters
         if role is not None:
-            
+
             _query_params.append(("role", role))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3286,13 +3285,13 @@ class ToolServersApi:
             _path_params["server_id"] = server_id
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -4515,13 +4514,13 @@ class ToolServersApi:
         # process the path parameters
         # process the query parameters
         if status is not None:
-            
+
             _query_params.append(("status", status.value))
-            
+
         if include_builtin is not None:
-            
+
             _query_params.append(("include_builtin", include_builtin))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

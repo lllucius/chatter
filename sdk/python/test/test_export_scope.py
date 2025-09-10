@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.export_scope import ExportScope
 
 
 class TestExportScope(unittest.TestCase):

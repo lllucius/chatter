@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.readiness_status import ReadinessStatus
 
 
 class TestReadinessStatus(unittest.TestCase):

@@ -20,7 +20,6 @@ import os
 import re
 import tempfile
 from enum import Enum
-from typing import Dict, List, Optional, Tuple, Union
 from urllib.parse import quote
 
 from dateutil.parser import parse
@@ -34,11 +33,6 @@ from chatter_sdk.configuration import Configuration
 from chatter_sdk.exceptions import (
     ApiException,
     ApiValueError,
-    BadRequestException,
-    ForbiddenException,
-    NotFoundException,
-    ServiceException,
-    UnauthorizedException,
 )
 
 RequestSerialized = tuple[str, str, dict[str, str], str | None, list[str]]
@@ -772,7 +766,7 @@ class ApiClient:
                 status=0,
                 reason=(
                     f"Failed to parse `{string}` as datetime object"
-                    
+
                 )
             )
 
@@ -790,7 +784,7 @@ class ApiClient:
                 status=0,
                 reason=(
                     f"Failed to parse `{data}` as `{klass}`"
-                    
+
                 )
             )
 

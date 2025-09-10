@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.reduction_strategy import ReductionStrategy
 
 
 class TestReductionStrategy(unittest.TestCase):

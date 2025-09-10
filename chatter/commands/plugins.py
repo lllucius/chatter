@@ -2,7 +2,6 @@
 
 import typer
 from rich.panel import Panel
-from rich.prompt import Prompt
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async

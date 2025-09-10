@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.provider_type import ProviderType
 
 
 class TestProviderType(unittest.TestCase):

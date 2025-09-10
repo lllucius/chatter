@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -1803,9 +1802,9 @@ class ChatApi:
             _path_params["conversation_id"] = conversation_id
         # process the query parameters
         if include_messages is not None:
-            
+
             _query_params.append(("include_messages", include_messages))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2076,13 +2075,13 @@ class ChatApi:
             _path_params["conversation_id"] = conversation_id
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3013,13 +3012,13 @@ class ChatApi:
         # process the path parameters
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

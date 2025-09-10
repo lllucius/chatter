@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.distance_metric import DistanceMetric
 
 
 class TestDistanceMetric(unittest.TestCase):

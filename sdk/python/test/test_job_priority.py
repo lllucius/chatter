@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.job_priority import JobPriority
 
 
 class TestJobPriority(unittest.TestCase):

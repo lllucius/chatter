@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.variant_allocation import VariantAllocation
 
 
 class TestVariantAllocation(unittest.TestCase):

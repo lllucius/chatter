@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -3261,21 +3260,21 @@ class ModelRegistryApi:
         # process the path parameters
         # process the query parameters
         if model_id is not None:
-            
+
             _query_params.append(("model_id", model_id))
-            
+
         if page is not None:
-            
+
             _query_params.append(("page", page))
-            
+
         if per_page is not None:
-            
+
             _query_params.append(("per_page", per_page))
-            
+
         if active_only is not None:
-            
+
             _query_params.append(("active_only", active_only))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3570,25 +3569,25 @@ class ModelRegistryApi:
         # process the path parameters
         # process the query parameters
         if provider_id is not None:
-            
+
             _query_params.append(("provider_id", provider_id))
-            
+
         if model_type is not None:
-            
+
             _query_params.append(("model_type", model_type.value))
-            
+
         if page is not None:
-            
+
             _query_params.append(("page", page))
-            
+
         if per_page is not None:
-            
+
             _query_params.append(("per_page", per_page))
-            
+
         if active_only is not None:
-            
+
             _query_params.append(("active_only", active_only))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3857,17 +3856,17 @@ class ModelRegistryApi:
         # process the path parameters
         # process the query parameters
         if page is not None:
-            
+
             _query_params.append(("page", page))
-            
+
         if per_page is not None:
-            
+
             _query_params.append(("per_page", per_page))
-            
+
         if active_only is not None:
-            
+
             _query_params.append(("active_only", active_only))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

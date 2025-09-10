@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.job_status import JobStatus
 
 
 class TestJobStatus(unittest.TestCase):

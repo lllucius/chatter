@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.document_status import DocumentStatus
 
 
 class TestDocumentStatus(unittest.TestCase):

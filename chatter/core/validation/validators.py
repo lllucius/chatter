@@ -399,7 +399,7 @@ class SecurityValidator(BaseValidator):
 class BusinessValidator(BaseValidator):
     """Validates business logic rules."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("business", "Validates business logic rules")
         self.supported_rules = [
             "model_consistency",
@@ -590,7 +590,7 @@ class BusinessValidator(BaseValidator):
 class ConfigValidator(BaseValidator):
     """Validates configuration settings."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("config", "Validates configuration settings")
         self.supported_rules = [
             "database_config",
@@ -690,7 +690,7 @@ class ConfigValidator(BaseValidator):
 class WorkflowValidator(BaseValidator):
     """Validates workflow configurations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__(
             "workflow", "Validates workflow configurations"
         )
@@ -808,7 +808,7 @@ class WorkflowValidator(BaseValidator):
 class AgentValidator(BaseValidator):
     """Validates agent-specific input."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         super().__init__("agent", "Validates agent-specific input")
         self.supported_rules = [
             "agent_input",

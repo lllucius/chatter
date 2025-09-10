@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.tool_status import ToolStatus
 
 
 class TestToolStatus(unittest.TestCase):

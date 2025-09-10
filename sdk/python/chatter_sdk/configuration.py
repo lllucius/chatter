@@ -20,12 +20,8 @@ from logging import FileHandler
 from typing import (
     Any,
     ClassVar,
-    Dict,
-    List,
     Literal,
-    Optional,
     TypedDict,
-    Union,
 )
 
 import urllib3

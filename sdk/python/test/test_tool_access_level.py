@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.tool_access_level import ToolAccessLevel
 
 
 class TestToolAccessLevel(unittest.TestCase):

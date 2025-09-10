@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.conversation_status import ConversationStatus
 
 
 class TestConversationStatus(unittest.TestCase):

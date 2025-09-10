@@ -1,6 +1,5 @@
 """Model registry and management commands for the CLI."""
 
-import json
 
 import typer
 from rich.panel import Panel
@@ -67,7 +66,7 @@ async def create_provider(
             console.print(f"❌ [red]Invalid provider type: {provider_type}[/red]")
             console.print("Valid types are: openai, anthropic, google, cohere, mistral")
             return
-            
+
         provider_data = ProviderCreate(
             name=name,
             provider_type=provider_type_enum,
@@ -268,7 +267,7 @@ async def register_model(
             console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
             console.print("Valid types are: chat, embedding, text, completion")
             return
-            
+
         model_data = ModelDefCreate(
             name=name,
             model_type=model_type_enum,
@@ -399,7 +398,7 @@ async def create_model(
             console.print(f"❌ [red]Invalid model type: {model_type}[/red]")
             console.print("Valid types are: chat, embedding, text, completion")
             return
-            
+
         model_data = ModelDefCreate(
             name=name,
             model_type=model_type_enum,

@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,

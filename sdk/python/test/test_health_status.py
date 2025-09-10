@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.health_status import HealthStatus
 
 
 class TestHealthStatus(unittest.TestCase):

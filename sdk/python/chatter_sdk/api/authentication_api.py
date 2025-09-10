@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -543,13 +542,13 @@ class AuthenticationApi:
         # process the path parameters
         # process the query parameters
         if token is not None:
-            
+
             _query_params.append(("token", token))
-            
+
         if new_password is not None:
-            
+
             _query_params.append(("new_password", new_password))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2712,9 +2711,9 @@ class AuthenticationApi:
         # process the path parameters
         # process the query parameters
         if email is not None:
-            
+
             _query_params.append(("email", email))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

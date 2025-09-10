@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.plugin_status import PluginStatus
 
 
 class TestPluginStatus(unittest.TestCase):

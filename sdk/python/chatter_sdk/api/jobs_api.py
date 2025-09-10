@@ -11,9 +11,8 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -21,7 +20,6 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
-    field_validator,
     validate_call,
 )
 from typing import Annotated
@@ -499,9 +497,9 @@ class JobsApi:
         # process the path parameters
         # process the query parameters
         if force is not None:
-            
+
             _query_params.append(("force", force))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1599,17 +1597,17 @@ class JobsApi:
         # process the path parameters
         # process the query parameters
         if status is not None:
-            
+
             _query_params.append(("status", status.value))
-            
+
         if priority is not None:
-            
+
             _query_params.append(("priority", priority.value))
-            
+
         if function_name is not None:
-            
+
             _query_params.append(("function_name", function_name))
-            
+
         if created_after is not None:
             if isinstance(created_after, datetime):
                 _query_params.append(
@@ -1622,7 +1620,7 @@ class JobsApi:
                 )
             else:
                 _query_params.append(("created_after", created_after))
-            
+
         if created_before is not None:
             if isinstance(created_before, datetime):
                 _query_params.append(
@@ -1635,27 +1633,27 @@ class JobsApi:
                 )
             else:
                 _query_params.append(("created_before", created_before))
-            
+
         if search is not None:
-            
+
             _query_params.append(("search", search))
-            
+
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         if sort_by is not None:
-            
+
             _query_params.append(("sort_by", sort_by))
-            
+
         if sort_order is not None:
-            
+
             _query_params.append(("sort_order", sort_order))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

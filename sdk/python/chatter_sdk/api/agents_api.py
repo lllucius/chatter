@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -2697,13 +2696,13 @@ class AgentsApi:
         # process the path parameters
         # process the query parameters
         if agent_type is not None:
-            
+
             _query_params.append(("agent_type", agent_type.value))
-            
+
         if status is not None:
-            
+
             _query_params.append(("status", status.value))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

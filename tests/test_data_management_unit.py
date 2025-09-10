@@ -160,20 +160,20 @@ class TestDataManagementUnit:
         """Test that bulk delete endpoints return the expected response structure."""
         # Test with empty array to get a valid response without side effects
         empty_request = []
-        
+
         endpoints = [
             "/api/v1/data-management/bulk/delete-documents",
             "/api/v1/data-management/bulk/delete-conversations", 
             "/api/v1/data-management/bulk/delete-prompts"
         ]
-        
+
         for endpoint in endpoints:
             response = await client.post(
                 endpoint, 
                 headers=auth_headers, 
                 json=empty_request
             )
-            
+
             # Should get 200 or 422, but if 200 check response structure
             if response.status_code == 200:
                 data = response.json()
@@ -182,7 +182,7 @@ class TestDataManagementUnit:
                 assert "successful_deletions" in data  
                 assert "failed_deletions" in data
                 assert "errors" in data
-                
+
                 # Verify field types
                 assert isinstance(data["total_requested"], int)
                 assert isinstance(data["successful_deletions"], int)

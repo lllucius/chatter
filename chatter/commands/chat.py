@@ -3,10 +3,8 @@
 import json
 
 import typer
-from rich.live import Live
 from rich.panel import Panel
 from rich.prompt import Prompt
-from rich.spinner import Spinner
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
@@ -49,7 +47,7 @@ async def send_message(
             console.print(f"💬 [dim]Sending message...[/dim]")
             console.print(f"[bold]User:[/bold] {message}")
             console.print(f"[bold]Assistant:[/bold]", end=" ")
-            
+
             async for chunk in sdk_client.chat_api.send_message_stream_api_v1_chat_stream_post(
                 chat_message=chat_request
             ):
@@ -60,11 +58,11 @@ async def send_message(
             response = await sdk_client.chat_api.send_message_api_v1_chat_send_post(
                 chat_message=chat_request
             )
-            
+
             console.print(f"💬 [green]Message sent successfully[/green]")
             console.print(f"[bold]User:[/bold] {message}")
             console.print(f"[bold]Assistant:[/bold] {response.content}")
-            
+
             if hasattr(response, "conversation_id"):
                 console.print(f"[dim]Conversation ID: {response.conversation_id}[/dim]")
 
@@ -131,7 +129,7 @@ async def show_conversation(
                 role = getattr(msg, "role", "unknown")
                 content = getattr(msg, "content", "No content")
                 timestamp = getattr(msg, "created_at", "N/A")
-                
+
                 role_style = "blue" if role == "user" else "green"
                 console.print(f"[{role_style}]{role.upper()}:[/{role_style}] {content[:200]}")
                 console.print(f"[dim]{timestamp}[/dim]\n")

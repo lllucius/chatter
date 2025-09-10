@@ -23,7 +23,6 @@ from chatter.schemas.auth import (
     PasswordChangeResponse,
     PasswordResetConfirmResponse,
     PasswordResetRequestResponse,
-    TokenRefresh,
     TokenRefreshResponse,
     TokenResponse,
     UserCreate,
@@ -246,7 +245,7 @@ async def login(
     await log_login_success(user.id, client_ip, user_agent)
 
     tokens = auth_service.create_tokens(user)
-    
+
     # Set refresh token as HttpOnly cookie
     response.set_cookie(
         key="refresh_token",
@@ -260,7 +259,7 @@ async def login(
 
     # Return only access token in response body (remove refresh_token from response)
     response_data = {k: v for k, v in tokens.items() if k != "refresh_token"}
-    
+
     return TokenResponse(
         **response_data, user=UserResponse.model_validate(user)
     )
@@ -283,7 +282,7 @@ async def refresh_token(
         New access token (refresh token set in HttpOnly cookie)
     """
     client_ip = get_client_ip(request)
-    
+
     # Read refresh token from HttpOnly cookie
     refresh_token = request.cookies.get("refresh_token")
     if not refresh_token:
@@ -293,7 +292,7 @@ async def refresh_token(
 
     try:
         result = await auth_service.refresh_access_token(refresh_token)
-        
+
         # Set new refresh token as HttpOnly cookie if provided
         if "refresh_token" in result:
             response.set_cookie(
@@ -526,7 +525,7 @@ async def logout(
     client_ip = get_client_ip(request)
 
     await auth_service.revoke_token(current_user.id)
-    
+
     # Clear refresh token cookie
     response.delete_cookie(
         key="refresh_token",

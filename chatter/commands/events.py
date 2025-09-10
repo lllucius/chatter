@@ -1,9 +1,6 @@
 """Event monitoring and streaming commands for the CLI."""
 
 import typer
-from rich.console import Group
-from rich.live import Live
-from rich.panel import Panel
 from rich.table import Table
 
 from chatter.commands import console, get_client, run_async
@@ -21,7 +18,7 @@ async def listen_events(
     """Listen to real-time events."""
     async with get_client() as sdk_client:
         filter_types = event_types.split(",") if event_types else None
-        
+
         console.print(f"🔄 [yellow]Listening for events for {duration} seconds...[/yellow]")
         console.print("[dim]Press Ctrl+C to stop[/dim]\n")
 
@@ -34,12 +31,12 @@ async def listen_events(
                 event_type = getattr(event, "event_type", "unknown")
                 timestamp = getattr(event, "timestamp", "N/A")
                 data = getattr(event, "data", {})
-                
+
                 console.print(f"📨 [{event_type}] {timestamp}")
                 if data:
                     console.print(f"   Data: {str(data)[:100]}...")
                 console.print()
-                
+
         except KeyboardInterrupt:
             console.print(f"\n✅ [green]Stopped listening. Received {events_received} events.[/green]")
 

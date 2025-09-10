@@ -11,8 +11,7 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -21,7 +20,6 @@ from pydantic import (
     StrictFloat,
     StrictInt,
     StrictStr,
-    field_validator,
     validate_call,
 )
 from typing import Annotated
@@ -1043,13 +1041,13 @@ class DocumentsApi:
             _path_params["document_id"] = document_id
         # process the query parameters
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1615,37 +1613,37 @@ class DocumentsApi:
         # process the path parameters
         # process the query parameters
         if status is not None:
-            
+
             _query_params.append(("status", status.value))
-            
+
         if document_type is not None:
-            
+
             _query_params.append(("document_type", document_type.value))
-            
+
         if tags is not None:
-            
+
             _query_params.append(("tags", tags))
-            
+
         if owner_id is not None:
-            
+
             _query_params.append(("owner_id", owner_id))
-            
+
         if limit is not None:
-            
+
             _query_params.append(("limit", limit))
-            
+
         if offset is not None:
-            
+
             _query_params.append(("offset", offset))
-            
+
         if sort_by is not None:
-            
+
             _query_params.append(("sort_by", sort_by))
-            
+
         if sort_order is not None:
-            
+
             _query_params.append(("sort_order", sort_order))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

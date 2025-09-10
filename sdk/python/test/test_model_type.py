@@ -14,7 +14,6 @@
 
 import unittest
 
-from chatter_sdk.models.model_type import ModelType
 
 
 class TestModelType(unittest.TestCase):

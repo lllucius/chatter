@@ -12,12 +12,12 @@ from .validators import BaseValidator
 class ValidationEngine:
     """Core validation engine that orchestrates all validation operations."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         self._validators: dict[str, BaseValidator] = {}
         self._rules: dict[str, dict[str, Any]] = {}
         self._initialize_default_validators()
 
-    def _initialize_default_validators(self):
+    def _initialize_default_validators(self) -> None:
         """Initialize default validators."""
         # Import here to avoid circular imports
         from .validators import (

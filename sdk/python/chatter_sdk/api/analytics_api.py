@@ -11,9 +11,8 @@
     Do not edit the class manually.
 """  # noqa: E501
 
-import warnings
 from datetime import datetime
-from typing import Any, Dict, List, Optional, Tuple, Union
+from typing import Any
 
 from pydantic import (
     Field,
@@ -316,13 +315,13 @@ class AnalyticsApi:
         # process the path parameters
         # process the query parameters
         if format is not None:
-            
+
             _query_params.append(("format", format))
-            
+
         if metrics is not None:
-            
+
             _query_params.append(("metrics", metrics))
-            
+
         if start_date is not None:
             if isinstance(start_date, datetime):
                 _query_params.append(
@@ -335,7 +334,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -348,11 +347,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1082,7 +1081,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -1095,11 +1094,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1379,7 +1378,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -1392,11 +1391,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1676,7 +1675,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -1689,11 +1688,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1973,7 +1972,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -1986,11 +1985,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2495,7 +2494,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -2508,11 +2507,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -2792,7 +2791,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -2805,11 +2804,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -3104,7 +3103,7 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("start_date", start_date))
-            
+
         if end_date is not None:
             if isinstance(end_date, datetime):
                 _query_params.append(
@@ -3117,11 +3116,11 @@ class AnalyticsApi:
                 )
             else:
                 _query_params.append(("end_date", end_date))
-            
+
         if period is not None:
-            
+
             _query_params.append(("period", period))
-            
+
         # process the header parameters
         # process the form parameters
         # process the body parameter

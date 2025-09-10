@@ -2,7 +2,6 @@
 
 import pytest
 
-from chatter.core.cache_factory import CacheFactory, CacheType
 from chatter.core.cache_interface import CacheConfig, CacheStats
 from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
 from chatter.core.enhanced_redis_cache import EnhancedRedisCache

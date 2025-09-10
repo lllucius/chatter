@@ -142,7 +142,7 @@ class EnhancedRedisCache(CacheInterface):
         """
         if self.is_disabled:
             return None
-            
+
         if (
             not self.is_valid_key(key)
             or not await self._ensure_connection()
@@ -186,7 +186,7 @@ class EnhancedRedisCache(CacheInterface):
         """
         if self.is_disabled:
             return False
-            
+
         if (
             not self.is_valid_key(key)
             or not await self._ensure_connection()
@@ -234,7 +234,7 @@ class EnhancedRedisCache(CacheInterface):
         """
         if self.is_disabled:
             return False
-            
+
         if (
             not self.is_valid_key(key)
             or not await self._ensure_connection()
@@ -265,7 +265,7 @@ class EnhancedRedisCache(CacheInterface):
         """
         if self.is_disabled:
             return True  # Consider successful if cache is disabled
-            
+
         if not await self._ensure_connection():
             return False
 

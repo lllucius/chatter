@@ -13,10 +13,31 @@ import {
   Slider,
   Typography,
   Box,
+  CircularProgress,
+  Alert,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import { ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
+import { getSDK } from '../services/auth-service';
+
+interface Provider {
+  name: string;
+  display_name: string;
+  description: string;
+  models: Array<{
+    name: string;
+    model_name: string;
+    display_name: string;
+    is_default: boolean;
+    max_tokens: number;
+  }>;
+}
+
+interface ProvidersData {
+  providers: Record<string, Provider>;
+  default_provider: string;
+}
 
 interface ProfileFormProps extends CrudFormProps<ProfileCreate, ProfileUpdate> {}
 
@@ -40,14 +61,30 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   });
 
   const [saving, setSaving] = useState(false);
+  const [loadingProviders, setLoadingProviders] = useState(false);
+  const [providersData, setProvidersData] = useState<ProvidersData | null>(null);
+  const [providersError, setProvidersError] = useState<string | null>(null);
 
-  const providers = ['openai', 'anthropic', 'google', 'cohere'];
-  const models = {
-    openai: ['gpt-4', 'gpt-4-turbo', 'gpt-3.5-turbo'],
-    anthropic: ['claude-3-opus', 'claude-3-sonnet', 'claude-3-haiku'],
-    google: ['gemini-pro', 'gemini-pro-vision'],
-    cohere: ['command', 'command-light'],
+  // Fetch providers data from API
+  const fetchProviders = async () => {
+    setLoadingProviders(true);
+    setProvidersError(null);
+    try {
+      const response = await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
+      setProvidersData(response as ProvidersData);
+    } catch (error) {
+      console.error('Failed to fetch providers:', error);
+      setProvidersError('Failed to load available providers');
+    } finally {
+      setLoadingProviders(false);
+    }
   };
+
+  useEffect(() => {
+    if (open && !providersData && !loadingProviders) {
+      fetchProviders();
+    }
+  }, [open, providersData, loadingProviders]);
 
   useEffect(() => {
     if (open) {
@@ -55,8 +92,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         setFormData({
           name: initialData.name || '',
           description: initialData.description || '',
-          llmModel: initialData.llmModel || '',
-          llmProvider: initialData.llmProvider || '',
+          llmModel: initialData.llm_model || '',
+          llmProvider: initialData.llm_provider || '',
           temperature: initialData.temperature ?? 0.7,
           max_tokens: initialData.max_tokens || 1000,
           top_p: initialData.top_p || 1.0,
@@ -82,10 +119,37 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   const handleSubmit = async () => {
     try {
       setSaving(true);
-      await onSubmit(formData);
+      // Transform camelCase form data to snake_case for API
+      const apiData: ProfileCreate | ProfileUpdate = {
+        name: formData.name,
+        description: formData.description,
+        llm_provider: formData.llmProvider,
+        llm_model: formData.llmModel,
+        temperature: formData.temperature,
+        max_tokens: formData.max_tokens,
+        top_p: formData.top_p,
+        frequency_penalty: formData.frequency_penalty,
+        presence_penalty: formData.presence_penalty,
+      };
+      await onSubmit(apiData);
     } finally {
       setSaving(false);
     }
+  };
+
+  const getAvailableProviders = (): string[] => {
+    if (!providersData) return [];
+    return Object.keys(providersData.providers);
+  };
+
+  const getAvailableModels = (): Array<{name: string, display_name: string}> => {
+    if (!providersData || !formData.llmProvider) return [];
+    const provider = providersData.providers[formData.llmProvider];
+    if (!provider) return [];
+    return provider.models.map(model => ({
+      name: model.model_name,
+      display_name: model.display_name || model.name
+    }));
   };
 
   return (
@@ -95,6 +159,12 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
       </DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 1 }}>
+          {providersError && (
+            <Alert severity="error" sx={{ mb: 2 }}>
+              {providersError}
+            </Alert>
+          )}
+          
           <Grid container spacing={3}>
             <Grid size={{ xs: 12, sm: 6 }}>
               <TextField
@@ -109,19 +179,30 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <FormControl fullWidth required>
                 <InputLabel>Provider</InputLabel>
                 <Select
-                  value={formData.llm_provider}
+                  value={formData.llmProvider}
                   label="Provider"
                   onChange={(e) => setFormData({
                     ...formData,
-                    llm_provider: e.target.value,
-                    llm_model: '' // Reset model when provider changes
+                    llmProvider: e.target.value,
+                    llmModel: '' // Reset model when provider changes
                   })}
+                  disabled={loadingProviders}
                 >
-                  {providers.map((provider) => (
-                    <MenuItem key={provider} value={provider}>
-                      {provider.charAt(0).toUpperCase() + provider.slice(1)}
+                  {loadingProviders ? (
+                    <MenuItem disabled>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      Loading providers...
                     </MenuItem>
-                  ))}
+                  ) : (
+                    getAvailableProviders().map((provider) => {
+                      const providerData = providersData?.providers[provider];
+                      return (
+                        <MenuItem key={provider} value={provider}>
+                          {providerData?.display_name || provider}
+                        </MenuItem>
+                      );
+                    })
+                  )}
                 </Select>
               </FormControl>
             </Grid>
@@ -142,11 +223,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                   value={formData.llmModel}
                   label="Model"
                   onChange={(e) => setFormData({ ...formData, llmModel: e.target.value })}
-                  disabled={!formData.llmProvider}
+                  disabled={!formData.llmProvider || loadingProviders}
                 >
-                  {formData.llmProvider && models[formData.llmProvider as keyof typeof models]?.map((model) => (
-                    <MenuItem key={model} value={model}>
-                      {model}
+                  {getAvailableModels().map((model) => (
+                    <MenuItem key={model.name} value={model.name}>
+                      {model.display_name}
                     </MenuItem>
                   ))}
                 </Select>

@@ -143,7 +143,7 @@ const ChatPage: React.FC = () => {
         system_prompt: systemPrompt,
       };
       const response = await getSDK().chat.createConversationApiV1ChatConversations(createRequest);
-      setCurrentConversation(response.data);
+      setCurrentConversation(response);
       setMessages([]);
 
       if (selectedPrompt && selectedPromptData) {
@@ -153,10 +153,10 @@ const ChatPage: React.FC = () => {
             role: 'system',
             content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
             timestamp: new Date(),
-          },
+          } as ExtendedChatMessage,
         ]);
       }
-      return response.data;
+      return response;
     } catch (err: any) {
       toastService.error(err, 'Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
@@ -240,7 +240,7 @@ const ChatPage: React.FC = () => {
           role: 'assistant',
           content: '',
           timestamp: new Date(),
-        };
+        } as ExtendedChatMessage;
         setMessages((prev) => [...prev, assistantMessage]);
       }
 
@@ -297,7 +297,7 @@ const ChatPage: React.FC = () => {
         role: 'user',
         content: text,
         timestamp: new Date(),
-      };
+      } as ExtendedChatMessage;
       setMessages((prev) => [...prev, userMessage]);
 
       // Build the chat request with config panel values

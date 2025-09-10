@@ -22,7 +22,7 @@ import {
   Alert,
   CircularProgress,
 } from '@mui/material';
-import CustomScrollbar from './CustomScrollbar';
+import { format } from 'date-fns';
 import {
   History as HistoryIcon,
   Message as MessageIcon,
@@ -190,7 +190,6 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                     filteredConversations.map((conversation) => (
                   <ListItem
                     key={conversation.id}
-                    button
                     onClick={() => handleSelectConversation(conversation)}
                     selected={conversation.id === currentConversationId}
                     sx={{
@@ -198,6 +197,10 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                       mb: 1,
                       border: conversation.id === currentConversationId ? '2px solid' : '1px solid',
                       borderColor: conversation.id === currentConversationId ? 'primary.main' : 'divider',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: 'action.hover'
+                      }
                     }}
                   >
                     <ListItemIcon>
@@ -220,8 +223,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                       secondary={
                         <Box>
                           <Typography variant="caption" color="text.secondary">
-                            {conversation.createdAt
-                              ? format(new Date(conversation.createdAt), 'MMM dd, yyyy HH:mm')
+                            {conversation.created_at
+                              ? format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm')
                               : 'Unknown date'}
                           </Typography>
                           <br />

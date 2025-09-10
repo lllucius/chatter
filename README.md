@@ -207,7 +207,7 @@ python scripts/generate_sdks.py --verbose
 ### SDK Locations
 
 - **Python SDK**: `sdk/python/` (package: `chatter_sdk`)
-- **TypeScript SDK**: `frontend/src/sdk/` (package: `chatter-sdk`)
+- **TypeScript SDK**: `sdk/typescript/` (package: `chatter-sdk`)
 
 For detailed information, see [SDK Generation Documentation](docs/sdk-generation.md).
 

@@ -51,7 +51,7 @@ python scripts/generate_sdks.py --python --verbose
 - **Library**: asyncio-based
 
 ### TypeScript SDK
-- **Location**: `frontend/src/sdk/`
+- **Location**: `sdk/typescript/`
 - **Package Name**: `chatter-sdk`
 - **Language**: TypeScript
 - **Target**: ES6+ with Fetch API

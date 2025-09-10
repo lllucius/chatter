@@ -368,17 +368,27 @@ Available templates:
 - `data_analyst`: Data analysis with computation tools
 
    */
+  
+  /**
+   * Chat with streaming support using the unified chat endpoint.
+   * This method uses the SDK's infrastructure (auth, middleware, etc.) but handles streaming responses.
+   */
   public async chatChatStreaming(
     data: ChatRequest,
     onChunk: (chunk: any) => void,
     onComplete?: () => void,
     onError?: (error: Error) => void
   ): Promise<void> {
-    const url = (this as any).buildURL('/api/v1/chat/chat');
-    const headers = { 
-      ...this.configuration.headers, 
+    // Use SDK infrastructure for URL building and headers
+    const path = '/api/v1/chat/chat';
+    const url = (this as any).buildURL(path);
+    
+    // Use SDK's configuration for headers and credentials
+    const headers = {
+      ...this.configuration.headers,
+      'Content-Type': 'application/json',
       'Accept': 'text/event-stream',
-      'Cache-Control': 'no-cache'
+      'Cache-Control': 'no-cache',
     };
     
     const init: RequestInit = {
@@ -454,87 +464,6 @@ Available templates:
     }
   }
 
-  /**Chat With Template
-   * Chat using a specific workflow template.
-## Workflow Types
-
-This endpoint supports multiple workflow types through the `workflow` parameter:
-
-### Plain Chat (`plain`)
-Basic conversation without tools or retrieval.
-```json
-{
-    "message": "Hello, how are you?",
-    "workflow": "plain"
-}
-```
-
-### RAG Workflow (`rag`)
-Retrieval-Augmented Generation with document search.
-```json
-{
-    "message": "What are the latest sales figures?",
-    "workflow": "rag",
-    "enable_retrieval": true
-}
-```
-
-### Tools Workflow (`tools`)
-Function calling with available tools.
-```json
-{
-    "message": "Calculate the square root of 144",
-    "workflow": "tools"
-}
-```
-
-### Full Workflow (`full`)
-Combination of RAG and tools for complex tasks.
-```json
-{
-    "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
-    "enable_retrieval": true
-}
-```
-
-## Streaming
-
-Set `stream: true` to receive real-time responses:
-```json
-{
-    "message": "Tell me a story",
-    "workflow": "plain",
-    "stream": true
-}
-```
-
-Streaming responses use Server-Sent Events (SSE) format with event types:
-- `token`: Content chunks
-- `node_start`: Workflow node started
-- `node_complete`: Workflow node completed
-- `usage`: Final usage statistics
-- `error`: Error occurred
-
-## Templates
-
-Use pre-configured templates for common scenarios:
-```json
-{
-    "message": "I need help with my order",
-    "workflow_template": "customer_support"
-}
-```
-
-Available templates:
-- `customer_support`: Customer service with knowledge base
-- `code_assistant`: Programming help with code tools
-- `research_assistant`: Document research and analysis
-- `general_chat`: General conversation
-- `document_qa`: Document question answering
-- `data_analyst`: Data analysis with computation tools
-
-   */
   public async chatWithTemplateApiV1ChatTemplateTemplateName(templateName: string, data: ChatRequest): Promise<ChatResponse> {
     const requestOptions = {
       method: 'POST' as const,

@@ -57,6 +57,9 @@ class EnhancedInMemoryCache(CacheInterface):
         Returns:
             Cached value or None if not found
         """
+        if self.is_disabled:
+            return None
+            
         if not self.is_valid_key(key):
             self._update_stats(error=True)
             return None
@@ -95,6 +98,9 @@ class EnhancedInMemoryCache(CacheInterface):
         Returns:
             True if successful, False otherwise
         """
+        if self.is_disabled:
+            return False
+            
         if not self.is_valid_key(key):
             self._update_stats(error=True)
             return False
@@ -152,6 +158,9 @@ class EnhancedInMemoryCache(CacheInterface):
         Returns:
             True if successful, False otherwise
         """
+        if self.is_disabled:
+            return False
+            
         if not self.is_valid_key(key):
             return False
 
@@ -172,6 +181,9 @@ class EnhancedInMemoryCache(CacheInterface):
         Returns:
             True if successful, False otherwise
         """
+        if self.is_disabled:
+            return True  # Consider successful if cache is disabled
+            
         try:
             async with self._lock:
                 cache_size = len(self._cache)

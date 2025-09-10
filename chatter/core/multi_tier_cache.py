@@ -116,6 +116,9 @@ class MultiTierCache(CacheInterface):
         Returns:
             Cached value or None if not found
         """
+        if self.is_disabled:
+            return None
+            
         if not self.is_valid_key(key):
             self._update_stats(error=True)
             return None
@@ -155,6 +158,9 @@ class MultiTierCache(CacheInterface):
         Returns:
             True if at least one cache layer succeeded
         """
+        if self.is_disabled:
+            return False
+            
         if not self.is_valid_key(key):
             self._update_stats(error=True)
             return False
@@ -190,6 +196,9 @@ class MultiTierCache(CacheInterface):
         Returns:
             True if successful in at least one layer
         """
+        if self.is_disabled:
+            return False
+            
         if not self.is_valid_key(key):
             return False
 
@@ -218,6 +227,9 @@ class MultiTierCache(CacheInterface):
         Returns:
             True if successful in at least one layer
         """
+        if self.is_disabled:
+            return True  # Consider successful if cache is disabled
+            
         l1_success = await self.l1_cache.clear()
         l2_success = await self.l2_cache.clear()
 

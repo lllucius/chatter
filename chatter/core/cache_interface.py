@@ -33,6 +33,7 @@ class CacheConfig:
     key_prefix: str = ""
     enable_stats: bool = True
     enable_compression: bool = False
+    disabled: bool = False  # Completely disable cache operations
 
 
 class CacheInterface(ABC):
@@ -46,6 +47,15 @@ class CacheInterface(ABC):
         """
         self.config = config or CacheConfig()
         self._stats = CacheStats()
+
+    @property
+    def is_disabled(self) -> bool:
+        """Check if cache is completely disabled.
+        
+        Returns:
+            True if cache operations should be skipped
+        """
+        return self.config.disabled
 
     @abstractmethod
     async def get(self, key: str) -> Any:

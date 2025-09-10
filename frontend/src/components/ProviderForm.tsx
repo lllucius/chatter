@@ -81,9 +81,9 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
       // Defensive programming: Ensure all fields are properly defined
       const safeFormData = {
         ...formData,
-        // Ensure description is always a string (empty string if null/undefined)
+        display_name: formData.display_name ?? '',
         description: formData.description ?? '',
-        // Ensure boolean fields are properly typed (preserve false values)
+        base_url: formData.base_url || '',
         api_key_required: formData.api_key_required ?? true,
         is_active: formData.is_active ?? true,
       };

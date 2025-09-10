@@ -2,7 +2,7 @@
  * Generated API client for Jobs
  */
 import { JobActionResponse, JobCreateRequest, JobListResponse, JobPriority, JobResponse, JobStatsResponse, JobStatus } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class JobsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -20,12 +20,16 @@ Returns:
     Created job data
    */
   public async createJobApiV1Jobs(data: JobCreateRequest): Promise<JobResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<JobResponse>(`/api/v1/jobs/`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<JobResponse>;
   }
   /**List Jobs
    * List jobs with optional filtering and pagination.
@@ -38,9 +42,12 @@ Returns:
     List of jobs with pagination info
    */
   public async listJobsApiV1Jobs(data: string[] | null, options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'status': options?.status,
         'priority': options?.priority,
@@ -57,7 +64,8 @@ Returns:
       body: data,
     };
 
-    return this.request<JobListResponse>(`/api/v1/jobs/`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<JobListResponse>;
   }
   /**Get Job
    * Get job by ID.
@@ -70,11 +78,15 @@ Returns:
     Job data
    */
   public async getJobApiV1JobsJobId(jobId: string): Promise<JobResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/${jobId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<JobResponse>(`/api/v1/jobs/${jobId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<JobResponse>;
   }
   /**Cancel Job
    * Cancel a job.
@@ -87,11 +99,15 @@ Returns:
     Cancellation result
    */
   public async cancelJobApiV1JobsJobIdCancel(jobId: string): Promise<JobActionResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/${jobId}/cancel`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<JobActionResponse>(`/api/v1/jobs/${jobId}/cancel`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<JobActionResponse>;
   }
   /**Get Job Stats
    * Get job queue statistics.
@@ -103,11 +119,15 @@ Returns:
     Job statistics
    */
   public async getJobStatsApiV1JobsStatsOverview(): Promise<JobStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/stats/overview`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<JobStatsResponse>(`/api/v1/jobs/stats/overview`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<JobStatsResponse>;
   }
   /**Cleanup Jobs
    * Clean up old completed jobs to free up memory.
@@ -123,15 +143,19 @@ Returns:
     Cleanup statistics
    */
   public async cleanupJobsApiV1JobsCleanup(options?: { force?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'POST' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/jobs/cleanup`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'force': options?.force,
         ...options?.query
       },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/jobs/cleanup`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
 }

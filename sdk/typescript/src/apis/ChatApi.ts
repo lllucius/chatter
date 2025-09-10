@@ -2,7 +2,7 @@
  * Generated API client for Chat
  */
 import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse, chatter__schemas__chat__WorkflowTemplatesResponse } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ChatApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -93,20 +93,27 @@ Available templates:
 
    */
   public async createConversationApiV1ChatConversations(data: ConversationCreate): Promise<ConversationResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ConversationResponse>(`/api/v1/chat/conversations`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ConversationResponse>;
   }
   /**List Conversations
    * List conversations for the current user.
    */
   public async listConversationsApiV1ChatConversations(options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationSearchResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
@@ -114,51 +121,67 @@ Available templates:
       },
     };
 
-    return this.request<ConversationSearchResponse>(`/api/v1/chat/conversations`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ConversationSearchResponse>;
   }
   /**Get Conversation
    * Get conversation details with optional messages.
    */
   public async getConversationApiV1ChatConversationsConversationId(conversationId: string, options?: { includeMessages?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationWithMessages> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'include_messages': options?.includeMessages,
         ...options?.query
       },
     };
 
-    return this.request<ConversationWithMessages>(`/api/v1/chat/conversations/${conversationId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ConversationWithMessages>;
   }
   /**Update Conversation
    * Update conversation.
    */
   public async updateConversationApiV1ChatConversationsConversationId(conversationId: string, data: ConversationUpdate): Promise<ConversationResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ConversationResponse>(`/api/v1/chat/conversations/${conversationId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ConversationResponse>;
   }
   /**Delete Conversation
    * Delete conversation.
    */
   public async deleteConversationApiV1ChatConversationsConversationId(conversationId: string): Promise<ConversationDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<ConversationDeleteResponse>(`/api/v1/chat/conversations/${conversationId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ConversationDeleteResponse>;
   }
   /**Get Conversation Messages
    * Get messages from a conversation.
    */
   public async getConversationMessagesApiV1ChatConversationsConversationIdMessages(conversationId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<MessageResponse[]> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}/messages`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
@@ -166,17 +189,22 @@ Available templates:
       },
     };
 
-    return this.request<MessageResponse[]>(`/api/v1/chat/conversations/${conversationId}/messages`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<MessageResponse[]>;
   }
   /**Delete Message
    * Delete a message from a conversation.
    */
   public async deleteMessageApiV1ChatConversationsConversationIdMessagesMessageId(conversationId: string, messageId: string): Promise<MessageDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}/messages/${messageId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<MessageDeleteResponse>(`/api/v1/chat/conversations/${conversationId}/messages/${messageId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<MessageDeleteResponse>;
   }
   /**Chat
    * Non-streaming chat endpoint supporting all workflow types.
@@ -260,12 +288,16 @@ Available templates:
 
    */
   public async chatChat(data: ChatRequest): Promise<ChatResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/chat`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ChatResponse>(`/api/v1/chat/chat`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ChatResponse>;
   }
   /**Streaming Chat
    * Streaming chat endpoint supporting all workflow types.
@@ -349,32 +381,44 @@ Available templates:
 
    */
   public async streamingChatApiV1ChatStreaming(data: ChatRequest): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/streaming`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/chat/streaming`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Get Available Tools
    * Get list of available MCP tools.
    */
   public async getAvailableToolsApiV1ChatToolsAvailable(): Promise<AvailableToolsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/tools/available`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<AvailableToolsResponse>(`/api/v1/chat/tools/available`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<AvailableToolsResponse>;
   }
   /**Get Workflow Templates
    * Get available workflow templates.
    */
   public async getWorkflowTemplatesApiV1ChatTemplates(): Promise<chatter__schemas__chat__WorkflowTemplatesResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/templates`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<chatter__schemas__chat__WorkflowTemplatesResponse>(`/api/v1/chat/templates`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<chatter__schemas__chat__WorkflowTemplatesResponse>;
   }
   /**Chat With Template
    * Chat using a specific workflow template.
@@ -458,31 +502,43 @@ Available templates:
 
    */
   public async chatWithTemplateApiV1ChatTemplateTemplateName(templateName: string, data: ChatRequest): Promise<ChatResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/template/${templateName}`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<ChatResponse>(`/api/v1/chat/template/${templateName}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ChatResponse>;
   }
   /**Get Performance Stats
    * Get workflow performance statistics.
    */
   public async getPerformanceStatsApiV1ChatPerformanceStats(): Promise<PerformanceStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/performance/stats`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<PerformanceStatsResponse>(`/api/v1/chat/performance/stats`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<PerformanceStatsResponse>;
   }
   /**Get Mcp Status
    * Get MCP service status.
    */
   public async getMcpStatusApiV1ChatMcpStatus(): Promise<McpStatusResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/mcp/status`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<McpStatusResponse>(`/api/v1/chat/mcp/status`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<McpStatusResponse>;
   }
 }

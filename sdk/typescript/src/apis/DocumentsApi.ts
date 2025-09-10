@@ -2,7 +2,7 @@
  * Generated API client for Documents
  */
 import { DocumentChunksResponse, DocumentDeleteResponse, DocumentListResponse, DocumentProcessingRequest, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentSearchResponse, DocumentStatsResponse, DocumentStatus, DocumentType, DocumentUpdate } from '../models/index';
-import { BaseAPI, Configuration, HTTPQuery, HTTPHeaders } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -27,12 +27,16 @@ Returns:
     Created document information
    */
   public async uploadDocumentApiV1DocumentsUpload(data: FormData): Promise<DocumentResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/upload`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<DocumentResponse>(`/api/v1/documents/upload`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentResponse>;
   }
   /**List Documents
    * List user's documents.
@@ -53,9 +57,12 @@ Returns:
     List of documents with pagination info
    */
   public async listDocumentsApiV1Documents(options?: { status?: DocumentStatus | null; documentType?: DocumentType | null; tags?: string[] | null; ownerId?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentListResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'status': options?.status,
         'document_type': options?.documentType,
@@ -69,7 +76,8 @@ Returns:
       },
     };
 
-    return this.request<DocumentListResponse>(`/api/v1/documents`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentListResponse>;
   }
   /**Get Document
    * Get document details.
@@ -83,11 +91,15 @@ Returns:
     Document information
    */
   public async getDocumentApiV1DocumentsDocumentId(documentId: string): Promise<DocumentResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<DocumentResponse>(`/api/v1/documents/${documentId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentResponse>;
   }
   /**Update Document
    * Update document metadata.
@@ -102,12 +114,16 @@ Returns:
     Updated document information
    */
   public async updateDocumentApiV1DocumentsDocumentId(documentId: string, data: DocumentUpdate): Promise<DocumentResponse> {
-    const requestOptions = {
-      method: 'PUT' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}`,
+      method: 'PUT' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<DocumentResponse>(`/api/v1/documents/${documentId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentResponse>;
   }
   /**Delete Document
    * Delete document.
@@ -122,11 +138,15 @@ Returns:
     Success message
    */
   public async deleteDocumentApiV1DocumentsDocumentId(documentId: string): Promise<DocumentDeleteResponse> {
-    const requestOptions = {
-      method: 'DELETE' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<DocumentDeleteResponse>(`/api/v1/documents/${documentId}`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentDeleteResponse>;
   }
   /**Search Documents
    * Search documents using vector similarity.
@@ -140,12 +160,16 @@ Returns:
     Search results
    */
   public async searchDocumentsApiV1DocumentsSearch(data: DocumentSearchRequest): Promise<DocumentSearchResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/search`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<DocumentSearchResponse>(`/api/v1/documents/search`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentSearchResponse>;
   }
   /**Get Document Chunks
    * Get document chunks.
@@ -161,9 +185,12 @@ Returns:
     List of document chunks with pagination
    */
   public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentChunksResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
-      headers: options?.headers,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/chunks`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
       query: {
         'limit': options?.limit,
         'offset': options?.offset,
@@ -171,7 +198,8 @@ Returns:
       },
     };
 
-    return this.request<DocumentChunksResponse>(`/api/v1/documents/${documentId}/chunks`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentChunksResponse>;
   }
   /**Process Document
    * Trigger document processing.
@@ -186,12 +214,16 @@ Returns:
     Processing status
    */
   public async processDocumentApiV1DocumentsDocumentIdProcess(documentId: string, data: DocumentProcessingRequest): Promise<DocumentProcessingResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/process`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
       body: data,
     };
 
-    return this.request<DocumentProcessingResponse>(`/api/v1/documents/${documentId}/process`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentProcessingResponse>;
   }
   /**Get Document Stats
    * Get document statistics.
@@ -204,11 +236,15 @@ Returns:
     Document statistics
    */
   public async getDocumentStatsApiV1DocumentsStatsOverview(): Promise<DocumentStatsResponse> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/stats/overview`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<DocumentStatsResponse>(`/api/v1/documents/stats/overview`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentStatsResponse>;
   }
   /**Download Document
    * Download original document file.
@@ -222,11 +258,15 @@ Returns:
     File download response
    */
   public async downloadDocumentApiV1DocumentsDocumentIdDownload(documentId: string): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/download`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/api/v1/documents/${documentId}/download`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
   /**Reprocess Document
    * Reprocess an existing document.
@@ -240,10 +280,14 @@ Returns:
     Processing status
    */
   public async reprocessDocumentApiV1DocumentsDocumentIdReprocess(documentId: string): Promise<DocumentProcessingResponse> {
-    const requestOptions = {
-      method: 'POST' as const,
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/reprocess`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<DocumentProcessingResponse>(`/api/v1/documents/${documentId}/reprocess`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentProcessingResponse>;
   }
 }

@@ -1,7 +1,7 @@
 /**
  * Generated API client for Default
  */
-import { BaseAPI, Configuration } from '../runtime';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class DefaultApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -12,10 +12,14 @@ export class DefaultApi extends BaseAPI {
    * Root endpoint.
    */
   public async root(): Promise<Record<string, unknown>> {
-    const requestOptions = {
-      method: 'GET' as const,
+    const requestContext: RequestOpts = {
+      path: `/`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
     };
 
-    return this.request<Record<string, unknown>>(`/`, requestOptions);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
 }

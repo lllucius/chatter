@@ -265,7 +265,7 @@ class TestProfilesIntegration:
         providers_data = providers_response.json()
         assert isinstance(providers_data, dict)
         # Should have at least some common providers
-        common_providers = ["openai", "anthropic", "google", "cohere"]
+        common_providers = ["openai", "anthropic", "google", "cohere", "local"]
         available_providers = list(providers_data.keys())
         assert any(
             provider in available_providers

@@ -1872,7 +1872,7 @@ async def list_embedding_spaces():
 @run_async
 async def create_provider(
     name: str = typer.Option(..., help="Unique provider name"),
-    provider_type: str = typer.Option(..., help="Provider type (openai, anthropic, google, cohere, mistral)"),
+    provider_type: str = typer.Option(..., help="Provider type (openai, anthropic, google, cohere, mistral, local)"),
     display_name: str = typer.Option(..., help="Human-readable display name"),
     description: str = typer.Option(None, help="Provider description"),
     api_key_required: bool = typer.Option(True, help="Whether API key is required"),

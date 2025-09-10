@@ -32,6 +32,7 @@ class ProviderType(str, Enum):
     GOOGLE = 'google'
     COHERE = 'cohere'
     MISTRAL = 'mistral'
+    LOCAL = 'local'
 
     @classmethod
     def from_json(cls, json_str: str) -> Self:

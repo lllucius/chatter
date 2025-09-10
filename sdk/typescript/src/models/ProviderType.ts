@@ -6,5 +6,6 @@ export enum ProviderType {
   anthropic = "anthropic",
   google = "google",
   cohere = "cohere",
-  mistral = "mistral"
+  mistral = "mistral",
+  local = "local"
 }

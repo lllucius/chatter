@@ -27,6 +27,7 @@ class ProviderType(str, Enum):
     GOOGLE = "google"
     COHERE = "cohere"
     MISTRAL = "mistral"
+    LOCAL = "local"
 
 
 class ModelType(str, Enum):

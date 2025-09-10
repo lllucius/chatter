@@ -6,10 +6,7 @@ import {
   Typography,
   TextField,
   IconButton,
-  Tooltip,
-  Alert,
   CircularProgress,
-  Paper,
   Chip,
   Button,
   Divider,
@@ -21,18 +18,14 @@ import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 import {
   Send as SendIcon,
-  Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
-  Stream as StreamIcon,
-  Speed as SpeedIcon,
   History as HistoryIcon,
   Download as DownloadIcon,
   Clear as ClearIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
-import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
+import { getSDK } from '../services/auth-service';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
@@ -174,37 +167,6 @@ const ChatPage: React.FC = () => {
     }
   }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
 
-  const onSelectConversation = useCallback(async (conversation: ConversationResponse) => {
-    try {
-      // Set current conversation
-      setCurrentConversation(conversation);
-      
-      // Load messages for this conversation
-      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
-        conversation.id
-      );
-      
-      // Convert messages to ExtendedChatMessage format
-      const chatMessages: ExtendedChatMessage[] = response.map(msg => ({
-        id: msg.id,
-        role: msg.role as 'user' | 'assistant' | 'system',
-        content: msg.content,
-        timestamp: new Date(msg.createdAt)
-      }));
-      
-      setMessages(chatMessages);
-      
-      // Scroll to bottom after messages are set
-      setTimeout(() => scrollToBottom(), 100);
-    } catch (err: any) {
-      toastService.error(err, 'Failed to load conversation');
-      if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
-        console.error(err);
-      }
-    }
-  }, []);
-
   useEffect(() => {
     loadData();
   }, []);
@@ -231,7 +193,6 @@ const ChatPage: React.FC = () => {
         profiles={profiles}
         prompts={prompts}
         documents={documents}
-        currentConversation={currentConversation}
         selectedProfile={selectedProfile}
         setSelectedProfile={setSelectedProfile}
         selectedPrompt={selectedPrompt}
@@ -244,7 +205,6 @@ const ChatPage: React.FC = () => {
         setMaxTokens={setMaxTokens}
         enableRetrieval={enableRetrieval}
         setEnableRetrieval={setEnableRetrieval}
-        onSelectConversation={onSelectConversation}
       />
     );
 
@@ -257,14 +217,12 @@ const ChatPage: React.FC = () => {
     profiles,
     prompts,
     documents,
-    currentConversation,
     selectedProfile,
     selectedPrompt,
     selectedDocuments,
     temperature,
     maxTokens,
     enableRetrieval,
-    onSelectConversation,
   ]);
 
   const scrollToBottom = () => {
@@ -286,95 +244,35 @@ const ChatPage: React.FC = () => {
         setMessages((prev) => [...prev, assistantMessage]);
       }
 
-      // Use SDK configuration for consistent base URL and authentication
-      const sdk = getSDK();
-      const config = (sdk as any).chat.configuration;
-      const basePath = config.basePath || '';
-      const headers = config.headers || {};
-      
-      // Make streaming request with SDK-based configuration
-      const response = await fetch(`${basePath}/api/v1/chat`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          ...headers,
-        },
-        credentials: config.credentials || 'include',
-        body: JSON.stringify({
-          ...chatRequest,
-          stream: true, // Ensure streaming is enabled
-        }),
-      });
-
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
-      }
-
-      if (!response.body) {
-        throw new Error('No response body for streaming');
-      }
-
-      const reader = response.body.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      try {
-        // eslint-disable-next-line no-constant-condition
-        while (true) {
-          const { done, value } = await reader.read();
-          
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6).trim(); // Remove 'data: ' prefix
-              
-              if (dataStr === '[DONE]') {
-                return; // End of stream
-              }
-              
-              if (dataStr) {
-                try {
-                  const chunk = JSON.parse(dataStr);
-                  
-                  // Update message content based on chunk type
-                  if (chunk.type === 'token' && chunk.content) {
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === messageId
-                          ? { ...msg, content: msg.content + chunk.content }
-                          : msg
-                      )
-                    );
-                  } else if (chunk.type === 'start') {
-                    // Stream started - no action needed
-                    console.log('Streaming started');
-                  } else if (chunk.type === 'end') {
-                    // Stream ended - no action needed
-                    console.log('Streaming ended');
-                    return; // End the streaming loop
-                  } else if (chunk.type === 'error') {
-                    throw new Error(chunk.content || chunk.error || 'Streaming error');
-                  }
-                } catch (parseError) {
-                  console.error('Failed to parse streaming data:', parseError, dataStr);
-                }
-              }
-            }
+      // Use the new SDK streaming method
+      await getSDK().chat.chatChatStreaming(
+        chatRequest,
+        (chunk) => {
+          // Update message content based on chunk type
+          if (chunk.type === 'token' && chunk.content) {
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === messageId
+                  ? { ...msg, content: msg.content + chunk.content }
+                  : msg
+              )
+            );
+          } else if (chunk.type === 'start') {
+            // Stream started - no action needed
+          } else if (chunk.type === 'end') {
+            // Stream ended - handled by onComplete callback
           }
+        },
+        () => {
+          // Stream completed successfully
+        },
+        (error) => {
+          // Stream error
+          toastService.error(error, 'Streaming failed');
         }
-      } finally {
-        reader.releaseLock();
-      }
+      );
 
     } catch (err: any) {
-      console.error('Streaming response error:', err);
       toastService.error(err, 'Streaming failed');
     }
   };
@@ -456,7 +354,6 @@ const ChatPage: React.FC = () => {
       }
     } catch (err: any) {
       toastService.error(err, 'Failed to send message');
-      console.error(err);
 
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -476,32 +373,6 @@ const ChatPage: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey && !(e.nativeEvent as any).isComposing) {
       e.preventDefault();
       sendMessage();
-    }
-  };
-
-  const getMessageAvatar = (role: string) => {
-    switch (role) {
-      case 'user':
-        return <PersonIcon />;
-      case 'assistant':
-        return <BotIcon />;
-      case 'system':
-        return <SpeedIcon />;
-      default:
-        return <BotIcon />;
-    }
-  };
-
-  const getMessageColor = (role: string) => {
-    switch (role) {
-      case 'user':
-        return 'primary.main';
-      case 'assistant':
-        return 'secondary.main';
-      case 'system':
-        return 'info.main';
-      default:
-        return 'grey.500';
     }
   };
 
@@ -569,7 +440,6 @@ const ChatPage: React.FC = () => {
       }
     } catch (err: any) {
       toastService.error(err, 'Failed to regenerate message');
-      console.error(err);
     } finally {
       setLoading(false);
     }

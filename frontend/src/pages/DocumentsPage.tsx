@@ -365,10 +365,12 @@ const DocumentsPage: React.FC = () => {
     },
 
     create: async (data: DocumentCreateData) => {
-      const response = await getSDK().documents.uploadDocumentApiV1DocumentsUpload({
-        file: data.file,
-        title: data.title || undefined
-      });
+      const formData = new FormData();
+      formData.append('file', data.file);
+      if (data.title) {
+        formData.append('title', data.title);
+      }
+      const response = await getSDK().documents.uploadDocumentApiV1DocumentsUpload(formData);
       return response.data;
     },
 

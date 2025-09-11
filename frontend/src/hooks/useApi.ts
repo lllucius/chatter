@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { getUserFriendlyErrorMessage } from '../services/backend-health';
 
 interface UseApiOptions<T> {
   immediate?: boolean;
@@ -45,8 +46,8 @@ export function useApi<T>(
       setData(result);
       onSuccessRef.current?.(result);
     } catch (err: any) {
-      const errorMessage = err.message || 'An error occurred';
-      setError(errorMessage);
+      const friendlyMessage = getUserFriendlyErrorMessage(err);
+      setError(friendlyMessage);
       onErrorRef.current?.(err);
       // Log error for debugging in development
       if (process.env.NODE_ENV === 'development') {

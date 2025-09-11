@@ -26,6 +26,7 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { toastService } from '../services/toast-service';
+import { getUserFriendlyErrorMessage } from '../services/backend-health';
 
 export interface CrudColumn<T> {
   id: keyof T;
@@ -126,8 +127,10 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
       const result = await service.list(page, rowsPerPage);
       setItems(result.items);
       setTotal(result.total);
-    } catch {
-      toastService.error(`Failed to load ${config.entityNamePlural.toLowerCase()}`);
+    } catch (error: any) {
+      const friendlyMessage = getUserFriendlyErrorMessage(error);
+      toastService.error(`Failed to load ${config.entityNamePlural.toLowerCase()}: ${friendlyMessage}`);
+      console.error(`Failed to load ${config.entityNamePlural}:`, error);
     } finally {
       setLoading(false);
     }
@@ -169,8 +172,10 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
         await service.delete(getItemId(item));
         toastService.success(`${config.entityName} deleted successfully`);
         await loadData();
-      } catch {
-        toastService.error(`Failed to delete ${config.entityName.toLowerCase()}`);
+      } catch (error: any) {
+        const friendlyMessage = getUserFriendlyErrorMessage(error);
+        toastService.error(`Failed to delete ${config.entityName.toLowerCase()}: ${friendlyMessage}`);
+        console.error(`Failed to delete ${config.entityName}:`, error);
       }
     }
   };
@@ -186,8 +191,10 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
       }
       handleDialogClose();
       await loadData();
-    } catch {
-      toastService.error(`Failed to ${dialogMode} ${config.entityName.toLowerCase()}`);
+    } catch (error: any) {
+      const friendlyMessage = getUserFriendlyErrorMessage(error);
+      toastService.error(`Failed to ${dialogMode} ${config.entityName.toLowerCase()}: ${friendlyMessage}`);
+      console.error(`Failed to ${dialogMode} ${config.entityName}:`, error);
     }
   };
 

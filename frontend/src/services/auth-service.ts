@@ -4,6 +4,7 @@
  * Uses memory for access tokens and HttpOnly cookies for refresh tokens
  */
 import { ChatterSDK, UserLogin } from 'chatter-sdk';
+import { isBackendUnavailableError } from './backend-health';
 
 class AuthService {
   private token: string | null = null; // Store access token in memory only
@@ -33,7 +34,16 @@ class AuthService {
     // Try to restore authentication state from refresh token cookie
     if (!this.token) {
       console.log('[AuthService] No access token in memory, attempting refresh...');
-      await this.refreshToken();
+      try {
+        await this.refreshToken();
+      } catch (error) {
+        // Don't fail initialization if backend is unavailable
+        if (isBackendUnavailableError(error)) {
+          console.warn('[AuthService] Backend unavailable during initialization, continuing...');
+        } else {
+          console.error('[AuthService] Refresh failed during initialization:', error);
+        }
+      }
     }
     
     this.initialized = true;
@@ -134,8 +144,15 @@ class AuthService {
       
       return false;
     } catch (error) {
-      console.error('Token refresh failed:', error);
-      this.clearToken();
+      // Check if this is a backend unavailable error
+      if (isBackendUnavailableError(error)) {
+        console.warn('Backend unavailable during token refresh:', error);
+        // Don't clear token immediately for backend unavailable errors
+        // Keep existing token in case backend comes back
+      } else {
+        console.error('Token refresh failed:', error);
+        this.clearToken();
+      }
       return false;
     } finally {
       this.refreshInProgress = false;
@@ -174,6 +191,11 @@ class AuthService {
     try {
       return await apiCall(sdk);
     } catch (error: any) {
+      // Check if this is a backend unavailable error first
+      if (isBackendUnavailableError(error)) {
+        throw new Error('Backend server is unavailable. Please check if the server is running and try again.');
+      }
+
       // Check if it's an authentication error (401)
       if (error?.status === 401 || error?.response?.status === 401) {
         console.log('[AuthService] Access token expired, attempting refresh...');

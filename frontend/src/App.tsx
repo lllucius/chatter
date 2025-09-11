@@ -10,6 +10,7 @@ import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
 import SuspenseWrapper from './components/SuspenseWrapper';
 import ThemedToastContainer from './components/ThemedToastContainer';
+import { NotificationProvider } from './components/NotificationSystem';
 import { SSEProvider } from './services/sse-context';
 
 // Initialize SDK at app startup
@@ -17,7 +18,7 @@ import { initializeSDK } from './services/auth-service';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DashboardPage = lazy(() => import('./pages/NewDashboardPage'));
 const ConversationsPage = lazy(() => import('./pages/ConversationsPage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const ProfilesPage = lazy(() => import('./pages/ProfilesPage'));
@@ -31,6 +32,7 @@ const ToolsPage = lazy(() => import('./pages/ToolsPage'));
 const WorkflowManagementPage = lazy(() => import('./pages/WorkflowManagementPage'));
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
+const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -142,9 +144,10 @@ function App() {
       <ThemeContext.Provider value={{ darkMode, toggleDarkMode }}>
         <ThemeProvider theme={theme}>
           <CssBaseline />
-          <SSEProvider autoConnect={true}>
-            <Router>
-              <Routes>
+          <NotificationProvider>
+            <SSEProvider autoConnect={true}>
+              <Router>
+                <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={
                   <SuspenseWrapper loadingMessage="Loading login page...">
@@ -229,15 +232,21 @@ function App() {
                       <UserSettingsPage />
                     </SuspenseWrapper>
                   } />
+                  <Route path="notifications-demo" element={
+                    <SuspenseWrapper loadingMessage="Loading demo...">
+                      <NotificationDemo />
+                    </SuspenseWrapper>
+                  } />
                 </Route>
               </Routes>
             </Router>
           </SSEProvider>
           <ThemedToastContainer />
-        </ThemeProvider>
-      </ThemeContext.Provider>
-    </ErrorBoundary>
-  );
+        </NotificationProvider>
+      </ThemeProvider>
+    </ThemeContext.Provider>
+  </ErrorBoundary>
+);
 }
 
 export default App;

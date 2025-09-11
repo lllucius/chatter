@@ -62,6 +62,7 @@ import {
   TestType,
 } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
+import ABTestAnalytics from '../components/ABTestAnalytics';
 
 interface TabPanelProps {
   children?: React.ReactNode;
@@ -591,45 +592,41 @@ const ABTestingPage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={activeTab} index={1}>
-          {testMetrics ? (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>Test Metrics</Typography>
-                <Paper sx={{ p: 2 }}>
-                  <pre>{JSON.stringify(testMetrics, null, 2)}</pre>
-                </Paper>
-              </Grid>
-            </Grid>
-          ) : (
-            <Alert severity="info">No metrics data available for this test.</Alert>
+          {selectedTest && (
+            <ABTestAnalytics
+              testId={selectedTest.id}
+              testName={selectedTest.name}
+              metrics={testMetrics}
+              results={testResults}
+              recommendations={testRecommendations}
+              performance={testPerformance}
+            />
           )}
         </TabPanel>
 
         <TabPanel value={activeTab} index={2}>
-          {testResults ? (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>Test Results</Typography>
-                <Paper sx={{ p: 2 }}>
-                  <pre>{JSON.stringify(testResults, null, 2)}</pre>
-                </Paper>
-              </Grid>
-            </Grid>
-          ) : (
-            <Alert severity="info">No results data available for this test.</Alert>
+          {selectedTest && (
+            <ABTestAnalytics
+              testId={selectedTest.id}
+              testName={selectedTest.name}
+              metrics={testMetrics}
+              results={testResults}
+              recommendations={testRecommendations}
+              performance={testPerformance}
+            />
           )}
         </TabPanel>
 
         <TabPanel value={activeTab} index={3}>
           {testPerformance ? (
-            <Grid container spacing={3}>
-              <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>Performance Data</Typography>
-                <Paper sx={{ p: 2 }}>
-                  <pre>{JSON.stringify(testPerformance, null, 2)}</pre>
-                </Paper>
-              </Grid>
-            </Grid>
+            <ABTestAnalytics
+              testId={selectedTest?.id || ''}
+              testName={selectedTest?.name || ''}
+              metrics={testMetrics}
+              results={testResults}
+              recommendations={testRecommendations}
+              performance={testPerformance}
+            />
           ) : (
             <Alert severity="info">No performance data available for this test.</Alert>
           )}

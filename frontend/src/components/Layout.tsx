@@ -20,6 +20,7 @@ import {
   ListSubheader,
 } from '@mui/material';
 import CustomScrollbar from './CustomScrollbar';
+import { NotificationIcon, NotificationMenu } from './NotificationSystem';
 import {
   Menu as MenuIcon,
   Dashboard as DashboardIcon,
@@ -112,6 +113,7 @@ const LayoutFrame: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
+  const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
   const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>(() => {
     // Initialize expanded state based on defaultExpanded property
     const initial: {[key: string]: boolean} = {};
@@ -184,6 +186,14 @@ const LayoutFrame: React.FC = () => {
 
   const handleProfileMenuClose = () => {
     setAnchorEl(null);
+  };
+
+  const handleNotificationMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setNotificationAnchorEl(event.currentTarget);
+  };
+
+  const handleNotificationMenuClose = () => {
+    setNotificationAnchorEl(null);
   };
 
   const handleSettingsClick = () => {
@@ -303,6 +313,7 @@ const LayoutFrame: React.FC = () => {
                   {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
                 </IconButton>
               </Tooltip>
+              <NotificationIcon onClick={handleNotificationMenuOpen} />
               <IconButton
                 size="small"
                 aria-label="account of current user"
@@ -343,6 +354,13 @@ const LayoutFrame: React.FC = () => {
           Logout
         </MenuItem>
       </Menu>
+
+      {/* Notification Menu */}
+      <NotificationMenu
+        anchorEl={notificationAnchorEl}
+        open={Boolean(notificationAnchorEl)}
+        onClose={handleNotificationMenuClose}
+      />
     </div>
   );
 

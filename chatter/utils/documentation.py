@@ -2,13 +2,13 @@
 
 from typing import Any
 
-import structlog
 from fastapi import FastAPI
 from fastapi.openapi.utils import get_openapi
 
+from chatter.utils.logging import get_logger
 from chatter.utils.versioning import version_manager
 
-logger = structlog.get_logger()
+logger = get_logger(__name__)
 
 # API Constants
 API_V1_PREFIX = "/api/v1"

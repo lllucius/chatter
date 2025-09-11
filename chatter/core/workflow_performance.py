@@ -4,21 +4,81 @@ This module provides caching and lazy loading features to improve workflow
 performance and reduce resource usage.
 """
 
+import asyncio
 import time
 from typing import Any
 
-from chatter.core.simplified_cache import (
-    get_tool_loader,
-    get_workflow_cache,
+from chatter.core.cache_factory import (
+    get_general_cache,
+    get_persistent_cache,
 )
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-# Global instances for easy access - using simplified cache system
-workflow_cache = get_workflow_cache()
-lazy_tool_loader = get_tool_loader()
+# Global instances for easy access - using core cache system directly
+_workflow_cache = get_persistent_cache()
+_tool_cache = get_general_cache()
+
+
+def _get_cache_stats_sync(cache):
+    """Get cache stats synchronously for monitoring purposes."""
+    try:
+        loop = asyncio.get_event_loop()
+        if loop.is_running():
+            # If we're already in an async context, we can't run async code
+            # Return default stats for monitoring
+            return {
+                "total_entries": 0,
+                "cache_hits": 0,
+                "cache_misses": 0,
+                "hit_rate": 0.0,
+                "memory_usage": 0,
+                "evictions": 0,
+                "errors": 0,
+            }
+        else:
+            return loop.run_until_complete(cache.get_stats())
+    except RuntimeError:
+        # No event loop - can run async code
+        return asyncio.run(cache.get_stats())
+    except Exception as e:
+        logger.warning(f"Failed to get cache stats: {e}")
+        return {
+            "total_entries": 0,
+            "cache_hits": 0,
+            "cache_misses": 0,
+            "hit_rate": 0.0,
+            "memory_usage": 0,
+            "evictions": 0,
+            "errors": 1,
+        }
+
+
+class CacheWrapper:
+    """Wrapper to provide sync interface for monitoring."""
+    
+    def __init__(self, cache):
+        self._cache = cache
+    
+    def get_stats(self):
+        """Get cache stats synchronously."""
+        stats = _get_cache_stats_sync(self._cache)
+        return {
+            "total_entries": stats.total_entries,
+            "cache_hits": stats.cache_hits,
+            "cache_misses": stats.cache_misses,
+            "hit_rate": stats.hit_rate,
+            "memory_usage": stats.memory_usage,
+            "evictions": stats.evictions,
+            "errors": stats.errors,
+        }
+
+
+# Create sync wrappers for monitoring
+workflow_cache = CacheWrapper(_workflow_cache)
+lazy_tool_loader = CacheWrapper(_tool_cache)
 
 
 class PerformanceMonitor:

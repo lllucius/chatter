@@ -6,7 +6,6 @@ decomposing the monolithic WorkflowExecutionService into manageable components.
 
 from __future__ import annotations
 
-import logging
 import time
 from abc import ABC, abstractmethod
 from collections.abc import AsyncGenerator
@@ -31,8 +30,9 @@ from chatter.models.conversation import (
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
+from chatter.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class WorkflowExecutionError(Exception):

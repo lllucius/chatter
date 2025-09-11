@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from chatter.core.cache_factory import get_model_registry_cache
+from chatter.core.cache_factory import get_general_cache
 from chatter.core.cache_interface import CacheInterface
 from chatter.models.registry import ModelType
 from chatter.utils.logging import get_logger
@@ -23,7 +23,7 @@ class UnifiedModelRegistryCache:
         Args:
             cache: Cache implementation to use (auto-created if None)
         """
-        self.cache = cache or get_model_registry_cache()
+        self.cache = cache or get_general_cache()
 
         # Cache TTL settings (in seconds) - these match the original implementation
         self.defaults_ttl = 300  # 5 minutes for defaults

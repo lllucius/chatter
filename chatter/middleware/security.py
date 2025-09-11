@@ -2,12 +2,13 @@
 
 from collections.abc import Callable
 
-import structlog
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
 
-logger = structlog.get_logger(__name__)
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
 
 
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

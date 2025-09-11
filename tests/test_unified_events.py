@@ -23,8 +23,8 @@ from chatter.core.events import (
 from chatter.core.security_adapter import (
     setup_security_integration,
 )
-from chatter.core.unified_events import (
-    UnifiedEventManager,
+from chatter.core.events import (
+    EventManager,
     emit_audit_event,
     emit_realtime_event,
     emit_security_event,
@@ -233,13 +233,13 @@ class TestEventRouter:
         mock_emitter.emit.assert_called_once_with(event)
 
 
-class TestUnifiedEventManager:
+class TestEventManager:
     """Test the unified event manager."""
 
     @pytest.fixture
     async def manager(self):
         """Create a fresh event manager for testing."""
-        manager = UnifiedEventManager()
+        manager = EventManager()
         await manager.initialize()
         yield manager
         await manager.shutdown()
@@ -247,7 +247,7 @@ class TestUnifiedEventManager:
     @pytest.mark.asyncio
     async def test_manager_initialization(self):
         """Test manager initialization and shutdown."""
-        manager = UnifiedEventManager()
+        manager = EventManager()
 
         assert not manager.is_initialized()
 
@@ -316,7 +316,7 @@ class TestEventIntegration:
     async def test_full_event_flow(self):
         """Test complete event flow through all systems."""
         # Initialize a fresh manager
-        manager = UnifiedEventManager()
+        manager = EventManager()
         await manager.initialize()
 
         try:
@@ -388,7 +388,7 @@ class TestEventIntegration:
     async def test_convenience_functions(self):
         """Test convenience functions work correctly."""
         # Initialize system
-        manager = UnifiedEventManager()
+        manager = EventManager()
         await manager.initialize()
 
         try:

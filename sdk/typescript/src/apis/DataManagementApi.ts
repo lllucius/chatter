@@ -17,6 +17,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/export`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -32,6 +33,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/backup`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -67,6 +69,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/restore`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -96,6 +99,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/bulk/delete-documents`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -111,6 +115,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/bulk/delete-conversations`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -126,6 +131,7 @@ export class DataManagementApi extends BaseAPI {
       path: `/api/v1/data/bulk/delete-prompts`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

@@ -25,6 +25,7 @@ Returns:
       path: `/api/v1/prompts/`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -183,6 +184,7 @@ Returns:
       path: `/api/v1/prompts/${promptId}/test`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -207,6 +209,7 @@ Returns:
       path: `/api/v1/prompts/${promptId}/clone`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

@@ -25,6 +25,7 @@ Returns:
       path: `/api/v1/plugins/install`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -145,6 +146,7 @@ Returns:
       path: `/api/v1/plugins/${pluginId}/enable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -167,6 +169,7 @@ Returns:
       path: `/api/v1/plugins/${pluginId}/disable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -259,6 +262,7 @@ Returns:
       path: `/api/v1/plugins/bulk/enable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -282,6 +286,7 @@ Returns:
       path: `/api/v1/plugins/bulk/disable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

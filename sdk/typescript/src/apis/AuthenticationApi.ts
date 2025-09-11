@@ -25,6 +25,7 @@ Returns:
       path: `/api/v1/auth/register`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -49,6 +50,7 @@ Returns:
       path: `/api/v1/auth/login`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -72,6 +74,7 @@ Returns:
       path: `/api/v1/auth/refresh`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -138,6 +141,7 @@ Returns:
       path: `/api/v1/auth/change-password`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -162,6 +166,7 @@ Returns:
       path: `/api/v1/auth/api-key`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -229,6 +234,7 @@ Returns:
       path: `/api/v1/auth/logout`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -251,6 +257,7 @@ Returns:
       path: `/api/v1/auth/password-reset/request`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
@@ -279,6 +286,7 @@ Returns:
       path: `/api/v1/auth/password-reset/confirm`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {

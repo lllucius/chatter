@@ -97,6 +97,7 @@ Available templates:
       path: `/api/v1/chat/conversations`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -292,6 +293,7 @@ Available templates:
       path: `/api/v1/chat/chat`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -385,6 +387,7 @@ Available templates:
       path: `/api/v1/chat/streaming`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -506,6 +509,7 @@ Available templates:
       path: `/api/v1/chat/template/${templateName}`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

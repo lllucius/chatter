@@ -82,8 +82,11 @@ const ProfilesPage: React.FC = () => {
 
   // Define service methods
   const service: CrudService<ProfileResponse, ProfileCreate, ProfileUpdate> = {
-    list: async () => {
-      const response = await getSDK().profiles.listProfilesApiV1Profiles({});
+    list: async (page: number, pageSize: number) => {
+      const response = await getSDK().profiles.listProfilesApiV1Profiles({
+        limit: pageSize,
+        offset: page * pageSize,
+      });
       return {
         items: response.profiles || [],
         total: response.totalCount || 0,

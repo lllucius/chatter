@@ -350,17 +350,15 @@ const DocumentsPage: React.FC = () => {
   // Define service methods
   const service: CrudService<DocumentResponse, DocumentCreateData, DocumentUpdateData> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().documents.listDocumentsApiV1Documents({});
+      const response = await getSDK().documents.listDocumentsApiV1Documents({
+        limit: pageSize,
+        offset: page * pageSize,
+      });
       const documents = response.documents || [];
       
-      // Implement client-side pagination for now
-      const startIndex = page * pageSize;
-      const endIndex = startIndex + pageSize;
-      const paginatedItems = documents.slice(startIndex, endIndex);
-      
       return {
-        items: paginatedItems,
-        total: documents.length,
+        items: documents,
+        total: response.total || documents.length,
       };
     },
 

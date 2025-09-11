@@ -134,8 +134,10 @@ const AgentsPage: React.FC = () => {
   const service: CrudService<AgentResponse, AgentCreateRequest, AgentUpdateRequest> = {
     list: async (page: number, pageSize: number) => {
       const response = await getSDK().agents.listAgentsApiV1Agents({
-        page: page + 1,
-        per_page: pageSize,
+        pagination: {
+          limit: pageSize,
+          offset: page * pageSize,
+        },
       });
       return {
         items: response.data || [],

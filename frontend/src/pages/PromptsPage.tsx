@@ -102,8 +102,8 @@ const PromptsPage: React.FC = () => {
   const service: CrudService<PromptResponse, PromptCreate, PromptUpdate> = {
     list: async (page: number, pageSize: number) => {
       const response = await getSDK().prompts.listPromptsApiV1Prompts({
-        page: page + 1, // API is 1-based, component is 0-based
-        per_page: pageSize,
+        limit: pageSize,
+        offset: page * pageSize,
       });
       return {
         items: response.prompts || [],

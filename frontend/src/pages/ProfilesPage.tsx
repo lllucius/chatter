@@ -98,10 +98,7 @@ const ProfilesPage: React.FC = () => {
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId({
-        profileId: id,
-        profileUpdate: data,
-      });
+      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId(id, data);
       return response;
     },
 

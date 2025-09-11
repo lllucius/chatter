@@ -224,10 +224,7 @@ const ToolsPage: React.FC = () => {
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId({
-        serverId: id,
-        toolServerUpdate: data,
-      });
+      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId(id, data);
       return response;
     },
 

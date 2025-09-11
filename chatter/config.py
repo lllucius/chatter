@@ -112,13 +112,22 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
-    # REDIS CACHE SETTINGS
+    # UNIFIED CACHING SETTINGS
     # =============================================================================
 
-    # Enable/disable Redis caching - if disabled, operations silently fail gracefully
-    cache_enabled: bool = Field(
-        default=True, description="Enable Redis caching (optional)"
+    # Global cache control
+    cache_disabled: bool = Field(
+        default=False,
+        description="Completely disable all caching operations"
     )
+    
+    # Cache backend configuration
+    cache_backend: str = Field(
+        default="multi_tier",
+        description="Cache backend: 'memory', 'redis', or 'multi_tier'"
+    )
+    
+    # Redis connection settings
     redis_url: str = Field(
         default="redis://localhost:6379/0",
         description="Redis URL for caching",
@@ -126,17 +135,37 @@ class Settings(BaseSettings):
     test_redis_url: str = Field(
         default="redis://localhost:6379/1", description="Test Redis URL"
     )
-    cache_ttl: int = Field(
-        default=3600, description="Default cache TTL in seconds"
-    )
-    # Connection timeout for Redis operations
     redis_connect_timeout: int = Field(
         default=5, description="Redis connection timeout in seconds"
     )
-    # Retry attempts for Redis connection
     redis_connect_retries: int = Field(
         default=3, description="Redis connection retry attempts"
     )
+    
+    # Cache sizing and behavior
+    cache_max_size: int = Field(
+        default=1000, description="Maximum entries in cache"
+    )
+    cache_l1_size_ratio: float = Field(
+        default=0.1,
+        description="L1 cache size as ratio of total size (for multi-tier)"
+    )
+    cache_eviction_policy: str = Field(
+        default="lru",
+        description="Cache eviction policy: 'lru', 'ttl', or 'random'"
+    )
+    
+    # TTL configuration - simplified hierarchy
+    cache_ttl_default: int = Field(
+        default=3600, description="Default cache TTL (1 hour)"
+    )
+    cache_ttl_short: int = Field(
+        default=300, description="Short-lived cache TTL (5 minutes)"
+    )
+    cache_ttl_long: int = Field(
+        default=7200, description="Long-lived cache TTL (2 hours)"
+    )
+    
     db_pool_recycle: int = Field(
         default=3600, description="Database pool recycle time"
     )
@@ -225,49 +254,26 @@ class Settings(BaseSettings):
     )
 
     # Cache TTL settings
-    cache_ttl_short: int = Field(
-        default=300, description="Short cache TTL"
-    )
-    cache_ttl_medium: int = Field(
-        default=1800, description="Medium cache TTL"
-    )
-    cache_ttl_long: int = Field(
-        default=3600, description="Long cache TTL"
-    )
-
-    # Unified cache system settings
-    cache_backend: str = Field(
-        default="auto",
-        description="Cache backend: 'memory', 'redis', 'multi_tier', or 'auto'",
-    )
-    cache_disable_all: bool = Field(
-        default=False,
-        description="Completely disable all caching (both in-memory and Redis)",
-    )
-    cache_model_registry_ttl: int = Field(
-        default=1800,
-        description="Model registry cache TTL (30 minutes)",
-    )
-    cache_workflow_ttl: int = Field(
-        default=3600, description="Workflow cache TTL (1 hour)"
-    )
-    cache_tool_ttl: int = Field(
-        default=3600, description="Tool cache TTL (1 hour)"
-    )
-    cache_session_ttl: int = Field(
-        default=300, description="Session cache TTL (5 minutes)"
-    )
-    cache_max_memory_size: int = Field(
-        default=1000, description="Maximum entries in memory cache"
-    )
-    cache_l1_size_ratio: float = Field(
-        default=0.1,
-        description="L1 cache size as ratio of L2 cache (for multi-tier)",
-    )
-    cache_eviction_policy: str = Field(
-        default="lru",
-        description="Cache eviction policy: 'lru', 'ttl', or 'random'",
-    )
+    # Backwards compatibility for existing code
+    @property
+    def cache_enabled(self) -> bool:
+        """Backwards compatibility - inverse of cache_disabled."""
+        return not self.cache_disabled
+        
+    @property
+    def cache_disable_all(self) -> bool:
+        """Backwards compatibility - same as cache_disabled."""
+        return self.cache_disabled
+        
+    @property
+    def cache_ttl(self) -> int:
+        """Backwards compatibility - same as cache_ttl_default."""
+        return self.cache_ttl_default
+        
+    @property
+    def cache_max_memory_size(self) -> int:
+        """Backwards compatibility - same as cache_max_size."""
+        return self.cache_max_size
 
     # =============================================================================
     # UNIFIED RATE LIMITING SETTINGS

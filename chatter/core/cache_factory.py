@@ -12,13 +12,11 @@ logger = get_logger(__name__)
 
 
 class CacheType(Enum):
-    """Cache types for different use cases."""
+    """Simplified cache types for different use cases."""
 
-    MODEL_REGISTRY = "model_registry"
-    WORKFLOW = "workflow"
-    TOOL = "tool"
-    GENERAL = "general"
-    SESSION = "session"
+    GENERAL = "general"  # General purpose caching (replaces TOOL, MODEL_REGISTRY)
+    SESSION = "session"  # Session-specific data with short TTL
+    PERSISTENT = "persistent"  # Long-term data caching (replaces WORKFLOW)
 
 
 class CacheFactory:
@@ -41,45 +39,29 @@ class CacheFactory:
             Cache configuration
         """
         configs = {
-            CacheType.MODEL_REGISTRY: CacheConfig(
-                default_ttl=settings.cache_model_registry_ttl,
-                max_size=settings.cache_max_memory_size // 2,
-                eviction_policy=settings.cache_eviction_policy,
-                key_prefix="model_registry",
-                enable_stats=True,
-                disabled=settings.cache_disable_all,
-            ),
-            CacheType.WORKFLOW: CacheConfig(
-                default_ttl=settings.cache_workflow_ttl,
-                max_size=100,
-                eviction_policy=settings.cache_eviction_policy,
-                key_prefix="workflow",
-                enable_stats=True,
-                disabled=settings.cache_disable_all,
-            ),
-            CacheType.TOOL: CacheConfig(
-                default_ttl=settings.cache_tool_ttl,
-                max_size=200,
-                eviction_policy=settings.cache_eviction_policy,
-                key_prefix="tool",
-                enable_stats=True,
-                disabled=settings.cache_disable_all,
-            ),
             CacheType.GENERAL: CacheConfig(
-                default_ttl=settings.cache_ttl,
-                max_size=settings.cache_max_memory_size,
+                default_ttl=settings.cache_ttl_default,
+                max_size=settings.cache_max_size,
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="general",
                 enable_stats=True,
-                disabled=settings.cache_disable_all,
+                disabled=settings.cache_disabled,
             ),
             CacheType.SESSION: CacheConfig(
-                default_ttl=settings.cache_session_ttl,
-                max_size=settings.cache_max_memory_size,
-                eviction_policy="ttl",
+                default_ttl=settings.cache_ttl_short,
+                max_size=settings.cache_max_size // 2,  # Smaller for sessions
+                eviction_policy="ttl",  # TTL-based for sessions
                 key_prefix="session",
                 enable_stats=True,
-                disabled=settings.cache_disable_all,
+                disabled=settings.cache_disabled,
+            ),
+            CacheType.PERSISTENT: CacheConfig(
+                default_ttl=settings.cache_ttl_long,
+                max_size=settings.cache_max_size * 2,  # Larger for persistent data
+                eviction_policy=settings.cache_eviction_policy,
+                key_prefix="persistent",
+                enable_stats=True,
+                disabled=settings.cache_disabled,
             ),
         }
         return configs.get(cache_type, configs[CacheType.GENERAL])
@@ -122,15 +104,19 @@ class CacheFactory:
             )
             return self._cache_instances[instance_key]
 
-        # Create multi-tier cache by default (best performance)
+        # Create cache based on backend configuration
+        backend = settings.cache_backend
         redis_url = kwargs.get("redis_url")
-        l1_config = kwargs.get("l1_config")
-        l1_size_ratio = kwargs.get(
-            "l1_size_ratio", settings.cache_l1_size_ratio
-        )
-        cache_instance = MultiTierCache(
-            config, l1_config, redis_url, l1_size_ratio
-        )
+        l1_size_ratio = kwargs.get("l1_size_ratio", settings.cache_l1_size_ratio)
+        
+        if backend == "memory":
+            from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
+            cache_instance = EnhancedInMemoryCache(config)
+        elif backend == "redis":
+            from chatter.core.enhanced_redis_cache import EnhancedRedisCache
+            cache_instance = EnhancedRedisCache(config, redis_url)
+        else:  # multi_tier (default)
+            cache_instance = MultiTierCache(config, None, redis_url, l1_size_ratio)
 
         # Store instance for reuse
         self._cache_instances[instance_key] = cache_instance
@@ -154,50 +140,19 @@ class CacheFactory:
         Returns:
             Cache instance or None if not found
         """
-        # First try to get the default instance for this cache type
         default_key = f"{cache_type.value}_default"
-        if default_key in self._cache_instances:
-            return self._cache_instances[default_key]
+        return self._cache_instances.get(default_key)
 
-        # If no default instance, look for any instance of this cache type
-        for key, instance in self._cache_instances.items():
-            if key.startswith(f"{cache_type.value}_"):
-                return instance
-
-        return None
-
-    def create_model_registry_cache(self, **kwargs) -> CacheInterface:
-        """Create cache for model registry data.
+    def create_general_cache(self, **kwargs) -> CacheInterface:
+        """Create general-purpose cache (replaces model_registry, tool caches).
 
         Args:
             **kwargs: Additional configuration options
 
         Returns:
-            Model registry cache instance
+            General cache instance
         """
-        return self.create_cache(CacheType.MODEL_REGISTRY, **kwargs)
-
-    def create_workflow_cache(self, **kwargs) -> CacheInterface:
-        """Create cache for workflow data.
-
-        Args:
-            **kwargs: Additional configuration options
-
-        Returns:
-            Workflow cache instance
-        """
-        return self.create_cache(CacheType.WORKFLOW, **kwargs)
-
-    def create_tool_cache(self, **kwargs) -> CacheInterface:
-        """Create cache for tool data.
-
-        Args:
-            **kwargs: Additional configuration options
-
-        Returns:
-            Tool cache instance
-        """
-        return self.create_cache(CacheType.TOOL, **kwargs)
+        return self.create_cache(CacheType.GENERAL, **kwargs)
 
     def create_session_cache(self, **kwargs) -> CacheInterface:
         """Create cache for session data.
@@ -210,16 +165,16 @@ class CacheFactory:
         """
         return self.create_cache(CacheType.SESSION, **kwargs)
 
-    def create_general_cache(self, **kwargs) -> CacheInterface:
-        """Create general-purpose cache.
+    def create_persistent_cache(self, **kwargs) -> CacheInterface:
+        """Create cache for persistent data (replaces workflow cache).
 
         Args:
             **kwargs: Additional configuration options
 
         Returns:
-            General cache instance
+            Persistent cache instance
         """
-        return self.create_cache(CacheType.GENERAL, **kwargs)
+        return self.create_cache(CacheType.PERSISTENT, **kwargs)
 
     async def health_check_all(self) -> dict[str, Any]:
         """Perform health check on all cache instances.
@@ -365,20 +320,10 @@ class CacheFactory:
 cache_factory = CacheFactory()
 
 
-# Convenience functions for common cache types
-def get_model_registry_cache(**kwargs) -> CacheInterface:
-    """Get model registry cache instance."""
-    return cache_factory.create_model_registry_cache(**kwargs)
-
-
-def get_workflow_cache(**kwargs) -> CacheInterface:
-    """Get workflow cache instance."""
-    return cache_factory.create_workflow_cache(**kwargs)
-
-
-def get_tool_cache(**kwargs) -> CacheInterface:
-    """Get tool cache instance."""
-    return cache_factory.create_tool_cache(**kwargs)
+# Simplified convenience functions for common cache types
+def get_general_cache(**kwargs) -> CacheInterface:
+    """Get general-purpose cache instance (replaces model_registry, tool caches)."""
+    return cache_factory.create_general_cache(**kwargs)
 
 
 def get_session_cache(**kwargs) -> CacheInterface:
@@ -386,6 +331,22 @@ def get_session_cache(**kwargs) -> CacheInterface:
     return cache_factory.create_session_cache(**kwargs)
 
 
-def get_general_cache(**kwargs) -> CacheInterface:
-    """Get general cache instance."""
-    return cache_factory.create_general_cache(**kwargs)
+def get_persistent_cache(**kwargs) -> CacheInterface:
+    """Get persistent cache instance (replaces workflow cache)."""
+    return cache_factory.create_persistent_cache(**kwargs)
+
+
+# Backwards compatibility aliases
+def get_model_registry_cache(**kwargs) -> CacheInterface:
+    """Backwards compatibility - use general cache."""
+    return get_general_cache(**kwargs)
+
+
+def get_workflow_cache(**kwargs) -> CacheInterface:
+    """Backwards compatibility - use persistent cache.""" 
+    return get_persistent_cache(**kwargs)
+
+
+def get_tool_cache(**kwargs) -> CacheInterface:
+    """Backwards compatibility - use general cache."""
+    return get_general_cache(**kwargs)

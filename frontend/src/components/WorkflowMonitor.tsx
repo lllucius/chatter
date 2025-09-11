@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Grid,
@@ -22,7 +22,6 @@ import {
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
 } from '@mui/material';
 import {
   PlayArrow as RunningIcon,
@@ -30,19 +29,15 @@ import {
   Error as ErrorIcon,
   Warning as WarningIcon,
   Pause as PausedIcon,
-  Timeline as TimelineIcon,
   Speed as SpeedIcon,
   Memory as MemoryIcon,
   Storage as StorageIcon,
   Refresh as RefreshIcon,
   Stop as StopIcon,
   Visibility as ViewIcon,
-  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format, differenceInSeconds } from 'date-fns';
 import { 
-  LineChart, 
-  Line, 
   XAxis, 
   YAxis, 
   CartesianGrid, 
@@ -170,7 +165,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
   };
 
   const runningExecutions = executions.filter(e => ['running', 'queued'].includes(e.status));
-  const recentExecutions = executions.slice(0, 10);
+  const _recentExecutions = executions.slice(0, 10);
 
   return (
     <Box>

@@ -6,7 +6,6 @@ import {
   CardContent,
   Typography,
   LinearProgress,
-  Alert,
   Paper,
   List,
   ListItem,
@@ -25,8 +24,6 @@ import {
 import {
   LineChart,
   Line,
-  AreaChart,
-  Area,
   BarChart,
   Bar,
   XAxis,
@@ -42,8 +39,8 @@ import {
 import { ABTestMetricsResponse, ABTestResultsResponse } from 'chatter-sdk';
 
 interface ABTestAnalyticsProps {
-  testId: string;
-  testName: string;
+  _testId: string;
+  _testName: string;
   metrics?: ABTestMetricsResponse;
   results?: ABTestResultsResponse;
   recommendations?: {
@@ -52,7 +49,7 @@ interface ABTestAnalyticsProps {
     winner?: string;
     confidence?: number;
   };
-  performance?: {
+  _performance?: {
     response_times: Array<{ timestamp: string; variant: string; response_time: number }>;
     error_rates: Array<{ timestamp: string; variant: string; error_rate: number }>;
     throughput: Array<{ timestamp: string; variant: string; requests_per_second: number }>;
@@ -60,12 +57,12 @@ interface ABTestAnalyticsProps {
 }
 
 const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
-  testId,
-  testName,
+  _testId,
+  _testName,
   metrics,
   results,
   recommendations,
-  performance,
+  _performance,
 }) => {
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {

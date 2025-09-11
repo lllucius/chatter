@@ -74,6 +74,27 @@ interface NotificationProviderProps {
   children: React.ReactNode;
 }
 
+// Helper functions for icons
+const getIcon = (type: Notification['type']) => {
+  switch (type) {
+    case 'success': return <SuccessIcon />;
+    case 'error': return <ErrorIcon />;
+    case 'warning': return <WarningIcon />;
+    case 'info': return <InfoIcon />;
+    default: return <InfoIcon />;
+  }
+};
+
+const getCategoryIcon = (category: Notification['category']) => {
+  switch (category) {
+    case 'workflow': return <WorkflowIcon fontSize="small" />;
+    case 'agent': return <AgentIcon fontSize="small" />;
+    case 'test': return <TestIcon fontSize="small" />;
+    case 'performance': return <PerformanceIcon fontSize="small" />;
+    default: return <InfoIcon fontSize="small" />;
+  }
+};
+
 export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
   const [currentSnackbar, setCurrentSnackbar] = useState<Notification | null>(null);
@@ -120,26 +141,6 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
 
   const handleCloseSnackbar = () => {
     setCurrentSnackbar(null);
-  };
-
-  const getIcon = (type: Notification['type']) => {
-    switch (type) {
-      case 'success': return <SuccessIcon />;
-      case 'error': return <ErrorIcon />;
-      case 'warning': return <WarningIcon />;
-      case 'info': return <InfoIcon />;
-      default: return <InfoIcon />;
-    }
-  };
-
-  const getCategoryIcon = (category: Notification['category']) => {
-    switch (category) {
-      case 'workflow': return <WorkflowIcon fontSize="small" />;
-      case 'agent': return <AgentIcon fontSize="small" />;
-      case 'test': return <TestIcon fontSize="small" />;
-      case 'performance': return <PerformanceIcon fontSize="small" />;
-      default: return <InfoIcon fontSize="small" />;
-    }
   };
 
   return (

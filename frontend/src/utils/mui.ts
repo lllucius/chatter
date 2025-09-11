@@ -3,8 +3,6 @@
  * and ensure consistent component usage across the application
  */
 
-import React from 'react';
-
 // Core layout components
 export {
   Box,

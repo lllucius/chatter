@@ -7,10 +7,8 @@ import {
   MenuItem,
   Slider,
   Typography,
-  Box,
   Alert,
   Grid,
-  CircularProgress,
 } from '../utils/mui';
 import { ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';

@@ -188,9 +188,6 @@ class MultiTierCache(CacheInterface):
         l1_success = await self.l1_cache.delete(key)
         l2_success = await self.l2_cache.delete(key)
 
-        # Remove from promotion tracking
-        self._promotion_counts.pop(key, None)
-
         success = l1_success or l2_success
 
         if success:
@@ -214,9 +211,6 @@ class MultiTierCache(CacheInterface):
 
         l1_success = await self.l1_cache.clear()
         l2_success = await self.l2_cache.clear()
-
-        # Clear promotion tracking
-        self._promotion_counts.clear()
 
         success = l1_success or l2_success
 
@@ -289,9 +283,9 @@ class MultiTierCache(CacheInterface):
             l2_results = await self.l2_cache.mget(remaining_keys)
             result.update(l2_results)
 
-            # Consider promoting L2 hits to L1
+            # Promote L2 hits to L1 for faster future access (simplified)
             for key, value in l2_results.items():
-                await self._consider_promotion(key, value)
+                await self.l1_cache.set(key, value, 300)  # Short TTL for L1
 
         return result
 

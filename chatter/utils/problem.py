@@ -13,6 +13,38 @@ from chatter.config import settings
 from chatter.schemas.utilities import ProblemDetail
 
 
+def _sanitize_for_json(obj: Any) -> Any:
+    """Sanitize an object to make it JSON serializable.
+
+    Args:
+        obj: The object to sanitize
+
+    Returns:
+        A JSON-serializable version of the object
+    """
+    if isinstance(obj, bytes):
+        return f"<bytes: {len(obj)} bytes>"
+    elif isinstance(obj, (list, tuple)):
+        return [_sanitize_for_json(item) for item in obj]
+    elif isinstance(obj, dict):
+        return {k: _sanitize_for_json(v) for k, v in obj.items()}
+    elif hasattr(obj, '__dict__'):
+        # Handle objects with attributes by converting to dict
+        try:
+            return _sanitize_for_json(obj.__dict__)
+        except (AttributeError, TypeError):
+            return str(obj)
+    else:
+        # For other non-serializable types, convert to string
+        try:
+            # Test if it's JSON serializable
+            import json
+            json.dumps(obj)
+            return obj
+        except (TypeError, ValueError):
+            return str(obj)
+
+
 class ProblemException(HTTPException):
     """Base exception class for RFC 9457 compliant problems."""
 
@@ -122,12 +154,15 @@ class ValidationProblem(ProblemException):
         validation_errors: list[Any] | None = None,
         **kwargs: Any,
     ) -> None:
+        # Sanitize validation errors to ensure JSON serializability
+        sanitized_errors = _sanitize_for_json(validation_errors or [])
+
         super().__init__(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             title="Validation Failed",
             detail=detail,
             type_suffix="validation-failed",
-            errors=validation_errors or [],
+            errors=sanitized_errors,
             **kwargs,
         )
 

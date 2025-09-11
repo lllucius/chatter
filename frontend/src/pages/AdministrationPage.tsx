@@ -300,7 +300,7 @@ const AdministrationPage: React.FC = () => {
       setLoading(true);
       switch (action) {
         case 'cancel':
-          await getSDK().jobs.cancelJobApiV1JobsJobIdCancel({ jobId });
+          await getSDK().jobs.cancelJobApiV1JobsJobIdCancel(jobId);
           toastService.success('Job cancelled successfully!');
           loadJobs();
           loadJobStats();
@@ -411,10 +411,10 @@ const AdministrationPage: React.FC = () => {
   const handlePluginToggle = async (pluginId: string, enabled: boolean) => {
     try {
       if (enabled) {
-        await getSDK().plugins.enablePluginApiV1PluginsPluginIdEnable({ pluginId });
+        await getSDK().plugins.enablePluginApiV1PluginsPluginIdEnable(pluginId);
         toastService.success('Plugin enabled successfully');
       } else {
-        await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisable({ pluginId });
+        await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisable(pluginId);
         toastService.success('Plugin disabled successfully');
       }
       loadPlugins();

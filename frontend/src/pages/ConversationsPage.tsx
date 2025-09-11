@@ -160,9 +160,9 @@ const ConversationsPage: React.FC = () => {
 
     try {
       // Use the available delete conversation API
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId({
-        conversationId: conversationId
-      });
+      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(
+        conversationId
+      );
       
       // Refresh the conversations list after successful deletion
       conversationsApi.reset();

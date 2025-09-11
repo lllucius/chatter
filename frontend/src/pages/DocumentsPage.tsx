@@ -178,11 +178,13 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks({
-          documentId: document.id,
-          limit: 3,
-          offset: 0
-        });
+        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
+          document.id,
+          {
+            limit: 3,
+            offset: 0
+          }
+        );
         if (chunksResponse.data && chunksResponse.data.chunks && chunksResponse.data.chunks.length > 0) {
           contentPreview = chunksResponse.data.chunks
             .map(chunk => chunk.content)
@@ -283,9 +285,9 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload({
-        documentId: document.id
-      });
+      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(
+        document.id
+      );
 
       // Create a blob URL and trigger download
       const blob = new Blob([response.data], { type: 'application/octet-stream' });
@@ -371,9 +373,7 @@ const DocumentsPage: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().documents.deleteDocumentApiV1DocumentsDocumentId({ 
-        documentId: id 
-      });
+      await getSDK().documents.deleteDocumentApiV1DocumentsDocumentId(id);
     },
   };
 

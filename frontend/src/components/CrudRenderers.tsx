@@ -46,7 +46,7 @@ export const createTypeChipRenderer = <T,>(
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' = 'secondary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  return (value: string) => (
+  const TypeChipRenderer = (value: string) => (
     <Chip 
       label={value?.replace(/[_-]/g, ' ')}
       size="small" 
@@ -54,6 +54,8 @@ export const createTypeChipRenderer = <T,>(
       variant={variant}
     />
   );
+  TypeChipRenderer.displayName = 'TypeChipRenderer';
+  return TypeChipRenderer;
 };
 
 export const createDateRenderer = <T,>(

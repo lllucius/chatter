@@ -7,18 +7,18 @@ performance and reduce resource usage.
 import time
 from typing import Any
 
-from chatter.core.unified_workflow_cache import (
-    get_unified_lazy_tool_loader,
-    get_unified_workflow_cache,
+from chatter.core.simplified_cache import (
+    get_tool_loader,
+    get_workflow_cache,
 )
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
-# Global instances for easy access - using unified cache system
-workflow_cache = get_unified_workflow_cache()
-lazy_tool_loader = get_unified_lazy_tool_loader()
+# Global instances for easy access - using simplified cache system
+workflow_cache = get_workflow_cache()
+lazy_tool_loader = get_tool_loader()
 
 
 class PerformanceMonitor:

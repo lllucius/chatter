@@ -35,9 +35,9 @@ class WorkflowManagementService:
             workflow_id: Specific workflow to invalidate, or None to invalidate all
         """
         try:
-            from chatter.core.unified_workflow_cache import get_unified_workflow_cache
+            from chatter.core.simplified_cache import get_workflow_cache
             
-            workflow_cache = get_unified_workflow_cache()
+            workflow_cache = get_workflow_cache()
             
             if workflow_id:
                 # For now, we don't have a way to invalidate specific workflows

@@ -350,17 +350,4 @@ def get_persistent_cache(**kwargs) -> CacheInterface:
     return cache_factory.create_persistent_cache(**kwargs)
 
 
-# Backwards compatibility aliases
-def get_model_registry_cache(**kwargs) -> CacheInterface:
-    """Backwards compatibility - use general cache."""
-    return get_general_cache(**kwargs)
 
-
-def get_workflow_cache(**kwargs) -> CacheInterface:
-    """Backwards compatibility - use persistent cache."""
-    return get_persistent_cache(**kwargs)
-
-
-def get_tool_cache(**kwargs) -> CacheInterface:
-    """Backwards compatibility - use general cache."""
-    return get_general_cache(**kwargs)

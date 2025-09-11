@@ -257,6 +257,4 @@ def get_tool_loader() -> SimplifiedToolLoader:
     return _tool_loader
 
 
-# For backward compatibility
-workflow_cache = get_workflow_cache()
-lazy_tool_loader = get_tool_loader()
+

@@ -4,7 +4,7 @@ import hashlib
 import time
 from typing import Any
 
-from chatter.core.cache_factory import get_workflow_cache
+from chatter.core.cache_factory import get_persistent_cache
 from chatter.core.cache_interface import CacheInterface
 from chatter.utils.logging import get_logger
 
@@ -27,7 +27,7 @@ class UnifiedWorkflowCache:
             cache: Cache implementation to use (auto-created if None)
             max_size: Maximum number of workflows to cache (for compatibility)
         """
-        self.cache = cache or get_workflow_cache()
+        self.cache = cache or get_persistent_cache()
         self.max_size = max_size
 
         # Statistics tracking (for compatibility with old API)
@@ -305,9 +305,9 @@ class UnifiedLazyToolLoader:
         Args:
             cache: Cache implementation to use (auto-created if None)
         """
-        from chatter.core.cache_factory import get_tool_cache
+        from chatter.core.cache_factory import get_general_cache
 
-        self.cache = cache or get_tool_cache()
+        self.cache = cache or get_general_cache()
         self._all_tools_loaded = False
         self._all_tools_cache_key = self.cache.make_key("all_tools")
 
@@ -520,6 +520,4 @@ def get_unified_lazy_tool_loader() -> UnifiedLazyToolLoader:
     return _lazy_tool_loader
 
 
-# For backward compatibility, expose as the old names
-workflow_cache = get_unified_workflow_cache()
-lazy_tool_loader = get_unified_lazy_tool_loader()
+

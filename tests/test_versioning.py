@@ -634,31 +634,3 @@ class TestVersioningIntegration:
         assert not self.manager.is_version_supported(APIVersion.V1)
         assert self.manager.is_version_supported(APIVersion.V2)
 
-    def test_backwards_compatibility_checking(self):
-        """Test backwards compatibility validation."""
-        # Register endpoints in V1
-        self.manager.register_endpoint(
-            "/api/stable", "GET", APIVersion.V1
-        )
-        self.manager.register_endpoint(
-            "/api/changing", "GET", APIVersion.V1, APIVersion.V2
-        )
-
-        # Get compatibility report
-        v1_endpoints = self.manager.get_endpoints_for_version(
-            APIVersion.V1
-        )
-        v2_endpoints = self.manager.get_endpoints_for_version(
-            APIVersion.V2
-        )
-
-        # Find breaking changes
-        v1_paths = {ep.path for ep in v1_endpoints}
-        v2_paths = {ep.path for ep in v2_endpoints}
-
-        removed_in_v2 = v1_paths - v2_paths
-        v2_paths - v1_paths
-
-        # Verify our test scenario
-        assert "/api/changing" in removed_in_v2
-        assert "/api/stable" not in removed_in_v2

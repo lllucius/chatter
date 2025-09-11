@@ -392,7 +392,7 @@ class LLMService:
 
         # Get provider instance
         try:
-            if provider is None:
+            if provider is None or provider == "":
                 provider_instance = await self.get_default_provider()
             else:
                 provider_instance = await self.get_provider(provider)
@@ -831,7 +831,7 @@ class LLMService:
         from chatter.core.langgraph import workflow_manager
 
         # Use default provider if none specified
-        if provider_name is None:
+        if provider_name is None or provider_name == "":
             provider = await self.get_default_provider()
         else:
             provider = await self.get_provider(provider_name)

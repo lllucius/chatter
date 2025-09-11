@@ -18,7 +18,7 @@ export const BASE_PATH = "http://localhost:8000".replace(/\/+$/, "");
 export interface ConfigurationParameters {
     basePath?: string; // override base path
     fetchApi?: FetchAPI; // override for fetch implementation
-    middleware?: Middleware[]; // middleware to apply before/after fetch requests
+    middleware?: Middleware[] | null | undefined; // middleware to apply before/after fetch requests
     queryParamsStringify?: (params: HTTPQuery) => string; // stringify function for query strings
     username?: string; // parameter for basic security
     password?: string; // parameter for basic security
@@ -29,7 +29,12 @@ export interface ConfigurationParameters {
 }
 
 export class Configuration {
-    constructor(private configuration: ConfigurationParameters = {}) {}
+    constructor(private configuration: ConfigurationParameters = {}) {
+        // Always normalize middleware to an array
+        if (!Array.isArray(this.configuration.middleware)) {
+            this.configuration.middleware = [];
+        }
+    }
 
     set config(configuration: Configuration) {
         this.configuration = configuration;
@@ -44,7 +49,9 @@ export class Configuration {
     }
 
     get middleware(): Middleware[] {
-        return this.configuration.middleware || [];
+        // Always returns an array, never null/undefined
+        const mw = this.configuration.middleware;
+        return Array.isArray(mw) ? mw.filter(Boolean) : [];
     }
 
     get queryParamsStringify(): (params: HTTPQuery) => string {
@@ -95,22 +102,29 @@ export class BaseAPI {
     private middleware: Middleware[];
 
     constructor(protected configuration = DefaultConfig) {
-        this.middleware = configuration.middleware || [];
+        // Always coerce to array and filter out nulls/undefined
+        const mw = configuration.middleware;
+        this.middleware = Array.isArray(mw) ? mw.filter(Boolean) : [];
     }
 
-    withMiddleware<T extends BaseAPI>(this: T, ...middlewares: Middleware[]) {
+    withMiddleware<T extends BaseAPI>(this: T, ...middlewares: (Middleware | null | undefined)[]) {
         const next = this.clone<T>();
-        next.middleware = next.middleware.concat(...middlewares);
+        // Always filter out null/undefined middlewares
+        next.middleware = [...(next.middleware || []), ...middlewares.filter(Boolean)];
         return next;
     }
 
-    withPreMiddleware<T extends BaseAPI>(this: T, ...preMiddlewares: Array<Middleware['pre']>) {
-        const middlewares = preMiddlewares.map((pre) => ({ pre }));
+    withPreMiddleware<T extends BaseAPI>(this: T, ...preMiddlewares: Array<Middleware['pre'] | null | undefined>) {
+        const middlewares = preMiddlewares
+            .filter(Boolean)
+            .map((pre) => ({ pre }));
         return this.withMiddleware<T>(...middlewares);
     }
 
-    withPostMiddleware<T extends BaseAPI>(this: T, ...postMiddlewares: Array<Middleware['post']>) {
-        const middlewares = postMiddlewares.map((post) => ({ post }));
+    withPostMiddleware<T extends BaseAPI>(this: T, ...postMiddlewares: Array<Middleware['post'] | null | undefined>) {
+        const middlewares = postMiddlewares
+            .filter(Boolean)
+            .map((post) => ({ post }));
         return this.withMiddleware<T>(...middlewares);
     }
 
@@ -205,8 +219,9 @@ export class BaseAPI {
 
     private fetchApi = async (url: string, init: RequestInit) => {
         let fetchParams = { url, init };
+        // Always iterate over array, never null/undefined; skip any null middleware
         for (const middleware of this.middleware) {
-            if (middleware.pre) {
+            if (middleware && middleware.pre) {
                 fetchParams = await middleware.pre({
                     fetch: this.fetchApi,
                     ...fetchParams,
@@ -218,7 +233,7 @@ export class BaseAPI {
             response = await (this.configuration.fetchApi || fetch)(fetchParams.url, fetchParams.init);
         } catch (e) {
             for (const middleware of this.middleware) {
-                if (middleware.onError) {
+                if (middleware && middleware.onError) {
                     response = await middleware.onError({
                         fetch: this.fetchApi,
                         url: fetchParams.url,
@@ -237,7 +252,7 @@ export class BaseAPI {
             }
         }
         for (const middleware of this.middleware) {
-            if (middleware.post) {
+            if (middleware && middleware.post) {
                 response = await middleware.post({
                     fetch: this.fetchApi,
                     url: fetchParams.url,
@@ -256,7 +271,7 @@ export class BaseAPI {
     private clone<T extends BaseAPI>(this: T): T {
         const constructor = this.constructor as any;
         const next = new constructor(this.configuration);
-        next.middleware = this.middleware.slice();
+        next.middleware = Array.isArray(this.middleware) ? this.middleware.filter(Boolean) : [];
         return next;
     }
 };
@@ -329,9 +344,13 @@ export function querystring(params: HTTPQuery, prefix: string = ''): string {
         .join('&');
 }
 
-function querystringSingleKey(key: string, value: string | number | null | undefined | boolean | Array<string | number | null | boolean> | Set<string | number | null | boolean> | HTTPQuery, keyPrefix: string = ''): string {
+function querystringSingleKey(
+    key: string,
+    value: string | number | null | undefined | boolean | Array<string | number | null | boolean> | Set<string | number | null | boolean> | HTTPQuery,
+    keyPrefix: string = ''
+): string {
     const fullKey = keyPrefix + (keyPrefix.length ? `[${key}]` : key);
-    if (value instanceof Array) {
+    if (Array.isArray(value)) {
         const multiValue = value.map(singleValue => encodeURIComponent(String(singleValue)))
             .join(`&${encodeURIComponent(fullKey)}=`);
         return `${encodeURIComponent(fullKey)}=${multiValue}`;
@@ -343,8 +362,11 @@ function querystringSingleKey(key: string, value: string | number | null | undef
     if (value instanceof Date) {
         return `${encodeURIComponent(fullKey)}=${encodeURIComponent(value.toISOString())}`;
     }
-    if (value instanceof Object) {
+    if (value instanceof Object && value !== null) {
         return querystring(value as HTTPQuery, fullKey);
+    }
+    if (value === undefined || value === null) {
+        return '';
     }
     return `${encodeURIComponent(fullKey)}=${encodeURIComponent(String(value))}`;
 }

@@ -768,8 +768,8 @@ async def model_usage(
 @run_async
 async def benchmark_model(
     model_id: str = typer.Argument(..., help="Model ID to benchmark"),
-    test_count: int = typer.Option(5, help="Number of test requests"),
-    prompt: str = typer.Option(
+    test_count: int = typer.Option(5, help="Number of test requests"),  # noqa: ARG001
+    prompt: str = typer.Option(  # noqa: ARG001
         "Generate a short paragraph about artificial intelligence",
         help="Benchmark prompt",
     ),

@@ -15,7 +15,6 @@ try:
 
     ANTHROPIC_EMBEDDINGS_AVAILABLE = True
 except ImportError:
-    AnthropicEmbeddings = None
     ANTHROPIC_EMBEDDINGS_AVAILABLE = False
 
 try:

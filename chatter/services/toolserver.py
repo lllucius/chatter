@@ -1,6 +1,7 @@
 """Tool server service with database persistence and CRUD operations."""
 
 import asyncio
+import os
 from datetime import UTC, datetime
 from typing import Any
 
@@ -1242,7 +1243,10 @@ class ToolServerService:
                     "args": [
                         "-y",
                         "@modelcontextprotocol/server-filesystem",
-                        os.environ.get("CHATTER_WORKSPACE_DIR", "/tmp/chatter_workspace"),  # nosec B108 - configurable via env var
+                        os.environ.get(
+                            "CHATTER_WORKSPACE_DIR",
+                            "/tmp/chatter_workspace",
+                        ),  # nosec B108 - configurable via env var
                     ],
                     "env": None,
                 },

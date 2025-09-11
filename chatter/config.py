@@ -35,7 +35,7 @@ class Settings(BaseSettings):
 
     host: str = Field(
         default="0.0.0.0",  # nosec B104 - configurable, use 127.0.0.1 for production
-        description="Server host - use 127.0.0.1 for local development, 0.0.0.0 for containers"
+        description="Server host - use 127.0.0.1 for local development, 0.0.0.0 for containers",
     )
     port: int = Field(default=8000, description="Server port")
     workers: int = Field(

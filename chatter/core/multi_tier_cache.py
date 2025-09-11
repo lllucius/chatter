@@ -40,54 +40,36 @@ class MultiTierCache(CacheInterface):
         """
         super().__init__(config)
 
-        # Create L1 (memory) cache configuration
+        # Create L1 (memory) cache configuration - inherit key prefix but simplified
         if l1_config is None:
             l1_config = CacheConfig(
-                default_ttl=min(
-                    300, self.config.default_ttl
-                ),  # Shorter TTL for L1
-                max_size=int(
-                    (self.config.max_size or 1000) * l1_size_ratio
-                ),
+                default_ttl=min(300, self.config.default_ttl),  # Shorter TTL for L1
+                max_size=int((self.config.max_size or 1000) * l1_size_ratio),
                 eviction_policy="lru",
-                key_prefix=(
-                    f"{self.config.key_prefix}:l1"
-                    if self.config.key_prefix
-                    else "l1"
-                ),
+                key_prefix=self.config.key_prefix,  # Use same prefix
                 enable_stats=self.config.enable_stats,
+                disabled=self.config.disabled,
             )
 
-        # Create L2 (Redis) cache configuration
+        # Create L2 (Redis) cache configuration - inherit key prefix
         l2_config = CacheConfig(
             default_ttl=self.config.default_ttl,
             max_size=self.config.max_size,
             eviction_policy=self.config.eviction_policy,
-            key_prefix=(
-                f"{self.config.key_prefix}:l2"
-                if self.config.key_prefix
-                else "l2"
-            ),
+            key_prefix=self.config.key_prefix,  # Use same prefix
             enable_stats=self.config.enable_stats,
+            disabled=self.config.disabled,
         )
 
         # Initialize cache layers
         self.l1_cache = EnhancedInMemoryCache(l1_config)
         self.l2_cache = EnhancedRedisCache(l2_config, redis_url)
 
-        # Configuration
-        self.l1_size_ratio = l1_size_ratio
-        self._promote_threshold = (
-            2  # Promote to L1 after this many L2 hits
-        )
-        self._promotion_counts: dict[str, int] = {}
-
         logger.info(
             "Multi-tier cache initialized",
             l1_max_size=l1_config.max_size,
             l2_enabled=True,
-            l1_ttl=l1_config.default_ttl,
-            l2_ttl=l2_config.default_ttl,
+            key_prefix=self.config.key_prefix,
         )
 
     async def connect(self) -> bool:
@@ -136,8 +118,8 @@ class MultiTierCache(CacheInterface):
             logger.debug("Multi-tier cache L2 hit", key=key)
             self._update_stats(hit=True)
 
-            # Consider promoting to L1
-            await self._consider_promotion(key, value)
+            # Promote to L1 for faster future access (simplified)
+            await self.l1_cache.set(key, value, 300)  # Short TTL for L1
             return value
 
         # Not found in either cache
@@ -467,45 +449,7 @@ class MultiTierCache(CacheInterface):
             "status": overall_status,
             "l1_cache": l1_health,
             "l2_cache": l2_health,
-            "promotion_stats": {
-                "tracked_keys": len(self._promotion_counts),
-                "promotion_threshold": self._promote_threshold,
-            },
         }
-
-    # Private helper methods
-
-    async def _consider_promotion(self, key: str, value: Any) -> None:
-        """Consider promoting a key from L2 to L1 based on access patterns.
-
-        Args:
-            key: Cache key
-            value: Cache value
-        """
-        # Increment access count for this key
-        self._promotion_counts[key] = (
-            self._promotion_counts.get(key, 0) + 1
-        )
-
-        # Promote if threshold reached
-        if self._promotion_counts[key] >= self._promote_threshold:
-            # Calculate L1 TTL (shorter than L2)
-            l2_ttl = await self.l2_cache.ttl(key)
-            l1_ttl = min(300, l2_ttl if l2_ttl and l2_ttl > 0 else 300)
-
-            # Promote to L1
-            success = await self.l1_cache.set(key, value, l1_ttl)
-
-            if success:
-                logger.debug(
-                    "Promoted key to L1 cache",
-                    key=key,
-                    access_count=self._promotion_counts[key],
-                    l1_ttl=l1_ttl,
-                )
-
-                # Reset promotion counter
-                self._promotion_counts[key] = 0
 
     async def invalidate_l1(self, key: str) -> bool:
         """Invalidate key from L1 cache only.

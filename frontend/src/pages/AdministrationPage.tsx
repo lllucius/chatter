@@ -545,9 +545,7 @@ const AdministrationPage: React.FC = () => {
             toastService.warning('Backup deletion is not yet supported by the API');
             break;
           case 'plugin':
-            await getSDK().plugins.uninstallPluginApiV1PluginsPluginId({
-              pluginId: id
-            });
+            await getSDK().plugins.uninstallPluginApiV1PluginsPluginId(id);
             toastService.success('Plugin uninstalled successfully!');
             loadPlugins();
             break;

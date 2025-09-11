@@ -217,17 +217,15 @@ const ToolsPage: React.FC = () => {
     },
 
     create: async (data: RemoteServerCreate) => {
-      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServers({
-        toolServerCreate: data,
-      });
+      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServers(data);
       return response;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId({
-        serverId: id,
-        toolServerUpdate: data,
-      });
+      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId(
+        id,
+        data
+      );
       return response;
     },
 

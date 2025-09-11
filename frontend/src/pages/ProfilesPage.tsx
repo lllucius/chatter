@@ -91,17 +91,15 @@ const ProfilesPage: React.FC = () => {
     },
 
     create: async (data: ProfileCreate) => {
-      const response = await getSDK().profiles.createProfileApiV1Profiles({
-        profileCreate: data,
-      });
+      const response = await getSDK().profiles.createProfileApiV1Profiles(data);
       return response;
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId({
-        profileId: id,
-        profileUpdate: data,
-      });
+      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId(
+        id,
+        data
+      );
       return response;
     },
 

@@ -141,7 +141,7 @@ const ConversationsPage: React.FC = () => {
     try {
       const response =
         await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
-          { conversationId: conversation.id }
+          conversation.id
         );
       const messages = response.data;
       setConversationMessages(messages);

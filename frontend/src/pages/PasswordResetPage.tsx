@@ -82,9 +82,9 @@ const PasswordResetPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await getSDK().confirmPasswordReset({
+        await getSDK().auth.confirmPasswordResetApiV1AuthPasswordResetConfirm({
           token: values.token,
-          new_password: values.newPassword,
+          newPassword: values.newPassword,
         });
         setStep('complete');
         toastService.success('Password reset successfully');

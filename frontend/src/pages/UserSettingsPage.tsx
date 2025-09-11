@@ -125,7 +125,7 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await getSDK().changePassword({
+        await getSDK().auth.changePasswordApiV1AuthChangePassword({
           current_password: values.current_password,
           new_password: values.new_password,
         });

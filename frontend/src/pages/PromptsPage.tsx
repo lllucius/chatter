@@ -93,9 +93,7 @@ const PromptsPage: React.FC = () => {
     },
 
     create: async (data: PromptCreate) => {
-      const response = await getSDK().prompts.createPromptApiV1Prompts({
-        promptCreate: data,
-      });
+      const response = await getSDK().prompts.createPromptApiV1Prompts(data);
       return response;
     },
 

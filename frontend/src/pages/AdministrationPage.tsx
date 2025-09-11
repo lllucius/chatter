@@ -333,21 +333,94 @@ const AdministrationPage: React.FC = () => {
       }
 
       let result;
+      let idsToDelete: string[] = [];
+      
       switch (bulkOperationData.operationType) {
         case 'conversations':
-          // For now, pass empty array to trigger validation error
-          // TODO: Implement proper filter-based bulk delete API
-          result = await getSDK().dataManagement.bulkDeleteConversationsApiV1DataBulkDeleteConversations([]);
+          // Get conversations based on filters
+          const conversationsResponse = await getSDK().chat.listConversationsApiV1ChatConversations({
+            limit: 1000  // Set a reasonable limit
+          });
+          idsToDelete = conversationsResponse.data.conversations
+            .filter(conv => {
+              // Apply filters
+              let matches = true;
+              if (bulkOperationData.filters.olderThan) {
+                const createdAt = new Date(conv.created_at);
+                const cutoffDate = new Date(bulkOperationData.filters.olderThan);
+                matches = matches && createdAt < cutoffDate;
+              }
+              if (bulkOperationData.filters.userId) {
+                matches = matches && conv.user_id === bulkOperationData.filters.userId;
+              }
+              if (bulkOperationData.filters.status) {
+                matches = matches && conv.status === bulkOperationData.filters.status;
+              }
+              return matches;
+            })
+            .map(conv => conv.id);
+          
+          if (idsToDelete.length > 0) {
+            result = await getSDK().dataManagement.bulkDeleteConversationsApiV1DataBulkDeleteConversations(idsToDelete);
+          } else {
+            result = { data: { successful_deletions: 0, failed_deletions: [], errors: [] } };
+          }
           break;
+          
         case 'documents':
-          // For now, pass empty array to trigger validation error
-          // TODO: Implement proper filter-based bulk delete API
-          result = await getSDK().dataManagement.bulkDeleteDocumentsApiV1DataBulkDeleteDocuments([]);
+          // Get documents based on filters
+          const documentsResponse = await getSDK().documents.listDocumentsApiV1Documents({
+            status: bulkOperationData.filters.status || undefined,
+            ownerId: bulkOperationData.filters.userId || undefined,
+            limit: 1000  // Set a reasonable limit
+          });
+          idsToDelete = documentsResponse.data.documents
+            .filter(doc => {
+              // Apply additional filters not supported by API
+              let matches = true;
+              if (bulkOperationData.filters.olderThan) {
+                const createdAt = new Date(doc.created_at);
+                const cutoffDate = new Date(bulkOperationData.filters.olderThan);
+                matches = matches && createdAt < cutoffDate;
+              }
+              return matches;
+            })
+            .map(doc => doc.id);
+          
+          if (idsToDelete.length > 0) {
+            result = await getSDK().dataManagement.bulkDeleteDocumentsApiV1DataBulkDeleteDocuments(idsToDelete);
+          } else {
+            result = { data: { successful_deletions: 0, failed_deletions: [], errors: [] } };
+          }
           break;
+          
         case 'prompts':
-          // For now, pass empty array to trigger validation error
-          // TODO: Implement proper filter-based bulk delete API
-          result = await getSDK().dataManagement.bulkDeletePromptsApiV1DataBulkDeletePrompts([]);
+          // Get prompts based on filters  
+          const promptsResponse = await getSDK().prompts.listPromptsApiV1Prompts({
+            limit: 1000  // Set a reasonable limit
+          });
+          idsToDelete = promptsResponse.data.prompts
+            .filter(prompt => {
+              // Apply filters
+              let matches = true;
+              if (bulkOperationData.filters.olderThan) {
+                const createdAt = new Date(prompt.created_at);
+                const cutoffDate = new Date(bulkOperationData.filters.olderThan);
+                matches = matches && createdAt < cutoffDate;
+              }
+              if (bulkOperationData.filters.userId) {
+                matches = matches && prompt.owner_id === bulkOperationData.filters.userId;
+              }
+              // Note: prompts may not have a status filter, skip if not applicable
+              return matches;
+            })
+            .map(prompt => prompt.id);
+          
+          if (idsToDelete.length > 0) {
+            result = await getSDK().dataManagement.bulkDeletePromptsApiV1DataBulkDeletePrompts(idsToDelete);
+          } else {
+            result = { data: { successful_deletions: 0, failed_deletions: [], errors: [] } };
+          }
           break;
       }
 

@@ -1,5 +1,14 @@
-import React, { useRef } from 'react';
-import { Button } from '@mui/material';
+import React, { useRef, useState } from 'react';
+import { 
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  Typography,
+  Box,
+  Chip
+} from '@mui/material';
 import { 
   Code as CodeIcon,
   Refresh as RefreshIcon,
@@ -18,6 +27,16 @@ import { PromptResponse, PromptCreate, PromptUpdate } from 'chatter-sdk';
 
 const PromptsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
+  
+  // State for view code dialog
+  const [codeDialogOpen, setCodeDialogOpen] = useState(false);
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
+
+  // Handle view code action
+  const handleViewCode = (prompt: PromptResponse) => {
+    setSelectedPrompt(prompt);
+    setCodeDialogOpen(true);
+  };
   // Define columns
   const columns: CrudColumn<PromptResponse>[] = [
     {
@@ -67,8 +86,8 @@ const PromptsPage: React.FC = () => {
       {
         icon: <CodeIcon />,
         label: 'View Code',
-        onClick: () => {
-          // TODO: Implement view code functionality
+        onClick: (prompt: PromptResponse) => {
+          handleViewCode(prompt);
         },
       },
     ],
@@ -142,6 +161,113 @@ const PromptsPage: React.FC = () => {
         FormComponent={PromptForm}
         getItemId={getItemId}
       />
+      
+      {/* View Code Dialog */}
+      <Dialog 
+        open={codeDialogOpen} 
+        onClose={() => setCodeDialogOpen(false)} 
+        maxWidth="md" 
+        fullWidth
+      >
+        <DialogTitle>
+          {selectedPrompt && (
+            <Box>
+              <Typography variant="h6" component="span">
+                {selectedPrompt.name}
+              </Typography>
+              <Box sx={{ mt: 1 }}>
+                <Chip 
+                  label={selectedPrompt.prompt_type} 
+                  size="small" 
+                  sx={{ mr: 1 }}
+                />
+                <Chip 
+                  label={selectedPrompt.category} 
+                  size="small" 
+                  color="secondary"
+                />
+              </Box>
+            </Box>
+          )}
+        </DialogTitle>
+        <DialogContent>
+          {selectedPrompt && (
+            <Box>
+              {selectedPrompt.description && (
+                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                  {selectedPrompt.description}
+                </Typography>
+              )}
+              
+              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                Template Content:
+              </Typography>
+              <Box
+                component="pre"
+                sx={{
+                  backgroundColor: 'grey.100',
+                  padding: 2,
+                  borderRadius: 1,
+                  overflow: 'auto',
+                  maxHeight: '400px',
+                  fontFamily: 'monospace',
+                  fontSize: '0.875rem',
+                  whiteSpace: 'pre-wrap',
+                  wordBreak: 'break-word'
+                }}
+              >
+                {selectedPrompt.content}
+              </Box>
+              
+              {selectedPrompt.variables && selectedPrompt.variables.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                    Template Variables:
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    {selectedPrompt.variables.map((variable, index) => (
+                      <Chip
+                        key={index}
+                        label={`{${variable}}`}
+                        size="small"
+                        variant="outlined"
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {selectedPrompt.examples && selectedPrompt.examples.length > 0 && (
+                <Box sx={{ mt: 2 }}>
+                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+                    Examples:
+                  </Typography>
+                  <Box
+                    component="pre"
+                    sx={{
+                      backgroundColor: 'grey.50',
+                      padding: 1.5,
+                      borderRadius: 1,
+                      overflow: 'auto',
+                      maxHeight: '200px',
+                      fontFamily: 'monospace',
+                      fontSize: '0.8rem',
+                      whiteSpace: 'pre-wrap'
+                    }}
+                  >
+                    {JSON.stringify(selectedPrompt.examples, null, 2)}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setCodeDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
     </PageLayout>
   );
 };

@@ -222,3 +222,5 @@ demo_*.py
 #
 data/
 
+# Test files should not be committed
+/tmp/

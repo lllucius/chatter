@@ -68,6 +68,7 @@ export class ModelRegistryApi extends BaseAPI {
       path: `/api/v1/models/providers/${providerId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -166,6 +167,7 @@ export class ModelRegistryApi extends BaseAPI {
       path: `/api/v1/models/models/${modelId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -195,7 +197,6 @@ export class ModelRegistryApi extends BaseAPI {
       path: `/api/v1/models/models/${modelId}/set-default`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 
@@ -262,6 +263,7 @@ export class ModelRegistryApi extends BaseAPI {
       path: `/api/v1/models/embedding-spaces/${spaceId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -291,7 +293,6 @@ export class ModelRegistryApi extends BaseAPI {
       path: `/api/v1/models/embedding-spaces/${spaceId}/set-default`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 

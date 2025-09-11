@@ -61,6 +61,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/definitions/${workflowId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -120,6 +121,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/templates/${templateId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

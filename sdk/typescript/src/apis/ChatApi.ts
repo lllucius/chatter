@@ -152,6 +152,7 @@ Available templates:
       path: `/api/v1/chat/conversations/${conversationId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

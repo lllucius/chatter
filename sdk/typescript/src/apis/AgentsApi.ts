@@ -33,6 +33,7 @@ export class AgentsApi extends BaseAPI {
       path: `/api/v1/agents/`,
       method: 'GET' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
@@ -114,6 +115,7 @@ Returns:
       path: `/api/v1/agents/${agentId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -221,6 +223,7 @@ Returns:
       path: `/api/v1/agents/bulk`,
       method: 'DELETE' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

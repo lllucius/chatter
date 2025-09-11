@@ -184,6 +184,15 @@ def get_request_body_type(operation: dict[str, Any]) -> str | None:
 
     return None
 
+def has_json_request_body(operation: dict[str, Any]) -> bool:
+    """Check if operation has a JSON request body"""
+    request_body = operation.get("requestBody", {})
+    if not request_body:
+        return False
+    
+    content = request_body.get("content", {})
+    return "application/json" in content
+
 def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
     """Generate TypeScript method for an API operation"""
     operation_id = get_operation_id(path, method, operation)
@@ -240,6 +249,11 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
       path: `{path_with_params}`,
       method: '{method.upper()}' as HTTPMethod,
       headers: {{"""
+
+    # Add Content-Type header for JSON request bodies
+    if has_json_request_body(operation):
+        method_body += """
+        'Content-Type': 'application/json',"""
 
     # Add headers from parameters
     if params["header"]:

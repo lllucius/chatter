@@ -113,6 +113,7 @@ Returns:
       path: `/api/v1/profiles/${profileId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

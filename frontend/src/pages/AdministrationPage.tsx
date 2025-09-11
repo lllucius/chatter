@@ -51,6 +51,7 @@ import { getSDK } from '../services/auth-service';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from 'chatter-sdk';
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
+import { cleanApiOptions } from '../utils/common';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 
@@ -369,11 +370,11 @@ const AdministrationPage: React.FC = () => {
           
         case 'documents':
           // Get documents based on filters
-          const documentsResponse = await getSDK().documents.listDocumentsApiV1Documents({
-            status: bulkOperationData.filters.status || undefined,
-            ownerId: bulkOperationData.filters.userId || undefined,
+          const documentsResponse = await getSDK().documents.listDocumentsApiV1Documents(cleanApiOptions({
+            status: bulkOperationData.filters.status,
+            ownerId: bulkOperationData.filters.userId,
             limit: 1000  // Set a reasonable limit
-          });
+          }));
           idsToDelete = documentsResponse.data.documents
             .filter(doc => {
               // Apply additional filters not supported by API

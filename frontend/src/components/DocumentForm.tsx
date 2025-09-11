@@ -12,7 +12,7 @@ import {
 } from '@mui/material';
 import { CloudUpload as UploadIcon } from '@mui/icons-material';
 import { CrudFormProps } from './CrudDataTable';
-import { formatFileSize } from '../utils/common';
+import { formatFileSize, cleanApiOptions } from '../utils/common';
 
 interface DocumentCreateData {
   file: File;
@@ -40,18 +40,18 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
       
       setUploading(true);
       try {
-        await onSubmit({
+        await onSubmit(cleanApiOptions({
           file,
-          title: title || undefined,
-        });
+          title,
+        }));
         handleClose();
       } finally {
         setUploading(false);
       }
     } else {
-      await onSubmit({
-        title: title || undefined,
-      });
+      await onSubmit(cleanApiOptions({
+        title,
+      }));
       handleClose();
     }
   };

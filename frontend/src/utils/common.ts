@@ -106,3 +106,19 @@ export const debounce = <T extends (...args: any[]) => any>(
 export const generateId = (length: number = 8): string => {
   return Math.random().toString(36).substring(2, 2 + length);
 };
+
+/**
+ * Filter out undefined and null values from an object
+ * This prevents sending "undefined" string values to APIs
+ * @param obj - Object to clean
+ * @returns Object with undefined/null values removed
+ */
+export const cleanApiOptions = <T extends Record<string, any>>(obj: T): Partial<T> => {
+  const cleaned: Partial<T> = {};
+  for (const [key, value] of Object.entries(obj)) {
+    if (value !== undefined && value !== null && value !== '') {
+      cleaned[key as keyof T] = value;
+    }
+  }
+  return cleaned;
+};

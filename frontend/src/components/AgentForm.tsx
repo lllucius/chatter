@@ -33,6 +33,7 @@ import {
 } from '@mui/icons-material';
 import { AgentCreateRequest, AgentUpdateRequest, AgentResponse } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
+import { cleanApiOptions } from '../utils/common';
 
 interface AgentFormProps extends CrudFormProps<AgentCreateRequest, AgentUpdateRequest> {}
 
@@ -196,15 +197,15 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const handleSubmit = async () => {
     setSaving(true);
     try {
-      const submitData: AgentCreateRequest = {
+      const submitData: AgentCreateRequest = cleanApiOptions({
         name: formData.name,
         description: formData.description,
         type: formData.type,
         status: formData.status,
         primary_llm: formData.primary_llm,
-        fallback_llm: formData.fallback_llm || undefined,
+        fallback_llm: formData.fallback_llm,
         system_prompt: formData.system_prompt,
-        personality: formData.personality || undefined,
+        personality: formData.personality,
         expertise_areas: formData.expertise_areas,
         max_iterations: formData.max_iterations,
         temperature: formData.temperature,
@@ -218,7 +219,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
         safety_filters: formData.safety_filters,
         audit_enabled: formData.audit_enabled,
         is_active: formData.is_active,
-      };
+      });
 
       await onSubmit(submitData);
     } catch (error) {

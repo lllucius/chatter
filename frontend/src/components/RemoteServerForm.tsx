@@ -21,6 +21,7 @@ import {
 import Grid from '@mui/material/Grid';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { CrudFormProps } from './CrudDataTable';
+import { cleanApiOptions } from '../utils/common';
 
 // Define the RemoteServer interface based on the original code
 interface RemoteServer {
@@ -147,12 +148,12 @@ const RemoteServerForm: React.FC<RemoteServerFormProps> = ({
         description: formData.description,
         base_url: formData.base_url,
         transport_type: formData.transport_type,
-        oauth_config: formData.oauth_enabled ? {
+        oauth_config: formData.oauth_enabled ? cleanApiOptions({
           client_id: formData.oauth_client_id,
           client_secret: formData.oauth_client_secret,
           token_url: formData.oauth_token_url,
-          scope: formData.oauth_scope || undefined,
-        } : undefined,
+          scope: formData.oauth_scope,
+        }) : undefined,
         headers: formData.headers ? JSON.parse(formData.headers) : undefined,
         timeout: formData.timeout,
         auto_start: formData.auto_start,

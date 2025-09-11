@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
+import { cleanApiOptions } from '../utils/common';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
@@ -136,14 +137,13 @@ const ChatPage: React.FC = () => {
       await loadData();
       
       const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
-      const systemPrompt = selectedPromptData?.content || undefined;
       
-      const createRequest: ConversationCreate = {
+      const createRequest: ConversationCreate = cleanApiOptions({
         title: `Chat ${new Date().toLocaleString()}`,
-        profile_id: selectedProfile || undefined,
+        profile_id: selectedProfile,
         enable_retrieval: enableRetrieval,
-        system_prompt: systemPrompt,
-      };
+        system_prompt: selectedPromptData?.content,
+      });
       const response = await getSDK().chat.createConversationApiV1ChatConversations(createRequest);
       setCurrentConversation(response.data);
       setMessages([]);

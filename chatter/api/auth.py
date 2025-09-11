@@ -253,12 +253,17 @@ async def login(
         httponly=True,
         secure=True,  # HTTPS only in production
         samesite="strict",
-        max_age=60 * 60 * 24 * 7,  # 7 days (should match settings.refresh_token_expire_days)
-        path="/"
+        max_age=60
+        * 60
+        * 24
+        * 7,  # 7 days (should match settings.refresh_token_expire_days)
+        path="/",
     )
 
     # Return only access token in response body (remove refresh_token from response)
-    response_data = {k: v for k, v in tokens.items() if k != "refresh_token"}
+    response_data = {
+        k: v for k, v in tokens.items() if k != "refresh_token"
+    }
 
     return TokenResponse(
         **response_data, user=UserResponse.model_validate(user)
@@ -302,10 +307,12 @@ async def refresh_token(
                 secure=True,  # HTTPS only in production
                 samesite="strict",
                 max_age=60 * 60 * 24 * 7,  # 7 days
-                path="/"
+                path="/",
             )
             # Remove refresh token from response body
-            result = {k: v for k, v in result.items() if k != "refresh_token"}
+            result = {
+                k: v for k, v in result.items() if k != "refresh_token"
+            }
 
         # Log token refresh
         from chatter.core.monitoring import (
@@ -532,7 +539,7 @@ async def logout(
         path="/",
         httponly=True,
         secure=True,
-        samesite="strict"
+        samesite="strict",
     )
 
     # Log logout for security monitoring

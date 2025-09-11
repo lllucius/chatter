@@ -4,7 +4,10 @@ import hashlib
 import time
 from typing import Any
 
-from chatter.core.cache_factory import get_general_cache, get_persistent_cache
+from chatter.core.cache_factory import (
+    get_general_cache,
+    get_persistent_cache,
+)
 from chatter.core.cache_interface import CacheInterface
 from chatter.utils.logging import get_logger
 
@@ -13,7 +16,7 @@ logger = get_logger(__name__)
 
 class SimplifiedWorkflowCache:
     """Simplified workflow cache using the core cache interface directly.
-    
+
     Replaces UnifiedWorkflowCache with a much simpler implementation.
     """
 
@@ -36,10 +39,10 @@ class SimplifiedWorkflowCache:
         # Create deterministic string representation
         config_items = sorted(config.items()) if config else []
         config_str = f"{provider_name}:{workflow_type}:{config_items}"
-        
+
         # Hash for consistent key length
         key_hash = hashlib.sha256(config_str.encode()).hexdigest()[:16]
-        
+
         # Use the cache's key generation for consistency
         return self.cache.make_key("workflow", key_hash)
 
@@ -52,7 +55,7 @@ class SimplifiedWorkflowCache:
         """Get cached workflow if available."""
         cache_key = self._make_key(provider_name, workflow_type, config)
         value = await self.cache.get(cache_key)
-        
+
         if value is not None:
             logger.debug(
                 "Workflow cache hit",
@@ -65,7 +68,7 @@ class SimplifiedWorkflowCache:
                 provider=provider_name,
                 workflow_type=workflow_type,
             )
-        
+
         return value
 
     async def put(
@@ -78,14 +81,14 @@ class SimplifiedWorkflowCache:
         """Cache compiled workflow."""
         cache_key = self._make_key(provider_name, workflow_type, config)
         success = await self.cache.set(cache_key, workflow)
-        
+
         if success:
             logger.debug(
                 "Workflow cached",
                 provider=provider_name,
                 workflow_type=workflow_type,
             )
-        
+
         return success
 
     async def clear(self) -> bool:
@@ -112,7 +115,7 @@ class SimplifiedWorkflowCache:
 
 class SimplifiedToolLoader:
     """Simplified tool loader using the core cache interface directly.
-    
+
     Replaces UnifiedLazyToolLoader with a much simpler implementation.
     """
 
@@ -145,7 +148,7 @@ class SimplifiedToolLoader:
         for tool_name in required_tools:
             tool_key = self.cache.make_key("tool", tool_name)
             tool = await self.cache.get(tool_key)
-            
+
             if tool is not None:
                 tools.append(tool)
             else:
@@ -169,7 +172,7 @@ class SimplifiedToolLoader:
         """Load all available tools."""
         all_tools_key = self.cache.make_key("all_tools")
         cached_tools = await self.cache.get(all_tools_key)
-        
+
         if cached_tools is not None:
             return cached_tools
 
@@ -209,11 +212,14 @@ class SimplifiedToolLoader:
         # For now, load all tools and extract the specific one
         # A more optimized implementation could selectively load tools
         all_tools = await self._load_all_tools()
-        
+
         for tool in all_tools:
-            if getattr(tool, "name", getattr(tool, "__name__", "")) == tool_name:
+            if (
+                getattr(tool, "name", getattr(tool, "__name__", ""))
+                == tool_name
+            ):
                 return tool
-        
+
         return None
 
     async def clear_cache(self) -> bool:

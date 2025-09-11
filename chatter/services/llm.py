@@ -642,12 +642,14 @@ class LLMService:
 
         return active_providers
 
-    async def invalidate_provider_cache(self, provider_name: str | None = None) -> None:
+    async def invalidate_provider_cache(
+        self, provider_name: str | None = None
+    ) -> None:
         """Invalidate cached LLM provider instances.
-        
+
         This should be called when providers or models are updated/deleted
         to ensure the cache doesn't serve stale data.
-        
+
         Args:
             provider_name: Specific provider to invalidate, or None to invalidate all
         """
@@ -655,13 +657,19 @@ class LLMService:
             # Invalidate specific provider
             if provider_name in self._providers:
                 del self._providers[provider_name]
-                logger.debug("Invalidated LLM provider cache", provider_name=provider_name)
+                logger.debug(
+                    "Invalidated LLM provider cache",
+                    provider_name=provider_name,
+                )
         else:
             # Invalidate all cached providers
             if self._providers:
                 provider_count = len(self._providers)
                 self._providers.clear()
-                logger.info("Invalidated all LLM provider caches", provider_count=provider_count)
+                logger.info(
+                    "Invalidated all LLM provider caches",
+                    provider_count=provider_count,
+                )
 
     async def get_provider_info(
         self, provider_name: str

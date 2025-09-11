@@ -44,11 +44,13 @@ async def send_message(
         )
 
         if stream:
-            console.print(f"💬 [dim]Sending message...[/dim]")
+            console.print("💬 [dim]Sending message...[/dim]")
             console.print(f"[bold]User:[/bold] {message}")
-            console.print(f"[bold]Assistant:[/bold]", end=" ")
+            console.print("[bold]Assistant:[/bold]", end=" ")
 
-            async for chunk in sdk_client.chat_api.send_message_stream_api_v1_chat_stream_post(
+            async for (
+                chunk
+            ) in sdk_client.chat_api.send_message_stream_api_v1_chat_stream_post(
                 chat_message=chat_request
             ):
                 if hasattr(chunk, "content"):
@@ -59,19 +61,25 @@ async def send_message(
                 chat_message=chat_request
             )
 
-            console.print(f"💬 [green]Message sent successfully[/green]")
+            console.print("💬 [green]Message sent successfully[/green]")
             console.print(f"[bold]User:[/bold] {message}")
             console.print(f"[bold]Assistant:[/bold] {response.content}")
 
             if hasattr(response, "conversation_id"):
-                console.print(f"[dim]Conversation ID: {response.conversation_id}[/dim]")
+                console.print(
+                    f"[dim]Conversation ID: {response.conversation_id}[/dim]"
+                )
 
 
 @chat_app.command("list")
 @run_async
 async def list_conversations(
-    limit: int = typer.Option(10, help="Number of conversations to list"),
-    offset: int = typer.Option(0, help="Number of conversations to skip"),
+    limit: int = typer.Option(
+        10, help="Number of conversations to list"
+    ),
+    offset: int = typer.Option(
+        0, help="Number of conversations to skip"
+    ),
 ):
     """List chat conversations."""
     async with get_client() as sdk_client:
@@ -83,7 +91,9 @@ async def list_conversations(
             console.print("No conversations found.")
             return
 
-        table = Table(title=f"Conversations ({response.total_count} total)")
+        table = Table(
+            title=f"Conversations ({response.total_count} total)"
+        )
         table.add_column("ID", style="cyan")
         table.add_column("Title", style="green")
         table.add_column("Messages", style="yellow")
@@ -131,14 +141,18 @@ async def show_conversation(
                 timestamp = getattr(msg, "created_at", "N/A")
 
                 role_style = "blue" if role == "user" else "green"
-                console.print(f"[{role_style}]{role.upper()}:[/{role_style}] {content[:200]}")
+                console.print(
+                    f"[{role_style}]{role.upper()}:[/{role_style}] {content[:200]}"
+                )
                 console.print(f"[dim]{timestamp}[/dim]\n")
 
 
 @chat_app.command("delete")
 @run_async
 async def delete_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to delete"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to delete"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Delete a conversation."""
@@ -156,13 +170,17 @@ async def delete_conversation(
             conversation_id=conversation_id
         )
 
-        console.print(f"✅ [green]Deleted conversation {conversation_id}[/green]")
+        console.print(
+            f"✅ [green]Deleted conversation {conversation_id}[/green]"
+        )
 
 
 @chat_app.command("clear")
 @run_async
 async def clear_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to clear"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to clear"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Clear all messages from a conversation."""
@@ -180,14 +198,20 @@ async def clear_conversation(
             conversation_id=conversation_id
         )
 
-        console.print(f"✅ [green]Cleared conversation {conversation_id}[/green]")
+        console.print(
+            f"✅ [green]Cleared conversation {conversation_id}[/green]"
+        )
 
 
 @chat_app.command("export")
 @run_async
 async def export_conversation(
-    conversation_id: str = typer.Argument(..., help="Conversation ID to export"),
-    format_type: str = typer.Option("json", help="Export format: json, txt, markdown"),
+    conversation_id: str = typer.Argument(
+        ..., help="Conversation ID to export"
+    ),
+    format_type: str = typer.Option(
+        "json", help="Export format: json, txt, markdown"
+    ),
     output_file: str = typer.Option(None, help="Output file path"),
 ):
     """Export conversation to file."""
@@ -202,9 +226,15 @@ async def export_conversation(
                     json.dump(response.data, f, indent=2)
                 else:
                     f.write(response.content)
-            console.print(f"✅ [green]Exported to: {output_file}[/green]")
+            console.print(
+                f"✅ [green]Exported to: {output_file}[/green]"
+            )
         else:
-            console.print(response.content if hasattr(response, "content") else str(response))
+            console.print(
+                response.content
+                if hasattr(response, "content")
+                else str(response)
+            )
 
 
 @chat_app.command("stats")
@@ -212,22 +242,30 @@ async def export_conversation(
 async def chat_stats():
     """Show chat statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.chat_api.get_chat_stats_api_v1_chat_stats_overview_get()
+        response = (
+            await sdk_client.chat_api.get_chat_stats_api_v1_chat_stats_overview_get()
+        )
 
         table = Table(title="Chat Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, "total_conversations"):
-            table.add_row("Total Conversations", str(response.total_conversations))
+            table.add_row(
+                "Total Conversations", str(response.total_conversations)
+            )
         if hasattr(response, "total_messages"):
-            table.add_row("Total Messages", str(response.total_messages))
+            table.add_row(
+                "Total Messages", str(response.total_messages)
+            )
         if hasattr(response, "avg_messages_per_conversation"):
             table.add_row(
                 "Avg Messages/Conversation",
                 f"{response.avg_messages_per_conversation:.1f}",
             )
         if hasattr(response, "total_tokens_used"):
-            table.add_row("Total Tokens Used", f"{response.total_tokens_used:,}")
+            table.add_row(
+                "Total Tokens Used", f"{response.total_tokens_used:,}"
+            )
 
         console.print(table)

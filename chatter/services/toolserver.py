@@ -1242,7 +1242,7 @@ class ToolServerService:
                     "args": [
                         "-y",
                         "@modelcontextprotocol/server-filesystem",
-                        "/tmp",
+                        os.environ.get("CHATTER_WORKSPACE_DIR", "/tmp/chatter_workspace"),  # nosec B108 - configurable via env var
                     ],
                     "env": None,
                 },

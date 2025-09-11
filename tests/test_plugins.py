@@ -1058,20 +1058,30 @@ class TestPluginInstallValidation:
         """Test that install_plugin rejects empty plugin paths."""
 
         # Test empty string
-        with pytest.raises(ValueError, match="Plugin path cannot be empty"):
+        with pytest.raises(
+            ValueError, match="Plugin path cannot be empty"
+        ):
             await self.plugin_manager.install_plugin("")
 
         # Test None
-        with pytest.raises(ValueError, match="Plugin path cannot be empty"):
+        with pytest.raises(
+            ValueError, match="Plugin path cannot be empty"
+        ):
             await self.plugin_manager.install_plugin(None)
 
         # Test whitespace only
-        with pytest.raises(ValueError, match="Plugin path cannot be empty"):
+        with pytest.raises(
+            ValueError, match="Plugin path cannot be empty"
+        ):
             await self.plugin_manager.install_plugin("   ")
 
     @pytest.mark.asyncio
     async def test_install_plugin_nonexistent_path(self):
         """Test that install_plugin rejects non-existent paths."""
 
-        with pytest.raises(ValueError, match="Plugin path does not exist"):
-            await self.plugin_manager.install_plugin("/nonexistent/path")
+        with pytest.raises(
+            ValueError, match="Plugin path does not exist"
+        ):
+            await self.plugin_manager.install_plugin(
+                "/nonexistent/path"
+            )

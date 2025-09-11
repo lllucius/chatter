@@ -40,7 +40,9 @@ async def list_documents(
         for doc in response.documents:
             table.add_row(
                 str(doc.id),
-                getattr(doc, "filename", getattr(doc, "name", "Unknown")),
+                getattr(
+                    doc, "filename", getattr(doc, "name", "Unknown")
+                ),
                 getattr(doc, "content_type", "unknown"),
                 getattr(doc, "status", "unknown"),
                 (
@@ -97,20 +99,14 @@ async def upload_document(
         with open(file_path_obj, "rb") as f:
             file_content = f.read()
 
-        # Create the upload request
-        upload_data = {
-            "filename": file_path_obj.name,
-            "content_type": "application/octet-stream",  # Default type
-            "description": description or "",
-            "tags": [tag.strip() for tag in tags.split(",")] if tags else [],
-        }
-
         response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
             file=(file_path_obj.name, file_content),
             description=description,
         )
 
-        console.print(f"✅ [green]Uploaded document: {response.filename}[/green]")
+        console.print(
+            f"✅ [green]Uploaded document: {response.filename}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
         console.print(f"[dim]Size: {response.size:,} bytes[/dim]")
 
@@ -118,7 +114,9 @@ async def upload_document(
 @documents_app.command("download")
 @run_async
 async def download_document(
-    document_id: str = typer.Argument(..., help="Document ID to download"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to download"
+    ),
     output_path: str = typer.Option(None, help="Output file path"),
 ):
     """Download a document."""
@@ -137,20 +135,26 @@ async def download_document(
         if output_path:
             output_file = Path(output_path)
         else:
-            output_file = Path(getattr(doc_info, "filename", f"document_{document_id}"))
+            output_file = Path(
+                getattr(doc_info, "filename", f"document_{document_id}")
+            )
 
         # Write to file
         with open(output_file, "wb") as f:
             f.write(content)
 
         console.print(f"✅ [green]Downloaded to: {output_file}[/green]")
-        console.print(f"[dim]Size: {output_file.stat().st_size:,} bytes[/dim]")
+        console.print(
+            f"[dim]Size: {output_file.stat().st_size:,} bytes[/dim]"
+        )
 
 
 @documents_app.command("delete")
 @run_async
 async def delete_document(
-    document_id: str = typer.Argument(..., help="Document ID to delete"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to delete"
+    ),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
 ):
     """Delete a document."""
@@ -168,7 +172,9 @@ async def delete_document(
             document_id=document_id
         )
 
-        console.print(f"✅ [green]Deleted document {document_id}[/green]")
+        console.print(
+            f"✅ [green]Deleted document {document_id}[/green]"
+        )
 
 
 @documents_app.command("search")
@@ -176,7 +182,9 @@ async def delete_document(
 async def search_documents(
     query: str = typer.Argument(..., help="Search query"),
     limit: int = typer.Option(10, help="Number of results to return"),
-    threshold: float = typer.Option(0.7, help="Similarity threshold (0.0-1.0)"),
+    threshold: float = typer.Option(
+        0.7, help="Similarity threshold (0.0-1.0)"
+    ),
 ):
     """Search documents using vector similarity."""
     async with get_client() as sdk_client:
@@ -198,7 +206,9 @@ async def search_documents(
             console.print("No matching documents found.")
             return
 
-        table = Table(title=f"Search Results ({len(response.results)} found)")
+        table = Table(
+            title=f"Search Results ({len(response.results)} found)"
+        )
         table.add_column("ID", style="cyan")
         table.add_column("Name", style="green")
         table.add_column("Score", style="yellow")
@@ -223,8 +233,12 @@ async def search_documents(
 @documents_app.command("process")
 @run_async
 async def process_document(
-    document_id: str = typer.Argument(..., help="Document ID to process"),
-    processor: str = typer.Option("default", help="Processor type to use"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to process"
+    ),
+    processor: str = typer.Option(
+        "default", help="Processor type to use"
+    ),
     force: bool = typer.Option(False, help="Force reprocessing"),
 ):
     """Process a document for content extraction and vectorization."""
@@ -239,7 +253,9 @@ async def process_document(
             process_request=process_request,
         )
 
-        console.print(f"✅ [green]Processing started for document {document_id}[/green]")
+        console.print(
+            f"✅ [green]Processing started for document {document_id}[/green]"
+        )
         if hasattr(response, "job_id"):
             console.print(f"[dim]Job ID: {response.job_id}[/dim]")
         if hasattr(response, "status"):
@@ -262,7 +278,9 @@ async def list_document_chunks(
             console.print("No chunks found for this document.")
             return
 
-        table = Table(title=f"Document Chunks ({len(response.chunks)} total)")
+        table = Table(
+            title=f"Document Chunks ({len(response.chunks)} total)"
+        )
         table.add_column("Index", style="cyan")
         table.add_column("Type", style="green")
         table.add_column("Size", style="yellow")
@@ -270,7 +288,9 @@ async def list_document_chunks(
 
         for i, chunk in enumerate(response.chunks):
             content = getattr(chunk, "content", "No content")
-            preview = content[:100] + "..." if len(content) > 100 else content
+            preview = (
+                content[:100] + "..." if len(content) > 100 else content
+            )
 
             table.add_row(
                 str(i),
@@ -287,18 +307,26 @@ async def list_document_chunks(
 async def document_stats():
     """Show document statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.documents_api.get_document_stats_api_v1_documents_stats_overview_get()
+        response = (
+            await sdk_client.documents_api.get_document_stats_api_v1_documents_stats_overview_get()
+        )
 
         table = Table(title="Document Statistics")
         table.add_column("Metric", style="cyan")
         table.add_column("Value", style="green")
 
         if hasattr(response, "total_documents"):
-            table.add_row("Total Documents", str(response.total_documents))
+            table.add_row(
+                "Total Documents", str(response.total_documents)
+            )
         if hasattr(response, "processed_documents"):
-            table.add_row("Processed Documents", str(response.processed_documents))
+            table.add_row(
+                "Processed Documents", str(response.processed_documents)
+            )
         if hasattr(response, "total_size"):
-            table.add_row("Total Size", f"{response.total_size:,} bytes")
+            table.add_row(
+                "Total Size", f"{response.total_size:,} bytes"
+            )
         if hasattr(response, "total_chunks"):
             table.add_row("Total Chunks", str(response.total_chunks))
         if hasattr(response, "avg_processing_time"):
@@ -313,9 +341,15 @@ async def document_stats():
 @documents_app.command("batch-upload")
 @run_async
 async def batch_upload_documents(
-    directory: str = typer.Argument(..., help="Directory containing files to upload"),
-    pattern: str = typer.Option("*", help="File pattern to match (e.g., '*.pdf')"),
-    description: str = typer.Option(None, help="Default description for all files"),
+    directory: str = typer.Argument(
+        ..., help="Directory containing files to upload"
+    ),
+    pattern: str = typer.Option(
+        "*", help="File pattern to match (e.g., '*.pdf')"
+    ),
+    description: str = typer.Option(
+        None, help="Default description for all files"
+    ),
 ):
     """Batch upload documents from a directory."""
     from glob import glob
@@ -345,9 +379,10 @@ async def batch_upload_documents(
                 with open(file_obj, "rb") as f:
                     file_content = f.read()
 
-                response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
+                _response = await sdk_client.documents_api.upload_document_api_v1_documents_upload_post(
                     file=(file_obj.name, file_content),
-                    description=description or f"Batch upload: {file_obj.name}",
+                    description=description
+                    or f"Batch upload: {file_obj.name}",
                 )
                 successful += 1
 
@@ -355,13 +390,17 @@ async def batch_upload_documents(
                 console.print(f"❌ Failed to upload {file_path}: {e}")
                 failed += 1
 
-        console.print(f"✅ [green]Upload complete: {successful} successful, {failed} failed[/green]")
+        console.print(
+            f"✅ [green]Upload complete: {successful} successful, {failed} failed[/green]"
+        )
 
 
 @documents_app.command("update")
 @run_async
 async def update_document(
-    document_id: str = typer.Argument(..., help="Document ID to update"),
+    document_id: str = typer.Argument(
+        ..., help="Document ID to update"
+    ),
     description: str = typer.Option(None, help="New description"),
     tags: str = typer.Option(None, help="Comma-separated tags"),
 ):
@@ -373,17 +412,23 @@ async def update_document(
         update_data["tags"] = [tag.strip() for tag in tags.split(",")]
 
     if not update_data:
-        console.print("❌ [red]No updates specified. Use --description or --tags[/red]")
+        console.print(
+            "❌ [red]No updates specified. Use --description or --tags[/red]"
+        )
         return
 
     async with get_client() as sdk_client:
-        response = await sdk_client.documents_api.update_document_api_v1_documents_document_id_put(
+        _response = await sdk_client.documents_api.update_document_api_v1_documents_document_id_put(
             document_id=document_id,
             document_update=update_data,
         )
 
-        console.print(f"✅ [green]Updated document {document_id}[/green]")
+        console.print(
+            f"✅ [green]Updated document {document_id}[/green]"
+        )
         if description:
             console.print(f"[dim]Description: {description}[/dim]")
         if tags:
-            console.print(f"[dim]Tags: {', '.join(update_data['tags'])}[/dim]")
+            console.print(
+                f"[dim]Tags: {', '.join(update_data['tags'])}[/dim]"
+            )

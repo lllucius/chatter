@@ -45,7 +45,9 @@ async def list_plugins(
 
 @plugins_app.command("show")
 @run_async
-async def show_plugin(plugin_name: str = typer.Argument(..., help="Plugin name")):
+async def show_plugin(
+    plugin_name: str = typer.Argument(..., help="Plugin name")
+):
     """Show detailed plugin information."""
     async with get_client() as sdk_client:
         response = await sdk_client.plugins_api.get_plugin_api_v1_plugins_plugin_name_get(
@@ -67,26 +69,34 @@ async def show_plugin(plugin_name: str = typer.Argument(..., help="Plugin name")
 
 @plugins_app.command("enable")
 @run_async
-async def enable_plugin(plugin_name: str = typer.Argument(..., help="Plugin name")):
+async def enable_plugin(
+    plugin_name: str = typer.Argument(..., help="Plugin name")
+):
     """Enable a plugin."""
     async with get_client() as sdk_client:
-        response = await sdk_client.plugins_api.enable_plugin_api_v1_plugins_plugin_name_enable_post(
+        _response = await sdk_client.plugins_api.enable_plugin_api_v1_plugins_plugin_name_enable_post(
             plugin_name=plugin_name
         )
 
-        console.print(f"✅ [green]Enabled plugin: {plugin_name}[/green]")
+        console.print(
+            f"✅ [green]Enabled plugin: {plugin_name}[/green]"
+        )
 
 
 @plugins_app.command("disable")
 @run_async
-async def disable_plugin(plugin_name: str = typer.Argument(..., help="Plugin name")):
+async def disable_plugin(
+    plugin_name: str = typer.Argument(..., help="Plugin name")
+):
     """Disable a plugin."""
     async with get_client() as sdk_client:
-        response = await sdk_client.plugins_api.disable_plugin_api_v1_plugins_plugin_name_disable_post(
+        _response = await sdk_client.plugins_api.disable_plugin_api_v1_plugins_plugin_name_disable_post(
             plugin_name=plugin_name
         )
 
-        console.print(f"✅ [green]Disabled plugin: {plugin_name}[/green]")
+        console.print(
+            f"✅ [green]Disabled plugin: {plugin_name}[/green]"
+        )
 
 
 @plugins_app.command("stats")
@@ -94,7 +104,9 @@ async def disable_plugin(plugin_name: str = typer.Argument(..., help="Plugin nam
 async def plugin_stats():
     """Show plugin statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.plugins_api.get_plugin_stats_api_v1_plugins_stats_get()
+        response = (
+            await sdk_client.plugins_api.get_plugin_stats_api_v1_plugins_stats_get()
+        )
 
         table = Table(title="Plugin Statistics")
         table.add_column("Metric", style="cyan")
@@ -103,8 +115,12 @@ async def plugin_stats():
         if hasattr(response, "total_plugins"):
             table.add_row("Total Plugins", str(response.total_plugins))
         if hasattr(response, "enabled_plugins"):
-            table.add_row("Enabled Plugins", str(response.enabled_plugins))
+            table.add_row(
+                "Enabled Plugins", str(response.enabled_plugins)
+            )
         if hasattr(response, "disabled_plugins"):
-            table.add_row("Disabled Plugins", str(response.disabled_plugins))
+            table.add_row(
+                "Disabled Plugins", str(response.disabled_plugins)
+            )
 
         console.print(table)

@@ -339,9 +339,7 @@ class SecurityValidator(BaseValidator):
 
         if errors:
             # Cast to base ValidationError list type
-            return ValidationResult(
-                is_valid=False, errors=list(errors)
-            )
+            return ValidationResult(is_valid=False, errors=list(errors))
 
         # Sanitize if enabled
         sanitized_value = value

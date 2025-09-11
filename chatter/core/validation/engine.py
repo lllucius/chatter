@@ -37,7 +37,9 @@ class ValidationEngine:
         self.register_validator("workflow", WorkflowValidator())
         self.register_validator("agent", AgentValidator())
 
-    def register_validator(self, name: str, validator: BaseValidator) -> None:
+    def register_validator(
+        self, name: str, validator: BaseValidator
+    ) -> None:
         """Register a validator with the engine."""
         self._validators[name] = validator
 

@@ -28,32 +28,37 @@ class WorkflowManagementService:
     def __init__(self, session: AsyncSession):
         self.session = session
 
-    async def _invalidate_workflow_caches(self, workflow_id: str | None = None) -> None:
+    async def _invalidate_workflow_caches(
+        self, workflow_id: str | None = None
+    ) -> None:
         """Invalidate workflow-related caches.
-        
+
         Args:
             workflow_id: Specific workflow to invalidate, or None to invalidate all
         """
         try:
             from chatter.core.simplified_cache import get_workflow_cache
-            
+
             workflow_cache = get_workflow_cache()
-            
+
             if workflow_id:
                 # For now, we don't have a way to invalidate specific workflows
                 # So we clear all workflows when any workflow changes
                 await workflow_cache.clear()
-                logger.debug("Invalidated workflow cache for workflow", workflow_id=workflow_id)
+                logger.debug(
+                    "Invalidated workflow cache for workflow",
+                    workflow_id=workflow_id,
+                )
             else:
                 await workflow_cache.clear()
                 logger.debug("Invalidated all workflow caches")
-                
+
         except Exception as e:
             # Don't fail the main operation if cache invalidation fails
             logger.warning(
-                "Failed to invalidate workflow caches", 
+                "Failed to invalidate workflow caches",
                 error=str(e),
-                workflow_id=workflow_id
+                workflow_id=workflow_id,
             )
 
     # Workflow Definition CRUD

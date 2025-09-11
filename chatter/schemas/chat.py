@@ -258,8 +258,8 @@ class ChatRequest(BaseModel):
         None, description="Profile ID to use"
     )
     stream: bool = Field(
-        default=False, 
-        description="[DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design."
+        default=False,
+        description="[DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design.",
     )
 
     # Workflow selection (preferred)

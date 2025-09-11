@@ -52,7 +52,7 @@ class CacheInterface(ABC):
     @property
     def is_disabled(self) -> bool:
         """Check if cache is completely disabled.
-        
+
         Returns:
             True if cache operations should be skipped
         """
@@ -261,7 +261,10 @@ class CacheInterface(ABC):
         return True
 
     async def get_or_set(
-        self, key: str, callable_func: Callable[[], Any], ttl: int | None = None
+        self,
+        key: str,
+        callable_func: Callable[[], Any],
+        ttl: int | None = None,
     ) -> Any:
         """Get value from cache or set it using the callable.
 

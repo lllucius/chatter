@@ -272,9 +272,7 @@ async def streaming_chat(
                 current_user.id, chat_request
             ):
                 if await request.is_disconnected():
-                    logger.info(
-                        "Client disconnected during streaming"
-                    )
+                    logger.info("Client disconnected during streaming")
                     break
                 yield f"data: {json.dumps(chunk.model_dump())}\n\n"
         except (NotFoundError, ChatServiceError) as e:

@@ -33,7 +33,10 @@ class Settings(BaseSettings):
     # SERVER SETTINGS
     # =============================================================================
 
-    host: str = Field(default="0.0.0.0", description="Server host")
+    host: str = Field(
+        default="0.0.0.0",  # nosec B104 - configurable, use 127.0.0.1 for production
+        description="Server host - use 127.0.0.1 for local development, 0.0.0.0 for containers"
+    )
     port: int = Field(default=8000, description="Server port")
     workers: int = Field(
         default=1, description="Number of worker processes"
@@ -118,15 +121,15 @@ class Settings(BaseSettings):
     # Global cache control
     cache_disabled: bool = Field(
         default=False,
-        description="Completely disable all caching operations"
+        description="Completely disable all caching operations",
     )
-    
+
     # Cache backend configuration
     cache_backend: str = Field(
         default="multi_tier",
-        description="Cache backend: 'memory', 'redis', or 'multi_tier'"
+        description="Cache backend: 'memory', 'redis', or 'multi_tier'",
     )
-    
+
     # Redis connection settings
     redis_url: str = Field(
         default="redis://localhost:6379/0",
@@ -141,20 +144,20 @@ class Settings(BaseSettings):
     redis_connect_retries: int = Field(
         default=3, description="Redis connection retry attempts"
     )
-    
+
     # Cache sizing and behavior
     cache_max_size: int = Field(
         default=1000, description="Maximum entries in cache"
     )
     cache_l1_size_ratio: float = Field(
         default=0.1,
-        description="L1 cache size as ratio of total size (for multi-tier)"
+        description="L1 cache size as ratio of total size (for multi-tier)",
     )
     cache_eviction_policy: str = Field(
         default="lru",
-        description="Cache eviction policy: 'lru', 'ttl', or 'random'"
+        description="Cache eviction policy: 'lru', 'ttl', or 'random'",
     )
-    
+
     # TTL configuration - simplified hierarchy
     cache_ttl_default: int = Field(
         default=3600, description="Default cache TTL (1 hour)"
@@ -165,7 +168,7 @@ class Settings(BaseSettings):
     cache_ttl_long: int = Field(
         default=7200, description="Long-lived cache TTL (2 hours)"
     )
-    
+
     db_pool_recycle: int = Field(
         default=3600, description="Database pool recycle time"
     )
@@ -259,17 +262,17 @@ class Settings(BaseSettings):
     def cache_enabled(self) -> bool:
         """Backwards compatibility - inverse of cache_disabled."""
         return not self.cache_disabled
-        
+
     @property
     def cache_disable_all(self) -> bool:
         """Backwards compatibility - same as cache_disabled."""
         return self.cache_disabled
-        
+
     @property
     def cache_ttl(self) -> int:
         """Backwards compatibility - same as cache_ttl_default."""
         return self.cache_ttl_default
-        
+
     @property
     def cache_max_memory_size(self) -> int:
         """Backwards compatibility - same as cache_max_size."""
@@ -703,11 +706,11 @@ class Settings(BaseSettings):
             dev_patterns = [
                 "localhost",
                 "127.0.0.1",
-                "0.0.0.0",
+                "0.0.0.0",  # nosec B104 - intentional for development/testing
                 "testserver",  # Add testserver for pytest TestClient
                 f"localhost:{self.port}",
                 f"127.0.0.1:{self.port}",
-                f"0.0.0.0:{self.port}",
+                f"0.0.0.0:{self.port}",  # nosec B104 - intentional for development/testing
             ]
 
             # Combine and deduplicate

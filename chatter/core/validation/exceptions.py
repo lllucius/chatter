@@ -31,7 +31,10 @@ class SecurityValidationError(ValidationError):
     """Security-related validation error."""
 
     def __init__(
-        self, message: str, threat_type: str | None = None, **kwargs: Any
+        self,
+        message: str,
+        threat_type: str | None = None,
+        **kwargs: Any,
     ) -> None:
         super().__init__(message, **kwargs)
         self.threat_type = threat_type

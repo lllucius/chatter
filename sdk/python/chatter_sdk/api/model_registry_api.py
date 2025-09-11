@@ -3253,7 +3253,7 @@ class ModelRegistryApi:
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3333,7 +3333,7 @@ class ModelRegistryApi:
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3413,7 +3413,7 @@ class ModelRegistryApi:
         self,
         model_id: Annotated[Optional[StrictStr], Field(description="Filter by model ID")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active spaces")] = None,
         _request_timeout: Union[
             None,
@@ -3571,7 +3571,7 @@ class ModelRegistryApi:
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3655,7 +3655,7 @@ class ModelRegistryApi:
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3739,7 +3739,7 @@ class ModelRegistryApi:
         provider_id: Annotated[Optional[StrictStr], Field(description="Filter by provider ID")] = None,
         model_type: Annotated[Optional[ModelType], Field(description="Filter by model type")] = None,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active models")] = None,
         _request_timeout: Union[
             None,
@@ -3903,7 +3903,7 @@ class ModelRegistryApi:
     async def list_providers_api_v1_models_providers_get(
         self,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,
@@ -3979,7 +3979,7 @@ class ModelRegistryApi:
     async def list_providers_api_v1_models_providers_get_with_http_info(
         self,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,
@@ -4055,7 +4055,7 @@ class ModelRegistryApi:
     async def list_providers_api_v1_models_providers_get_without_preload_content(
         self,
         page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Page number")] = None,
-        per_page: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Items per page")] = None,
+        per_page: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Items per page")] = None,
         active_only: Annotated[Optional[StrictBool], Field(description="Show only active providers")] = None,
         _request_timeout: Union[
             None,

@@ -1973,7 +1973,7 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -2049,7 +2049,7 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_with_http_info(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -2125,7 +2125,7 @@ class ChatApi:
     async def get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get_without_preload_content(
         self,
         conversation_id: Annotated[str, Field(min_length=1, strict=True, description="Conversation ID")],
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -3008,7 +3008,7 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -3080,7 +3080,7 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_with_http_info(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -3152,7 +3152,7 @@ class ChatApi:
     @validate_call
     async def list_conversations_api_v1_chat_conversations_get_without_preload_content(
         self,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Number of results per page")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Number of results per page")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,

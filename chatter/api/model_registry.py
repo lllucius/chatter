@@ -48,7 +48,7 @@ router = APIRouter()
 async def list_providers(
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(
-        20, ge=1, le=100, description="Items per page"
+        20, ge=1, description="Items per page"
     ),
     active_only: bool = Query(
         True, description="Show only active providers"
@@ -315,7 +315,7 @@ async def list_models(
     ),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(
-        20, ge=1, le=100, description="Items per page"
+        20, ge=1, description="Items per page"
     ),
     active_only: bool = Query(
         True, description="Show only active models"
@@ -538,7 +538,7 @@ async def list_embedding_spaces(
     model_id: str = Query(None, description="Filter by model ID"),
     page: int = Query(1, ge=1, description="Page number"),
     per_page: int = Query(
-        20, ge=1, le=100, description="Items per page"
+        20, ge=1, description="Items per page"
     ),
     active_only: bool = Query(
         True, description="Show only active spaces"

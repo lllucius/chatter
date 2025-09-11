@@ -267,8 +267,6 @@ async def list_agents(
         limit = request.pagination.limit
         if not isinstance(limit, int) or limit < 1:
             limit = 10
-        elif limit > 100:
-            limit = 100
 
         # Get agents with filtering
         agents, total = await agent_manager.list_agents(

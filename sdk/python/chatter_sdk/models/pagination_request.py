@@ -28,7 +28,7 @@ class PaginationRequest(BaseModel):
     """
     Common pagination request schema.
     """ # noqa: E501
-    limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = Field(default=50, description="Maximum number of results")
+    limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=50, description="Maximum number of results")
     offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = Field(default=0, description="Number of results to skip")
     __properties: ClassVar[List[str]] = ["limit", "offset"]
 
@@ -45,8 +45,8 @@ class PaginationRequest(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-
-        return self.model_dump_json(by_alias=True, exclude_unset=True)
+        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
+        return json.dumps(self.to_dict())
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:

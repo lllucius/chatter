@@ -173,7 +173,7 @@ class JobListRequest(BaseModel):
 
     # Pagination
     limit: int = Field(
-        20, ge=1, le=100, description="Maximum number of results"
+        20, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
         0, ge=0, description="Number of results to skip"

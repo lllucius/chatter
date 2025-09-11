@@ -2898,7 +2898,6 @@ components:
         limit:
           default: 10
           description: Maximum number of results
-          maximum: 100.0
           minimum: 1.0
           title: Limit
           type: integer
@@ -4573,7 +4572,6 @@ components:
         limit:
           default: 50
           description: Maximum number of results
-          maximum: 100.0
           minimum: 1.0
           title: Limit
           type: integer
@@ -12579,7 +12577,6 @@ paths:
         schema:
           default: 20
           description: Number of results per page
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -12880,7 +12877,6 @@ paths:
         schema:
           default: 50
           description: Number of results per page
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -13610,7 +13606,6 @@ paths:
         schema:
           default: 50
           description: Maximum number of results
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -13970,7 +13965,6 @@ paths:
         schema:
           default: 50
           description: Maximum number of results
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -14333,7 +14327,6 @@ paths:
         required: false
         schema:
           default: 20
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -14728,7 +14721,6 @@ paths:
         schema:
           default: 20
           description: Items per page
-          maximum: 100
           minimum: 1
           title: Per Page
           type: integer
@@ -15015,7 +15007,6 @@ paths:
         schema:
           default: 20
           description: Items per page
-          maximum: 100
           minimum: 1
           title: Per Page
           type: integer
@@ -15287,7 +15278,6 @@ paths:
         schema:
           default: 20
           description: Items per page
-          maximum: 100
           minimum: 1
           title: Per Page
           type: integer
@@ -16135,7 +16125,6 @@ paths:
         schema:
           default: 50
           description: Maximum number of results
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -16589,7 +16578,6 @@ paths:
         schema:
           default: 50
           description: Maximum number of results
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer
@@ -17900,7 +17888,6 @@ paths:
         required: false
         schema:
           default: 50
-          maximum: 100
           minimum: 1
           title: Limit
           type: integer

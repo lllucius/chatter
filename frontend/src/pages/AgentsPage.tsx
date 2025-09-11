@@ -117,7 +117,7 @@ const AgentsPage: React.FC = () => {
     columns,
     actions: [
       {
-        icon: <BotIcon />,
+        icon: <AgentIcon />,
         label: 'Test Agent',
         onClick: (agent: AgentResponse) => {
           handleTestAgent(agent);

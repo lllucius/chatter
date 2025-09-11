@@ -277,6 +277,8 @@ class ToolServerEventData(ValidatedEventData):
     details: dict[str, Any] | None = None
     error: str | None = Field(None, max_length=1000)
     checked_at: str | None = Field(None, description="Health check timestamp")
+    started_at: str | None = Field(None, description="Server start timestamp")
+    stopped_at: str | None = Field(None, description="Server stop timestamp")
 
 
 class UserEventData(ValidatedEventData):

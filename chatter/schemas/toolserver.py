@@ -473,7 +473,7 @@ class ServerToolsRequest(BaseModel):
     """Schema for server tools request with pagination."""
 
     limit: int = Field(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
         0, ge=0, description="Number of results to skip"

@@ -856,7 +856,7 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -932,7 +932,7 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get_with_http_info(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -1008,7 +1008,7 @@ class DocumentsApi:
     async def get_document_chunks_api_v1_documents_document_id_chunks_get_without_preload_content(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
@@ -1403,7 +1403,7 @@ class DocumentsApi:
         document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
         tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
         sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
@@ -1501,7 +1501,7 @@ class DocumentsApi:
         document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
         tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
         sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
@@ -1599,7 +1599,7 @@ class DocumentsApi:
         document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
         tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(le=100, strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
         offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
         sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,

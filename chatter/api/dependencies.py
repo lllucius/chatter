@@ -68,7 +68,7 @@ WorkflowId = Annotated[ValidatedULID, Path(description="Workflow ID")]
 
 # Common query parameters
 PaginationLimit = Annotated[
-    int, Query(ge=1, le=100, description="Number of results per page")
+    int, Query(ge=1, description="Number of results per page")
 ]
 PaginationOffset = Annotated[
     int, Query(ge=0, description="Number of results to skip")

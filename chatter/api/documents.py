@@ -168,7 +168,7 @@ async def list_documents(
         None, description="Filter by owner (admin only)"
     ),
     limit: int = Query(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     ),
     offset: int = Query(
         0, ge=0, description="Number of results to skip"
@@ -439,7 +439,7 @@ async def search_documents(
 async def get_document_chunks(
     document_id: str,
     limit: int = Query(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     ),
     offset: int = Query(
         0, ge=0, description="Number of results to skip"

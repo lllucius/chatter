@@ -128,7 +128,7 @@ async def list_profiles(
         None, description="Filter by public status"
     ),
     limit: int = Query(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     ),
     offset: int = Query(
         0, ge=0, description="Number of results to skip"

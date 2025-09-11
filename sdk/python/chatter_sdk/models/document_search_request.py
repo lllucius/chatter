@@ -30,7 +30,7 @@ class DocumentSearchRequest(BaseModel):
     Schema for document search request.
     """ # noqa: E501
     query: Annotated[str, Field(min_length=1, strict=True, max_length=1000)] = Field(description="Search query")
-    limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = Field(default=10, description="Maximum number of results")
+    limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = Field(default=10, description="Maximum number of results")
     score_threshold: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = Field(default=0.5, description="Minimum similarity score")
     document_types: Optional[List[DocumentType]] = None
     tags: Optional[List[StrictStr]] = None
@@ -50,8 +50,8 @@ class DocumentSearchRequest(BaseModel):
 
     def to_json(self) -> str:
         """Returns the JSON representation of the model using alias"""
-
-        return self.model_dump_json(by_alias=True, exclude_unset=True)
+        # TODO: pydantic v2: use .model_dump_json(by_alias=True, exclude_unset=True) instead
+        return json.dumps(self.to_dict())
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:

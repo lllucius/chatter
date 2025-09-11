@@ -129,7 +129,7 @@ class DocumentSearchRequest(BaseModel):
         ..., min_length=1, max_length=1000, description="Search query"
     )
     limit: int = Field(
-        10, ge=1, le=100, description="Maximum number of results"
+        10, ge=1, description="Maximum number of results"
     )
     score_threshold: float = Field(
         0.5, ge=0.0, le=1.0, description="Minimum similarity score"
@@ -189,7 +189,7 @@ class DocumentListRequest(ListRequestBase):
 
     # Pagination and sorting fields
     limit: int = Field(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
         0, ge=0, description="Number of results to skip"

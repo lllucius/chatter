@@ -1727,7 +1727,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Number of results per page",
               "default": 20,
@@ -2240,7 +2239,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Number of results per page",
               "default": 50,
@@ -3332,7 +3330,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Maximum number of results",
               "default": 50,
@@ -4125,7 +4122,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Maximum number of results",
               "default": 50,
@@ -4855,7 +4851,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Maximum number of results",
               "default": 50,
@@ -5994,7 +5989,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Maximum number of results",
               "default": 50,
@@ -10763,7 +10757,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "default": 50,
               "title": "Limit"
@@ -19583,7 +19576,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "default": 20,
               "title": "Limit"
@@ -21057,7 +21049,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Items per page",
               "default": 20,
@@ -21805,7 +21796,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Items per page",
               "default": 20,
@@ -22533,7 +22523,6 @@
             "required": false,
             "schema": {
               "type": "integer",
-              "maximum": 100,
               "minimum": 1,
               "description": "Items per page",
               "default": 20,
@@ -27713,7 +27702,6 @@
           },
           "limit": {
             "type": "integer",
-            "maximum": 100.0,
             "minimum": 1.0,
             "title": "Limit",
             "description": "Maximum number of results",
@@ -30190,7 +30178,6 @@
         "properties": {
           "limit": {
             "type": "integer",
-            "maximum": 100.0,
             "minimum": 1.0,
             "title": "Limit",
             "description": "Maximum number of results",

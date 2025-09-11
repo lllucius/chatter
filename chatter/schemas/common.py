@@ -11,7 +11,7 @@ class PaginationRequest(BaseModel):
     """Common pagination request schema."""
 
     limit: int = Field(
-        50, ge=1, le=100, description="Maximum number of results"
+        50, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
         0, ge=0, description="Number of results to skip"
@@ -71,7 +71,7 @@ class PaginationParams(BaseModel):
     """Pagination parameters for requests."""
 
     page: int = Field(1, ge=1, description="Page number")
-    limit: int = Field(20, ge=1, le=100, description="Page size limit")
+    limit: int = Field(20, ge=1, description="Page size limit")
 
 
 class PaginationResponse(BaseModel):

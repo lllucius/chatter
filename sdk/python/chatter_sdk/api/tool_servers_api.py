@@ -3284,7 +3284,7 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         _request_timeout: Union[
             None,
@@ -3360,7 +3360,7 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_with_http_info(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         _request_timeout: Union[
             None,
@@ -3436,7 +3436,7 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_without_preload_content(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(le=100, strict=True, ge=1)]] = None,
+        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
         offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
         _request_timeout: Union[
             None,

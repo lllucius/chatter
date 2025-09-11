@@ -3,6 +3,8 @@
  * and ensure consistent component usage across the application
  */
 
+import React from 'react';
+
 // Core layout components
 export {
   Box,
@@ -102,7 +104,6 @@ export {
 export {
   Tabs,
   Tab,
-  TabPanel,
   Breadcrumbs,
   Stepper,
   Step,
@@ -142,3 +143,7 @@ export {
 export {
   useMediaQuery,
 } from '@mui/material';
+
+// TabPanel is defined in a separate file
+export { TabPanel } from './TabPanel';
+export type { TabPanelProps } from './TabPanel';

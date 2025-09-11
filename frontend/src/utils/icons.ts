@@ -83,4 +83,5 @@ export {
   Assessment as AssessmentIcon,
   Timeline as TimelineIcon,
   Assignment as TaskIcon,
+  Star,
 } from '@mui/icons-material';

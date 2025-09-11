@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Tabs, Tab, Typography, Chip, Button } from '@mui/material';
-import { Star as DefaultIcon, Refresh as RefreshIcon, Add as AddIcon } from '@mui/icons-material';
+import { Box, Tabs, Tab, TabPanel, Typography, Chip, Button } from '../utils/mui';
+import { Star as DefaultIcon, RefreshIcon, AddIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
@@ -21,26 +21,6 @@ import {
   DefaultProvider,
 } from 'chatter-sdk';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
-
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 const ModelManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
@@ -377,7 +357,7 @@ const ModelManagementPage: React.FC = () => {
         <Tab iconPosition="start" value={1} label="Models" />
       </Tabs>
 
-      <TabPanel value={activeTab} index={0}>
+      <TabPanel value={activeTab} index={0} idPrefix="model-management">
         <CrudDataTable
           ref={providerCrudRef}
           config={providerConfig}
@@ -387,7 +367,7 @@ const ModelManagementPage: React.FC = () => {
         />
       </TabPanel>
 
-      <TabPanel value={activeTab} index={1}>
+      <TabPanel value={activeTab} index={1} idPrefix="model-management">
         <CrudDataTable
           ref={modelCrudRef}
           config={modelConfig}

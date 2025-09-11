@@ -331,6 +331,9 @@ export function querystring(params: HTTPQuery, prefix: string = ''): string {
 
 function querystringSingleKey(key: string, value: string | number | null | undefined | boolean | Array<string | number | null | boolean> | Set<string | number | null | boolean> | HTTPQuery, keyPrefix: string = ''): string {
     const fullKey = keyPrefix + (keyPrefix.length ? `[${key}]` : key);
+    if (value === null || value === undefined) {
+        return '';
+    }
     if (value instanceof Array) {
         const multiValue = value.map(singleValue => encodeURIComponent(String(singleValue)))
             .join(`&${encodeURIComponent(fullKey)}=`);

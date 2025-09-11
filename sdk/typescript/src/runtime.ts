@@ -95,7 +95,7 @@ export class BaseAPI {
     private middleware: Middleware[];
 
     constructor(protected configuration = DefaultConfig) {
-        this.middleware = configuration.middleware;
+        this.middleware = configuration.middleware || [];
     }
 
     withMiddleware<T extends BaseAPI>(this: T, ...middlewares: Middleware[]) {

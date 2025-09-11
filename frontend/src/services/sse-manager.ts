@@ -9,7 +9,6 @@ import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
 import { authService } from '../services/auth-service';
 
 export class SSEEventManager {
-  private eventSource: EventSource | null = null;
   private listeners: SSEEventListeners = {};
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
@@ -120,7 +119,7 @@ export class SSEEventManager {
   }
 
   /**
-   * Create the EventSource connection using SDK authentication
+   * Create the connection using SDK authentication
    */
   private createConnection(): void {
     if (!authService.isAuthenticated()) {

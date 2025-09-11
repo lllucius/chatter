@@ -177,6 +177,9 @@ class ModelRegistryService:
         await self.session.commit()
         await self.session.refresh(provider)
 
+        # Invalidate list caches since a new provider is added
+        await self.cache.invalidate_list_caches()
+
         # Log the created provider to verify fields were saved
         logger.debug(
             "Provider created successfully",
@@ -222,6 +225,10 @@ class ModelRegistryService:
         await self.session.commit()
         await self.session.refresh(provider)
 
+        # Invalidate provider cache and list caches after update
+        await self.cache.invalidate_provider(provider_id)
+        await self.cache.invalidate_list_caches()
+
         # Log the updated provider to verify fields were saved
         logger.debug(
             "Provider updated successfully",
@@ -235,7 +242,7 @@ class ModelRegistryService:
 
     async def delete_provider(self, provider_id: str) -> bool:
         """Delete a provider and its dependent models and embedding spaces."""
-        # Check if provider has any models
+        # Get models before deletion for cache invalidation
         models_result = await self.session.execute(
             select(ModelDef).where(ModelDef.provider_id == provider_id)
         )
@@ -259,6 +266,21 @@ class ModelRegistryService:
             delete(Provider).where(Provider.id == provider_id)
         )
         await self.session.commit()
+
+        if result.rowcount > 0:
+            # Invalidate provider cache
+            await self.cache.invalidate_provider(provider_id)
+            
+            # Invalidate model caches for all deleted models
+            for model in models:
+                await self.cache.invalidate_model(model.id)
+                
+            # Invalidate list caches and defaults for all model types that might be affected
+            await self.cache.invalidate_list_caches()
+            for model in models:
+                if model.is_default:
+                    await self.cache.invalidate_defaults(model.model_type)
+                    
         return result.rowcount > 0
 
     async def set_default_provider(
@@ -339,6 +361,13 @@ class ModelRegistryService:
                 )
 
         await self.session.commit()
+        
+        # Invalidate defaults cache for this model type
+        await self.cache.invalidate_defaults(model_type)
+        
+        # Also invalidate list caches as provider defaults may affect lists
+        await self.cache.invalidate_list_caches()
+        
         return result.rowcount > 0
 
     # Model definition methods
@@ -446,6 +475,13 @@ class ModelRegistryService:
         self.session.add(model)
         await self.session.commit()
         await self.session.refresh(model)
+        
+        # Invalidate list caches since a new model is added
+        await self.cache.invalidate_list_caches(
+            provider_id=model.provider_id, 
+            model_type=model.model_type
+        )
+        
         return model
 
     async def update_model(
@@ -498,10 +534,27 @@ class ModelRegistryService:
 
         await self.session.commit()
         await self.session.refresh(model)
+        
+        # Invalidate model cache and list caches after update
+        await self.cache.invalidate_model(model_id)
+        await self.cache.invalidate_list_caches(
+            provider_id=model.provider_id,
+            model_type=model.model_type
+        )
+        
+        # If default status changed, invalidate defaults cache
+        if "is_default" in update_data:
+            await self.cache.invalidate_defaults(model.model_type)
+            
         return model
 
     async def delete_model(self, model_id: str) -> bool:
         """Delete a model definition and its dependent embedding spaces."""
+        # Get the model before deletion for cache invalidation
+        model = await self.get_model(model_id)
+        if not model:
+            return False
+            
         # First delete all embedding spaces that depend on this model
         await self.session.execute(
             delete(EmbeddingSpace).where(
@@ -514,6 +567,21 @@ class ModelRegistryService:
             delete(ModelDef).where(ModelDef.id == model_id)
         )
         await self.session.commit()
+        
+        if result.rowcount > 0:
+            # Invalidate model cache
+            await self.cache.invalidate_model(model_id)
+            
+            # Invalidate list caches
+            await self.cache.invalidate_list_caches(
+                provider_id=model.provider_id,
+                model_type=model.model_type
+            )
+            
+            # If this was a default model, invalidate defaults
+            if model.is_default:
+                await self.cache.invalidate_defaults(model.model_type)
+                
         return result.rowcount > 0
 
     async def set_default_model(self, model_id: str) -> bool:
@@ -539,6 +607,10 @@ class ModelRegistryService:
             .values(is_default=True)
         )
         await self.session.commit()
+        
+        # Invalidate defaults cache for this model type  
+        await self.cache.invalidate_defaults(model.model_type)
+        
         return result.rowcount > 0
 
     # Embedding space methods

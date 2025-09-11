@@ -101,6 +101,7 @@ Returns:
       path: `/api/v1/plugins/${pluginId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -146,7 +147,6 @@ Returns:
       path: `/api/v1/plugins/${pluginId}/enable`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 
@@ -169,7 +169,6 @@ Returns:
       path: `/api/v1/plugins/${pluginId}/disable`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 

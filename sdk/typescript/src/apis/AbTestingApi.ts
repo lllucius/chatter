@@ -49,6 +49,7 @@ Returns:
       path: `/api/v1/ab-tests/`,
       method: 'GET' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
@@ -101,6 +102,7 @@ Returns:
       path: `/api/v1/ab-tests/${testId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -146,7 +148,6 @@ Returns:
       path: `/api/v1/ab-tests/${testId}/start`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 
@@ -169,7 +170,6 @@ Returns:
       path: `/api/v1/ab-tests/${testId}/pause`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 
@@ -192,7 +192,6 @@ Returns:
       path: `/api/v1/ab-tests/${testId}/complete`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
       },
     };
 
@@ -260,7 +259,6 @@ Returns:
       path: `/api/v1/ab-tests/${testId}/end`,
       method: 'POST' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {

@@ -137,6 +137,7 @@ Returns:
       path: `/api/v1/prompts/${promptId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

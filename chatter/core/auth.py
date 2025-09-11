@@ -105,6 +105,29 @@ class AuthService:
         """
         self.session = session
 
+    async def _invalidate_user_cache(self, user_id: str) -> None:
+        """Invalidate cached user data.
+        
+        Args:
+            user_id: User ID to invalidate from cache
+        """
+        try:
+            from chatter.core.cache_factory import get_general_cache
+
+            cache_service = get_general_cache()
+            if cache_service:
+                health = await cache_service.health_check()
+                if health.get("status") == "healthy":
+                    cache_key = f"user:{user_id}"
+                    await cache_service.delete(cache_key)
+                    logger.debug("Invalidated user cache", user_id=user_id)
+        except Exception as cache_error:
+            logger.debug(
+                "Failed to invalidate user cache",
+                user_id=user_id,
+                error=str(cache_error),
+            )
+
     async def create_user(self, user_data: UserCreate) -> User:
         """Create a new user with enhanced security validation.
 
@@ -408,6 +431,9 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
+        # Invalidate user cache after update
+        await self._invalidate_user_cache(user_id)
+
         logger.info("User updated", user_id=user.id)
         return user
 
@@ -473,6 +499,9 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
+        # Invalidate user cache after password change
+        await self._invalidate_user_cache(user_id)
+
         # Revoke all existing tokens for security
         try:
             from chatter.core.token_manager import get_token_manager
@@ -524,6 +553,9 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
+        # Invalidate user cache after API key creation
+        await self._invalidate_user_cache(user_id)
+
         logger.info(
             "Secure API key created",
             user_id=user.id,
@@ -555,6 +587,9 @@ class AuthService:
         await self.session.commit()
         await self.session.refresh(user)
 
+        # Invalidate user cache after API key revocation
+        await self._invalidate_user_cache(user_id)
+
         logger.info("API key revoked", user_id=user.id)
         return True
 
@@ -577,6 +612,9 @@ class AuthService:
         user.is_active = False
         await self.session.commit()
         await self.session.refresh(user)
+
+        # Invalidate user cache after deactivation
+        await self._invalidate_user_cache(user_id)
 
         logger.info("User deactivated", user_id=user.id)
         return True

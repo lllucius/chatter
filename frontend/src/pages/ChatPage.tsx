@@ -286,37 +286,15 @@ const ChatPage: React.FC = () => {
         setMessages((prev) => [...prev, assistantMessage]);
       }
 
-      // Use SDK configuration for consistent base URL and authentication
+      // Use SDK streaming method instead of direct fetch
       const sdk = getSDK();
-      const config = (sdk as any).chat.configuration;
-      const basePath = config.basePath || '';
-      const headers = config.headers || {};
-      
-      // Make streaming request with SDK-based configuration
-      const response = await fetch(`${basePath}/api/v1/chat/streaming`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-          ...headers,
-        },
-        credentials: config.credentials || 'include',
-        body: JSON.stringify({
-          ...chatRequest,
-          // Note: stream field is deprecated and not needed for streaming endpoint
-        }),
-      });
+      const stream = await sdk.chat.streamingChatApiV1ChatStreaming(chatRequest);
 
-      if (!response.ok) {
-        throw new Error(`HTTP ${response.status}: ${response.statusText}`);
+      if (!stream) {
+        throw new Error('No response stream received');
       }
 
-      if (!response.body) {
-        throw new Error('No response body for streaming');
-      }
-
-      const reader = response.body.getReader();
+      const reader = stream.getReader();
       const decoder = new TextDecoder();
       let buffer = '';
 

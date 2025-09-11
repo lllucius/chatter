@@ -1,12 +1,12 @@
 import React, { useState, useRef } from 'react';
-import { Box, Tabs, Tab, Chip, Button } from '@mui/material';
+import { Box, Tabs, Tab, TabPanel, Chip, Button } from '../utils/mui';
 import { 
-  Refresh as RefreshIcon, 
-  Add as AddIcon,
-  Storage as ServersIcon,
-  Build as ToolsIcon,
-  PowerSettingsNew as ToggleIcon,
-} from '@mui/icons-material';
+  RefreshIcon, 
+  AddIcon,
+  ModelsIcon as ServersIcon,
+  ToolsIcon,
+  ToggleIcon,
+} from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
 import RemoteServerForm from '../components/RemoteServerForm';
@@ -22,26 +22,7 @@ import {
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`simple-tabpanel-${index}`}
-      aria-labelledby={`simple-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ py: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 // Define interfaces based on the original ToolsPage
 interface RemoteServer {
@@ -372,7 +353,7 @@ const ToolsPage: React.FC = () => {
         </Tabs>
       </Box>
 
-      <TabPanel value={activeTab} index={0}>
+      <TabPanel value={activeTab} index={0} idPrefix="tools">
         <CrudDataTable
           ref={serverCrudRef}
           config={serverConfig}
@@ -382,7 +363,7 @@ const ToolsPage: React.FC = () => {
         />
       </TabPanel>
 
-      <TabPanel value={activeTab} index={1}>
+      <TabPanel value={activeTab} index={1} idPrefix="tools">
         <CrudDataTable
           ref={toolCrudRef}
           config={toolConfig}

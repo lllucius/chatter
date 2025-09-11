@@ -7,6 +7,7 @@ import {
   Grid,
   Tab,
   Tabs,
+  TabPanel,
   Button,
   IconButton,
   Chip,
@@ -38,7 +39,7 @@ import {
   Stack,
   Breadcrumbs,
   Link,
-} from '@mui/material';
+} from '../utils/mui';
 import {
   AccountTree as WorkflowIcon,
   PlayArrow as PlayIcon,
@@ -72,31 +73,7 @@ import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import WorkflowMonitor from '../components/WorkflowMonitor';
 import PageLayout from '../components/PageLayout';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`workflow-tabpanel-${index}`}
-      aria-labelledby={`workflow-tab-${index}`}
-      {...other}
-    >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
-    </div>
-  );
-}
 
 interface WorkflowExecution {
   id: string;
@@ -607,16 +584,16 @@ const WorkflowManagementPage: React.FC = () => {
 
       {/* Tab Content */}
       <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        <TabPanel value={tabValue} index={0}>
+        <TabPanel value={tabValue} index={0} idPrefix="workflow">
           {renderTemplatesTab()}
         </TabPanel>
-        <TabPanel value={tabValue} index={1}>
+        <TabPanel value={tabValue} index={1} idPrefix="workflow">
           {renderBuilderTab()}
         </TabPanel>
-        <TabPanel value={tabValue} index={2}>
+        <TabPanel value={tabValue} index={2} idPrefix="workflow">
           {renderExecutionTab()}
         </TabPanel>
-        <TabPanel value={tabValue} index={3}>
+        <TabPanel value={tabValue} index={3} idPrefix="workflow">
           {renderAnalyticsTab()}
         </TabPanel>
       </Box>

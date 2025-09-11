@@ -18,23 +18,24 @@ import {
   Tooltip,
   Tabs,
   Tab,
+  TabPanel,
   Divider,
-} from '@mui/material';
+} from '../utils/mui';
 import {
-  AccountTree as WorkflowIcon,
-  SmartToy as AgentIcon,
-  Analytics as AnalyticsIcon,
-  TrendingUp as TrendingUpIcon,
-  Warning as WarningIcon,
-  CheckCircle as SuccessIcon,
-  Speed as SpeedIcon,
-  Group as GroupIcon,
-  Assignment as TaskIcon,
-  Timeline as TimelineIcon,
-  Assessment as AssessmentIcon,
-  Refresh as RefreshIcon,
-  Launch as LaunchIcon,
-} from '@mui/icons-material';
+  WorkflowIcon,
+  AgentIcon,
+  AnalyticsIcon,
+  TrendingUpIcon,
+  WarningIcon,
+  CheckIcon as SuccessIcon,
+  SpeedIcon,
+  GroupIcon,
+  TaskIcon,
+  TimelineIcon,
+  AssessmentIcon,
+  RefreshIcon,
+  LaunchIcon,
+} from '../utils/icons';
 import {
   LineChart,
   Line,
@@ -166,11 +167,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     }
   };
 
-  const TabPanel = ({ children, value, index }: { children: React.ReactNode; value: number; index: number }) => (
-    <div role="tabpanel" hidden={value !== index}>
-      {value === index && <Box sx={{ pt: 3 }}>{children}</Box>}
-    </div>
-  );
+
 
   return (
     <Box>
@@ -306,7 +303,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
             </Tabs>
           </Box>
 
-          <TabPanel value={selectedTab} index={0}>
+          <TabPanel value={selectedTab} index={0} idPrefix="dashboard">
             <Grid container spacing={3}>
               <Grid item xs={12} lg={8}>
                 <Typography variant="h6" gutterBottom>
@@ -400,7 +397,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
             </Grid>
           </TabPanel>
 
-          <TabPanel value={selectedTab} index={1}>
+          <TabPanel value={selectedTab} index={1} idPrefix="dashboard">
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Typography variant="h6" gutterBottom>
@@ -464,7 +461,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
             </Grid>
           </TabPanel>
 
-          <TabPanel value={selectedTab} index={2}>
+          <TabPanel value={selectedTab} index={2} idPrefix="dashboard">
             <Typography variant="h6" gutterBottom>
               24-Hour Performance Overview
             </Typography>

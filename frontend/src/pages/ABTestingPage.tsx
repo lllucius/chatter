@@ -31,24 +31,25 @@ import {
   LinearProgress,
   Tabs,
   Tab,
+  TabPanel,
   List,
   ListItem,
   ListItemText,
   Divider,
-} from '@mui/material';
+} from '../utils/mui';
 import {
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Add as AddIcon,
-  Refresh as RefreshIcon,
-  PlayArrow as StartIcon,
-  Pause as PauseIcon,
-  Stop as StopIcon,
-  CheckCircle as CompleteIcon,
-  MoreVert as MoreVertIcon,
-  TrendingUp as TrendingUpIcon,
-  TrendingFlat as TrendingFlatIcon,
-} from '@mui/icons-material';
+  EditIcon,
+  DeleteIcon,
+  AddIcon,
+  RefreshIcon,
+  PlayIcon as StartIcon,
+  PauseIcon,
+  StopIcon,
+  CheckIcon as CompleteIcon,
+  MoreIcon as MoreVertIcon,
+  TrendingUpIcon,
+} from '../utils/icons';
+import { TrendingFlat as TrendingFlatIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
@@ -64,27 +65,7 @@ import {
 import PageLayout from '../components/PageLayout';
 import ABTestAnalytics from '../components/ABTestAnalytics';
 
-interface TabPanelProps {
-  children?: React.ReactNode;
-  index: number;
-  value: number;
-}
 
-function TabPanel(props: TabPanelProps) {
-  const { children, value, index, ...other } = props;
-
-  return (
-    <div
-      role="tabpanel"
-      hidden={value !== index}
-      id={`ab-testing-tabpanel-${index}`}
-      aria-labelledby={`ab-testing-tab-${index}`}
-      {...other}
-    >
-      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
-    </div>
-  );
-}
 
 const ABTestingPage: React.FC = () => {
   const [tests, setTests] = useState<ABTestResponse[]>([]);
@@ -547,7 +528,7 @@ const ABTestingPage: React.FC = () => {
           </Tabs>
         </Box>
         
-        <TabPanel value={activeTab} index={0}>
+        <TabPanel value={activeTab} index={0} idPrefix="ab-testing">
           {selectedTest && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
@@ -591,7 +572,7 @@ const ABTestingPage: React.FC = () => {
           )}
         </TabPanel>
 
-        <TabPanel value={activeTab} index={1}>
+        <TabPanel value={activeTab} index={1} idPrefix="ab-testing">
           {selectedTest && (
             <ABTestAnalytics
               testId={selectedTest.id}
@@ -604,7 +585,7 @@ const ABTestingPage: React.FC = () => {
           )}
         </TabPanel>
 
-        <TabPanel value={activeTab} index={2}>
+        <TabPanel value={activeTab} index={2} idPrefix="ab-testing">
           {selectedTest && (
             <ABTestAnalytics
               testId={selectedTest.id}
@@ -617,7 +598,7 @@ const ABTestingPage: React.FC = () => {
           )}
         </TabPanel>
 
-        <TabPanel value={activeTab} index={3}>
+        <TabPanel value={activeTab} index={3} idPrefix="ab-testing">
           {testPerformance ? (
             <ABTestAnalytics
               testId={selectedTest?.id || ''}
@@ -632,7 +613,7 @@ const ABTestingPage: React.FC = () => {
           )}
         </TabPanel>
 
-        <TabPanel value={activeTab} index={4}>
+        <TabPanel value={activeTab} index={4} idPrefix="ab-testing">
           {testRecommendations ? (
             <Grid container spacing={3}>
               <Grid item xs={12}>

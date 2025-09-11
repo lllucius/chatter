@@ -1,141 +1,46 @@
-import React, { useState, useCallback, useMemo, memo } from 'react';
+import React, { useState, useCallback, useRef, memo } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
   Typography,
   Button,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  TablePagination,
   IconButton,
   Chip,
-  Alert,
   CircularProgress,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
-  TextField,
-  InputAdornment,
   Avatar,
   Paper,
-  Menu,
-  MenuItem,
-  ListItemIcon,
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
   Delete as DeleteIcon,
-  Search as SearchIcon,
   Refresh as RefreshIcon,
   Message as MessageIcon,
   Person as PersonIcon,
   SmartToy as BotIcon,
-  MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK } from "../services/auth-service";
 import { ConversationResponse, MessageResponse } from 'chatter-sdk';
-import { useApi } from '../hooks/useApi';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
+import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
+import { createDateRenderer } from '../components/CrudRenderers';
 
-// Memoized conversation table row component
-const ConversationTableRow = memo(({ 
-  conversation, 
-  onView, 
-  onDelete, 
-  onActionClick 
-}: {
-  conversation: ConversationResponse;
-  onView: (conversation: ConversationResponse) => void;
-  onDelete: (conversationId: string) => void;
-  onActionClick: (event: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => void;
-}) => (
-  <TableRow hover>
-    <TableCell>
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-          <MessageIcon fontSize="small" />
-        </Avatar>
-        <Box>
-          <Typography variant="body2" fontWeight="medium">
-            {conversation.title || `Conversation ${conversation.id.slice(0, 8)}`}
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {conversation.id}
-          </Typography>
-        </Box>
-      </Box>
-    </TableCell>
-    <TableCell>
-      <Chip
-        label="Active"
-        size="small"
-        color="success"
-        variant="outlined"
-      />
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2">
-        {conversation.created_at ? format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm') : 'Unknown'}
-      </Typography>
-    </TableCell>
-    <TableCell>
-      <Typography variant="body2">
-        {conversation.updated_at ? format(new Date(conversation.updated_at), 'MMM dd, yyyy HH:mm') : 'Unknown'}
-      </Typography>
-    </TableCell>
-    <TableCell align="right">
-      <IconButton
-        size="small"
-        onClick={() => onView(conversation)}
-        aria-label="View conversation"
-      >
-        <ViewIcon />
-      </IconButton>
-      <IconButton
-        size="small"
-        onClick={(event) => onActionClick(event, conversation)}
-        aria-label="More actions"
-      >
-        <MoreVertIcon />
-      </IconButton>
-    </TableCell>
-  </TableRow>
-));
 
-ConversationTableRow.displayName = 'ConversationTableRow';
 
 const ConversationsPage: React.FC = () => {
-  const [page, setPage] = useState(0);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-  const [searchTerm, setSearchTerm] = useState('');
+  const crudTableRef = useRef<CrudDataTableRef>(null);
   
-  // Use custom API hook for conversations - fetch a reasonable amount for client-side filtering
-  const conversationsApi = useApi(
-    () => getSDK().chat.listConversationsApiV1ChatConversations({
-      limit: 1000, // Fetch more for client-side filtering
-      offset: 0,
-    }),
-    { immediate: true }
-  );
+  // View conversation dialog state
   const [selectedConversation, setSelectedConversation] = useState<ConversationResponse | null>(null);
   const [conversationMessages, setConversationMessages] = useState<MessageResponse[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
-  // Actions menu state
-  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
-  const [actionConversation, setActionConversation] = useState<ConversationResponse | null>(null);
-
-  const conversations = conversationsApi.data?.data?.conversations || [];
-
+  // Handle view conversation action
   const handleViewConversation = useCallback(async (conversation: ConversationResponse) => {
     setSelectedConversation(conversation);
     setViewDialogOpen(true);
@@ -156,62 +61,112 @@ const ConversationsPage: React.FC = () => {
     }
   }, []);
 
-  const handleDeleteConversation = useCallback(async (conversationId: string) => {
-    if (!window.confirm('Are you sure you want to delete this conversation?')) {
-      return;
-    }
-
-    try {
-      // Use the available delete conversation API
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(
-        conversationId
-      );
-      
-      // Refresh the conversations list after successful deletion
-      conversationsApi.reset();
-      conversationsApi.execute();
-    } catch (err: any) {
-      console.error('Failed to delete conversation:', err);
-    }
-  }, [conversationsApi]);
-
-  const handleActionClick = useCallback((event: React.MouseEvent<HTMLElement>, conversation: ConversationResponse) => {
-    setActionAnchorEl(event.currentTarget);
-    setActionConversation(conversation);
-  }, []);
-
-  const handleActionClose = useCallback(() => {
-    setActionAnchorEl(null);
-    setActionConversation(null);
-  }, []);
-
-  // For now, we'll fetch a larger set and do client-side filtering
-  // since the API doesn't support text search filtering
-  
-  // Memoized filtered conversations
-  const filteredConversations = useMemo(() => 
-    conversations.filter(conversation =>
-      conversation.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      conversation.id.toLowerCase().includes(searchTerm.toLowerCase())
-    ), [conversations, searchTerm]
+  // Conversation title renderer
+  const renderConversationTitle = (title: string | null, conversation: ConversationResponse) => (
+    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+      <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+        <MessageIcon fontSize="small" />
+      </Avatar>
+      <Box>
+        <Typography variant="body2" fontWeight="medium">
+          {title || `Conversation ${conversation.id.slice(0, 8)}`}
+        </Typography>
+        <Typography variant="caption" color="text.secondary">
+          {conversation.id}
+        </Typography>
+      </Box>
+    </Box>
   );
 
-  // Since we're doing client-side filtering, we need to paginate the filtered results
-  const paginatedConversations = useMemo(() => 
-    filteredConversations.slice(
-      page * rowsPerPage,
-      page * rowsPerPage + rowsPerPage
-    ), [filteredConversations, page, rowsPerPage]
+  // Status renderer - for now all are active
+  const renderStatus = () => (
+    <Chip
+      label="Active"
+      size="small"
+      color="success"
+      variant="outlined"
+    />
   );
 
-  const handleChangePage = useCallback((_event: unknown, newPage: number) => {
-    setPage(newPage);
-  }, []);
+  // Message count renderer
+  const renderMessageCount = (count: number) => (
+    <Typography variant="body2">
+      {count} {count === 1 ? 'message' : 'messages'}
+    </Typography>
+  );
 
-  const handleChangeRowsPerPage = useCallback((event: React.ChangeEvent<HTMLInputElement>) => {
-    setRowsPerPage(parseInt(event.target.value, 10));
-    setPage(0);
-  }, []);
+  // Define columns
+  const columns: CrudColumn<ConversationResponse>[] = [
+    {
+      id: 'title',
+      label: 'Conversation',
+      width: '300px',
+      render: renderConversationTitle,
+    },
+    {
+      id: 'status',
+      label: 'Status',
+      width: '120px',
+      render: renderStatus,
+    },
+    {
+      id: 'message_count',
+      label: 'Messages',
+      width: '100px',
+      render: renderMessageCount,
+    },
+    {
+      id: 'created_at',
+      label: 'Created',
+      width: '140px',
+      render: createDateRenderer<ConversationResponse>('MMM dd, yyyy HH:mm'),
+    },
+    {
+      id: 'updated_at',
+      label: 'Updated',
+      width: '140px',
+      render: createDateRenderer<ConversationResponse>('MMM dd, yyyy HH:mm'),
+    },
+  ];
+
+  // Define CRUD configuration
+  const config: CrudConfig<ConversationResponse> = {
+    entityName: 'Conversation',
+    entityNamePlural: 'Conversations',
+    columns,
+    actions: [
+      {
+        icon: <ViewIcon />,
+        label: 'View Messages',
+        onClick: handleViewConversation,
+      },
+    ],
+    enableCreate: false, // Conversations are created from chat interface
+    enableEdit: false,   // Conversations don't have direct edit functionality
+    enableDelete: true,
+    enableRefresh: true,
+    pageSize: 10,
+  };
+
+  // Define service methods
+  const service: CrudService<ConversationResponse, never, never> = {
+    list: async (page: number, pageSize: number) => {
+      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
+        limit: pageSize,
+        offset: page * pageSize,
+      });
+      return {
+        items: response.data?.conversations || [],
+        total: response.data?.total || 0,
+      };
+    },
+
+    delete: async (id: string) => {
+      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(id);
+    },
+  };
+
+  const getItemId = (item: ConversationResponse) => item.id;
 
   const getMessageIcon = useCallback((role: string) => {
     switch (role) {
@@ -237,20 +192,11 @@ const ConversationsPage: React.FC = () => {
     }
   }, []);
 
-  if (conversationsApi.loading) {
-    return (
-      <Box sx={{ display: 'flex', justifyContent: 'center', mt: 4 }}>
-        <CircularProgress size={60} />
-      </Box>
-    );
-  }
-
   const toolbar = (
     <Button
       variant="outlined"
       startIcon={<RefreshIcon />}
-      onClick={conversationsApi.execute}
-      disabled={conversationsApi.loading}
+      onClick={() => crudTableRef.current?.handleRefresh()}
     >
       Refresh
     </Button>
@@ -258,108 +204,12 @@ const ConversationsPage: React.FC = () => {
 
   return (
     <PageLayout title="Conversation Management" toolbar={toolbar}>
-
-      {conversationsApi.error && (
-        <Alert severity="error" sx={{ mb: 2 }}>
-          {conversationsApi.error}
-        </Alert>
-      )}
-
-      {/* Search and Filters */}
-      <Card sx={{ mb: 3 }}>
-        <CardContent>
-          <TextField
-            fullWidth
-            placeholder="Search conversations..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            InputProps={{
-              startAdornment: (
-                <InputAdornment position="start">
-                  <SearchIcon />
-                </InputAdornment>
-              ),
-            }}
-            size="small"
-          />
-        </CardContent>
-      </Card>
-
-      {/* Conversations Table */}
-      <Card>
-        <TableContainer>
-          <Table>
-            <TableHead>
-              <TableRow>
-                <TableCell>Conversation</TableCell>
-                <TableCell>Status</TableCell>
-                <TableCell>Created</TableCell>
-                <TableCell>Updated</TableCell>
-                <TableCell align="right">Actions</TableCell>
-              </TableRow>
-            </TableHead>
-            <TableBody>
-              {paginatedConversations.map((conversation) => (
-                <ConversationTableRow
-                  key={conversation.id}
-                  conversation={conversation}
-                  onView={handleViewConversation}
-                  onDelete={handleDeleteConversation}
-                  onActionClick={handleActionClick}
-                />
-              ))}
-              {paginatedConversations.length === 0 && (
-                <TableRow>
-                  <TableCell colSpan={5} align="center">
-                    <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
-                      No conversations found
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              )}
-            </TableBody>
-          </Table>
-        </TableContainer>
-        <TablePagination
-          rowsPerPageOptions={[5, 10, 25, 50]}
-          component="div"
-          count={filteredConversations.length}
-          rowsPerPage={rowsPerPage}
-          page={page}
-          onPageChange={handleChangePage}
-          onRowsPerPageChange={handleChangeRowsPerPage}
-        />
-      </Card>
-
-      {/* Actions Menu */}
-      <Menu
-        anchorEl={actionAnchorEl}
-        open={Boolean(actionAnchorEl)}
-        onClose={handleActionClose}
-      >
-        <MenuItem
-          onClick={() => {
-            if (actionConversation) handleViewConversation(actionConversation);
-            handleActionClose();
-          }}
-        >
-          <ListItemIcon>
-            <ViewIcon fontSize="small" />
-          </ListItemIcon>
-          View
-        </MenuItem>
-        <MenuItem
-          onClick={() => {
-            if (actionConversation) handleDeleteConversation(actionConversation.id);
-            handleActionClose();
-          }}
-        >
-          <ListItemIcon>
-            <DeleteIcon fontSize="small" />
-          </ListItemIcon>
-          Delete
-        </MenuItem>
-      </Menu>
+      <CrudDataTable
+        ref={crudTableRef}
+        config={config}
+        service={service}
+        getItemId={getItemId}
+      />
 
       {/* View Conversation Dialog */}
       <Dialog

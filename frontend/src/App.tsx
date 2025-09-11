@@ -17,7 +17,7 @@ import { initializeSDK } from './services/auth-service';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const DashboardPage = lazy(() => import('./pages/DashboardPage'));
+const DashboardPage = lazy(() => import('./pages/NewDashboardPage'));
 const ConversationsPage = lazy(() => import('./pages/ConversationsPage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const ProfilesPage = lazy(() => import('./pages/ProfilesPage'));

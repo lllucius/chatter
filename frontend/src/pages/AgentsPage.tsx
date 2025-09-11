@@ -25,6 +25,7 @@ import {
   createBooleanSwitchRenderer,
   createDateRenderer 
 } from '../components/CrudRenderers';
+import AgentForm from '../components/AgentForm';
 import { getSDK } from "../services/auth-service";
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest, AgentInteractRequest, AgentInteractResponse } from 'chatter-sdk';
 
@@ -190,7 +191,7 @@ const AgentsPage: React.FC = () => {
         config={config}
         service={service}
         getItemId={getItemId}
-        // Note: Form component would be created similar to PromptForm
+        FormComponent={AgentForm}
       />
       
       {/* Test Agent Dialog */}

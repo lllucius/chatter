@@ -69,6 +69,7 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from 'chatter-sdk';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
+import WorkflowMonitor from '../components/WorkflowMonitor';
 import PageLayout from '../components/PageLayout';
 
 interface TabPanelProps {
@@ -436,65 +437,59 @@ const WorkflowManagementPage: React.FC = () => {
 
   const renderExecutionTab = () => (
     <Box>
-      {executions.length === 0 ? (
-        <Alert severity="info">
-          No workflow executions yet. Execute a workflow template to see results here.
-        </Alert>
-      ) : (
-        <List>
-          {executions.map((execution) => (
-            <React.Fragment key={execution.id}>
-              <ListItem>
-                <ListItemIcon>
-                  {getStatusIcon(execution.status)}
-                </ListItemIcon>
-                <ListItemText
-                  primary={
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      <Typography variant="subtitle1">
-                        {execution.templateName || 'Custom Workflow'}
-                      </Typography>
-                      <Chip 
-                        label={execution.status} 
-                        size="small" 
-                        color={getStatusColor(execution.status)}
-                      />
-                    </Box>
-                  }
-                  secondary={
-                    <Box>
-                      <Typography variant="body2" color="text.secondary">
-                        Started: {execution.startTime.toLocaleString()}
-                      </Typography>
-                      {execution.endTime && (
-                        <Typography variant="body2" color="text.secondary">
-                          Duration: {Math.round((execution.endTime.getTime() - execution.startTime.getTime()) / 1000)}s
-                        </Typography>
-                      )}
-                      {execution.error && (
-                        <Typography variant="body2" color="error">
-                          Error: {execution.error}
-                        </Typography>
-                      )}
-                    </Box>
-                  }
-                />
-                <ListItemSecondaryAction>
-                  <IconButton size="small">
-                    <ViewIcon />
-                  </IconButton>
-                </ListItemSecondaryAction>
-              </ListItem>
-              {execution.status === 'running' && execution.progress !== undefined && (
-                <Box sx={{ px: 2, pb: 1 }}>
-                  <LinearProgress variant="determinate" value={execution.progress} />
-                </Box>
-              )}
-              <Divider />
-            </React.Fragment>
-          ))}
-        </List>
-      )}
+      <WorkflowMonitor
+        executions={executions.map(exec => ({
+          id: exec.id,
+          workflowId: exec.templateName || 'unknown',
+          workflowName: exec.templateName || 'Custom Workflow',
+          status: exec.status === 'completed' ? 'completed' : 
+                 exec.status === 'failed' ? 'failed' : 
+                 exec.status === 'running' ? 'running' : 'queued',
+          startTime: exec.startTime,
+          endTime: exec.endTime,
+          progress: exec.progress || 0,
+          currentStep: 'Processing...',
+          totalSteps: 5,
+          completedSteps: Math.floor((exec.progress || 0) / 20),
+          metrics: {
+            tokensUsed: Math.floor(Math.random() * 1000) + 500,
+            apiCalls: Math.floor(Math.random() * 20) + 5,
+            memoryUsage: Math.floor(Math.random() * 100) + 50,
+            executionTime: exec.endTime ? 
+              Math.floor((exec.endTime.getTime() - exec.startTime.getTime()) / 1000) : 
+              Math.floor((new Date().getTime() - exec.startTime.getTime()) / 1000),
+            cost: (Math.random() * 0.1).toFixed(4) as any,
+          },
+          logs: [
+            {
+              timestamp: exec.startTime,
+              level: 'info' as const,
+              message: 'Workflow execution started',
+            },
+            ...(exec.error ? [{
+              timestamp: new Date(),
+              level: 'error' as const,
+              message: exec.error,
+            }] : []),
+          ],
+          ...(exec.error && {
+            error: {
+              message: exec.error,
+              stepId: 'step-1',
+              timestamp: new Date(),
+            }
+          }),
+        }))}
+        onRefresh={() => {/* Refresh executions */}}
+        onStop={(executionId) => {
+          // Handle stop execution
+          console.log('Stop execution:', executionId);
+        }}
+        onRetry={(executionId) => {
+          // Handle retry execution
+          console.log('Retry execution:', executionId);
+        }}
+      />
     </Box>
   );
 

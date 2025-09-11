@@ -39,6 +39,7 @@ def _sanitize_for_json(obj: Any) -> Any:
         try:
             # Test if it's JSON serializable
             import json
+
             json.dumps(obj)
             return obj
         except (TypeError, ValueError):

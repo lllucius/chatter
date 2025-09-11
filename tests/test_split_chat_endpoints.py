@@ -22,10 +22,7 @@ class TestSplitChatEndpoints:
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
             "/api/v1/chat/chat",
-            json={
-                "message": "Hello",
-                "workflow": "plain"
-            },
+            json={"message": "Hello", "workflow": "plain"},
         )
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
@@ -35,11 +32,8 @@ class TestSplitChatEndpoints:
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
             "/api/v1/chat/streaming",
-            json={
-                "message": "Hello",
-                "workflow": "plain"
-            },
-            headers={"Accept": "text/event-stream"}
+            json={"message": "Hello", "workflow": "plain"},
+            headers={"Accept": "text/event-stream"},
         )
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
@@ -49,35 +43,34 @@ class TestSplitChatEndpoints:
         request_data = {
             "message": "Hello, world!",
             "workflow": "plain",
-            "stream": True
+            "stream": True,
         }
-        
+
         chat_request = ChatRequest(**request_data)
         assert chat_request.message == "Hello, world!"
         assert chat_request.stream == True  # Still works but deprecated
-        
+
         # Check if the field description mentions deprecation
         field_info = ChatRequest.model_fields["stream"]
         assert "DEPRECATED" in field_info.description
 
     def test_chat_request_schema_without_stream_field(self):
         """Test that ChatRequest works without stream field."""
-        request_data = {
-            "message": "Hello, world!",
-            "workflow": "plain"
-        }
-        
+        request_data = {"message": "Hello, world!", "workflow": "plain"}
+
         chat_request = ChatRequest(**request_data)
         assert chat_request.message == "Hello, world!"
         assert chat_request.stream == False  # Default value
 
-    @pytest.mark.parametrize("workflow", ["plain", "rag", "tools", "full"])
+    @pytest.mark.parametrize(
+        "workflow", ["plain", "rag", "tools", "full"]
+    )
     def test_chat_request_workflow_types(self, workflow):
         """Test that all workflow types are supported."""
         request_data = {
             "message": "Hello, world!",
-            "workflow": workflow
+            "workflow": workflow,
         }
-        
+
         chat_request = ChatRequest(**request_data)
         assert chat_request.workflow == workflow

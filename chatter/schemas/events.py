@@ -231,7 +231,9 @@ class BackupEventData(ValidatedEventData):
     progress: float | None = Field(None, ge=0.0, le=100.0)
     backup_path: str | None = Field(None, max_length=1000)
     error: str | None = Field(None, max_length=1000)
-    updated_at: str | None = Field(None, description="Last update timestamp")
+    updated_at: str | None = Field(
+        None, description="Last update timestamp"
+    )
 
 
 class JobEventData(ValidatedEventData):
@@ -276,9 +278,15 @@ class ToolServerEventData(ValidatedEventData):
     health_status: str | None = Field(None, max_length=100)
     details: dict[str, Any] | None = None
     error: str | None = Field(None, max_length=1000)
-    checked_at: str | None = Field(None, description="Health check timestamp")
-    started_at: str | None = Field(None, description="Server start timestamp")
-    stopped_at: str | None = Field(None, description="Server stop timestamp")
+    checked_at: str | None = Field(
+        None, description="Health check timestamp"
+    )
+    started_at: str | None = Field(
+        None, description="Server start timestamp"
+    )
+    stopped_at: str | None = Field(
+        None, description="Server stop timestamp"
+    )
 
 
 class UserEventData(ValidatedEventData):

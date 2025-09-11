@@ -27,7 +27,6 @@ try:
         Configuration,
         DataManagementApi,
         DocumentsApi,
-        DocumentSearchRequest,
         EventsApi,
         HealthApi,
         JobsApi,
@@ -36,13 +35,31 @@ try:
         ProfilesApi,
         PromptsApi,
         ToolServersApi,
-        UserLogin,
     )
     from chatter_sdk.exceptions import ApiException
 except ImportError as e:
     print(f"Error importing chatter_sdk: {e}")
     print("Please ensure the SDK is properly installed.")
     sys.exit(1)
+
+# Import modular command groups
+from chatter.commands.agents import agents_app
+from chatter.commands.analytics import analytics_app
+from chatter.commands.auth import auth_app
+from chatter.commands.chat import chat_app
+from chatter.commands.config import (
+    config_command,
+    version_command,
+    welcome_command,
+)
+from chatter.commands.documents import documents_app
+from chatter.commands.events import events_app
+from chatter.commands.health import health_app
+from chatter.commands.jobs import jobs_app
+from chatter.commands.models import models_app
+from chatter.commands.plugins import plugins_app
+from chatter.commands.profiles import profiles_app
+from chatter.commands.prompts import prompts_app
 
 # Initialize console
 console = Console()
@@ -157,6 +174,7 @@ def run_async(async_func):
             if hasattr(e, "body") and e.body:
                 try:
                     import json
+
                     error_data = json.loads(e.body)
                     error_detail = error_data.get("detail")
                 except (json.JSONDecodeError, AttributeError):
@@ -204,25 +222,6 @@ app = typer.Typer(
 )
 
 
-# Import modular command groups
-from chatter.commands.agents import agents_app
-from chatter.commands.analytics import analytics_app
-from chatter.commands.auth import auth_app
-from chatter.commands.chat import chat_app
-from chatter.commands.config import (
-    config_command,
-    version_command,
-    welcome_command,
-)
-from chatter.commands.documents import documents_app
-from chatter.commands.events import events_app
-from chatter.commands.health import health_app
-from chatter.commands.jobs import jobs_app
-from chatter.commands.models import models_app
-from chatter.commands.plugins import plugins_app
-from chatter.commands.profiles import profiles_app
-from chatter.commands.prompts import prompts_app
-
 # Add all command groups to the main app
 app.add_typer(health_app, name="health")
 app.add_typer(auth_app, name="auth")
@@ -244,7 +243,3 @@ app.add_typer(plugins_app, name="plugins")
 # Main execution
 if __name__ == "__main__":
     app()
-
-
-
-

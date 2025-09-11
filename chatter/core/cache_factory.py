@@ -16,7 +16,9 @@ class CacheType(Enum):
 
     GENERAL = "general"  # General purpose caching (replaces TOOL, MODEL_REGISTRY)
     SESSION = "session"  # Session-specific data with short TTL
-    PERSISTENT = "persistent"  # Long-term data caching (replaces WORKFLOW)
+    PERSISTENT = (
+        "persistent"  # Long-term data caching (replaces WORKFLOW)
+    )
 
 
 class CacheFactory:
@@ -49,7 +51,8 @@ class CacheFactory:
             ),
             CacheType.SESSION: CacheConfig(
                 default_ttl=settings.cache_ttl_short,
-                max_size=settings.cache_max_size // 2,  # Smaller for sessions
+                max_size=settings.cache_max_size
+                // 2,  # Smaller for sessions
                 eviction_policy="ttl",  # TTL-based for sessions
                 key_prefix="session",
                 enable_stats=True,
@@ -57,7 +60,8 @@ class CacheFactory:
             ),
             CacheType.PERSISTENT: CacheConfig(
                 default_ttl=settings.cache_ttl_long,
-                max_size=settings.cache_max_size * 2,  # Larger for persistent data
+                max_size=settings.cache_max_size
+                * 2,  # Larger for persistent data
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="persistent",
                 enable_stats=True,
@@ -107,16 +111,26 @@ class CacheFactory:
         # Create cache based on backend configuration
         backend = settings.cache_backend
         redis_url = kwargs.get("redis_url")
-        l1_size_ratio = kwargs.get("l1_size_ratio", settings.cache_l1_size_ratio)
-        
+        l1_size_ratio = kwargs.get(
+            "l1_size_ratio", settings.cache_l1_size_ratio
+        )
+
         if backend == "memory":
-            from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
+            from chatter.core.enhanced_memory_cache import (
+                EnhancedInMemoryCache,
+            )
+
             cache_instance = EnhancedInMemoryCache(config)
         elif backend == "redis":
-            from chatter.core.enhanced_redis_cache import EnhancedRedisCache
+            from chatter.core.enhanced_redis_cache import (
+                EnhancedRedisCache,
+            )
+
             cache_instance = EnhancedRedisCache(config, redis_url)
         else:  # multi_tier (default)
-            cache_instance = MultiTierCache(config, None, redis_url, l1_size_ratio)
+            cache_instance = MultiTierCache(
+                config, None, redis_url, l1_size_ratio
+            )
 
         # Store instance for reuse
         self._cache_instances[instance_key] = cache_instance
@@ -343,7 +357,7 @@ def get_model_registry_cache(**kwargs) -> CacheInterface:
 
 
 def get_workflow_cache(**kwargs) -> CacheInterface:
-    """Backwards compatibility - use persistent cache.""" 
+    """Backwards compatibility - use persistent cache."""
     return get_persistent_cache(**kwargs)
 
 

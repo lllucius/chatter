@@ -17,11 +17,12 @@ from chatter.commands.health import health_app
 
 # Try to import the chatter_sdk
 try:
-    from chatter_sdk.exceptions import ApiException
+    pass  # SDK import placeholder
 except ImportError as e:
     print(f"Error importing chatter_sdk: {e}")
     print("Please ensure the SDK is properly installed.")
     import sys
+
     sys.exit(1)
 
 # Initialize Typer app
@@ -40,7 +41,7 @@ app.command("config")(config_command)
 app.command("version")(version_command)
 
 # NOTE: This is a partial refactor showing the modular approach.
-# The remaining command groups (prompts, documents, chat, models, etc.) 
+# The remaining command groups (prompts, documents, chat, models, etc.)
 # would be extracted similarly from the original api_cli.py file.
 
 # Placeholder command groups for remaining functionality
@@ -79,7 +80,9 @@ app.add_typer(plugins_app, name="plugins")
 toolservers_app = typer.Typer(help="Tool server management commands")
 app.add_typer(toolservers_app, name="toolservers")
 
-ab_tests_app = typer.Typer(help="A/B testing and experimentation commands")
+ab_tests_app = typer.Typer(
+    help="A/B testing and experimentation commands"
+)
 app.add_typer(ab_tests_app, name="ab-tests")
 
 jobs_app = typer.Typer(help="Job management commands")

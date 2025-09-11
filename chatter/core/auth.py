@@ -107,7 +107,7 @@ class AuthService:
 
     async def _invalidate_user_cache(self, user_id: str) -> None:
         """Invalidate cached user data.
-        
+
         Args:
             user_id: User ID to invalidate from cache
         """
@@ -120,7 +120,9 @@ class AuthService:
                 if health.get("status") == "healthy":
                     cache_key = f"user:{user_id}"
                     await cache_service.delete(cache_key)
-                    logger.debug("Invalidated user cache", user_id=user_id)
+                    logger.debug(
+                        "Invalidated user cache", user_id=user_id
+                    )
         except Exception as cache_error:
             logger.debug(
                 "Failed to invalidate user cache",

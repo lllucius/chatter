@@ -64,7 +64,10 @@ async def get_metrics():
         if hasattr(response, "health") and response.health:
             console.print("[cyan]Health Metrics:[/cyan]")
             if isinstance(response.health, dict):
-                for metric_name, metric_value in response.health.items():
+                for (
+                    metric_name,
+                    metric_value,
+                ) in response.health.items():
                     console.print(f"  {metric_name}: {metric_value}")
             else:
                 console.print(f"  Health: {response.health}")
@@ -73,7 +76,10 @@ async def get_metrics():
         if hasattr(response, "performance") and response.performance:
             console.print("[cyan]Performance Metrics:[/cyan]")
             if isinstance(response.performance, dict):
-                for metric_name, metric_value in response.performance.items():
+                for (
+                    metric_name,
+                    metric_value,
+                ) in response.performance.items():
                     console.print(f"  {metric_name}: {metric_value}")
             else:
                 console.print(f"  Performance: {response.performance}")
@@ -85,23 +91,35 @@ async def get_metrics():
                 for endpoint, metrics in response.endpoints.items():
                     console.print(f"  {endpoint}:")
                     if isinstance(metrics, dict):
-                        table = Table(show_header=False, box=None, padding=(0, 2))
+                        table = Table(
+                            show_header=False, box=None, padding=(0, 2)
+                        )
                         table.add_column("Metric", style="dim")
                         table.add_column("Value", style="green")
 
                         for metric_key, metric_value in metrics.items():
                             # Format metric names nicely
-                            formatted_key = metric_key.replace("_", " ").title()
+                            formatted_key = metric_key.replace(
+                                "_", " "
+                            ).title()
                             if isinstance(metric_value, float):
                                 if "time" in metric_key.lower():
-                                    formatted_value = f"{metric_value:.2f}ms"
+                                    formatted_value = (
+                                        f"{metric_value:.2f}ms"
+                                    )
                                 elif "rate" in metric_key.lower():
-                                    formatted_value = f"{metric_value:.1%}"
+                                    formatted_value = (
+                                        f"{metric_value:.1%}"
+                                    )
                                 else:
-                                    formatted_value = f"{metric_value:.2f}"
+                                    formatted_value = (
+                                        f"{metric_value:.2f}"
+                                    )
                             else:
                                 formatted_value = str(metric_value)
-                            table.add_row(formatted_key, formatted_value)
+                            table.add_row(
+                                formatted_key, formatted_value
+                            )
 
                         console.print(table)
                     else:
@@ -111,6 +129,11 @@ async def get_metrics():
                 console.print(f"  Endpoints: {response.endpoints}")
 
         # If none of the expected fields are present, show the whole response
-        if not any(hasattr(response, attr) for attr in ["health", "performance", "endpoints"]):
-            console.print("[yellow]Raw response (unexpected format):[/yellow]")
+        if not any(
+            hasattr(response, attr)
+            for attr in ["health", "performance", "endpoints"]
+        ):
+            console.print(
+                "[yellow]Raw response (unexpected format):[/yellow]"
+            )
             console.print(str(response))

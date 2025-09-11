@@ -163,15 +163,13 @@ class TestDataManagementUnit:
 
         endpoints = [
             "/api/v1/data-management/bulk/delete-documents",
-            "/api/v1/data-management/bulk/delete-conversations", 
-            "/api/v1/data-management/bulk/delete-prompts"
+            "/api/v1/data-management/bulk/delete-conversations",
+            "/api/v1/data-management/bulk/delete-prompts",
         ]
 
         for endpoint in endpoints:
             response = await client.post(
-                endpoint, 
-                headers=auth_headers, 
-                json=empty_request
+                endpoint, headers=auth_headers, json=empty_request
             )
 
             # Should get 200 or 422, but if 200 check response structure
@@ -179,12 +177,12 @@ class TestDataManagementUnit:
                 data = response.json()
                 # Verify the response has the correct field names for frontend
                 assert "total_requested" in data
-                assert "successful_deletions" in data  
+                assert "successful_deletions" in data
                 assert "failed_deletions" in data
                 assert "errors" in data
 
                 # Verify field types
                 assert isinstance(data["total_requested"], int)
                 assert isinstance(data["successful_deletions"], int)
-                assert isinstance(data["failed_deletions"], int) 
+                assert isinstance(data["failed_deletions"], int)
                 assert isinstance(data["errors"], list)

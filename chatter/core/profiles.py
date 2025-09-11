@@ -770,8 +770,10 @@ class ProfileService:
             for (
                 provider_name
             ) in await self.llm_service.list_available_providers():
-                provider_info = await self.llm_service.get_provider_info(
-                    provider_name
+                provider_info = (
+                    await self.llm_service.get_provider_info(
+                        provider_name
+                    )
                 )
                 providers[provider_name] = provider_info
 

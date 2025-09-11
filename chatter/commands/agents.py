@@ -22,8 +22,10 @@ async def list_agents(
 ):
     """List AI agents."""
     async with get_client() as sdk_client:
-        response = await sdk_client.agents_api.list_agents_api_v1_agents_get(
-            limit=limit, offset=offset, agent_type=agent_type
+        response = (
+            await sdk_client.agents_api.list_agents_api_v1_agents_get(
+                limit=limit, offset=offset, agent_type=agent_type
+            )
         )
 
         if not response.agents:
@@ -51,7 +53,9 @@ async def list_agents(
 
 @agents_app.command("show")
 @run_async
-async def show_agent(agent_id: str = typer.Argument(..., help="Agent ID")):
+async def show_agent(
+    agent_id: str = typer.Argument(..., help="Agent ID")
+):
     """Show detailed agent information."""
     async with get_client() as sdk_client:
         response = await sdk_client.agents_api.get_agent_api_v1_agents_agent_id_get(
@@ -78,7 +82,9 @@ async def create_agent(
     name: str = typer.Option(..., help="Agent name"),
     agent_type: str = typer.Option("generic", help="Agent type"),
     description: str = typer.Option(None, help="Agent description"),
-    config: str = typer.Option(None, help="Agent configuration as JSON"),
+    config: str = typer.Option(
+        None, help="Agent configuration as JSON"
+    ),
 ):
     """Create a new AI agent."""
     from chatter_sdk.models.agent_create_request import (
@@ -101,11 +107,15 @@ async def create_agent(
             config=agent_config,
         )
 
-        response = await sdk_client.agents_api.create_agent_api_v1_agents_post(
-            agent_create_request=agent_data
+        response = (
+            await sdk_client.agents_api.create_agent_api_v1_agents_post(
+                agent_create_request=agent_data
+            )
         )
 
-        console.print(f"✅ [green]Created agent: {response.name}[/green]")
+        console.print(
+            f"✅ [green]Created agent: {response.name}[/green]"
+        )
         console.print(f"[dim]ID: {response.id}[/dim]")
 
 
@@ -137,7 +147,9 @@ async def delete_agent(
 @run_async
 async def deploy_agent(
     agent_id: str = typer.Argument(..., help="Agent ID to deploy"),
-    environment: str = typer.Option("production", help="Deployment environment"),
+    environment: str = typer.Option(
+        "production", help="Deployment environment"
+    ),
 ):
     """Deploy an agent to an environment."""
     async with get_client() as sdk_client:
@@ -149,16 +161,22 @@ async def deploy_agent(
             agent_id=agent_id, deploy_request=deploy_request
         )
 
-        console.print(f"✅ [green]Deployed agent {agent_id} to {environment}[/green]")
+        console.print(
+            f"✅ [green]Deployed agent {agent_id} to {environment}[/green]"
+        )
         if hasattr(response, "deployment_id"):
-            console.print(f"[dim]Deployment ID: {response.deployment_id}[/dim]")
+            console.print(
+                f"[dim]Deployment ID: {response.deployment_id}[/dim]"
+            )
 
 
 @agents_app.command("execute")
 @run_async
 async def execute_agent(
     agent_id: str = typer.Argument(..., help="Agent ID to execute"),
-    input_data: str = typer.Option(..., help="Input data as JSON string"),
+    input_data: str = typer.Option(
+        ..., help="Input data as JSON string"
+    ),
 ):
     """Execute an agent with input data."""
     try:
@@ -169,13 +187,18 @@ async def execute_agent(
 
     async with get_client() as sdk_client:
         response = await sdk_client.agents_api.execute_agent_api_v1_agents_agent_id_execute_post(
-            agent_id=agent_id, execution_request={"input": execution_input}
+            agent_id=agent_id,
+            execution_request={"input": execution_input},
         )
 
-        console.print(f"✅ [green]Agent execution completed[/green]")
-        console.print(f"[bold]Output:[/bold] {getattr(response, 'output', 'No output')}")
+        console.print("✅ [green]Agent execution completed[/green]")
+        console.print(
+            f"[bold]Output:[/bold] {getattr(response, 'output', 'No output')}"
+        )
         if hasattr(response, "execution_time"):
-            console.print(f"[dim]Execution Time: {response.execution_time}ms[/dim]")
+            console.print(
+                f"[dim]Execution Time: {response.execution_time}ms[/dim]"
+            )
 
 
 @agents_app.command("logs")
@@ -194,7 +217,9 @@ async def show_agent_logs(
             console.print("No logs found for this agent.")
             return
 
-        table = Table(title=f"Agent Logs ({len(response.logs)} entries)")
+        table = Table(
+            title=f"Agent Logs ({len(response.logs)} entries)"
+        )
         table.add_column("Timestamp", style="cyan")
         table.add_column("Level", style="yellow")
         table.add_column("Message", style="green")
@@ -214,7 +239,9 @@ async def show_agent_logs(
 async def agent_stats():
     """Show agent statistics."""
     async with get_client() as sdk_client:
-        response = await sdk_client.agents_api.get_agent_stats_api_v1_agents_stats_get()
+        response = (
+            await sdk_client.agents_api.get_agent_stats_api_v1_agents_stats_get()
+        )
 
         table = Table(title="Agent Statistics")
         table.add_column("Metric", style="cyan")
@@ -225,8 +252,13 @@ async def agent_stats():
         if hasattr(response, "active_agents"):
             table.add_row("Active Agents", str(response.active_agents))
         if hasattr(response, "total_executions"):
-            table.add_row("Total Executions", f"{response.total_executions:,}")
+            table.add_row(
+                "Total Executions", f"{response.total_executions:,}"
+            )
         if hasattr(response, "avg_execution_time"):
-            table.add_row("Avg Execution Time", f"{response.avg_execution_time:.2f}ms")
+            table.add_row(
+                "Avg Execution Time",
+                f"{response.avg_execution_time:.2f}ms",
+            )
 
         console.print(table)

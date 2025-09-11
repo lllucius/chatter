@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { getSDK, authService } from "../services/auth-service";
+import { authService } from "../services/auth-service";
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -18,7 +18,6 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           setIsAuthenticated(true);
         } else {
           // Try to refresh token before giving up
-          console.log('[ProtectedRoute] Not authenticated, attempting token refresh...');
           const refreshSuccess = await authService.refreshToken();
           setIsAuthenticated(refreshSuccess);
         }

@@ -142,13 +142,16 @@ async def get_client() -> ChatterSDKClient:
 
 def run_async(async_func):
     """Helper decorator to run async functions in typer commands."""
+
     @functools.wraps(async_func)
     def wrapper(*args, **kwargs):
         try:
             return asyncio.run(async_func(*args, **kwargs))
         except ApiException as e:
             if e.status == 401:
-                console.print("[red]Authentication failed. Please log in first:[/red]")
+                console.print(
+                    "[red]Authentication failed. Please log in first:[/red]"
+                )
                 console.print("  chatter auth login")
                 sys.exit(1)
             elif e.status == 404:
@@ -164,7 +167,9 @@ def run_async(async_func):
                     console.print(f"[dim]Details: {e.reason}[/dim]")
                 sys.exit(1)
             else:
-                console.print(f"[red]API error: {e.status} - {e.reason}[/red]")
+                console.print(
+                    f"[red]API error: {e.status} - {e.reason}[/red]"
+                )
                 if hasattr(e, "body") and e.body:
                     console.print(f"[dim]Details: {e.body}[/dim]")
                 sys.exit(1)

@@ -43,8 +43,12 @@ class MultiTierCache(CacheInterface):
         # Create L1 (memory) cache configuration - inherit key prefix but simplified
         if l1_config is None:
             l1_config = CacheConfig(
-                default_ttl=min(300, self.config.default_ttl),  # Shorter TTL for L1
-                max_size=int((self.config.max_size or 1000) * l1_size_ratio),
+                default_ttl=min(
+                    300, self.config.default_ttl
+                ),  # Shorter TTL for L1
+                max_size=int(
+                    (self.config.max_size or 1000) * l1_size_ratio
+                ),
                 eviction_policy="lru",
                 key_prefix=self.config.key_prefix,  # Use same prefix
                 enable_stats=self.config.enable_stats,
@@ -285,7 +289,9 @@ class MultiTierCache(CacheInterface):
 
             # Promote L2 hits to L1 for faster future access (simplified)
             for key, value in l2_results.items():
-                await self.l1_cache.set(key, value, 300)  # Short TTL for L1
+                await self.l1_cache.set(
+                    key, value, 300
+                )  # Short TTL for L1
 
         return result
 

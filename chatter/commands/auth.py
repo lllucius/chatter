@@ -73,9 +73,15 @@ async def whoami():
         table.add_row("ID", str(response.id))
         table.add_row("Email", response.email)
         table.add_row("Username", response.username)
-        table.add_row("Is Superuser", "Yes" if response.is_superuser else "No")
-        table.add_row("Is Active", "Yes" if response.is_active else "No")
-        table.add_row("Is Verified", "Yes" if response.is_verified else "No")
+        table.add_row(
+            "Is Superuser", "Yes" if response.is_superuser else "No"
+        )
+        table.add_row(
+            "Is Active", "Yes" if response.is_active else "No"
+        )
+        table.add_row(
+            "Is Verified", "Yes" if response.is_verified else "No"
+        )
         table.add_row("Created", str(response.created_at))
 
         console.print(table)

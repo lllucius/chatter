@@ -290,7 +290,7 @@ class DynamicEmbeddingService:
             from sqlalchemy import text
 
             # Use pgvector's cosine distance operator
-            similarity_query = text(
+            similarity_query = text(  # nosec B608 - table name from SQLAlchemy metadata, not user input
                 f"""
                 SELECT
                     de.chunk_id,

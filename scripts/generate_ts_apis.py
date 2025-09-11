@@ -57,9 +57,34 @@ def get_operation_id(path: str, method: str, operation: dict[str, Any]) -> str:
 
     return camel_case(f"{method.lower()}_{clean_path}")
 
+def is_streaming_endpoint(operation: dict[str, Any]) -> bool:
+    """Check if this is a streaming endpoint that returns text/event-stream"""
+    responses = operation.get("responses", {})
+    
+    # Look for 200, 201, or first successful response with text/event-stream
+    for status in ["200", "201", "202"]:
+        if status in responses:
+            response = responses[status]
+            content = response.get("content", {})
+            if "text/event-stream" in content:
+                return True
+
+    # Fallback to any successful response
+    for status, response in responses.items():
+        if status.startswith("2"):
+            content = response.get("content", {})
+            if "text/event-stream" in content:
+                return True
+
+    return False
+
 def get_response_type(operation: dict[str, Any]) -> str:
     """Extract response type from operation"""
     responses = operation.get("responses", {})
+
+    # Check for streaming endpoint first
+    if is_streaming_endpoint(operation):
+        return "ReadableStream<Uint8Array>"
 
     # Look for 200, 201, or first successful response
     for status in ["200", "201", "202"]:
@@ -255,8 +280,8 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
     method_body += f"""
     }};
 
-    const response = await this.request(requestContext);
-    return response.json() as Promise<{response_type}>;
+    const response = await this.{'requestStream' if is_streaming_endpoint(operation) else 'request'}(requestContext);
+    {'return response;' if is_streaming_endpoint(operation) else f'return response.json() as Promise<{response_type}>;'}
   }}"""
 
     return method_body
@@ -326,7 +351,8 @@ def generate_api_class(tag: str, operations: list[tuple]) -> str:
             "Record", "Array", "Promise", "Date", "RegExp", "Error", "Object",
             "String", "Number", "Boolean", "Function", "Map", "Set", "WeakMap", "WeakSet",
             "ReadonlyArray", "Partial", "Required", "Pick", "Omit", "Exclude", "Extract",
-            "string", "number", "boolean", "unknown", "null", "undefined", "void", "any"
+            "string", "number", "boolean", "unknown", "null", "undefined", "void", "any",
+            "ReadableStream", "Uint8Array"  # Browser/Node.js streaming types
         }
         filtered_imports = [imp for imp in imports if imp not in builtin_types]
         if filtered_imports:

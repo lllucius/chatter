@@ -140,6 +140,18 @@ export class BaseAPI {
         throw new ResponseError(response, 'Response returned an error code');
     }
 
+    protected async requestStream(context: RequestOpts, initOverrides?: RequestInit | InitOverrideFunction): Promise<ReadableStream<Uint8Array>> {
+        const { url, init } = await this.createFetchParams(context, initOverrides);
+        const response = await this.fetchApi(url, init);
+        if (response && (response.status >= 200 && response.status < 300)) {
+            if (!response.body) {
+                throw new ResponseError(response, 'Response body is null for streaming request');
+            }
+            return response.body;
+        }
+        throw new ResponseError(response, 'Response returned an error code');
+    }
+
     private async createFetchParams(context: RequestOpts, initOverrides?: RequestInit | InitOverrideFunction) {
         let url = this.configuration.basePath + context.path;
         if (context.query !== undefined && Object.keys(context.query).length !== 0) {

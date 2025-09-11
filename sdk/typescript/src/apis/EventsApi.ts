@@ -19,7 +19,7 @@ Args:
 Returns:
     StreamingResponse with SSE format
    */
-  public async eventsStreamApiV1EventsStream(): Promise<Record<string, unknown>> {
+  public async eventsStreamApiV1EventsStream(): Promise<ReadableStream<Uint8Array>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/events/stream`,
       method: 'GET' as HTTPMethod,
@@ -27,8 +27,8 @@ Returns:
       },
     };
 
-    const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    const response = await this.requestStream(requestContext);
+    return response;
   }
   /**Admin Events Stream
    * Stream all system events for admin users.
@@ -40,7 +40,7 @@ Args:
 Returns:
     StreamingResponse with SSE format for all events
    */
-  public async adminEventsStreamApiV1EventsAdminStream(): Promise<Record<string, unknown>> {
+  public async adminEventsStreamApiV1EventsAdminStream(): Promise<ReadableStream<Uint8Array>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/events/admin/stream`,
       method: 'GET' as HTTPMethod,
@@ -48,8 +48,8 @@ Returns:
       },
     };
 
-    const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    const response = await this.requestStream(requestContext);
+    return response;
   }
   /**Get Sse Stats
    * Get SSE service statistics.

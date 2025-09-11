@@ -380,7 +380,7 @@ Available templates:
 - `data_analyst`: Data analysis with computation tools
 
    */
-  public async streamingChatApiV1ChatStreaming(data: ChatRequest): Promise<Record<string, unknown>> {
+  public async streamingChatApiV1ChatStreaming(data: ChatRequest): Promise<ReadableStream<Uint8Array>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/chat/streaming`,
       method: 'POST' as HTTPMethod,
@@ -389,8 +389,8 @@ Available templates:
       body: data,
     };
 
-    const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    const response = await this.requestStream(requestContext);
+    return response;
   }
   /**Get Available Tools
    * Get list of available MCP tools.

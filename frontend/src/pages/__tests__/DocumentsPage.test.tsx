@@ -95,9 +95,6 @@ describe('DocumentsPage', () => {
   });
 
   it('loads and displays documents', async () => {
-    // Add console.log to debug the API response
-    console.log('Mock documents:', mockDocuments);
-    
     await act(async () => {
       render(
         <TestWrapper>
@@ -108,8 +105,6 @@ describe('DocumentsPage', () => {
 
     // Wait for documents to load and display
     await waitFor(() => {
-      // Debug what's actually rendered
-      console.log('Rendered content:', screen.getByRole('main').innerHTML);
       expect(screen.getByText('Test Document')).toBeInTheDocument();
       expect(screen.getByText('Another Document')).toBeInTheDocument();
     }, { timeout: 10000 });

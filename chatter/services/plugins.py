@@ -1231,7 +1231,7 @@ class PluginManager:
                 import platform
                 import signal
 
-                def timeout_handler(signum, frame):
+                def timeout_handler(signum, frame):  # noqa: ARG001
                     raise TimeoutError(
                         "Plugin loading timeout"
                     ) from None

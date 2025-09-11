@@ -100,10 +100,10 @@ const PromptsPage: React.FC = () => {
     },
 
     update: async (id: string, data: PromptUpdate) => {
-      const response = await getSDK().prompts.updatePromptApiV1PromptsPromptId({
-        promptId: id,
-        promptUpdate: data,
-      });
+      const response = await getSDK().prompts.updatePromptApiV1PromptsPromptId(
+        id,
+        data
+      );
       return response;
     },
 

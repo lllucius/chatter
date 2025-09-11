@@ -92,9 +92,7 @@ const AgentsPage: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().agents.deleteAgentApiV1AgentsAgentIdDelete({
-        agentId: id,
-      });
+      await getSDK().agents.deleteAgentApiV1AgentsAgentId(id);
     },
   };
 

@@ -99,9 +99,9 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     if (!actionConversation) return;
     
     try {
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId({
-        conversationId: actionConversation.id
-      });
+      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(
+        actionConversation.id
+      );
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));
       handleActionClose();
     } catch {

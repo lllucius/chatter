@@ -11,7 +11,7 @@ import { getStatusColor } from '../utils/common';
 export const createStatusChipRenderer = <T,>(
   colorMapping?: { [key: string]: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' }
 ): CrudColumn<T>['render'] => {
-  return (value: string) => {
+  const StatusChipRenderer = (value: string) => {
     const color = colorMapping?.[value?.toLowerCase()] || getStatusColor(value);
     
     return (
@@ -22,13 +22,15 @@ export const createStatusChipRenderer = <T,>(
       />
     );
   };
+  StatusChipRenderer.displayName = 'StatusChipRenderer';
+  return StatusChipRenderer;
 };
 
 export const createCategoryChipRenderer = <T,>(
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' = 'primary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  return (value: string) => (
+  const CategoryChipRenderer = (value: string) => (
     <Chip 
       label={value} 
       size="small" 
@@ -36,6 +38,8 @@ export const createCategoryChipRenderer = <T,>(
       variant={variant}
     />
   );
+  CategoryChipRenderer.displayName = 'CategoryChipRenderer';
+  return CategoryChipRenderer;
 };
 
 export const createTypeChipRenderer = <T,>(

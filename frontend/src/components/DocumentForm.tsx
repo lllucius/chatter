@@ -5,7 +5,6 @@ import {
   Typography,
   LinearProgress,
 } from '../utils/mui';
-import { UploadIcon } from '../utils/icons';
 import { CrudFormProps } from './CrudDataTable';
 import { FormDialog } from './BaseDialog';
 import { useBaseForm } from '../hooks/useBaseForm';

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Grid,
@@ -12,10 +12,7 @@ import {
   ListItemIcon,
   Chip,
   LinearProgress,
-  Alert,
   Button,
-  IconButton,
-  Tooltip,
   Tabs,
   Tab,
   TabPanel,
@@ -30,15 +27,11 @@ import {
   CheckIcon as SuccessIcon,
   SpeedIcon,
   GroupIcon,
-  TaskIcon,
   TimelineIcon,
   AssessmentIcon,
-  RefreshIcon,
   LaunchIcon,
 } from '../utils/icons';
 import {
-  LineChart,
-  Line,
   AreaChart,
   Area,
   BarChart,
@@ -53,7 +46,7 @@ import {
   Legend,
   ResponsiveContainer,
 } from 'recharts';
-import { format, subDays, startOfDay } from 'date-fns';
+import { format, subDays } from 'date-fns';
 import { useNavigate } from 'react-router-dom';
 
 interface DashboardStats {
@@ -94,7 +87,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [stats, setStats] = useState<DashboardStats>({
+  const [stats, _setStats] = useState<DashboardStats>({
     workflows: {
       total: 24,
       active: 3,
@@ -266,7 +259,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
                 <div>
                   <Typography color="text.secondary" gutterBottom>
-                    Today's Cost
+                    Today&apos;s Cost
                   </Typography>
                   <Typography variant="h4" color="error">
                     ${stats.system.cost.toFixed(2)}

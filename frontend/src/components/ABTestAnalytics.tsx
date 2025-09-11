@@ -6,7 +6,6 @@ import {
   CardContent,
   Typography,
   LinearProgress,
-  Alert,
   Paper,
   List,
   ListItem,
@@ -25,8 +24,6 @@ import {
 import {
   LineChart,
   Line,
-  AreaChart,
-  Area,
   BarChart,
   Bar,
   XAxis,
@@ -60,12 +57,12 @@ interface ABTestAnalyticsProps {
 }
 
 const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
-  testId,
-  testName,
+  _testId,
+  _testName,
   metrics,
   results,
   recommendations,
-  performance,
+  _performance,
 }) => {
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {

@@ -8,7 +8,6 @@ import {
   CircularProgress,
   Box,
 } from '@mui/material';
-import { CloseIcon } from '../utils/icons';
 
 /**
  * Base dialog component that consolidates common dialog patterns

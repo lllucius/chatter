@@ -19,17 +19,11 @@ import {
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  Divider,
-  Alert,
-  Autocomplete,
   Tooltip,
-  IconButton,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   Add as AddIcon,
-  Delete as DeleteIcon,
-  Help as HelpIcon,
 } from '@mui/icons-material';
 import { AgentCreateRequest, AgentUpdateRequest, AgentResponse } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
@@ -245,7 +239,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
     });
   };
 
-  const addTool = () => {
+  const _addTool = () => {
     if (toolInput.name.trim()) {
       setFormData({
         ...formData,
@@ -255,7 +249,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
     }
   };
 
-  const removeTool = (index: number) => {
+  const _removeTool = (index: number) => {
     setFormData({
       ...formData,
       tools: formData.tools.filter((_, i) => i !== index)

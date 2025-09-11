@@ -129,14 +129,10 @@ export class SSEEventManager {
     }
 
     try {
-      // Use SDK to get the base URL and handle authentication properly
-      const sdk = authService.getSDK();
-      const baseURL = authService.getURL() || window.location.origin;
-      const url = `${baseURL}/api/v1/events/stream`;
-      console.log('SSE: Connecting to', url);
+      console.log('SSE: Connecting using SDK events stream method');
 
-      // Use SDK-based authentication with automatic retry
-      this.connectWithSDKAuth(url);
+      // Use SDK method with automatic authentication and retry
+      this.connectWithSDKAuth();
 
     } catch (error) {
       console.error('SSE: Failed to create connection:', error);
@@ -150,54 +146,20 @@ export class SSEEventManager {
   /**
    * Connect using SDK authentication with automatic token refresh
    */
-  private async connectWithSDKAuth(url: string): Promise<void> {
-    const makeRequest = async (): Promise<Response> => {
-      const token = authService.getToken();
-      if (!token) {
-        throw new Error('No access token available');
-      }
-
-      return fetch(url, {
-        headers: {
-          'Authorization': `Bearer ${token}`,
-          'Accept': 'text/event-stream',
-          'Cache-Control': 'no-cache',
-        },
-        credentials: 'include', // Include cookies for refresh token
-      });
-    };
-
+  private async connectWithSDKAuth(): Promise<void> {
     try {
-      let response = await makeRequest();
+      // Use SDK method with automatic authentication handling
+      const stream = await authService.executeWithAuth(async (sdk) => {
+        return await sdk.events.eventsStreamApiV1EventsStream();
+      });
 
-      // If unauthorized, try to refresh token and retry once
-      if (response.status === 401) {
-        console.log('SSE: Access token expired, attempting refresh...');
-        
-        const refreshSuccess = await authService.refreshToken();
-        if (refreshSuccess) {
-          console.log('SSE: Token refresh successful, retrying connection...');
-          response = await makeRequest();
-        } else {
-          throw new Error('SSE: Token refresh failed - authentication required');
-        }
-      }
-
-      if (!response.ok) {
-        throw new Error(`SSE: HTTP ${response.status} ${response.statusText}`);
-      }
-
-      if (!response.body) {
-        throw new Error('SSE: No response body');
-      }
-
-      const reader = response.body.getReader();
+      const reader = stream.getReader();
       const decoder = new TextDecoder();
 
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.reconnectDelay = 1000;
-      console.log('SSE: Connection opened');
+      console.log('SSE: Connection opened via SDK');
 
       // Emit connection established event
       this.emitEvent({

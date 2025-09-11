@@ -93,20 +93,26 @@ const createMockResponse = (messages: string[] = []): Response => {
 
 // Mock authService
 vi.mock('../auth-service', () => {
+  const mockEventsApi = {
+    eventsStreamApiV1EventsStream: vi.fn(() => Promise.resolve(new MockReadableStream(['data: {"id": "test", "type": "test", "timestamp": "2024-01-01T00:00:00Z", "data": {}}\n\n']))),
+  };
+
+  const mockSDK = {
+    events: mockEventsApi,
+  };
+
   const mockAuthService = {
     isAuthenticated: vi.fn(() => true),
     getURL: vi.fn(() => 'http://localhost:8000'),
     getToken: vi.fn(() => 'test-token'),
-    getSDK: vi.fn(() => ({})),
+    getSDK: vi.fn(() => mockSDK),
     refreshToken: vi.fn(() => Promise.resolve(true)),
-    executeWithAuth: vi.fn((apiCall) => apiCall({})),
+    executeWithAuth: vi.fn((apiCall) => apiCall(mockSDK)),
   };
 
   return {
     authService: mockAuthService,
-    getSDK: vi.fn(() => ({
-      // Mock SDK methods as needed for tests
-    }))
+    getSDK: vi.fn(() => mockSDK)
   };
 });
 
@@ -124,10 +130,20 @@ describe('SSEEventManager', () => {
     (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
     (authService.getURL as vi.Mock).mockReturnValue('http://localhost:8000');
     (authService.getToken as vi.Mock).mockReturnValue('test-token');
-    (authService.getSDK as vi.Mock).mockReturnValue({});
     (authService.refreshToken as vi.Mock).mockResolvedValue(true);
     
-    // Setup default fetch mock
+    // Mock the SDK events stream method
+    const mockSDK = (authService.getSDK as vi.Mock)();
+    if (mockSDK.events) {
+      mockSDK.events.eventsStreamApiV1EventsStream = vi.fn(() => 
+        Promise.resolve(new MockReadableStream(['data: {"id": "test", "type": "test", "timestamp": "2024-01-01T00:00:00Z", "data": {}}\n\n']))
+      );
+    }
+    
+    // Setup executeWithAuth to use the mock SDK
+    (authService.executeWithAuth as vi.Mock).mockImplementation((apiCall) => apiCall(mockSDK));
+    
+    // Setup default fetch mock (still needed for some tests)
     (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
   });
 

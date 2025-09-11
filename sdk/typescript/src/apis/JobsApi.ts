@@ -24,6 +24,7 @@ Returns:
       path: `/api/v1/jobs/`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -103,6 +104,7 @@ Returns:
       path: `/api/v1/jobs/${jobId}/cancel`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -147,6 +149,7 @@ Returns:
       path: `/api/v1/jobs/cleanup`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {

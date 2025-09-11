@@ -261,6 +261,7 @@ Returns:
       path: `/api/v1/analytics/export`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {

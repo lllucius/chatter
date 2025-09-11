@@ -31,6 +31,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/definitions`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -103,6 +104,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/templates`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -147,6 +149,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/definitions/${workflowId}/execute`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -162,6 +165,7 @@ export class WorkflowsApi extends BaseAPI {
       path: `/api/v1/workflows/workflows/definitions/validate`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

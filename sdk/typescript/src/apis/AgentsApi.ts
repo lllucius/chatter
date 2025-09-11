@@ -17,6 +17,7 @@ export class AgentsApi extends BaseAPI {
       path: `/api/v1/agents/`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -150,6 +151,7 @@ Returns:
       path: `/api/v1/agents/${agentId}/interact`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -195,6 +197,7 @@ Returns:
       path: `/api/v1/agents/bulk`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };

@@ -31,6 +31,7 @@ Returns:
       path: `/api/v1/documents/upload`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -164,6 +165,7 @@ Returns:
       path: `/api/v1/documents/search`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -218,6 +220,7 @@ Returns:
       path: `/api/v1/documents/${documentId}/process`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -284,6 +287,7 @@ Returns:
       path: `/api/v1/documents/${documentId}/reprocess`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 

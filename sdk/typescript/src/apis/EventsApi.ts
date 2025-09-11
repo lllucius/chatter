@@ -85,6 +85,7 @@ Returns:
       path: `/api/v1/events/test-event`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -105,6 +106,7 @@ Returns:
       path: `/api/v1/events/broadcast-test`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 

@@ -25,6 +25,7 @@ Returns:
       path: `/api/v1/toolservers/servers`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -144,6 +145,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/start`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -166,6 +168,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/stop`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -188,6 +191,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/restart`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -210,6 +214,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/enable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -232,6 +237,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/disable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -283,6 +289,7 @@ Returns:
       path: `/api/v1/toolservers/tools/${toolId}/enable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -305,6 +312,7 @@ Returns:
       path: `/api/v1/toolservers/tools/${toolId}/disable`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -371,6 +379,7 @@ Returns:
       path: `/api/v1/toolservers/servers/bulk`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -415,6 +424,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/test-connectivity`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 
@@ -437,6 +447,7 @@ Returns:
       path: `/api/v1/toolservers/permissions`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -528,6 +539,7 @@ Returns:
       path: `/api/v1/toolservers/role-access`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -578,6 +590,7 @@ Returns:
       path: `/api/v1/toolservers/access-check`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
       body: data,
     };
@@ -601,6 +614,7 @@ Returns:
       path: `/api/v1/toolservers/servers/${serverId}/refresh-tools`,
       method: 'POST' as HTTPMethod,
       headers: {
+        'Content-Type': 'application/json',
       },
     };
 

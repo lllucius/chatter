@@ -496,9 +496,10 @@ class WorkflowExecutionService:
                 )
             messages.append({"role": "user", "content": user_content})
 
-            # Make LLM call
-            response = await self.llm_service.generate_completion(
+            # Make LLM call - use None provider to get default
+            response = await self.llm_service.generate(
                 messages=messages,
+                provider=None,  # Use default provider
                 model=model,
                 temperature=temperature,
                 max_tokens=max_tokens,

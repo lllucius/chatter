@@ -44,6 +44,7 @@ import { ConversationResponse, MessageResponse } from 'chatter-sdk';
 import { useApi } from '../hooks/useApi';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
+import BackendStatusBanner from '../components/BackendStatusBanner';
 
 // Memoized conversation table row component
 const ConversationTableRow = memo(({ 
@@ -251,6 +252,7 @@ const ConversationsPage: React.FC = () => {
 
   return (
     <PageLayout title="Conversation Management" toolbar={toolbar}>
+      <BackendStatusBanner />
 
       {conversationsApi.error && (
         <Alert severity="error" sx={{ mb: 2 }}>

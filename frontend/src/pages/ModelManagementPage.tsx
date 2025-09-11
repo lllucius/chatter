@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef } from 'react';
 import { Box, Tabs, Tab, Typography, Chip, Button } from '@mui/material';
 import { Star as DefaultIcon, Refresh as RefreshIcon, Add as AddIcon } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
+import BackendStatusBanner from '../components/BackendStatusBanner';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
@@ -366,6 +367,8 @@ const ModelManagementPage: React.FC = () => {
 
   return (
     <PageLayout title="Model Management" toolbar={toolbar}>
+      <BackendStatusBanner />
+      
       <Tabs
         value={activeTab}
         onChange={handleTabChange}

@@ -3,7 +3,6 @@ import {
   Box,
   Card,
   Typography,
-  Button,
   Table,
   TableBody,
   TableCell,
@@ -12,7 +11,6 @@ import {
   TableRow,
   TablePagination,
   IconButton,
-  Alert,
   CircularProgress,
   Menu,
   MenuItem,
@@ -25,7 +23,6 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
-  Refresh as RefreshIcon,
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { toastService } from '../services/toast-service';
@@ -95,7 +92,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
   getItemId,
   externalDialogOpen,
   onExternalDialogClose,
-}: CrudDataTableProps<T, TCreate, TUpdate>, ref) {
+}: CrudDataTableProps<T, TCreate, TUpdate>, ref: React.ForwardedRef<CrudDataTableRef>) {
   // State management
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
@@ -129,7 +126,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
       const result = await service.list(page, rowsPerPage);
       setItems(result.items);
       setTotal(result.total);
-    } catch (err) {
+    } catch {
       toastService.error(`Failed to load ${config.entityNamePlural.toLowerCase()}`);
     } finally {
       setLoading(false);

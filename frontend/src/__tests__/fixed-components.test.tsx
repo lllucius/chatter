@@ -35,7 +35,7 @@ vi.mock('../components/PageLayout', () => ({
 
 // Mock WorkflowEditor
 vi.mock('../components/workflow/WorkflowEditor', () => ({
-  default: ({ onSave, onWorkflowChange }: { onSave: any, onWorkflowChange: any }) => (
+  default: () => (
     <div data-testid="workflow-editor">WorkflowEditor Mock</div>
   )
 }));

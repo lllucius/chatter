@@ -6,10 +6,7 @@ import {
   Typography,
   TextField,
   IconButton,
-  Tooltip,
-  Alert,
   CircularProgress,
-  Paper,
   Chip,
   Button,
   Divider,
@@ -24,13 +21,11 @@ import {
   Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
-  Stream as StreamIcon,
   Speed as SpeedIcon,
   History as HistoryIcon,
   Download as DownloadIcon,
   Clear as ClearIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
@@ -332,10 +327,8 @@ const ChatPage: React.FC = () => {
                     );
                   } else if (chunk.type === 'start') {
                     // Stream started - no action needed
-                    console.log('Streaming started');
                   } else if (chunk.type === 'end') {
                     // Stream ended - no action needed
-                    console.log('Streaming ended');
                     return; // End the streaming loop
                   } else if (chunk.type === 'error') {
                     throw new Error(chunk.content || chunk.error || 'Streaming error');
@@ -454,32 +447,6 @@ const ChatPage: React.FC = () => {
     if (e.key === 'Enter' && !e.shiftKey && !(e.nativeEvent as any).isComposing) {
       e.preventDefault();
       sendMessage();
-    }
-  };
-
-  const getMessageAvatar = (role: string) => {
-    switch (role) {
-      case 'user':
-        return <PersonIcon />;
-      case 'assistant':
-        return <BotIcon />;
-      case 'system':
-        return <SpeedIcon />;
-      default:
-        return <BotIcon />;
-    }
-  };
-
-  const getMessageColor = (role: string) => {
-    switch (role) {
-      case 'user':
-        return 'primary.main';
-      case 'assistant':
-        return 'secondary.main';
-      case 'system':
-        return 'info.main';
-      default:
-        return 'grey.500';
     }
   };
 

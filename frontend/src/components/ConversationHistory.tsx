@@ -33,7 +33,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK, authService } from "../services/auth-service";
+import { getSDK } from "../services/auth-service";
 import { ConversationResponse } from 'chatter-sdk';
 
 interface ConversationHistoryProps {
@@ -61,9 +61,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
       setLoading(true);
       setError('');
       const response = await getSDK().chat.listConversationsApiV1ChatConversations({
-        limit: 20,
-        sortBy: 'updated_at',
-        sortOrder: 'desc'
+        limit: 20
       });
       setConversations(response.conversations || []);
     } catch {
@@ -191,14 +189,17 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                     filteredConversations.map((conversation) => (
                   <ListItem
                     key={conversation.id}
-                    button
+                    component="div"
                     onClick={() => handleSelectConversation(conversation)}
-                    selected={conversation.id === currentConversationId}
                     sx={{
                       borderRadius: 1,
                       mb: 1,
                       border: conversation.id === currentConversationId ? '2px solid' : '1px solid',
                       borderColor: conversation.id === currentConversationId ? 'primary.main' : 'divider',
+                      cursor: 'pointer',
+                      '&:hover': {
+                        backgroundColor: 'action.hover'
+                      }
                     }}
                   >
                     <ListItemIcon>
@@ -221,8 +222,8 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                       secondary={
                         <Box>
                           <Typography variant="caption" color="text.secondary">
-                            {conversation.createdAt
-                              ? format(new Date(conversation.createdAt), 'MMM dd, yyyy HH:mm')
+                            {conversation.created_at
+                              ? format(new Date(conversation.created_at), 'MMM dd, yyyy HH:mm')
                               : 'Unknown date'}
                           </Typography>
                           <br />

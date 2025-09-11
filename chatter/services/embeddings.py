@@ -409,6 +409,27 @@ class EmbeddingService:
             )
         return all_info
 
+    async def invalidate_provider_cache(self, provider_name: str | None = None) -> None:
+        """Invalidate cached embedding provider instances.
+        
+        This should be called when providers or models are updated/deleted
+        to ensure the cache doesn't serve stale data.
+        
+        Args:
+            provider_name: Specific provider to invalidate, or None to invalidate all
+        """
+        if provider_name:
+            # Invalidate specific provider
+            if provider_name in self._providers:
+                del self._providers[provider_name]
+                logger.debug("Invalidated embedding provider cache", provider_name=provider_name)
+        else:
+            # Invalidate all cached providers
+            if self._providers:
+                provider_count = len(self._providers)
+                self._providers.clear()
+                logger.info("Invalidated all embedding provider caches", provider_count=provider_count)
+
     async def generate_embedding(
         self, text: str, provider_name: str | None = None
     ) -> tuple[list[float], dict[str, Any]]:

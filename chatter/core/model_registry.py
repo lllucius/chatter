@@ -70,6 +70,38 @@ class ModelRegistryService:
         self.cache = get_registry_cache()
         self.metrics = get_performance_metrics()
 
+    async def _invalidate_dependent_service_caches(self, provider_name: str | None = None) -> None:
+        """Invalidate caches in dependent services when providers/models change.
+        
+        Args:
+            provider_name: Specific provider to invalidate, or None to invalidate all
+        """
+        try:
+            # Import here to avoid circular imports
+            from chatter.services.embeddings import EmbeddingService
+            from chatter.services.llm import LLMService
+            
+            # Create temporary service instances to call invalidation
+            # Note: These don't need a session for cache invalidation operations
+            embedding_service = EmbeddingService()
+            llm_service = LLMService()
+            
+            # Invalidate provider caches in dependent services
+            await embedding_service.invalidate_provider_cache(provider_name)
+            await llm_service.invalidate_provider_cache(provider_name)
+            
+            logger.debug(
+                "Invalidated dependent service caches", 
+                provider_name=provider_name or "all"
+            )
+        except Exception as e:
+            # Don't fail the main operation if cache invalidation fails
+            logger.warning(
+                "Failed to invalidate dependent service caches", 
+                error=str(e),
+                provider_name=provider_name
+            )
+
     # Provider methods
     async def list_providers(
         self, params: ListParams = ListParams()
@@ -180,6 +212,9 @@ class ModelRegistryService:
         # Invalidate list caches since a new provider is added
         await self.cache.invalidate_list_caches()
 
+        # Invalidate dependent service caches
+        await self._invalidate_dependent_service_caches()
+
         # Log the created provider to verify fields were saved
         logger.debug(
             "Provider created successfully",
@@ -229,6 +264,9 @@ class ModelRegistryService:
         await self.cache.invalidate_provider(provider_id)
         await self.cache.invalidate_list_caches()
 
+        # Invalidate dependent service caches for this specific provider
+        await self._invalidate_dependent_service_caches(provider.name)
+
         # Log the updated provider to verify fields were saved
         logger.debug(
             "Provider updated successfully",
@@ -268,6 +306,16 @@ class ModelRegistryService:
         await self.session.commit()
 
         if result.rowcount > 0:
+            # Get provider name before we lose access to models data
+            provider_name = None
+            if models:
+                # Get provider for dependent cache invalidation
+                provider_result = await self.session.execute(
+                    select(Provider).where(Provider.id == provider_id)
+                )
+                if provider_obj := provider_result.scalar_one_or_none():
+                    provider_name = provider_obj.name
+            
             # Invalidate provider cache
             await self.cache.invalidate_provider(provider_id)
             
@@ -280,6 +328,10 @@ class ModelRegistryService:
             for model in models:
                 if model.is_default:
                     await self.cache.invalidate_defaults(model.model_type)
+                    
+            # Invalidate dependent service caches for this specific provider
+            if provider_name:
+                await self._invalidate_dependent_service_caches(provider_name)
                     
         return result.rowcount > 0
 
@@ -367,6 +419,9 @@ class ModelRegistryService:
         
         # Also invalidate list caches as provider defaults may affect lists
         await self.cache.invalidate_list_caches()
+        
+        # Invalidate dependent service caches
+        await self._invalidate_dependent_service_caches()
         
         return result.rowcount > 0
 
@@ -482,6 +537,9 @@ class ModelRegistryService:
             model_type=model.model_type
         )
         
+        # Invalidate dependent service caches for models
+        await self._invalidate_dependent_service_caches()
+        
         return model
 
     async def update_model(
@@ -546,6 +604,9 @@ class ModelRegistryService:
         if "is_default" in update_data:
             await self.cache.invalidate_defaults(model.model_type)
             
+        # Invalidate dependent service caches for models
+        await self._invalidate_dependent_service_caches()
+            
         return model
 
     async def delete_model(self, model_id: str) -> bool:
@@ -582,6 +643,9 @@ class ModelRegistryService:
             if model.is_default:
                 await self.cache.invalidate_defaults(model.model_type)
                 
+            # Invalidate dependent service caches for models
+            await self._invalidate_dependent_service_caches()
+                
         return result.rowcount > 0
 
     async def set_default_model(self, model_id: str) -> bool:
@@ -610,6 +674,9 @@ class ModelRegistryService:
         
         # Invalidate defaults cache for this model type  
         await self.cache.invalidate_defaults(model.model_type)
+        
+        # Invalidate dependent service caches for models
+        await self._invalidate_dependent_service_caches()
         
         return result.rowcount > 0
 

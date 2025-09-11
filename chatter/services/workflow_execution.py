@@ -6,7 +6,6 @@ orchestration layer that delegates to focused executor classes.
 
 from __future__ import annotations
 
-import logging
 import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
@@ -30,8 +29,9 @@ from chatter.models.conversation import Conversation, Message
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
+from chatter.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class WorkflowExecutionService:

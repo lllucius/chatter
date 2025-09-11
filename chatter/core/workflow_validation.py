@@ -21,15 +21,14 @@ except ImportError:
 
 
 # Use standard logging to avoid config dependencies
-import logging
-
 from chatter.models.workflow import (
     WorkflowDefinition,
     WorkflowTemplate,
     WorkflowType,
 )
+from chatter.utils.logging import get_logger
 
-logger = logging.getLogger(__name__)
+logger = get_logger(__name__)
 
 
 class WorkflowValidationService:

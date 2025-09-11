@@ -391,9 +391,10 @@ describe('SSEEventManager', () => {
     test('should handle malformed messages gracefully', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       
-      // Create mock response with malformed data
-      const messages = ['data: invalid json{\n\n'];
-      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse(messages));
+      // Create mock stream with malformed data
+      const mockSDK = (authService.getSDK as vi.Mock)();
+      const malformedStream = new MockReadableStream(['data: invalid json{\n\n']);
+      mockSDK.events.eventsStreamApiV1EventsStream = vi.fn(() => Promise.resolve(malformedStream));
       
       sseManager.connect();
       
@@ -410,8 +411,9 @@ describe('SSEEventManager', () => {
     test('should handle connection errors', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
       
-      // Mock fetch to reject
-      (global.fetch as vi.Mock).mockRejectedValue(new Error('Connection failed'));
+      // Mock SDK to reject the stream request
+      const mockSDK = (authService.getSDK as vi.Mock)();
+      mockSDK.events.eventsStreamApiV1EventsStream = vi.fn(() => Promise.reject(new Error('Connection failed')));
       
       sseManager.connect();
       

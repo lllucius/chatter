@@ -1,11 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import {
-  Dialog,
-  DialogTitle,
-  DialogContent,
-  DialogActions,
   TextField,
-  Button,
   FormControl,
   InputLabel,
   Select,
@@ -13,12 +8,14 @@ import {
   Slider,
   Typography,
   Box,
-  CircularProgress,
   Alert,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+  Grid,
+  CircularProgress,
+} from '../utils/mui';
 import { ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
+import { FormDialog } from './BaseDialog';
+import { useBaseForm } from '../hooks/useBaseForm';
 import { getSDK } from '../services/auth-service';
 
 interface Provider {
@@ -41,6 +38,18 @@ interface ProvidersData {
 
 interface ProfileFormProps extends CrudFormProps<ProfileCreate, ProfileUpdate> {}
 
+const defaultProfileData = {
+  name: '',
+  description: '',
+  llmModel: '',
+  llmProvider: '',
+  temperature: 0.7,
+  max_tokens: 1000,
+  top_p: 1.0,
+  frequency_penalty: 0.0,
+  presence_penalty: 0.0,
+};
+
 const ProfileForm: React.FC<ProfileFormProps> = ({
   open,
   mode,
@@ -48,22 +57,35 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   onClose,
   onSubmit,
 }) => {
-  const [formData, setFormData] = useState({
-    name: '',
-    description: '',
-    llmModel: '',
-    llmProvider: '',
-    temperature: 0.7,
-    max_tokens: 1000,
-    top_p: 1.0,
-    frequency_penalty: 0.0,
-    presence_penalty: 0.0,
-  });
-
-  const [saving, setSaving] = useState(false);
   const [loadingProviders, setLoadingProviders] = useState(false);
   const [providersData, setProvidersData] = useState<ProvidersData | null>(null);
   const [providersError, setProvidersError] = useState<string | null>(null);
+
+  const {
+    formData,
+    updateFormData,
+    isSubmitting,
+    handleSubmit,
+    handleClose,
+  } = useBaseForm(
+    {
+      defaultData: defaultProfileData,
+      transformInitialData: (data: any) => ({
+        name: data.name || '',
+        description: data.description || '',
+        llmModel: data.llmModel || '',
+        llmProvider: data.llmProvider || '',
+        temperature: data.temperature ?? 0.7,
+        max_tokens: data.max_tokens ?? 1000,
+        top_p: data.top_p ?? 1.0,
+        frequency_penalty: data.frequency_penalty ?? 0.0,
+        presence_penalty: data.presence_penalty ?? 0.0,
+      }),
+    },
+    open,
+    mode,
+    initialData
+  );
 
   // Fetch providers data from API
   const fetchProviders = async () => {
@@ -86,56 +108,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     }
   }, [open, providersData, loadingProviders]);
 
-  useEffect(() => {
-    if (open) {
-      if (mode === 'edit' && initialData) {
-        setFormData({
-          name: initialData.name || '',
-          description: initialData.description || '',
-          llmModel: initialData.llm_model || '',
-          llmProvider: initialData.llm_provider || '',
-          temperature: initialData.temperature ?? 0.7,
-          max_tokens: initialData.max_tokens || 1000,
-          top_p: initialData.top_p || 1.0,
-          frequency_penalty: initialData.frequency_penalty || 0.0,
-          presence_penalty: initialData.presence_penalty || 0.0,
-        });
-      } else {
-        setFormData({
-          name: '',
-          description: '',
-          llmModel: '',
-          llmProvider: '',
-          temperature: 0.7,
-          max_tokens: 1000,
-          top_p: 1.0,
-          frequency_penalty: 0.0,
-          presence_penalty: 0.0,
-        });
-      }
-    }
-  }, [open, mode, initialData]);
-
-  const handleSubmit = async () => {
-    try {
-      setSaving(true);
-      // Transform camelCase form data to snake_case for API
-      const apiData: ProfileCreate | ProfileUpdate = {
-        name: formData.name,
-        description: formData.description,
-        llm_provider: formData.llmProvider,
-        llm_model: formData.llmModel,
-        temperature: formData.temperature,
-        max_tokens: formData.max_tokens,
-        top_p: formData.top_p,
-        frequency_penalty: formData.frequency_penalty,
-        presence_penalty: formData.presence_penalty,
-      };
-      await onSubmit(apiData);
-    } finally {
-      setSaving(false);
-    }
-  };
+  const handleFormSubmit = handleSubmit(async (data) => {
+    // Transform camelCase form data to snake_case for API
+    const apiData: ProfileCreate | ProfileUpdate = {
+      name: data.name,
+      description: data.description,
+      llm_provider: data.llmProvider,
+      llm_model: data.llmModel,
+      temperature: data.temperature,
+      max_tokens: data.max_tokens,
+      top_p: data.top_p,
+      frequency_penalty: data.frequency_penalty,
+      presence_penalty: data.presence_penalty,
+    };
+    await onSubmit(apiData);
+  });
 
   const getAvailableProviders = (): string[] => {
     if (!providersData) return [];
@@ -153,80 +140,81 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   };
 
   return (
-    <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
-      <DialogTitle>
-        {mode === 'create' ? 'Create Profile' : 'Edit Profile'}
-      </DialogTitle>
-      <DialogContent>
-        <Box sx={{ pt: 1 }}>
-          {providersError && (
-            <Alert severity="error" sx={{ mb: 2 }}>
-              {providersError}
-            </Alert>
-          )}
-          
-          <Grid container spacing={3}>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="Name"
-                value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
-                required
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth required>
-                <InputLabel>Provider</InputLabel>
-                <Select
-                  value={formData.llmProvider}
-                  label="Provider"
-                  onChange={(e) => setFormData({
-                    ...formData,
-                    llmProvider: e.target.value,
-                    llmModel: '' // Reset model when provider changes
-                  })}
-                  disabled={loadingProviders}
-                >
-                  {loadingProviders ? (
-                    <MenuItem disabled>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      Loading providers...
+    <FormDialog
+      open={open}
+      mode={mode}
+      entityName="Profile"
+      onClose={handleClose(onClose)}
+      onSubmit={handleFormSubmit}
+      maxWidth="md"
+      isSubmitting={isSubmitting}
+    >
+      {providersError && (
+        <Alert severity="error" sx={{ mb: 2 }}>
+          {providersError}
+        </Alert>
+      )}
+      
+      <Grid container spacing={3}>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField
+            fullWidth
+            label="Name"
+            value={formData.name}
+            onChange={(e) => updateFormData({ name: e.target.value })}
+            required
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <FormControl fullWidth required>
+            <InputLabel>Provider</InputLabel>
+            <Select
+              value={formData.llmProvider}
+              label="Provider"
+              onChange={(e) => updateFormData({
+                llmProvider: e.target.value,
+                llmModel: '' // Reset model when provider changes
+              })}
+              disabled={loadingProviders}
+            >
+              {loadingProviders ? (
+                <MenuItem disabled>
+                  Loading providers...
+                </MenuItem>
+              ) : (
+                getAvailableProviders().map((provider) => {
+                  const providerData = providersData?.providers[provider];
+                  return (
+                    <MenuItem key={provider} value={provider}>
+                      {providerData?.display_name || provider}
                     </MenuItem>
-                  ) : (
-                    getAvailableProviders().map((provider) => {
-                      const providerData = providersData?.providers[provider];
-                      return (
-                        <MenuItem key={provider} value={provider}>
-                          {providerData?.display_name || provider}
-                        </MenuItem>
-                      );
-                    })
-                  )}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={12}>
-              <TextField
-                fullWidth
-                label="Description"
-                value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
-                multiline
-                rows={2}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <FormControl fullWidth required>
-                <InputLabel>Model</InputLabel>
-                <Select
-                  value={formData.llmModel}
-                  label="Model"
-                  onChange={(e) => setFormData({ ...formData, llmModel: e.target.value })}
-                  disabled={!formData.llmProvider || loadingProviders}
-                >
-                  {getAvailableModels().map((model) => (
-                    <MenuItem key={model.name} value={model.name}>
+                  );
+                })
+              )}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid size={12}>
+          <TextField
+            fullWidth
+            label="Description"
+            value={formData.description}
+            onChange={(e) => updateFormData({ description: e.target.value })}
+            multiline
+            rows={2}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <FormControl fullWidth required>
+            <InputLabel>Model</InputLabel>
+            <Select
+              value={formData.llmModel}
+              label="Model"
+              onChange={(e) => updateFormData({ llmModel: e.target.value })}
+              disabled={!formData.llmProvider || loadingProviders}
+            >
+              {getAvailableModels().map((model) => (
+                <MenuItem key={model.name} value={model.name}>
                       {model.display_name}
                     </MenuItem>
                   ))}
@@ -239,7 +227,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
                 label="Max Tokens"
                 type="number"
                 value={formData.max_tokens}
-                onChange={(e) => setFormData({ ...formData, max_tokens: parseInt(e.target.value) })}
+                onChange={(e) => updateFormData({ max_tokens: parseInt(e.target.value) || 0 })}
                 inputProps={{ min: 1, max: 32000 }}
               />
             </Grid>
@@ -247,7 +235,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <Typography gutterBottom>Temperature: {formData.temperature}</Typography>
               <Slider
                 value={formData.temperature}
-                onChange={(_, value) => setFormData({ ...formData, temperature: value as number })}
+                onChange={(_, value) => updateFormData({ temperature: value as number })}
                 min={0}
                 max={2}
                 step={0.1}
@@ -262,7 +250,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <Typography gutterBottom>Top P: {formData.top_p}</Typography>
               <Slider
                 value={formData.top_p}
-                onChange={(_, value) => setFormData({ ...formData, top_p: value as number })}
+                onChange={(_, value) => updateFormData({ top_p: value as number })}
                 min={0}
                 max={1}
                 step={0.1}
@@ -277,7 +265,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <Typography gutterBottom>Frequency Penalty: {formData.frequency_penalty}</Typography>
               <Slider
                 value={formData.frequency_penalty}
-                onChange={(_, value) => setFormData({ ...formData, frequency_penalty: value as number })}
+                onChange={(_, value) => updateFormData({ frequency_penalty: value as number })}
                 min={-2}
                 max={2}
                 step={0.1}
@@ -292,7 +280,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               <Typography gutterBottom>Presence Penalty: {formData.presence_penalty}</Typography>
               <Slider
                 value={formData.presence_penalty}
-                onChange={(_, value) => setFormData({ ...formData, presence_penalty: value as number })}
+                onChange={(_, value) => updateFormData({ presence_penalty: value as number })}
                 min={-2}
                 max={2}
                 step={0.1}
@@ -304,21 +292,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               />
             </Grid>
           </Grid>
-        </Box>
-      </DialogContent>
-      <DialogActions>
-        <Button onClick={onClose} disabled={saving}>
-          Cancel
-        </Button>
-        <Button
-          onClick={handleSubmit}
-          variant="contained"
-          disabled={!formData.name || !formData.llmProvider || !formData.llmModel || saving}
-        >
-          {saving ? 'Saving...' : (mode === 'create' ? 'Create' : 'Update')}
-        </Button>
-      </DialogActions>
-    </Dialog>
+    </FormDialog>
   );
 };
 

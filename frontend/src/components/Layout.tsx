@@ -18,35 +18,35 @@ import {
   Tooltip,
   Collapse,
   ListSubheader,
-} from '@mui/material';
+  useTheme,
+  useMediaQuery,
+} from '../utils/mui';
 import CustomScrollbar from './CustomScrollbar';
 import { NotificationIcon, NotificationMenu } from './NotificationSystem';
 import {
-  Menu as MenuIcon,
-  Dashboard as DashboardIcon,
-  Chat as ChatIcon,
-  Description as DocumentIcon,
-  AccountBox as ProfileIcon,
-  TextSnippet as PromptIcon,
-  SmartToy as AgentIcon,
-  BarChart as AnalyticsIcon,
-  HealthAndSafety as HealthIcon,
-  Logout as LogoutIcon,
-  Settings as SettingsIcon,
-  ChevronLeft as ChevronLeftIcon,
-  ChevronRight as ChevronRightIcon,
-  LightMode as LightModeIcon,
-  DarkMode as DarkModeIcon,
-  AdminPanelSettings as AdminIcon,
-  Storage as ModelsIcon,
-  Build as ToolsIcon,
-  AccountTree as WorkflowIcon,
-  Science as ABTestIcon,
+  MenuIcon,
+  DashboardIcon,
+  ChatIcon,
+  DocumentIcon,
+  ProfileIcon,
+  PromptIcon,
+  AgentIcon,
+  AnalyticsIcon,
+  HealthIcon,
+  LogoutIcon,
+  SettingsIcon,
+  ChevronLeft,
+  ChevronRight,
+  LightModeIcon,
+  DarkModeIcon,
+  AdminIcon,
+  ModelsIcon,
+  ToolsIcon,
+  WorkflowIcon,
+  ABTestIcon,
   ExpandLess,
   ExpandMore,
-} from '@mui/icons-material';
-import { useTheme } from '@mui/material/styles';
-import useMediaQuery from '@mui/material/useMediaQuery';
+} from '../utils/icons';
 import { authService } from '../services/auth-service';
 import { ThemeContext } from '../App';
 import { RightSidebarProvider, useRightSidebar } from './RightSidebarContext';
@@ -326,7 +326,7 @@ const LayoutFrame: React.FC = () => {
             </>
           )}
           <IconButton onClick={handleSidebarToggle} sx={{ display: { xs: 'none', sm: 'block' } }}>
-            {sidebarCollapsed ? <ChevronRightIcon /> : <ChevronLeftIcon />}
+            {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </IconButton>
         </Box>
       </Toolbar>
@@ -379,7 +379,7 @@ const LayoutFrame: React.FC = () => {
           sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
           aria-label={rightCollapsed ? 'expand panel' : 'collapse panel'}
         >
-          {rightCollapsed ? <ChevronLeftIcon /> : <ChevronRightIcon />}
+          {rightCollapsed ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Toolbar>
       <CustomScrollbar style={{ flexGrow: 1 }}>

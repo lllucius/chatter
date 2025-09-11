@@ -11,14 +11,15 @@ import {
   Chip,
   CircularProgress,
   Alert
-} from '@mui/material';
+} from '../utils/mui';
 import { 
-  SmartToy as BotIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon,
-  Send as SendIcon
-} from '@mui/icons-material';
+  AgentIcon,
+  RefreshIcon,
+  AddIcon,
+  SendIcon
+} from '../utils/icons';
 import PageLayout from '../components/PageLayout';
+import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
 import { 
   createNameWithDescriptionRenderer, 
@@ -165,29 +166,13 @@ const AgentsPage: React.FC = () => {
 
   const getItemId = (item: AgentResponse) => item.id || '';
 
-  const toolbar = (
-    <>
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.handleRefresh()}
-        size="small"
-      >
-        Refresh
-      </Button>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => crudTableRef.current?.handleCreate()}
-        size="small"
-      >
-        Add Agent
-      </Button>
-    </>
-  );
-
   return (
-    <PageLayout title="AI Agents" toolbar={toolbar}>
+    <PageLayout title="AI Agents">
+      <CrudPageHeader
+        entityName="Agent"
+        onRefresh={() => crudTableRef.current?.handleRefresh()}
+        onAdd={() => crudTableRef.current?.handleCreate()}
+      />
       <CrudDataTable
         ref={crudTableRef}
         config={config}

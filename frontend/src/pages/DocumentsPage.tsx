@@ -13,15 +13,16 @@ import {
   ListItemText,
   Paper,
   LinearProgress,
-} from '@mui/material';
+} from '../utils/mui';
 import {
-  Search as SearchIcon,
-  Visibility as ViewIcon,
-  GetApp as DownloadIcon,
-  Add as AddIcon,
-} from '@mui/icons-material';
+  SearchIcon,
+  ViewIcon,
+  DownloadIcon,
+  AddIcon,
+} from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
+import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
 import DocumentForm from '../components/DocumentForm';
 import CustomScrollbar from '../components/CustomScrollbar';

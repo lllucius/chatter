@@ -430,6 +430,10 @@ def create_app() -> FastAPI:
         endpoint_limits=endpoint_limits,
     )
 
+    # Add undefined query parameter handling middleware (before logging)
+    from chatter.utils.query_params import UndefinedQueryParamMiddleware
+    app.add_middleware(UndefinedQueryParamMiddleware)
+
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
 

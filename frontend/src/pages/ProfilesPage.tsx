@@ -1,9 +1,6 @@
 import React, { useRef } from 'react';
-import { Typography, Button } from '@mui/material';
-import { 
-  Refresh as RefreshIcon,
-  Add as AddIcon
-} from '@mui/icons-material';
+import { CrudPageHeader } from '../components/PageHeader';
+import { RefreshIcon, AddIcon } from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
@@ -113,29 +110,13 @@ const ProfilesPage: React.FC = () => {
 
   const getItemId = (item: ProfileResponse) => item.id || '';
 
-  const toolbar = (
-    <>
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.handleRefresh()}
-        size="small"
-      >
-        Refresh
-      </Button>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => crudTableRef.current?.handleCreate()}
-        size="small"
-      >
-        Add Profile
-      </Button>
-    </>
-  );
-
   return (
-    <PageLayout title="Profile Management" toolbar={toolbar}>
+    <PageLayout title="Profile Management">
+      <CrudPageHeader
+        entityName="Profile"
+        onRefresh={() => crudTableRef.current?.handleRefresh()}
+        onAdd={() => crudTableRef.current?.handleCreate()}
+      />
       <CrudDataTable
         ref={crudTableRef}
         config={config}

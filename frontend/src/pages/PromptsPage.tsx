@@ -1,6 +1,5 @@
 import React, { useRef, useState } from 'react';
 import { 
-  Button,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -8,13 +7,14 @@ import {
   Typography,
   Box,
   Chip
-} from '@mui/material';
+} from '../utils/mui';
 import { 
-  Code as CodeIcon,
-  Refresh as RefreshIcon,
-  Add as AddIcon
-} from '@mui/icons-material';
+  CodeIcon,
+  RefreshIcon,
+  AddIcon
+} from '../utils/icons';
 import PageLayout from '../components/PageLayout';
+import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
 import PromptForm from '../components/PromptForm';
 import { 
@@ -131,29 +131,13 @@ const PromptsPage: React.FC = () => {
 
   const getItemId = (item: PromptResponse) => item.id;
 
-  const toolbar = (
-    <>
-      <Button
-        variant="outlined"
-        startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.handleRefresh()}
-        size="small"
-      >
-        Refresh
-      </Button>
-      <Button
-        variant="contained"
-        startIcon={<AddIcon />}
-        onClick={() => crudTableRef.current?.handleCreate()}
-        size="small"
-      >
-        Add Prompt
-      </Button>
-    </>
-  );
-
   return (
-    <PageLayout title="Prompts" toolbar={toolbar}>
+    <PageLayout title="Prompts">
+      <CrudPageHeader
+        entityName="Prompt"
+        onRefresh={() => crudTableRef.current?.handleRefresh()}
+        onAdd={() => crudTableRef.current?.handleCreate()}
+      />
       <CrudDataTable
         ref={crudTableRef}
         config={config}

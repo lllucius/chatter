@@ -14,7 +14,7 @@ describe('AuthService and ChatterSDK', () => {
     expect(sdk).toBeDefined();
     expect(sdk.auth).toBeDefined();
     expect(sdk.agents).toBeDefined();
-    expect(sdk.models).toBeDefined();
+    expect(sdk.modelRegistry).toBeDefined();
     expect(sdk.toolServers).toBeDefined();
     expect(sdk.chat).toBeDefined();
   });

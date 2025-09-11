@@ -8,20 +8,22 @@ import { ChatterSDK, UserLogin } from 'chatter-sdk';
 class AuthService {
   private token: string | null = null; // Store access token in memory only
   private baseSDK: ChatterSDK;
+  private basePath: string; // Store base path to avoid repeated withConfig calls
   private initialized: boolean = false;
   private refreshInProgress: boolean = false; // Prevent multiple concurrent refresh attempts
 
   constructor() {
+    this.basePath = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     this.baseSDK = new ChatterSDK({
-      basePath: import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000',
+      basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
     });
     // Don't call initialize() in constructor anymore - it's async now
   }
 
   /**
-   * Initialize the auth service (automatically called in constructor)
-   * Can be called explicitly if needed for testing or re-initialization
+   * Initialize the auth service
+   * Attempts to restore authentication state from refresh token cookie
    */
   public async initialize(): Promise<void> {
     if (this.initialized) {
@@ -36,7 +38,7 @@ class AuthService {
     
     this.initialized = true;
     
-    console.log('[AuthService] Initialized with base URL:', this.baseSDK.withConfig({}).basePath);
+    console.log('[AuthService] Initialized with base URL:', this.getURL());
   }
 
   public isAuthenticated(): boolean {
@@ -147,16 +149,18 @@ class AuthService {
   }
 
   public getURL(): string | null {
-    return this.baseSDK.withConfig({}).basePath || null;
+    // Return stored base path instead of creating new SDK instance
+    return this.basePath;
   }
 
   /**
    * Get the current SDK configuration (for debugging/inspection)
    */
-  public getSDKInfo(): { basePath: string | undefined; hasToken: boolean } {
+  public getSDKInfo(): { basePath: string | undefined; hasToken: boolean; initialized: boolean } {
     return {
-      basePath: this.baseSDK.withConfig({}).basePath,
-      hasToken: !!this.token
+      basePath: this.basePath,
+      hasToken: !!this.token,
+      initialized: this.initialized
     };
   }
 

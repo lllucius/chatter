@@ -113,15 +113,18 @@ const ConversationTableRow = memo(({
 ConversationTableRow.displayName = 'ConversationTableRow';
 
 const ConversationsPage: React.FC = () => {
-  // Use custom API hook for conversations
-  const conversationsApi = useApi(
-    () => getSDK().chat.listConversationsApiV1ChatConversations({}),
-    { immediate: true }
-  );
-
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [searchTerm, setSearchTerm] = useState('');
+  
+  // Use custom API hook for conversations - fetch a reasonable amount for client-side filtering
+  const conversationsApi = useApi(
+    () => getSDK().chat.listConversationsApiV1ChatConversations({
+      limit: 1000, // Fetch more for client-side filtering
+      offset: 0,
+    }),
+    { immediate: true }
+  );
   const [selectedConversation, setSelectedConversation] = useState<ConversationResponse | null>(null);
   const [conversationMessages, setConversationMessages] = useState<MessageResponse[]>([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
@@ -182,7 +185,10 @@ const ConversationsPage: React.FC = () => {
     setActionConversation(null);
   }, []);
 
-  // Memoized filtered and paginated conversations
+  // For now, we'll fetch a larger set and do client-side filtering
+  // since the API doesn't support text search filtering
+  
+  // Memoized filtered conversations
   const filteredConversations = useMemo(() => 
     conversations.filter(conversation =>
       conversation.title?.toLowerCase().includes(searchTerm.toLowerCase()) ||
@@ -190,6 +196,7 @@ const ConversationsPage: React.FC = () => {
     ), [conversations, searchTerm]
   );
 
+  // Since we're doing client-side filtering, we need to paginate the filtered results
   const paginatedConversations = useMemo(() => 
     filteredConversations.slice(
       page * rowsPerPage,

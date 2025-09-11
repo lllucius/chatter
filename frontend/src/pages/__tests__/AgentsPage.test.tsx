@@ -57,4 +57,31 @@ describe('AgentsPage', () => {
     
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });
+
+  test('passes correct pagination parameters to SDK', async () => {
+    const mockListAgents = vi.fn().mockResolvedValue({
+      data: []
+    });
+    
+    // Import the module to get the mock
+    const { getSDK } = await import('../../services/auth-service');
+    vi.mocked(getSDK).mockReturnValue({
+      agents: {
+        listAgentsApiV1Agents: mockListAgents
+      }
+    } as any);
+
+    renderAgentsPage();
+    
+    // Wait for the component to call the API
+    await new Promise(resolve => setTimeout(resolve, 100));
+    
+    // Verify the API was called with correct pagination structure
+    expect(mockListAgents).toHaveBeenCalledWith({
+      pagination: {
+        limit: 10,
+        offset: 0,
+      },
+    });
+  });
 });

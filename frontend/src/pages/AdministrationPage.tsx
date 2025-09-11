@@ -155,7 +155,10 @@ const AdministrationPage: React.FC = () => {
   const loadJobs = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await getSDK().jobs.listJobsApiV1Jobs({});
+      const response = await getSDK().jobs.listJobsApiV1Jobs({}, {
+        limit: 100, // Load a reasonable amount for admin monitoring
+        offset: 0,
+      });
       const newJobs = response.jobs || [];
       newJobs.forEach(job => {
         const previousState = lastJobStates.get(job.id);

@@ -356,7 +356,7 @@ class LLMService:
     async def generate(
         self,
         messages: list[dict],
-        provider: str,
+        provider: str | None,
         model: str,
         max_retries: int = 1,
         track_cost: bool = False,
@@ -366,7 +366,7 @@ class LLMService:
 
         Args:
             messages: List of message dictionaries with role and content
-            provider: Provider name (openai, anthropic, etc.)
+            provider: Provider name (openai, anthropic, etc.) or None for default
             model: Model name
             max_retries: Maximum retry attempts
             track_cost: Whether to track cost information
@@ -392,10 +392,13 @@ class LLMService:
 
         # Get provider instance
         try:
-            provider_instance = await self.get_provider(provider)
+            if provider is None:
+                provider_instance = await self.get_default_provider()
+            else:
+                provider_instance = await self.get_provider(provider)
         except Exception as e:
             # If provider not found, try to create a simple instance
-            if provider.lower() == "openai":
+            if provider and provider.lower() == "openai":
                 api_key = os.getenv("OPENAI_API_KEY", "dummy")
                 provider_instance = ChatOpenAI(
                     api_key=api_key,
@@ -403,7 +406,7 @@ class LLMService:
                     temperature=kwargs.get("temperature", 0.7),
                     max_tokens=kwargs.get("max_tokens", 1000),
                 )
-            elif provider.lower() == "anthropic":
+            elif provider and provider.lower() == "anthropic":
                 api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")
                 provider_instance = ChatAnthropic(
                     api_key=api_key,
@@ -816,7 +819,7 @@ class LLMService:
 
     async def create_langgraph_workflow(
         self,
-        provider_name: str,
+        provider_name: str | None,
         workflow_type: str = "plain",  # "plain" | "rag" | "tools" | "full"
         system_message: str | None = None,
         retriever=None,
@@ -827,7 +830,11 @@ class LLMService:
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
 
-        provider = await self.get_provider(provider_name)
+        # Use default provider if none specified
+        if provider_name is None:
+            provider = await self.get_default_provider()
+        else:
+            provider = await self.get_provider(provider_name)
 
         # Get default tools if needed
         if workflow_type in ("tools", "full") and not tools:

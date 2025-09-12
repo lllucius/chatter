@@ -111,3 +111,157 @@ def test_api_cli_file_compiles():
     # This should not raise any exceptions
     compile(content, str(api_cli_file), 'exec')
     ast.parse(content, filename=str(api_cli_file))
+
+
+def test_comprehensive_compilation():
+    """Test that all Python files in the chatter module compile without errors."""
+    chatter_dir = Path(__file__).parent.parent / "chatter"
+    compilation_errors = []
+    
+    for python_file in chatter_dir.rglob("*.py"):
+        # Skip __pycache__ and test files
+        if "__pycache__" in str(python_file) or "test_" in python_file.name:
+            continue
+            
+        try:
+            with open(python_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            compile(content, str(python_file), 'exec')
+        except Exception as e:
+            compilation_errors.append((python_file, str(e)))
+    
+    assert not compilation_errors, f"Compilation errors found: {compilation_errors}"
+
+
+def test_critical_imports_exist():
+    """Test that critical imports used across the codebase are properly available."""
+    # Map of modules to critical imports that should be available
+    critical_imports = {
+        "chatter.commands": ["ChatterSDKClient"],
+        "chatter.models.conversation": ["ConversationStatus"],
+        "chatter.core.exceptions": ["ChatterBaseException", "ValidationError", "ServiceError"],
+        "chatter.services.llm": ["LLMService"],
+        "chatter.utils.database": ["get_session_maker"],
+    }
+    
+    for module_name, expected_imports in critical_imports.items():
+        try:
+            # Try to import the module
+            module_path = Path(__file__).parent.parent / module_name.replace(".", "/")
+            if module_path.is_dir():
+                init_file = module_path / "__init__.py"
+            else:
+                init_file = module_path.with_suffix(".py")
+            
+            if init_file.exists():
+                with open(init_file, 'r') as f:
+                    content = f.read()
+                
+                tree = ast.parse(content, filename=str(init_file))
+                
+                # Check if expected imports/definitions exist
+                defined_names = set()
+                for node in ast.walk(tree):
+                    if isinstance(node, (ast.FunctionDef, ast.ClassDef)):
+                        defined_names.add(node.name)
+                
+                for expected_import in expected_imports:
+                    assert expected_import in defined_names or expected_import in content, \
+                        f"{expected_import} not found in {module_name}"
+                        
+        except Exception as e:
+            # If we can't analyze the file, at least check it exists
+            assert False, f"Error checking critical imports in {module_name}: {e}"
+
+
+def test_no_obvious_missing_imports():
+    """Test for obvious missing import patterns that could cause runtime errors."""
+    chatter_dir = Path(__file__).parent.parent / "chatter"
+    
+    # Patterns that often indicate missing imports
+    suspicious_patterns = []
+    
+    for python_file in chatter_dir.rglob("*.py"):
+        if "__pycache__" in str(python_file) or "test_" in python_file.name:
+            continue
+            
+        try:
+            with open(python_file, 'r', encoding='utf-8') as f:
+                content = f.read()
+            
+            tree = ast.parse(content, filename=str(python_file))
+            
+            # Extract imports
+            imported_names = set()
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Import):
+                    for alias in node.names:
+                        name = alias.asname or alias.name.split('.')[0]
+                        imported_names.add(name)
+                elif isinstance(node, ast.ImportFrom):
+                    if node.module:
+                        for alias in node.names:
+                            name = alias.asname or alias.name
+                            imported_names.add(name)
+            
+            # Look for calls to specific classes that should be imported
+            known_external_classes = {
+                'HTTPException', 'APIRouter', 'Depends', 'AsyncSession', 'Session'
+            }
+            
+            for node in ast.walk(tree):
+                if isinstance(node, ast.Call) and isinstance(node.func, ast.Name):
+                    call_name = node.func.id
+                    if (call_name in known_external_classes and 
+                        call_name not in imported_names):
+                        # Check if it's defined locally
+                        locally_defined = any(
+                            isinstance(n, ast.ClassDef) and n.name == call_name
+                            for n in ast.walk(tree)
+                        )
+                        if not locally_defined:
+                            suspicious_patterns.append(
+                                f"{python_file.relative_to(chatter_dir)}:{getattr(node, 'lineno', 0)} - "
+                                f"Possible missing import: {call_name}"
+                            )
+                            
+        except Exception:
+            # Skip files that can't be parsed
+            continue
+    
+    # Allow a small number of false positives, but flag if too many
+    assert len(suspicious_patterns) < 5, \
+        f"Too many suspicious import patterns found: {suspicious_patterns[:10]}"
+
+
+def test_sdk_import_consistency():
+    """Test that SDK imports are consistent across CLI and command files."""
+    # Files that use the SDK should have consistent import patterns
+    sdk_files = [
+        Path(__file__).parent.parent / "chatter" / "api_cli.py",
+        Path(__file__).parent.parent / "chatter" / "commands" / "__init__.py",
+    ]
+    
+    sdk_import_patterns = []
+    
+    for file_path in sdk_files:
+        if file_path.exists():
+            with open(file_path, 'r') as f:
+                content = f.read()
+            
+            # Check for chatter_sdk imports
+            if "chatter_sdk" in content:
+                tree = ast.parse(content, filename=str(file_path))
+                
+                # Extract SDK-related imports
+                sdk_imports = set()
+                for node in ast.walk(tree):
+                    if isinstance(node, ast.ImportFrom) and node.module and "chatter_sdk" in node.module:
+                        for alias in node.names:
+                            sdk_imports.add(alias.name)
+                
+                sdk_import_patterns.append((file_path.name, sdk_imports))
+    
+    # Ensure SDK imports are reasonable (not checking exact match as different files may need different APIs)
+    for file_name, imports in sdk_import_patterns:
+        assert len(imports) > 0, f"No SDK imports found in {file_name} despite chatter_sdk usage"

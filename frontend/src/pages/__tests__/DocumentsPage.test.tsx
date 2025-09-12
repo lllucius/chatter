@@ -7,8 +7,8 @@ import DocumentsPage from '../DocumentsPage';
 import { getSDK, authService } from "../../services/auth-service";
 
 // Mock dependencies
-vi.mock('../../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
+vi.mock('../../services/auth-service', (): void => ({
+  getSDK: vi.fn((): void => ({
     documents: {
       listDocumentsApiV1Documents: vi.fn(),
       uploadDocumentApiV1DocumentsUploadPost: vi.fn(),
@@ -25,8 +25,8 @@ vi.mock('../../services/auth-service', () => ({
 }));
 
 // Mock SSE context
-vi.mock('../../services/sse-context', () => ({
-  useSSE: () => ({
+vi.mock('../../services/sse-context', (): void => ({
+  useSSE: (): void => ({
     on: vi.fn(() => vi.fn()),
     off: vi.fn(),
     isConnected: false,
@@ -37,7 +37,7 @@ vi.mock('../../services/sse-context', () => ({
 }));
 
 // Mock App context
-vi.mock('../../App', () => ({
+vi.mock('../../App', (): void => ({
   ThemeContext: React.createContext({
     darkMode: false,
     toggleDarkMode: vi.fn(),
@@ -76,7 +76,7 @@ const mockDocuments = [
 ];
 
 // Wrapper component
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }): void => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>
       {children}
@@ -126,7 +126,6 @@ describe('DocumentsPage', () => {
   });
 
   it('displays error message when API call fails', async () => {
-    // Mock console.error to capture error logs  
     const consoleErrorSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     
     // Override the default mock to simulate API failure for this specific test

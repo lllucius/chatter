@@ -5,8 +5,8 @@ import WorkflowManagementPage from '../pages/WorkflowManagementPage';
 import ChatConfigPanel from '../pages/ChatConfigPanel';
 
 // Mock the client to prevent actual API calls
-vi.mock('../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
+vi.mock('../services/auth-service', (): void => ({
+  getSDK: vi.fn((): void => ({
     chat: {
       getWorkflowTemplatesApiV1ChatTemplatesGet: vi.fn().mockResolvedValue({ templates: {} }),
       getAvailableToolsApiV1ChatToolsAvailableGet: vi.fn().mockResolvedValue({ data: { tools: [] } }),
@@ -19,7 +19,7 @@ vi.mock('../services/auth-service', () => ({
 }));
 
 // Mock toast service
-vi.mock('../services/toast-service', () => ({
+vi.mock('../services/toast-service', (): void => ({
   toastService: {
     success: vi.fn(),
     error: vi.fn()
@@ -27,22 +27,22 @@ vi.mock('../services/toast-service', () => ({
 }));
 
 // Mock PageLayout
-vi.mock('../components/PageLayout', () => ({
-  default: ({ children, title }: { children: React.ReactNode, title: string }) => (
+vi.mock('../components/PageLayout', (): void => ({
+  default: ({ children, title }: { children: React.ReactNode, title: string }): void => (
     <div data-testid="page-layout" title={title}>{children}</div>
   )
 }));
 
 // Mock WorkflowEditor
-vi.mock('../components/workflow/WorkflowEditor', () => ({
-  default: () => (
+vi.mock('../components/workflow/WorkflowEditor', (): void => ({
+  default: (): void => (
     <div data-testid="workflow-editor">WorkflowEditor Mock</div>
   )
 }));
 
 // Mock RightSidebarContext
-vi.mock('../components/RightSidebarContext', () => ({
-  useRightSidebar: () => ({ collapsed: false, setCollapsed: vi.fn() })
+vi.mock('../components/RightSidebarContext', (): void => ({
+  useRightSidebar: (): void => ({ collapsed: false, setCollapsed: vi.fn() })
 }));
 
 describe('Fixed Components - No Infinite Loops', () => {

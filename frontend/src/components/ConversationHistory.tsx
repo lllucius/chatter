@@ -186,7 +186,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
                       />
                     </ListItem>
                   ) : (
-                    filteredConversations.map((conversation) => (
+                    filteredConversations.map((conversation): void => (
                   <ListItem
                     key={conversation.id}
                     component="div"

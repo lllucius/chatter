@@ -67,6 +67,19 @@ import ABTestAnalytics from '../components/ABTestAnalytics';
 
 
 
+interface TestRecommendations {
+  suggestions: string[];
+  nextSteps: string[];
+  improvements: string[];
+}
+
+interface TestPerformance {
+  averageResponseTime: number;
+  throughput: number;
+  errorRate: number;
+  successRate: number;
+}
+
 const ABTestingPage: React.FC = () => {
   const [tests, setTests] = useState<ABTestResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -82,8 +95,8 @@ const ABTestingPage: React.FC = () => {
   // Additional data states
   const [testMetrics, setTestMetrics] = useState<ABTestMetricsResponse | null>(null);
   const [testResults, setTestResults] = useState<ABTestResultsResponse | null>(null);
-  const [testRecommendations, setTestRecommendations] = useState<any>(null);
-  const [testPerformance, setTestPerformance] = useState<any>(null);
+  const [testRecommendations, setTestRecommendations] = useState<TestRecommendations | null>(null);
+  const [testPerformance, setTestPerformance] = useState<TestPerformance | null>(null);
   
   const [formData, setFormData] = useState({
     name: '',
@@ -122,7 +135,7 @@ const ABTestingPage: React.FC = () => {
       const response = await getSDK().abTesting.listAbTestsApiV1AbTests({});
       const data = response.data;
       setTests(data.tests || []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to load AB tests');
     } finally {
       setLoading(false);
@@ -239,7 +252,7 @@ const ABTestingPage: React.FC = () => {
 
       handleCloseDialog();
       await loadTests();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to save test');
     } finally {
       setSaving(false);
@@ -255,7 +268,7 @@ const ABTestingPage: React.FC = () => {
       await getSDK().abTesting.deleteAbTestApiV1AbTestsTestId(test.id);
       toastService.success('Test deleted successfully');
       await loadTests();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to delete test');
     }
   };
@@ -280,7 +293,7 @@ const ABTestingPage: React.FC = () => {
       toastService.success(response.message);
       await loadTests();
       handleCloseActionMenu();
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, `Failed to ${action} test`);
     }
   };
@@ -337,7 +350,7 @@ const ABTestingPage: React.FC = () => {
   const canEnd = (test: ABTestResponse) => test.status === 'running' || test.status === 'paused';
   const canComplete = (test: ABTestResponse) => test.status === 'running' || test.status === 'paused';
 
-  const renderTestDialog = () => (
+  const renderTestDialog = (): void => (
     <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>{editingTest ? 'Edit AB Test' : 'Create AB Test'}</DialogTitle>
       <DialogContent>
@@ -361,7 +374,7 @@ const ABTestingPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, test_type: e.target.value as TestType })}
                   label="Test Type"
                 >
-                  {testTypes.map((type) => (
+                  {testTypes.map((type): void => (
                     <MenuItem key={type.value} value={type.value}>
                       {type.label}
                     </MenuItem>
@@ -388,7 +401,7 @@ const ABTestingPage: React.FC = () => {
                 Test Variants
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {formData.variants.map((variant, index) => (
+                {formData.variants.map((variant, index): void => (
                   <Grid container spacing={2} key={index} alignItems="center">
                     <Grid size={{ xs: 12, sm: 8 }}>
                       <TextField
@@ -499,7 +512,7 @@ const ABTestingPage: React.FC = () => {
     </Dialog>
   );
 
-  const renderDetailDialog = () => (
+  const renderDetailDialog = (): void => (
     <Dialog 
       open={detailDialogOpen} 
       onClose={handleCloseDetailDialog} 
@@ -553,7 +566,7 @@ const ABTestingPage: React.FC = () => {
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Test Variants</Typography>
-                  {selectedTest.variants.map((variant) => (
+                  {selectedTest.variants.map((variant): void => (
                     <Box key={variant.name} sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="subtitle1">{variant.name}</Typography>
@@ -621,7 +634,7 @@ const ABTestingPage: React.FC = () => {
                 <Paper sx={{ p: 2 }}>
                   {testRecommendations.recommendations && testRecommendations.recommendations.length > 0 ? (
                     <List>
-                      {testRecommendations.recommendations.map((rec: string, index: number) => (
+                      {testRecommendations.recommendations.map((rec: string, index: number): void => (
                         <ListItem key={index}>
                           <ListItemText primary={rec} />
                         </ListItem>
@@ -635,7 +648,7 @@ const ABTestingPage: React.FC = () => {
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle1">Insights</Typography>
                       <List>
-                        {testRecommendations.insights.map((insight: string, index: number) => (
+                        {testRecommendations.insights.map((insight: string, index: number): void => (
                           <ListItem key={index}>
                             <ListItemText primary={insight} />
                           </ListItem>
@@ -657,7 +670,7 @@ const ABTestingPage: React.FC = () => {
     </Dialog>
   );
 
-  const renderActionMenu = () => (
+  const renderActionMenu = (): void => (
     <Menu
       anchorEl={actionAnchorEl}
       open={Boolean(actionAnchorEl)}
@@ -741,7 +754,7 @@ const ABTestingPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((test) => (
+                {tests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((test): void => (
                   <TableRow key={test.id} hover>
                     <TableCell>
                       <Box>

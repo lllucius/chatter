@@ -97,7 +97,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
 }) => {
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<Array<{ timestamp: string; tokensPerSecond: number; latency: number }>>([]);
 
   // Auto-refresh functionality
   useEffect(() => {
@@ -165,7 +165,6 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
   };
 
   const runningExecutions = executions.filter(e => ['running', 'queued'].includes(e.status));
-  const _recentExecutions = executions.slice(0, 10);
 
   return (
     <Box>
@@ -257,7 +256,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 <Alert severity="info">No active workflow executions.</Alert>
               ) : (
                 <List>
-                  {runningExecutions.map((execution) => (
+                  {runningExecutions.map((execution): void => (
                     <React.Fragment key={execution.id}>
                       <ListItem sx={{ px: 0 }}>
                         <ListItemIcon>
@@ -383,7 +382,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   <YAxis />
                   <RechartsTooltip
                     labelFormatter={(time) => format(new Date(time), 'HH:mm:ss')}
-                    formatter={(value: any, name: string) => [Math.round(value), name]}
+                    formatter={(value: number, name: string) => [Math.round(value), name]}
                   />
                   <Area
                     type="monotone"
@@ -486,7 +485,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Execution Logs</Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {selectedExecution.logs.map((log, index) => (
+                    {selectedExecution.logs.map((log, index): void => (
                       <Box key={index} sx={{ mb: 1 }}>
                         <Typography 
                           variant="body2" 

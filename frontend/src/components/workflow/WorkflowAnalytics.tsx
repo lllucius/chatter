@@ -152,8 +152,8 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     currentPath: string[],
     visited: Set<string>,
     allPaths: string[][],
-    edges: any[],
-    nodes: any[]
+    edges: Array<{ source: string; target: string }>,
+    nodes: Array<{ id: string }>
   ) => {
     const outgoingEdges = edges.filter(edge => edge.source === currentNodeId);
     
@@ -228,7 +228,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           Node Distribution
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {Object.entries(metrics.nodeTypeDistribution).map(([type, count]) => (
+          {Object.entries(metrics.nodeTypeDistribution).map(([type, count]): void => (
             <Chip
               key={type}
               label={`${type}: ${count}`}
@@ -249,7 +249,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
             Execution Paths ({metrics.executionPaths.length})
           </Typography>
         </Box>
-        {metrics.executionPaths.slice(0, 3).map((path, index) => (
+        {metrics.executionPaths.slice(0, 3).map((path, index): void => (
           <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
             Path {index + 1}: {path.length} nodes
           </Typography>
@@ -274,7 +274,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
               </Typography>
             </Box>
             <List dense>
-              {metrics.potentialBottlenecks.map((bottleneck, index) => (
+              {metrics.potentialBottlenecks.map((bottleneck, index): void => (
                 <ListItem key={index}>
                   <ListItemIcon>
                     <WarningIcon fontSize="small" color="warning" />
@@ -301,7 +301,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         </Box>
         {metrics.recommendations.length > 0 ? (
           <List dense>
-            {metrics.recommendations.map((recommendation, index) => (
+            {metrics.recommendations.map((recommendation, index): void => (
               <ListItem key={index}>
                 <ListItemIcon>
                   <CheckIcon fontSize="small" color="success" />

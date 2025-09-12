@@ -77,7 +77,7 @@ const AgentsPage: React.FC = () => {
       );
       
       setTestResponse(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       setTestError(error.message || 'Failed to test agent');
     } finally {
       setTesting(false);

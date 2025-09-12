@@ -37,7 +37,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onNodeUpdate,
   onClose,
 }) => {
-  const [config, setConfig] = useState<Record<string, any>>({});
+  const [config, setConfig] = useState<Record<string, unknown>>({});
   const [label, setLabel] = useState('');
 
   // Sync with selected node
@@ -156,7 +156,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 Selected Tools:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                {(config.tools || []).map((tool: string, index: number) => (
+                {(config.tools || []).map((tool: string, index: number): void => (
                   <Chip
                     key={index}
                     label={tool}

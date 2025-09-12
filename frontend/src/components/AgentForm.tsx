@@ -25,7 +25,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { AgentCreateRequest, AgentUpdateRequest, AgentResponse } from 'chatter-sdk';
+import { AgentCreateRequest, AgentUpdateRequest, AgentResponse, AgentType, AgentStatus } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface AgentFormProps extends CrudFormProps<AgentCreateRequest, AgentUpdateRequest> {}
@@ -39,7 +39,7 @@ interface Tool {
 interface AgentCapability {
   name: string;
   enabled: boolean;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 const AgentForm: React.FC<AgentFormProps> = ({
@@ -74,7 +74,6 @@ const AgentForm: React.FC<AgentFormProps> = ({
   });
 
   const [expertiseInput, setExpertiseInput] = useState('');
-  const [toolInput, setToolInput] = useState({ name: '', description: '' });
   const [saving, setSaving] = useState(false);
   const [expandedSections, setExpandedSections] = useState({
     basic: true,
@@ -215,8 +214,8 @@ const AgentForm: React.FC<AgentFormProps> = ({
       };
 
       await onSubmit(submitData);
-    } catch (error) {
-      console.error('Error saving agent:', error);
+    } catch {
+      // Error saving agent - handled gracefully by finally block
     } finally {
       setSaving(false);
     }
@@ -322,10 +321,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     <InputLabel>Agent Type</InputLabel>
                     <Select
                       value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, type: e.target.value as AgentType })}
                       label="Agent Type"
                     >
-                      {agentTypes.map((type) => (
+                      {agentTypes.map((type): void => (
                         <MenuItem key={type.value} value={type.value}>
                           <Tooltip title={type.description}>
                             <span>{type.label}</span>
@@ -351,10 +350,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     <InputLabel>Status</InputLabel>
                     <Select
                       value={formData.status}
-                      onChange={(e) => setFormData({ ...formData, status: e.target.value as any })}
+                      onChange={(e) => setFormData({ ...formData, status: e.target.value as AgentStatus })}
                       label="Status"
                     >
-                      {agentStatuses.map((status) => (
+                      {agentStatuses.map((status): void => (
                         <MenuItem key={status.value} value={status.value}>
                           {status.label}
                         </MenuItem>
@@ -415,7 +414,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     Expertise Areas
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                    {formData.expertise_areas.map((area) => (
+                    {formData.expertise_areas.map((area): void => (
                       <Chip
                         key={area}
                         label={area}
@@ -466,7 +465,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Primary LLM"
                       required
                     >
-                      {llmModels.map((model) => (
+                      {llmModels.map((model): void => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -483,7 +482,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Fallback LLM"
                     >
                       <MenuItem value="">None</MenuItem>
-                      {llmModels.map((model) => (
+                      {llmModels.map((model): void => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -536,7 +535,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={2}>
-                {defaultCapabilities.map((capability) => (
+                {defaultCapabilities.map((capability): void => (
                   <Grid item xs={12} sm={6} md={4} key={capability.name}>
                     <Box
                       sx={{

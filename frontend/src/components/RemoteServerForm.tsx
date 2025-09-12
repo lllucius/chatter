@@ -22,25 +22,6 @@ import Grid from '@mui/material/Grid';
 import { ExpandMore as ExpandMoreIcon } from '@mui/icons-material';
 import { CrudFormProps } from './CrudDataTable';
 
-// Define the RemoteServer interface based on the original code
-interface RemoteServer {
-  id: string;
-  name: string;
-  display_name: string;
-  description?: string;
-  base_url: string;
-  transport_type: 'http' | 'sse';
-  oauth_config?: {
-    client_id: string;
-    client_secret: string;
-    token_url: string;
-    scope?: string;
-  };
-  headers?: Record<string, string>;
-  timeout: number;
-  auto_start: boolean;
-}
-
 interface RemoteServerCreate {
   name: string;
   display_name: string;
@@ -70,6 +51,23 @@ interface RemoteServerUpdate {
     scope?: string;
   };
   headers?: Record<string, string>;
+}
+
+interface RemoteServerData {
+  name?: string;
+  display_name?: string;
+  description?: string;
+  base_url?: string;
+  transport_type?: 'http' | 'sse';
+  oauth_config?: {
+    client_id: string;
+    client_secret: string;
+    token_url: string;
+    scope?: string;
+  };
+  headers?: Record<string, string>;
+  timeout?: number;
+  auto_start?: boolean;
 }
 
 interface RemoteServerFormProps extends CrudFormProps<RemoteServerCreate, RemoteServerUpdate> {}
@@ -103,17 +101,17 @@ const RemoteServerForm: React.FC<RemoteServerFormProps> = ({
     if (open) {
       if (mode === 'edit' && initialData) {
         setFormData({
-          name: (initialData as any).name || '',
+          name: (initialData as RemoteServerData).name || '',
           display_name: initialData.display_name || '',
           description: initialData.description || '',
-          base_url: (initialData as any).base_url || '',
-          transport_type: (initialData as any).transport_type || 'http',
-          oauth_enabled: Boolean((initialData as any).oauth_config),
-          oauth_client_id: (initialData as any).oauth_config?.client_id || '',
-          oauth_client_secret: (initialData as any).oauth_config?.client_secret || '',
-          oauth_token_url: (initialData as any).oauth_config?.token_url || '',
-          oauth_scope: (initialData as any).oauth_config?.scope || '',
-          headers: (initialData as any).headers ? JSON.stringify((initialData as any).headers) : '{}',
+          base_url: (initialData as RemoteServerData).base_url || '',
+          transport_type: (initialData as RemoteServerData).transport_type || 'http',
+          oauth_enabled: Boolean((initialData as RemoteServerData).oauth_config),
+          oauth_client_id: (initialData as RemoteServerData).oauth_config?.client_id || '',
+          oauth_client_secret: (initialData as RemoteServerData).oauth_config?.client_secret || '',
+          oauth_token_url: (initialData as RemoteServerData).oauth_config?.token_url || '',
+          oauth_scope: (initialData as RemoteServerData).oauth_config?.scope || '',
+          headers: (initialData as RemoteServerData).headers ? JSON.stringify((initialData as RemoteServerData).headers) : '{}',
           timeout: initialData.timeout || 30,
           auto_start: initialData.auto_start !== undefined ? initialData.auto_start : true,
         });
@@ -160,7 +158,8 @@ const RemoteServerForm: React.FC<RemoteServerFormProps> = ({
 
       if (mode === 'edit') {
         // For edit mode, remove fields that can't be updated
-        const { name, base_url, transport_type, ...updateData } = submitData;
+        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+        const { name: _name, base_url: _base_url, transport_type: _transport_type, ...updateData } = submitData;
         await onSubmit(updateData);
       } else {
         await onSubmit(submitData);

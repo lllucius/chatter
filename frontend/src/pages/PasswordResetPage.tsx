@@ -52,7 +52,7 @@ const PasswordResetPage: React.FC = () => {
         setEmail(values.email);
         setStep('confirm');
         toastService.success('Password reset instructions sent to your email');
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error('Failed to send reset instructions: ' + error.message);
         throw error;
       }
@@ -88,7 +88,7 @@ const PasswordResetPage: React.FC = () => {
         });
         setStep('complete');
         toastService.success('Password reset successfully');
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error('Failed to reset password: ' + error.message);
         throw error;
       }
@@ -114,7 +114,7 @@ const PasswordResetPage: React.FC = () => {
           </Box>
 
           <Stepper activeStep={stepIndex} sx={{ mb: 4 }}>
-            {steps.map((label) => (
+            {steps.map((label): void => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
               </Step>

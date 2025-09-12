@@ -150,7 +150,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
   };
 
   // Expose methods to parent component via ref
-  useImperativeHandle(ref, () => ({
+  useImperativeHandle(ref, (): void => ({
     handleCreate,
     handleRefresh: loadData,
   }));
@@ -227,7 +227,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
           <Table>
             <TableHead>
               <TableRow>
-                {config.columns.map((column) => (
+                {config.columns.map((column): void => (
                   <TableCell key={String(column.id)} width={column.width}>
                     {column.label}
                   </TableCell>
@@ -259,9 +259,9 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
                   </TableCell>
                 </TableRow>
               ) : (
-                items.map((item) => (
+                items.map((item): void => (
                   <TableRow key={getItemId(item)} hover>
-                    {config.columns.map((column) => (
+                    {config.columns.map((column): void => (
                       <TableCell key={String(column.id)}>
                         {column.render
                           ? column.render((item as Record<string, unknown>)[column.id], item)
@@ -331,7 +331,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         {(config.enableEdit || config.enableDelete) && config.actions && config.actions.length > 0 && (
           <Divider />
         )}
-        {config.actions?.map((action, index) => (
+        {config.actions?.map((action, index): void => (
           <MenuItem key={index} onClick={() => handleActionClick(action)}>
             <ListItemIcon>{action.icon}</ListItemIcon>
             {action.label}

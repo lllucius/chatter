@@ -131,7 +131,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               onChange={(e) => setFormData({ ...formData, category: e.target.value })}
               label="Category"
             >
-              {categories.map((category) => (
+              {categories.map((category): void => (
                 <MenuItem key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </MenuItem>
@@ -146,7 +146,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               onChange={(e) => setFormData({ ...formData, prompt_type: e.target.value as PromptCreate['prompt_type'] })}
               label="Type"
             >
-              {promptTypes.map((type) => (
+              {promptTypes.map((type): void => (
                 <MenuItem key={type} value={type}>
                   {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
                 </MenuItem>
@@ -170,7 +170,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               Variables
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-              {formData.variables.map((variable) => (
+              {formData.variables.map((variable): void => (
                 <Chip
                   key={variable}
                   label={variable}

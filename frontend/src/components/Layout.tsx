@@ -204,19 +204,18 @@ const LayoutFrame: React.FC = () => {
   const handleLogout = async () => {
     try {
       await authService.logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Still proceed with navigation even if logout API call fails
+    } catch {
+      // Logout failed but still proceed with navigation for user experience
     } finally {
       navigate('/login', { replace: true });
       handleProfileMenuClose();
     }
   };
 
-  const renderNavigation = (isMobile: boolean = false) => (
+  const renderNavigation = (isMobile: boolean = false): void => (
     <CustomScrollbar style={{ height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)' }}>
       <List sx={{ pt: 0 }}>
-        {navSections.map((section) => (
+        {navSections.map((section): void => (
           <React.Fragment key={section.title}>
             {/* Section Header */}
             {!sidebarCollapsed && (
@@ -251,7 +250,7 @@ const LayoutFrame: React.FC = () => {
             
             {/* Section Items */}
             <Collapse in={sidebarCollapsed || expandedSections[section.title]} timeout="auto" unmountOnExit>
-              {section.items.map((item) => (
+              {section.items.map((item): void => (
                 <ListItem key={item.path} disablePadding>
                   <ListItemButton
                     selected={location.pathname === item.path}

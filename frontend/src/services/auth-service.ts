@@ -32,13 +32,13 @@ class AuthService {
     
     // Try to restore authentication state from refresh token cookie
     if (!this.token) {
-      console.log('[AuthService] No access token in memory, attempting refresh...');
+      
       await this.refreshToken();
     }
     
     this.initialized = true;
     
-    console.log('[AuthService] Initialized with base URL:', this.getURL());
+    
   }
 
   public isAuthenticated(): boolean {
@@ -74,7 +74,7 @@ class AuthService {
         throw new Error('No access token received');
       }
     } catch (error: unknown) {
-      console.error('Login failed:', error);
+      
       
       // Extract error message from the response
       let errorMessage = 'Login failed';
@@ -94,7 +94,7 @@ class AuthService {
         await getSDK().auth.authLogout();
       }
     } catch (error) {
-      console.error('Logout API call failed:', error);
+      
       // Continue with local logout even if API call fails
     } finally {
       this.clearToken();
@@ -134,7 +134,7 @@ class AuthService {
       
       return false;
     } catch (error) {
-      console.error('Token refresh failed:', error);
+      
       this.clearToken();
       return false;
     } finally {
@@ -183,15 +183,15 @@ class AuthService {
       );
       
       if (isAuthError) {
-        console.log('[AuthService] Access token expired, attempting refresh...');
+        
         
         const refreshSuccess = await this.refreshToken();
         if (refreshSuccess) {
-          console.log('[AuthService] Token refresh successful, retrying request...');
+          
           const refreshedSDK = this.getSDK();
           return await apiCall(refreshedSDK);
         } else {
-          console.error('[AuthService] Token refresh failed, user needs to re-login');
+          
           throw new Error('Authentication failed - please login again');
         }
       }
@@ -211,5 +211,5 @@ export const getSDK = (): ChatterSDK => authService.getSDK();
 // Export initialization function for explicit app setup if needed
 export const initializeSDK = async (): Promise<void> => {
   await authService.initialize();
-  console.log('[SDK] Initialization complete:', authService.getSDKInfo());
+  
 };

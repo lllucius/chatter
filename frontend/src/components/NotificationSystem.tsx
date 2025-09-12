@@ -54,11 +54,21 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
-  showNotification: () => {},
-  markAsRead: () => {},
-  markAllAsRead: () => {},
-  clearNotification: () => {},
-  clearAll: () => {},
+  showNotification: () => {
+    // Default implementation - will be overridden by provider
+  },
+  markAsRead: () => {
+    // Default implementation - will be overridden by provider
+  },
+  markAllAsRead: () => {
+    // Default implementation - will be overridden by provider
+  },
+  clearNotification: () => {
+    // Default implementation - will be overridden by provider
+  },
+  clearAll: () => {
+    // Default implementation - will be overridden by provider
+  },
   unreadCount: 0,
 });
 
@@ -263,7 +273,7 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
           </Typography>
         </MenuItem>
       ) : (
-        notifications.slice(0, 10).map((notification) => (
+        notifications.slice(0, 10).map((notification): void => (
           <MenuItem
             key={notification.id}
             onClick={() => handleNotificationClick(notification)}

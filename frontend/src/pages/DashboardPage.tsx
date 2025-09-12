@@ -315,7 +315,6 @@ const DashboardPage: React.FC = () => {
       setExportDialogOpen(false);
       toastService.success(`Analytics exported as ${fileName}.${exportFormat}`);
     } catch (error) {
-      console.error('Export failed:', error);
       toastService.error('Failed to export analytics');
     }
   };
@@ -645,7 +644,7 @@ const DashboardPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {chartData.systemHealthData.map((entry, index) => (
+                      {chartData.systemHealthData.map((entry, index): void => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

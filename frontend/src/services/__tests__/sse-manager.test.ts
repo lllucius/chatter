@@ -2,10 +2,9 @@
  * Tests for SSE Event Manager Service
  */
 
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { vi, describe, beforeEach, afterEach, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
-import { authService, getSDK } from "../../services/auth-service";
-import { AnySSEEvent, SSEEventType } from '../sse-types';
+import { authService } from "../../services/auth-service";
 
 // Mock ReadableStream for fetch response
 class MockReadableStream {
@@ -24,7 +23,7 @@ class MockStreamReader {
   private messages: string[] = [];
   private index: number = 0;
   private closed: boolean = false;
-  private pendingResolves: Array<(value: any) => void> = [];
+  private pendingResolves: Array<(value: unknown) => void> = [];
 
   constructor(messages: string[] = []) {
     this.messages = [...messages];
@@ -435,7 +434,6 @@ describe('SSEEventManager', () => {
       return new Promise<void>((resolve) => {
         setTimeout(() => {
           // Whether or not connection completed, test disconnect behavior
-          const wasConnected = sseManager.connected;
           
           sseManager.disconnect();
           

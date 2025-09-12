@@ -41,7 +41,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
   } = useBaseForm(
     {
       defaultData: defaultDocumentData,
-      transformInitialData: (data: DocumentUpdateData) => ({
+      transformInitialData: (data: DocumentUpdateData): void => ({
         title: data.title || '',
       }),
     },

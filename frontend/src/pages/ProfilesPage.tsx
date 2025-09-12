@@ -46,7 +46,7 @@ const ProfilesPage: React.FC = () => {
       id: 'maxTokens',
       label: 'Max Tokens',
       width: '120px',
-      render: (value?: number) => (
+      render: (value?: number): void => (
         value ? (
           <Typography variant="body2">
             {value.toLocaleString()}

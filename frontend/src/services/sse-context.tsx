@@ -101,7 +101,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     return sseEventManager.getConnectionStats();
   }, []);
 
-  const value: SSEContextValue = useMemo(() => ({
+  const value: SSEContextValue = useMemo((): void => ({
     isConnected,
     connectionState,
     connect,

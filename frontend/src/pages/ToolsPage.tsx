@@ -229,7 +229,7 @@ const ToolsPage: React.FC = () => {
     {
       id: 'status',
       label: 'Status',
-      render: (value, item) => (
+      render: (value, item): void => (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
           {createStatusChipRenderer<Tool>()(value, item)}
           {!item.is_available && (

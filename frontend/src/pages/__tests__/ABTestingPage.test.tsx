@@ -6,8 +6,8 @@ import { vi, describe, test, expect, beforeEach } from 'vitest';
 import ABTestingPage from '../ABTestingPage';
 
 // Mock the getSDK function and authService
-vi.mock('../../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
+vi.mock('../../services/auth-service', (): void => ({
+  getSDK: vi.fn((): void => ({
     abTesting: {
       listAbTestsApiV1AbTestsGet: vi.fn().mockResolvedValue({
         data: {
@@ -22,7 +22,7 @@ vi.mock('../../services/auth-service', () => ({
 }));
 
 // Mock the toast service
-vi.mock('../../services/toast-service', () => ({
+vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),

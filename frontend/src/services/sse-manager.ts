@@ -29,12 +29,12 @@ export class SSEEventManager {
    */
   public connect(): void {
     if (!authService.isAuthenticated()) {
-      console.error('SSE: Not authenticated. Please login first.');
+      
       return;
     }
 
     if (this.isConnected || this.connectionStartTime) {
-      console.log('SSE: Already connected or connecting');
+      
       return;
     }
 
@@ -63,7 +63,7 @@ export class SSEEventManager {
 
     // Note: With fetch-based approach, we don't have a direct way to cancel
     // The stream will be cancelled when the browser closes the connection
-    console.log('SSE: Disconnected');
+    
   }
 
   /**
@@ -123,18 +123,18 @@ export class SSEEventManager {
    */
   private createConnection(): void {
     if (!authService.isAuthenticated()) {
-      console.error('SSE: Not authenticated');
+      
       return;
     }
 
     try {
-      console.log('SSE: Connecting using SDK events stream method');
+      
 
       // Use SDK method with automatic authentication and retry
       this.connectWithSDKAuth();
 
     } catch (error) {
-      console.error('SSE: Failed to create connection:', error);
+      
       this.connectionStartTime = null;
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
@@ -158,7 +158,7 @@ export class SSEEventManager {
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.reconnectDelay = 1000;
-      console.log('SSE: Connection opened via SDK');
+      
 
       // Emit connection established event
       this.emitEvent({
@@ -179,7 +179,7 @@ export class SSEEventManager {
     } catch (error) {
       this.isConnected = false;
       this.connectionStartTime = null;
-      console.error('SSE: Connection error', error);
+      
       
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
@@ -199,7 +199,7 @@ export class SSEEventManager {
         const { done, value } = await reader.read();
         
         if (done) {
-          console.log('SSE: Stream ended');
+          
           break;
         }
 
@@ -212,7 +212,7 @@ export class SSEEventManager {
         }
       }
     } catch (error) {
-      console.error('SSE: Stream processing error:', error);
+      
     } finally {
       this.isConnected = false;
       this.connectionStartTime = null;
@@ -233,7 +233,7 @@ export class SSEEventManager {
         const event = JSON.parse(data) as AnySSEEvent;
         this.emitEvent(event);
       } catch (error) {
-        console.error('SSE: Failed to parse event data:', error, data);
+        
       }
     }
     // We can also handle other SSE fields like id:, event:, retry: if needed
@@ -243,7 +243,7 @@ export class SSEEventManager {
    * Emit an event to all registered listeners
    */
   private emitEvent(event: AnySSEEvent): void {
-    console.log('SSE: Received event:', event.type, event.data);
+    
 
     // Update event tracking
     this.eventCount++;
@@ -251,14 +251,14 @@ export class SSEEventManager {
 
     // Basic event validation for security
     if (!this.isValidEvent(event)) {
-      console.warn('SSE: Received invalid event, ignoring:', event);
+      
       return;
     }
 
     // Extract unified event metadata if available
     const unifiedMetadata = this.extractUnifiedMetadata(event);
     if (unifiedMetadata) {
-      console.log('SSE: Unified event metadata:', unifiedMetadata);
+      
     }
 
     // Route high priority events to special handlers
@@ -272,7 +272,7 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          console.error(`SSE: Error in event listener for ${event.type}:`, error);
+          
         }
       });
     }
@@ -283,7 +283,7 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          console.error('SSE: Error in wildcard event listener:', error);
+          
         }
       });
     }
@@ -333,7 +333,7 @@ export class SSEEventManager {
    */
   private scheduleReconnect(): void {
     if (this.isManuallyDisconnected || this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log('SSE: Max reconnection attempts reached or manually disconnected');
+      
       return;
     }
 
@@ -346,7 +346,7 @@ export class SSEEventManager {
       this.maxReconnectDelay
     );
     
-    console.log(`SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
+    
     
     const timeout = setTimeout(() => {
       // Remove this timeout from tracking
@@ -376,7 +376,7 @@ export class SSEEventManager {
         const healthCheckTimeout = 60000; // 60 seconds
         
         if (timeSinceLastEvent > healthCheckTimeout) {
-          console.warn('SSE: No events received for 60 seconds, connection may be stale');
+          
           // Could trigger a reconnection here if needed
         }
       }
@@ -384,7 +384,6 @@ export class SSEEventManager {
       // Log connection stats periodically
       if (this.connectionStartTime) {
         const connectionDuration = now - this.connectionStartTime;
-        console.debug(`SSE: Connection stats - Duration: ${Math.round(connectionDuration / 1000)}s, Events: ${this.eventCount}`);
       }
     }, 30000); // Check every 30 seconds
   }
@@ -445,13 +444,7 @@ export class SSEEventManager {
    * Handle high priority events with special treatment
    */
   private handleHighPriorityEvent(event: AnySSEEvent, metadata: Record<string, unknown>): void {
-    // Log high priority events
-    console.warn('SSE: High priority event received:', {
-      type: event.type,
-      priority: metadata.priority,
-      category: metadata.category,
-      timestamp: event.timestamp
-    });
+    // Log high priority events - handled by metadata tracking
 
     // Could trigger notifications, sounds, or other UI feedback
     if (metadata.priority === 'critical') {
@@ -484,7 +477,7 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          console.error(`SSE: Error in category listener for ${category}:`, error);
+          
         }
       });
     }
@@ -533,7 +526,7 @@ export class SSEEventManager {
    */
   public async requestNotificationPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      console.warn('SSE: Notifications not supported');
+      
       return false;
     }
 
@@ -559,10 +552,10 @@ export class SSEEventManager {
         return await sdk.events.triggerTestEventApiV1EventsTestEvent();
       });
       
-      console.log('SSE: Test event triggered successfully:', response);
+      
       return true;
     } catch (error) {
-      console.error('SSE: Failed to trigger test event:', error);
+      
       return false;
     }
   }
@@ -578,7 +571,7 @@ export class SSEEventManager {
       
       return response;
     } catch (error) {
-      console.error('SSE: Failed to get SSE stats:', error);
+      
       return null;
     }
   }

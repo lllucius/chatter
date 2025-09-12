@@ -6,7 +6,7 @@ import '@testing-library/jest-dom';
 
 // Mock window.getComputedStyle for SimpleBar compatibility with jsdom
 Object.defineProperty(window, 'getComputedStyle', {
-  value: (_element: Element) => ({
+  value: (_element: Element): void => ({
     getPropertyValue: (prop: string) => {
       if (prop === 'overflow') return 'visible';
       if (prop === 'overflow-x') return 'visible';

@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import { renderHook, act } from '@testing-library/react';
 import { useForm } from '../useForm';
 
@@ -67,7 +67,7 @@ describe('useForm fix for login button disabled issue', () => {
     act(() => {
       result.current.handleChange('password')({
         target: { value: 'n', type: 'text' },
-      } as any);
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     expect(result.current.errors.password).toBeUndefined();
@@ -86,13 +86,13 @@ describe('useForm fix for login button disabled issue', () => {
     act(() => {
       result.current.handleChange('username')({
         target: { value: 'testuser', type: 'text' },
-      } as any);
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     act(() => {
       result.current.handleChange('password')({
         target: { value: 'testpass', type: 'text' },
-      } as any);
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     expect(result.current.isValid).toBe(true);
@@ -110,7 +110,7 @@ describe('useForm fix for login button disabled issue', () => {
     act(() => {
       result.current.handleChange('username')({
         target: { value: 'test', type: 'text' },
-      } as any);
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     // Now blur should trigger validation since field has content
@@ -124,7 +124,7 @@ describe('useForm fix for login button disabled issue', () => {
     act(() => {
       result.current.handleChange('username')({
         target: { value: '', type: 'text' },
-      } as any);
+      } as React.ChangeEvent<HTMLInputElement>);
     });
 
     // Blur on empty field should not show error

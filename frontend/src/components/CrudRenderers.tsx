@@ -30,7 +30,7 @@ export const createCategoryChipRenderer = <T,>(
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' = 'primary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  const CategoryChipRenderer = (value: string) => (
+  const CategoryChipRenderer = (value: string): void => (
     <Chip 
       label={value} 
       size="small" 
@@ -46,7 +46,7 @@ export const createTypeChipRenderer = <T,>(
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' = 'secondary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  const TypeChipRenderer = (value: string) => (
+  const TypeChipRenderer = (value: string): void => (
     <Chip 
       label={value?.replace(/[_-]/g, ' ')}
       size="small" 
@@ -74,7 +74,7 @@ export const createDateRenderer = <T,>(
 
 export const createNameWithDescriptionRenderer = <T extends { name?: string; display_name?: string; description?: string }>(
 ): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T) => (
+  return (value: unknown, item: T): void => (
     <Box>
       <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
         {value || item.display_name || item.name}
@@ -91,7 +91,7 @@ export const createNameWithDescriptionRenderer = <T extends { name?: string; dis
 export const createBooleanSwitchRenderer = <T,>(
   disabled: boolean = true
 ): CrudColumn<T>['render'] => {
-  return (value: boolean) => (
+  return (value: boolean): void => (
     <Switch
       checked={!!value}
       disabled={disabled}
@@ -101,7 +101,7 @@ export const createBooleanSwitchRenderer = <T,>(
 };
 
 export const createMonospaceTextRenderer = <T,>(): CrudColumn<T>['render'] => {
-  return (value: string) => (
+  return (value: string): void => (
     <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
       {value || '—'}
     </Typography>
@@ -113,7 +113,7 @@ export const createCountRenderer = <T,>(
   plural: string,
   unknownText: string = 'Unknown'
 ): CrudColumn<T>['render'] => {
-  return (value: number | undefined) => (
+  return (value: number | undefined): void => (
     <Typography variant="body2">
       {value !== undefined 
         ? `${value} ${value === 1 ? singular : plural}` 
@@ -127,7 +127,7 @@ export const createPerformanceRenderer = <T,>(
   unit: string = 'ms',
   precision: number = 0
 ): CrudColumn<T>['render'] => {
-  return (value: number) => (
+  return (value: number): void => (
     <Typography variant="body2">
       {value ? `${value.toFixed(precision)}${unit}` : 'N/A'}
     </Typography>
@@ -136,7 +136,7 @@ export const createPerformanceRenderer = <T,>(
 
 export const createUsageStatsRenderer = <T extends { total_errors?: number }>(
 ): CrudColumn<T>['render'] => {
-  return (value: number, item: T) => (
+  return (value: number, item: T): void => (
     <Box>
       <Typography variant="body2">
         Calls: {value}

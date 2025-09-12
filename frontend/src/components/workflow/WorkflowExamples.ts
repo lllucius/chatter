@@ -281,7 +281,6 @@ export class WorkflowValidator {
     }
     
     // Check for isolated nodes
-    const nodeIds = new Set(workflow.nodes.map(n => n.id));
     const connectedNodes = new Set<string>();
     
     workflow.edges.forEach(edge => {

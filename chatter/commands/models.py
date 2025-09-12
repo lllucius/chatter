@@ -152,8 +152,9 @@ async def update_provider(
 ):
     """Update a provider."""
     from chatter_sdk.models.provider_update import ProviderUpdate
+    from typing import Any
 
-    update_data = {}
+    update_data: dict[str, Any] = {}
     if display_name:
         update_data["display_name"] = display_name
     if (
@@ -387,7 +388,9 @@ async def update_model(
     ),
 ):
     """Update a model's information."""
-    update_data = {}
+    from typing import Any
+    
+    update_data: dict[str, Any] = {}
     if name:
         update_data["name"] = name
     if description:
@@ -532,7 +535,9 @@ async def update_model_detailed(
     ),
 ):
     """Update a model."""
-    update_data = {}
+    from typing import Any
+    
+    update_data: dict[str, Any] = {}
     if name:
         update_data["name"] = name
     if description:
@@ -693,8 +698,9 @@ async def update_embedding_space(
     from chatter_sdk.models.embedding_space_update import (
         EmbeddingSpaceUpdate,
     )
+    from typing import Any
 
-    update_data = {}
+    update_data: dict[str, Any] = {}
     if name:
         update_data["name"] = name
     if (

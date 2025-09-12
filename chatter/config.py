@@ -96,6 +96,7 @@ class Settings(BaseSettings):
     # =============================================================================
 
     database_url: str = Field(
+        ...,
         description="Database URL (required, no default for security)",
     )
     test_database_url: str = Field(
@@ -721,10 +722,6 @@ class Settings(BaseSettings):
             return base_hosts
 
 
-# Create module-level settings instance
-settings = Settings()
-
-
 # Global settings instance cache
 _settings_instance: Settings | None = None
 
@@ -733,5 +730,23 @@ def get_settings() -> Settings:
     """Get settings instance using singleton pattern."""
     global _settings_instance
     if _settings_instance is None:
-        _settings_instance = settings
+        try:
+            _settings_instance = Settings()  # type: ignore[call-arg]
+        except Exception as e:
+            # If database_url is not available, we can't create settings
+            # This is expected in some contexts like testing or CLI tools
+            raise RuntimeError(
+                "Settings initialization failed. Ensure DATABASE_URL environment variable is set."
+            ) from e
     return _settings_instance
+
+
+# Module-level settings that will be lazily initialized
+class _SettingsProxy:
+    """Proxy to provide backward compatibility for module-level settings access."""
+    
+    def __getattr__(self, name: str) -> Any:
+        return getattr(get_settings(), name)
+
+
+settings = _SettingsProxy()

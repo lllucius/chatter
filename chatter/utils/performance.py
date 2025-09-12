@@ -980,12 +980,29 @@ class PerformanceMonitor:
         Returns:
             Dictionary with health metrics including database and vector performance
         """
+        # Calculate overall performance metrics
+        all_times = [
+            time for times in self.query_times.values() for time in times
+        ]
+        avg_ms = sum(all_times) / len(all_times) if all_times else 0
+        p95_ms = (
+            sorted(all_times)[int(len(all_times) * 0.95)]
+            if all_times
+            else 0
+        )
+        slow_queries = sum(
+            1 for time in all_times if time > self.slow_query_threshold_ms
+        )
+        total_queries = sum(self.query_counts.values())
+        
         return {
             "database_response_time_ms": self.get_database_response_time(),
             "vector_search_time_ms": self.get_vector_search_time(),
             "slow_query_analysis": self.get_slow_query_analysis(),
-            "performance_grade": self._calculate_performance_grade(),
-            "total_queries": sum(self.query_counts.values()),
+            "performance_grade": self._calculate_performance_grade(
+                avg_ms, p95_ms, slow_queries, total_queries
+            ),
+            "total_queries": total_queries,
             "active_operations": len(
                 [op for op, times in self.query_times.items() if times]
             ),

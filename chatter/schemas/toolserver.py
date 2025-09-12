@@ -421,7 +421,7 @@ class BulkToolServerOperation(BaseModel):
     """Schema for bulk operations on tool servers."""
 
     server_ids: list[str] = Field(
-        ..., min_items=1, description="List of server IDs"
+        ..., min_length=1, description="List of server IDs"
     )
     operation: str = Field(..., description="Operation to perform")
     parameters: dict[str, Any] | None = Field(

@@ -58,10 +58,10 @@ def _get_cache_stats_sync(cache):
 
 class CacheWrapper:
     """Wrapper to provide sync interface for monitoring."""
-    
+
     def __init__(self, cache):
         self._cache = cache
-    
+
     def get_stats(self):
         """Get cache stats synchronously."""
         stats = _get_cache_stats_sync(self._cache)

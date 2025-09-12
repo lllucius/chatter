@@ -5,7 +5,8 @@ import functools
 import os
 import sys
 from contextlib import asynccontextmanager
-from typing import Any, AsyncGenerator, Callable, TypeVar
+from typing import Any, TypeVar
+from collections.abc import AsyncGenerator, Callable
 
 F = TypeVar('F', bound=Callable[..., Any])
 

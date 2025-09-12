@@ -389,7 +389,7 @@ async def update_model(
 ):
     """Update a model's information."""
     from typing import Any
-    
+
     update_data: dict[str, Any] = {}
     if name:
         update_data["name"] = name
@@ -536,7 +536,7 @@ async def update_model_detailed(
 ):
     """Update a model."""
     from typing import Any
-    
+
     update_data: dict[str, Any] = {}
     if name:
         update_data["name"] = name

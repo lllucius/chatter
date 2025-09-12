@@ -1,6 +1,7 @@
 """Validation result classes."""
 
-from typing import Any, Sequence
+from typing import Any
+from collections.abc import Sequence
 
 from .exceptions import ValidationError
 

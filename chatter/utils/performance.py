@@ -994,7 +994,7 @@ class PerformanceMonitor:
             1 for time in all_times if time > self.slow_query_threshold_ms
         )
         total_queries = sum(self.query_counts.values())
-        
+
         return {
             "database_response_time_ms": self.get_database_response_time(),
             "vector_search_time_ms": self.get_vector_search_time(),

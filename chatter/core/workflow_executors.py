@@ -228,7 +228,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -347,14 +347,14 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                
+
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -483,7 +483,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -612,14 +612,14 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                
+
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -748,7 +748,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -877,14 +877,14 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                
+
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -1020,7 +1020,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             assistant_message = (
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=response_content,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,
@@ -1156,14 +1156,14 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                
+
                             )
 
             # Create final message
             if content_buffer:
                 await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    
+
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
                     metadata={"correlation_id": correlation_id} if correlation_id else None,

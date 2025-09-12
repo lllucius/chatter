@@ -826,6 +826,8 @@ class LLMService:
         tools: list[Any] | None = None,
         enable_memory: bool = False,
         memory_window: int = 20,
+        max_tool_calls: int | None = None,
+        max_documents: int | None = None,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
@@ -857,6 +859,8 @@ class LLMService:
             tools=tools if mode in ("tools", "full") else None,
             enable_memory=enable_memory,
             memory_window=memory_window,
+            max_tool_calls=max_tool_calls,
+            max_documents=max_documents,
         )
 
     async def generate_with_fallback(

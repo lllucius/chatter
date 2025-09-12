@@ -120,6 +120,8 @@ class LangGraphWorkflowManager:
         conversation_id: str | None = None,
         provider_name: str | None = None,
         model_name: str | None = None,
+        max_tool_calls: int | None = None,
+        max_documents: int | None = None,
     ) -> Pregel:
         """Create a unified conversation workflow.
 
@@ -144,6 +146,8 @@ class LangGraphWorkflowManager:
             conversation_id: ID of the conversation (for metrics)
             provider_name: Name of the LLM provider (for metrics)
             model_name: Name of the model (for metrics)
+            max_tool_calls: Maximum number of tool calls allowed (optional)
+            max_documents: Maximum number of documents to retrieve for RAG (optional)
         """
         # Start metrics tracking if enabled (store config for later async initialization)
         workflow_tracking_config = None
@@ -159,6 +163,8 @@ class LangGraphWorkflowManager:
                     "memory_window": memory_window,
                     "has_retriever": retriever is not None,
                     "has_tools": tools is not None and len(tools) > 0,
+                    "max_tool_calls": max_tool_calls,
+                    "max_documents": max_documents,
                 },
             }
         use_retriever = mode in ("rag", "full")

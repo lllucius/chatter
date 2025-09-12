@@ -1,4 +1,4 @@
-/* eslint-disable no-console */
+ 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -178,7 +178,7 @@ const AdministrationPage: React.FC = () => {
       setLastJobStates(newStates);
       setJobs(newJobs);
     } catch (error: any) {
-      // eslint-disable-next-line no-console
+       
       console.error('Failed to load jobs:', error);
       toastService.error(error, 'Failed to load jobs');
     } finally {

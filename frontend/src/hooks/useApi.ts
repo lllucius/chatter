@@ -50,7 +50,7 @@ export function useApi<T>(
       onErrorRef.current?.(err);
       // Log error for debugging in development
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.error('API call failed:', err);
       }
     } finally {

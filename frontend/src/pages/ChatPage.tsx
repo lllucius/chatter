@@ -124,7 +124,7 @@ const ChatPage: React.FC = () => {
     } catch (err: any) {
       toastService.error(err, 'Failed to load chat data');
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.error(err);
       }
     }
@@ -162,7 +162,7 @@ const ChatPage: React.FC = () => {
     } catch (err: any) {
       toastService.error(err, 'Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.error(err);
       }
       return null;
@@ -194,7 +194,7 @@ const ChatPage: React.FC = () => {
     } catch (err: any) {
       toastService.error(err, 'Failed to load conversation');
       if (process.env.NODE_ENV === 'development') {
-        // eslint-disable-next-line no-console
+         
         console.error(err);
       }
     }
@@ -294,7 +294,7 @@ const ChatPage: React.FC = () => {
       let buffer = '';
 
       try {
-        // eslint-disable-next-line no-constant-condition
+         
         while (true) {
           const { done, value } = await reader.read();
           

@@ -279,7 +279,7 @@ const DashboardPage: React.FC = () => {
         // Create a downloadable file
         let blob;
         let mimeType;
-        let fileExtension = exportFormat;
+        const fileExtension = exportFormat;
         
         switch (exportFormat) {
           case 'json':

@@ -66,7 +66,7 @@ class LangGraphWorkflowManager:
         # Lazy initialization flag to avoid async setup at import time
         self._initialized = False
 
-    def _ensure_initialized(self) -> None:
+    async def _ensure_initialized(self) -> None:
         """Ensure the workflow manager is initialized."""
         if self._initialized:
             return
@@ -75,19 +75,40 @@ class LangGraphWorkflowManager:
         try:
             if settings.langgraph_checkpoint_store == "postgres":
                 # Use PostgreSQL checkpointer for production
-                self.checkpointer = PostgresSaver.from_conn_string(
-                    settings.database_url
-                )
-                logger.info(
-                    "LangGraph PostgreSQL checkpointer initialized"
-                )
+                try:
+                    # PostgresSaver.from_conn_string returns a context manager
+                    # We need to properly enter the context to get the actual saver
+                    from sqlalchemy import create_engine
+                    from urllib.parse import urlparse, urlunparse
+                    
+                    # Convert async URL to sync URL for PostgresSaver
+                    parsed = urlparse(settings.database_url)
+                    if parsed.scheme == "postgresql+asyncpg":
+                        # Convert to sync postgresql URL
+                        sync_url = urlunparse(parsed._replace(scheme="postgresql"))
+                        saver_context = PostgresSaver.from_conn_string(sync_url)
+                    else:
+                        # Use as-is for other schemes
+                        saver_context = PostgresSaver.from_conn_string(settings.database_url)
+                    
+                    # Enter the context manager to get the actual checkpointer
+                    self.checkpointer = saver_context.__enter__()
+                    logger.info("LangGraph PostgreSQL checkpointer initialized")
+                        
+                except Exception as postgres_error:
+                    logger.warning(
+                        "Failed to initialize PostgreSQL checkpointer, falling back to memory",
+                        error=str(postgres_error),
+                    )
+                    self.checkpointer = MemorySaver()
+                    logger.info("LangGraph Memory checkpointer initialized (postgres fallback)")
             else:
                 # Fallback to in-memory checkpointer for development
                 self.checkpointer = MemorySaver()
                 logger.info("LangGraph Memory checkpointer initialized")
         except Exception as e:
             logger.warning(
-                "Failed to initialize PostgreSQL checkpointer, falling back to memory",
+                "Failed to initialize checkpointer, falling back to memory",
                 error=str(e),
             )
             # Always fallback to memory checkpointer if PostgreSQL fails
@@ -106,7 +127,7 @@ class LangGraphWorkflowManager:
 
         self._initialized = True
 
-    def create_workflow(
+    async def create_workflow(
         self,
         llm: BaseChatModel,
         *,
@@ -488,7 +509,7 @@ class LangGraphWorkflowManager:
             workflow.add_edge("call_model", END)
 
         # Compile with checkpointer
-        self._ensure_initialized()
+        await self._ensure_initialized()
         app = workflow.compile(
             checkpointer=self.checkpointer,
             interrupt_before=[],

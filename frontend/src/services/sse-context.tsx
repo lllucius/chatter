@@ -14,11 +14,11 @@ interface SSEContextValue {
   connectionState: 'connecting' | 'open' | 'closed';
   connect: () => void;
   disconnect: () => void;
-  on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void => () => void;
+  on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => () => void;
   off: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => void;
-  onCategory: (category: string, listener: SSEEventListener): void => () => void;
+  onCategory: (category: string, listener: SSEEventListener) => () => void;
   offCategory: (category: string, listener: SSEEventListener) => void;
-  onHighPriority: (listener: SSEEventListener): void => () => void;
+  onHighPriority: (listener: SSEEventListener) => () => void;
   requestNotificationPermission: () => Promise<boolean>;
   getConnectionStats: () => Record<string, unknown>;
 }

@@ -11,8 +11,8 @@ interface UseFormReturn<T> {
   errors: Partial<Record<keyof T, string>>;
   touched: Partial<Record<keyof T, boolean>>;
   isSubmitting: boolean;
-  handleChange: (name: keyof T): void => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleBlur: (name: keyof T): void => () => void;
+  handleChange: (name: keyof T) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleBlur: (name: keyof T) => () => void;
   handleSubmit: (event?: React.FormEvent) => Promise<void>;
   setFieldValue: (name: keyof T, value: T[keyof T]) => void;
   setFieldError: (name: keyof T, error: string) => void;

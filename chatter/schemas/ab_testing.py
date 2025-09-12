@@ -38,10 +38,10 @@ class ABTestCreateRequest(BaseModel):
     )
 
     variants: list[TestVariant] = Field(
-        ..., min_items=2, description="Test variants"
+        ..., min_length=2, description="Test variants"
     )
     metrics: list[MetricType] = Field(
-        ..., min_items=1, description="Metrics to track"
+        ..., min_length=1, description="Metrics to track"
     )
 
     # Test configuration

@@ -435,8 +435,8 @@ class AgentBulkCreateRequest(BaseModel):
 
     agents: list[AgentCreateRequest] = Field(
         ...,
-        min_items=1,
-        max_items=10,
+        min_length=1,
+        max_length=10,
         description="List of agents to create (max 10)",
     )
 
@@ -463,7 +463,7 @@ class AgentBulkDeleteRequest(BaseModel):
 
     agent_ids: list[str] = Field(
         ...,
-        min_items=1,
-        max_items=50,
+        min_length=1,
+        max_length=50,
         description="List of agent IDs to delete (max 50)",
     )

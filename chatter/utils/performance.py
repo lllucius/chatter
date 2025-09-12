@@ -453,7 +453,7 @@ class QueryOptimizer:
         if model_type:
             conditions.append(ModelDef.model_type == model_type)
         if active_only:
-            conditions.append(ModelDef.is_active)
+            conditions.append(ModelDef.is_active == True)
 
         where_clause = and_(*conditions) if conditions else None
 
@@ -509,7 +509,7 @@ class QueryOptimizer:
         if provider_type:
             conditions.append(Provider.provider_type == provider_type)
         if active_only:
-            conditions.append(Provider.is_active)
+            conditions.append(Provider.is_active == True)
 
         where_clause = and_(*conditions) if conditions else None
 

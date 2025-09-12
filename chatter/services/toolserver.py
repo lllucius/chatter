@@ -225,7 +225,7 @@ class ToolServerService:
         if user_id:
             filters.append(ToolServer.created_by == user_id)
         if not include_builtin:
-            filters.append(ToolServer.is_builtin is False)
+            filters.append(ToolServer.is_builtin == False)
 
         if filters:
             query = query.where(and_(*filters))

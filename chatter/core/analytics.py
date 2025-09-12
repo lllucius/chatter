@@ -1359,7 +1359,7 @@ class AnalyticsService:
                 select(func.count(ToolUsage.id)).where(
                     and_(
                         func.date(ToolUsage.called_at) == today,
-                        ToolUsage.success is False,
+                        ToolUsage.success == False,
                         (
                             usage_where
                             if usage_where is not None
@@ -1379,7 +1379,7 @@ class AnalyticsService:
                         >= datetime.combine(
                             month_ago, datetime.min.time()
                         ).replace(tzinfo=UTC),
-                        ToolUsage.success is False,
+                        ToolUsage.success == False,
                         (
                             usage_where
                             if usage_where is not None
@@ -1441,7 +1441,7 @@ class AnalyticsService:
                     .label("enabled_tools"),
                     func.count(ToolUsage.id).label("total_calls"),
                     func.count(ToolUsage.id)
-                    .filter(ToolUsage.success is False)
+                    .filter(ToolUsage.success == False)
                     .label("total_errors"),
                     func.avg(ToolUsage.response_time_ms).label(
                         "avg_response_time"
@@ -1497,7 +1497,7 @@ class AnalyticsService:
                     ServerTool.status,
                     func.count(ToolUsage.id).label("total_calls"),
                     func.count(ToolUsage.id)
-                    .filter(ToolUsage.success is False)
+                    .filter(ToolUsage.success == False)
                     .label("total_errors"),
                     func.avg(ToolUsage.response_time_ms).label(
                         "avg_response_time"
@@ -1514,7 +1514,7 @@ class AnalyticsService:
                         and_(
                             ToolUsage.called_at
                             >= datetime.now(UTC) - timedelta(hours=24),
-                            ToolUsage.success is False,
+                            ToolUsage.success == False,
                         )
                     )
                     .label("errors_last_24h"),
@@ -1579,7 +1579,7 @@ class AnalyticsService:
                     func.date(ToolUsage.called_at).label("date"),
                     func.count(ToolUsage.id).label("calls"),
                     func.count(ToolUsage.id)
-                    .filter(ToolUsage.success is False)
+                    .filter(ToolUsage.success == False)
                     .label("errors"),
                 )
                 .where(

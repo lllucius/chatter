@@ -65,7 +65,7 @@ class ValidationContext:
         """Get custom pattern if defined."""
         return self.custom_patterns.get(pattern_name)
 
-    def with_overrides(self, **kwargs) -> "ValidationContext":
+    def with_overrides(self, **kwargs: Any) -> "ValidationContext":
         """Create a new context with overrides."""
         # Create a copy of current context
         new_context = ValidationContext(

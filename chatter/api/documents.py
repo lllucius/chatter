@@ -11,6 +11,7 @@ from fastapi import (
     UploadFile,
     status,
 )
+from fastapi.responses import FileResponse
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -579,7 +580,7 @@ async def download_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
-):
+) -> FileResponse:
     """Download original document file.
 
     Args:
@@ -611,8 +612,6 @@ async def download_document(
                 resource_type="document",
                 resource_id=document_id,
             ) from None
-
-        from fastapi.responses import FileResponse
 
         return FileResponse(
             path=document.file_path,

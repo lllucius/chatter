@@ -26,9 +26,9 @@ class BaseValidator(ABC):
 
     @abstractmethod
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
-        """Validate a value according to the specified rule."""
+        """Validate a value according to the specified rule(s)."""
         pass
 
     def sanitize(self, value: Any, context: ValidationContext) -> Any:
@@ -144,10 +144,21 @@ class InputValidator(BaseValidator):
         )
 
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
-        """Validate input according to the specified rule."""
+        """Validate input according to the specified rule(s)."""
+        # Handle multiple rules
+        if isinstance(rule, list):
+            errors = []
+            for single_rule in rule:
+                result = self.validate(value, single_rule, context)
+                if not result.is_valid:
+                    errors.extend(result.errors)
+            return ValidationResult(
+                is_valid=len(errors) == 0, value=value, errors=errors
+            )
 
+        # Handle single rule
         if rule not in self.rules:
             return ValidationResult(
                 is_valid=False,
@@ -177,9 +188,11 @@ class InputValidator(BaseValidator):
             )
 
         # Apply context overrides for max length
-        max_length = context.get_max_length(
-            rule, validation_rule.max_length
-        )
+        max_length = None
+        if validation_rule.max_length is not None:
+            max_length = context.get_max_length(
+                rule, validation_rule.max_length
+            )
         if max_length and len(str_value) > max_length:
             return ValidationResult(
                 is_valid=False,
@@ -302,9 +315,21 @@ class SecurityValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
         """Validate input for security threats."""
+        # Handle multiple rules
+        if isinstance(rule, list):
+            errors = []
+            for single_rule in rule:
+                result = self.validate(value, single_rule, context)
+                if not result.is_valid:
+                    errors.extend(result.errors)
+            return ValidationResult(
+                is_valid=len(errors) == 0, value=value, errors=errors
+            )
+
+        # Handle single rule
         if not isinstance(value, str):
             return ValidationResult(is_valid=True, value=value)
 
@@ -597,10 +622,21 @@ class ConfigValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
         """Validate configuration settings."""
+        # Handle multiple rules
+        if isinstance(rule, list):
+            errors = []
+            for single_rule in rule:
+                result = self.validate(value, single_rule, context)
+                if not result.is_valid:
+                    errors.extend(result.errors)
+            return ValidationResult(
+                is_valid=len(errors) == 0, value=value, errors=errors
+            )
 
+        # Handle single rule
         if rule == "database_config":
             return self._validate_database_config(value, context)
         elif rule == "api_keys":
@@ -699,10 +735,21 @@ class WorkflowValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
         """Validate workflow configurations."""
+        # Handle multiple rules
+        if isinstance(rule, list):
+            errors = []
+            for single_rule in rule:
+                result = self.validate(value, single_rule, context)
+                if not result.is_valid:
+                    errors.extend(result.errors)
+            return ValidationResult(
+                is_valid=len(errors) == 0, value=value, errors=errors
+            )
 
+        # Handle single rule
         if rule == "workflow_config":
             return self._validate_workflow_config(value, context)
         elif rule == "workflow_request":
@@ -816,10 +863,21 @@ class AgentValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str, context: ValidationContext
+        self, value: Any, rule: str | list[str], context: ValidationContext
     ) -> ValidationResult:
         """Validate agent-specific input."""
+        # Handle multiple rules
+        if isinstance(rule, list):
+            errors = []
+            for single_rule in rule:
+                result = self.validate(value, single_rule, context)
+                if not result.is_valid:
+                    errors.extend(result.errors)
+            return ValidationResult(
+                is_valid=len(errors) == 0, value=value, errors=errors
+            )
 
+        # Handle single rule
         if rule == "agent_id":
             return self._validate_agent_id(value, context)
         elif rule == "conversation_id":

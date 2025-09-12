@@ -1,6 +1,6 @@
 """Validation result classes."""
 
-from typing import Any
+from typing import Any, Sequence
 
 from .exceptions import ValidationError
 
@@ -12,13 +12,13 @@ class ValidationResult:
         self,
         is_valid: bool = True,
         value: Any = None,
-        errors: list[ValidationError] | None = None,
+        errors: Sequence[ValidationError] | None = None,
         warnings: list[str] | None = None,
         metadata: dict[str, Any] | None = None,
     ):
         self.is_valid = is_valid
         self.value = value
-        self.errors = errors or []
+        self.errors = list(errors) if errors else []
         self.warnings = warnings or []
         self.metadata = metadata or {}
 

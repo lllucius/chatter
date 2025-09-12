@@ -157,8 +157,8 @@ const ConversationsPage: React.FC = () => {
         offset: page * pageSize,
       });
       return {
-        items: response.data?.conversations || [],
-        total: response.data?.total || 0,
+        items: response.conversations || [],
+        total: response.total || 0,
       };
     },
 

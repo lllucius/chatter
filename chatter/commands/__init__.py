@@ -5,9 +5,12 @@ import functools
 import os
 import sys
 from contextlib import asynccontextmanager
+from typing import Any, AsyncGenerator, Callable, TypeVar
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 # Import all the API classes that commands might need
-from chatter_sdk import (
+from chatter_sdk import (  # type: ignore[import-not-found]
     ABTestingApi,
     AgentsApi,
     AnalyticsApi,
@@ -26,7 +29,7 @@ from chatter_sdk import (
     PromptsApi,
     ToolServersApi,
 )
-from chatter_sdk.exceptions import ApiException
+from chatter_sdk.exceptions import ApiException  # type: ignore[import-not-found]
 from rich.console import Console
 
 # Initialize console
@@ -80,13 +83,13 @@ class ChatterSDKClient:
         self.tools_api = ToolServersApi(self.api_client)
         self.ab_api = ABTestingApi(self.api_client)
 
-    async def __aenter__(self):
+    async def __aenter__(self) -> "ChatterSDKClient":
         return self
 
-    async def __aexit__(self, exc_type, exc_val, exc_tb):
+    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
         await self.api_client.close()
 
-    def save_token(self, token: str):
+    def save_token(self, token: str) -> None:
         """Save authentication token to config file."""
         import json
         from pathlib import Path
@@ -115,7 +118,8 @@ class ChatterSDKClient:
         if config_file.exists():
             try:
                 config = json.loads(config_file.read_text())
-                return config.get("access_token")
+                token = config.get("access_token")
+                return token if isinstance(token, str) else None
             except (json.JSONDecodeError, FileNotFoundError):
                 pass
 
@@ -123,7 +127,7 @@ class ChatterSDKClient:
 
 
 @asynccontextmanager
-async def get_client() -> ChatterSDKClient:
+async def get_client() -> AsyncGenerator[ChatterSDKClient, None]:
     """Get client instance with token loading."""
     client = ChatterSDKClient()
 
@@ -140,11 +144,11 @@ async def get_client() -> ChatterSDKClient:
         await client.api_client.close()
 
 
-def run_async(async_func):
+def run_async(async_func: Callable[..., Any]) -> Callable[..., Any]:
     """Helper decorator to run async functions in typer commands."""
 
     @functools.wraps(async_func)
-    def wrapper(*args, **kwargs):
+    def wrapper(*args: Any, **kwargs: Any) -> Any:
         try:
             return asyncio.run(async_func(*args, **kwargs))
         except ApiException as e:

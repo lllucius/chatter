@@ -11,7 +11,7 @@ vi.mock('../../services/auth-service', () => ({
     prompts: {
       listPromptsApiV1Prompts: vi.fn().mockResolvedValue({
         prompts: [],
-        totalCount: 0
+        total_count: 0
       })
     }
   })),

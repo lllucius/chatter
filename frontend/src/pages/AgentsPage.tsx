@@ -141,8 +141,8 @@ const AgentsPage: React.FC = () => {
         },
       });
       return {
-        items: response.data || [],
-        total: response.data?.length || 0, // Adjust based on actual API response
+        items: response.agents || [],
+        total: response.total || 0,
       };
     },
 

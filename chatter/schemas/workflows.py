@@ -282,7 +282,7 @@ class OptimizationSuggestion(BaseModel):
         ..., description="Expected impact (low/medium/high)"
     )
     node_ids: list[str] | None = Field(
-        None, description="Affected node IDs"
+        default=None, description="Affected node IDs"
     )
 
 

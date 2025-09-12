@@ -164,7 +164,7 @@ class TestResult(BaseModel):
     statistical_significance: dict[str, bool] = Field(
         default_factory=dict
     )
-    confidence_intervals: dict[str, dict[str, float]] = Field(
+    confidence_intervals: dict[str, dict[str, dict[str, float]]] = Field(
         default_factory=dict
     )
     recommendations: list[str] = Field(default_factory=list)
@@ -682,7 +682,7 @@ class ABTestManager:
                 sanitized[clean_key] = value
             elif isinstance(value, list):
                 # Sanitize list elements
-                clean_list = []
+                clean_list: list[Any] = []
                 for item in value[:10]:  # Limit list size
                     if isinstance(item, str):
                         clean_item = str(item)[:100]

@@ -27,11 +27,11 @@ def _get_validation_errors_as_strings(validation_result) -> list[str]:
     errors = validation_result.errors
     if not errors:
         return []
-    
+
     # If first error is a string, assume all are strings (fallback interface)
     if isinstance(errors[0], str):
         return errors
-    
+
     # Otherwise, extract message from ValidationError objects
     return [getattr(error, 'message', str(error)) for error in errors]
 
@@ -187,7 +187,7 @@ class WorkflowManagementService:
         try:
             conditions = [WorkflowDefinition.owner_id == owner_id]
             if include_public:
-                conditions.append(WorkflowDefinition.is_public == True)
+                conditions.append(WorkflowDefinition.is_public)
 
             result = await self.session.execute(
                 select(WorkflowDefinition)
@@ -381,7 +381,7 @@ class WorkflowManagementService:
         """Validate a workflow definition and return validation results."""
         try:
             validation_result = workflow_validation_service.validate_workflow_definition(
-                definition_data, owner_id
+                definition=definition_data, owner_id=owner_id
             )
 
             return {

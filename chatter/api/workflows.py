@@ -391,8 +391,8 @@ async def validate_workflow_definition(
     try:
         validation_result = (
             await workflow_service.validate_workflow_definition(
-                nodes=workflow_definition.nodes,
-                edges=workflow_definition.edges,
+                definition_data=workflow_definition.model_dump(),
+                owner_id=current_user.id,
             )
         )
         return WorkflowValidationResponse(**validation_result)

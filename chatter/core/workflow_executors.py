@@ -251,6 +251,8 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             return assistant_message, {"usage": result.get("usage", {})}
 
         except Exception as e:
+            import traceback
+            traceback.print_exc()
             # Record error metrics
             await self._record_metrics(
                 workflow_id,

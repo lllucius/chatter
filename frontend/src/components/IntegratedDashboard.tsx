@@ -87,7 +87,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
-  const [stats, _setStats] = useState<DashboardStats>({
+  const [stats] = useState<DashboardStats>({
     workflows: {
       total: 24,
       active: 3,

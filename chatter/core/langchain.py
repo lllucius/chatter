@@ -218,7 +218,7 @@ class LangChainOrchestrator:
         self, messages: list[dict[str, Any]]
     ) -> list[BaseMessage]:
         """Convert API messages to LangChain message format."""
-        langchain_messages = []
+        langchain_messages: list[BaseMessage] = []
 
         for msg in messages:
             role = msg.get("role", "user")

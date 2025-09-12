@@ -22,6 +22,18 @@ export default [
         ...globals.browser,
         ...globals.es2021,
         ...globals.node,
+        // Test environment globals
+        describe: 'readonly',
+        test: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+        vitest: 'readonly',
+        // Node globals
+        NodeJS: 'readonly',
       },
     },
     plugins: {
@@ -42,15 +54,18 @@ export default [
       '@typescript-eslint/explicit-function-return-type': 'off',
       '@typescript-eslint/explicit-module-boundary-types': 'off',
       '@typescript-eslint/no-empty-function': 'warn',
+      '@typescript-eslint/no-empty-object-type': 'off', // Allow empty interfaces for extension
       
       // React rules
       'react/react-in-jsx-scope': 'off', // Not needed with React 17+
       'react/prop-types': 'off', // TypeScript handles this
+      'react/display-name': 'off', // Not critical for functionality
       
       // General rules
       'no-console': 'warn',
       'no-debugger': 'error',
       'no-unused-vars': 'off', // Use TypeScript version instead
+      'no-undef': 'off', // TypeScript handles this better
     },
     settings: {
       react: {

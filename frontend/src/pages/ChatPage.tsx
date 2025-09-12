@@ -159,7 +159,7 @@ const ChatPage: React.FC = () => {
         ]);
       }
       return response.data;
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
          
@@ -191,7 +191,7 @@ const ChatPage: React.FC = () => {
       
       // Scroll to bottom after messages are set
       setTimeout(() => scrollToBottom(), 100);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to load conversation');
       if (process.env.NODE_ENV === 'development') {
          

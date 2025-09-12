@@ -119,8 +119,9 @@ class LangGraphWorkflowManager:
                 "Failed to initialize checkpointer, falling back to memory",
                 error=str(e),
             )
-            # Always ensure we have a working checkpointer
-            self.checkpointer = None
+            # Always ensure we have a working checkpointer - fallback to MemorySaver directly
+            self.checkpointer = MemorySaver()
+            logger.info("LangGraph Memory checkpointer initialized (exception fallback)")
 
         # Final safety check - ensure we always have a working checkpointer
         if self.checkpointer is None:
@@ -584,7 +585,7 @@ class LangGraphWorkflowManager:
         self, workflow: Pregel, thread_id: str
     ) -> ConversationState | None:
         """Get conversation history for a thread."""
-        self._ensure_initialized()
+        await self._ensure_initialized()
         if not self.checkpointer:
             return None
 

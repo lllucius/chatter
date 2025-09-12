@@ -48,10 +48,11 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const response =
-        await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
-          conversation.id
+        await getSDK().chat.getConversationApiV1ChatConversationsConversationId(
+          conversation.id,
+          { includeMessages: true }
         );
-      const messages = response.data;
+      const messages = response.messages || [];
       setConversationMessages(messages);
     } catch (err: any) {
       console.error('Failed to load messages:', err);

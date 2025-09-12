@@ -21,7 +21,7 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
           const refreshSuccess = await authService.refreshToken();
           setIsAuthenticated(refreshSuccess);
         }
-      } catch (_error) {
+      } catch {
         // Authentication check failed - user will be redirected to login
         setIsAuthenticated(false);
       } finally {

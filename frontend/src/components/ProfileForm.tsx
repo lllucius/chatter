@@ -92,7 +92,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     try {
       const response = await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
       setProvidersData(response as ProvidersData);
-    } catch (_error) {
+    } catch {
       // Failed to fetch providers - handled by setting error state
       setProvidersError('Failed to load available providers');
     } finally {

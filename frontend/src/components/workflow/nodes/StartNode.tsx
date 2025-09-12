@@ -4,7 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { PlayArrow as StartIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const StartNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const StartNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data: _data, selected }) => {
   return (
     <>
       <Card 

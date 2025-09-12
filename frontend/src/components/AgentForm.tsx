@@ -214,7 +214,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
       };
 
       await onSubmit(submitData);
-    } catch (_error) {
+    } catch {
       // Error saving agent - handled gracefully by finally block
     } finally {
       setSaving(false);

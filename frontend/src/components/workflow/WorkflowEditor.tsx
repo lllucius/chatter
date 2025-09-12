@@ -255,7 +255,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   );
 
   // Get default configuration for node type
-  const getDefaultNodeConfig = (nodeType: WorkflowNodeType): Record<string, any> => {
+  const getDefaultNodeConfig = (nodeType: WorkflowNodeType): Record<string, unknown> => {
     switch (nodeType) {
       case 'start':
         return { isEntryPoint: true };

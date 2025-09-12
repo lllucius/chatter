@@ -17,7 +17,7 @@ export interface UseBaseFormOptions<TData> {
   defaultData: TData;
   resetOnOpen?: boolean;
   resetOnClose?: boolean;
-  transformInitialData?: (initialData: any) => TData;
+  transformInitialData?: (initialData: unknown) => TData;
 }
 
 export interface UseBaseFormReturn<TData> {
@@ -35,7 +35,7 @@ export function useBaseForm<TData>(
   options: UseBaseFormOptions<TData>,
   open: boolean,
   mode: 'create' | 'edit',
-  initialData?: any
+  initialData?: unknown
 ): UseBaseFormReturn<TData> {
   const {
     defaultData,
@@ -105,7 +105,7 @@ export function useBaseForm<TData>(
 /**
  * Common form validation utilities
  */
-export interface ValidationRule<T = any> {
+export interface ValidationRule<T = unknown> {
   required?: boolean;
   minLength?: number;
   maxLength?: number;
@@ -117,7 +117,7 @@ export interface ValidationErrors {
   [key: string]: string;
 }
 
-export function validateField(value: any, rules: ValidationRule): string | null {
+export function validateField(value: unknown, rules: ValidationRule): string | null {
   if (rules.required && (!value || (typeof value === 'string' && !value.trim()))) {
     return 'This field is required';
   }
@@ -143,7 +143,7 @@ export function validateField(value: any, rules: ValidationRule): string | null 
   return null;
 }
 
-export function validateForm<T extends Record<string, any>>(
+export function validateForm<T extends Record<string, unknown>>(
   data: T,
   rules: { [K in keyof T]?: ValidationRule }
 ): ValidationErrors {
@@ -164,7 +164,7 @@ export function validateForm<T extends Record<string, any>>(
 /**
  * Hook for form validation
  */
-export function useFormValidation<T extends Record<string, any>>(
+export function useFormValidation<T extends Record<string, unknown>>(
   data: T,
   rules: { [K in keyof T]?: ValidationRule }
 ) {

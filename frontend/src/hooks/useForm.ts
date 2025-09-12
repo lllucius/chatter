@@ -14,7 +14,7 @@ interface UseFormReturn<T> {
   handleChange: (name: keyof T) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
   handleBlur: (name: keyof T) => () => void;
   handleSubmit: (event?: React.FormEvent) => Promise<void>;
-  setFieldValue: (name: keyof T, value: any) => void;
+  setFieldValue: (name: keyof T, value: T[keyof T]) => void;
   setFieldError: (name: keyof T, error: string) => void;
   resetForm: () => void;
   isValid: boolean;
@@ -23,7 +23,7 @@ interface UseFormReturn<T> {
 /**
  * Custom hook for form handling with validation and submission
  */
-export function useForm<T extends Record<string, any>>(
+export function useForm<T extends Record<string, unknown>>(
   options: UseFormOptions<T>
 ): UseFormReturn<T> {
   const { initialValues, onSubmit, validate } = options;
@@ -75,7 +75,7 @@ export function useForm<T extends Record<string, any>>(
     }
   }, [values, validate]);
 
-  const setFieldValue = useCallback((name: keyof T, value: any) => {
+  const setFieldValue = useCallback((name: keyof T, value: T[keyof T]) => {
     setValues(prev => ({
       ...prev,
       [name]: value,
@@ -123,10 +123,10 @@ export function useForm<T extends Record<string, any>>(
       try {
         await onSubmit(values);
       } catch (error) {
-        // Log error for debugging in development
+        // Form submission error - handled by UI state
         if (process.env.NODE_ENV === 'development') {
            
-          console.error('Form submission error:', error);
+          // Error details available for debugging in dev mode
         }
       } finally {
         setIsSubmitting(false);

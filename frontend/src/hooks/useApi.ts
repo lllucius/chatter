@@ -44,14 +44,14 @@ export function useApi<T>(
       const result = await apiCallRef.current();
       setData(result);
       onSuccessRef.current?.(result);
-    } catch (err: any) {
-      const errorMessage = err.message || 'An error occurred';
+    } catch (err: unknown) {
+      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
       onErrorRef.current?.(err);
-      // Log error for debugging in development
+      // API call failed - error is available in component state
       if (process.env.NODE_ENV === 'development') {
          
-        console.error('API call failed:', err);
+        // Error details available for debugging in dev mode
       }
     } finally {
       setLoading(false);

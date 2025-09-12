@@ -1,4 +1,4 @@
-import { WorkflowDefinition, WorkflowNodeData } from './WorkflowEditor';
+import { WorkflowDefinition, WorkflowNodeType } from './WorkflowEditor';
 
 /**
  * Utility to convert visual workflow definitions to LangGraph-compatible format
@@ -23,7 +23,7 @@ export interface LangGraphWorkflowConfig {
 export interface LangGraphNode {
   id: string;
   type: 'start' | 'manage_memory' | 'retrieve_context' | 'call_model' | 'execute_tools' | 'conditional';
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 export interface LangGraphEdge {
@@ -89,7 +89,7 @@ export class WorkflowTranslator {
    */
   private static translateNodes(workflow: WorkflowDefinition): LangGraphNode[] {
     return workflow.nodes.map(node => {
-      const langGraphType = this.mapNodeTypeToLangGraph(node.type as any);
+      const langGraphType = this.mapNodeTypeToLangGraph(node.type as WorkflowNodeType);
       
       return {
         id: node.id,

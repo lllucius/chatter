@@ -204,7 +204,7 @@ const LayoutFrame: React.FC = () => {
   const handleLogout = async () => {
     try {
       await authService.logout();
-    } catch (_error) {
+    } catch {
       // Logout failed but still proceed with navigation for user experience
     } finally {
       navigate('/login', { replace: true });

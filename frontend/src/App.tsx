@@ -54,7 +54,7 @@ function App() {
     const initAuth = async () => {
       try {
         await initializeSDK();
-      } catch (_error) {
+      } catch {
         // Failed to initialize SDK - handled gracefully by setting authInitialized to true
       } finally {
         setAuthInitialized(true);

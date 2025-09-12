@@ -187,7 +187,7 @@ class WorkflowManagementService:
         try:
             conditions = [WorkflowDefinition.owner_id == owner_id]
             if include_public:
-                conditions.append(WorkflowDefinition.is_public)
+                conditions.append(WorkflowDefinition.is_public == True)
 
             result = await self.session.execute(
                 select(WorkflowDefinition)

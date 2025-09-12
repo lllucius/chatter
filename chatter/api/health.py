@@ -167,7 +167,6 @@ async def get_metrics() -> MetricsResponse:
             endpoint_stats.update(
                 {k: v.__dict__ for k, v in endpoint_data.items()}
             )
-            endpoint_stats.update(endpoint_data)
         except Exception as e:
             logger.warning(f"Failed to get endpoint stats: {e}")
 

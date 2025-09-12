@@ -77,7 +77,7 @@ class LLMService:
                     base_url=provider.base_url,
                     model=model_def.model_name,
                     temperature=config.get("temperature", 0.7),
-                    max_tokens=model_def.max_tokens
+                    max_completion_tokens=model_def.max_tokens
                     or config.get("max_tokens", 4096),
                 )
 

@@ -402,8 +402,8 @@ class ToolAccessService:
         self, tool_name: str, server_name: str | None
     ) -> tuple[ServerTool | None, ToolServer | None]:
         """Get tool and server information."""
-        tool = None
-        server = None
+        tool: ServerTool | None = None
+        server: ToolServer | None = None
 
         if server_name:
             # Get server first

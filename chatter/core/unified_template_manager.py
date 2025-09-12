@@ -18,6 +18,7 @@ from sqlalchemy.orm import selectinload
 
 # Use the centralized validation result from the workflow validation service
 from chatter.core.validation.results import ValidationResult
+from chatter.core.validation.exceptions import ValidationError
 from chatter.core.workflow_validation import workflow_validation_service
 from chatter.models.workflow import TemplateCategory
 
@@ -38,6 +39,7 @@ def get_secure_logger(name: str):
 logger = get_secure_logger(__name__)
 
 
+@dataclass
 @dataclass
 class WorkflowTemplate:
     """Pre-configured workflow template."""
@@ -308,9 +310,9 @@ class UnifiedTemplateManager:
         validation_result = await self.validate_template(
             custom_template
         )
-        if not validation_result.valid:
+        if not validation_result.is_valid:
             raise WorkflowConfigurationError(
-                f"Template validation failed: {', '.join(validation_result.errors)}"
+                f"Template validation failed: {', '.join(str(error) for error in validation_result.errors)}"
             )
 
         # Save to database if session available
@@ -483,9 +485,9 @@ class UnifiedTemplateManager:
         """
         # Validate template before registration
         validation_result = await self.validate_template(template)
-        if not validation_result.valid:
+        if not validation_result.is_valid:
             raise WorkflowConfigurationError(
-                f"Cannot register invalid template: {', '.join(validation_result.errors)}"
+                f"Cannot register invalid template: {', '.join(str(error) for error in validation_result.errors)}"
             )
 
         if self.session:
@@ -597,16 +599,15 @@ class UnifiedTemplateManager:
             # Use centralized validation service
             return (
                 workflow_validation_service.validate_workflow_template(
-                    template
+                    template  # type: ignore # Template compatibility handled by validation service
                 )
             )
         except Exception as e:
             logger.error(f"Template validation failed: {e}")
             return ValidationResult(
-                valid=False,
-                errors=[f"Validation failed: {str(e)}"],
+                is_valid=False,
+                errors=[ValidationError(f"Validation failed: {str(e)}")],
                 warnings=[],
-                requirements_met=False,
             )
 
     async def validate_template_requirements(
@@ -663,14 +664,9 @@ class UnifiedTemplateManager:
         requirements_met = len(errors) == 0
 
         return ValidationResult(
-            valid=requirements_met,
-            errors=errors,
+            is_valid=requirements_met,
+            errors=[ValidationError(error) for error in errors],
             warnings=warnings,
-            requirements_met=requirements_met,
-            missing_tools=missing_tools if missing_tools else None,
-            missing_retrievers=(
-                missing_retrievers if missing_retrievers else None
-            ),
         )
 
     # Workflow creation (from WorkflowTemplateManager)

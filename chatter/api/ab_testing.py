@@ -997,7 +997,7 @@ async def get_ab_test_metrics(
                             if isinstance(sample_size, int | float)
                             else 0
                         ),
-                        confidence_interval=confidence_interval,
+                        confidence_interval=list(confidence_interval) if confidence_interval else None,
                     )
                 )
 

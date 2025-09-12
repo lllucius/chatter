@@ -206,22 +206,20 @@ class PGVectorStore(AbstractVectorStore):
             if embeddings:
                 return await asyncio.to_thread(
                     self._store.add_embeddings,
-                    list(
-                        zip(
-                            [doc.page_content for doc in documents],
-                            embeddings,
-                            strict=False,
-                        )
-                    ),
+                    list(zip(  # type: ignore # Complex langchain integration
+                        [doc.page_content for doc in documents],
+                        embeddings,
+                        strict=False,
+                    )),
                     [doc.metadata for doc in documents],
-                    ids,
+                    ids,  # type: ignore # Complex langchain parameter handling
                 )
             else:
                 assert (
                     self._store is not None
                 ), "PGVector store not initialized"
                 return await asyncio.to_thread(
-                    self._store.add_documents, documents, ids
+                    self._store.add_documents, documents, ids  # type: ignore # Complex langchain parameter handling
                 )
         except Exception as e:
             logger.error(

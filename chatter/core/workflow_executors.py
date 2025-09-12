@@ -186,6 +186,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=20
@@ -295,6 +300,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             if user_id is None:
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
+                
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
                 
             recent_messages = (
                 await self.message_service.get_recent_messages(
@@ -432,6 +442,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=30
@@ -550,6 +565,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             if user_id is None:
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
+                
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
                 
             recent_messages = (
                 await self.message_service.get_recent_messages(
@@ -687,6 +707,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=100
@@ -805,6 +830,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
             if user_id is None:
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
+                
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
                 
             recent_messages = (
                 await self.message_service.get_recent_messages(
@@ -949,6 +979,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=50
@@ -1074,6 +1109,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
             if user_id is None:
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
+                
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
                 
             recent_messages = (
                 await self.message_service.get_recent_messages(

@@ -77,14 +77,15 @@ class TestDataManagementIntegration:
             response_data = response.json()
             assert "backup_id" in response_data
             backup_id = response_data["backup_id"]
-            
+
             # Use the backup_id to test backup status or details endpoint
             backup_status_response = await client.get(
-                f"/api/v1/data-management/backups/{backup_id}", headers=auth_headers
+                f"/api/v1/data-management/backups/{backup_id}",
+                headers=auth_headers,
             )
             # Should either work (200) or gracefully handle not found (404) during async backup
             assert backup_status_response.status_code in [200, 404, 500]
-            
+
             if backup_status_response.status_code == 200:
                 backup_data = backup_status_response.json()
                 assert "backup_id" in backup_data
@@ -142,24 +143,35 @@ class TestDataManagementIntegration:
         if response.status_code == 200:
             stats_data = response.json()
             assert isinstance(stats_data, dict)
-            
+
             # Validate expected fields in storage stats response
-            expected_fields = ["total_size", "documents", "conversations", "backups"]
+            expected_fields = [
+                "total_size",
+                "documents",
+                "conversations",
+                "backups",
+            ]
             present_fields = []
-            
+
             # Check which expected fields are actually present
             for field in expected_fields:
                 if field in stats_data:
                     present_fields.append(field)
                     # Validate field types
                     if field == "total_size":
-                        assert isinstance(stats_data[field], (int, float))
+                        assert isinstance(
+                            stats_data[field], (int, float)
+                        )
                         assert stats_data[field] >= 0
                     else:  # documents, conversations, backups should be counts or objects
-                        assert isinstance(stats_data[field], (int, dict))
-                        
+                        assert isinstance(
+                            stats_data[field], (int, dict)
+                        )
+
             # At least one expected field should be present
-            assert len(present_fields) > 0, f"None of the expected fields {expected_fields} found in response: {list(stats_data.keys())}"
+            assert (
+                len(present_fields) > 0
+            ), f"None of the expected fields {expected_fields} found in response: {list(stats_data.keys())}"
 
     @pytest.mark.integration
     async def test_bulk_delete_documents_workflow(

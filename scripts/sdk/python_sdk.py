@@ -54,26 +54,36 @@ class PythonSDKGenerator:
             generator_config = get_openapi_generator_config(self.config)
 
             # Create temporary config file
-            config_file = self.config.output_dir / "generator-config.json"
+            config_file = (
+                self.config.output_dir / "generator-config.json"
+            )
             with open(config_file, "w") as f:
                 json.dump(generator_config, f, indent=2)
             self.temp_files.append(config_file)
 
             # Build OpenAPI Generator command
             cmd = [
-                "npx", "@openapitools/openapi-generator-cli", "generate",
-                "-i", str(openapi_spec),
-                "-g", "python",
-                "-o", str(self.config.output_dir),
-                "-c", str(config_file),
+                "npx",
+                "@openapitools/openapi-generator-cli",
+                "generate",
+                "-i",
+                str(openapi_spec),
+                "-g",
+                "python",
+                "-o",
+                str(self.config.output_dir),
+                "-c",
+                str(config_file),
                 "--skip-validate-spec",  # Skip spec validation for OpenAPI 3.1
                 "--additional-properties",
                 f"packageName={self.config.package_name},"
                 f"projectName={self.config.project_name},"
-                f"packageVersion={self.config.package_version}"
+                f"packageVersion={self.config.package_version}",
             ]
 
-            print(f"🐍 Generating Python SDK in {self.config.output_dir}")
+            print(
+                f"🐍 Generating Python SDK in {self.config.output_dir}"
+            )
             print(f"   Using spec: {openapi_spec}")
 
             # Run the generator
@@ -81,7 +91,7 @@ class PythonSDKGenerator:
                 cmd,
                 capture_output=True,
                 text=True,
-                cwd=self.config.project_root
+                cwd=self.config.project_root,
             )
 
             if result.returncode != 0:
@@ -115,7 +125,7 @@ class PythonSDKGenerator:
                 f"{self.config.package_name}/__init__.py",
                 f"{self.config.package_name}/api_client.py",
                 f"{self.config.package_name}/configuration.py",
-                "requirements.txt"
+                "requirements.txt",
             ]
 
             missing_files = []
@@ -125,11 +135,17 @@ class PythonSDKGenerator:
                     missing_files.append(file_path)
 
             if missing_files:
-                print(f"❌ Missing essential SDK files: {missing_files}")
+                print(
+                    f"❌ Missing essential SDK files: {missing_files}"
+                )
                 return False
 
             # Check for API modules
-            api_dir = self.config.output_dir / self.config.package_name / "api"
+            api_dir = (
+                self.config.output_dir
+                / self.config.package_name
+                / "api"
+            )
             if api_dir.exists():
                 api_files = list(api_dir.glob("*.py"))
                 if not api_files:
@@ -137,7 +153,11 @@ class PythonSDKGenerator:
                     return False
 
             # Check for model modules
-            models_dir = self.config.output_dir / self.config.package_name / "models"
+            models_dir = (
+                self.config.output_dir
+                / self.config.package_name
+                / "models"
+            )
             if models_dir.exists():
                 model_files = list(models_dir.glob("*.py"))
                 if not model_files:
@@ -159,14 +179,20 @@ class PythonSDKGenerator:
         """
         # Look for spec files in standard locations (prefer 3.0 compatible version)
         possible_locations = [
-            self.config.project_root / "docs" / "api" / "openapi-3.0.json",
+            self.config.project_root
+            / "docs"
+            / "api"
+            / "openapi-3.0.json",
             self.config.project_root / "docs" / "api" / "openapi.json",
-            self.config.project_root / "docs" / "api" / "openapi-3.0.yaml",
+            self.config.project_root
+            / "docs"
+            / "api"
+            / "openapi-3.0.yaml",
             self.config.project_root / "docs" / "api" / "openapi.yaml",
             self.config.project_root / "openapi-3.0.json",
             self.config.project_root / "openapi.json",
             self.config.project_root / "openapi-3.0.yaml",
-            self.config.project_root / "openapi.yaml"
+            self.config.project_root / "openapi.yaml",
         ]
 
         for spec_path in possible_locations:

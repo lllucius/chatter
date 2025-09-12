@@ -633,4 +633,3 @@ class TestVersioningIntegration:
 
         assert not self.manager.is_version_supported(APIVersion.V1)
         assert self.manager.is_version_supported(APIVersion.V2)
-

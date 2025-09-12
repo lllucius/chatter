@@ -36,6 +36,7 @@ def convert_openapi_3_1_to_3_0(spec: dict[str, Any]) -> dict[str, Any]:
     """
     # Create a deep copy to avoid modifying the original
     import copy
+
     converted = copy.deepcopy(spec)
 
     # Convert version to 3.0.3
@@ -56,8 +57,14 @@ def convert_openapi_3_1_to_3_0(spec: dict[str, Any]) -> dict[str, Any]:
     def replace_refs(obj):
         if isinstance(obj, dict):
             for key, value in obj.items():
-                if key == "$ref" and isinstance(value, str) and value.startswith("#/$defs/"):
-                    obj[key] = value.replace("#/$defs/", "#/components/schemas/")
+                if (
+                    key == "$ref"
+                    and isinstance(value, str)
+                    and value.startswith("#/$defs/")
+                ):
+                    obj[key] = value.replace(
+                        "#/$defs/", "#/components/schemas/"
+                    )
                 else:
                     replace_refs(value)
         elif isinstance(obj, list):
@@ -69,7 +76,9 @@ def convert_openapi_3_1_to_3_0(spec: dict[str, Any]) -> dict[str, Any]:
     return converted
 
 
-def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
+def export_openapi_json(
+    spec: dict[str, Any], output_path: Path
+) -> None:
     """Export OpenAPI specification as JSON.
 
     Args:
@@ -82,7 +91,9 @@ def export_openapi_json(spec: dict[str, Any], output_path: Path) -> None:
         json.dump(spec, f, indent=2, ensure_ascii=False)
 
 
-def export_openapi_yaml(spec: dict[str, Any], output_path: Path) -> None:
+def export_openapi_yaml(
+    spec: dict[str, Any], output_path: Path
+) -> None:
     """Export OpenAPI specification as YAML.
 
     Args:

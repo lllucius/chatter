@@ -195,8 +195,6 @@ class TestContractTesting:
                 doc["status"] in valid_statuses
             ), f"Invalid document status: {doc['status']}"
 
-
-
     @pytest.mark.contract
     async def test_error_response_consistency(
         self, client: AsyncClient, auth_headers: dict[str, str]

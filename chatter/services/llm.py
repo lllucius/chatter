@@ -300,7 +300,11 @@ class LLMService:
                 # Only create provider if we have an API key or if it's not required
                 if api_key or not provider.api_key_required:
                     return ChatAnthropic(
-                        api_key=SecretStr(api_key) if api_key else SecretStr("dummy"),
+                        api_key=(
+                            SecretStr(api_key)
+                            if api_key
+                            else SecretStr("dummy")
+                        ),
                         model_name=model_def.model_name,
                         temperature=profile.temperature,
                         max_tokens_to_sample=profile.max_tokens,
@@ -408,7 +412,9 @@ class LLMService:
                     api_key=SecretStr(api_key),
                     model=model,
                     temperature=kwargs.get("temperature", 0.7),
-                    max_completion_tokens=kwargs.get("max_tokens", 1000),
+                    max_completion_tokens=kwargs.get(
+                        "max_tokens", 1000
+                    ),
                 )
             elif provider and provider.lower() == "anthropic":
                 api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")

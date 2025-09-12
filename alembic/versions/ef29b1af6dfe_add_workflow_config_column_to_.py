@@ -5,6 +5,7 @@ Revises: 001_workflow_templates
 Create Date: 2025-09-08 11:11:25.347617
 
 """
+
 from collections.abc import Sequence
 
 import sqlalchemy as sa
@@ -25,7 +26,7 @@ def upgrade() -> None:
     try:
         op.add_column(
             "conversations",
-            sa.Column("workflow_config", sa.JSON(), nullable=True)
+            sa.Column("workflow_config", sa.JSON(), nullable=True),
         )
     except Exception:
         # If table doesn't exist, we'll skip this for now

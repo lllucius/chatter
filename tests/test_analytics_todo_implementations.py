@@ -28,13 +28,16 @@ class TestAnalyticsTodoImplementations:
         """Create analytics service with mocked dependencies."""
         # Create actual performance monitor but with mocked data
         from chatter.utils.performance import PerformanceMonitor
-        
+
         mock_perf_monitor = PerformanceMonitor()
         # Pre-populate with test data to simulate real operation tracking
         mock_perf_monitor.query_times = {
-            "get_conversation_stats": [50.0] * 10,  # 10 operations at 50ms each
-            "vector_search_operation": [100.0] * 5,  # 5 operations at 100ms each
-            "embedding_generation": [200.0] * 3,  # 3 operations at 200ms each
+            "get_conversation_stats": [50.0]
+            * 10,  # 10 operations at 50ms each
+            "vector_search_operation": [100.0]
+            * 5,  # 5 operations at 100ms each
+            "embedding_generation": [200.0]
+            * 3,  # 3 operations at 200ms each
         }
         mock_perf_monitor.query_counts = {
             "get_conversation_stats": 10,
@@ -46,8 +49,12 @@ class TestAnalyticsTodoImplementations:
         mock_cache = AsyncMock()
         mock_cache.get_stats.return_value = Mock(hit_rate=0.85)
 
-        with patch("chatter.core.cache_factory.CacheFactory") as mock_cache_factory:
-            mock_cache_factory.return_value.get_cache.return_value = mock_cache
+        with patch(
+            "chatter.core.cache_factory.CacheFactory"
+        ) as mock_cache_factory:
+            mock_cache_factory.return_value.get_cache.return_value = (
+                mock_cache
+            )
 
             service = AnalyticsService(mock_session)
             # Inject the mock performance monitor with real data
@@ -103,7 +110,7 @@ class TestAnalyticsTodoImplementations:
     def analytics_service_empty(self, mock_session):
         """Create analytics service with empty performance data."""
         from chatter.utils.performance import PerformanceMonitor
-        
+
         mock_perf_monitor = PerformanceMonitor()
         # Empty data
         mock_perf_monitor.query_times = {}
@@ -113,8 +120,12 @@ class TestAnalyticsTodoImplementations:
         mock_cache = AsyncMock()
         mock_cache.get_stats.return_value = Mock(hit_rate=0.85)
 
-        with patch("chatter.core.cache_factory.CacheFactory") as mock_cache_factory:
-            mock_cache_factory.return_value.get_cache.return_value = mock_cache
+        with patch(
+            "chatter.core.cache_factory.CacheFactory"
+        ) as mock_cache_factory:
+            mock_cache_factory.return_value.get_cache.return_value = (
+                mock_cache
+            )
 
             service = AnalyticsService(mock_session)
             service.performance_monitor = mock_perf_monitor
@@ -135,17 +146,21 @@ class TestAnalyticsTodoImplementations:
     async def test_get_cache_hit_rate_no_cache(self, mock_session):
         """Test cache hit rate when no cache is available."""
         from chatter.utils.performance import PerformanceMonitor
-        
+
         mock_perf_monitor = PerformanceMonitor()
-        
-        with patch("chatter.core.cache_factory.CacheFactory") as mock_cache_factory:
+
+        with patch(
+            "chatter.core.cache_factory.CacheFactory"
+        ) as mock_cache_factory:
             # Mock cache factory to raise exception
-            mock_cache_factory.return_value.get_cache.side_effect = Exception("No cache")
+            mock_cache_factory.return_value.get_cache.side_effect = (
+                Exception("No cache")
+            )
 
             service = AnalyticsService(mock_session)
             service.performance_monitor = mock_perf_monitor
             service._cache_instance = None
-            
+
             hit_rate = await service._get_cache_hit_rate()
             assert hit_rate == 0.0
 
@@ -155,14 +170,22 @@ class TestAnalyticsTodoImplementations:
     ):
         """Test that the TODO implementations integrate correctly."""
         # Test the methods directly to ensure they are working as expected
-        database_time = await analytics_service._get_database_response_time()
-        vector_time = await analytics_service._get_vector_search_time() 
-        embedding_time = await analytics_service._get_embedding_generation_time()
-        
+        database_time = (
+            await analytics_service._get_database_response_time()
+        )
+        vector_time = await analytics_service._get_vector_search_time()
+        embedding_time = (
+            await analytics_service._get_embedding_generation_time()
+        )
+
         # Verify the implementations work correctly with the test data
         assert database_time == 50.0  # From test fixture
-        assert vector_time == 137.5   # Combined vector+embedding operations
-        assert embedding_time == 200.0  # Embedding generation operations only
+        assert (
+            vector_time == 137.5
+        )  # Combined vector+embedding operations
+        assert (
+            embedding_time == 200.0
+        )  # Embedding generation operations only
 
     @pytest.mark.asyncio
     async def test_system_analytics_integration(
@@ -170,10 +193,14 @@ class TestAnalyticsTodoImplementations:
     ):
         """Test that the system analytics TODO implementations work."""
         # Test the methods directly
-        vector_size = await analytics_service._get_vector_database_size()
+        vector_size = (
+            await analytics_service._get_vector_database_size()
+        )
         cache_hit_rate = await analytics_service._get_cache_hit_rate()
-        
+
         # Verify the implementations work correctly
-        expected_size = 5000 * (1536 * 4 + 1024)  # From test fixture calculation  
+        expected_size = 5000 * (
+            1536 * 4 + 1024
+        )  # From test fixture calculation
         assert vector_size == expected_size
         assert cache_hit_rate == 0.85  # From test fixture

@@ -518,6 +518,3 @@ def get_unified_lazy_tool_loader() -> UnifiedLazyToolLoader:
     if _lazy_tool_loader is None:
         _lazy_tool_loader = UnifiedLazyToolLoader()
     return _lazy_tool_loader
-
-
-

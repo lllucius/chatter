@@ -8,8 +8,8 @@ from typing import Any
 import numpy as np
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
-from sqlalchemy.ext.asyncio import AsyncSession
 from pydantic import SecretStr
+from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
     from langchain_anthropic import AnthropicEmbeddings
@@ -27,8 +27,8 @@ except ImportError:
     GOOGLE_AVAILABLE = False
 
 try:
-    from langchain_cohere import CohereEmbeddings
     import cohere
+    from langchain_cohere import CohereEmbeddings
 
     COHERE_AVAILABLE = True
 except ImportError:
@@ -228,7 +228,9 @@ class EmbeddingService:
                     cohere_api_key=SecretStr(api_key),
                     model=model_def.model_name,
                     client=cohere.Client(api_key) if cohere else None,
-                    async_client=cohere.AsyncClient(api_key) if cohere else None,
+                    async_client=(
+                        cohere.AsyncClient(api_key) if cohere else None
+                    ),
                 )
 
             else:

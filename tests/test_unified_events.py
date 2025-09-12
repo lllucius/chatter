@@ -11,6 +11,7 @@ from chatter.core.audit_adapter import (
 )
 from chatter.core.events import (
     EventCategory,
+    EventManager,
     EventPriority,
     EventRouter,
     UnifiedEvent,
@@ -19,17 +20,14 @@ from chatter.core.events import (
     create_realtime_event,
     create_security_event,
     create_streaming_event,
-)
-from chatter.core.security_adapter import (
-    setup_security_integration,
-)
-from chatter.core.events import (
-    EventManager,
     emit_audit_event,
     emit_realtime_event,
     emit_security_event,
     emit_system_alert,
     get_event_stats,
+)
+from chatter.core.security_adapter import (
+    setup_security_integration,
 )
 
 

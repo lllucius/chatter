@@ -236,7 +236,7 @@ class DocumentService:
                         Document.id == document_id,
                         or_(
                             Document.owner_id == user_id,
-                            Document.is_public == True,
+                            Document.is_public,
                         ),
                     )
                 )
@@ -283,7 +283,7 @@ class DocumentService:
             query = select(Document).where(
                 or_(
                     Document.owner_id == user_id,
-                    Document.is_public == True,
+                    Document.is_public,
                 )
             )
 
@@ -485,7 +485,7 @@ class DocumentService:
                 select(Document.id).where(
                     or_(
                         Document.owner_id == user_id,
-                        Document.is_public == True,
+                        Document.is_public,
                     )
                 )
             )

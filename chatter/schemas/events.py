@@ -146,7 +146,9 @@ class BackupEvent(BaseModel):
     progress: float | None = Field(
         None, description="Progress percentage"
     )
-    message: str | None = Field(default=None, description="Status message")
+    message: str | None = Field(
+        default=None, description="Status message"
+    )
     backup_path: str | None = Field(
         None, description="Backup file path"
     )
@@ -175,7 +177,9 @@ class ToolServerEvent(BaseModel):
     server_id: str = Field(..., description="Tool server ID")
     server_name: str = Field(..., description="Tool server name")
     status: str = Field(..., description="Server status")
-    health_status: str | None = Field(default=None, description="Health status")
+    health_status: str | None = Field(
+        default=None, description="Health status"
+    )
     details: dict[str, Any] | None = Field(
         None, description="Additional details"
     )
@@ -188,7 +192,9 @@ class DocumentEvent(BaseModel):
     """Document event data."""
 
     document_id: str = Field(..., description="Document ID")
-    filename: str | None = Field(default=None, description="Document filename")
+    filename: str | None = Field(
+        default=None, description="Document filename"
+    )
     status: str = Field(..., description="Document processing status")
     progress: float | None = Field(
         None, description="Processing progress"
@@ -205,7 +211,9 @@ class SystemEvent(BaseModel):
     """System event data."""
 
     message: str = Field(..., description="System message")
-    status: str | None = Field(default=None, description="System status")
+    status: str | None = Field(
+        default=None, description="System status"
+    )
     details: dict[str, Any] | None = Field(
         None, description="Additional details"
     )

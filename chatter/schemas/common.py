@@ -35,7 +35,8 @@ class PaginatedRequest(BaseModel):
         description="Pagination parameters",
     )
     sorting: SortingRequest = Field(
-        default_factory=lambda: SortingRequest(), description="Sorting parameters"
+        default_factory=lambda: SortingRequest(),
+        description="Sorting parameters",
     )
 
 
@@ -133,7 +134,9 @@ class FilterParams(BaseModel):
     """Base filter parameters."""
 
     search: str | None = Field(default=None, description="Search query")
-    tags: list[str] | None = Field(default=None, description="Filter by tags")
+    tags: list[str] | None = Field(
+        default=None, description="Filter by tags"
+    )
     created_after: datetime | None = Field(
         None, description="Created after date"
     )

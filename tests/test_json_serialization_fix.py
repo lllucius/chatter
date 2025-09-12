@@ -1,8 +1,8 @@
 """Test for JSON serialization fix for bytes objects in validation errors."""
 
 import json
+
 from fastapi.exceptions import RequestValidationError
-import pytest
 
 from chatter.utils.problem import ValidationProblem, _sanitize_for_json
 

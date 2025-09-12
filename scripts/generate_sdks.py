@@ -23,17 +23,19 @@ from scripts.utils.config import (
 
 # Import standalone generators
 sys.path.insert(0, str(project_root))
-from generate_ts_models import main as generate_models_main  
 from generate_ts_apis import main as generate_apis_main
+from generate_ts_models import main as generate_models_main
 
 
-def generate_python_sdk(project_root: Path, verbose: bool = False) -> bool:
+def generate_python_sdk(
+    project_root: Path, verbose: bool = False
+) -> bool:
     """Generate Python SDK.
-    
+
     Args:
         project_root: Root directory of the project
         verbose: Enable verbose output
-        
+
     Returns:
         True if generation was successful, False otherwise
     """
@@ -47,7 +49,9 @@ def generate_python_sdk(project_root: Path, verbose: bool = False) -> bool:
 
     if success:
         if verbose:
-            print(f"✅ Python SDK generated successfully in {config.output_dir}")
+            print(
+                f"✅ Python SDK generated successfully in {config.output_dir}"
+            )
         # Validate the generated SDK
         if generator.validate():
             if verbose:
@@ -61,13 +65,15 @@ def generate_python_sdk(project_root: Path, verbose: bool = False) -> bool:
         return False
 
 
-def generate_typescript_sdk(project_root: Path, verbose: bool = False) -> bool:
+def generate_typescript_sdk(
+    project_root: Path, verbose: bool = False
+) -> bool:
     """Generate TypeScript SDK.
-    
+
     Args:
         project_root: Root directory of the project
         verbose: Enable verbose output
-        
+
     Returns:
         True if generation was successful, False otherwise
     """
@@ -75,38 +81,40 @@ def generate_typescript_sdk(project_root: Path, verbose: bool = False) -> bool:
         print("📦 Starting TypeScript SDK generation...")
 
     config = get_default_typescript_config(project_root)
-    
+
     try:
         # Clean output directories for models and apis
         models_dir = config.output_dir / "src" / "models"
         apis_dir = config.output_dir / "src" / "apis"
-        
+
         if models_dir.exists():
             if verbose:
                 print("🧹 Cleaning models directory...")
             import shutil
+
             shutil.rmtree(models_dir)
-            
+
         if apis_dir.exists():
             if verbose:
                 print("🧹 Cleaning APIs directory...")
             import shutil
+
             shutil.rmtree(apis_dir)
-        
+
         # Change to project directory for the generators
         original_cwd = Path.cwd()
         os.chdir(project_root)
-        
+
         # Generate TypeScript models
         if verbose:
             print("🔧 Generating TypeScript models...")
         generate_models_main()
-        
-        # Generate TypeScript APIs  
+
+        # Generate TypeScript APIs
         if verbose:
             print("🔧 Generating TypeScript API clients...")
         generate_apis_main()
-        
+
     except Exception as e:
         print(f"❌ TypeScript SDK generation failed: {e}")
         return False
@@ -115,8 +123,10 @@ def generate_typescript_sdk(project_root: Path, verbose: bool = False) -> bool:
         os.chdir(original_cwd)
 
     if verbose:
-        print(f"✅ TypeScript SDK generated successfully in {config.output_dir}")
-    
+        print(
+            f"✅ TypeScript SDK generated successfully in {config.output_dir}"
+        )
+
     # Validate the generated SDK
     if validate_typescript_sdk(config, verbose):
         if verbose:
@@ -133,7 +143,7 @@ def validate_typescript_sdk(config, verbose: bool = False) -> bool:
     Args:
         config: TypeScript SDK configuration
         verbose: Enable verbose output
-        
+
     Returns:
         True if SDK validation passes, False otherwise
     """
@@ -144,10 +154,7 @@ def validate_typescript_sdk(config, verbose: bool = False) -> bool:
             return False
 
         # Check for essential TypeScript SDK files
-        essential_files = [
-            "src/index.ts",
-            "src/runtime.ts"
-        ]
+        essential_files = ["src/index.ts", "src/runtime.ts"]
 
         missing_files = []
         for file_path in essential_files:
@@ -194,38 +201,37 @@ def main() -> int:
         epilog="""
 Examples:
   python scripts/generate_sdks.py --python      # Generate Python SDK only
-  python scripts/generate_sdks.py --typescript  # Generate TypeScript SDK only  
+  python scripts/generate_sdks.py --typescript  # Generate TypeScript SDK only
   python scripts/generate_sdks.py --all         # Generate both SDKs
   python scripts/generate_sdks.py               # Generate both SDKs (default)
-  
+
   # Alternative module execution:
   python -m scripts --python                    # Generate Python SDK only
   python -m scripts --all                       # Generate both SDKs
-        """.strip()
+        """.strip(),
     )
 
     parser.add_argument(
-        "--python",
-        action="store_true",
-        help="Generate Python SDK only"
+        "--python", action="store_true", help="Generate Python SDK only"
     )
 
     parser.add_argument(
-        "--typescript", 
+        "--typescript",
         action="store_true",
-        help="Generate TypeScript SDK only"
+        help="Generate TypeScript SDK only",
     )
 
     parser.add_argument(
         "--all",
-        action="store_true", 
-        help="Generate both Python and TypeScript SDKs"
+        action="store_true",
+        help="Generate both Python and TypeScript SDKs",
     )
 
     parser.add_argument(
-        "--verbose", "-v",
+        "--verbose",
+        "-v",
         action="store_true",
-        help="Enable verbose output"
+        help="Enable verbose output",
     )
 
     args = parser.parse_args()
@@ -243,7 +249,9 @@ Examples:
 
     if args.verbose:
         print(f"🏠 Project root: {project_root}")
-        print(f"🔧 Generating: Python={generate_python}, TypeScript={generate_typescript}")
+        print(
+            f"🔧 Generating: Python={generate_python}, TypeScript={generate_typescript}"
+        )
         print()
 
     success_count = 0
@@ -258,7 +266,7 @@ Examples:
             if not args.verbose:
                 print("❌ Python SDK generation failed")
 
-    # Generate TypeScript SDK  
+    # Generate TypeScript SDK
     if generate_typescript:
         total_count += 1
         if generate_typescript_sdk(project_root, args.verbose):
@@ -270,7 +278,9 @@ Examples:
     # Summary
     if args.verbose:
         print()
-        print(f"📊 Summary: {success_count}/{total_count} SDKs generated successfully")
+        print(
+            f"📊 Summary: {success_count}/{total_count} SDKs generated successfully"
+        )
 
     if success_count == total_count:
         if not args.verbose:
@@ -278,7 +288,9 @@ Examples:
         return 0
     else:
         if not args.verbose:
-            print(f"❌ Failed to generate {total_count - success_count} out of {total_count} SDK(s)")
+            print(
+                f"❌ Failed to generate {total_count - success_count} out of {total_count} SDK(s)"
+            )
         return 1
 
 

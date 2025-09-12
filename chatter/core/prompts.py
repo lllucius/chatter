@@ -145,7 +145,7 @@ class PromptService:
                         Prompt.id == prompt_id,
                         or_(
                             Prompt.owner_id == user_id,
-                            Prompt.is_public == True,
+                            Prompt.is_public,
                         ),
                     )
                 )
@@ -212,7 +212,7 @@ class PromptService:
             query = select(Prompt).where(
                 or_(
                     Prompt.owner_id == user_id,
-                    Prompt.is_public == True,
+                    Prompt.is_public,
                 )
             )
 

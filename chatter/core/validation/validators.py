@@ -26,7 +26,10 @@ class BaseValidator(ABC):
 
     @abstractmethod
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate a value according to the specified rule(s)."""
         pass
@@ -144,7 +147,10 @@ class InputValidator(BaseValidator):
         )
 
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate input according to the specified rule(s)."""
         # Handle multiple rules
@@ -315,7 +321,10 @@ class SecurityValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate input for security threats."""
         # Handle multiple rules
@@ -622,7 +631,10 @@ class ConfigValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate configuration settings."""
         # Handle multiple rules
@@ -735,7 +747,10 @@ class WorkflowValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate workflow configurations."""
         # Handle multiple rules
@@ -863,7 +878,10 @@ class AgentValidator(BaseValidator):
         ]
 
     def validate(
-        self, value: Any, rule: str | list[str], context: ValidationContext
+        self,
+        value: Any,
+        rule: str | list[str],
+        context: ValidationContext,
     ) -> ValidationResult:
         """Validate agent-specific input."""
         # Handle multiple rules

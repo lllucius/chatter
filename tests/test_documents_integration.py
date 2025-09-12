@@ -217,11 +217,16 @@ class TestDocumentsIntegration:
         if response.status_code == 200:
             stats_data = response.json()
             assert isinstance(stats_data, dict)
-            
+
             # Validate expected fields in document statistics
-            expected_fields = ["total_documents", "total_size", "by_type", "by_status"]
+            expected_fields = [
+                "total_documents",
+                "total_size",
+                "by_type",
+                "by_status",
+            ]
             present_fields = []
-            
+
             # Check which expected fields are actually present
             for field in expected_fields:
                 if field in stats_data:
@@ -231,17 +236,21 @@ class TestDocumentsIntegration:
                         assert isinstance(stats_data[field], int)
                         assert stats_data[field] >= 0
                     elif field == "total_size":
-                        assert isinstance(stats_data[field], (int, float))
+                        assert isinstance(
+                            stats_data[field], (int, float)
+                        )
                         assert stats_data[field] >= 0
                     elif field in ["by_type", "by_status"]:
                         assert isinstance(stats_data[field], dict)
                         # Each value should be a count
-                        for key, value in stats_data[field].items():
+                        for _key, value in stats_data[field].items():
                             assert isinstance(value, int)
                             assert value >= 0
-                        
+
             # At least one expected field should be present
-            assert len(present_fields) > 0, f"None of the expected fields {expected_fields} found in response: {list(stats_data.keys())}"
+            assert (
+                len(present_fields) > 0
+            ), f"None of the expected fields {expected_fields} found in response: {list(stats_data.keys())}"
 
     @pytest.mark.integration
     async def test_document_download_workflow(

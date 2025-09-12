@@ -40,7 +40,9 @@ class DatabaseHealthCheck(BaseModel):
     response_time_ms: float | None = Field(
         None, description="Database response time in milliseconds"
     )
-    database_type: str | None = Field(default=None, description="Database type")
+    database_type: str | None = Field(
+        default=None, description="Database type"
+    )
     error: str | None = Field(
         None, description="Error message if unhealthy"
     )

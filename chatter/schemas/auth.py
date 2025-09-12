@@ -100,7 +100,9 @@ class UserResponse(UserBase):
     )
 
     # API key name (but not the actual key for security)
-    api_key_name: str | None = Field(default=None, description="API key name")
+    api_key_name: str | None = Field(
+        default=None, description="API key name"
+    )
 
     created_at: datetime = Field(
         ..., description="Account creation date"
@@ -171,7 +173,9 @@ class PasswordReset(BaseModel):
     """Schema for password reset request."""
 
     email: EmailStr = Field(..., description="User email address")
-    token: str | None = Field(default=None, description="Password reset token")
+    token: str | None = Field(
+        default=None, description="Password reset token"
+    )
     new_password: str | None = Field(
         None, min_length=8, max_length=128, description="New password"
     )

@@ -151,8 +151,9 @@ async def update_provider(
     ),
 ):
     """Update a provider."""
-    from chatter_sdk.models.provider_update import ProviderUpdate
     from typing import Any
+
+    from chatter_sdk.models.provider_update import ProviderUpdate
 
     update_data: dict[str, Any] = {}
     if display_name:
@@ -695,10 +696,11 @@ async def update_embedding_space(
     ),
 ):
     """Update an embedding space."""
+    from typing import Any
+
     from chatter_sdk.models.embedding_space_update import (
         EmbeddingSpaceUpdate,
     )
-    from typing import Any
 
     update_data: dict[str, Any] = {}
     if name:
@@ -774,7 +776,9 @@ async def model_usage(
 @run_async
 async def benchmark_model(
     model_id: str = typer.Argument(..., help="Model ID to benchmark"),
-    test_count: int = typer.Option(5, help="Number of test requests"),  # noqa: ARG001
+    test_count: int = typer.Option(
+        5, help="Number of test requests"
+    ),  # noqa: ARG001
     prompt: str = typer.Option(  # noqa: ARG001
         "Generate a short paragraph about artificial intelligence",
         help="Benchmark prompt",

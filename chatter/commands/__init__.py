@@ -4,9 +4,9 @@ import asyncio
 import functools
 import os
 import sys
+from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 from typing import Any, TypeVar
-from collections.abc import AsyncGenerator, Callable
 
 F = TypeVar('F', bound=Callable[..., Any])
 
@@ -30,7 +30,9 @@ from chatter_sdk import (  # type: ignore[import-not-found]
     PromptsApi,
     ToolServersApi,
 )
-from chatter_sdk.exceptions import ApiException  # type: ignore[import-not-found]
+from chatter_sdk.exceptions import (
+    ApiException,  # type: ignore[import-not-found]
+)
 from rich.console import Console
 
 # Initialize console
@@ -87,7 +89,9 @@ class ChatterSDKClient:
     async def __aenter__(self) -> "ChatterSDKClient":
         return self
 
-    async def __aexit__(self, exc_type: Any, exc_val: Any, exc_tb: Any) -> None:
+    async def __aexit__(
+        self, exc_type: Any, exc_val: Any, exc_tb: Any
+    ) -> None:
         await self.api_client.close()
 
     def save_token(self, token: str) -> None:

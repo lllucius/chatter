@@ -317,7 +317,7 @@ class ChatService:
                 # Execute workflow to get response
                 response_message, usage_info = (
                     await self.workflow_service.execute_workflow(
-                        conversation, chat_request, correlation_id
+                        conversation, chat_request, correlation_id, user_id
                     )
                 )
 
@@ -399,7 +399,7 @@ class ChatService:
             async for (
                 chunk
             ) in self.workflow_service.execute_workflow_streaming(
-                conversation, chat_request, correlation_id
+                conversation, chat_request, correlation_id, user_id
             ):
                 yield chunk
 

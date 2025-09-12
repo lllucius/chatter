@@ -297,14 +297,16 @@ export class SSEEventManager {
   /**
    * Validate event structure for security
    */
-  private isValidEvent(event: any): boolean {
+  private isValidEvent(event: unknown): event is SSEEvent {
     // Basic validation to prevent malicious events
     if (!event || typeof event !== 'object') {
       return false;
     }
 
+    const obj = event as Record<string, unknown>;
+    
     // Required fields
-    if (!event.id || !event.type || !event.timestamp) {
+    if (!obj.id || !obj.type || !obj.timestamp) {
       return false;
     }
 
@@ -442,7 +444,7 @@ export class SSEEventManager {
   /**
    * Handle high priority events with special treatment
    */
-  private handleHighPriorityEvent(event: AnySSEEvent, metadata: any): void {
+  private handleHighPriorityEvent(event: AnySSEEvent, metadata: Record<string, unknown>): void {
     // Log high priority events
     console.warn('SSE: High priority event received:', {
       type: event.type,
@@ -568,7 +570,7 @@ export class SSEEventManager {
   /**
    * Get SSE statistics using the SDK
    */
-  public async getSSEStats(): Promise<any> {
+  public async getSSEStats(): Promise<Record<string, unknown>> {
     try {
       const response = await authService.executeWithAuth(async (sdk) => {
         return await sdk.events.getSseStatsApiV1EventsStats();

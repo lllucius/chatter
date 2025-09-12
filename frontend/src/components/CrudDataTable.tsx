@@ -31,7 +31,7 @@ export interface CrudColumn<T> {
   id: keyof T;
   label: string;
   width?: string;
-  render?: (value: any, item: T) => ReactNode;
+  render?: (value: unknown, item: T) => ReactNode;
   sortable?: boolean;
 }
 
@@ -85,7 +85,7 @@ interface CrudDataTableProps<T, TCreate, TUpdate> {
   onExternalDialogClose?: () => void;
 }
 
-export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any, any, any>>(function CrudDataTable<T, TCreate, TUpdate>({
+export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unknown, unknown, unknown>>(function CrudDataTable<T, TCreate, TUpdate>({
   config,
   service,
   FormComponent,
@@ -264,8 +264,8 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<any
                     {config.columns.map((column) => (
                       <TableCell key={String(column.id)}>
                         {column.render
-                          ? column.render((item as any)[column.id], item)
-                          : String((item as any)[column.id] || '')
+                          ? column.render((item as Record<string, unknown>)[column.id], item)
+                          : String((item as Record<string, unknown>)[column.id] || '')
                         }
                       </TableCell>
                     ))}

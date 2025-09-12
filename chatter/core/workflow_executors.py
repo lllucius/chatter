@@ -182,9 +182,13 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation context
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=20
+                    conversation.id, user_id, limit=20
                 )
             )
 
@@ -287,9 +291,13 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation state
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=20
+                    conversation.id, user_id, limit=20
                 )
             )
 
@@ -418,9 +426,13 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation context
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=30
+                    conversation.id, user_id, limit=30
                 )
             )
 
@@ -532,9 +544,13 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation state
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=30
+                    conversation.id, user_id, limit=30
                 )
             )
 
@@ -663,9 +679,13 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation context
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=100
+                    conversation.id, user_id, limit=100
                 )
             )
 
@@ -777,9 +797,13 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation state
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=100
+                    conversation.id, user_id, limit=100
                 )
             )
 
@@ -915,9 +939,13 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation context
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=50
+                    conversation.id, user_id, limit=50
                 )
             )
 
@@ -1036,9 +1064,13 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
 
             # Prepare conversation state
             messages = []
+            if user_id is None:
+                # Extract user_id from conversation if not provided
+                user_id = conversation.user_id
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
-                    conversation.id, limit=50
+                    conversation.id, user_id, limit=50
                 )
             )
 

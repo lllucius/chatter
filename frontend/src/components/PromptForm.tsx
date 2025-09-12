@@ -50,7 +50,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           description: initialData.description || '',
           content: initialData.content || '',
           category: initialData.category || 'general',
-          prompt_type: (initialData.prompt_type || 'template') as any,
+          prompt_type: (initialData.prompt_type || 'template'),
           variables: initialData.variables || [],
         });
       } else {
@@ -143,7 +143,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
             <InputLabel>Type</InputLabel>
             <Select
               value={formData.prompt_type}
-              onChange={(e) => setFormData({ ...formData, prompt_type: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, prompt_type: e.target.value as PromptCreate['prompt_type'] })}
               label="Type"
             >
               {promptTypes.map((type) => (

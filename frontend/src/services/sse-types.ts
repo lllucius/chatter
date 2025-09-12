@@ -8,10 +8,10 @@
 export interface SSEEvent {
   id: string;
   type: string;
-  data: any;
+  data: unknown;
   timestamp: string;
   user_id?: string;
-  metadata: Record<string, any>;
+  metadata: Record<string, unknown>;
 }
 
 // Event categories matching backend unified system
@@ -135,7 +135,7 @@ export interface JobCompletedEvent extends SSEEvent {
   data: {
     job_id: string;
     job_name: string;
-    result: any;
+    result: unknown;
     completed_at: string;
   };
 }
@@ -215,7 +215,7 @@ export interface PluginEvent extends SSEEvent {
   data: {
     plugin_id: string;
     plugin_name: string;
-    [key: string]: any;
+    [key: string]: unknown;
   };
 }
 
@@ -225,7 +225,7 @@ export interface SystemAlertEvent extends SSEEvent {
   data: {
     message: string;
     severity: 'info' | 'warning' | 'error';
-    details?: any;
+    details?: unknown;
   };
 }
 
@@ -233,7 +233,7 @@ export interface SystemStatusEvent extends SSEEvent {
   type: 'system.status';
   data: {
     status: string;
-    details?: any;
+    details?: unknown;
   };
 }
 

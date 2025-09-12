@@ -62,9 +62,18 @@ class LangGraphWorkflowManager:
     def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
+        self._postgres_context = None
 
         # Lazy initialization flag to avoid async setup at import time
         self._initialized = False
+
+    def __del__(self) -> None:
+        """Clean up PostgreSQL context manager if needed."""
+        if self._postgres_context is not None:
+            try:
+                self._postgres_context.__exit__(None, None, None)
+            except Exception:
+                pass  # Ignore cleanup errors
 
     async def _ensure_initialized(self) -> None:
         """Ensure the workflow manager is initialized."""
@@ -72,13 +81,11 @@ class LangGraphWorkflowManager:
             return
 
         # Initialize checkpointer
+        self.checkpointer = None
         try:
             if settings.langgraph_checkpoint_store == "postgres":
                 # Use PostgreSQL checkpointer for production
                 try:
-                    # PostgresSaver.from_conn_string returns a context manager
-                    # We need to properly enter the context to get the actual saver
-                    from sqlalchemy import create_engine
                     from urllib.parse import urlparse, urlunparse
                     
                     # Convert async URL to sync URL for PostgresSaver
@@ -86,13 +93,14 @@ class LangGraphWorkflowManager:
                     if parsed.scheme == "postgresql+asyncpg":
                         # Convert to sync postgresql URL
                         sync_url = urlunparse(parsed._replace(scheme="postgresql"))
-                        saver_context = PostgresSaver.from_conn_string(sync_url)
                     else:
                         # Use as-is for other schemes
-                        saver_context = PostgresSaver.from_conn_string(settings.database_url)
+                        sync_url = settings.database_url
                     
-                    # Enter the context manager to get the actual checkpointer
-                    self.checkpointer = saver_context.__enter__()
+                    # Use PostgresSaver properly with context manager
+                    # Don't call __enter__ directly - store the context manager
+                    self._postgres_context = PostgresSaver.from_conn_string(sync_url)
+                    self.checkpointer = self._postgres_context.__enter__()
                     logger.info("LangGraph PostgreSQL checkpointer initialized")
                         
                 except Exception as postgres_error:
@@ -111,19 +119,23 @@ class LangGraphWorkflowManager:
                 "Failed to initialize checkpointer, falling back to memory",
                 error=str(e),
             )
-            # Always fallback to memory checkpointer if PostgreSQL fails
+            # Always ensure we have a working checkpointer
+            self.checkpointer = None
+
+        # Final safety check - ensure we always have a working checkpointer
+        if self.checkpointer is None:
             try:
                 self.checkpointer = MemorySaver()
-                logger.info(
-                    "LangGraph Memory checkpointer initialized (fallback)"
-                )
+                logger.info("LangGraph Memory checkpointer initialized (final fallback)")
             except Exception as fallback_error:
                 logger.error(
-                    "Failed to initialize any checkpointer",
+                    "Failed to initialize any checkpointer - this will cause workflow failures",
                     error=str(fallback_error),
                 )
-                # Use a no-op checkpointer as last resort
-                self.checkpointer = None
+                # Don't set checkpointer to None - raise an error instead
+                raise RuntimeError(
+                    f"Unable to initialize any checkpointer: {fallback_error}"
+                ) from fallback_error
 
         self._initialized = True
 

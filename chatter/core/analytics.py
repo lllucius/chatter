@@ -208,7 +208,9 @@ class AnalyticsService:
                 )
                 .group_by(Conversation.status)
             )
-            conversations_by_status = dict(status_result.all())
+            conversations_by_status: dict[ConversationStatus, int] = {
+                status: count for status, count in status_result.all()
+            }
 
             # Total messages
             total_messages_result = await self.session.execute(
@@ -766,7 +768,7 @@ class AnalyticsService:
                 .group_by(Message.finish_reason)
             )
             errors_by_type = {
-                row.finish_reason or "unknown": int(row.count)
+                row.finish_reason or "unknown": row.count
                 for row in error_types_result.all()
             }
 

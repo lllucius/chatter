@@ -62,15 +62,15 @@ def _create_validation_result(errors: list[str], warnings: list[str]) -> Validat
     """Create ValidationResult using the appropriate interface."""
     if _HAS_REAL_VALIDATION:
         # Convert string errors to ValidationError objects
-        error_objects = [ValidationError(msg) for msg in errors]
-        return ValidationResult(  # type: ignore
+        error_objects = [_ValidationError(msg) for msg in errors]
+        return _ValidationResult(
             is_valid=len(errors) == 0,
             errors=error_objects,
             warnings=warnings,
         )
     else:
         # Use fallback interface with string errors
-        return ValidationResult(  # type: ignore
+        return _FallbackValidationResult(
             valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,

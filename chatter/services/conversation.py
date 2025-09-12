@@ -759,7 +759,7 @@ class ConversationService:
             conversations = await self.list_conversations(
                 user_id, limit=limit
             )
-            return conversations
+            return list(conversations)
         except Exception as e:
             logger.error(f"Failed to get recent conversations: {e}")
             return []

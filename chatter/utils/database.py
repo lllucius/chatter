@@ -411,7 +411,8 @@ async def create_tables() -> bool:
     """
     try:
         engine = get_engine()
-        await Base.metadata.create_all(engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.create_all)
         return True
     except Exception as e:
         logger.error("Failed to create tables", error=str(e))
@@ -426,7 +427,8 @@ async def drop_tables() -> bool:
     """
     try:
         engine = get_engine()
-        await Base.metadata.drop_all(engine)
+        async with engine.begin() as conn:
+            await conn.run_sync(Base.metadata.drop_all)
         return True
     except Exception as e:
         logger.error("Failed to drop tables", error=str(e))

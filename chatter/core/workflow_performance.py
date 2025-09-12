@@ -319,7 +319,7 @@ class WorkflowOptimizer:
             )
 
         # Sort by performance (fastest first)
-        results.sort(key=lambda x: x["avg_execution_time"])
+        results.sort(key=lambda x: float(x["avg_execution_time"]))
 
         return results
 

@@ -76,7 +76,7 @@ class TokenManager:
 
         # Store token metadata for revocation tracking
         await self._store_token_metadata(
-            jti, user.id, access_payload["session_id"]
+            jti, user.id, str(access_payload["session_id"])
         )
 
         return {

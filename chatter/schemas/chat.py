@@ -329,19 +329,33 @@ class StreamingChatChunk(BaseModel):
     metadata: dict[str, Any] | None = Field(default=None, description="Additional metadata")
 
 
-class ConversationSearchRequest(ListRequestBase):
-    """Schema for conversation search."""
+class ConversationListRequest(ListRequestBase):
+    """Schema for conversation list request."""
 
+    status: ConversationStatus | None = Field(
+        None, description="Filter by conversation status"
+    )
+    llm_provider: str | None = Field(
+        None, description="Filter by LLM provider"
+    )
+    llm_model: str | None = Field(
+        None, description="Filter by LLM model"
+    )
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
+    enable_retrieval: bool | None = Field(
+        None, description="Filter by retrieval enabled status"
+    )
+
+    # Pagination and sorting fields
     limit: int = Field(
         50, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
         0, ge=0, description="Number of results to skip"
     )
-    search: str | None = Field(default=None, description="Search query")
-    query: str | None = Field(default=None, description="Search query")
-    status: ConversationStatus | None = Field(
-        None, description="Filter by status"
+    sort_by: str = Field("updated_at", description="Sort field")
+    sort_order: str = Field(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
     )
 
 
@@ -375,15 +389,15 @@ class McpStatusRequest(GetRequestBase):
     pass
 
 
-class ConversationSearchResponse(BaseModel):
-    """Schema for conversation search response."""
+class ConversationListResponse(BaseModel):
+    """Schema for conversation list response."""
 
     conversations: list[ConversationResponse] = Field(
-        ..., description="Conversations"
+        ..., description="List of conversations"
     )
-    total: int = Field(..., description="Total number of conversations")
-    limit: int = Field(..., description="Request limit")
-    offset: int = Field(..., description="Request offset")
+    total_count: int = Field(..., description="Total number of conversations")
+    limit: int = Field(..., description="Applied limit")
+    offset: int = Field(..., description="Applied offset")
 
 
 class ConversationDeleteResponse(BaseModel):

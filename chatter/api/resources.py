@@ -7,7 +7,7 @@ from chatter.schemas.chat import (
     ConversationCreate,
     ConversationDeleteResponse,
     ConversationResponse,
-    ConversationSearchResponse,
+    ConversationListResponse,
     ConversationUpdate,
     ConversationWithMessages,
     MessageDeleteResponse,
@@ -39,7 +39,7 @@ class ConversationResourceHandler:
         current_user: User,
         limit: int,
         offset: int,
-    ) -> ConversationSearchResponse:
+    ) -> ConversationListResponse:
         """List conversations for current user."""
         conversations, total = (
             await self.chat_service.list_conversations(
@@ -47,12 +47,12 @@ class ConversationResourceHandler:
             )
         )
 
-        return ConversationSearchResponse(
+        return ConversationListResponse(
             conversations=[
                 ConversationResponse.model_validate(conv)
                 for conv in conversations
             ],
-            total=total,
+            total_count=total,
             limit=limit,
             offset=offset,
         )

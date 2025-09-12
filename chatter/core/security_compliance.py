@@ -44,7 +44,7 @@ class SecurityComplianceChecker:
         }
 
     async def check_compliance(
-        self, standard: SecurityStandard = None
+        self, standard: SecurityStandard | None = None
     ) -> dict[str, Any]:
         """Check compliance against security standards.
 
@@ -59,7 +59,7 @@ class SecurityComplianceChecker:
         else:
             standards_to_check = list(SecurityStandard)
 
-        report = {
+        report: dict[str, Any] = {
             "timestamp": "2024-01-01T00:00:00Z",  # Would use actual timestamp
             "overall_score": 0,
             "standards": {},
@@ -592,7 +592,7 @@ async def quick_security_check() -> dict[str, Any]:
 
 # Function to generate security report
 async def generate_security_report(
-    standards: list[SecurityStandard] = None,
+    standards: list[SecurityStandard] | None = None,
 ) -> str:
     """Generate a human-readable security compliance report.
 

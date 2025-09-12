@@ -481,7 +481,7 @@ class EventManager:
     def __init__(self):
         """Initialize the event manager."""
         self._initialized = False
-        self._event_stats = {
+        self._event_stats: dict[str, Any] = {
             "emitted": 0,
             "processed": 0,
             "errors": 0,

@@ -237,7 +237,7 @@ class Profile(Base):
 
     def get_generation_config(self) -> dict[str, Any]:
         """Get generation configuration for LLM calls."""
-        config = {
+        config: dict[str, Any] = {
             "temperature": self.temperature,
             "max_tokens": self.max_tokens,
         }

@@ -348,6 +348,3 @@ def get_session_cache(**kwargs) -> CacheInterface:
 def get_persistent_cache(**kwargs) -> CacheInterface:
     """Get persistent cache instance (replaces workflow cache)."""
     return cache_factory.create_persistent_cache(**kwargs)
-
-
-

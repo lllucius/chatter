@@ -357,7 +357,8 @@ class AnalyticsTimeRange(BaseModel):
         default=None, description="End date for analytics"
     )
     period: str = Field(
-        default="7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+        default="7d",
+        description="Predefined period (1h, 24h, 7d, 30d, 90d)",
     )
 
     @field_validator("period")

@@ -4,8 +4,13 @@ from typing import Any
 
 # Import validation classes with fallback handling
 try:
-    from chatter.core.validation.results import ValidationResult as _ValidationResult
-    from chatter.core.validation.exceptions import ValidationError as _ValidationError
+    from chatter.core.validation.exceptions import (
+        ValidationError as _ValidationError,
+    )
+    from chatter.core.validation.results import (
+        ValidationResult as _ValidationResult,
+    )
+
     _HAS_REAL_VALIDATION = True
 except ImportError:
     _HAS_REAL_VALIDATION = False
@@ -16,7 +21,7 @@ except ImportError:
 
 class _FallbackValidationResult:
     """Fallback validation result for environments without full validation engine."""
-    
+
     def __init__(
         self,
         valid: bool,
@@ -32,7 +37,7 @@ class _FallbackValidationResult:
 
 class _FallbackValidationError(Exception):
     """Fallback validation error."""
-    
+
     def __init__(self, message: str):
         super().__init__(message)
         self.message = message

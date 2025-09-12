@@ -495,7 +495,9 @@ class DatabaseSeeder:
             user = User(
                 email=user_data["email"],
                 username=user_data["username"],
-                hashed_password=hash_password(str(user_data["password"])),
+                hashed_password=hash_password(
+                    str(user_data["password"])
+                ),
                 full_name=user_data["full_name"],
                 is_active=True,
                 is_verified=True,

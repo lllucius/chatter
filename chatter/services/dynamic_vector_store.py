@@ -368,7 +368,7 @@ class DynamicVectorStoreService:
 
                 # Execute query synchronously
                 rows = sync_session.execute(query).fetchall()
-                
+
                 # Convert rows to list of tuples (chunk_id, distance)
                 return [(str(row[0]), float(row[1])) for row in rows]
         except Exception as e:

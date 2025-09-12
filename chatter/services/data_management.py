@@ -10,6 +10,9 @@ import aiofiles
 
 from chatter.config import settings
 from chatter.schemas.data_management import (
+    RestoreRequest,  # only for typing clarity in comments
+)
+from chatter.schemas.data_management import (
     BackupRequest,
     BackupType,
     DataFormat,
@@ -17,7 +20,6 @@ from chatter.schemas.data_management import (
     DataOperationModel,
     ExportDataRequest,
     OperationStatus,
-    RestoreRequest,  # only for typing clarity in comments
 )
 from chatter.schemas.jobs import JobPriority
 from chatter.services.job_queue import job_queue

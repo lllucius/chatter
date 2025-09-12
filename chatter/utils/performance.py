@@ -453,7 +453,7 @@ class QueryOptimizer:
         if model_type:
             conditions.append(ModelDef.model_type == model_type)
         if active_only:
-            conditions.append(ModelDef.is_active == True)
+            conditions.append(ModelDef.is_active)
 
         where_clause = and_(*conditions) if conditions else None
 
@@ -509,7 +509,7 @@ class QueryOptimizer:
         if provider_type:
             conditions.append(Provider.provider_type == provider_type)
         if active_only:
-            conditions.append(Provider.is_active == True)
+            conditions.append(Provider.is_active)
 
         where_clause = and_(*conditions) if conditions else None
 
@@ -982,7 +982,9 @@ class PerformanceMonitor:
         """
         # Calculate overall performance metrics
         all_times = [
-            time for times in self.query_times.values() for time in times
+            time
+            for times in self.query_times.values()
+            for time in times
         ]
         avg_ms = sum(all_times) / len(all_times) if all_times else 0
         p95_ms = (
@@ -991,7 +993,9 @@ class PerformanceMonitor:
             else 0
         )
         slow_queries = sum(
-            1 for time in all_times if time > self.slow_query_threshold_ms
+            1
+            for time in all_times
+            if time > self.slow_query_threshold_ms
         )
         total_queries = sum(self.query_counts.values())
 

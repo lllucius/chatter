@@ -231,7 +231,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
             )
 
@@ -356,7 +360,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
 
             # Record success metrics
@@ -485,7 +493,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
             )
 
@@ -620,7 +632,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
 
             # Record success metrics
@@ -749,7 +765,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
             )
 
@@ -884,7 +904,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
 
             # Record success metrics
@@ -1020,7 +1044,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
             )
 
@@ -1162,7 +1190,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                     user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
-                    metadata={"correlation_id": correlation_id} if correlation_id else None,
+                    metadata=(
+                        {"correlation_id": correlation_id}
+                        if correlation_id
+                        else None
+                    ),
                 )
 
             # Record success metrics

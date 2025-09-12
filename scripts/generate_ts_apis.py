@@ -16,26 +16,38 @@ def camel_case(name: str) -> str:
     clean_name = re.sub(r"[^a-zA-Z0-9_\s]", "", name)
     clean_name = re.sub(r"\s+", "_", clean_name)
     components = clean_name.split("_")
-    components = [comp for comp in components if comp]  # Remove empty components
+    components = [
+        comp for comp in components if comp
+    ]  # Remove empty components
     if not components:
         return "unknown"
-    return components[0].lower() + "".join(word.capitalize() for word in components[1:])
+    return components[0].lower() + "".join(
+        word.capitalize() for word in components[1:]
+    )
+
 
 def pascal_case(name: str) -> str:
     """Convert snake_case to PascalCase"""
     # First clean the name of special characters and spaces
     clean_name = re.sub(r"[^a-zA-Z0-9_\s]", "", name)
     clean_name = re.sub(r"\s+", "_", clean_name)
-    return "".join(word.capitalize() for word in clean_name.split("_") if word)
+    return "".join(
+        word.capitalize() for word in clean_name.split("_") if word
+    )
 
-def get_operation_id(path: str, method: str, operation: dict[str, Any]) -> str:
+
+def get_operation_id(
+    path: str, method: str, operation: dict[str, Any]
+) -> str:
     """Generate operation ID from path and method"""
     if "operationId" in operation:
         # Use existing operationId but make it cleaner
         op_id = operation["operationId"]
         # Remove common prefixes and suffixes like api_v1_..._post
         op_id = re.sub(r"^[^_]*_api_v\d+_", "", op_id)
-        op_id = re.sub(r"_(get|post|put|patch|delete|options|head)$", "", op_id)
+        op_id = re.sub(
+            r"_(get|post|put|patch|delete|options|head)$", "", op_id
+        )
         # Convert to camelCase
         return camel_case(op_id)
 
@@ -57,10 +69,11 @@ def get_operation_id(path: str, method: str, operation: dict[str, Any]) -> str:
 
     return camel_case(f"{method.lower()}_{clean_path}")
 
+
 def is_streaming_endpoint(operation: dict[str, Any]) -> bool:
     """Check if this is a streaming endpoint that returns text/event-stream"""
     responses = operation.get("responses", {})
-    
+
     # Look for 200, 201, or first successful response with text/event-stream
     for status in ["200", "201", "202"]:
         if status in responses:
@@ -77,6 +90,7 @@ def is_streaming_endpoint(operation: dict[str, Any]) -> bool:
                 return True
 
     return False
+
 
 def get_response_type(operation: dict[str, Any]) -> str:
     """Extract response type from operation"""
@@ -104,6 +118,7 @@ def get_response_type(operation: dict[str, Any]) -> str:
                 return typescript_type_from_schema(schema)
 
     return "unknown"
+
 
 def typescript_type_from_schema(schema: dict[str, Any]) -> str:
     """Convert OpenAPI schema to TypeScript type - simplified version"""
@@ -147,14 +162,12 @@ def typescript_type_from_schema(schema: dict[str, Any]) -> str:
 
     return "unknown"
 
-def get_parameters(operation: dict[str, Any]) -> dict[str, list[dict[str, Any]]]:
+
+def get_parameters(
+    operation: dict[str, Any],
+) -> dict[str, list[dict[str, Any]]]:
     """Extract parameters from operation"""
-    params = {
-        "path": [],
-        "query": [],
-        "header": [],
-        "cookie": []
-    }
+    params = {"path": [], "query": [], "header": [], "cookie": []}
 
     for param in operation.get("parameters", []):
         if "$ref" in param:
@@ -166,6 +179,7 @@ def get_parameters(operation: dict[str, Any]) -> dict[str, list[dict[str, Any]]]
             params[param_in].append(param)
 
     return params
+
 
 def get_request_body_type(operation: dict[str, Any]) -> str | None:
     """Extract request body type from operation"""
@@ -184,19 +198,25 @@ def get_request_body_type(operation: dict[str, Any]) -> str | None:
 
     return None
 
+
 def has_json_request_body(operation: dict[str, Any]) -> bool:
     """Check if operation has a JSON request body"""
     request_body = operation.get("requestBody", {})
     if not request_body:
         return False
-    
+
     content = request_body.get("content", {})
     return "application/json" in content
 
-def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
+
+def generate_method(
+    path: str, method: str, operation: dict[str, Any]
+) -> str:
     """Generate TypeScript method for an API operation"""
     operation_id = get_operation_id(path, method, operation)
-    method_name = operation_id  # Already camelCase from get_operation_id
+    method_name = (
+        operation_id  # Already camelCase from get_operation_id
+    )
 
     response_type = get_response_type(operation)
     params = get_parameters(operation)
@@ -208,7 +228,9 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
     # Path parameters (required)
     for param in params["path"]:
         param_name = camel_case(param["name"])
-        param_type = typescript_type_from_schema(param.get("schema", {"type": "string"}))
+        param_type = typescript_type_from_schema(
+            param.get("schema", {"type": "string"})
+        )
         method_params.append(f"{param_name}: {param_type}")
 
     # Request body (if exists)
@@ -221,24 +243,35 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
             method_params.append(f"data?: {request_body_type}")
 
     # Options parameter (for query params, headers, etc.)
-    needs_options = bool(params["query"] or params["header"] or params["cookie"])
+    needs_options = bool(
+        params["query"] or params["header"] or params["cookie"]
+    )
     if needs_options:
-        method_params.append("options?: { " + 
-                           "".join([f"{camel_case(p['name'])}?: {typescript_type_from_schema(p.get('schema', {'type': 'string'}))}; " 
-                                   for p in params["query"] + params["header"] + params["cookie"]]) + 
-                           "query?: HTTPQuery; headers?: HTTPHeaders; }")
+        method_params.append(
+            "options?: { "
+            + "".join(
+                [
+                    f"{camel_case(p['name'])}?: {typescript_type_from_schema(p.get('schema', {'type': 'string'}))}; "
+                    for p in params["query"]
+                    + params["header"]
+                    + params["cookie"]
+                ]
+            )
+            + "query?: HTTPQuery; headers?: HTTPHeaders; }"
+        )
 
     params_str = ", ".join(method_params)
 
     # Build method body
-    url_parts = []
     path_with_params = path
 
     # Replace path parameters
     for param in params["path"]:
         param_name = param["name"]
         camel_name = camel_case(param_name)
-        path_with_params = path_with_params.replace(f"{{{param_name}}}", f"${{{camel_name}}}")
+        path_with_params = path_with_params.replace(
+            f"{{{param_name}}}", f"${{{camel_name}}}"
+        )
 
     method_body = f"""
   /**{operation.get('summary', f'{method.upper()} {path}')}
@@ -300,13 +333,24 @@ def generate_method(path: str, method: str, operation: dict[str, Any]) -> str:
 
     return method_body
 
-def group_operations_by_tag(spec: dict[str, Any]) -> dict[str, list[tuple]]:
+
+def group_operations_by_tag(
+    spec: dict[str, Any],
+) -> dict[str, list[tuple]]:
     """Group operations by their tags"""
     grouped = defaultdict(list)
 
     for path, path_item in spec.get("paths", {}).items():
         for method, operation in path_item.items():
-            if method.lower() not in ["get", "post", "put", "patch", "delete", "options", "head"]:
+            if method.lower() not in [
+                "get",
+                "post",
+                "put",
+                "patch",
+                "delete",
+                "options",
+                "head",
+            ]:
                 continue
 
             tags = operation.get("tags", ["Default"])
@@ -315,6 +359,7 @@ def group_operations_by_tag(spec: dict[str, Any]) -> dict[str, list[tuple]]:
             grouped[tag].append((path, method, operation))
 
     return grouped
+
 
 def generate_api_class(tag: str, operations: list[tuple]) -> str:
     """Generate API class for a tag"""
@@ -341,20 +386,35 @@ def generate_api_class(tag: str, operations: list[tuple]) -> str:
         if response_type and not response_type.startswith("Record<"):
             # Extract type names from union types, arrays, etc.
             # Updated regex to handle complex names with double underscores
-            type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", response_type)
+            type_names = re.findall(
+                r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b",
+                response_type,
+            )
             imports.update(type_names)
 
         request_body_type = get_request_body_type(operation)
-        if request_body_type and not request_body_type.startswith("Record<") and request_body_type not in ["FormData", "URLSearchParams"]:
-            type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", request_body_type)
+        if (
+            request_body_type
+            and not request_body_type.startswith("Record<")
+            and request_body_type not in ["FormData", "URLSearchParams"]
+        ):
+            type_names = re.findall(
+                r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b",
+                request_body_type,
+            )
             imports.update(type_names)
 
         # Also check parameter types
         params = get_parameters(operation)
         for param_list in params.values():
             for param in param_list:
-                param_type = typescript_type_from_schema(param.get("schema", {}))
-                type_names = re.findall(r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b", param_type)
+                param_type = typescript_type_from_schema(
+                    param.get("schema", {})
+                )
+                type_names = re.findall(
+                    r"\b[a-zA-Z][a-zA-Z0-9_]*(?:__[a-zA-Z0-9_]+)*\b",
+                    param_type,
+                )
                 imports.update(type_names)
 
     # Generate import statements
@@ -362,25 +422,63 @@ def generate_api_class(tag: str, operations: list[tuple]) -> str:
     if imports:
         # Filter out built-in TypeScript types and generic Record types
         builtin_types = {
-            "Record", "Array", "Promise", "Date", "RegExp", "Error", "Object",
-            "String", "Number", "Boolean", "Function", "Map", "Set", "WeakMap", "WeakSet",
-            "ReadonlyArray", "Partial", "Required", "Pick", "Omit", "Exclude", "Extract",
-            "string", "number", "boolean", "unknown", "null", "undefined", "void", "any",
-            "ReadableStream", "Uint8Array"  # Browser/Node.js streaming types
+            "Record",
+            "Array",
+            "Promise",
+            "Date",
+            "RegExp",
+            "Error",
+            "Object",
+            "String",
+            "Number",
+            "Boolean",
+            "Function",
+            "Map",
+            "Set",
+            "WeakMap",
+            "WeakSet",
+            "ReadonlyArray",
+            "Partial",
+            "Required",
+            "Pick",
+            "Omit",
+            "Exclude",
+            "Extract",
+            "string",
+            "number",
+            "boolean",
+            "unknown",
+            "null",
+            "undefined",
+            "void",
+            "any",
+            "ReadableStream",
+            "Uint8Array",  # Browser/Node.js streaming types
         }
-        filtered_imports = [imp for imp in imports if imp not in builtin_types]
+        filtered_imports = [
+            imp for imp in imports if imp not in builtin_types
+        ]
         if filtered_imports:
             import_list = ", ".join(sorted(filtered_imports))
-            import_statements.append(f"import {{ {import_list} }} from '../models/index';")
+            import_statements.append(
+                f"import {{ {import_list} }} from '../models/index';"
+            )
 
     # Build runtime import - only include what's actually used
-    runtime_imports = ["BaseAPI", "Configuration", "RequestOpts", "HTTPMethod"]
+    runtime_imports = [
+        "BaseAPI",
+        "Configuration",
+        "RequestOpts",
+        "HTTPMethod",
+    ]
     if uses_http_query:
         runtime_imports.append("HTTPQuery")
     if uses_http_headers:
         runtime_imports.append("HTTPHeaders")
 
-    runtime_import = f"import {{ {', '.join(runtime_imports)} }} from '../runtime';"
+    runtime_import = (
+        f"import {{ {', '.join(runtime_imports)} }} from '../runtime';"
+    )
     import_statements.append(runtime_import)
     import_statements.append("")
 
@@ -396,6 +494,7 @@ export class {class_name} extends BaseAPI {{
 }}"""
 
     return class_code
+
 
 def main():
     # Load OpenAPI spec
@@ -429,12 +528,15 @@ def main():
     # Generate index file that exports all APIs
     index_path = apis_dir / "index.ts"
     with open(index_path, "w") as f:
-        f.write("/**\n * Generated TypeScript API clients from OpenAPI schema\n */\n\n")
+        f.write(
+            "/**\n * Generated TypeScript API clients from OpenAPI schema\n */\n\n"
+        )
         for class_name in sorted(api_classes):
             f.write(f"export * from './{class_name}';\n")
 
     print(f"\nGenerated {len(api_classes)} API client classes")
     print(f"Index file created at {index_path}")
+
 
 if __name__ == "__main__":
     main()

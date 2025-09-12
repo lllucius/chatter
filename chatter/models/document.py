@@ -11,13 +11,15 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+)
+from sqlalchemy import Enum as SQLEnum
+from sqlalchemy import (
     ForeignKey,
     Integer,
     String,
     Text,
     UniqueConstraint,
 )
-from sqlalchemy import Enum as SQLEnum
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
 from chatter.models.base import Base, Keys

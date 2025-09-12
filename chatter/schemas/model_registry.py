@@ -63,7 +63,9 @@ class ProviderCreate(ProviderBase):
 class ProviderUpdate(BaseModel):
     """Schema for updating a provider."""
 
-    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    display_name: str | None = Field(
+        default=None, min_length=1, max_length=200
+    )
     description: str | None = Field(default=None, max_length=1000)
     api_key_required: bool | None = None
     base_url: str | None = Field(default=None, max_length=500)
@@ -146,9 +148,13 @@ class ModelDefCreate(ModelDefBase):
 class ModelDefUpdate(BaseModel):
     """Schema for updating a model definition."""
 
-    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    display_name: str | None = Field(
+        default=None, min_length=1, max_length=200
+    )
     description: str | None = Field(default=None, max_length=1000)
-    model_name: str | None = Field(default=None, min_length=1, max_length=200)
+    model_name: str | None = Field(
+        default=None, min_length=1, max_length=200
+    )
     max_tokens: int | None = Field(default=None, gt=0, le=1000000)
     context_length: int | None = Field(default=None, gt=0, le=10000000)
     dimensions: int | None = Field(default=None, gt=0, le=10000)

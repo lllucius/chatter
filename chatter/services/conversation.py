@@ -19,7 +19,6 @@ from chatter.schemas.chat import (
 from chatter.utils.performance import (
     ConversationQueryService,
     get_conversation_optimized,
-    get_user_conversations_optimized,
 )
 from chatter.utils.security_enhanced import get_secure_logger
 
@@ -202,37 +201,49 @@ class ConversationService:
             query = select(Conversation).where(
                 Conversation.user_id == user_id
             )
-            
+
             # Apply status filter (default: exclude deleted)
             if status is not None:
                 query = query.where(Conversation.status == status)
             else:
-                query = query.where(Conversation.status != ConversationStatus.DELETED)
-                
+                query = query.where(
+                    Conversation.status != ConversationStatus.DELETED
+                )
+
             # Apply additional filters
             if llm_provider is not None:
-                query = query.where(Conversation.llm_provider == llm_provider)
-                
+                query = query.where(
+                    Conversation.llm_provider == llm_provider
+                )
+
             if llm_model is not None:
                 query = query.where(Conversation.llm_model == llm_model)
-                
+
             if enable_retrieval is not None:
-                query = query.where(Conversation.enable_retrieval == enable_retrieval)
-                
+                query = query.where(
+                    Conversation.enable_retrieval == enable_retrieval
+                )
+
             # Tags filter - check if all specified tags are present
             if tags is not None and len(tags) > 0:
                 for tag in tags:
-                    query = query.where(Conversation.tags.contains([tag]))
-            
+                    query = query.where(
+                        Conversation.tags.contains([tag])
+                    )
+
             # Apply sorting
             if sort_order.lower() == "desc":
-                query = query.order_by(getattr(Conversation, sort_field).desc())
+                query = query.order_by(
+                    getattr(Conversation, sort_field).desc()
+                )
             else:
-                query = query.order_by(getattr(Conversation, sort_field).asc())
-                
+                query = query.order_by(
+                    getattr(Conversation, sort_field).asc()
+                )
+
             # Apply pagination
             query = query.offset(offset).limit(limit)
-            
+
             # Execute query
             result = await self.session.execute(query)
             conversations = result.scalars().all()
@@ -611,28 +622,36 @@ class ConversationService:
             query = select(Conversation).where(
                 Conversation.user_id == user_id
             )
-            
+
             # Apply status filter (default: exclude deleted)
             if status is not None:
                 query = query.where(Conversation.status == status)
             else:
-                query = query.where(Conversation.status != ConversationStatus.DELETED)
-                
+                query = query.where(
+                    Conversation.status != ConversationStatus.DELETED
+                )
+
             # Apply additional filters
             if llm_provider is not None:
-                query = query.where(Conversation.llm_provider == llm_provider)
-                
+                query = query.where(
+                    Conversation.llm_provider == llm_provider
+                )
+
             if llm_model is not None:
                 query = query.where(Conversation.llm_model == llm_model)
-                
+
             if enable_retrieval is not None:
-                query = query.where(Conversation.enable_retrieval == enable_retrieval)
-                
+                query = query.where(
+                    Conversation.enable_retrieval == enable_retrieval
+                )
+
             # Tags filter - check if all specified tags are present
             if tags is not None and len(tags) > 0:
                 for tag in tags:
-                    query = query.where(Conversation.tags.contains([tag]))
-            
+                    query = query.where(
+                        Conversation.tags.contains([tag])
+                    )
+
             result = await self.session.execute(query)
             conversations = result.scalars().all()
             return len(conversations)

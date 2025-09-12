@@ -37,7 +37,9 @@ class WorkflowNode(BaseModel):
 class WorkflowEdgeData(BaseModel):
     """Schema for workflow edge data."""
 
-    condition: str | None = Field(default=None, description="Edge condition")
+    condition: str | None = Field(
+        default=None, description="Edge condition"
+    )
     label: str | None = Field(default=None, description="Edge label")
 
 
@@ -55,7 +57,8 @@ class WorkflowEdge(BaseModel):
     )
     type: str | None = Field(default="default", description="Edge type")
     data: WorkflowEdgeData | None = Field(
-        default_factory=lambda: WorkflowEdgeData(), description="Edge data"
+        default_factory=lambda: WorkflowEdgeData(),
+        description="Edge data",
     )
 
 
@@ -78,7 +81,9 @@ class WorkflowDefinitionBase(BaseModel):
         default=False,
         description="Whether workflow is publicly visible",
     )
-    tags: list[str] | None = Field(default=None, description="Workflow tags")
+    tags: list[str] | None = Field(
+        default=None, description="Workflow tags"
+    )
     template_id: str | None = Field(
         None, description="Source template ID if created from template"
     )
@@ -118,7 +123,9 @@ class WorkflowDefinitionResponse(WorkflowDefinitionBase):
     is_public: bool = Field(
         default=False, description="Whether workflow is public"
     )
-    tags: list[str] | None = Field(default=None, description="Workflow tags")
+    tags: list[str] | None = Field(
+        default=None, description="Workflow tags"
+    )
     version: int = Field(default=1, description="Workflow version")
 
     class Config:
@@ -157,7 +164,9 @@ class WorkflowTemplateBase(BaseModel):
     required_retrievers: list[str] | None = Field(
         None, description="Required retrievers"
     )
-    tags: list[str] | None = Field(default=None, description="Template tags")
+    tags: list[str] | None = Field(
+        default=None, description="Template tags"
+    )
     is_public: bool = Field(
         default=False, description="Whether template is public"
     )
@@ -183,7 +192,9 @@ class WorkflowTemplateUpdate(BaseModel):
     description: str | None = Field(
         None, description="Template description"
     )
-    category: str | None = Field(default=None, description="Template category")
+    category: str | None = Field(
+        default=None, description="Template category"
+    )
     default_params: dict[str, Any] | None = Field(
         None, description="Default parameters"
     )
@@ -193,7 +204,9 @@ class WorkflowTemplateUpdate(BaseModel):
     required_retrievers: list[str] | None = Field(
         None, description="Required retrievers"
     )
-    tags: list[str] | None = Field(default=None, description="Template tags")
+    tags: list[str] | None = Field(
+        default=None, description="Template tags"
+    )
     is_public: bool | None = Field(
         None, description="Whether template is public"
     )
@@ -214,12 +227,16 @@ class WorkflowTemplateResponse(WorkflowTemplateBase):
     is_latest: bool = Field(
         default=True, description="Whether this is the latest version"
     )
-    rating: float | None = Field(default=None, description="Average rating")
+    rating: float | None = Field(
+        default=None, description="Average rating"
+    )
     rating_count: int = Field(
         default=0, description="Number of ratings"
     )
     usage_count: int = Field(default=0, description="Usage count")
-    success_rate: float | None = Field(default=None, description="Success rate")
+    success_rate: float | None = Field(
+        default=None, description="Success rate"
+    )
     config_hash: str = Field(..., description="Configuration hash")
     estimated_complexity: int | None = Field(
         None, description="Estimated complexity score"
@@ -329,8 +346,12 @@ class ValidationError(BaseModel):
 
     type: str = Field(..., description="Error type")
     message: str = Field(..., description="Error message")
-    node_id: str | None = Field(default=None, description="Associated node ID")
-    edge_id: str | None = Field(default=None, description="Associated edge ID")
+    node_id: str | None = Field(
+        default=None, description="Associated node ID"
+    )
+    edge_id: str | None = Field(
+        default=None, description="Associated edge ID"
+    )
     severity: str = Field(
         ..., description="Error severity (error/warning/info)"
     )
@@ -363,7 +384,9 @@ class NodePropertyDefinition(BaseModel):
     description: str | None = Field(
         None, description="Property description"
     )
-    default_value: Any | None = Field(default=None, description="Default value")
+    default_value: Any | None = Field(
+        default=None, description="Default value"
+    )
     options: list[str] | None = Field(
         None, description="Valid options for select type"
     )

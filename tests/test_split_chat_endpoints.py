@@ -4,12 +4,7 @@ Tests for the split chat endpoints.
 Tests the new separate /chat (non-streaming) and /streaming endpoints.
 """
 
-import json
-from unittest.mock import AsyncMock, patch
-
 import pytest
-from httpx import AsyncClient
-from starlette.status import HTTP_200_OK
 
 from chatter.schemas.chat import ChatRequest
 
@@ -48,7 +43,7 @@ class TestSplitChatEndpoints:
 
         chat_request = ChatRequest(**request_data)
         assert chat_request.message == "Hello, world!"
-        assert chat_request.stream == True  # Still works but deprecated
+        assert chat_request.stream  # Still works but deprecated
 
         # Check if the field description mentions deprecation
         field_info = ChatRequest.model_fields["stream"]
@@ -60,7 +55,7 @@ class TestSplitChatEndpoints:
 
         chat_request = ChatRequest(**request_data)
         assert chat_request.message == "Hello, world!"
-        assert chat_request.stream == False  # Default value
+        assert not chat_request.stream  # Default value
 
     @pytest.mark.parametrize(
         "workflow", ["plain", "rag", "tools", "full"]

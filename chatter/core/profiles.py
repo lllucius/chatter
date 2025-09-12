@@ -170,7 +170,7 @@ class ProfileService:
                         Profile.id == profile_id,
                         or_(
                             Profile.owner_id == user_id,
-                            Profile.is_public == True,
+                            Profile.is_public,
                         ),
                     )
                 )
@@ -202,7 +202,7 @@ class ProfileService:
             query = select(Profile).where(
                 or_(
                     Profile.owner_id == user_id,
-                    Profile.is_public == True,
+                    Profile.is_public,
                 )
             )
 

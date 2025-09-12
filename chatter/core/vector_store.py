@@ -206,11 +206,13 @@ class PGVectorStore(AbstractVectorStore):
             if embeddings:
                 return await asyncio.to_thread(
                     self._store.add_embeddings,
-                    list(zip(  # type: ignore # Complex langchain integration
-                        [doc.page_content for doc in documents],
-                        embeddings,
-                        strict=False,
-                    )),
+                    list(
+                        zip(  # type: ignore # Complex langchain integration
+                            [doc.page_content for doc in documents],
+                            embeddings,
+                            strict=False,
+                        )
+                    ),
                     [doc.metadata for doc in documents],
                     ids,  # type: ignore # Complex langchain parameter handling
                 )

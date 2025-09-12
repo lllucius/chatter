@@ -91,7 +91,9 @@ async def create_prompt(
     category: str = typer.Option("general", help="Prompt category"),
 ) -> None:
     """Create a new prompt."""
-    from chatter_sdk.models.prompt_create import PromptCreate  # type: ignore[import-not-found]
+    from chatter_sdk.models.prompt_create import (
+        PromptCreate,  # type: ignore[import-not-found]
+    )
 
     async with get_client() as sdk_client:
         prompt_data = PromptCreate(

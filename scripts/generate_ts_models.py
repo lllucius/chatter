@@ -9,7 +9,9 @@ from pathlib import Path
 from typing import Any
 
 
-def typescript_type_from_schema(schema: dict[str, Any], schema_name: str = "") -> str:
+def typescript_type_from_schema(
+    schema: dict[str, Any], schema_name: str = ""
+) -> str:
     """Convert OpenAPI schema to TypeScript type"""
 
     if "$ref" in schema:
@@ -36,12 +38,16 @@ def typescript_type_from_schema(schema: dict[str, Any], schema_name: str = "") -
         return f"{result} | null" if has_null else result
 
     if "oneOf" in schema:
-        types = [typescript_type_from_schema(s) for s in schema["oneOf"]]
+        types = [
+            typescript_type_from_schema(s) for s in schema["oneOf"]
+        ]
         return " | ".join(types)
 
     if "allOf" in schema:
         # For allOf, we'll need to merge the schemas - simplified approach
-        types = [typescript_type_from_schema(s) for s in schema["allOf"]]
+        types = [
+            typescript_type_from_schema(s) for s in schema["allOf"]
+        ]
         return " & ".join(types)
 
     schema_type = schema.get("type", "object")
@@ -84,6 +90,7 @@ def typescript_type_from_schema(schema: dict[str, Any], schema_name: str = "") -
 
     return "unknown"
 
+
 def generate_inline_interface(schema: dict[str, Any]) -> str:
     """Generate inline interface for object schema"""
     properties = schema.get("properties", {})
@@ -103,6 +110,7 @@ def generate_inline_interface(schema: dict[str, Any]) -> str:
     lines.append("}")
     return "\n".join(lines)
 
+
 def extract_type_references(typescript_content: str) -> list[str]:
     """Extract all custom type references from TypeScript content"""
     # Find type references specifically in property type annotations
@@ -112,17 +120,45 @@ def extract_type_references(typescript_content: str) -> list[str]:
     property_pattern = r'^\s*(?:/\*\*.*?\*/\s*)?"?[a-zA-Z_$][a-zA-Z0-9_$]*"?\??:\s*(.+?);'
 
     # Find all property type definitions
-    property_matches = re.findall(property_pattern, typescript_content, re.MULTILINE)
+    property_matches = re.findall(
+        property_pattern, typescript_content, re.MULTILINE
+    )
 
     custom_types = []
     seen = set()
 
     # Built-in TypeScript types to exclude
     builtin_types = {
-        "Record", "Array", "Promise", "Date", "RegExp", "Error", "Object",
-        "String", "Number", "Boolean", "Function", "Map", "Set", "WeakMap", "WeakSet",
-        "ReadonlyArray", "Partial", "Required", "Pick", "Omit", "Exclude", "Extract",
-        "string", "number", "boolean", "null", "undefined", "unknown", "any", "void"
+        "Record",
+        "Array",
+        "Promise",
+        "Date",
+        "RegExp",
+        "Error",
+        "Object",
+        "String",
+        "Number",
+        "Boolean",
+        "Function",
+        "Map",
+        "Set",
+        "WeakMap",
+        "WeakSet",
+        "ReadonlyArray",
+        "Partial",
+        "Required",
+        "Pick",
+        "Omit",
+        "Exclude",
+        "Extract",
+        "string",
+        "number",
+        "boolean",
+        "null",
+        "undefined",
+        "unknown",
+        "any",
+        "void",
     }
 
     for property_type in property_matches:
@@ -138,13 +174,18 @@ def extract_type_references(typescript_content: str) -> list[str]:
 
     return custom_types
 
-def generate_typescript_interface(name: str, schema: dict[str, Any]) -> tuple[str, list[str]]:
+
+def generate_typescript_interface(
+    name: str, schema: dict[str, Any]
+) -> tuple[str, list[str]]:
     """Generate a TypeScript interface from OpenAPI schema and return imports needed"""
 
     # Handle enums
     if schema.get("type") == "string" and "enum" in schema:
         enum_values = [f'  {v} = "{v}"' for v in schema["enum"]]
-        content = f"export enum {name} {{\n" + ",\n".join(enum_values) + "\n}"
+        content = (
+            f"export enum {name} {{\n" + ",\n".join(enum_values) + "\n}"
+        )
         return content, []
 
     # Handle simple type aliases
@@ -162,7 +203,9 @@ def generate_typescript_interface(name: str, schema: dict[str, Any]) -> tuple[st
     required = schema.get("required", [])
 
     if not properties:
-        content = f"export interface {name} {{\n  [key: string]: unknown;\n}}"
+        content = (
+            f"export interface {name} {{\n  [key: string]: unknown;\n}}"
+        )
         return content, []
 
     lines = [f"export interface {name} {{"]
@@ -191,6 +234,7 @@ def generate_typescript_interface(name: str, schema: dict[str, Any]) -> tuple[st
 
     return content, imports
 
+
 def main():
     # Load OpenAPI spec
     spec_path = Path("docs/api/openapi.json")
@@ -204,20 +248,28 @@ def main():
     models_dir.mkdir(parents=True, exist_ok=True)
 
     model_files = []
-    all_schema_names = set(schemas.keys())  # Track all available schema names
+    all_schema_names = set(
+        schemas.keys()
+    )  # Track all available schema names
 
     for schema_name, schema in schemas.items():
         # Generate TypeScript interface and get required imports
-        ts_interface, required_imports = generate_typescript_interface(schema_name, schema)
+        ts_interface, required_imports = generate_typescript_interface(
+            schema_name, schema
+        )
 
         # Filter imports to only include types that actually exist in the schemas
-        valid_imports = [imp for imp in required_imports if imp in all_schema_names]
+        valid_imports = [
+            imp for imp in required_imports if imp in all_schema_names
+        ]
 
         # Generate import statements
         import_statements = []
         if valid_imports:
             for import_name in sorted(valid_imports):
-                import_statements.append(f"import {{ {import_name} }} from './{import_name}';")
+                import_statements.append(
+                    f"import {{ {import_name} }} from './{import_name}';"
+                )
             import_statements.append("")  # Add blank line after imports
 
         # Write to file
@@ -225,24 +277,31 @@ def main():
         file_path = models_dir / file_name
 
         with open(file_path, "w") as f:
-            f.write(f"/**\n * Generated from OpenAPI schema: {schema_name}\n */\n")
+            f.write(
+                f"/**\n * Generated from OpenAPI schema: {schema_name}\n */\n"
+            )
             if import_statements:
                 f.write("\n".join(import_statements) + "\n")
             f.write(ts_interface)
             f.write("\n")
 
         model_files.append(schema_name)
-        print(f"Generated {file_name} with {len(valid_imports)} imports")
+        print(
+            f"Generated {file_name} with {len(valid_imports)} imports"
+        )
 
     # Generate index file that exports all models
     index_path = models_dir / "index.ts"
     with open(index_path, "w") as f:
-        f.write("/**\n * Generated TypeScript models from OpenAPI schema\n */\n\n")
+        f.write(
+            "/**\n * Generated TypeScript models from OpenAPI schema\n */\n\n"
+        )
         for model_name in sorted(model_files):
             f.write(f"export * from './{model_name}';\n")
 
     print(f"\nGenerated {len(model_files)} model files")
     print(f"Index file created at {index_path}")
+
 
 if __name__ == "__main__":
     main()

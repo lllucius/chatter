@@ -140,10 +140,10 @@ async def list_conversations(
     ),
 ) -> ConversationListResponse:
     """List conversations for the current user.
-    
+
     Args:
         status: Filter by conversation status
-        llm_provider: Filter by LLM provider  
+        llm_provider: Filter by LLM provider
         llm_model: Filter by LLM model
         tags: Filter by tags
         enable_retrieval: Filter by retrieval enabled status
@@ -153,7 +153,7 @@ async def list_conversations(
         sort_order: Sort order (asc/desc)
         current_user: Current authenticated user
         handler: Conversation resource handler
-        
+
     Returns:
         List of conversations with pagination info
     """

@@ -116,7 +116,9 @@ class ToolServerCreate(ToolServerBase):
 class ToolServerUpdate(BaseModel):
     """Schema for updating a remote tool server."""
 
-    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    display_name: str | None = Field(
+        default=None, min_length=1, max_length=200
+    )
     description: str | None = Field(None)
     base_url: HttpUrl | None = Field(None)
     transport_type: str | None = Field(
@@ -159,7 +161,9 @@ class ServerToolBase(BaseModel):
 class ServerToolUpdate(BaseModel):
     """Schema for updating a server tool."""
 
-    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    display_name: str | None = Field(
+        default=None, min_length=1, max_length=200
+    )
     description: str | None = Field(None)
     status: ToolStatus | None = Field(None)
     bypass_when_unavailable: bool | None = Field(None)
@@ -243,7 +247,9 @@ class ToolServerResponse(ToolServerBase):
     updated_at: datetime = Field(
         ..., description="Last update timestamp"
     )
-    created_by: str | None = Field(default=None, description="Creator user ID")
+    created_by: str | None = Field(
+        default=None, description="Creator user ID"
+    )
     tools: list[ServerToolResponse] = Field(
         default_factory=list, description="Server tools"
     )
@@ -272,7 +278,9 @@ class ToolUsageResponse(BaseModel):
         None, description="Response time"
     )
     success: bool = Field(..., description="Success status")
-    error_message: str | None = Field(default=None, description="Error message")
+    error_message: str | None = Field(
+        default=None, description="Error message"
+    )
     called_at: datetime = Field(..., description="Call timestamp")
 
 
@@ -503,7 +511,9 @@ class ToolPermissionBase(BaseModel):
     """Base schema for tool permissions."""
 
     user_id: str = Field(..., description="User ID")
-    tool_id: str | None = Field(default=None, description="Specific tool ID")
+    tool_id: str | None = Field(
+        default=None, description="Specific tool ID"
+    )
     server_id: str | None = Field(
         None, description="Server ID (for all tools)"
     )
@@ -598,7 +608,9 @@ class UserToolAccessCheck(BaseModel):
 
     user_id: str = Field(..., description="User ID")
     tool_name: str = Field(..., description="Tool name")
-    server_name: str | None = Field(default=None, description="Server name")
+    server_name: str | None = Field(
+        default=None, description="Server name"
+    )
 
 
 class ToolAccessResult(BaseModel):

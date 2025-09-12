@@ -349,8 +349,12 @@ class ProfileUpdate(BaseModel):
     )
 
     # LLM Configuration
-    llm_provider: str | None = Field(default=None, description="LLM provider")
-    llm_model: str | None = Field(default=None, description="LLM model name")
+    llm_provider: str | None = Field(
+        default=None, description="LLM provider"
+    )
+    llm_model: str | None = Field(
+        default=None, description="LLM model name"
+    )
 
     # Generation parameters
     temperature: float | None = Field(
@@ -359,7 +363,9 @@ class ProfileUpdate(BaseModel):
     top_p: float | None = Field(
         None, ge=0.0, le=1.0, description="Top-p parameter"
     )
-    top_k: int | None = Field(default=None, ge=1, description="Top-k parameter")
+    top_k: int | None = Field(
+        default=None, ge=1, description="Top-k parameter"
+    )
     max_tokens: int | None = Field(
         None, ge=1, le=100000, description="Maximum tokens"
     )
@@ -410,7 +416,9 @@ class ProfileUpdate(BaseModel):
     content_filter_enabled: bool | None = Field(
         None, description="Enable content filtering"
     )
-    safety_level: str | None = Field(default=None, description="Safety level")
+    safety_level: str | None = Field(
+        default=None, description="Safety level"
+    )
 
     # Response formatting
     response_format: str | None = Field(
@@ -443,7 +451,9 @@ class ProfileUpdate(BaseModel):
     )
 
     # Metadata and tags
-    tags: list[str] | None = Field(default=None, description="Profile tags")
+    tags: list[str] | None = Field(
+        default=None, description="Profile tags"
+    )
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -475,7 +485,9 @@ class ProfileListRequest(ListRequestBase):
     llm_provider: str | None = Field(
         None, description="Filter by LLM provider"
     )
-    tags: list[str] | None = Field(default=None, description="Filter by tags")
+    tags: list[str] | None = Field(
+        default=None, description="Filter by tags"
+    )
     is_public: bool | None = Field(
         None, description="Filter by public status"
     )

@@ -279,6 +279,9 @@ class TestAuthIntegration:
             "/api/v1/auth/me", headers=auth_headers
         )
         assert profile_response.status_code == 200
+        profile_data = (
+            profile_response.json()
+        )  # Store original profile data
 
         # Logout
         logout_response = await client.post(
@@ -287,17 +290,21 @@ class TestAuthIntegration:
         assert logout_response.status_code == 200
 
         # Verify token no longer works after logout
-        profile_response_after = await client.get("/api/v1/auth/me", headers=auth_headers)
+        profile_response_after = await client.get(
+            "/api/v1/auth/me", headers=auth_headers
+        )
         # After logout, the token should either be invalid (401) or user info should show as not authenticated
         # Different auth implementations may handle this differently
         assert profile_response_after.status_code in [401, 200]
-        
+
         if profile_response_after.status_code == 200:
             # If status is 200, verify that user is marked as not authenticated
             profile_data_after = profile_response_after.json()
             # The implementation may return different fields to indicate logged out state
             # Common patterns: is_authenticated=False, token_valid=False, or different user info
-            assert profile_data_after != profile_data  # Profile should be different after logout
+            assert (
+                profile_data_after != profile_data
+            )  # Profile should be different after logout
 
     @pytest.mark.integration
     async def test_account_deactivation_workflow(

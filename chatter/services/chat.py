@@ -17,13 +17,15 @@ from chatter.models.conversation import (
 )
 from chatter.schemas.chat import (
     ChatRequest,
-    StreamingChatChunk,
 )
 from chatter.schemas.chat import (
     ConversationCreate as ConversationCreateSchema,
 )
 from chatter.schemas.chat import (
     ConversationUpdate as ConversationUpdateSchema,
+)
+from chatter.schemas.chat import (
+    StreamingChatChunk,
 )
 from chatter.services.conversation import ConversationService
 from chatter.services.llm import LLMService
@@ -192,8 +194,12 @@ class ChatService:
             )
         )
         total = await self.conversation_service.get_conversation_count(
-            user_id, status=status, llm_provider=llm_provider,
-            llm_model=llm_model, tags=tags, enable_retrieval=enable_retrieval
+            user_id,
+            status=status,
+            llm_provider=llm_provider,
+            llm_model=llm_model,
+            tags=tags,
+            enable_retrieval=enable_retrieval,
         )
         return list(conversations), total
 
@@ -317,7 +323,10 @@ class ChatService:
                 # Execute workflow to get response
                 response_message, usage_info = (
                     await self.workflow_service.execute_workflow(
-                        conversation, chat_request, correlation_id, user_id
+                        conversation,
+                        chat_request,
+                        correlation_id,
+                        user_id,
                     )
                 )
 

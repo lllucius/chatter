@@ -10,4 +10,5 @@ if __name__ == "__main__":
         sys.path.insert(0, str(project_root))
 
     from scripts.generate_sdks import main
+
     sys.exit(main())

@@ -164,8 +164,8 @@ class TestResult(BaseModel):
     statistical_significance: dict[str, bool] = Field(
         default_factory=dict
     )
-    confidence_intervals: dict[str, dict[str, dict[str, float]]] = Field(
-        default_factory=dict
+    confidence_intervals: dict[str, dict[str, dict[str, float]]] = (
+        Field(default_factory=dict)
     )
     recommendations: list[str] = Field(default_factory=list)
     analysis_date: datetime = Field(

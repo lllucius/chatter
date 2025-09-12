@@ -255,6 +255,3 @@ def get_tool_loader() -> SimplifiedToolLoader:
     if _tool_loader is None:
         _tool_loader = SimplifiedToolLoader()
     return _tool_loader
-
-
-

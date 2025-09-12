@@ -16,9 +16,10 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chatter.core.validation.exceptions import ValidationError
+
 # Use the centralized validation result from the workflow validation service
 from chatter.core.validation.results import ValidationResult
-from chatter.core.validation.exceptions import ValidationError
 from chatter.core.workflow_validation import workflow_validation_service
 from chatter.models.workflow import TemplateCategory
 
@@ -597,16 +598,16 @@ class UnifiedTemplateManager:
         """
         try:
             # Use centralized validation service
-            return (
-                workflow_validation_service.validate_workflow_template(
-                    template  # type: ignore # Template compatibility handled by validation service
-                )
+            return workflow_validation_service.validate_workflow_template(
+                template  # type: ignore # Template compatibility handled by validation service
             )
         except Exception as e:
             logger.error(f"Template validation failed: {e}")
             return ValidationResult(
                 is_valid=False,
-                errors=[ValidationError(f"Validation failed: {str(e)}")],
+                errors=[
+                    ValidationError(f"Validation failed: {str(e)}")
+                ],
                 warnings=[],
             )
 

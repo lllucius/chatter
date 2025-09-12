@@ -44,7 +44,9 @@ def validate_input(
     )
 
 
-def validate_security(value: str, context: ValidationContext | None = None) -> ValidationResult:
+def validate_security(
+    value: str, context: ValidationContext | None = None
+) -> ValidationResult:
     """Validate input for security threats."""
     return validation_engine.validate_security(
         value, context or DEFAULT_CONTEXT
@@ -52,7 +54,9 @@ def validate_security(value: str, context: ValidationContext | None = None) -> V
 
 
 def validate_business_logic(
-    data: dict[str, Any], rules: list[str], context: ValidationContext | None = None
+    data: dict[str, Any],
+    rules: list[str],
+    context: ValidationContext | None = None,
 ) -> ValidationResult:
     """Validate business logic rules."""
     return validation_engine.validate_business_logic(

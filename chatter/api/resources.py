@@ -7,8 +7,8 @@ from chatter.models.user import User
 from chatter.schemas.chat import (
     ConversationCreate,
     ConversationDeleteResponse,
-    ConversationResponse,
     ConversationListResponse,
+    ConversationResponse,
     ConversationUpdate,
     ConversationWithMessages,
     MessageDeleteResponse,

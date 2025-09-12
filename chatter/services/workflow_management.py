@@ -111,7 +111,9 @@ class WorkflowManagementService:
             if not _is_validation_result_valid(validation_result):
                 from chatter.utils.problem import BadRequestProblem
 
-                error_messages = _get_validation_errors_as_strings(validation_result)
+                error_messages = _get_validation_errors_as_strings(
+                    validation_result
+                )
                 raise BadRequestProblem(
                     detail=f"Workflow validation failed: {'; '.join(error_messages)}"
                 )
@@ -386,9 +388,13 @@ class WorkflowManagementService:
 
             return {
                 "valid": _is_validation_result_valid(validation_result),
-                "errors": _get_validation_errors_as_strings(validation_result),
+                "errors": _get_validation_errors_as_strings(
+                    validation_result
+                ),
                 "warnings": validation_result.warnings,
-                "requirements_met": getattr(validation_result, 'requirements_met', True),
+                "requirements_met": getattr(
+                    validation_result, 'requirements_met', True
+                ),
             }
 
         except Exception as e:

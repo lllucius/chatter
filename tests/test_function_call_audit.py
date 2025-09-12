@@ -79,3 +79,35 @@ def test_no_undefined_names_in_analytics():
     
     # The test passes if no import errors occur during compilation
     # This is sufficient to verify the fix worked
+
+
+def test_chatter_sdk_client_import():
+    """Test that ChatterSDKClient is properly imported in api_cli.py."""
+    api_cli_file = Path(__file__).parent.parent / "chatter" / "api_cli.py"
+    
+    with open(api_cli_file, 'r') as f:
+        content = f.read()
+    
+    # Parse the AST
+    tree = ast.parse(content, filename=str(api_cli_file))
+    
+    # Check for ChatterSDKClient import
+    imported_names = set()
+    for node in ast.walk(tree):
+        if isinstance(node, ast.ImportFrom) and node.module == "chatter.commands":
+            for alias in node.names:
+                imported_names.add(alias.name)
+    
+    assert "ChatterSDKClient" in imported_names, "ChatterSDKClient should be imported from chatter.commands"
+
+
+def test_api_cli_file_compiles():
+    """Test that api_cli.py compiles without errors."""
+    api_cli_file = Path(__file__).parent.parent / "chatter" / "api_cli.py"
+    
+    with open(api_cli_file, 'r') as f:
+        content = f.read()
+    
+    # This should not raise any exceptions
+    compile(content, str(api_cli_file), 'exec')
+    ast.parse(content, filename=str(api_cli_file))

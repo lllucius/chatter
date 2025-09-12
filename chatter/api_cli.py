@@ -43,6 +43,7 @@ except ImportError as e:
     sys.exit(1)
 
 # Import modular command groups
+from chatter.commands import ChatterSDKClient
 from chatter.commands.agents import agents_app
 from chatter.commands.analytics import analytics_app
 from chatter.commands.auth import auth_app

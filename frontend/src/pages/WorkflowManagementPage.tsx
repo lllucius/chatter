@@ -96,6 +96,8 @@ const WorkflowManagementPage: React.FC = () => {
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
+  const [viewDetailsDialogOpen, setViewDetailsDialogOpen] = useState(false);
+  const [detailsTemplate, setDetailsTemplate] = useState<WorkflowTemplateInfo | null>(null);
   const [customWorkflow, setCustomWorkflow] = useState({
     name: '',
     description: '',
@@ -187,6 +189,37 @@ const WorkflowManagementPage: React.FC = () => {
     setExecuteDialogOpen(true);
   };
 
+  const handleViewDetails = (templateName: string) => {
+    const template = templates[templateName];
+    if (template) {
+      setDetailsTemplate(template);
+      setViewDetailsDialogOpen(true);
+    }
+  };
+
+  const handleCopyTemplate = (templateName: string) => {
+    const template = templates[templateName];
+    if (template) {
+      // Copy template data to clipboard as JSON
+      const templateData = {
+        name: `${template.name} (Copy)`,
+        description: template.description,
+        workflow_type: template.workflow_type,
+        category: template.category,
+        required_tools: template.required_tools,
+        parameters: template.parameters,
+      };
+      
+      navigator.clipboard.writeText(JSON.stringify(templateData, null, 2))
+        .then(() => {
+          toastService.success(`Template "${template.name}" copied to clipboard`);
+        })
+        .catch(() => {
+          toastService.error('Failed to copy template to clipboard');
+        });
+    }
+  };
+
   const handleExecuteConfirm = () => {
     if (selectedTemplate && executionInput.trim()) {
       executeWorkflow(selectedTemplate, executionInput);
@@ -275,12 +308,12 @@ const WorkflowManagementPage: React.FC = () => {
                       Execute
                     </Button>
                     <Tooltip title="View Details">
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => handleViewDetails(name)}>
                         <ViewIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Template">
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => handleCopyTemplate(name)}>
                         <CopyIcon />
                       </IconButton>
                     </Tooltip>
@@ -710,6 +743,75 @@ const WorkflowManagementPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setBuilderDialogOpen(false)}>
+            Close
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog 
+        open={viewDetailsDialogOpen} 
+        onClose={() => setViewDetailsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Template Details: {detailsTemplate?.name}
+        </DialogTitle>
+        <DialogContent>
+          {detailsTemplate && (
+            <Box>
+              <Typography variant="body1" paragraph>
+                <strong>Description:</strong> {detailsTemplate.description || 'No description available'}
+              </Typography>
+              
+              <Typography variant="body1" paragraph>
+                <strong>Type:</strong> {detailsTemplate.workflow_type || 'Unknown'}
+              </Typography>
+              
+              {detailsTemplate.category && (
+                <Typography variant="body1" paragraph>
+                  <strong>Category:</strong> {detailsTemplate.category}
+                </Typography>
+              )}
+              
+              {detailsTemplate.required_tools && detailsTemplate.required_tools.length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    <strong>Required Tools:</strong>
+                  </Typography>
+                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                    {detailsTemplate.required_tools.map((tool, index) => (
+                      <Chip 
+                        key={index}
+                        label={tool} 
+                        size="small" 
+                        variant="outlined" 
+                      />
+                    ))}
+                  </Box>
+                </Box>
+              )}
+              
+              {detailsTemplate.parameters && Object.keys(detailsTemplate.parameters).length > 0 && (
+                <Box sx={{ mb: 2 }}>
+                  <Typography variant="body1" sx={{ mb: 1 }}>
+                    <strong>Parameters:</strong>
+                  </Typography>
+                  <Box sx={{ pl: 2 }}>
+                    {Object.entries(detailsTemplate.parameters).map(([key, value]) => (
+                      <Typography key={key} variant="body2" sx={{ mb: 0.5 }}>
+                        • <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : String(value)}
+                      </Typography>
+                    ))}
+                  </Box>
+                </Box>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewDetailsDialogOpen(false)}>
             Close
           </Button>
         </DialogActions>

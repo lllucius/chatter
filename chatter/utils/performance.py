@@ -10,7 +10,7 @@ from collections.abc import AsyncGenerator, Sequence
 from contextlib import asynccontextmanager
 from typing import Any
 
-from sqlalchemy import and_, func, or_, select, update
+from sqlalchemy import and_, func, or_, select, text, update
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import joinedload, selectinload
 from sqlalchemy.sql import Select
@@ -1226,7 +1226,7 @@ class DatabaseIndexManager:
                     )
 
                     start_time = time.time()
-                    await session.execute(index_sql)
+                    await session.execute(text(index_sql))
                     duration = time.time() - start_time
 
                     applied.append(

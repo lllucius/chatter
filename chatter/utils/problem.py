@@ -269,13 +269,15 @@ class RateLimitProblem(ProblemException):
             headers["Retry-After"] = str(retry_after)
 
         # Additional rate limit metadata
-        extra_fields = {}
+        extra_fields: dict[str, Any] = {}
         if limit is not None:
             extra_fields["limit"] = limit
         if window is not None:
             extra_fields["window"] = window
         if remaining is not None:
             extra_fields["remaining"] = remaining
+        if retry_after is not None:
+            extra_fields["retryAfter"] = retry_after
 
         super().__init__(
             status_code=status.HTTP_429_TOO_MANY_REQUESTS,
@@ -283,9 +285,7 @@ class RateLimitProblem(ProblemException):
             detail=detail,
             type_suffix="rate-limit-exceeded",
             headers=headers,
-            retryAfter=retry_after,
             **extra_fields,
-            **kwargs,
         )
 
 

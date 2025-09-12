@@ -144,7 +144,6 @@ class APIVersionManager:
             path=path,
             method=method.upper(),
             introduced_in=introduced_in,
-            deprecated_in=None,
             removed_in=removed_in,
         )
 

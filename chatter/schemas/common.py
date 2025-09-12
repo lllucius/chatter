@@ -11,19 +11,19 @@ class PaginationRequest(BaseModel):
     """Common pagination request schema."""
 
     limit: int = Field(
-        50, ge=1, description="Maximum number of results"
+        default=50, ge=1, description="Maximum number of results"
     )
     offset: int = Field(
-        0, ge=0, description="Number of results to skip"
+        default=0, ge=0, description="Number of results to skip"
     )
 
 
 class SortingRequest(BaseModel):
     """Common sorting request schema."""
 
-    sort_by: str = Field("created_at", description="Sort field")
+    sort_by: str = Field(default="created_at", description="Sort field")
     sort_order: str = Field(
-        "desc", pattern="^(asc|desc)$", description="Sort order"
+        default="desc", pattern="^(asc|desc)$", description="Sort order"
     )
 
 
@@ -31,11 +31,11 @@ class PaginatedRequest(BaseModel):
     """Base class for paginated requests."""
 
     pagination: PaginationRequest = Field(
-        default=PaginationRequest(),
+        default_factory=lambda: PaginationRequest(),
         description="Pagination parameters",
     )
     sorting: SortingRequest = Field(
-        default=SortingRequest(), description="Sorting parameters"
+        default_factory=lambda: SortingRequest(), description="Sorting parameters"
     )
 
 

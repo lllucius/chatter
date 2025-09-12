@@ -27,7 +27,7 @@ import {
   ContentCopy as CopyIcon,
   Delete as DeleteIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 
 export interface ChatMessage {
   id: string;
@@ -54,6 +54,14 @@ interface EnhancedMessageProps {
   canRegenerate?: boolean;
   canDelete?: boolean;
 }
+
+// Helper function to safely format timestamps
+const formatTimestamp = (timestamp: Date, formatString: string): string => {
+  if (!timestamp || !isValid(timestamp)) {
+    return '--:--';
+  }
+  return format(timestamp, formatString);
+};
 
 const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
   message,
@@ -198,7 +206,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="caption" color="text.secondary">
-                    {format(message.timestamp, 'HH:mm')}
+                    {formatTimestamp(message.timestamp, 'HH:mm')}
                   </Typography>
                   <IconButton size="small" onClick={handleMenuOpen}>
                     <MoreVertIcon fontSize="small" />

@@ -11,6 +11,7 @@ from langchain_core.messages import (
     SystemMessage,
 )
 from langchain_core.tools import BaseTool
+from pydantic import SecretStr
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -653,15 +654,17 @@ class AgentManager:
                 return ChatOpenAI(
                     model="gpt-3.5-turbo",
                     temperature=0.7,
-                    max_tokens=4096,
+                    max_completion_tokens=4096,
                 )
             elif provider == "anthropic":
                 from langchain_anthropic import ChatAnthropic
 
                 return ChatAnthropic(
-                    model="claude-3-sonnet-20240229",
+                    model_name="claude-3-sonnet-20240229",
                     temperature=0.7,
-                    max_tokens=4096,
+                    max_tokens_to_sample=4096,
+                    timeout=None,
+                    stop=None,
                 )
             else:
                 # Fallback to a mock LLM for testing

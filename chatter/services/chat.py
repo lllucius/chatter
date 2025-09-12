@@ -461,10 +461,12 @@ class ChatService:
                         if len(chat_request.message) > 50
                         else chat_request.message
                     ),
+                    description=None,
                     profile_id=chat_request.profile_id,
                     temperature=chat_request.temperature,
                     max_tokens=chat_request.max_tokens,
                     workflow_config=chat_request.workflow_config,
+                    extra_metadata=None,
                 )
                 return await self.create_conversation(
                     user_id, conv_data

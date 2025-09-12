@@ -14,6 +14,7 @@ from langchain_core.messages import (
     SystemMessage,
 )
 from langchain_openai import ChatOpenAI
+from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.dependencies import (
@@ -83,11 +84,13 @@ class LLMService:
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 return ChatAnthropic(
-                    api_key=api_key or "dummy",
-                    model=model_def.model_name,
+                    api_key=SecretStr(api_key or "dummy"),
+                    model_name=model_def.model_name,
                     temperature=config.get("temperature", 0.7),
-                    max_tokens=model_def.max_tokens
+                    max_tokens_to_sample=model_def.max_tokens
                     or config.get("max_tokens", 4096),
+                    timeout=None,
+                    stop=None,
                 )
 
             else:
@@ -271,16 +274,16 @@ class LLMService:
                 # Only create provider if we have an API key or if it's not required
                 if api_key or not provider.api_key_required:
                     return ChatOpenAI(
-                        api_key=api_key,
+                        api_key=SecretStr(api_key) if api_key else None,
                         base_url=provider.base_url,
                         model=model_def.model_name,
                         temperature=profile.temperature,
-                        max_tokens=profile.max_tokens,
+                        max_completion_tokens=profile.max_tokens,
                         top_p=profile.top_p,
                         presence_penalty=profile.presence_penalty,
                         frequency_penalty=profile.frequency_penalty,
                         seed=profile.seed,
-                        stop=profile.stop_sequences,
+                        stop_sequences=profile.stop_sequences,
                         logit_bias=profile.logit_bias,
                     )
                 else:
@@ -297,12 +300,13 @@ class LLMService:
                 # Only create provider if we have an API key or if it's not required
                 if api_key or not provider.api_key_required:
                     return ChatAnthropic(
-                        api_key=api_key,
-                        model=model_def.model_name,
+                        api_key=SecretStr(api_key) if api_key else SecretStr("dummy"),
+                        model_name=model_def.model_name,
                         temperature=profile.temperature,
-                        max_tokens=profile.max_tokens,
+                        max_tokens_to_sample=profile.max_tokens,
                         top_p=profile.top_p,
-                        stop_sequences=profile.stop_sequences,
+                        stop=profile.stop_sequences,
+                        timeout=None,
                     )
                 else:
                     raise LLMProviderError(
@@ -401,18 +405,20 @@ class LLMService:
             if provider and provider.lower() == "openai":
                 api_key = os.getenv("OPENAI_API_KEY", "dummy")
                 provider_instance = ChatOpenAI(
-                    api_key=api_key,
+                    api_key=SecretStr(api_key),
                     model=model,
                     temperature=kwargs.get("temperature", 0.7),
-                    max_tokens=kwargs.get("max_tokens", 1000),
+                    max_completion_tokens=kwargs.get("max_tokens", 1000),
                 )
             elif provider and provider.lower() == "anthropic":
                 api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")
                 provider_instance = ChatAnthropic(
-                    api_key=api_key,
-                    model=model,
+                    api_key=SecretStr(api_key),
+                    model_name=model,
                     temperature=kwargs.get("temperature", 0.7),
-                    max_tokens=kwargs.get("max_tokens", 1000),
+                    max_tokens_to_sample=kwargs.get("max_tokens", 1000),
+                    timeout=None,
+                    stop=None,
                 )
             else:
                 raise LLMProviderError(

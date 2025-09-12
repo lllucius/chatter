@@ -20,8 +20,16 @@ import {
 import {
   Download as DownloadIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
+import { format, isValid } from 'date-fns';
 import { ChatMessage } from './EnhancedMessage';
+
+// Helper function to safely format timestamps  
+const formatTimestamp = (timestamp: Date, formatString: string): string => {
+  if (!timestamp || !isValid(timestamp)) {
+    return 'Invalid Date';
+  }
+  return format(timestamp, formatString);
+};
 
 interface ChatExportProps {
   open: boolean;
@@ -85,7 +93,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
       content += `## ${roleEmoji} ${roleName}`;
       
       if (includeTimestamps) {
-        content += ` (${format(msg.timestamp, 'PPpp')})`;
+        content += ` (${formatTimestamp(msg.timestamp, 'PPpp')})`;
       }
       
       if (msg.edited) {
@@ -126,7 +134,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
       content += `[${index + 1}] ${roleName}`;
       
       if (includeTimestamps) {
-        content += ` (${format(msg.timestamp, 'PPpp')})`;
+        content += ` (${formatTimestamp(msg.timestamp, 'PPpp')})`;
       }
       
       if (msg.edited) {
@@ -189,7 +197,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
         <div class="message ${msg.role}">
           <div class="role">
             ${msg.role === 'user' ? '👤 User' : msg.role === 'assistant' ? '🤖 Assistant' : '⚙️ System'}
-            ${includeTimestamps ? `<span class="timestamp"> - ${format(msg.timestamp, 'PPpp')}</span>` : ''}
+            ${includeTimestamps ? `<span class="timestamp"> - ${formatTimestamp(msg.timestamp, 'PPpp')}</span>` : ''}
             ${msg.edited ? ' <span style="color: orange;">✏️ Edited</span>' : ''}
           </div>
           <div class="content">${msg.content.replace(/\n/g, '<br>')}</div>

@@ -359,7 +359,7 @@ const DocumentsPage: React.FC = () => {
       
       return {
         items: documents,
-        total: response.total || documents.length,
+        total: response.total_count || documents.length,
       };
     },
 

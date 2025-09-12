@@ -609,14 +609,14 @@ class ToolAccessResult(BaseModel):
         ..., description="Access level"
     )
     rate_limit_remaining_hour: int | None = Field(
-        None, description="Remaining hourly calls"
+        default=None, description="Remaining hourly calls"
     )
     rate_limit_remaining_day: int | None = Field(
-        None, description="Remaining daily calls"
+        default=None, description="Remaining daily calls"
     )
     restriction_reason: str | None = Field(
-        None, description="Reason if restricted"
+        default=None, description="Reason if restricted"
     )
     expires_at: datetime | None = Field(
-        None, description="Permission expiry"
+        default=None, description="Permission expiry"
     )

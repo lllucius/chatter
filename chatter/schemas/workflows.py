@@ -37,8 +37,8 @@ class WorkflowNode(BaseModel):
 class WorkflowEdgeData(BaseModel):
     """Schema for workflow edge data."""
 
-    condition: str | None = Field(None, description="Edge condition")
-    label: str | None = Field(None, description="Edge label")
+    condition: str | None = Field(default=None, description="Edge condition")
+    label: str | None = Field(default=None, description="Edge label")
 
 
 class WorkflowEdge(BaseModel):
@@ -282,7 +282,7 @@ class OptimizationSuggestion(BaseModel):
         ..., description="Expected impact (low/medium/high)"
     )
     node_ids: list[str] | None = Field(
-        None, description="Affected node IDs"
+        default=None, description="Affected node IDs"
     )
 
 

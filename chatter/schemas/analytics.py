@@ -351,13 +351,13 @@ class AnalyticsTimeRange(BaseModel):
     """Schema for analytics time range filter."""
 
     start_date: datetime | None = Field(
-        None, description="Start date for analytics"
+        default=None, description="Start date for analytics"
     )
     end_date: datetime | None = Field(
-        None, description="End date for analytics"
+        default=None, description="End date for analytics"
     )
     period: str = Field(
-        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+        default="7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     )
 
     @field_validator("period")

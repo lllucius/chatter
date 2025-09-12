@@ -11,6 +11,7 @@ from chatter.core.exceptions import ChatServiceError
 from chatter.core.monitoring import record_request_metrics
 from chatter.models.conversation import (
     Conversation,
+    ConversationStatus,
     Message,
     MessageRole,
 )
@@ -163,16 +164,36 @@ class ChatService:
         )
 
     async def list_conversations(
-        self, user_id: str, limit: int = 20, offset: int = 0
+        self,
+        user_id: str,
+        limit: int = 20,
+        offset: int = 0,
+        status: ConversationStatus | None = None,
+        llm_provider: str | None = None,
+        llm_model: str | None = None,
+        tags: list[str] | None = None,
+        enable_retrieval: bool | None = None,
+        sort_by: str = "updated_at",
+        sort_order: str = "desc",
     ) -> tuple[list[Conversation], int]:
-        """List conversations for a user with pagination."""
+        """List conversations for a user with pagination and filtering."""
         conversations = (
             await self.conversation_service.list_conversations(
-                user_id, limit, offset
+                user_id=user_id,
+                limit=limit,
+                offset=offset,
+                status=status,
+                llm_provider=llm_provider,
+                llm_model=llm_model,
+                tags=tags,
+                enable_retrieval=enable_retrieval,
+                sort_field=sort_by,
+                sort_order=sort_order,
             )
         )
         total = await self.conversation_service.get_conversation_count(
-            user_id
+            user_id, status=status, llm_provider=llm_provider,
+            llm_model=llm_model, tags=tags, enable_retrieval=enable_retrieval
         )
         return list(conversations), total
 

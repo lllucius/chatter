@@ -18,6 +18,7 @@ from chatter.api.resources import (
     MessageResourceHandler,
 )
 from chatter.core.exceptions import ChatServiceError, NotFoundError
+from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
     AvailableToolResponse,
@@ -26,8 +27,8 @@ from chatter.schemas.chat import (
     ChatResponse,
     ConversationCreate,
     ConversationDeleteResponse,
+    ConversationListResponse,
     ConversationResponse,
-    ConversationSearchResponse,
     ConversationUpdate,
     ConversationWithMessages,
     McpStatusResponse,
@@ -107,18 +108,68 @@ async def create_conversation(
 
 @router.get(
     "/conversations",
-    response_model=ConversationSearchResponse,
+    response_model=ConversationListResponse,
 )
 async def list_conversations(
-    limit: PaginationLimit = 20,
-    offset: PaginationOffset = 0,
+    status: ConversationStatus | None = Query(
+        None, description="Filter by conversation status"
+    ),
+    llm_provider: str | None = Query(
+        None, description="Filter by LLM provider"
+    ),
+    llm_model: str | None = Query(
+        None, description="Filter by LLM model"
+    ),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    enable_retrieval: bool | None = Query(
+        None, description="Filter by retrieval enabled status"
+    ),
+    limit: int = Query(
+        50, ge=1, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
+    sort_by: str = Query("updated_at", description="Sort field"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     handler: ConversationResourceHandler = Depends(
         get_conversation_handler
     ),
-) -> ConversationSearchResponse:
-    """List conversations for the current user."""
-    return await handler.list_conversations(current_user, limit, offset)
+) -> ConversationListResponse:
+    """List conversations for the current user.
+    
+    Args:
+        status: Filter by conversation status
+        llm_provider: Filter by LLM provider  
+        llm_model: Filter by LLM model
+        tags: Filter by tags
+        enable_retrieval: Filter by retrieval enabled status
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
+        current_user: Current authenticated user
+        handler: Conversation resource handler
+        
+    Returns:
+        List of conversations with pagination info
+    """
+    # Create ConversationListRequest object to pass filters
+    return await handler.list_conversations(
+        current_user=current_user,
+        limit=limit,
+        offset=offset,
+        status=status,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
+        tags=tags,
+        enable_retrieval=enable_retrieval,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 @router.get(

@@ -175,16 +175,17 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await getSDK().chat.getConversationMessagesApiV1ChatConversationsConversationIdMessages(
-        conversation.id
+      const response = await getSDK().chat.getConversationApiV1ChatConversationsConversationId(
+        conversation.id,
+        { includeMessages: true }
       );
       
       // Convert messages to ExtendedChatMessage format
-      const chatMessages: ExtendedChatMessage[] = response.map(msg => ({
+      const chatMessages: ExtendedChatMessage[] = (response.messages || []).map(msg => ({
         id: msg.id,
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
-        timestamp: new Date(msg.createdAt)
+        timestamp: new Date(msg.created_at)
       }));
       
       setMessages(chatMessages);

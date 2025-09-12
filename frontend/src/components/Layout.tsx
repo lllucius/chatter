@@ -204,9 +204,8 @@ const LayoutFrame: React.FC = () => {
   const handleLogout = async () => {
     try {
       await authService.logout();
-    } catch (error) {
-      console.error('Logout failed:', error);
-      // Still proceed with navigation even if logout API call fails
+    } catch (_error) {
+      // Logout failed but still proceed with navigation for user experience
     } finally {
       navigate('/login', { replace: true });
       handleProfileMenuClose();

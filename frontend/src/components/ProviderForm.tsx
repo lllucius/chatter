@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   Box,
 } from '@mui/material';
-import { ProviderCreate, ProviderUpdate } from 'chatter-sdk';
+import { ProviderCreate, ProviderUpdate, ProviderType } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface ProviderFormProps extends CrudFormProps<ProviderCreate, ProviderUpdate> {}
@@ -113,7 +113,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
             <InputLabel>Provider Type</InputLabel>
             <Select
               value={formData.provider_type}
-              onChange={(e) => setFormData({ ...formData, provider_type: e.target.value as any })}
+              onChange={(e) => setFormData({ ...formData, provider_type: e.target.value as ProviderType })}
               disabled={mode === 'edit'}
               label="Provider Type"
               helperText={mode === 'edit' ? "Provider type cannot be changed after creation" : ""}

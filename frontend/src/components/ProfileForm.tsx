@@ -10,7 +10,7 @@ import {
   Alert,
   Grid,
 } from '../utils/mui';
-import { ProfileCreate, ProfileUpdate } from 'chatter-sdk';
+import { ProfileCreate, ProfileUpdate, ProfileResponse } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 import { FormDialog } from './BaseDialog';
 import { useBaseForm } from '../hooks/useBaseForm';
@@ -68,7 +68,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   } = useBaseForm(
     {
       defaultData: defaultProfileData,
-      transformInitialData: (data: any) => ({
+      transformInitialData: (data: ProfileResponse) => ({
         name: data.name || '',
         description: data.description || '',
         llmModel: data.llmModel || '',
@@ -92,8 +92,8 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     try {
       const response = await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
       setProvidersData(response as ProvidersData);
-    } catch (error) {
-      console.error('Failed to fetch providers:', error);
+    } catch (_error) {
+      // Failed to fetch providers - handled by setting error state
       setProvidersError('Failed to load available providers');
     } finally {
       setLoadingProviders(false);

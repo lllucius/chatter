@@ -54,11 +54,21 @@ interface NotificationContextType {
 
 const NotificationContext = createContext<NotificationContextType>({
   notifications: [],
-  showNotification: () => {},
-  markAsRead: () => {},
-  markAllAsRead: () => {},
-  clearNotification: () => {},
-  clearAll: () => {},
+  showNotification: () => {
+    // Default implementation - will be overridden by provider
+  },
+  markAsRead: () => {
+    // Default implementation - will be overridden by provider
+  },
+  markAllAsRead: () => {
+    // Default implementation - will be overridden by provider
+  },
+  clearNotification: () => {
+    // Default implementation - will be overridden by provider
+  },
+  clearAll: () => {
+    // Default implementation - will be overridden by provider
+  },
   unreadCount: 0,
 });
 

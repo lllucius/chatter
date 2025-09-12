@@ -87,7 +87,7 @@ export type WorkflowNodeType =
 export interface WorkflowNodeData extends Record<string, unknown> {
   label: string;
   nodeType: WorkflowNodeType;
-  config?: Record<string, any>;
+  config?: Record<string, unknown>;
 }
 
 export interface WorkflowEdgeData extends Record<string, unknown> {
@@ -191,7 +191,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, [setNodes, saveToHistory]);
 
   // Smart positioning function
-  const getSmartPosition = useCallback((nodeType: WorkflowNodeType): { x: number; y: number } => {
+  const getSmartPosition = useCallback((_nodeType: WorkflowNodeType): { x: number; y: number } => {
     const existingNodes = nodes;
     let x = 100;
     let y = 100;

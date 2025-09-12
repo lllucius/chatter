@@ -152,8 +152,8 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     currentPath: string[],
     visited: Set<string>,
     allPaths: string[][],
-    edges: any[],
-    nodes: any[]
+    edges: Array<{ source: string; target: string }>,
+    nodes: Array<{ id: string }>
   ) => {
     const outgoingEdges = edges.filter(edge => edge.source === currentNodeId);
     

@@ -40,7 +40,9 @@ export const ThemeContext = React.createContext<{
   toggleDarkMode: () => void;
 }>({
   darkMode: false,
-  toggleDarkMode: () => {},
+  toggleDarkMode: () => {
+    // Implementation will be added when needed
+  },
 });
 
 function App() {
@@ -52,8 +54,8 @@ function App() {
     const initAuth = async () => {
       try {
         await initializeSDK();
-      } catch (error) {
-        console.error('Failed to initialize SDK:', error);
+      } catch (_error) {
+        // Failed to initialize SDK - handled gracefully by setting authInitialized to true
       } finally {
         setAuthInitialized(true);
       }

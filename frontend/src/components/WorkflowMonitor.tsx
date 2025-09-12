@@ -97,7 +97,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
 }) => {
   const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [performanceData, setPerformanceData] = useState<any[]>([]);
+  const [performanceData, setPerformanceData] = useState<Array<{ timestamp: string; tokensPerSecond: number; latency: number }>>([]);
 
   // Auto-refresh functionality
   useEffect(() => {
@@ -165,7 +165,6 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
   };
 
   const runningExecutions = executions.filter(e => ['running', 'queued'].includes(e.status));
-  const _recentExecutions = executions.slice(0, 10);
 
   return (
     <Box>
@@ -383,7 +382,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   <YAxis />
                   <RechartsTooltip
                     labelFormatter={(time) => format(new Date(time), 'HH:mm:ss')}
-                    formatter={(value: any, name: string) => [Math.round(value), name]}
+                    formatter={(value: number, name: string) => [Math.round(value), name]}
                   />
                   <Area
                     type="monotone"

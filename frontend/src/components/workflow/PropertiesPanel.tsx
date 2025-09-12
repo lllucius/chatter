@@ -37,7 +37,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onNodeUpdate,
   onClose,
 }) => {
-  const [config, setConfig] = useState<Record<string, any>>({});
+  const [config, setConfig] = useState<Record<string, unknown>>({});
   const [label, setLabel] = useState('');
 
   // Sync with selected node

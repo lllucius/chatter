@@ -1,5 +1,7 @@
 """Configuration management for Chatter application."""
 
+from typing import Any
+
 # Using pydantic v2
 from pydantic import Field, field_validator, model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict

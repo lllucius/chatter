@@ -5,12 +5,14 @@ import { Box } from '@mui/material';
  * Custom TabPanel component that consolidates the tab panel pattern
  * used across multiple pages in the application
  */
-export interface TabPanelProps {
+export import { SxProps, Theme } from '@mui/material';
+
+interface TabPanelProps {
   children?: React.ReactNode;
   index: number;
   value: number;
   idPrefix?: string;
-  sx?: any;
+  sx?: SxProps<Theme>;
 }
 
 export const TabPanel: React.FC<TabPanelProps> = ({ 

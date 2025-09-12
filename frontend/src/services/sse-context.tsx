@@ -20,7 +20,7 @@ interface SSEContextValue {
   offCategory: (category: string, listener: SSEEventListener) => void;
   onHighPriority: (listener: SSEEventListener) => () => void;
   requestNotificationPermission: () => Promise<boolean>;
-  getConnectionStats: () => any;
+  getConnectionStats: () => Record<string, unknown>;
 }
 
 const SSEContext = createContext<SSEContextValue | null>(null);

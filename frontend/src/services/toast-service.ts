@@ -23,13 +23,13 @@ interface ProblemDetail {
   status?: number;
   detail?: string;
   instance?: string;
-  [key: string]: any; // Additional fields
+  [key: string]: unknown; // Additional fields
 }
 
 // Error response structure from backend
 interface ErrorResponse {
   response?: {
-    data?: ProblemDetail | any;
+    data?: ProblemDetail | unknown;
     status?: number;
   };
   message?: string;

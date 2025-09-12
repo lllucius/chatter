@@ -265,8 +265,8 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                   <XAxis dataKey="day" label={{ value: 'Days', position: 'insideBottom', offset: -5 }} />
                   <YAxis label={{ value: 'Conversion Rate', angle: -90, position: 'insideLeft' }} />
                   <Tooltip 
-                    formatter={(value: any, name: string) => [
-                      `${(value * 100).toFixed(2)}%`, 
+                    formatter={(value: unknown, name: string) => [
+                      `${(Number(value) * 100).toFixed(2)}%`, 
                       name.replace('_', ' ').toUpperCase()
                     ]}
                   />
@@ -391,7 +391,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                   />
                   <YAxis />
                   <Tooltip 
-                    formatter={(value: any) => [`$${value.toLocaleString()}`, 'Revenue']}
+                    formatter={(value: unknown) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
                     labelFormatter={(label) => label.replace('_', ' ').toUpperCase()}
                   />
                   <Bar dataKey="revenue" fill="#82ca9d" />

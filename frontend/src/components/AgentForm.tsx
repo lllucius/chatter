@@ -239,22 +239,23 @@ const AgentForm: React.FC<AgentFormProps> = ({
     });
   };
 
-  const _addTool = () => {
-    if (toolInput.name.trim()) {
-      setFormData({
-        ...formData,
-        tools: [...formData.tools, { ...toolInput, enabled: true }]
-      });
-      setToolInput({ name: '', description: '' });
-    }
-  };
+  // TODO: Implement tool management functionality
+  // const addTool = () => {
+  //   if (toolInput.name.trim()) {
+  //     setFormData({
+  //       ...formData,
+  //       tools: [...formData.tools, { ...toolInput, enabled: true }]
+  //     });
+  //     setToolInput({ name: '', description: '' });
+  //   }
+  // };
 
-  const _removeTool = (index: number) => {
-    setFormData({
-      ...formData,
-      tools: formData.tools.filter((_, i) => i !== index)
-    });
-  };
+  // const removeTool = (index: number) => {
+  //   setFormData({
+  //     ...formData,
+  //     tools: formData.tools.filter((_, i) => i !== index)
+  //   });
+  // };
 
   const toggleCapability = (capabilityName: string) => {
     const exists = formData.capabilities.find(c => c.name === capabilityName);

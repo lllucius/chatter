@@ -18,8 +18,8 @@ import {
 
 export interface BaseFieldProps {
   label: string;
-  value: any;
-  onChange: (value: any) => void;
+  value: unknown;
+  onChange: (value: unknown) => void;
   error?: string;
   disabled?: boolean;
   required?: boolean;
@@ -32,7 +32,7 @@ export interface TextFieldProps extends BaseFieldProps {
   rows?: number;
   placeholder?: string;
   helperText?: string;
-  inputProps?: any;
+  inputProps?: Record<string, unknown>;
 }
 
 export interface SelectFieldProps extends BaseFieldProps {

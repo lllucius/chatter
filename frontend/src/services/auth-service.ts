@@ -73,14 +73,14 @@ class AuthService {
       } else {
         throw new Error('No access token received');
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error('Login failed:', error);
       
       // Extract error message from the response
       let errorMessage = 'Login failed';
-      if (error?.body?.detail) {
-        errorMessage = error.body.detail;
-      } else if (error?.message) {
+      if (error && typeof error === 'object' && 'body' in error && error.body && typeof error.body === 'object' && 'detail' in error.body) {
+        errorMessage = String(error.body.detail);
+      } else if (error instanceof Error) {
         errorMessage = error.message;
       }
       
@@ -173,9 +173,16 @@ class AuthService {
     
     try {
       return await apiCall(sdk);
-    } catch (error: any) {
+    } catch (error: unknown) {
       // Check if it's an authentication error (401)
-      if (error?.status === 401 || error?.response?.status === 401) {
+      const isAuthError = (
+        (error && typeof error === 'object' && 'status' in error && error.status === 401) ||
+        (error && typeof error === 'object' && 'response' in error && 
+         error.response && typeof error.response === 'object' && 'status' in error.response && 
+         error.response.status === 401)
+      );
+      
+      if (isAuthError) {
         console.log('[AuthService] Access token expired, attempting refresh...');
         
         const refreshSuccess = await this.refreshToken();

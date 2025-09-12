@@ -74,7 +74,7 @@ export const createDateRenderer = <T,>(
 
 export const createNameWithDescriptionRenderer = <T extends { name?: string; display_name?: string; description?: string }>(
 ): CrudColumn<T>['render'] => {
-  return (value: any, item: T) => (
+  return (value: unknown, item: T) => (
     <Box>
       <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
         {value || item.display_name || item.name}
@@ -149,12 +149,12 @@ export const createUsageStatsRenderer = <T extends { total_errors?: number }>(
 };
 
 export const createConditionalChipRenderer = <T,>(
-  condition: (value: any, item: T) => boolean,
+  condition: (value: unknown, item: T) => boolean,
   label: string,
   color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' = 'primary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  return (value: any, item: T) => 
+  return (value: unknown, item: T) => 
     condition(value, item) ? (
       <Chip 
         label={label}

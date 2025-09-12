@@ -13,6 +13,7 @@ from chatter.core.cache_factory import cache_factory
 from chatter.core.cache_interface import CacheInterface
 from chatter.models.conversation import (
     Conversation,
+    ConversationStatus,
     Message,
     MessageRole,
 )

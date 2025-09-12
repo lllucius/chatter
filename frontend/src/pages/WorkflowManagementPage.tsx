@@ -95,6 +95,7 @@ const WorkflowManagementPage: React.FC = () => {
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
+  const [viewDetailsDialogOpen, setViewDetailsDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
   const [customWorkflow, setCustomWorkflow] = useState({
     name: '',
@@ -196,6 +197,30 @@ const WorkflowManagementPage: React.FC = () => {
     }
   };
 
+  const handleViewDetails = (templateName: string) => {
+    setSelectedTemplate(templateName);
+    setViewDetailsDialogOpen(true);
+  };
+
+  const handleCopyTemplate = async (templateName: string, template: WorkflowTemplateInfo) => {
+    try {
+      const templateData = {
+        name: template.name,
+        workflow_type: template.workflow_type,
+        description: template.description,
+        required_tools: template.required_tools,
+        required_retrievers: template.required_retrievers,
+        default_params: template.default_params
+      };
+      
+      await navigator.clipboard.writeText(JSON.stringify(templateData, null, 2));
+      toastService.success(`Template "${templateName}" copied to clipboard`);
+    } catch (error) {
+      console.error('Failed to copy template:', error);
+      toastService.error('Failed to copy template to clipboard');
+    }
+  };
+
   const renderTemplatesTab = () => (
     <Box>
       {loading ? (
@@ -275,12 +300,12 @@ const WorkflowManagementPage: React.FC = () => {
                       Execute
                     </Button>
                     <Tooltip title="View Details">
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => handleViewDetails(name)}>
                         <ViewIcon />
                       </IconButton>
                     </Tooltip>
                     <Tooltip title="Copy Template">
-                      <IconButton size="small">
+                      <IconButton size="small" onClick={() => handleCopyTemplate(name, template)}>
                         <CopyIcon />
                       </IconButton>
                     </Tooltip>
@@ -633,6 +658,109 @@ const WorkflowManagementPage: React.FC = () => {
           >
             Execute
           </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* View Details Dialog */}
+      <Dialog 
+        open={viewDetailsDialogOpen} 
+        onClose={() => setViewDetailsDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>
+          Template Details: {selectedTemplate}
+        </DialogTitle>
+        <DialogContent>
+          {selectedTemplate && templates[selectedTemplate] && (
+            <Box sx={{ mt: 1 }}>
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Description:</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                {templates[selectedTemplate].description}
+              </Typography>
+
+              <Typography variant="subtitle1" gutterBottom>
+                <strong>Workflow Type:</strong>
+              </Typography>
+              <Typography variant="body2" sx={{ mb: 2 }}>
+                {templates[selectedTemplate].workflow_type}
+              </Typography>
+
+              {templates[selectedTemplate].required_tools.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Required Tools:</strong>
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {templates[selectedTemplate].required_tools.map((tool, index) => (
+                      <Chip 
+                        key={index}
+                        label={tool} 
+                        size="small" 
+                        variant="outlined" 
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {templates[selectedTemplate].required_retrievers.length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Required Retrievers:</strong>
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    {templates[selectedTemplate].required_retrievers.map((retriever, index) => (
+                      <Chip 
+                        key={index}
+                        label={retriever} 
+                        size="small" 
+                        variant="outlined" 
+                        color="secondary"
+                        sx={{ mr: 0.5, mb: 0.5 }}
+                      />
+                    ))}
+                  </Box>
+                </>
+              )}
+
+              {Object.keys(templates[selectedTemplate].default_params || {}).length > 0 && (
+                <>
+                  <Typography variant="subtitle1" gutterBottom>
+                    <strong>Default Parameters:</strong>
+                  </Typography>
+                  <Box sx={{ mb: 2 }}>
+                    <pre style={{ 
+                      backgroundColor: '#f5f5f5', 
+                      padding: '8px', 
+                      borderRadius: '4px', 
+                      fontSize: '12px',
+                      overflow: 'auto'
+                    }}>
+                      {JSON.stringify(templates[selectedTemplate].default_params, null, 2)}
+                    </pre>
+                  </Box>
+                </>
+              )}
+            </Box>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setViewDetailsDialogOpen(false)}>
+            Close
+          </Button>
+          {selectedTemplate && templates[selectedTemplate] && (
+            <Button 
+              onClick={() => handleCopyTemplate(selectedTemplate, templates[selectedTemplate])}
+              variant="contained"
+              startIcon={<CopyIcon />}
+            >
+              Copy Template
+            </Button>
+          )}
         </DialogActions>
       </Dialog>
 

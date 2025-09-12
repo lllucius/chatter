@@ -863,7 +863,7 @@ class LLMService:
         )
 
         # Use the unified create_workflow method
-        return workflow_manager.create_workflow(
+        return await workflow_manager.create_workflow(
             llm=provider,
             mode=mode,
             system_message=system_message,

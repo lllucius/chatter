@@ -5,6 +5,7 @@ import os
 from datetime import UTC, datetime
 from typing import Any
 
+from pydantic import HttpUrl
 from sqlalchemy import and_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
@@ -987,7 +988,7 @@ class ToolServerService:
 
             remote_server = RemoteMCPServer(
                 name=server.name,
-                base_url=server.base_url,
+                base_url=HttpUrl(server.base_url),
                 transport_type=server.transport_type,
                 oauth_config=oauth_config,
                 headers=server.headers,

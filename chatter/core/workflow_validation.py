@@ -70,7 +70,7 @@ def _create_validation_result(errors: list[str], warnings: list[str]) -> Validat
         )
     else:
         # Use fallback interface with string errors
-        return _FallbackValidationResult(
+        return _FallbackValidationResult(  # type: ignore
             valid=len(errors) == 0,
             errors=errors,
             warnings=warnings,

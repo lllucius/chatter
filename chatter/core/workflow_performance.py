@@ -319,7 +319,7 @@ class WorkflowOptimizer:
             )
 
         # Sort by performance (fastest first)
-        results.sort(key=lambda x: float(x["avg_execution_time"]))
+        results.sort(key=lambda x: x["avg_execution_time"] if isinstance(x["avg_execution_time"], (int, float)) else float('inf'))
 
         return results
 

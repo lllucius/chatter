@@ -610,7 +610,7 @@ class MCPToolService:
         name: str,
         description: str,
         func: Callable,
-        args_schema: BaseModel | None = None,
+        args_schema: type[BaseModel] | None = None,
     ) -> BaseTool:
         """Create a custom tool for integration."""
         return StructuredTool.from_function(

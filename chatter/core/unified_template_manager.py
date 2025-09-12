@@ -40,6 +40,7 @@ logger = get_secure_logger(__name__)
 
 
 @dataclass
+@dataclass
 class WorkflowTemplate:
     """Pre-configured workflow template."""
 
@@ -598,7 +599,7 @@ class UnifiedTemplateManager:
             # Use centralized validation service
             return (
                 workflow_validation_service.validate_workflow_template(
-                    template
+                    template  # type: ignore # Template compatibility handled by validation service
                 )
             )
         except Exception as e:

@@ -55,7 +55,7 @@ class WorkflowEdge(BaseModel):
     )
     type: str | None = Field(default="default", description="Edge type")
     data: WorkflowEdgeData | None = Field(
-        default_factory=WorkflowEdgeData, description="Edge data"
+        default_factory=lambda: WorkflowEdgeData(), description="Edge data"
     )
 
 

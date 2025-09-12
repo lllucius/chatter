@@ -75,14 +75,33 @@ class LangGraphWorkflowManager:
         try:
             if settings.langgraph_checkpoint_store == "postgres":
                 # Use PostgreSQL checkpointer for production
-                # PostgresSaver.from_conn_string returns an async context manager
-                # We need to create the checkpointer synchronously using the connection
-                # For now, fall back to memory checkpointer to avoid the async context manager issue
-                logger.warning(
-                    "PostgreSQL checkpointer requires async initialization, falling back to memory"
-                )
-                self.checkpointer = MemorySaver()
-                logger.info("LangGraph Memory checkpointer initialized (postgres fallback)")
+                try:
+                    # PostgresSaver.from_conn_string returns a context manager
+                    # We need to properly enter the context to get the actual saver
+                    from sqlalchemy import create_engine
+                    from urllib.parse import urlparse, urlunparse
+                    
+                    # Convert async URL to sync URL for PostgresSaver
+                    parsed = urlparse(settings.database_url)
+                    if parsed.scheme == "postgresql+asyncpg":
+                        # Convert to sync postgresql URL
+                        sync_url = urlunparse(parsed._replace(scheme="postgresql"))
+                        saver_context = PostgresSaver.from_conn_string(sync_url)
+                    else:
+                        # Use as-is for other schemes
+                        saver_context = PostgresSaver.from_conn_string(settings.database_url)
+                    
+                    # Enter the context manager to get the actual checkpointer
+                    self.checkpointer = saver_context.__enter__()
+                    logger.info("LangGraph PostgreSQL checkpointer initialized")
+                        
+                except Exception as postgres_error:
+                    logger.warning(
+                        "Failed to initialize PostgreSQL checkpointer, falling back to memory",
+                        error=str(postgres_error),
+                    )
+                    self.checkpointer = MemorySaver()
+                    logger.info("LangGraph Memory checkpointer initialized (postgres fallback)")
             else:
                 # Fallback to in-memory checkpointer for development
                 self.checkpointer = MemorySaver()

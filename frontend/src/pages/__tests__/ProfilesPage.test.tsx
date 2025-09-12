@@ -11,7 +11,7 @@ vi.mock('../../services/auth-service', () => ({
     profiles: {
       listProfilesApiV1Profiles: vi.fn().mockResolvedValue({
         profiles: [],
-        totalCount: 0
+        total_count: 0
       })
     }
   })),

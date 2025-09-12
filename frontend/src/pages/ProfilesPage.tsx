@@ -87,7 +87,7 @@ const ProfilesPage: React.FC = () => {
       });
       return {
         items: response.profiles || [],
-        total: response.totalCount || 0,
+        total: response.total_count || 0,
       };
     },
 

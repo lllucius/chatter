@@ -186,6 +186,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=20
@@ -221,11 +226,12 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
 
             # Create response message
             assistant_message = (
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
             )
 
@@ -235,7 +241,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -248,7 +254,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Plain workflow execution failed: {str(e)}"
@@ -295,6 +301,11 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=20
@@ -336,16 +347,17 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                                user_id=user_id,
                             )
 
             # Create final message
             if content_buffer:
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
 
             # Record success metrics
@@ -354,7 +366,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
         except Exception as e:
@@ -365,7 +377,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Plain workflow streaming failed: {str(e)}"
@@ -430,6 +442,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=30
@@ -464,11 +481,12 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Create response message
             assistant_message = (
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
             )
 
@@ -478,7 +496,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -491,7 +509,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"RAG workflow execution failed: {str(e)}"
@@ -548,6 +566,11 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=30
@@ -589,16 +612,17 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                                user_id=user_id,
                             )
 
             # Create final message
             if content_buffer:
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
 
             # Record success metrics
@@ -607,7 +631,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
         except Exception as e:
@@ -618,7 +642,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"RAG workflow streaming failed: {str(e)}"
@@ -683,6 +707,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=100
@@ -717,11 +746,12 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
 
             # Create response message
             assistant_message = (
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
             )
 
@@ -731,7 +761,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -744,7 +774,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Tools workflow execution failed: {str(e)}"
@@ -801,6 +831,11 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=100
@@ -842,16 +877,17 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                                user_id=user_id,
                             )
 
             # Create final message
             if content_buffer:
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
 
             # Record success metrics
@@ -860,7 +896,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
         except Exception as e:
@@ -871,7 +907,7 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Tools workflow streaming failed: {str(e)}"
@@ -943,6 +979,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=50
@@ -977,11 +1018,12 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
 
             # Create response message
             assistant_message = (
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=response_content,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
             )
 
@@ -991,7 +1033,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "execute",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
             return assistant_message, {"usage": result.get("usage", {})}
@@ -1004,7 +1046,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Full workflow execution failed: {str(e)}"
@@ -1068,6 +1110,11 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 # Extract user_id from conversation if not provided
                 user_id = conversation.user_id
                 
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+                
             recent_messages = (
                 await self.message_service.get_recent_messages(
                     conversation.id, user_id, limit=50
@@ -1109,16 +1156,17 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                                 content=new_content,
                                 message_id=correlation_id,
                                 conversation_id=conversation.id,
-                                correlation_id=correlation_id,
+                                user_id=user_id,
                             )
 
             # Create final message
             if content_buffer:
-                await self.message_service.create_message(
+                await self.message_service.add_message_to_conversation(
                     conversation_id=conversation.id,
-                    correlation_id=correlation_id,
+                    user_id=user_id,
                     role=MessageRole.ASSISTANT,
                     content=content_buffer,
+                    metadata={"correlation_id": correlation_id} if correlation_id else None,
                 )
 
             # Record success metrics
@@ -1127,7 +1175,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 "stream",
                 start_time,
                 True,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
 
         except Exception as e:
@@ -1138,7 +1186,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 start_time,
                 False,
                 error_type=type(e).__name__,
-                correlation_id=correlation_id,
+                user_id=user_id,
             )
             raise WorkflowExecutionError(
                 f"Full workflow streaming failed: {str(e)}"

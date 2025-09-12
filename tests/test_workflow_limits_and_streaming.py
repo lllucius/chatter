@@ -192,11 +192,11 @@ class TestWorkflowExecutionService:
         self.llm_service = AsyncMock(spec=LLMService)
         self.message_service = AsyncMock(spec=MessageService)
 
-        # Add the missing create_message method to the mock
+        # Add the missing add_message_to_conversation method to the mock
         mock_message = MagicMock()
         mock_message.id = "msg_123"
         mock_message.content = "Test response"
-        self.message_service.create_message = AsyncMock(
+        self.message_service.add_message_to_conversation = AsyncMock(
             return_value=mock_message
         )
         self.message_service.get_recent_messages = AsyncMock(

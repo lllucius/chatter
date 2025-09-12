@@ -10,6 +10,8 @@ Key components:
 - Validation exceptions with consistent error handling
 """
 
+from typing import Any
+
 from .context import DEFAULT_CONTEXT, LENIENT_CONTEXT, ValidationContext
 from .engine import ValidationEngine
 from .exceptions import (
@@ -34,15 +36,15 @@ validation_engine = ValidationEngine()
 
 # Convenience functions for common validations
 def validate_input(
-    value, rule_name: str, context: ValidationContext = None
-):
+    value: Any, rule_name: str, context: ValidationContext | None = None
+) -> ValidationResult:
     """Validate user input using the unified validation engine."""
     return validation_engine.validate_input(
         value, rule_name, context or DEFAULT_CONTEXT
     )
 
 
-def validate_security(value: str, context: ValidationContext = None):
+def validate_security(value: str, context: ValidationContext | None = None) -> ValidationResult:
     """Validate input for security threats."""
     return validation_engine.validate_security(
         value, context or DEFAULT_CONTEXT
@@ -50,8 +52,8 @@ def validate_security(value: str, context: ValidationContext = None):
 
 
 def validate_business_logic(
-    data: dict, rules: list, context: ValidationContext = None
-):
+    data: dict[str, Any], rules: list[str], context: ValidationContext | None = None
+) -> ValidationResult:
     """Validate business logic rules."""
     return validation_engine.validate_business_logic(
         data, rules, context or DEFAULT_CONTEXT

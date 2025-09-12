@@ -384,7 +384,6 @@ export class SSEEventManager {
       // Log connection stats periodically
       if (this.connectionStartTime) {
         const connectionDuration = now - this.connectionStartTime;
-        console.debug(`SSE: Connection stats - Duration: ${Math.round(connectionDuration / 1000)}s, Events: ${this.eventCount}`);
       }
     }, 30000); // Check every 30 seconds
   }
@@ -445,13 +444,7 @@ export class SSEEventManager {
    * Handle high priority events with special treatment
    */
   private handleHighPriorityEvent(event: AnySSEEvent, metadata: Record<string, unknown>): void {
-    // Log high priority events
-    console.warn('SSE: High priority event received:', {
-      type: event.type,
-      priority: metadata.priority,
-      category: metadata.category,
-      timestamp: event.timestamp
-    });
+    // Log high priority events - handled by metadata tracking
 
     // Could trigger notifications, sounds, or other UI feedback
     if (metadata.priority === 'critical') {

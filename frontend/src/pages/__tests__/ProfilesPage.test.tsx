@@ -6,8 +6,8 @@ import { vi, describe, test, expect } from 'vitest';
 import ProfilesPage from '../ProfilesPage';
 
 // Mock the getSDK function and authService
-vi.mock('../../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
+vi.mock('../../services/auth-service', (): void => ({
+  getSDK: vi.fn((): void => ({
     profiles: {
       listProfilesApiV1Profiles: vi.fn().mockResolvedValue({
         profiles: [],
@@ -21,7 +21,7 @@ vi.mock('../../services/auth-service', () => ({
 }));
 
 // Mock the toast service
-vi.mock('../../services/toast-service', () => ({
+vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),

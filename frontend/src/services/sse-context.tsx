@@ -14,11 +14,11 @@ interface SSEContextValue {
   connectionState: 'connecting' | 'open' | 'closed';
   connect: () => void;
   disconnect: () => void;
-  on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => () => void;
+  on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void => () => void;
   off: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => void;
-  onCategory: (category: string, listener: SSEEventListener) => () => void;
+  onCategory: (category: string, listener: SSEEventListener): void => () => void;
   offCategory: (category: string, listener: SSEEventListener) => void;
-  onHighPriority: (listener: SSEEventListener) => () => void;
+  onHighPriority: (listener: SSEEventListener): void => () => void;
   requestNotificationPermission: () => Promise<boolean>;
   getConnectionStats: () => Record<string, unknown>;
 }
@@ -101,7 +101,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     return sseEventManager.getConnectionStats();
   }, []);
 
-  const value: SSEContextValue = useMemo(() => ({
+  const value: SSEContextValue = useMemo((): void => ({
     isConnected,
     connectionState,
     connect,

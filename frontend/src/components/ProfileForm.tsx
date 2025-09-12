@@ -68,7 +68,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   } = useBaseForm(
     {
       defaultData: defaultProfileData,
-      transformInitialData: (data: ProfileResponse) => ({
+      transformInitialData: (data: ProfileResponse): void => ({
         name: data.name || '',
         description: data.description || '',
         llmModel: data.llmModel || '',
@@ -211,7 +211,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onChange={(e) => updateFormData({ llmModel: e.target.value })}
               disabled={!formData.llmProvider || loadingProviders}
             >
-              {getAvailableModels().map((model) => (
+              {getAvailableModels().map((model): void => (
                 <MenuItem key={model.name} value={model.name}>
                       {model.display_name}
                     </MenuItem>

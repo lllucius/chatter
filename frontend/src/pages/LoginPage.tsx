@@ -30,8 +30,8 @@ const LoginPage: React.FC = () => {
       try {
         await authService.login(values.username, values.password);
         navigate('/dashboard');
-      } catch (err: any) {
-        const errorMessage = err.message || 'Login failed';
+      } catch (err: unknown) {
+        const errorMessage = err instanceof Error ? err.message : 'Login failed';
         
         // Check if error is related to username (user not found, invalid username format, etc.)
         if (errorMessage.toLowerCase().includes('user') || 

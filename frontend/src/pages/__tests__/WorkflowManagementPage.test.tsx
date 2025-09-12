@@ -5,8 +5,8 @@ import { vi, describe, test, beforeEach, expect } from 'vitest';
 import WorkflowManagementPage from '../WorkflowManagementPage';
 
 // Mock the auth service
-vi.mock('../../services/auth-service', () => ({
-  getSDK: () => ({
+vi.mock('../../services/auth-service', (): void => ({
+  getSDK: (): void => ({
     chat: {
       getWorkflowTemplatesApiV1ChatTemplates: vi.fn().mockResolvedValue({
         templates: {
@@ -34,7 +34,7 @@ vi.mock('../../services/auth-service', () => ({
 }));
 
 // Mock toast service
-vi.mock('../../services/toast-service', () => ({
+vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     success: vi.fn(),
     error: vi.fn()

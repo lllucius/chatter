@@ -118,7 +118,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
               label="Provider Type"
               helperText={mode === 'edit' ? "Provider type cannot be changed after creation" : ""}
             >
-              {providerOptions.map((opt) => (
+              {providerOptions.map((opt): void => (
                 <MenuItem key={opt.value} value={opt.value}>{opt.label}</MenuItem>
               ))}
             </Select>

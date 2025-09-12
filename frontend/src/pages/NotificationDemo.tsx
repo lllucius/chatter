@@ -114,7 +114,7 @@ const NotificationDemo: React.FC = () => {
       </Alert>
 
       <Grid container spacing={3}>
-        {demoNotifications.map((demo, index) => (
+        {demoNotifications.map((demo, index): void => (
           <Grid item xs={12} sm={6} md={4} key={index}>
             <Card>
               <CardContent>

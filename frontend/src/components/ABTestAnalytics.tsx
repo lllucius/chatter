@@ -305,7 +305,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Variant Performance
               </Typography>
               <List>
-                {sampleResults.variants?.map((variant) => (
+                {sampleResults.variants?.map((variant): void => (
                   <ListItem key={variant.name} sx={{ px: 0 }}>
                     <ListItemIcon>
                       {getTrendIcon(variant.conversion_rate, 0.12)}
@@ -362,7 +362,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     fill="#8884d8"
                     dataKey="participants"
                   >
-                    {sampleResults.variants?.map((entry, index) => (
+                    {sampleResults.variants?.map((entry, index): void => (
                       <Cell 
                         key={`cell-${index}`} 
                         fill={Object.values(variantColors)[index]} 
@@ -412,7 +412,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                   AI Recommendations
                 </Typography>
                 <List>
-                  {recommendations.recommendations.map((rec, index) => (
+                  {recommendations.recommendations.map((rec, index): void => (
                     <ListItem key={index} sx={{ px: 0 }}>
                       <ListItemIcon>
                         {getRecommendationIcon('winner')}
@@ -432,7 +432,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                   Key Insights
                 </Typography>
                 <List>
-                  {recommendations.insights.map((insight, index) => (
+                  {recommendations.insights.map((insight, index): void => (
                     <ListItem key={index} sx={{ px: 0 }}>
                       <ListItemIcon>
                         {getRecommendationIcon('info')}

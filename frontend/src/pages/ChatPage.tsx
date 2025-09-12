@@ -121,11 +121,10 @@ const ChatPage: React.FC = () => {
       if (profilesResponse.profiles.length > 0) {
         setSelectedProfile(profilesResponse.profiles[0].id);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to load chat data');
       if (process.env.NODE_ENV === 'development') {
          
-        console.error(err);
       }
     }
   };
@@ -163,7 +162,6 @@ const ChatPage: React.FC = () => {
       toastService.error(err, 'Failed to start new conversation');
       if (process.env.NODE_ENV === 'development') {
          
-        console.error(err);
       }
       return null;
     }
@@ -196,7 +194,6 @@ const ChatPage: React.FC = () => {
       toastService.error(err, 'Failed to load conversation');
       if (process.env.NODE_ENV === 'development') {
          
-        console.error(err);
       }
     }
   }, []);
@@ -335,7 +332,6 @@ const ChatPage: React.FC = () => {
                     throw new Error(chunk.content || chunk.error || 'Streaming error');
                   }
                 } catch (parseError) {
-                  console.error('Failed to parse streaming data:', parseError, dataStr);
                 }
               }
             }
@@ -345,8 +341,7 @@ const ChatPage: React.FC = () => {
         reader.releaseLock();
       }
 
-    } catch (err: any) {
-      console.error('Streaming response error:', err);
+    } catch (err: unknown) {
       toastService.error(err, 'Streaming failed');
     }
   };
@@ -426,9 +421,8 @@ const ChatPage: React.FC = () => {
           setMessages((prev) => [...prev, tokenMessage]);
         }
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to send message');
-      console.error(err);
 
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -513,9 +507,8 @@ const ChatPage: React.FC = () => {
         };
         setMessages(prev => [...prev, assistantMessage]);
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to regenerate message');
-      console.error(err);
     } finally {
       setLoading(false);
     }
@@ -676,7 +669,7 @@ const ChatPage: React.FC = () => {
                 </Typography>
               </Box>
             ) : (
-              messages.map((msg) => (
+              messages.map((msg): void => (
                 <EnhancedMessage
                   key={msg.id}
                   message={msg}

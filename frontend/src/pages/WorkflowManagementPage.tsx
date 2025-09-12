@@ -116,8 +116,7 @@ const WorkflowManagementPage: React.FC = () => {
       if (response.templates) {
         setTemplates(response.templates);
       }
-    } catch (error: any) {
-      console.error('Failed to load workflow templates:', error);
+    } catch (error: unknown) {
       toastService.error('Failed to load workflow templates');
     } finally {
       setLoading(false);
@@ -128,8 +127,7 @@ const WorkflowManagementPage: React.FC = () => {
     try {
       const response = await getSDK().chat.getAvailableToolsApiV1ChatToolsAvailable();
       setAvailableTools(response.data);
-    } catch (error: any) {
-      console.error('Failed to load available tools:', error);
+    } catch (error: unknown) {
       // Don't show error toast for tools as it's not critical
     }
   }, []);
@@ -173,8 +171,7 @@ const WorkflowManagementPage: React.FC = () => {
       ));
 
       toastService.success(`Workflow "${templateName}" executed successfully`);
-    } catch (error: any) {
-      console.error('Workflow execution failed:', error);
+    } catch (error: unknown) {
       setExecutions(prev => prev.map(exec => 
         exec.id === executionId 
           ? { ...exec, status: 'failed', endTime: new Date(), error: error.message, progress: 100 }
@@ -229,7 +226,7 @@ const WorkflowManagementPage: React.FC = () => {
     }
   };
 
-  const renderTemplatesTab = () => (
+  const renderTemplatesTab = (): void => (
     <Box>
       {loading ? (
         <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
@@ -237,7 +234,7 @@ const WorkflowManagementPage: React.FC = () => {
         </Box>
       ) : (
         <Grid container spacing={3}>
-          {Object.entries(templates).map(([name, template]) => (
+          {Object.entries(templates).map(([name, template]): void => (
             <Grid item xs={12} md={6} lg={4} key={name}>
               <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
                 <CardContent sx={{ flexGrow: 1 }}>
@@ -274,7 +271,7 @@ const WorkflowManagementPage: React.FC = () => {
                         Required Tools:
                       </Typography>
                       <Box sx={{ mt: 0.5 }}>
-                        {template.required_tools.map((tool, index) => (
+                        {template.required_tools.map((tool, index): void => (
                           <Chip 
                             key={index}
                             label={tool} 
@@ -333,7 +330,7 @@ const WorkflowManagementPage: React.FC = () => {
     </Box>
   );
 
-  const renderBuilderTab = () => (
+  const renderBuilderTab = (): void => (
     <Box>
       <Grid container spacing={3}>
         <Grid item xs={12} md={4}>
@@ -394,7 +391,7 @@ const WorkflowManagementPage: React.FC = () => {
         </Typography>
         {availableTools ? (
           <Grid container spacing={2}>
-            {availableTools.tools?.map((tool, index) => (
+            {availableTools.tools?.map((tool, index): void => (
               <Grid item xs={12} sm={6} md={4} key={index}>
                 <Card variant="outlined">
                   <CardContent>
@@ -445,7 +442,7 @@ const WorkflowManagementPage: React.FC = () => {
     }
   };
 
-  const renderExecutionTab = () => (
+  const renderExecutionTab = (): void => (
     <Box>
       <WorkflowMonitor
         executions={executions.map(exec => ({
@@ -493,17 +490,15 @@ const WorkflowManagementPage: React.FC = () => {
         onRefresh={() => {/* Refresh executions */}}
         onStop={(executionId) => {
           // Handle stop execution
-          console.log('Stop execution:', executionId);
         }}
         onRetry={(executionId) => {
           // Handle retry execution
-          console.log('Retry execution:', executionId);
         }}
       />
     </Box>
   );
 
-  const renderAnalyticsTab = () => (
+  const renderAnalyticsTab = (): void => (
     <Box>
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
@@ -714,7 +709,6 @@ const WorkflowManagementPage: React.FC = () => {
                 toastService.success('Workflow saved successfully');
                 setBuilderDialogOpen(false);
               } catch (error) {
-                console.error('Error saving workflow:', error);
                 toastService.error('Failed to save workflow');
               }
             }, [])}
@@ -781,7 +775,7 @@ const WorkflowManagementPage: React.FC = () => {
                     <strong>Required Tools:</strong>
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                    {detailsTemplate.required_tools.map((tool, index) => (
+                    {detailsTemplate.required_tools.map((tool, index): void => (
                       <Chip 
                         key={index}
                         label={tool} 
@@ -799,7 +793,7 @@ const WorkflowManagementPage: React.FC = () => {
                     <strong>Parameters:</strong>
                   </Typography>
                   <Box sx={{ pl: 2 }}>
-                    {Object.entries(detailsTemplate.parameters).map(([key, value]) => (
+                    {Object.entries(detailsTemplate.parameters).map(([key, value]): void => (
                       <Typography key={key} variant="body2" sx={{ mb: 0.5 }}>
                         • <strong>{key}:</strong> {typeof value === 'object' ? JSON.stringify(value) : String(value)}
                       </Typography>

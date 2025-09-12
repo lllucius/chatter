@@ -7,8 +7,8 @@ import { fireEvent } from '@testing-library/react';
 import ToolsPage from '../ToolsPage';
 
 // Mock the getSDK function and authService
-vi.mock('../../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
+vi.mock('../../services/auth-service', (): void => ({
+  getSDK: vi.fn((): void => ({
     toolServers: {
       listToolServersApiV1ToolserversServers: vi.fn().mockResolvedValue([]),
       listAllToolsApiV1ToolserversToolsAll: vi.fn().mockResolvedValue([])
@@ -20,7 +20,7 @@ vi.mock('../../services/auth-service', () => ({
 }));
 
 // Mock the toast service
-vi.mock('../../services/toast-service', () => ({
+vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),

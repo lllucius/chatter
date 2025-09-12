@@ -97,7 +97,7 @@ const DocumentsPage: React.FC = () => {
 
   // Custom file size renderer
   const createFileSizeRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: number) => (
+    return (value: number): void => (
       <Typography variant="body2">
         {formatFileSize(value)}
       </Typography>
@@ -118,7 +118,7 @@ const DocumentsPage: React.FC = () => {
 
   // Custom title renderer with filename fallback
   const createTitleRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: string | undefined, item: DocumentResponse) => (
+    return (value: string | undefined, item: DocumentResponse): void => (
       <Box>
         <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
           {value || item.filename}
@@ -278,7 +278,7 @@ const DocumentsPage: React.FC = () => {
         `);
         newWindow.document.close();
       }
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to view document details');
     }
   };
@@ -300,7 +300,7 @@ const DocumentsPage: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       window.document.body.removeChild(a);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to download document');
     }
   };
@@ -317,7 +317,7 @@ const DocumentsPage: React.FC = () => {
       };
       const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearch(searchRequest);
       setSearchResults(response.results);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to search documents');
     } finally {
       setSearching(false);
@@ -450,7 +450,7 @@ const DocumentsPage: React.FC = () => {
             <Paper sx={{ mt: 3, maxHeight: 400 }}>
               <CustomScrollbar>
                 <List>
-                  {searchResults.map((result, index) => (
+                  {searchResults.map((result, index): void => (
                     <ListItem key={index} divider>
                       <ListItemText
                         primary={

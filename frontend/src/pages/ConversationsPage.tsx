@@ -54,8 +54,7 @@ const ConversationsPage: React.FC = () => {
         );
       const messages = response.messages || [];
       setConversationMessages(messages);
-    } catch (err: any) {
-      console.error('Failed to load messages:', err);
+    } catch (err: unknown) {
       setConversationMessages([]);
     } finally {
       setLoadingMessages(false);
@@ -63,7 +62,7 @@ const ConversationsPage: React.FC = () => {
   }, []);
 
   // Conversation title renderer
-  const renderConversationTitle = (title: string | null, conversation: ConversationResponse) => (
+  const renderConversationTitle = (title: string | null, conversation: ConversationResponse): void => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
         <MessageIcon fontSize="small" />
@@ -80,7 +79,7 @@ const ConversationsPage: React.FC = () => {
   );
 
   // Status renderer - for now all are active
-  const renderStatus = () => (
+  const renderStatus = (): void => (
     <Chip
       label="Active"
       size="small"
@@ -90,7 +89,7 @@ const ConversationsPage: React.FC = () => {
   );
 
   // Message count renderer
-  const renderMessageCount = (count: number) => (
+  const renderMessageCount = (count: number): void => (
     <Typography variant="body2">
       {count} {count === 1 ? 'message' : 'messages'}
     </Typography>
@@ -236,7 +235,7 @@ const ConversationsPage: React.FC = () => {
             <Box sx={{ maxHeight: 400, p: 2 }}>
               <CustomScrollbar>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  {conversationMessages.map((message) => (
+                  {conversationMessages.map((message): void => (
                     <Box
                       key={message.id}
                       sx={{

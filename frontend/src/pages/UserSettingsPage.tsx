@@ -91,7 +91,7 @@ const UserSettingsPage: React.FC = () => {
         const updatedProfile = await getSDK().auth.updateProfileApiV1AuthMe(values);
         setUserProfile({ ...userProfile!, ...updatedProfile });
         toastService.success('Profile updated successfully');
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error('Failed to update profile: ' + error.message);
         throw error;
       }
@@ -131,7 +131,7 @@ const UserSettingsPage: React.FC = () => {
         });
         toastService.success('Password changed successfully');
         passwordForm.reset();
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error('Failed to change password: ' + error.message);
         throw error;
       }
@@ -150,7 +150,7 @@ const UserSettingsPage: React.FC = () => {
         toastService.success('API key created successfully');
         setApiKeyDialogOpen(false);
         apiKeyForm.reset();
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error('Failed to create API key: ' + error.message);
         throw error;
       }
@@ -165,7 +165,7 @@ const UserSettingsPage: React.FC = () => {
         full_name: profile.full_name || '',
         email: profile.email || '',
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error('Failed to load user profile: ' + error.message);
     }
   };
@@ -175,7 +175,7 @@ const UserSettingsPage: React.FC = () => {
       setApiKeysLoading(true);
       const keys = await getSDK().listApiKeys();
       setApiKeys(keys);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error('Failed to load API keys: ' + error.message);
     } finally {
       setApiKeysLoading(false);
@@ -187,7 +187,7 @@ const UserSettingsPage: React.FC = () => {
       await getSDK().revokeApiKey(keyId);
       setApiKeys(apiKeys.filter(key => key.id !== keyId));
       toastService.success('API key revoked successfully');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error('Failed to revoke API key: ' + error.message);
     }
   };
@@ -197,7 +197,7 @@ const UserSettingsPage: React.FC = () => {
       await getSDK().deactivateAccount();
       toastService.success('Account deactivated successfully');
       // The SDK will handle logout and redirect
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error('Failed to deactivate account: ' + error.message);
     } finally {
       setDeactivateDialogOpen(false);
@@ -388,7 +388,7 @@ const UserSettingsPage: React.FC = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      apiKeys.map((key) => (
+                      apiKeys.map((key): void => (
                         <TableRow key={key.id}>
                           <TableCell>{key.name}</TableCell>
                           <TableCell>

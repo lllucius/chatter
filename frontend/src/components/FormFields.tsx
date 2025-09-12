@@ -126,7 +126,7 @@ export const FormSelectField: React.FC<SelectFieldProps> = ({
             <em>{emptyLabel}</em>
           </MenuItem>
         )}
-        {options.map((option) => (
+        {options.map((option): void => (
           <MenuItem
             key={option.value}
             value={option.value}

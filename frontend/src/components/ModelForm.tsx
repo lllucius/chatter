@@ -96,7 +96,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
               label="Provider"
               helperText={mode === 'edit' ? "Provider cannot be changed after creation" : ""}
             >
-              {providers.map((p) => (
+              {providers.map((p): void => (
                 <MenuItem key={p.id} value={p.id}>
                   {p.displayName}
                 </MenuItem>
@@ -120,7 +120,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
               value={formData.model_type}
               onChange={(e) => {
                 const modelType = e.target.value as ModelDefCreate['model_type'];
-                setFormData((f) => ({
+                setFormData((f): void => ({
                   ...f,
                   model_type: modelType,
                   dimensions: modelType === 'embedding' ? (f.dimensions ?? 1536) : undefined,

@@ -27,8 +27,8 @@ export interface UseBaseFormReturn<TData> {
   resetForm: () => void;
   isSubmitting: boolean;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
-  handleSubmit: (onSubmit: (data: TData) => Promise<void>) => () => Promise<void>;
-  handleClose: (onClose: () => void) => () => void;
+  handleSubmit: (onSubmit: (data: TData) => Promise<void>): void => () => Promise<void>;
+  handleClose: (onClose: () => void): void => () => void;
 }
 
 export function useBaseForm<TData>(

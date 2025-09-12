@@ -66,7 +66,7 @@ const PromptsPage: React.FC = () => {
       id: 'variables',
       label: 'Variables',
       width: '150px',
-      render: (variables: any[]) => (
+      render: (variables: any[]): void => (
         variables?.length > 0 ? `${variables.length} variables` : 'None'
       ),
     },
@@ -210,7 +210,7 @@ const PromptsPage: React.FC = () => {
                     Template Variables:
                   </Typography>
                   <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selectedPrompt.variables.map((variable, index) => (
+                    {selectedPrompt.variables.map((variable, index): void => (
                       <Chip
                         key={index}
                         label={`{${variable}}`}

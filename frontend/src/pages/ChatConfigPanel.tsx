@@ -73,7 +73,7 @@ const ChatConfigPanel: React.FC<Props> = ({
   });
 
   const handlePanelChange =
-    (panel: string) => (_: React.SyntheticEvent, isExpanded: boolean) => {
+    (panel: string): void => (_: React.SyntheticEvent, isExpanded: boolean) => {
       const newPanel = isExpanded ? panel : '';
       setExpandedPanel(newPanel);
       localStorage.setItem('chatter_expandedPanel', newPanel);
@@ -140,7 +140,7 @@ const ChatConfigPanel: React.FC<Props> = ({
               label="AI Profile"
               onChange={(e) => setSelectedProfile(e.target.value)}
             >
-              {profiles.map((profile) => (
+              {profiles.map((profile): void => (
                 <MenuItem key={profile.id} value={profile.id}>
                   {profile.name} ({profile.llm_model})
                 </MenuItem>
@@ -194,7 +194,7 @@ const ChatConfigPanel: React.FC<Props> = ({
               onChange={(e) => setSelectedPrompt(e.target.value)}
             >
               <MenuItem value="">None</MenuItem>
-              {prompts.map((prompt) => (
+              {prompts.map((prompt): void => (
                 <MenuItem key={prompt.id} value={prompt.id}>
                   {prompt.name}
                 </MenuItem>
@@ -231,7 +231,7 @@ const ChatConfigPanel: React.FC<Props> = ({
               value={selectedDocuments}
               label="Selected Documents"
               onChange={(e) => setSelectedDocuments(e.target.value as string[])}
-              renderValue={(selected) => (
+              renderValue={(selected): void => (
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {(selected as string[]).map((value) => {
                     const doc = documents.find((d) => d.id === value);
@@ -240,7 +240,7 @@ const ChatConfigPanel: React.FC<Props> = ({
                 </Box>
               )}
             >
-              {documents.map((document) => (
+              {documents.map((document): void => (
                 <MenuItem key={document.id} value={document.id}>
                   {document.title}
                 </MenuItem>

@@ -144,7 +144,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
   ];
 
   const performanceData = React.useMemo(() => {
-    return Array.from({ length: 24 }, (_, i) => ({
+    return Array.from({ length: 24 }, (_, i): void => ({
       hour: `${i}:00`,
       workflows: 5 + Math.floor(Math.random() * 15),
       agents: 20 + Math.floor(Math.random() * 30),
@@ -408,7 +408,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry, index) => (
+                      {integrationData.map((entry, index): void => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

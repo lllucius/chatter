@@ -324,7 +324,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       onChange={(e) => setFormData({ ...formData, type: e.target.value as AgentType })}
                       label="Agent Type"
                     >
-                      {agentTypes.map((type) => (
+                      {agentTypes.map((type): void => (
                         <MenuItem key={type.value} value={type.value}>
                           <Tooltip title={type.description}>
                             <span>{type.label}</span>
@@ -353,7 +353,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as AgentStatus })}
                       label="Status"
                     >
-                      {agentStatuses.map((status) => (
+                      {agentStatuses.map((status): void => (
                         <MenuItem key={status.value} value={status.value}>
                           {status.label}
                         </MenuItem>
@@ -414,7 +414,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     Expertise Areas
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                    {formData.expertise_areas.map((area) => (
+                    {formData.expertise_areas.map((area): void => (
                       <Chip
                         key={area}
                         label={area}
@@ -465,7 +465,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Primary LLM"
                       required
                     >
-                      {llmModels.map((model) => (
+                      {llmModels.map((model): void => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -482,7 +482,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Fallback LLM"
                     >
                       <MenuItem value="">None</MenuItem>
-                      {llmModels.map((model) => (
+                      {llmModels.map((model): void => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -535,7 +535,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={2}>
-                {defaultCapabilities.map((capability) => (
+                {defaultCapabilities.map((capability): void => (
                   <Grid item xs={12} sm={6} md={4} key={capability.name}>
                     <Box
                       sx={{

@@ -177,9 +177,8 @@ const AdministrationPage: React.FC = () => {
       newJobs.forEach(job => newStates.set(job.id, job.status));
       setLastJobStates(newStates);
       setJobs(newJobs);
-    } catch (error: any) {
+    } catch (error: unknown) {
        
-      console.error('Failed to load jobs:', error);
       toastService.error(error, 'Failed to load jobs');
     } finally {
       setDataLoading(false);
@@ -190,7 +189,7 @@ const AdministrationPage: React.FC = () => {
     try {
       const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
       setJobStats(response.data);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to load job stats');
     }
   }, []);
@@ -201,7 +200,7 @@ const AdministrationPage: React.FC = () => {
       const response = await getSDK().dataManagement.listBackupsApiV1DataBackups({});
       const items = response.backups || [];
       setBackups(items);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to load backups');
     } finally {
       setDataLoading(false);
@@ -212,7 +211,7 @@ const AdministrationPage: React.FC = () => {
     try {
       const response = await getSDK().plugins.listPluginsApiV1Plugins({});
       setPlugins(response.plugins || []);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to load plugins');
     }
   }, []);
@@ -309,7 +308,7 @@ const AdministrationPage: React.FC = () => {
           loadJobStats();
           break;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, `Failed to ${action} job`);
     } finally {
       setLoading(false);
@@ -439,7 +438,7 @@ const AdministrationPage: React.FC = () => {
         type: bulkOperationData.dryRun ? 'info' : 'success'
       });
 
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Bulk operation failed');
     } finally {
       setLoading(false);
@@ -468,7 +467,7 @@ const AdministrationPage: React.FC = () => {
       toastService.success('User settings updated successfully!');
       setUserSettingsOpen(false);
       setEditingUser(null);
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to update user settings');
     }
   };
@@ -477,7 +476,7 @@ const AdministrationPage: React.FC = () => {
     try {
       setLoading(true);
       toastService.info('Backup download functionality will be available soon');
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to download backup');
     } finally {
       setLoading(false);
@@ -494,7 +493,7 @@ const AdministrationPage: React.FC = () => {
         toastService.success('Plugin disabled successfully');
       }
       loadPlugins();
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'Failed to toggle plugin status');
     }
   };
@@ -602,7 +601,7 @@ const AdministrationPage: React.FC = () => {
         scheduleAt: '',
         maxRetries: 3,
       });
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, 'An error occurred. Please try again.');
     } finally {
       setLoading(false);
@@ -632,7 +631,7 @@ const AdministrationPage: React.FC = () => {
             loadJobStats();
             break;
         }
-      } catch (error: any) {
+      } catch (error: unknown) {
         toastService.error(error, `Failed to delete ${type}`);
       } finally {
         setLoading(false);
@@ -654,7 +653,7 @@ const AdministrationPage: React.FC = () => {
           toastService.warning('Plugin editing functionality would be implemented based on plugin architecture');
           break;
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       toastService.error(error, `Failed to edit ${type}`);
     } finally {
       setLoading(false);
@@ -750,7 +749,7 @@ const AdministrationPage: React.FC = () => {
           <Box sx={{ maxHeight: 200 }}>
             <CustomScrollbar>
               <List>
-                {notifications.map((notification) => (
+                {notifications.map((notification): void => (
                   <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
                     <ListItemText
                       primary={notification.title}
@@ -820,7 +819,7 @@ const AdministrationPage: React.FC = () => {
                 />
               </ListItem>
             ) : (
-              backups.map((backup) => (
+              backups.map((backup): void => (
                 <ListItem key={backup.id}>
                   <ListItemText
                     primary={backup.name || `Backup ${backup.id?.substring(0, 8)}`}
@@ -939,7 +938,7 @@ const AdministrationPage: React.FC = () => {
                 />
               </ListItem>
             ) : (
-              plugins.map((plugin) => (
+              plugins.map((plugin): void => (
                 <ListItem key={plugin.id}>
                   <ListItemIcon />
                   <ListItemText
@@ -966,7 +965,7 @@ const AdministrationPage: React.FC = () => {
       {activeTab === 'users' && (
         <Box>
           <List>
-            {users.map((user) => (
+            {users.map((user): void => (
               <ListItem key={user.id}>
                 <ListItemText
                   primary={user.email}

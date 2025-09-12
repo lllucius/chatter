@@ -5,7 +5,7 @@ import CustomScrollbar from '../CustomScrollbar';
 
 const theme = createTheme();
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }): void => (
   <ThemeProvider theme={theme}>{children}</ThemeProvider>
 );
 

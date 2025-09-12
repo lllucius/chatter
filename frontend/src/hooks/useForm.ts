@@ -11,8 +11,8 @@ interface UseFormReturn<T> {
   errors: Partial<Record<keyof T, string>>;
   touched: Partial<Record<keyof T, boolean>>;
   isSubmitting: boolean;
-  handleChange: (name: keyof T) => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
-  handleBlur: (name: keyof T) => () => void;
+  handleChange: (name: keyof T): void => (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => void;
+  handleBlur: (name: keyof T): void => () => void;
   handleSubmit: (event?: React.FormEvent) => Promise<void>;
   setFieldValue: (name: keyof T, value: T[keyof T]) => void;
   setFieldError: (name: keyof T, error: string) => void;
@@ -33,7 +33,7 @@ export function useForm<T extends Record<string, unknown>>(
   const [touched, setTouched] = useState<Partial<Record<keyof T, boolean>>>({});
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const handleChange = useCallback((name: keyof T) => (
+  const handleChange = useCallback((name: keyof T): void => (
     event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>
   ) => {
     const { value, type, checked } = event.target as HTMLInputElement;
@@ -51,7 +51,7 @@ export function useForm<T extends Record<string, unknown>>(
     }));
   }, []);
 
-  const handleBlur = useCallback((name: keyof T) => () => {
+  const handleBlur = useCallback((name: keyof T): void => () => {
     setTouched(prev => ({
       ...prev,
       [name]: true,
@@ -102,7 +102,7 @@ export function useForm<T extends Record<string, unknown>>(
     }
 
     // Mark all fields as touched
-    const allTouched = Object.keys(values).reduce((acc, key) => ({
+    const allTouched = Object.keys(values).reduce((acc, key): void => ({
       ...acc,
       [key]: true,
     }), {} as Partial<Record<keyof T, boolean>>);
@@ -122,7 +122,7 @@ export function useForm<T extends Record<string, unknown>>(
       setIsSubmitting(true);
       try {
         await onSubmit(values);
-      } catch (error) {
+      } catch {
         // Form submission error - handled by UI state
         if (process.env.NODE_ENV === 'development') {
            

@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { toastService } from '../toast-service';
 
 // Mock react-toastify
-vi.mock('react-toastify', () => ({
+vi.mock('react-toastify', (): void => ({
   toast: Object.assign(vi.fn().mockImplementation(() => 'mock-toast-id'), {
     dismiss: vi.fn(),
     update: vi.fn(),

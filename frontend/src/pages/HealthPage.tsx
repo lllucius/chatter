@@ -58,7 +58,7 @@ const HealthPage: React.FC = () => {
       ]);
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);
-    } catch (err: any) {
+    } catch (err: unknown) {
       toastService.error(err, 'Failed to load health data');
     } finally {
       setLoading(false);
@@ -364,7 +364,7 @@ const HealthPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(toolServers || []).map((server) => (
+                {(toolServers || []).map((server): void => (
                   <TableRow key={server.id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>

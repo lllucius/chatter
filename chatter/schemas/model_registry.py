@@ -63,10 +63,10 @@ class ProviderCreate(ProviderBase):
 class ProviderUpdate(BaseModel):
     """Schema for updating a provider."""
 
-    display_name: str | None = Field(None, min_length=1, max_length=200)
-    description: str | None = Field(None, max_length=1000)
+    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
     api_key_required: bool | None = None
-    base_url: str | None = Field(None, max_length=500)
+    base_url: str | None = Field(default=None, max_length=500)
     default_config: dict[str, Any] | None = None
     is_active: bool | None = None
     is_default: bool | None = None
@@ -146,15 +146,15 @@ class ModelDefCreate(ModelDefBase):
 class ModelDefUpdate(BaseModel):
     """Schema for updating a model definition."""
 
-    display_name: str | None = Field(None, min_length=1, max_length=200)
-    description: str | None = Field(None, max_length=1000)
-    model_name: str | None = Field(None, min_length=1, max_length=200)
-    max_tokens: int | None = Field(None, gt=0, le=1000000)
-    context_length: int | None = Field(None, gt=0, le=10000000)
-    dimensions: int | None = Field(None, gt=0, le=10000)
-    chunk_size: int | None = Field(None, gt=0, le=100000)
+    display_name: str | None = Field(default=None, min_length=1, max_length=200)
+    description: str | None = Field(default=None, max_length=1000)
+    model_name: str | None = Field(default=None, min_length=1, max_length=200)
+    max_tokens: int | None = Field(default=None, gt=0, le=1000000)
+    context_length: int | None = Field(default=None, gt=0, le=10000000)
+    dimensions: int | None = Field(default=None, gt=0, le=10000)
+    chunk_size: int | None = Field(default=None, gt=0, le=100000)
     supports_batch: bool | None = None
-    max_batch_size: int | None = Field(None, gt=0, le=10000)
+    max_batch_size: int | None = Field(default=None, gt=0, le=10000)
     default_config: dict[str, Any] | None = None
     is_active: bool | None = None
     is_default: bool | None = None

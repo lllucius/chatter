@@ -28,7 +28,7 @@ class OAuthConfigSchema(BaseModel):
     token_url: HttpUrl = Field(
         ..., description="OAuth token endpoint URL"
     )
-    scope: str | None = Field(None, description="OAuth scope")
+    scope: str | None = Field(default=None, description="OAuth scope")
 
 
 # Base schemas
@@ -116,7 +116,7 @@ class ToolServerCreate(ToolServerBase):
 class ToolServerUpdate(BaseModel):
     """Schema for updating a remote tool server."""
 
-    display_name: str | None = Field(None, min_length=1, max_length=200)
+    display_name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(None)
     base_url: HttpUrl | None = Field(None)
     transport_type: str | None = Field(
@@ -124,10 +124,10 @@ class ToolServerUpdate(BaseModel):
     )
     oauth_config: OAuthConfigSchema | None = Field(None)
     headers: dict[str, str] | None = Field(None)
-    timeout: int | None = Field(None, ge=5, le=300)
+    timeout: int | None = Field(default=None, ge=5, le=300)
     auto_start: bool | None = Field(None)
     auto_update: bool | None = Field(None)
-    max_failures: int | None = Field(None, ge=1, le=10)
+    max_failures: int | None = Field(default=None, ge=1, le=10)
 
 
 class ToolServerStatusUpdate(BaseModel):
@@ -159,7 +159,7 @@ class ServerToolBase(BaseModel):
 class ServerToolUpdate(BaseModel):
     """Schema for updating a server tool."""
 
-    display_name: str | None = Field(None, min_length=1, max_length=200)
+    display_name: str | None = Field(default=None, min_length=1, max_length=200)
     description: str | None = Field(None)
     status: ToolStatus | None = Field(None)
     bypass_when_unavailable: bool | None = Field(None)
@@ -184,7 +184,7 @@ class ToolUsageCreate(BaseModel):
     error_message: str | None = Field(
         None, description="Error message if failed"
     )
-    user_id: str | None = Field(None, description="User ID")
+    user_id: str | None = Field(default=None, description="User ID")
     conversation_id: str | None = Field(
         None, description="Conversation ID"
     )
@@ -243,7 +243,7 @@ class ToolServerResponse(ToolServerBase):
     updated_at: datetime = Field(
         ..., description="Last update timestamp"
     )
-    created_by: str | None = Field(None, description="Creator user ID")
+    created_by: str | None = Field(default=None, description="Creator user ID")
     tools: list[ServerToolResponse] = Field(
         default_factory=list, description="Server tools"
     )
@@ -258,7 +258,7 @@ class ToolUsageResponse(BaseModel):
     server_id: str = Field(..., description="Server ID")
     tool_id: str = Field(..., description="Tool ID")
     tool_name: str = Field(..., description="Tool name")
-    user_id: str | None = Field(None, description="User ID")
+    user_id: str | None = Field(default=None, description="User ID")
     conversation_id: str | None = Field(
         None, description="Conversation ID"
     )
@@ -272,7 +272,7 @@ class ToolUsageResponse(BaseModel):
         None, description="Response time"
     )
     success: bool = Field(..., description="Success status")
-    error_message: str | None = Field(None, description="Error message")
+    error_message: str | None = Field(default=None, description="Error message")
     called_at: datetime = Field(..., description="Call timestamp")
 
 
@@ -503,7 +503,7 @@ class ToolPermissionBase(BaseModel):
     """Base schema for tool permissions."""
 
     user_id: str = Field(..., description="User ID")
-    tool_id: str | None = Field(None, description="Specific tool ID")
+    tool_id: str | None = Field(default=None, description="Specific tool ID")
     server_id: str | None = Field(
         None, description="Server ID (for all tools)"
     )
@@ -537,8 +537,8 @@ class ToolPermissionUpdate(BaseModel):
     """Schema for updating tool permissions."""
 
     access_level: ToolAccessLevel | None = Field(None)
-    rate_limit_per_hour: int | None = Field(None, ge=0)
-    rate_limit_per_day: int | None = Field(None, ge=0)
+    rate_limit_per_hour: int | None = Field(default=None, ge=0)
+    rate_limit_per_day: int | None = Field(default=None, ge=0)
     allowed_hours: list[int] | None = Field(None)
     allowed_days: list[int] | None = Field(None)
     expires_at: datetime | None = Field(None)
@@ -571,8 +571,8 @@ class RoleToolAccessBase(BaseModel):
     access_level: ToolAccessLevel = Field(
         ..., description="Access level"
     )
-    default_rate_limit_per_hour: int | None = Field(None, ge=0)
-    default_rate_limit_per_day: int | None = Field(None, ge=0)
+    default_rate_limit_per_hour: int | None = Field(default=None, ge=0)
+    default_rate_limit_per_day: int | None = Field(default=None, ge=0)
     allowed_hours: list[int] | None = Field(None)
     allowed_days: list[int] | None = Field(None)
 
@@ -598,7 +598,7 @@ class UserToolAccessCheck(BaseModel):
 
     user_id: str = Field(..., description="User ID")
     tool_name: str = Field(..., description="Tool name")
-    server_name: str | None = Field(None, description="Server name")
+    server_name: str | None = Field(default=None, description="Server name")
 
 
 class ToolAccessResult(BaseModel):

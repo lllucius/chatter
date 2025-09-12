@@ -96,7 +96,7 @@ class PromptBase(BaseModel):
     )
 
     # Metadata and tags
-    tags: list[str] | None = Field(None, description="Prompt tags")
+    tags: list[str] | None = Field(default=None, description="Prompt tags")
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -282,7 +282,7 @@ class PromptUpdate(BaseModel):
     )
 
     # Metadata and tags
-    tags: list[str] | None = Field(None, description="Prompt tags")
+    tags: list[str] | None = Field(default=None, description="Prompt tags")
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -447,18 +447,18 @@ class PromptResponse(BaseModel):
     is_latest: bool = Field(
         ..., description="Whether this is the latest version"
     )
-    changelog: str | None = Field(None, description="Version changelog")
+    changelog: str | None = Field(default=None, description="Version changelog")
 
     # Access control
     is_public: bool = Field(..., description="Whether prompt is public")
 
     # Quality and ratings
-    rating: float | None = Field(None, description="Average rating")
+    rating: float | None = Field(default=None, description="Average rating")
     rating_count: int = Field(..., description="Number of ratings")
 
     # Usage statistics
     usage_count: int = Field(..., description="Usage count")
-    success_rate: float | None = Field(None, description="Success rate")
+    success_rate: float | None = Field(default=None, description="Success rate")
     avg_response_time_ms: int | None = Field(
         None, description="Average response time"
     )
@@ -474,7 +474,7 @@ class PromptResponse(BaseModel):
     )
 
     # Metadata and tags
-    tags: list[str] | None = Field(None, description="Prompt tags")
+    tags: list[str] | None = Field(default=None, description="Prompt tags")
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -484,7 +484,7 @@ class PromptResponse(BaseModel):
     estimated_tokens: int | None = Field(
         None, description="Estimated token count"
     )
-    language: str | None = Field(None, description="Content language")
+    language: str | None = Field(default=None, description="Content language")
 
     # Timestamps
     created_at: datetime = Field(..., description="Creation timestamp")
@@ -502,7 +502,7 @@ class PromptListRequest(ListRequestBase):
     category: PromptCategory | None = Field(
         None, description="Filter by category"
     )
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
     is_public: bool | None = Field(
         None, description="Filter by public status"
     )

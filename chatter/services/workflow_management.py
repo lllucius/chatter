@@ -22,6 +22,27 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+def _get_validation_errors_as_strings(validation_result) -> list[str]:
+    """Extract error messages as strings from validation result."""
+    errors = validation_result.errors
+    if not errors:
+        return []
+    
+    # If first error is a string, assume all are strings (fallback interface)
+    if isinstance(errors[0], str):
+        return errors
+    
+    # Otherwise, extract message from ValidationError objects
+    return [getattr(error, 'message', str(error)) for error in errors]
+
+
+def _is_validation_result_valid(validation_result) -> bool:
+    """Check if validation result is valid, handling both interfaces."""
+    if hasattr(validation_result, 'is_valid'):
+        return validation_result.is_valid
+    return validation_result.valid
+
+
 class WorkflowManagementService:
     """Service for managing workflow definitions and templates."""
 
@@ -87,11 +108,12 @@ class WorkflowManagementService:
                 definition_data, owner_id
             )
 
-            if not validation_result.valid:
+            if not _is_validation_result_valid(validation_result):
                 from chatter.utils.problem import BadRequestProblem
 
+                error_messages = _get_validation_errors_as_strings(validation_result)
                 raise BadRequestProblem(
-                    detail=f"Workflow validation failed: {'; '.join(validation_result.errors)}"
+                    detail=f"Workflow validation failed: {'; '.join(error_messages)}"
                 )
 
             # Log warnings if any
@@ -363,10 +385,10 @@ class WorkflowManagementService:
             )
 
             return {
-                "valid": validation_result.valid,
-                "errors": validation_result.errors,
+                "valid": _is_validation_result_valid(validation_result),
+                "errors": _get_validation_errors_as_strings(validation_result),
                 "warnings": validation_result.warnings,
-                "requirements_met": validation_result.requirements_met,
+                "requirements_met": getattr(validation_result, 'requirements_met', True),
             }
 
         except Exception as e:
@@ -598,6 +620,8 @@ class WorkflowManagementService:
                     ValidationError(
                         type="missing_nodes",
                         message="Workflow must have at least one node",
+                        node_id=None,
+                        edge_id=None,
                         severity="error",
                     )
                 )
@@ -613,6 +637,8 @@ class WorkflowManagementService:
                     ValidationError(
                         type="missing_start_node",
                         message="Workflow must have a start node",
+                        node_id=None,
+                        edge_id=None,
                         severity="error",
                     )
                 )
@@ -621,6 +647,8 @@ class WorkflowManagementService:
                     ValidationError(
                         type="multiple_start_nodes",
                         message="Workflow can only have one start node",
+                        node_id=None,
+                        edge_id=None,
                         severity="error",
                     )
                 )
@@ -633,6 +661,7 @@ class WorkflowManagementService:
                         ValidationError(
                             type="invalid_edge_source",
                             message=f"Edge source '{edge['source']}' references non-existent node",
+                            node_id=None,
                             edge_id=edge["id"],
                             severity="error",
                         )
@@ -642,6 +671,7 @@ class WorkflowManagementService:
                         ValidationError(
                             type="invalid_edge_target",
                             message=f"Edge target '{edge['target']}' references non-existent node",
+                            node_id=None,
                             edge_id=edge["id"],
                             severity="error",
                         )
@@ -663,6 +693,7 @@ class WorkflowManagementService:
                             type="orphaned_node",
                             message=f"Node '{node['id']}' is not connected to any other nodes",
                             node_id=node["id"],
+                            edge_id=None,
                             severity="warning",
                         )
                     )
@@ -691,6 +722,7 @@ class WorkflowManagementService:
                             type="potential_infinite_loop",
                             message=f"Loop node '{loop_node['id']}' may cause infinite loop without max iterations or exit condition",
                             node_id=loop_node["id"],
+                            edge_id=None,
                             severity="warning",
                         )
                     )

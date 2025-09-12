@@ -16,11 +16,11 @@ from chatter.schemas.common import (
 class DocumentBase(BaseModel):
     """Base document schema."""
 
-    title: str | None = Field(None, description="Document title")
+    title: str | None = Field(default=None, description="Document title")
     description: str | None = Field(
         None, description="Document description"
     )
-    tags: list[str] | None = Field(None, description="Document tags")
+    tags: list[str] | None = Field(default=None, description="Document tags")
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -46,11 +46,11 @@ class DocumentCreate(DocumentBase):
 class DocumentUploadRequest(BaseModel):
     """Schema for document upload request."""
 
-    title: str | None = Field(None, description="Document title")
+    title: str | None = Field(default=None, description="Document title")
     description: str | None = Field(
         None, description="Document description"
     )
-    tags: list[str] | None = Field(None, description="Document tags")
+    tags: list[str] | None = Field(default=None, description="Document tags")
     chunk_size: int = Field(
         1000,
         ge=100,
@@ -68,11 +68,11 @@ class DocumentUploadRequest(BaseModel):
 class DocumentUpdate(BaseModel):
     """Schema for updating a document."""
 
-    title: str | None = Field(None, description="Document title")
+    title: str | None = Field(default=None, description="Document title")
     description: str | None = Field(
         None, description="Document description"
     )
-    tags: list[str] | None = Field(None, description="Document tags")
+    tags: list[str] | None = Field(default=None, description="Document tags")
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -137,7 +137,7 @@ class DocumentSearchRequest(BaseModel):
     document_types: list[DocumentType] | None = Field(
         None, description="Filter by document types"
     )
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
     include_content: bool = Field(
         False, description="Include document content in results"
     )
@@ -182,7 +182,7 @@ class DocumentListRequest(ListRequestBase):
     document_type: DocumentType | None = Field(
         None, description="Filter by document type"
     )
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
     owner_id: str | None = Field(
         None, description="Filter by owner (admin only)"
     )
@@ -255,8 +255,8 @@ class DocumentChunkResponse(BaseModel):
     extra_metadata: dict[str, Any] | None = Field(
         None, description="Chunk metadata"
     )
-    token_count: int | None = Field(None, description="Token count")
-    language: str | None = Field(None, description="Detected language")
+    token_count: int | None = Field(default=None, description="Token count")
+    language: str | None = Field(default=None, description="Detected language")
     embedding_model: str | None = Field(
         None, description="Embedding model used"
     )

@@ -146,7 +146,7 @@ class BackupEvent(BaseModel):
     progress: float | None = Field(
         None, description="Progress percentage"
     )
-    message: str | None = Field(None, description="Status message")
+    message: str | None = Field(default=None, description="Status message")
     backup_path: str | None = Field(
         None, description="Backup file path"
     )
@@ -175,7 +175,7 @@ class ToolServerEvent(BaseModel):
     server_id: str = Field(..., description="Tool server ID")
     server_name: str = Field(..., description="Tool server name")
     status: str = Field(..., description="Server status")
-    health_status: str | None = Field(None, description="Health status")
+    health_status: str | None = Field(default=None, description="Health status")
     details: dict[str, Any] | None = Field(
         None, description="Additional details"
     )
@@ -188,7 +188,7 @@ class DocumentEvent(BaseModel):
     """Document event data."""
 
     document_id: str = Field(..., description="Document ID")
-    filename: str | None = Field(None, description="Document filename")
+    filename: str | None = Field(default=None, description="Document filename")
     status: str = Field(..., description="Document processing status")
     progress: float | None = Field(
         None, description="Processing progress"
@@ -205,7 +205,7 @@ class SystemEvent(BaseModel):
     """System event data."""
 
     message: str = Field(..., description="System message")
-    status: str | None = Field(None, description="System status")
+    status: str | None = Field(default=None, description="System status")
     details: dict[str, Any] | None = Field(
         None, description="Additional details"
     )
@@ -227,10 +227,10 @@ class BackupEventData(ValidatedEventData):
     """Validated data for backup events."""
 
     backup_id: str = Field(..., min_length=1, max_length=255)
-    status: str | None = Field(None, max_length=100)
-    progress: float | None = Field(None, ge=0.0, le=100.0)
-    backup_path: str | None = Field(None, max_length=1000)
-    error: str | None = Field(None, max_length=1000)
+    status: str | None = Field(default=None, max_length=100)
+    progress: float | None = Field(default=None, ge=0.0, le=100.0)
+    backup_path: str | None = Field(default=None, max_length=1000)
+    error: str | None = Field(default=None, max_length=1000)
     updated_at: str | None = Field(
         None, description="Last update timestamp"
     )
@@ -241,20 +241,20 @@ class JobEventData(ValidatedEventData):
 
     job_id: str = Field(..., min_length=1, max_length=255)
     job_name: str = Field(..., min_length=1, max_length=255)
-    status: str | None = Field(None, max_length=100)
+    status: str | None = Field(default=None, max_length=100)
     result: dict[str, Any] | None = None
-    error: str | None = Field(None, max_length=1000)
+    error: str | None = Field(default=None, max_length=1000)
 
 
 class DocumentEventData(ValidatedEventData):
     """Validated data for document events."""
 
     document_id: str = Field(..., min_length=1, max_length=255)
-    filename: str | None = Field(None, max_length=500)
+    filename: str | None = Field(default=None, max_length=500)
     status: str = Field(..., max_length=100)
-    progress: float | None = Field(None, ge=0.0, le=100.0)
+    progress: float | None = Field(default=None, ge=0.0, le=100.0)
     result: dict[str, Any] | None = None
-    error: str | None = Field(None, max_length=1000)
+    error: str | None = Field(default=None, max_length=1000)
 
 
 class SystemEventData(ValidatedEventData):
@@ -267,7 +267,7 @@ class SystemEventData(ValidatedEventData):
     details: dict[str, Any] | None = None
     test: bool | None = None
     broadcast: bool | None = None
-    triggered_by: str | None = Field(None, max_length=255)
+    triggered_by: str | None = Field(default=None, max_length=255)
 
 
 class ToolServerEventData(ValidatedEventData):
@@ -275,9 +275,9 @@ class ToolServerEventData(ValidatedEventData):
 
     server_id: str = Field(..., min_length=1, max_length=255)
     server_name: str = Field(..., min_length=1, max_length=255)
-    health_status: str | None = Field(None, max_length=100)
+    health_status: str | None = Field(default=None, max_length=100)
     details: dict[str, Any] | None = None
-    error: str | None = Field(None, max_length=1000)
+    error: str | None = Field(default=None, max_length=1000)
     checked_at: str | None = Field(
         None, description="Health check timestamp"
     )
@@ -293,7 +293,7 @@ class UserEventData(ValidatedEventData):
     """Validated data for user events."""
 
     user_id: str = Field(..., min_length=1, max_length=255)
-    status: str | None = Field(None, max_length=100)
+    status: str | None = Field(default=None, max_length=100)
     details: dict[str, Any] | None = None
 
 

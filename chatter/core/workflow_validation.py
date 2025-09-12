@@ -2,22 +2,49 @@
 
 from typing import Any
 
+# Import validation classes with fallback handling
 try:
-    from chatter.core.validation.results import ValidationResult
+    from chatter.core.validation.results import ValidationResult as _ValidationResult
+    from chatter.core.validation.exceptions import ValidationError as _ValidationError
+    _HAS_REAL_VALIDATION = True
 except ImportError:
-    # Fallback validation result for environments without full validation engine
-    class ValidationResult:
-        def __init__(
-            self,
-            valid: bool,
-            errors: list[str],
-            warnings: list[str],
-            requirements_met: bool = True,
-        ):
-            self.valid = valid
-            self.errors = errors
-            self.warnings = warnings
-            self.requirements_met = requirements_met
+    _HAS_REAL_VALIDATION = False
+    # Type hints for fallback - actual classes created at module level
+    _ValidationResult = None  # type: ignore
+    _ValidationError = None  # type: ignore
+
+
+class _FallbackValidationResult:
+    """Fallback validation result for environments without full validation engine."""
+    
+    def __init__(
+        self,
+        valid: bool,
+        errors: list[str],
+        warnings: list[str],
+        requirements_met: bool = True,
+    ):
+        self.valid = valid
+        self.errors = errors
+        self.warnings = warnings
+        self.requirements_met = requirements_met
+
+
+class _FallbackValidationError(Exception):
+    """Fallback validation error."""
+    
+    def __init__(self, message: str):
+        super().__init__(message)
+        self.message = message
+
+
+# Set up the classes to use
+if _HAS_REAL_VALIDATION:
+    ValidationResult = _ValidationResult
+    ValidationError = _ValidationError
+else:
+    ValidationResult = _FallbackValidationResult  # type: ignore
+    ValidationError = _FallbackValidationError  # type: ignore
 
 
 # Use standard logging to avoid config dependencies
@@ -31,10 +58,30 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+def _create_validation_result(errors: list[str], warnings: list[str]) -> ValidationResult:  # type: ignore
+    """Create ValidationResult using the appropriate interface."""
+    if _HAS_REAL_VALIDATION:
+        # Convert string errors to ValidationError objects
+        error_objects = [ValidationError(msg) for msg in errors]
+        return ValidationResult(  # type: ignore
+            is_valid=len(errors) == 0,
+            errors=error_objects,
+            warnings=warnings,
+        )
+    else:
+        # Use fallback interface with string errors
+        return ValidationResult(  # type: ignore
+            valid=len(errors) == 0,
+            errors=errors,
+            warnings=warnings,
+            requirements_met=True,
+        )
+
+
 class WorkflowValidationService:
     """Centralized service for workflow validation to eliminate duplication."""
 
-    def __init__(self):
+    def __init__(self) -> None:
         # Note: ValidationEngine is optional to avoid config dependencies
         self.validation_engine = None
         try:
@@ -107,12 +154,7 @@ class WorkflowValidationService:
             errors.extend(structure_validation.get("errors", []))
             warnings.extend(structure_validation.get("warnings", []))
 
-        return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings,
-            requirements_met=True,
-        )
+        return _create_validation_result(errors, warnings)
 
     def validate_workflow_template(
         self,
@@ -148,12 +190,7 @@ class WorkflowValidationService:
             errors.extend(param_validation.get("errors", []))
             warnings.extend(param_validation.get("warnings", []))
 
-        return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings,
-            requirements_met=True,
-        )
+        return _create_validation_result(errors, warnings)
 
     def validate_execution_request(
         self,
@@ -161,8 +198,8 @@ class WorkflowValidationService:
         definition: WorkflowDefinition,
     ) -> ValidationResult:
         """Validate a workflow execution request."""
-        errors = []
-        warnings = []
+        errors: list[str] = []
+        warnings: list[str] = []
 
         # Validate input data structure
         if "input_data" in request:
@@ -179,12 +216,7 @@ class WorkflowValidationService:
         if not start_nodes:
             errors.append("Workflow has no start node - cannot execute")
 
-        return ValidationResult(
-            valid=len(errors) == 0,
-            errors=errors,
-            warnings=warnings,
-            requirements_met=True,
-        )
+        return _create_validation_result(errors, warnings)
 
     def _validate_nodes(
         self, nodes: list[dict[str, Any]]

@@ -132,8 +132,8 @@ class SortOrder(str, Enum):
 class FilterParams(BaseModel):
     """Base filter parameters."""
 
-    search: str | None = Field(None, description="Search query")
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    search: str | None = Field(default=None, description="Search query")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
     created_after: datetime | None = Field(
         None, description="Created after date"
     )

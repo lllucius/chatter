@@ -171,7 +171,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
     <Box>
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 3 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -184,7 +184,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -199,7 +199,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -214,7 +214,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
           </Card>
         </Grid>
         
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -236,7 +236,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
 
       <Grid container spacing={3}>
         {/* Running Executions */}
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12 }} lg: 8>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
@@ -317,7 +317,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
         </Grid>
 
         {/* System Metrics */}
-        <Grid item xs={12} lg={4}>
+        <Grid size={{ xs: 12 }} lg: 4>
           <Card sx={{ mb: 3 }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -418,7 +418,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
         <DialogContent>
           {selectedExecution && (
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Execution Status</Typography>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
@@ -450,7 +450,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 </Paper>
               </Grid>
               
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Metrics</Typography>
                   <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
@@ -471,7 +471,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
               </Grid>
               
               {selectedExecution.error && (
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Alert severity="error">
                     <Typography variant="subtitle2">Error in step: {selectedExecution.error.stepId}</Typography>
                     <Typography variant="body2">{selectedExecution.error.message}</Typography>
@@ -482,7 +482,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 </Grid>
               )}
               
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Execution Logs</Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>

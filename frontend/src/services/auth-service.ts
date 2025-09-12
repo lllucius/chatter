@@ -13,11 +13,8 @@ class AuthService {
   private refreshInProgress: boolean = false; // Prevent multiple concurrent refresh attempts
 
   constructor() {
-    this.basePath = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-    this.baseSDK = new ChatterSDK({
-      basePath: this.basePath,
-      credentials: 'include', // Include cookies for refresh token
-    });
+    this.basePath = (import.meta as any).env?.VITE_API_BASE_URL || 'http://localhost:8000';
+    this.baseSDK = new ChatterSDK();
     // Don't call initialize() in constructor anymore - it's async now
   }
 
@@ -121,9 +118,7 @@ class AuthService {
     try {
       // Use empty refresh token - the actual refresh token is in HttpOnly cookie
       // and will be sent automatically with credentials: 'include'
-      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh({
-        refreshToken: '', // Server will use the cookie
-      });
+      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh();
 
       if (response.access_token) {
         this.token = response.access_token; // Store in memory only

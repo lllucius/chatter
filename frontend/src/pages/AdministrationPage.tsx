@@ -798,7 +798,7 @@ const AdministrationPage: React.FC = () => {
         <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={4}>
+              <Grid size={{ xs: 12 }} sm: 4>
                 <FormControlLabel
                   control={<Switch defaultChecked />}
                   label="Automatic Backups"
@@ -850,7 +850,7 @@ const AdministrationPage: React.FC = () => {
         <Box>
           <Box sx={{ mb: 2 }}>
             <Grid container spacing={2} alignItems="center">
-              <Grid item xs={12} sm={12}>
+              <Grid size={{ xs: 12 }} sm: 12>
                 {jobStats && (
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="body2" color="text.secondary">
@@ -996,7 +996,7 @@ const AdministrationPage: React.FC = () => {
             </Typography>
             
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <FormControl fullWidth sx={{ mb: 2 }}>
                   <InputLabel>Operation Type</InputLabel>
                   <Select
@@ -1052,7 +1052,7 @@ const AdministrationPage: React.FC = () => {
                 />
               </Grid>
 
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <Typography variant="subtitle1" gutterBottom>
                   Operation Summary
                 </Typography>

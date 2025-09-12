@@ -5,7 +5,7 @@
  * for components to subscribe to specific events.
  */
 
-import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
+import { AnySSEEvent, SSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
 import { authService } from '../services/auth-service';
 
 export class SSEEventManager {
@@ -311,17 +311,17 @@ export class SSEEventManager {
     }
 
     // Type validation
-    if (typeof event.id !== 'string' || typeof event.type !== 'string' || typeof event.timestamp !== 'string') {
+    if (typeof obj.id !== 'string' || typeof obj.type !== 'string' || typeof obj.timestamp !== 'string') {
       return false;
     }
 
     // Data should be an object
-    if (event.data && typeof event.data !== 'object') {
+    if (obj.data && typeof obj.data !== 'object') {
       return false;
     }
 
     // Metadata should be an object if present
-    if (event.metadata && typeof event.metadata !== 'object') {
+    if (obj.metadata && typeof obj.metadata !== 'object') {
       return false;
     }
 
@@ -434,10 +434,10 @@ export class SSEEventManager {
     if (!event.metadata) return null;
 
     return {
-      category: event.metadata.category,
-      priority: event.metadata.priority,
-      source_system: event.metadata.source_system,
-      correlation_id: event.metadata.correlation_id,
+      category: event.metadata.category as string | undefined,
+      priority: event.metadata.priority as string | undefined,
+      source_system: event.metadata.source_system as string | undefined,
+      correlation_id: event.metadata.correlation_id as string | undefined,
     };
   }
 
@@ -467,7 +467,7 @@ export class SSEEventManager {
     // This could integrate with a notification system
     if ('Notification' in window && Notification.permission === 'granted') {
       new Notification('Critical System Alert', {
-        body: `${event.type}: ${event.data.message || 'Critical event occurred'}`,
+        body: `${event.type}: ${(event.data as any)?.message || 'Critical event occurred'}`,
         icon: '/favicon.ico',
         tag: 'critical-alert'
       });
@@ -512,7 +512,7 @@ export class SSEEventManager {
   public offCategory(category: string, listener: SSEEventListener): void {
     const categoryKey = `category:${category}`;
     if (this.listeners[categoryKey]) {
-      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter(l => l !== listener);
+      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter((l: SSEEventListener) => l !== listener);
     }
   }
 
@@ -576,7 +576,7 @@ export class SSEEventManager {
         return await sdk.events.getSseStatsApiV1EventsStats();
       });
       
-      return response;
+      return response as unknown as Record<string, unknown>;
     } catch (error) {
       console.error('SSE: Failed to get SSE stats:', error);
       return null;

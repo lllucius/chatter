@@ -166,7 +166,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     <Box>
       {/* Summary Statistics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/workflows')}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -195,7 +195,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/agents')}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -224,7 +224,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/ab-testing')}>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -253,7 +253,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 3>
           <Card>
             <CardContent>
               <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
@@ -298,7 +298,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={0} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid item xs={12} lg={8}>
+              <Grid size={{ xs: 12 }} lg: 8>
                 <Typography variant="h6" gutterBottom>
                   7-Day Activity Trend
                 </Typography>
@@ -337,7 +337,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
               
-              <Grid item xs={12} lg={4}>
+              <Grid size={{ xs: 12 }} lg: 4>
                 <Typography variant="h6" gutterBottom>
                   Recent Activity
                 </Typography>
@@ -392,7 +392,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={1} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <Typography variant="h6" gutterBottom>
                   Feature Integration Usage
                 </Typography>
@@ -417,7 +417,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
               
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12 }} md: 6>
                 <Typography variant="h6" gutterBottom>
                   Integration Benefits
                 </Typography>
@@ -472,7 +472,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
             </ResponsiveContainer>
             
             <Grid container spacing={2} sx={{ mt: 2 }}>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6 }} sm: 3>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="primary">
                     {stats.workflows.avgExecutionTime}s
@@ -482,7 +482,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6 }} sm: 3>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="success">
                     {stats.agents.avgResponseTime}s
@@ -492,7 +492,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6 }} sm: 3>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="warning">
                     {((1 - stats.workflows.failureRate) * 100).toFixed(1)}%
@@ -502,7 +502,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   </Typography>
                 </Paper>
               </Grid>
-              <Grid item xs={6} sm={3}>
+              <Grid size={{ xs: 6 }} sm: 3>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="info">
                     {stats.system.uptime}%
@@ -519,7 +519,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
       {/* Quick Actions */}
       <Grid container spacing={3}>
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 4>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -558,7 +558,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={4}>
+        <Grid size={{ xs: 12 }} sm: 6 md: 4>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -588,7 +588,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={12} md={4}>
+        <Grid size={{ xs: 12 }} sm: 12 md: 4>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>

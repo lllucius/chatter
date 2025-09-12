@@ -1,7 +1,6 @@
 import React from 'react';
 import {
   Box,
-  Grid,
   Card,
   CardContent,
   Typography,
@@ -13,6 +12,7 @@ import {
   ListItemText,
   Chip,
 } from '@mui/material';
+import { Grid } from '@mui/material/GridLegacy';
 import {
   TrendingUp,
   TrendingDown,
@@ -182,7 +182,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Total Participants
               </Typography>
               <Typography variant="h4">
-                {sampleMetrics.total_participants?.toLocaleString() || 'N/A'}
+                {sampleMetrics.participant_count?.toLocaleString() || 'N/A'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Across all variants

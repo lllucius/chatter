@@ -246,7 +246,7 @@ const UserSettingsPage: React.FC = () => {
               Profile Information
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12 }} sm: 6>
                 <TextField
                   fullWidth
                   label="Username"
@@ -255,7 +255,7 @@ const UserSettingsPage: React.FC = () => {
                   helperText="Username cannot be changed"
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12 }} sm: 6>
                 <TextField
                   fullWidth
                   label="Email"
@@ -266,7 +266,7 @@ const UserSettingsPage: React.FC = () => {
                   helperText={profileForm.errors.email}
                 />
               </Grid>
-              <Grid item xs={12} sm={6}>
+              <Grid size={{ xs: 12 }} sm: 6>
                 <TextField
                   fullWidth
                   label="Full Name"
@@ -276,7 +276,7 @@ const UserSettingsPage: React.FC = () => {
                   helperText={profileForm.errors.full_name}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Typography variant="body2" color="text.secondary">
                   Account created: {userProfile?.created_at ? format(new Date(userProfile.created_at), 'PPpp') : 'Unknown'}
                 </Typography>
@@ -302,7 +302,7 @@ const UserSettingsPage: React.FC = () => {
               Change Password
             </Typography>
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="Current Password"
@@ -313,7 +313,7 @@ const UserSettingsPage: React.FC = () => {
                   helperText={passwordForm.errors.current_password}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="New Password"
@@ -324,7 +324,7 @@ const UserSettingsPage: React.FC = () => {
                   helperText={passwordForm.errors.new_password}
                 />
               </Grid>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <TextField
                   fullWidth
                   label="Confirm New Password"

@@ -825,7 +825,10 @@ class DocumentService:
 
             # Trigger reprocessing (similar to process_document but for existing docs)
             processing_request = DocumentProcessingRequest(
-                reprocess=True
+                reprocess=True,
+                chunk_size=None,
+                chunk_overlap=None,
+                generate_embeddings=True,
             )
             await self.process_document(
                 document_id, user_id, processing_request

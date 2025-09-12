@@ -4,7 +4,7 @@ import json
 import tarfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any
+from typing import Any, Literal
 
 import aiofiles
 
@@ -708,13 +708,15 @@ async def data_backup_job(operation_id: str) -> dict[str, Any]:
         # Create backup archive
         compress = bool(backup_req.get("compress", True))
         backup_filename = f"{operation.id}.tar"
-        mode = "w:gz" if compress else "w"
         if compress:
+            mode: Literal["w:gz"] = "w:gz"
             backup_filename += ".gz"
+        else:
+            mode: Literal["w"] = "w"
 
         backup_path = data_manager.backup_directory / backup_filename
 
-        with tarfile.open(backup_path, mode):
+        with tarfile.open(str(backup_path), mode):
             # In a real implementation, add files/data here
             pass
 

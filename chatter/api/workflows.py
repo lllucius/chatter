@@ -361,7 +361,7 @@ async def execute_workflow(
                 detail="Workflow definition not found"
             )
 
-        result = await execution_service.execute_workflow(
+        result = await execution_service.execute_workflow_definition(
             workflow_definition=definition,
             input_data=execution_request.input_data,
             context=execution_request.context or {},

@@ -9,6 +9,7 @@ import numpy as np
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from sqlalchemy.ext.asyncio import AsyncSession
+from pydantic import SecretStr
 
 try:
     from langchain_anthropic import AnthropicEmbeddings
@@ -27,10 +28,12 @@ except ImportError:
 
 try:
     from langchain_cohere import CohereEmbeddings
+    import cohere
 
     COHERE_AVAILABLE = True
 except ImportError:
     CohereEmbeddings = None
+    cohere = None
     COHERE_AVAILABLE = False
 
 try:
@@ -222,8 +225,10 @@ class EmbeddingService:
                     return None
 
                 return CohereEmbeddings(
-                    cohere_api_key=api_key,
+                    cohere_api_key=SecretStr(api_key),
                     model=model_def.model_name,
+                    client=cohere.Client(api_key) if cohere else None,
+                    async_client=cohere.AsyncClient(api_key) if cohere else None,
                 )
 
             else:

@@ -81,11 +81,11 @@ class ABTestCreateRequest(BaseModel):
 class ABTestUpdateRequest(BaseModel):
     """Request schema for updating an A/B test."""
 
-    name: str | None = Field(None, description="Test name")
+    name: str | None = Field(default=None, description="Test name")
     description: str | None = Field(
         None, description="Test description"
     )
-    status: TestStatus | None = Field(None, description="Test status")
+    status: TestStatus | None = Field(default=None, description="Test status")
 
     # Configuration updates (only allowed for draft tests)
     duration_days: int | None = Field(
@@ -105,7 +105,7 @@ class ABTestUpdateRequest(BaseModel):
     )
 
     # Metadata
-    tags: list[str] | None = Field(None, description="Test tags")
+    tags: list[str] | None = Field(default=None, description="Test tags")
     metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -149,7 +149,7 @@ class ABTestResponse(BaseModel):
     start_date: datetime | None = Field(
         None, description="Test start date"
     )
-    end_date: datetime | None = Field(None, description="Test end date")
+    end_date: datetime | None = Field(default=None, description="Test end date")
     participant_count: int = Field(
         0, description="Number of participants"
     )
@@ -175,7 +175,7 @@ class ABTestListRequest(ListRequestBase):
     test_type: TestType | None = Field(
         None, description="Filter by test type"
     )
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
 
 
 class ABTestListResponse(BaseModel):

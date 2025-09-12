@@ -92,14 +92,14 @@ class ExportDataRequest(BaseModel):
     )
 
     # Filtering options
-    user_id: str | None = Field(None, description="Filter by user ID")
+    user_id: str | None = Field(default=None, description="Filter by user ID")
     conversation_id: str | None = Field(
         None, description="Filter by conversation ID"
     )
     date_from: datetime | None = Field(
         None, description="Filter from date"
     )
-    date_to: datetime | None = Field(None, description="Filter to date")
+    date_to: datetime | None = Field(default=None, description="Filter to date")
 
     # Export options
     include_metadata: bool = Field(True, description="Include metadata")
@@ -143,7 +143,7 @@ class BackupRequest(BaseModel):
     backup_type: BackupType = Field(
         BackupType.FULL, description="Backup type"
     )
-    name: str | None = Field(None, description="Backup name")
+    name: str | None = Field(default=None, description="Backup name")
     description: str | None = Field(
         None, description="Backup description"
     )
@@ -213,7 +213,7 @@ class BackupListRequest(ListRequestBase):
     backup_type: BackupType | None = Field(
         None, description="Filter by backup type"
     )
-    status: str | None = Field(None, description="Filter by status")
+    status: str | None = Field(default=None, description="Filter by status")
 
 
 class BackupListResponse(BaseModel):

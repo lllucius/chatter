@@ -189,14 +189,14 @@ class AgentCreateRequest(BaseModel):
 class AgentUpdateRequest(BaseModel):
     """Request schema for updating an agent."""
 
-    name: str | None = Field(None, description="Agent name")
+    name: str | None = Field(default=None, description="Agent name")
     description: str | None = Field(
         None, description="Agent description"
     )
     system_prompt: str | None = Field(
         None, description="System prompt for the agent"
     )
-    status: AgentStatus | None = Field(None, description="Agent status")
+    status: AgentStatus | None = Field(default=None, description="Agent status")
 
     # Optional configuration
     personality_traits: list[str] | None = Field(
@@ -252,7 +252,7 @@ class AgentUpdateRequest(BaseModel):
     )
 
     # Metadata
-    tags: list[str] | None = Field(None, description="Agent tags")
+    tags: list[str] | None = Field(default=None, description="Agent tags")
     metadata: dict[str, Any] | None = Field(
         None, description="Additional metadata"
     )
@@ -332,7 +332,7 @@ class AgentListRequest(PaginatedRequest):
     status: AgentStatus | None = Field(
         None, description="Filter by status"
     )
-    tags: list[str] | None = Field(None, description="Filter by tags")
+    tags: list[str] | None = Field(default=None, description="Filter by tags")
 
 
 class AgentListResponse(BaseModel):

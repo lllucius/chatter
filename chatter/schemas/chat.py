@@ -48,11 +48,11 @@ class MessageResponse(MessageBase):
     model_used: str | None = Field(
         None, description="Model used for generation"
     )
-    provider_used: str | None = Field(None, description="Provider used")
+    provider_used: str | None = Field(default=None, description="Provider used")
     response_time_ms: int | None = Field(
         None, description="Response time in milliseconds"
     )
-    cost: float | None = Field(None, description="Cost of the message")
+    cost: float | None = Field(default=None, description="Cost of the message")
     finish_reason: str | None = Field(
         None, description="Reason for completion"
     )
@@ -79,7 +79,7 @@ class ConversationCreate(ConversationBase):
     profile_id: str | None = Field(
         None, description="Profile ID to use"
     )
-    system_prompt: str | None = Field(None, description="System prompt")
+    system_prompt: str | None = Field(default=None, description="System prompt")
     enable_retrieval: bool = Field(
         default=False, description="Enable document retrieval"
     )
@@ -100,7 +100,7 @@ class ConversationCreate(ConversationBase):
 class ConversationUpdate(BaseModel):
     """Schema for updating a conversation."""
 
-    title: str | None = Field(None, description="Conversation title")
+    title: str | None = Field(default=None, description="Conversation title")
     description: str | None = Field(
         None, description="Conversation description"
     )
@@ -126,12 +126,12 @@ class ConversationResponse(ConversationBase):
 
     id: str = Field(..., description="Conversation ID")
     user_id: str = Field(..., description="User ID")
-    profile_id: str | None = Field(None, description="Profile ID")
+    profile_id: str | None = Field(default=None, description="Profile ID")
     status: ConversationStatus = Field(
         ..., description="Conversation status"
     )
-    llm_provider: str | None = Field(None, description="LLM provider")
-    llm_model: str | None = Field(None, description="LLM model")
+    llm_provider: str | None = Field(default=None, description="LLM provider")
+    llm_model: str | None = Field(default=None, description="LLM model")
     temperature: float | None = Field(
         None, description="Temperature setting"
     )
@@ -144,7 +144,7 @@ class ConversationResponse(ConversationBase):
     total_cost: float = Field(..., description="Total cost")
 
     # Configuration fields that were missing
-    system_prompt: str | None = Field(None, description="System prompt")
+    system_prompt: str | None = Field(default=None, description="System prompt")
     context_window: int = Field(..., description="Context window size")
     memory_enabled: bool = Field(..., description="Memory enabled")
     memory_strategy: str | None = Field(
@@ -321,20 +321,12 @@ class StreamingChatChunk(BaseModel):
     type: str = Field(
         ..., description="Chunk type: 'token', 'usage', 'end'"
     )
-    content: str | None = Field(None, description="Token content")
-    usage: dict[str, Any] | None = Field(
-        None, description="Token usage information"
-    )
-    conversation_id: str | None = Field(
-        None, description="Conversation ID"
-    )
-    message_id: str | None = Field(None, description="Message ID")
-    correlation_id: str | None = Field(
-        None, description="Correlation ID"
-    )
-    metadata: dict[str, Any] | None = Field(
-        None, description="Additional metadata"
-    )
+    content: str | None = Field(default=None, description="Token content")
+    usage: dict[str, Any] | None = Field(default=None, description="Token usage information")
+    conversation_id: str | None = Field(default=None, description="Conversation ID")
+    message_id: str | None = Field(default=None, description="Message ID")
+    correlation_id: str | None = Field(default=None, description="Correlation ID")
+    metadata: dict[str, Any] | None = Field(default=None, description="Additional metadata")
 
 
 class ConversationSearchRequest(ListRequestBase):
@@ -346,8 +338,8 @@ class ConversationSearchRequest(ListRequestBase):
     offset: int = Field(
         0, ge=0, description="Number of results to skip"
     )
-    search: str | None = Field(None, description="Search query")
-    query: str | None = Field(None, description="Search query")
+    search: str | None = Field(default=None, description="Search query")
+    query: str | None = Field(default=None, description="Search query")
     status: ConversationStatus | None = Field(
         None, description="Filter by status"
     )

@@ -5,7 +5,7 @@ description = "Chatter API"
 authors = [
   {name = "OpenAPI Generator Community",email = "support@chatter.ai"},
 ]
-license = "NoLicense"
+license = {text = "NoLicense"}
 readme = "README.md"
 keywords = ["OpenAPI", "OpenAPI-Generator", "Chatter API"]
 requires-python = ">=3.9"

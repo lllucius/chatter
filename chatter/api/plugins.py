@@ -1,5 +1,7 @@
 """Plugin management endpoints."""
 
+from typing import Any
+
 from fastapi import APIRouter, Depends, status
 
 from chatter.api.auth import get_current_user
@@ -449,7 +451,7 @@ async def health_check_plugins(
     auto_disable_unhealthy: bool = False,
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
-) -> dict:
+) -> PluginHealthCheckResponse:
     """Perform health check on all plugins.
 
     Args:
@@ -519,7 +521,7 @@ async def check_plugin_dependencies(
     plugin_id: str,
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
-) -> dict:
+) -> dict[str, Any]:
     """Check plugin dependencies.
 
     Args:
@@ -552,7 +554,7 @@ async def bulk_enable_plugins(
     plugin_ids: list[str],
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
-) -> dict:
+) -> dict[str, Any]:
     """Enable multiple plugins.
 
     Args:
@@ -589,7 +591,7 @@ async def bulk_disable_plugins(
     plugin_ids: list[str],
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
-) -> dict:
+) -> dict[str, Any]:
     """Disable multiple plugins.
 
     Args:

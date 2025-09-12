@@ -202,15 +202,11 @@ class ValidationEngine:
 
         validator = self._validators[validator_name]
 
-        # Check if validator supports async
-        if hasattr(validator, "validate_async"):
-            return await validator.validate_async(value, rule, context)
-        else:
-            # Fall back to sync validation in executor
-            loop = asyncio.get_event_loop()
-            return await loop.run_in_executor(
-                None, validator.validate, value, rule, context
-            )
+        # Execute sync validation in executor for async context
+        loop = asyncio.get_event_loop()
+        return await loop.run_in_executor(
+            None, validator.validate, value, rule, context
+        )
 
     def validate_with_recovery(
         self,
@@ -253,20 +249,20 @@ class ValidationEngine:
 
     def get_validation_summary(self) -> dict[str, Any]:
         """Get summary of registered validators and their capabilities."""
-        summary = {
+        summary: dict[str, Any] = {
             "registered_validators": list(self._validators.keys()),
             "validator_details": {},
         }
 
         for name, validator in self._validators.items():
-            summary["validator_details"][name] = {
+            supported_rules = getattr(validator, "supported_rules", [])
+            validator_info = {
                 "class": validator.__class__.__name__,
-                "supported_rules": getattr(
-                    validator, "supported_rules", []
-                ),
+                "supported_rules": list(supported_rules),
                 "description": getattr(
                     validator, "description", "No description available"
                 ),
             }
+            summary["validator_details"][name] = validator_info
 
         return summary

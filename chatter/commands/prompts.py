@@ -19,7 +19,7 @@ async def list_prompts(
     limit: int = typer.Option(10, help="Number of prompts to list"),
     offset: int = typer.Option(0, help="Number of prompts to skip"),
     prompt_type: str = typer.Option(None, help="Filter by prompt type"),
-):
+) -> None:
     """List available prompts."""
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.list_prompts_api_v1_prompts_get(
@@ -61,7 +61,7 @@ async def list_prompts(
 @run_async
 async def show_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID")
-):
+) -> None:
     """Show detailed prompt information."""
     async with get_client() as sdk_client:
         response = await sdk_client.prompts_api.get_prompt_api_v1_prompts_prompt_id_get(
@@ -89,9 +89,9 @@ async def create_prompt(
     description: str = typer.Option(None, help="Prompt description"),
     prompt_type: str = typer.Option("system", help="Prompt type"),
     category: str = typer.Option("general", help="Prompt category"),
-):
+) -> None:
     """Create a new prompt."""
-    from chatter_sdk.models.prompt_create import PromptCreate
+    from chatter_sdk.models.prompt_create import PromptCreate  # type: ignore[import-not-found]
 
     async with get_client() as sdk_client:
         prompt_data = PromptCreate(
@@ -117,7 +117,7 @@ async def create_prompt(
 async def delete_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to delete"),
     force: bool = typer.Option(False, help="Skip confirmation prompt"),
-):
+) -> None:
     """Delete a prompt."""
     if not force:
         confirm = Prompt.ask(
@@ -141,7 +141,7 @@ async def delete_prompt(
 async def clone_prompt(
     prompt_id: str = typer.Argument(..., help="Prompt ID to clone"),
     new_name: str = typer.Option(None, help="Name for cloned prompt"),
-):
+) -> None:
     """Clone an existing prompt."""
     async with get_client() as sdk_client:
         clone_data = {}
@@ -165,7 +165,7 @@ async def test_prompt(
     variables: str = typer.Option(
         None, help="Template variables as JSON"
     ),
-):
+) -> None:
     """Test a prompt with variables."""
     test_variables = {}
     if variables:
@@ -189,7 +189,7 @@ async def test_prompt(
 
 @prompts_app.command("stats")
 @run_async
-async def prompt_stats():
+async def prompt_stats() -> None:
     """Show prompt usage statistics."""
     async with get_client() as sdk_client:
         response = (

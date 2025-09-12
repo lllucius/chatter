@@ -2,6 +2,7 @@
 
 from chatter.api.dependencies import ConversationId, MessageId
 from chatter.core.exceptions import NotFoundError
+from chatter.models.conversation import ConversationStatus
 from chatter.models.user import User
 from chatter.schemas.chat import (
     ConversationCreate,
@@ -39,11 +40,27 @@ class ConversationResourceHandler:
         current_user: User,
         limit: int,
         offset: int,
+        status: ConversationStatus | None = None,
+        llm_provider: str | None = None,
+        llm_model: str | None = None,
+        tags: list[str] | None = None,
+        enable_retrieval: bool | None = None,
+        sort_by: str = "updated_at",
+        sort_order: str = "desc",
     ) -> ConversationListResponse:
-        """List conversations for current user."""
+        """List conversations for current user with filters."""
         conversations, total = (
             await self.chat_service.list_conversations(
-                current_user.id, limit, offset
+                user_id=current_user.id,
+                limit=limit,
+                offset=offset,
+                status=status,
+                llm_provider=llm_provider,
+                llm_model=llm_model,
+                tags=tags,
+                enable_retrieval=enable_retrieval,
+                sort_by=sort_by,
+                sort_order=sort_order,
             )
         )
 

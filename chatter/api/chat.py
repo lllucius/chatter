@@ -157,9 +157,19 @@ async def list_conversations(
     Returns:
         List of conversations with pagination info
     """
-    # For now, pass the basic parameters to maintain compatibility
-    # TODO: Update service layer to support additional filters
-    return await handler.list_conversations(current_user, limit, offset)
+    # Create ConversationListRequest object to pass filters
+    return await handler.list_conversations(
+        current_user=current_user,
+        limit=limit,
+        offset=offset,
+        status=status,
+        llm_provider=llm_provider,
+        llm_model=llm_model,
+        tags=tags,
+        enable_retrieval=enable_retrieval,
+        sort_by=sort_by,
+        sort_order=sort_order,
+    )
 
 
 @router.get(

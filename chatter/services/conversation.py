@@ -174,8 +174,13 @@ class ConversationService:
         offset: int = 0,
         sort_field: str = "updated_at",
         sort_order: str = "desc",
+        status: ConversationStatus | None = None,
+        llm_provider: str | None = None,
+        llm_model: str | None = None,
+        tags: list[str] | None = None,
+        enable_retrieval: bool | None = None,
     ) -> Sequence[Conversation]:
-        """List conversations for a user.
+        """List conversations for a user with filtering.
 
         Args:
             user_id: User ID
@@ -183,23 +188,68 @@ class ConversationService:
             offset: Number of conversations to skip
             sort_field: Field to sort by
             sort_order: Sort order (asc/desc)
+            status: Filter by conversation status
+            llm_provider: Filter by LLM provider
+            llm_model: Filter by LLM model
+            tags: Filter by tags (must contain all specified tags)
+            enable_retrieval: Filter by retrieval enabled status
 
         Returns:
             List of conversations
         """
         try:
-            conversations = await get_user_conversations_optimized(
-                self.session, user_id, limit, offset
+            # Build query with filters
+            query = select(Conversation).where(
+                Conversation.user_id == user_id
             )
+            
+            # Apply status filter (default: exclude deleted)
+            if status is not None:
+                query = query.where(Conversation.status == status)
+            else:
+                query = query.where(Conversation.status != ConversationStatus.DELETED)
+                
+            # Apply additional filters
+            if llm_provider is not None:
+                query = query.where(Conversation.llm_provider == llm_provider)
+                
+            if llm_model is not None:
+                query = query.where(Conversation.llm_model == llm_model)
+                
+            if enable_retrieval is not None:
+                query = query.where(Conversation.enable_retrieval == enable_retrieval)
+                
+            # Tags filter - check if all specified tags are present
+            if tags is not None and len(tags) > 0:
+                for tag in tags:
+                    query = query.where(Conversation.tags.contains([tag]))
+            
+            # Apply sorting
+            if sort_order.lower() == "desc":
+                query = query.order_by(getattr(Conversation, sort_field).desc())
+            else:
+                query = query.order_by(getattr(Conversation, sort_field).asc())
+                
+            # Apply pagination
+            query = query.offset(offset).limit(limit)
+            
+            # Execute query
+            result = await self.session.execute(query)
+            conversations = result.scalars().all()
 
             logger.debug(
-                "Listed conversations",
+                "Listed conversations with filters",
                 user_id=user_id,
                 count=len(conversations),
                 limit=limit,
                 offset=offset,
                 sort_field=sort_field,
                 sort_order=sort_order,
+                status=status,
+                llm_provider=llm_provider,
+                llm_model=llm_model,
+                tags=tags,
+                enable_retrieval=enable_retrieval,
             )
 
             return conversations
@@ -534,22 +584,55 @@ class ConversationService:
             )
             raise
 
-    async def get_conversation_count(self, user_id: str) -> int:
-        """Get total conversation count for user.
+    async def get_conversation_count(
+        self,
+        user_id: str,
+        status: ConversationStatus | None = None,
+        llm_provider: str | None = None,
+        llm_model: str | None = None,
+        tags: list[str] | None = None,
+        enable_retrieval: bool | None = None,
+    ) -> int:
+        """Get total conversation count for user with optional filters.
 
         Args:
             user_id: User ID
+            status: Filter by conversation status
+            llm_provider: Filter by LLM provider
+            llm_model: Filter by LLM model
+            tags: Filter by tags (must contain all specified tags)
+            enable_retrieval: Filter by retrieval enabled status
 
         Returns:
-            Number of conversations
+            Number of conversations matching the filters
         """
         try:
+            # Build query with filters
             query = select(Conversation).where(
-                and_(
-                    Conversation.user_id == user_id,
-                    Conversation.status != ConversationStatus.DELETED,
-                )
+                Conversation.user_id == user_id
             )
+            
+            # Apply status filter (default: exclude deleted)
+            if status is not None:
+                query = query.where(Conversation.status == status)
+            else:
+                query = query.where(Conversation.status != ConversationStatus.DELETED)
+                
+            # Apply additional filters
+            if llm_provider is not None:
+                query = query.where(Conversation.llm_provider == llm_provider)
+                
+            if llm_model is not None:
+                query = query.where(Conversation.llm_model == llm_model)
+                
+            if enable_retrieval is not None:
+                query = query.where(Conversation.enable_retrieval == enable_retrieval)
+                
+            # Tags filter - check if all specified tags are present
+            if tags is not None and len(tags) > 0:
+                for tag in tags:
+                    query = query.where(Conversation.tags.contains([tag]))
+            
             result = await self.session.execute(query)
             conversations = result.scalars().all()
             return len(conversations)

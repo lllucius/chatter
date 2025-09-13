@@ -191,7 +191,12 @@ const ChatPage: React.FC = () => {
         id: msg.id,
         role: msg.role as 'user' | 'assistant' | 'system',
         content: msg.content,
-        timestamp: new Date(msg.created_at)
+        timestamp: new Date(msg.created_at),
+        metadata: {
+          model: msg.model_used || undefined,
+          tokens: msg.total_tokens || undefined,
+          processingTime: msg.response_time_ms || undefined,
+        },
       }));
       
       setMessages(chatMessages);

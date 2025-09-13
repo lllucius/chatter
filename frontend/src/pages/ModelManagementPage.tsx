@@ -32,7 +32,7 @@ const ModelManagementPage: React.FC = () => {
   // Load providers for model form
   const loadProviders = async () => {
     try {
-      const response = await getSDK().models.listProvidersApiV1ModelsProviders({
+      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
         activeOnly: false,
       });
       setProviders(response.providers || []);
@@ -162,7 +162,7 @@ const ModelManagementPage: React.FC = () => {
               model_type: 'embedding' as any,
             } as DefaultProvider;
 
-            await getSDK().models.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault(
+            await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault(
               provider.id,
               defaultProviderBody
             );
@@ -193,7 +193,7 @@ const ModelManagementPage: React.FC = () => {
 
   const providerService: CrudService<Provider, ProviderCreate, ProviderUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().models.listProvidersApiV1ModelsProviders({
+      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
         activeOnly: false,
         page: page + 1,
         perPage: pageSize,
@@ -205,19 +205,19 @@ const ModelManagementPage: React.FC = () => {
     },
 
     create: async (data: ProviderCreate) => {
-      const response = await getSDK().models.createProviderApiV1ModelsProviders(data);
+      const response = await getSDK().modelRegistry.createProviderApiV1ModelsProviders(data);
       await loadProviders(); // Refresh providers for model form
       return response;
     },
 
     update: async (id: string, data: ProviderUpdate) => {
-      const response = await getSDK().models.updateProviderApiV1ModelsProvidersProviderId(id, data);
+      const response = await getSDK().modelRegistry.updateProviderApiV1ModelsProvidersProviderId(id, data);
       await loadProviders(); // Refresh providers for model form
       return response;
     },
 
     delete: async (id: string) => {
-      await getSDK().models.deleteProviderApiV1ModelsProvidersProviderId(id);
+      await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderId(id);
       await loadProviders(); // Refresh providers for model form
     },
   };
@@ -291,7 +291,7 @@ const ModelManagementPage: React.FC = () => {
       onClick: async (model) => {
         if (!model.isDefault) {
           try {
-            await getSDK().models.setDefaultModelApiV1ModelsModelsModelIdSetDefault(model.id);
+            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(model.id);
             toastService.success('Default model updated');
           } catch (error) {
             handleError(error, {
@@ -319,7 +319,7 @@ const ModelManagementPage: React.FC = () => {
 
   const modelService: CrudService<ModelDefWithProvider, ModelDefCreate, ModelDefUpdate> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().models.listModelsApiV1ModelsModels({
+      const response = await getSDK().modelRegistry.listModelsApiV1ModelsModels({
         activeOnly: false,
         page: page + 1,
         perPage: pageSize,
@@ -331,17 +331,17 @@ const ModelManagementPage: React.FC = () => {
     },
 
     create: async (data: ModelDefCreate) => {
-      const response = await getSDK().models.createModelApiV1ModelsModels(data);
+      const response = await getSDK().modelRegistry.createModelApiV1ModelsModels(data);
       return response;
     },
 
     update: async (id: string, data: ModelDefUpdate) => {
-      const response = await getSDK().models.updateModelApiV1ModelsModelsModelId(id, data);
+      const response = await getSDK().modelRegistry.updateModelApiV1ModelsModelsModelId(id, data);
       return response;
     },
 
     delete: async (id: string) => {
-      await getSDK().models.deleteModelApiV1ModelsModelsModelId(id);
+      await getSDK().modelRegistry.deleteModelApiV1ModelsModelsModelId(id);
     },
   };
 

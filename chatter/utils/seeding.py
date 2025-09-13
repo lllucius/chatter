@@ -242,16 +242,21 @@ class DatabaseSeeder:
         try:
             # Check if database is virgin (for non-force mode)
             if not force:
-                existing_users = await self._count_users()
-                if existing_users > 0:
-                    # Testing mode should still respect existing data unless forced
-                    logger.info(
-                        f"Database has {existing_users} users, skipping seeding"
-                    )
-                    results["skipped"]["reason"] = "Database not empty"
-                    return results
+                try:
+                    existing_users = await self._count_users()
+                    if existing_users > 0:
+                        # Testing mode should still respect existing data unless forced
+                        logger.info(
+                            f"Database has {existing_users} users, skipping seeding"
+                        )
+                        results["skipped"]["reason"] = "Database not empty"
+                        return results
+                except Exception as e:
+                    # If we can't count users, rollback and let seeding continue
+                    logger.warning(f"Could not count existing users: {e}")
+                    await self.session.rollback()
 
-            # Begin transaction for consistent seeding
+            # Begin fresh transaction for consistent seeding
             # Note: Individual methods handle their own commits for efficiency
 
             # Seed based on mode
@@ -277,7 +282,11 @@ class DatabaseSeeder:
         except Exception as e:
             logger.error("Database seeding failed", error=str(e))
             results["errors"].append(str(e))
-            # Note: Individual methods handle rollback as needed
+            # Ensure transaction is rolled back on failure
+            try:
+                await self.session.rollback()
+            except Exception as rollback_error:
+                logger.error(f"Failed to rollback transaction: {rollback_error}")
             raise
 
     async def _count_users(self) -> int:
@@ -292,7 +301,16 @@ class DatabaseSeeder:
             # Table doesn't exist yet, return 0
             if "does not exist" in str(e):
                 logger.debug("Users table does not exist, returning 0 count")
+                # Rollback transaction to reset failed state for PostgreSQL
+                await self.session.rollback()
                 return 0
+            # For other errors, rollback and re-raise
+            await self.session.rollback()
+            raise
+        except Exception as e:
+            # For any other database errors, rollback transaction
+            await self.session.rollback()
+            logger.error(f"Error counting users: {e}")
             raise
 
     async def _seed_minimal_data(
@@ -425,12 +443,18 @@ class DatabaseSeeder:
         """Create admin user."""
         try:
             if skip_existing:
-                existing = await self.session.execute(
-                    select(User).where(User.username == "admin")
-                )
-                if existing.scalar_one_or_none():
-                    logger.info("Admin user already exists, skipping")
-                    return existing.scalar_one_or_none()
+                try:
+                    existing = await self.session.execute(
+                        select(User).where(User.username == "admin")
+                    )
+                    existing_user = existing.scalar_one_or_none()
+                    if existing_user:
+                        logger.info("Admin user already exists, skipping")
+                        return existing_user
+                except Exception as e:
+                    # If query fails (e.g., table doesn't exist), rollback and continue
+                    await self.session.rollback()
+                    logger.debug(f"Could not check for existing admin user: {e}")
 
             # Generate secure random password
             admin_password = "".join(
@@ -498,13 +522,18 @@ class DatabaseSeeder:
         try:
             for user_data in users_data:
                 if skip_existing:
-                    existing = await self.session.execute(
-                        select(User).where(
-                            User.username == user_data["username"]
+                    try:
+                        existing = await self.session.execute(
+                            select(User).where(
+                                User.username == user_data["username"]
+                            )
                         )
-                    )
-                    if existing.scalar_one_or_none():
-                        continue
+                        if existing.scalar_one_or_none():
+                            continue
+                    except Exception as e:
+                        # If query fails, rollback and continue
+                        await self.session.rollback()
+                        logger.debug(f"Could not check for existing user {user_data['username']}: {e}")
 
                 user = User(
                     email=user_data["email"],
@@ -556,13 +585,18 @@ class DatabaseSeeder:
         created_users = []
         for user_data in test_users_data:
             if skip_existing:
-                existing = await self.session.execute(
-                    select(User).where(
-                        User.username == user_data["username"]
+                try:
+                    existing = await self.session.execute(
+                        select(User).where(
+                            User.username == user_data["username"]
+                        )
                     )
-                )
-                if existing.scalar_one_or_none():
-                    continue
+                    if existing.scalar_one_or_none():
+                        continue
+                except Exception as e:
+                    # If query fails, rollback and continue
+                    await self.session.rollback()
+                    logger.debug(f"Could not check for existing test user {user_data['username']}: {e}")
 
             user = User(
                 email=user_data["email"],
@@ -1488,8 +1522,12 @@ async def seed_database(
     skip_existing: bool = True,
 ) -> dict[str, Any]:
     """Convenience function to seed database."""
-    async with DatabaseSeeder() as seeder:
-        return await seeder.seed_database(mode, force, skip_existing)
+    try:
+        async with DatabaseSeeder() as seeder:
+            return await seeder.seed_database(mode, force, skip_existing)
+    except Exception as e:
+        logger.error(f"Database seeding failed: {e}")
+        raise
 
 
 async def clear_all_data(confirm: bool = False) -> bool:

@@ -174,10 +174,16 @@ class TestErrorHandling:
             side_effect=Exception("Database error")
         )
 
-        with pytest.raises((Exception, RuntimeError)):
-            await seeder.seed_database(
-                mode=SeedingMode.MINIMAL, force=False
-            )
+        # Should now handle the error gracefully and continue seeding
+        result = await seeder.seed_database(
+            mode=SeedingMode.MINIMAL, force=False
+        )
+        
+        # Should have succeeded despite the count error
+        assert "created" in result
+        assert result["mode"] == SeedingMode.MINIMAL
+        # Should have rolled back after count error
+        mock_session.rollback.assert_called()
 
 
 class TestSkipExistingLogic:

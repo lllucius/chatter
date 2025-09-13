@@ -127,7 +127,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       const result = await service.list(page, rowsPerPage);
       setItems(result.items);
       setTotal(result.total);
-    } catch {
+    } catch (error) {
       handleError(error, {
         source: 'CrudDataTable.loadData',
         operation: `load ${config.entityNamePlural.toLowerCase()}`,

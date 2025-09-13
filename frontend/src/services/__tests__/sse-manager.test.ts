@@ -4,6 +4,7 @@
 
 import { vi, describe, beforeEach, afterEach, expect } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
+import { SSEEventType } from '../sse-types';
 import { authService } from "../../services/auth-service";
 
 // Mock ReadableStream for fetch response

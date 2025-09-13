@@ -18,6 +18,10 @@ Name | Type | Description | Notes
 **most_active_hours** | **Dict[str, int]** | Most active hours | 
 **popular_models** | **Dict[str, int]** | Popular LLM models | 
 **popular_providers** | **Dict[str, int]** | Popular LLM providers | 
+**total_ratings** | **int** | Total number of message ratings | [optional] [default to 0]
+**avg_message_rating** | **float** | Average message rating | [optional] [default to 0.0]
+**messages_with_ratings** | **int** | Number of messages with ratings | [optional] [default to 0]
+**rating_distribution** | **Dict[str, int]** | Distribution of ratings (1-5 stars) | [optional] 
 
 ## Example
 

@@ -19,6 +19,8 @@ Name | Type | Description | Notes
 **response_time_ms** | **int** |  | [optional] 
 **cost** | **float** |  | [optional] 
 **finish_reason** | **str** |  | [optional] 
+**rating** | **float** |  | [optional] 
+**rating_count** | **int** | Number of ratings for the message | [optional] [default to 0]
 **created_at** | **datetime** | Creation timestamp | 
 
 ## Example

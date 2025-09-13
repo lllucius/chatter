@@ -1,7 +1,7 @@
 /**
  * Generated API client for Chat
  */
-import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationResponse, ConversationSearchResponse, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageResponse, PerformanceStatsResponse, chatter__schemas__chat__WorkflowTemplatesResponse } from '../models/index';
+import { AvailableToolsResponse, ChatRequest, ChatResponse, ConversationCreate, ConversationDeleteResponse, ConversationListResponse, ConversationResponse, ConversationStatus, ConversationUpdate, ConversationWithMessages, McpStatusResponse, MessageDeleteResponse, MessageRatingResponse, MessageRatingUpdate, MessageResponse, PerformanceStatsResponse, chatter__schemas__chat__WorkflowTemplatesResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ChatApi extends BaseAPI {
@@ -107,8 +107,24 @@ Available templates:
   }
   /**List Conversations
    * List conversations for the current user.
+
+Args:
+    status: Filter by conversation status
+    llm_provider: Filter by LLM provider
+    llm_model: Filter by LLM model
+    tags: Filter by tags
+    enable_retrieval: Filter by retrieval enabled status
+    limit: Maximum number of results
+    offset: Number of results to skip
+    sort_by: Sort field
+    sort_order: Sort order (asc/desc)
+    current_user: Current authenticated user
+    handler: Conversation resource handler
+
+Returns:
+    List of conversations with pagination info
    */
-  public async listConversationsApiV1ChatConversations(options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationSearchResponse> {
+  public async listConversationsApiV1ChatConversations(options?: { status?: ConversationStatus | null; llmProvider?: string | null; llmModel?: string | null; tags?: string[] | null; enableRetrieval?: boolean | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ConversationListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/chat/conversations`,
       method: 'GET' as HTTPMethod,
@@ -116,14 +132,21 @@ Available templates:
         ...options?.headers,
       },
       query: {
+        'status': options?.status,
+        'llm_provider': options?.llmProvider,
+        'llm_model': options?.llmModel,
+        'tags': options?.tags,
+        'enable_retrieval': options?.enableRetrieval,
         'limit': options?.limit,
         'offset': options?.offset,
+        'sort_by': options?.sortBy,
+        'sort_order': options?.sortOrder,
         ...options?.query
       },
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<ConversationSearchResponse>;
+    return response.json() as Promise<ConversationListResponse>;
   }
   /**Get Conversation
    * Get conversation details with optional messages.
@@ -207,6 +230,22 @@ Available templates:
 
     const response = await this.request(requestContext);
     return response.json() as Promise<MessageDeleteResponse>;
+  }
+  /**Update Message Rating
+   * Update the rating for a message.
+   */
+  public async updateMessageRatingApiV1ChatConversationsConversationIdMessagesMessageIdRating(conversationId: string, messageId: string, data: MessageRatingUpdate): Promise<MessageRatingResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/chat/conversations/${conversationId}/messages/${messageId}/rating`,
+      method: 'PATCH' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<MessageRatingResponse>;
   }
   /**Chat
    * Non-streaming chat endpoint supporting all workflow types.

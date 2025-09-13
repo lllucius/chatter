@@ -1431,14 +1431,8 @@ components:
       properties:
         pagination:
           $ref: '#/components/schemas/PaginationRequest'
-          default:
-            limit: 50
-            offset: 0
         sorting:
           $ref: '#/components/schemas/SortingRequest'
-          default:
-            sort_by: created_at
-            sort_order: desc
         tags:
           anyOf:
           - items:
@@ -1836,6 +1830,34 @@ components:
       - message
       title: ConversationDeleteResponse
       type: object
+    ConversationListResponse:
+      description: Schema for conversation list response.
+      properties:
+        conversations:
+          description: List of conversations
+          items:
+            $ref: '#/components/schemas/ConversationResponse'
+          title: Conversations
+          type: array
+        limit:
+          description: Applied limit
+          title: Limit
+          type: integer
+        offset:
+          description: Applied offset
+          title: Offset
+          type: integer
+        total_count:
+          description: Total number of conversations
+          title: Total Count
+          type: integer
+      required:
+      - conversations
+      - total_count
+      - limit
+      - offset
+      title: ConversationListResponse
+      type: object
     ConversationResponse:
       description: Schema for conversation response.
       properties:
@@ -1990,37 +2012,14 @@ components:
       - updated_at
       title: ConversationResponse
       type: object
-    ConversationSearchResponse:
-      description: Schema for conversation search response.
-      properties:
-        conversations:
-          description: Conversations
-          items:
-            $ref: '#/components/schemas/ConversationResponse'
-          title: Conversations
-          type: array
-        limit:
-          description: Request limit
-          title: Limit
-          type: integer
-        offset:
-          description: Request offset
-          title: Offset
-          type: integer
-        total:
-          description: Total number of conversations
-          title: Total
-          type: integer
-      required:
-      - conversations
-      - total
-      - limit
-      - offset
-      title: ConversationSearchResponse
-      type: object
     ConversationStatsResponse:
       description: Schema for conversation statistics response.
       properties:
+        avg_message_rating:
+          default: 0.0
+          description: Average message rating
+          title: Avg Message Rating
+          type: number
         avg_messages_per_conversation:
           description: Average messages per conversation
           title: Avg Messages Per Conversation
@@ -2047,6 +2046,11 @@ components:
           description: Messages grouped by role
           title: Messages By Role
           type: object
+        messages_with_ratings:
+          default: 0
+          description: Number of messages with ratings
+          title: Messages With Ratings
+          type: integer
         most_active_hours:
           additionalProperties:
             type: integer
@@ -2065,6 +2069,12 @@ components:
           description: Popular LLM providers
           title: Popular Providers
           type: object
+        rating_distribution:
+          additionalProperties:
+            type: integer
+          description: Distribution of ratings (1-5 stars)
+          title: Rating Distribution
+          type: object
         total_conversations:
           description: Total number of conversations
           title: Total Conversations
@@ -2076,6 +2086,11 @@ components:
         total_messages:
           description: Total number of messages
           title: Total Messages
+          type: integer
+        total_ratings:
+          default: 0
+          description: Total number of message ratings
+          title: Total Ratings
           type: integer
         total_tokens_used:
           description: Total tokens used
@@ -3897,6 +3912,40 @@ components:
       - message
       title: MessageDeleteResponse
       type: object
+    MessageRatingResponse:
+      description: Response schema for message rating update.
+      properties:
+        message:
+          description: Rating update result message
+          title: Message
+          type: string
+        rating:
+          description: Updated rating value
+          title: Rating
+          type: number
+        rating_count:
+          description: Total number of ratings
+          title: Rating Count
+          type: integer
+      required:
+      - message
+      - rating
+      - rating_count
+      title: MessageRatingResponse
+      type: object
+    MessageRatingUpdate:
+      description: Schema for updating message rating.
+      properties:
+        rating:
+          description: Rating value from 0.0 to 5.0
+          maximum: 5.0
+          minimum: 0.0
+          title: Rating
+          type: number
+      required:
+      - rating
+      title: MessageRatingUpdate
+      type: object
     MessageResponse:
       description: Schema for message response.
       properties:
@@ -3954,6 +4003,20 @@ components:
           - type: 'null'
           description: Provider used
           title: Provider Used
+        rating:
+          anyOf:
+          - maximum: 5.0
+            minimum: 0.0
+            type: number
+          - type: 'null'
+          description: User rating for the message
+          title: Rating
+        rating_count:
+          default: 0
+          description: Number of ratings for the message
+          minimum: 0.0
+          title: Rating Count
+          type: integer
         response_time_ms:
           anyOf:
           - type: integer
@@ -12567,16 +12630,75 @@ paths:
       - Chat
   /api/v1/chat/conversations:
     get:
-      description: List conversations for the current user.
+      description: "List conversations for the current user.\n\nArgs:\n    status:\
+        \ Filter by conversation status\n    llm_provider: Filter by LLM provider\n\
+        \    llm_model: Filter by LLM model\n    tags: Filter by tags\n    enable_retrieval:\
+        \ Filter by retrieval enabled status\n    limit: Maximum number of results\n\
+        \    offset: Number of results to skip\n    sort_by: Sort field\n    sort_order:\
+        \ Sort order (asc/desc)\n    current_user: Current authenticated user\n  \
+        \  handler: Conversation resource handler\n\nReturns:\n    List of conversations\
+        \ with pagination info"
       operationId: list_conversations_api_v1_chat_conversations_get
       parameters:
-      - description: Number of results per page
+      - description: Filter by conversation status
+        in: query
+        name: status
+        required: false
+        schema:
+          anyOf:
+          - $ref: '#/components/schemas/ConversationStatus'
+          - type: 'null'
+          description: Filter by conversation status
+          title: Status
+      - description: Filter by LLM provider
+        in: query
+        name: llm_provider
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by LLM provider
+          title: Llm Provider
+      - description: Filter by LLM model
+        in: query
+        name: llm_model
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by LLM model
+          title: Llm Model
+      - description: Filter by tags
+        in: query
+        name: tags
+        required: false
+        schema:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Filter by tags
+          title: Tags
+      - description: Filter by retrieval enabled status
+        in: query
+        name: enable_retrieval
+        required: false
+        schema:
+          anyOf:
+          - type: boolean
+          - type: 'null'
+          description: Filter by retrieval enabled status
+          title: Enable Retrieval
+      - description: Maximum number of results
         in: query
         name: limit
         required: false
         schema:
-          default: 20
-          description: Number of results per page
+          default: 50
+          description: Maximum number of results
           minimum: 1
           title: Limit
           type: integer
@@ -12590,12 +12712,31 @@ paths:
           minimum: 0
           title: Offset
           type: integer
+      - description: Sort field
+        in: query
+        name: sort_by
+        required: false
+        schema:
+          default: updated_at
+          description: Sort field
+          title: Sort By
+          type: string
+      - description: Sort order
+        in: query
+        name: sort_order
+        required: false
+        schema:
+          default: desc
+          description: Sort order
+          pattern: ^(asc|desc)$
+          title: Sort Order
+          type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/ConversationSearchResponse'
+                $ref: '#/components/schemas/ConversationListResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12975,6 +13116,65 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Delete Message
+      tags:
+      - Chat
+  /api/v1/chat/conversations/{conversation_id}/messages/{message_id}/rating:
+    patch:
+      description: Update the rating for a message.
+      operationId: update_message_rating_api_v1_chat_conversations__conversation_id__messages__message_id__rating_patch
+      parameters:
+      - description: Conversation ID
+        in: path
+        name: conversation_id
+        required: true
+        schema:
+          description: Conversation ID
+          minLength: 1
+          title: Conversation Id
+          type: string
+      - description: Message ID
+        in: path
+        name: message_id
+        required: true
+        schema:
+          description: Message ID
+          minLength: 1
+          title: Message Id
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/MessageRatingUpdate'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/MessageRatingResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Update Message Rating
       tags:
       - Chat
   /api/v1/chat/mcp/status:

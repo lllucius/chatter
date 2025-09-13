@@ -156,6 +156,7 @@ Class | Method | HTTP request | Description
 *ChatApi* | [**list_conversations_api_v1_chat_conversations_get**](docs/ChatApi.md#list_conversations_api_v1_chat_conversations_get) | **GET** /api/v1/chat/conversations | List Conversations
 *ChatApi* | [**streaming_chat_api_v1_chat_streaming_post**](docs/ChatApi.md#streaming_chat_api_v1_chat_streaming_post) | **POST** /api/v1/chat/streaming | Streaming Chat
 *ChatApi* | [**update_conversation_api_v1_chat_conversations_conversation_id_put**](docs/ChatApi.md#update_conversation_api_v1_chat_conversations_conversation_id_put) | **PUT** /api/v1/chat/conversations/{conversation_id} | Update Conversation
+*ChatApi* | [**update_message_rating_api_v1_chat_conversations_conversation_id_messages_message_id_rating_patch**](docs/ChatApi.md#update_message_rating_api_v1_chat_conversations_conversation_id_messages_message_id_rating_patch) | **PATCH** /api/v1/chat/conversations/{conversation_id}/messages/{message_id}/rating | Update Message Rating
 *DataManagementApi* | [**bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post**](docs/DataManagementApi.md#bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post) | **POST** /api/v1/data/bulk/delete-conversations | Bulk Delete Conversations
 *DataManagementApi* | [**bulk_delete_documents_api_v1_data_bulk_delete_documents_post**](docs/DataManagementApi.md#bulk_delete_documents_api_v1_data_bulk_delete_documents_post) | **POST** /api/v1/data/bulk/delete-documents | Bulk Delete Documents
 *DataManagementApi* | [**bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post**](docs/DataManagementApi.md#bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post) | **POST** /api/v1/data/bulk/delete-prompts | Bulk Delete Prompts
@@ -355,8 +356,8 @@ Class | Method | HTTP request | Description
  - [ComplexityMetrics](docs/ComplexityMetrics.md)
  - [ConversationCreate](docs/ConversationCreate.md)
  - [ConversationDeleteResponse](docs/ConversationDeleteResponse.md)
+ - [ConversationListResponse](docs/ConversationListResponse.md)
  - [ConversationResponse](docs/ConversationResponse.md)
- - [ConversationSearchResponse](docs/ConversationSearchResponse.md)
  - [ConversationStatsResponse](docs/ConversationStatsResponse.md)
  - [ConversationStatus](docs/ConversationStatus.md)
  - [ConversationUpdate](docs/ConversationUpdate.md)
@@ -405,6 +406,8 @@ Class | Method | HTTP request | Description
  - [MaxValue](docs/MaxValue.md)
  - [McpStatusResponse](docs/McpStatusResponse.md)
  - [MessageDeleteResponse](docs/MessageDeleteResponse.md)
+ - [MessageRatingResponse](docs/MessageRatingResponse.md)
+ - [MessageRatingUpdate](docs/MessageRatingUpdate.md)
  - [MessageResponse](docs/MessageResponse.md)
  - [MessageRole](docs/MessageRole.md)
  - [MetricType](docs/MetricType.md)

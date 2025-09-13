@@ -1713,7 +1713,7 @@
           "Chat"
         ],
         "summary": "List Conversations",
-        "description": "List conversations for the current user.",
+        "description": "List conversations for the current user.\n\nArgs:\n    status: Filter by conversation status\n    llm_provider: Filter by LLM provider\n    llm_model: Filter by LLM model\n    tags: Filter by tags\n    enable_retrieval: Filter by retrieval enabled status\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Sort field\n    sort_order: Sort order (asc/desc)\n    current_user: Current authenticated user\n    handler: Conversation resource handler\n\nReturns:\n    List of conversations with pagination info",
         "operationId": "list_conversations_api_v1_chat_conversations_get",
         "security": [
           {
@@ -1722,17 +1722,110 @@
         ],
         "parameters": [
           {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ConversationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by conversation status",
+              "title": "Status"
+            },
+            "description": "Filter by conversation status"
+          },
+          {
+            "name": "llm_provider",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by LLM provider",
+              "title": "Llm Provider"
+            },
+            "description": "Filter by LLM provider"
+          },
+          {
+            "name": "llm_model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by LLM model",
+              "title": "Llm Model"
+            },
+            "description": "Filter by LLM model"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by tags",
+              "title": "Tags"
+            },
+            "description": "Filter by tags"
+          },
+          {
+            "name": "enable_retrieval",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by retrieval enabled status",
+              "title": "Enable Retrieval"
+            },
+            "description": "Filter by retrieval enabled status"
+          },
+          {
             "name": "limit",
             "in": "query",
             "required": false,
             "schema": {
               "type": "integer",
               "minimum": 1,
-              "description": "Number of results per page",
-              "default": 20,
+              "description": "Maximum number of results",
+              "default": 50,
               "title": "Limit"
             },
-            "description": "Number of results per page"
+            "description": "Maximum number of results"
           },
           {
             "name": "offset",
@@ -1746,6 +1839,31 @@
               "title": "Offset"
             },
             "description": "Number of results to skip"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort field",
+              "default": "updated_at",
+              "title": "Sort By"
+            },
+            "description": "Sort field"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort order",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order"
           }
         ],
         "responses": {
@@ -1754,7 +1872,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/ConversationSearchResponse"
+                  "$ref": "#/components/schemas/ConversationListResponse"
                 }
               }
             },
@@ -2400,6 +2518,145 @@
               "application/json": {
                 "schema": {
                   "$ref": "#/components/schemas/MessageDeleteResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/chat/conversations/{conversation_id}/messages/{message_id}/rating": {
+      "patch": {
+        "tags": [
+          "Chat"
+        ],
+        "summary": "Update Message Rating",
+        "description": "Update the rating for a message.",
+        "operationId": "update_message_rating_api_v1_chat_conversations__conversation_id__messages__message_id__rating_patch",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          },
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Message ID",
+              "title": "Message Id"
+            },
+            "description": "Message ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRatingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRatingResponse"
                 }
               }
             },
@@ -25550,18 +25807,10 @@
       "Body_list_agents_api_v1_agents__get": {
         "properties": {
           "pagination": {
-            "$ref": "#/components/schemas/PaginationRequest",
-            "default": {
-              "limit": 50,
-              "offset": 0
-            }
+            "$ref": "#/components/schemas/PaginationRequest"
           },
           "sorting": {
-            "$ref": "#/components/schemas/SortingRequest",
-            "default": {
-              "sort_by": "created_at",
-              "sort_order": "desc"
-            }
+            "$ref": "#/components/schemas/SortingRequest"
           },
           "tags": {
             "anyOf": [
@@ -26158,6 +26407,42 @@
         "title": "ConversationDeleteResponse",
         "description": "Schema for conversation delete response."
       },
+      "ConversationListResponse": {
+        "properties": {
+          "conversations": {
+            "items": {
+              "$ref": "#/components/schemas/ConversationResponse"
+            },
+            "type": "array",
+            "title": "Conversations",
+            "description": "List of conversations"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total number of conversations"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Applied limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "description": "Applied offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversations",
+          "total_count",
+          "limit",
+          "offset"
+        ],
+        "title": "ConversationListResponse",
+        "description": "Schema for conversation list response."
+      },
       "ConversationResponse": {
         "properties": {
           "title": {
@@ -26402,42 +26687,6 @@
         "title": "ConversationResponse",
         "description": "Schema for conversation response."
       },
-      "ConversationSearchResponse": {
-        "properties": {
-          "conversations": {
-            "items": {
-              "$ref": "#/components/schemas/ConversationResponse"
-            },
-            "type": "array",
-            "title": "Conversations",
-            "description": "Conversations"
-          },
-          "total": {
-            "type": "integer",
-            "title": "Total",
-            "description": "Total number of conversations"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit",
-            "description": "Request limit"
-          },
-          "offset": {
-            "type": "integer",
-            "title": "Offset",
-            "description": "Request offset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "conversations",
-          "total",
-          "limit",
-          "offset"
-        ],
-        "title": "ConversationSearchResponse",
-        "description": "Schema for conversation search response."
-      },
       "ConversationStatsResponse": {
         "properties": {
           "total_conversations": {
@@ -26517,6 +26766,32 @@
             "type": "object",
             "title": "Popular Providers",
             "description": "Popular LLM providers"
+          },
+          "total_ratings": {
+            "type": "integer",
+            "title": "Total Ratings",
+            "description": "Total number of message ratings",
+            "default": 0
+          },
+          "avg_message_rating": {
+            "type": "number",
+            "title": "Avg Message Rating",
+            "description": "Average message rating",
+            "default": 0.0
+          },
+          "messages_with_ratings": {
+            "type": "integer",
+            "title": "Messages With Ratings",
+            "description": "Number of messages with ratings",
+            "default": 0
+          },
+          "rating_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Rating Distribution",
+            "description": "Distribution of ratings (1-5 stars)"
           }
         },
         "type": "object",
@@ -29157,6 +29432,50 @@
         "title": "MessageDeleteResponse",
         "description": "Response schema for message deletion."
       },
+      "MessageRatingResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Rating update result message"
+          },
+          "rating": {
+            "type": "number",
+            "title": "Rating",
+            "description": "Updated rating value"
+          },
+          "rating_count": {
+            "type": "integer",
+            "title": "Rating Count",
+            "description": "Total number of ratings"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "rating",
+          "rating_count"
+        ],
+        "title": "MessageRatingResponse",
+        "description": "Response schema for message rating update."
+      },
+      "MessageRatingUpdate": {
+        "properties": {
+          "rating": {
+            "type": "number",
+            "maximum": 5.0,
+            "minimum": 0.0,
+            "title": "Rating",
+            "description": "Rating value from 0.0 to 5.0"
+          }
+        },
+        "type": "object",
+        "required": [
+          "rating"
+        ],
+        "title": "MessageRatingUpdate",
+        "description": "Schema for updating message rating."
+      },
       "MessageResponse": {
         "properties": {
           "role": {
@@ -29279,6 +29598,27 @@
             ],
             "title": "Finish Reason",
             "description": "Reason for completion"
+          },
+          "rating": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 5.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Rating",
+            "description": "User rating for the message"
+          },
+          "rating_count": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Rating Count",
+            "description": "Number of ratings for the message",
+            "default": 0
           },
           "created_at": {
             "type": "string",

@@ -26,4 +26,12 @@ export interface ConversationStatsResponse {
   popular_models: Record<string, number>;
   /** Popular LLM providers */
   popular_providers: Record<string, number>;
+  /** Total number of message ratings */
+  total_ratings?: number;
+  /** Average message rating */
+  avg_message_rating?: number;
+  /** Number of messages with ratings */
+  messages_with_ratings?: number;
+  /** Distribution of ratings (1-5 stars) */
+  rating_distribution?: Record<string, number>;
 }

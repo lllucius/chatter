@@ -76,8 +76,8 @@ chatter_sdk/models/chatter_schemas_workflows_workflow_templates_response.py
 chatter_sdk/models/complexity_metrics.py
 chatter_sdk/models/conversation_create.py
 chatter_sdk/models/conversation_delete_response.py
+chatter_sdk/models/conversation_list_response.py
 chatter_sdk/models/conversation_response.py
-chatter_sdk/models/conversation_search_response.py
 chatter_sdk/models/conversation_stats_response.py
 chatter_sdk/models/conversation_status.py
 chatter_sdk/models/conversation_update.py
@@ -126,6 +126,8 @@ chatter_sdk/models/logout_response.py
 chatter_sdk/models/max_value.py
 chatter_sdk/models/mcp_status_response.py
 chatter_sdk/models/message_delete_response.py
+chatter_sdk/models/message_rating_response.py
+chatter_sdk/models/message_rating_update.py
 chatter_sdk/models/message_response.py
 chatter_sdk/models/message_role.py
 chatter_sdk/models/metric_type.py
@@ -301,8 +303,8 @@ docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md
 docs/ComplexityMetrics.md
 docs/ConversationCreate.md
 docs/ConversationDeleteResponse.md
+docs/ConversationListResponse.md
 docs/ConversationResponse.md
-docs/ConversationSearchResponse.md
 docs/ConversationStatsResponse.md
 docs/ConversationStatus.md
 docs/ConversationUpdate.md
@@ -357,6 +359,8 @@ docs/LogoutResponse.md
 docs/MaxValue.md
 docs/McpStatusResponse.md
 docs/MessageDeleteResponse.md
+docs/MessageRatingResponse.md
+docs/MessageRatingUpdate.md
 docs/MessageResponse.md
 docs/MessageRole.md
 docs/MetricType.md
@@ -544,8 +548,8 @@ test/test_chatter_schemas_workflows_workflow_templates_response.py
 test/test_complexity_metrics.py
 test/test_conversation_create.py
 test/test_conversation_delete_response.py
+test/test_conversation_list_response.py
 test/test_conversation_response.py
-test/test_conversation_search_response.py
 test/test_conversation_stats_response.py
 test/test_conversation_status.py
 test/test_conversation_update.py
@@ -600,6 +604,8 @@ test/test_logout_response.py
 test/test_max_value.py
 test/test_mcp_status_response.py
 test/test_message_delete_response.py
+test/test_message_rating_response.py
+test/test_message_rating_update.py
 test/test_message_response.py
 test/test_message_role.py
 test/test_metric_type.py

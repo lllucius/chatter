@@ -30,6 +30,10 @@ export interface MessageResponse {
   cost?: number | null;
   /** Reason for completion */
   finish_reason?: string | null;
+  /** User rating for the message */
+  rating?: number | null;
+  /** Number of ratings for the message */
+  rating_count?: number;
   /** Creation timestamp */
   created_at: string;
 }

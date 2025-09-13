@@ -1544,1202 +1544,6 @@
         ]
       }
     },
-    "/api/v1/chat/conversations": {
-      "post": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Create Conversation",
-        "description": "Create a new conversation.\n\nCreate a new conversation with specified configuration\n## Workflow Types\n\nThis endpoint supports multiple workflow types through the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation with document search.\n```json\n{\n    \"message\": \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find recent customer feedback and create a summary report\",\n    \"workflow\": \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet `stream: true` to receive real-time responses:\n```json\n{\n    \"message\": \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n}\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n- `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates for common scenarios:\n```json\n{\n    \"message\": \"I need help with my order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable templates:\n- `customer_support`: Customer service with knowledge base\n- `code_assistant`: Programming help with code tools\n- `research_assistant`: Document research and analysis\n- `general_chat`: General conversation\n- `document_qa`: Document question answering\n- `data_analyst`: Data analysis with computation tools\n",
-        "operationId": "create_conversation_api_v1_chat_conversations_post",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConversationCreate"
-              },
-              "example": {
-                "title": "Help with Python",
-                "description": "Discussion about Python programming",
-                "llm_provider": "openai",
-                "llm_model": "gpt-4",
-                "temperature": 0.7,
-                "system_prompt": "You are a helpful Python programming assistant."
-              }
-            }
-          }
-        },
-        "responses": {
-          "201": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationResponse"
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-                    "title": "Help with Python",
-                    "description": "Discussion about Python programming",
-                    "status": "active",
-                    "llm_provider": "openai",
-                    "llm_model": "gpt-4",
-                    "temperature": 0.7,
-                    "message_count": 0,
-                    "total_tokens": 0,
-                    "total_cost": 0.0,
-                    "created_at": "2025-01-09T00:00:00Z"
-                  },
-                  "message": "Conversation created successfully",
-                  "metadata": {
-                    "timestamp": "2025-01-09T00:00:00Z",
-                    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-                    "version": "0.1.0"
-                  }
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                },
-                "example": {
-                  "success": true,
-                  "data": {
-                    "id": "01ARZ3NDEKTSV4RRFFQ69G5FAV",
-                    "title": "Help with Python",
-                    "description": "Discussion about Python programming",
-                    "status": "active",
-                    "llm_provider": "openai",
-                    "llm_model": "gpt-4",
-                    "temperature": 0.7,
-                    "message_count": 0,
-                    "total_tokens": 0,
-                    "total_cost": 0.0,
-                    "created_at": "2025-01-09T00:00:00Z"
-                  },
-                  "message": "Conversation created successfully",
-                  "metadata": {
-                    "timestamp": "2025-01-09T00:00:00Z",
-                    "correlation_id": "550e8400-e29b-41d4-a716-446655440000",
-                    "version": "0.1.0"
-                  }
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "get": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "List Conversations",
-        "description": "List conversations for the current user.\n\nArgs:\n    status: Filter by conversation status\n    llm_provider: Filter by LLM provider\n    llm_model: Filter by LLM model\n    tags: Filter by tags\n    enable_retrieval: Filter by retrieval enabled status\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Sort field\n    sort_order: Sort order (asc/desc)\n    current_user: Current authenticated user\n    handler: Conversation resource handler\n\nReturns:\n    List of conversations with pagination info",
-        "operationId": "list_conversations_api_v1_chat_conversations_get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/ConversationStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by conversation status",
-              "title": "Status"
-            },
-            "description": "Filter by conversation status"
-          },
-          {
-            "name": "llm_provider",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by LLM provider",
-              "title": "Llm Provider"
-            },
-            "description": "Filter by LLM provider"
-          },
-          {
-            "name": "llm_model",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by LLM model",
-              "title": "Llm Model"
-            },
-            "description": "Filter by LLM model"
-          },
-          {
-            "name": "tags",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tags",
-              "title": "Tags"
-            },
-            "description": "Filter by tags"
-          },
-          {
-            "name": "enable_retrieval",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "boolean"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by retrieval enabled status",
-              "title": "Enable Retrieval"
-            },
-            "description": "Filter by retrieval enabled status"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Maximum number of results",
-              "default": 50,
-              "title": "Limit"
-            },
-            "description": "Maximum number of results"
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Number of results to skip",
-              "default": 0,
-              "title": "Offset"
-            },
-            "description": "Number of results to skip"
-          },
-          {
-            "name": "sort_by",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Sort field",
-              "default": "updated_at",
-              "title": "Sort By"
-            },
-            "description": "Sort field"
-          },
-          {
-            "name": "sort_order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^(asc|desc)$",
-              "description": "Sort order",
-              "default": "desc",
-              "title": "Sort Order"
-            },
-            "description": "Sort order"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationListResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/chat/conversations/{conversation_id}": {
-      "get": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Get Conversation",
-        "description": "Get conversation details with optional messages.",
-        "operationId": "get_conversation_api_v1_chat_conversations__conversation_id__get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          },
-          {
-            "name": "include_messages",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "boolean",
-              "description": "Include messages in response",
-              "default": true,
-              "title": "Include Messages"
-            },
-            "description": "Include messages in response"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationWithMessages"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Update Conversation",
-        "description": "Update conversation.",
-        "operationId": "update_conversation_api_v1_chat_conversations__conversation_id__put",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/ConversationUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "delete": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Delete Conversation",
-        "description": "Delete conversation.",
-        "operationId": "delete_conversation_api_v1_chat_conversations__conversation_id__delete",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ConversationDeleteResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/chat/conversations/{conversation_id}/messages": {
-      "get": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Get Conversation Messages",
-        "description": "Get messages from a conversation.",
-        "operationId": "get_conversation_messages_api_v1_chat_conversations__conversation_id__messages_get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Number of results per page",
-              "default": 50,
-              "title": "Limit"
-            },
-            "description": "Number of results per page"
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Number of results to skip",
-              "default": 0,
-              "title": "Offset"
-            },
-            "description": "Number of results to skip"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/MessageResponse"
-                  },
-                  "title": "Response Get Conversation Messages Api V1 Chat Conversations  Conversation Id  Messages Get"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/chat/conversations/{conversation_id}/messages/{message_id}": {
-      "delete": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Delete Message",
-        "description": "Delete a message from a conversation.",
-        "operationId": "delete_message_api_v1_chat_conversations__conversation_id__messages__message_id__delete",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          },
-          {
-            "name": "message_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Message ID",
-              "title": "Message Id"
-            },
-            "description": "Message ID"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageDeleteResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/chat/conversations/{conversation_id}/messages/{message_id}/rating": {
-      "patch": {
-        "tags": [
-          "Chat"
-        ],
-        "summary": "Update Message Rating",
-        "description": "Update the rating for a message.",
-        "operationId": "update_message_rating_api_v1_chat_conversations__conversation_id__messages__message_id__rating_patch",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "conversation_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Conversation ID",
-              "title": "Conversation Id"
-            },
-            "description": "Conversation ID"
-          },
-          {
-            "name": "message_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "minLength": 1,
-              "description": "Message ID",
-              "title": "Message Id"
-            },
-            "description": "Message ID"
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/MessageRatingUpdate"
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/MessageRatingResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "uuid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/chat/chat": {
       "post": {
         "tags": [
@@ -3377,6 +2181,1150 @@
             "CustomHTTPBearer": []
           }
         ]
+      }
+    },
+    "/api/v1/conversations/": {
+      "post": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Create Conversation",
+        "description": "Create a new conversation.",
+        "operationId": "create_conversation_api_v1_conversations__post",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationCreate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "201": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "List Conversations",
+        "description": "List conversations for the current user.\n\nArgs:\n    status: Filter by conversation status\n    llm_provider: Filter by LLM provider\n    llm_model: Filter by LLM model\n    tags: Filter by tags\n    enable_retrieval: Filter by retrieval enabled status\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Sort field\n    sort_order: Sort order (asc/desc)\n    current_user: Current authenticated user\n    handler: Conversation resource handler\n\nReturns:\n    List of conversations with pagination info",
+        "operationId": "list_conversations_api_v1_conversations__get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "status",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "$ref": "#/components/schemas/ConversationStatus"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by conversation status",
+              "title": "Status"
+            },
+            "description": "Filter by conversation status"
+          },
+          {
+            "name": "llm_provider",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by LLM provider",
+              "title": "Llm Provider"
+            },
+            "description": "Filter by LLM provider"
+          },
+          {
+            "name": "llm_model",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by LLM model",
+              "title": "Llm Model"
+            },
+            "description": "Filter by LLM model"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by tags",
+              "title": "Tags"
+            },
+            "description": "Filter by tags"
+          },
+          {
+            "name": "enable_retrieval",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "boolean"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by retrieval enabled status",
+              "title": "Enable Retrieval"
+            },
+            "description": "Filter by retrieval enabled status"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of results",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum number of results"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort field",
+              "default": "updated_at",
+              "title": "Sort By"
+            },
+            "description": "Sort field"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort order",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationListResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Get Conversation",
+        "description": "Get conversation details with optional messages.",
+        "operationId": "get_conversation_api_v1_conversations__conversation_id__get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          },
+          {
+            "name": "include_messages",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "description": "Include messages in response",
+              "default": true,
+              "title": "Include Messages"
+            },
+            "description": "Include messages in response"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationWithMessages"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "put": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Update Conversation",
+        "description": "Update conversation.",
+        "operationId": "update_conversation_api_v1_conversations__conversation_id__put",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ConversationUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Delete Conversation",
+        "description": "Delete conversation.",
+        "operationId": "delete_conversation_api_v1_conversations__conversation_id__delete",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ConversationDeleteResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/messages": {
+      "get": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Get Conversation Messages",
+        "description": "Get messages from a conversation.",
+        "operationId": "get_conversation_messages_api_v1_conversations__conversation_id__messages_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Number of results per page",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Number of results per page"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/MessageResponse"
+                  },
+                  "title": "Response Get Conversation Messages Api V1 Conversations  Conversation Id  Messages Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/messages/{message_id}": {
+      "delete": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Delete Message",
+        "description": "Delete a message from a conversation.",
+        "operationId": "delete_message_api_v1_conversations__conversation_id__messages__message_id__delete",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          },
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Message ID",
+              "title": "Message Id"
+            },
+            "description": "Message ID"
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageDeleteResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/conversations/{conversation_id}/messages/{message_id}/rating": {
+      "patch": {
+        "tags": [
+          "Conversations"
+        ],
+        "summary": "Update Message Rating",
+        "description": "Update the rating for a message.",
+        "operationId": "update_message_rating_api_v1_conversations__conversation_id__messages__message_id__rating_patch",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "conversation_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Conversation ID",
+              "title": "Conversation Id"
+            },
+            "description": "Conversation ID"
+          },
+          {
+            "name": "message_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Message ID",
+              "title": "Message Id"
+            },
+            "description": "Message ID"
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/MessageRatingUpdate"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MessageRatingResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "uuid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
       }
     },
     "/api/v1/documents/upload": {
@@ -25807,10 +25755,24 @@
       "Body_list_agents_api_v1_agents__get": {
         "properties": {
           "pagination": {
-            "$ref": "#/components/schemas/PaginationRequest"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/PaginationRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "sorting": {
-            "$ref": "#/components/schemas/SortingRequest"
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/SortingRequest"
+              },
+              {
+                "type": "null"
+              }
+            ]
           },
           "tags": {
             "anyOf": [

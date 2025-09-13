@@ -48,7 +48,7 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const response =
-        await getSDK().chat.getConversationApiV1ChatConversationsConversationId(
+        await getSDK().conversations.getConversationApiV1ConversationsConversationId(
           conversation.id,
           { includeMessages: true }
         );
@@ -151,7 +151,7 @@ const ConversationsPage: React.FC = () => {
   // Define service methods
   const service: CrudService<ConversationResponse, never, never> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
+      const response = await getSDK().conversations.listConversationsApiV1Conversations({
         limit: pageSize,
         offset: page * pageSize,
       });
@@ -162,7 +162,7 @@ const ConversationsPage: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(id);
+      await getSDK().conversations.deleteConversationApiV1ConversationsConversationId(id);
     },
   };
 

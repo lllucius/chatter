@@ -41,45 +41,10 @@ class TestChatApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_create_conversation_api_v1_chat_conversations_post(self) -> None:
-        """Test case for create_conversation_api_v1_chat_conversations_post
-
-        Create Conversation
-        """
-        pass
-
-    async def test_delete_conversation_api_v1_chat_conversations_conversation_id_delete(self) -> None:
-        """Test case for delete_conversation_api_v1_chat_conversations_conversation_id_delete
-
-        Delete Conversation
-        """
-        pass
-
-    async def test_delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete(self) -> None:
-        """Test case for delete_message_api_v1_chat_conversations_conversation_id_messages_message_id_delete
-
-        Delete Message
-        """
-        pass
-
     async def test_get_available_tools_api_v1_chat_tools_available_get(self) -> None:
         """Test case for get_available_tools_api_v1_chat_tools_available_get
 
         Get Available Tools
-        """
-        pass
-
-    async def test_get_conversation_api_v1_chat_conversations_conversation_id_get(self) -> None:
-        """Test case for get_conversation_api_v1_chat_conversations_conversation_id_get
-
-        Get Conversation
-        """
-        pass
-
-    async def test_get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get(self) -> None:
-        """Test case for get_conversation_messages_api_v1_chat_conversations_conversation_id_messages_get
-
-        Get Conversation Messages
         """
         pass
 
@@ -104,31 +69,10 @@ class TestChatApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_list_conversations_api_v1_chat_conversations_get(self) -> None:
-        """Test case for list_conversations_api_v1_chat_conversations_get
-
-        List Conversations
-        """
-        pass
-
     async def test_streaming_chat_api_v1_chat_streaming_post(self) -> None:
         """Test case for streaming_chat_api_v1_chat_streaming_post
 
         Streaming Chat
-        """
-        pass
-
-    async def test_update_conversation_api_v1_chat_conversations_conversation_id_put(self) -> None:
-        """Test case for update_conversation_api_v1_chat_conversations_conversation_id_put
-
-        Update Conversation
-        """
-        pass
-
-    async def test_update_message_rating_api_v1_chat_conversations_conversation_id_messages_message_id_rating_patch(self) -> None:
-        """Test case for update_message_rating_api_v1_chat_conversations_conversation_id_messages_message_id_rating_patch
-
-        Update Message Rating
         """
         pass
 

@@ -5,7 +5,7 @@ import { PaginationRequest } from './PaginationRequest';
 import { SortingRequest } from './SortingRequest';
 
 export interface Body_list_agents_api_v1_agents__get {
-  pagination?: PaginationRequest;
-  sorting?: SortingRequest;
+  pagination?: PaginationRequest | null;
+  sorting?: SortingRequest | null;
   tags?: string[] | null;
 }

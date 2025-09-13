@@ -145,8 +145,8 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await getSDK().chat.createConversationApiV1ChatConversations(createRequest);
-      setCurrentConversation(response.data);
+      const response = await getSDK().conversations.createConversationApiV1Conversations(createRequest);
+      setCurrentConversation(response);
       setMessages([]);
 
       if (selectedPrompt && selectedPromptData) {
@@ -181,7 +181,7 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await getSDK().chat.getConversationApiV1ChatConversationsConversationId(
+      const response = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
         conversation.id,
         { includeMessages: true }
       );

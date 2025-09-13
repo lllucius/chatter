@@ -179,9 +179,17 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
       <Card
         sx={{
           mb: 1,
-          bgcolor: message.role === 'user' ? 'primary.50' : message.role === 'assistant' ? 'grey.100' : 'background.paper',
+          bgcolor: message.role === 'user' 
+            ? 'primary.50' 
+            : message.role === 'assistant' 
+              ? (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'
+              : 'background.paper',
           border: '1px solid',
-          borderColor: message.role === 'user' ? 'primary.200' : message.role === 'assistant' ? 'grey.300' : 'grey.200',
+          borderColor: message.role === 'user' 
+            ? 'primary.200' 
+            : message.role === 'assistant' 
+              ? (theme) => theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300'
+              : 'grey.200',
         }}
       >
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>

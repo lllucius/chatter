@@ -9,10 +9,8 @@ import ABTestingPage from '../ABTestingPage';
 vi.mock('../../services/auth-service', (): void => ({
   getSDK: vi.fn((): void => ({
     abTesting: {
-      listAbTestsApiV1AbTestsGet: vi.fn().mockResolvedValue({
-        data: {
-          tests: []
-        }
+      listAbTestsApiV1AbTests: vi.fn().mockResolvedValue({
+        tests: []
       })
     }
   })),

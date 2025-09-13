@@ -174,7 +174,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         await service.delete(getItemId(item));
         toastService.success(`${config.entityName} deleted successfully`);
         await loadData();
-      } catch {
+      } catch (error) {
         handleError(error, {
           source: 'CrudDataTable.handleDelete',
           operation: `delete ${config.entityName.toLowerCase()}`,
@@ -198,7 +198,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       }
       handleDialogClose();
       await loadData();
-    } catch {
+    } catch (error) {
       handleError(error, {
         source: 'CrudDataTable.handleSave',
         operation: `${dialogMode} ${config.entityName.toLowerCase()}`,

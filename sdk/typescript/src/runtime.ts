@@ -185,7 +185,10 @@ export class BaseAPI {
         };
 
         let body: any;
-        if (isFormData(overriddenInit.body)
+        // GET and HEAD requests cannot have a body according to the Fetch API specification
+        if (context.method.toUpperCase() === 'GET' || context.method.toUpperCase() === 'HEAD') {
+            body = undefined;
+        } else if (isFormData(overriddenInit.body)
             || (overriddenInit.body instanceof URLSearchParams)
             || isBlob(overriddenInit.body)) {
           body = overriddenInit.body;

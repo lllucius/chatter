@@ -1,6 +1,7 @@
 import React, { Component, ErrorInfo, ReactNode } from 'react';
 import { Box, Typography, Button, Alert, Container } from '@mui/material';
 import { Refresh as RefreshIcon } from '@mui/icons-material';
+import { errorHandler } from '../utils/error-handler';
 
 interface Props {
   children: ReactNode;
@@ -10,6 +11,7 @@ interface Props {
 interface State {
   hasError: boolean;
   error?: Error;
+  errorDetails?: string;
 }
 
 class ErrorBoundary extends Component<Props, State> {
@@ -21,13 +23,29 @@ class ErrorBoundary extends Component<Props, State> {
     return { hasError: true, error };
   }
 
-  public componentDidCatch(_error: Error, _errorInfo: ErrorInfo) {
-     
-    // Error caught and handled by ErrorBoundary UI
+  public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    // Use standardized error handling to log and process the error
+    errorHandler.handleError(error, {
+      source: 'ErrorBoundary',
+      operation: 'React component rendering',
+      additionalData: {
+        componentStack: errorInfo.componentStack,
+        errorBoundary: true
+      }
+    }, {
+      showToast: false, // Don't show toast since we're showing UI
+      logToConsole: true
+    });
+
+    // Store error details for development mode display
+    if (process.env.NODE_ENV === 'development') {
+      const errorDetails = `${error.message}\n\nComponent Stack:${errorInfo.componentStack}\n\nError Stack:\n${error.stack}`;
+      this.setState({ errorDetails });
+    }
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined });
+    this.setState({ hasError: false, error: undefined, errorDetails: undefined });
   };
 
   private handleReload = () => {
@@ -67,13 +85,13 @@ class ErrorBoundary extends Component<Props, State> {
             </Button>
           </Box>
 
-          {process.env.NODE_ENV === 'development' && this.state.error && (
+          {process.env.NODE_ENV === 'development' && this.state.errorDetails && (
             <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
               <Typography variant="subtitle2" gutterBottom>
                 Error Details (Development Mode):
               </Typography>
-              <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto' }}>
-                {this.state.error.stack}
+              <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto', whiteSpace: 'pre-wrap' }}>
+                {this.state.errorDetails}
               </Typography>
             </Box>
           )}

@@ -1,4 +1,5 @@
 import { useState, useEffect, useCallback, useRef } from 'react';
+import { handleError } from '../utils/error-handler';
 
 interface UseApiOptions<T> {
   immediate?: boolean;
@@ -48,11 +49,16 @@ export function useApi<T>(
       const errorMessage = err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
       onErrorRef.current?.(err);
-      // API call failed - error is available in component state
-      if (process.env.NODE_ENV === 'development') {
-         
-        // Error details available for debugging in dev mode
-      }
+      
+      // Use standardized error handling
+      handleError(err, {
+        source: 'useApi.execute',
+        operation: 'API call execution'
+      }, {
+        showToast: true,
+        logToConsole: true,
+        fallbackMessage: 'API call failed'
+      });
     } finally {
       setLoading(false);
     }

@@ -4,6 +4,7 @@
  * Uses memory for access tokens and HttpOnly cookies for refresh tokens
  */
 import { ChatterSDK, UserLogin } from 'chatter-sdk';
+import { handleError } from '../utils/error-handler';
 
 class AuthService {
   private token: string | null = null; // Store access token in memory only
@@ -32,13 +33,10 @@ class AuthService {
     
     // Try to restore authentication state from refresh token cookie
     if (!this.token) {
-      
       await this.refreshToken();
     }
     
     this.initialized = true;
-    
-    
   }
 
   public isAuthenticated(): boolean {
@@ -67,24 +65,21 @@ class AuthService {
 
       if (response.access_token) {
         this.token = response.access_token; // Store in memory only
-        
         // Refresh token is automatically stored in HttpOnly cookie by the server
         // No need to manually handle refresh token storage
       } else {
         throw new Error('No access token received');
       }
     } catch (error: unknown) {
-      
-      
-      // Extract error message from the response
-      let errorMessage = 'Login failed';
-      if (error && typeof error === 'object' && 'body' in error && error.body && typeof error.body === 'object' && 'detail' in error.body) {
-        errorMessage = String(error.body.detail);
-      } else if (error instanceof Error) {
-        errorMessage = error.message;
-      }
-      
-      throw new Error(errorMessage);
+      // Use standardized error handling
+      handleError(error, {
+        source: 'AuthService.login',
+        operation: 'user authentication',
+        additionalData: { username }
+      }, {
+        showToast: false, // Let the calling component handle the UI
+        rethrow: true
+      });
     }
   }
 
@@ -94,7 +89,14 @@ class AuthService {
         await getSDK().auth.authLogout();
       }
     } catch (error) {
-      
+      // Use standardized error handling for logout failures
+      handleError(error, {
+        source: 'AuthService.logout',
+        operation: 'user logout'
+      }, {
+        showToast: false, // Don't interrupt logout flow with error toast
+        logToConsole: true
+      });
       // Continue with local logout even if API call fails
     } finally {
       this.clearToken();
@@ -134,7 +136,14 @@ class AuthService {
       
       return false;
     } catch (error) {
-      
+      // Use standardized error handling for refresh failures
+      handleError(error, {
+        source: 'AuthService.refreshToken',
+        operation: 'token refresh'
+      }, {
+        showToast: false, // Don't show toast for automatic token refresh failures
+        logToConsole: true
+      });
       this.clearToken();
       return false;
     } finally {
@@ -183,21 +192,23 @@ class AuthService {
       );
       
       if (isAuthError) {
-        
-        
         const refreshSuccess = await this.refreshToken();
         if (refreshSuccess) {
-          
           const refreshedSDK = this.getSDK();
           return await apiCall(refreshedSDK);
         } else {
-          
           throw new Error('Authentication failed - please login again');
         }
       }
       
-      // Re-throw other errors
-      throw error;
+      // For non-auth errors, use standardized error handling
+      handleError(error, {
+        source: 'AuthService.executeWithAuth',
+        operation: 'authenticated API call'
+      }, {
+        showToast: false, // Let the calling component handle the UI
+        rethrow: true
+      });
     }
   }
 }
@@ -211,5 +222,4 @@ export const getSDK = (): ChatterSDK => authService.getSDK();
 // Export initialization function for explicit app setup if needed
 export const initializeSDK = async (): Promise<void> => {
   await authService.initialize();
-  
 };

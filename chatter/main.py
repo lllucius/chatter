@@ -518,6 +518,7 @@ def create_app() -> FastAPI:
         analytics,
         auth,
         chat,
+        conversations,
         data_management,
         documents,
         events,
@@ -541,6 +542,12 @@ def create_app() -> FastAPI:
 
     app.include_router(
         chat.router, prefix=f"{settings.api_prefix}/chat", tags=["Chat"]
+    )
+
+    app.include_router(
+        conversations.router,
+        prefix=f"{settings.api_prefix}/conversations",
+        tags=["Conversations"],
     )
 
     app.include_router(

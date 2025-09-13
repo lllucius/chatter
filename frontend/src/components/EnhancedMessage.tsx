@@ -17,6 +17,7 @@ import {
   Chip,
   Avatar,
   Rating,
+  CircularProgress,
 } from '@mui/material';
 import {
   Person as PersonIcon,
@@ -49,7 +50,7 @@ interface EnhancedMessageProps {
   onEdit?: (messageId: string, newContent: string) => void;
   onRegenerate?: (messageId: string) => void;
   onDelete?: (messageId: string) => void;
-  onRate?: (messageId: string, rating: number) => void;
+  onRate?: (messageId: string, rating: number) => Promise<void> | void;
   canEdit?: boolean;
   canRegenerate?: boolean;
   canDelete?: boolean;
@@ -77,6 +78,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
   const [editDialogOpen, setEditDialogOpen] = useState(false);
   const [editContent, setEditContent] = useState(message.content);
   const [rating, setRating] = useState(message.rating || 0);
+  const [ratingLoading, setRatingLoading] = useState(false);
 
   const handleMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(event.currentTarget);
@@ -127,11 +129,17 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
     handleMenuClose();
   };
 
-  const handleRatingChange = (newRating: number | null) => {
+  const handleRatingChange = async (newRating: number | null) => {
     const ratingValue = newRating || 0;
+    setRatingLoading(true);
     setRating(ratingValue);
-    if (onRate) {
-      onRate(message.id, ratingValue);
+    
+    try {
+      if (onRate) {
+        await onRate(message.id, ratingValue);
+      }
+    } finally {
+      setRatingLoading(false);
     }
   };
 
@@ -236,7 +244,11 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                       value={rating}
                       onChange={(_, newValue) => handleRatingChange(newValue)}
                       size="small"
+                      disabled={ratingLoading}
                     />
+                    {ratingLoading && (
+                      <CircularProgress size={16} />
+                    )}
                   </Box>
                   {message.metadata && (message.metadata.tokens || message.metadata.processingTime) && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>

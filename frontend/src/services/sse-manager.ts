@@ -117,6 +117,9 @@ export class SSEEventManager {
    * Get current connection state
    */
   public getConnectionState(): 'connecting' | 'open' | 'closed' {
+    if (this.connectionStartTime && !this.isConnected) {
+      return 'connecting';
+    }
     return this.isConnected ? 'open' : 'closed';
   }
 

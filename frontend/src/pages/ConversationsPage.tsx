@@ -47,8 +47,12 @@ const ConversationsPage: React.FC = () => {
     setLoadingMessages(true);
 
     try {
+      const sdk = getSDK();
+      if (!sdk || !sdk.conversations) {
+        throw new Error('SDK not properly initialized. Please reload the page.');
+      }
       const response =
-        await getSDK().conversations.getConversationApiV1ConversationsConversationId(
+        await sdk.conversations.getConversationApiV1ConversationsConversationId(
           conversation.id,
           { includeMessages: true }
         );
@@ -151,7 +155,11 @@ const ConversationsPage: React.FC = () => {
   // Define service methods
   const service: CrudService<ConversationResponse, never, never> = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().conversations.listConversationsApiV1Conversations({
+      const sdk = getSDK();
+      if (!sdk || !sdk.conversations) {
+        throw new Error('SDK not properly initialized. Please reload the page.');
+      }
+      const response = await sdk.conversations.listConversationsApiV1Conversations({
         limit: pageSize,
         offset: page * pageSize,
       });
@@ -162,7 +170,11 @@ const ConversationsPage: React.FC = () => {
     },
 
     delete: async (id: string) => {
-      await getSDK().conversations.deleteConversationApiV1ConversationsConversationId(id);
+      const sdk = getSDK();
+      if (!sdk || !sdk.conversations) {
+        throw new Error('SDK not properly initialized. Please reload the page.');
+      }
+      await sdk.conversations.deleteConversationApiV1ConversationsConversationId(id);
     },
   };
 

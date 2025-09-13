@@ -49,7 +49,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           <Typography 
             variant="h6" 
             component="h1" 
-            nowrap
+            noWrap
             sx={{ 
               fontWeight: 'bold',
             }}

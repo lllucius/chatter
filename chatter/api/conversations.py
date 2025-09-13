@@ -1,7 +1,5 @@
 """Conversations API endpoints - Direct access to conversations without /chat prefix."""
 
-from typing import Union
-
 from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -85,17 +83,17 @@ async def create_conversation(
     response_model=ConversationListResponse,
 )
 async def list_conversations(
-    status: Union[ConversationStatus, None] = Query(
+    status: ConversationStatus | None = Query(
         None, description="Filter by conversation status"
     ),
-    llm_provider: Union[str, None] = Query(
+    llm_provider: str | None = Query(
         None, description="Filter by LLM provider"
     ),
-    llm_model: Union[str, None] = Query(
+    llm_model: str | None = Query(
         None, description="Filter by LLM model"
     ),
-    tags: Union[list[str], None] = Query(None, description="Filter by tags"),
-    enable_retrieval: Union[bool, None] = Query(
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    enable_retrieval: bool | None = Query(
         None, description="Filter by retrieval enabled status"
     ),
     limit: int = Query(
@@ -113,7 +111,25 @@ async def list_conversations(
         get_conversation_handler
     ),
 ) -> ConversationListResponse:
-    """List conversations for the current user."""
+    """List conversations for the current user.
+
+    Args:
+        status: Filter by conversation status
+        llm_provider: Filter by LLM provider
+        llm_model: Filter by LLM model
+        tags: Filter by tags
+        enable_retrieval: Filter by retrieval enabled status
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order (asc/desc)
+        current_user: Current authenticated user
+        handler: Conversation resource handler
+
+    Returns:
+        List of conversations with pagination info
+    """
+    # Create ConversationListRequest object to pass filters
     return await handler.list_conversations(
         current_user=current_user,
         limit=limit,

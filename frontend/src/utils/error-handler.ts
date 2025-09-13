@@ -1,0 +1,271 @@
+/**
+ * Standardized error handling for the frontend
+ * Provides consistent error display with development mode details and production-friendly messages
+ */
+
+import { toastService } from '../services/toast-service';
+
+// Error response structure from backend
+interface ErrorResponse {
+  response?: {
+    data?: ProblemDetail | unknown;
+    status?: number;
+  };
+  message?: string;
+  stack?: string;
+}
+
+// RFC 9457 Problem Detail structure
+interface ProblemDetail {
+  type?: string;
+  title?: string;
+  status?: number;
+  detail?: string;
+  instance?: string;
+  [key: string]: unknown;
+}
+
+export interface ErrorContext {
+  source: string; // Where the error occurred (e.g., 'AuthService.login', 'useApi.execute')
+  operation?: string; // What operation was being performed
+  userId?: string; // Optional user context
+  additionalData?: Record<string, unknown>; // Any additional context
+}
+
+export interface ErrorHandlerOptions {
+  showToast?: boolean; // Whether to show toast notification (default: true)
+  logToConsole?: boolean; // Whether to log to console (default: true in dev)
+  rethrow?: boolean; // Whether to rethrow the error (default: false)
+  fallbackMessage?: string; // Fallback message if no meaningful error can be extracted
+}
+
+/**
+ * Standardized error handler that provides consistent error handling across the frontend
+ */
+class ErrorHandler {
+  private isDevelopment(): boolean {
+    return process.env.NODE_ENV === 'development';
+  }
+
+  /**
+   * Extract a meaningful error message from various error types
+   */
+  private extractErrorMessage(error: unknown, fallback: string = 'An unexpected error occurred'): string {
+    // Handle string errors
+    if (typeof error === 'string') {
+      return error;
+    }
+
+    // Handle Error objects
+    if (error instanceof Error) {
+      return error.message || fallback;
+    }
+
+    // Handle API error responses with problem details
+    if (error && typeof error === 'object') {
+      const errorResponse = error as ErrorResponse;
+      
+      // Try to extract problem detail information
+      const problemDetail = errorResponse?.response?.data as ProblemDetail;
+      
+      if (problemDetail && typeof problemDetail === 'object') {
+        // Priority order: title + detail, detail only, title only
+        if (problemDetail.title && problemDetail.detail) {
+          return `${problemDetail.title}: ${problemDetail.detail}`;
+        }
+        
+        if (problemDetail.detail) {
+          return problemDetail.detail;
+        }
+        
+        if (problemDetail.title) {
+          return problemDetail.title;
+        }
+      }
+
+      // Fallback to generic message from error response
+      if (errorResponse?.message) {
+        return errorResponse.message;
+      }
+    }
+
+    return fallback;
+  }
+
+  /**
+   * Extract error stack trace and additional debug information
+   */
+  private extractErrorDetails(error: unknown, context: ErrorContext): string {
+    const details: string[] = [];
+    
+    // Add context information
+    details.push(`Source: ${context.source}`);
+    if (context.operation) {
+      details.push(`Operation: ${context.operation}`);
+    }
+    if (context.userId) {
+      details.push(`User: ${context.userId}`);
+    }
+
+    // Add timestamp
+    details.push(`Timestamp: ${new Date().toISOString()}`);
+
+    // Add error details
+    if (error instanceof Error) {
+      details.push(`Error Type: ${error.constructor.name}`);
+      details.push(`Message: ${error.message}`);
+      if (error.stack) {
+        details.push(`Stack Trace:\n${error.stack}`);
+      }
+    } else if (error && typeof error === 'object') {
+      details.push(`Error Object: ${JSON.stringify(error, null, 2)}`);
+    } else {
+      details.push(`Error Value: ${String(error)}`);
+    }
+
+    // Add additional context data
+    if (context.additionalData) {
+      details.push(`Additional Data: ${JSON.stringify(context.additionalData, null, 2)}`);
+    }
+
+    return details.join('\n');
+  }
+
+  /**
+   * Generate a production-friendly error message with minimal context
+   */
+  private generateProductionMessage(userMessage: string, context: ErrorContext): string {
+    // In production, show user-friendly message with minimal context for debugging
+    return `${userMessage} (Error in ${context.source})`;
+  }
+
+  /**
+   * Handle an error with standardized processing
+   */
+  public handleError(
+    error: unknown,
+    context: ErrorContext,
+    options: ErrorHandlerOptions = {}
+  ): void {
+    const {
+      showToast = true,
+      logToConsole = this.isDevelopment(),
+      rethrow = false,
+      fallbackMessage = 'An unexpected error occurred'
+    } = options;
+
+    const userMessage = this.extractErrorMessage(error, fallbackMessage);
+    const isDev = this.isDevelopment();
+
+    // Log to console if requested
+    if (logToConsole) {
+      if (isDev) {
+        // In development, show full error details
+        const errorDetails = this.extractErrorDetails(error, context);
+        console.error(`[Error Handler] ${context.source}:`, error);
+        console.error('Full Error Details:\n', errorDetails);
+      } else {
+        // In production, log minimal information
+        console.error(`[Error] ${context.source}: ${userMessage}`);
+      }
+    }
+
+    // Show toast notification if requested
+    if (showToast) {
+      if (isDev) {
+        // In development, show detailed error in toast
+        const devMessage = `${userMessage}\n\nSource: ${context.source}${
+          context.operation ? `\nOperation: ${context.operation}` : ''
+        }`;
+        toastService.error(devMessage, { autoClose: false });
+      } else {
+        // In production, show user-friendly message
+        const prodMessage = this.generateProductionMessage(userMessage, context);
+        toastService.error(prodMessage);
+      }
+    }
+
+    // Rethrow if requested
+    if (rethrow) {
+      throw error;
+    }
+  }
+
+  /**
+   * Handle an error and return a formatted error response
+   * Useful for functions that need to return error information
+   */
+  public handleErrorWithResult<T = unknown>(
+    error: unknown,
+    context: ErrorContext,
+    options: ErrorHandlerOptions = {}
+  ): { success: false; error: string; details?: string } {
+    const userMessage = this.extractErrorMessage(error, options.fallbackMessage);
+    const isDev = this.isDevelopment();
+
+    // Handle the error (logging, toasts, etc.)
+    this.handleError(error, context, options);
+
+    // Return structured error response
+    return {
+      success: false,
+      error: userMessage,
+      ...(isDev && { details: this.extractErrorDetails(error, context) })
+    };
+  }
+
+  /**
+   * Create a wrapper function for handling async operations
+   */
+  public wrapAsync<T extends (...args: any[]) => Promise<any>>(
+    fn: T,
+    context: ErrorContext,
+    options: ErrorHandlerOptions = {}
+  ): T {
+    return (async (...args: Parameters<T>) => {
+      try {
+        return await fn(...args);
+      } catch (error) {
+        this.handleError(error, context, { ...options, rethrow: true });
+      }
+    }) as T;
+  }
+
+  /**
+   * Create a wrapper function for handling sync operations
+   */
+  public wrapSync<T extends (...args: any[]) => any>(
+    fn: T,
+    context: ErrorContext,
+    options: ErrorHandlerOptions = {}
+  ): T {
+    return ((...args: Parameters<T>) => {
+      try {
+        return fn(...args);
+      } catch (error) {
+        this.handleError(error, context, { ...options, rethrow: true });
+      }
+    }) as T;
+  }
+}
+
+// Export singleton instance
+export const errorHandler = new ErrorHandler();
+
+// Convenience function for handling errors
+export const handleError = (
+  error: unknown,
+  context: ErrorContext,
+  options?: ErrorHandlerOptions
+): void => {
+  errorHandler.handleError(error, context, options);
+};
+
+// Convenience function for handling errors with result
+export const handleErrorWithResult = <T = unknown>(
+  error: unknown,
+  context: ErrorContext,
+  options?: ErrorHandlerOptions
+) => {
+  return errorHandler.handleErrorWithResult<T>(error, context, options);
+};

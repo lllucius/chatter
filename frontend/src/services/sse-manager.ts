@@ -7,6 +7,7 @@
 
 import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
 import { authService } from '../services/auth-service';
+import { handleError } from '../utils/error-handler';
 
 export class SSEEventManager {
   private listeners: SSEEventListeners = {};
@@ -29,12 +30,10 @@ export class SSEEventManager {
    */
   public connect(): void {
     if (!authService.isAuthenticated()) {
-      
       return;
     }
 
     if (this.isConnected || this.connectionStartTime) {
-      
       return;
     }
 
@@ -128,13 +127,17 @@ export class SSEEventManager {
     }
 
     try {
-      
-
       // Use SDK method with automatic authentication and retry
       this.connectWithSDKAuth();
 
     } catch (error) {
-      
+      handleError(error, {
+        source: 'SSEEventManager.createConnection',
+        operation: 'SSE connection initialization'
+      }, {
+        showToast: false, // Don't show toast for connection failures
+        logToConsole: true
+      });
       this.connectionStartTime = null;
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
@@ -180,6 +183,13 @@ export class SSEEventManager {
       this.isConnected = false;
       this.connectionStartTime = null;
       
+      handleError(error, {
+        source: 'SSEEventManager.connectWithSDKAuth',
+        operation: 'SSE stream connection'
+      }, {
+        showToast: false, // Don't show toast for connection failures
+        logToConsole: true
+      });
       
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
@@ -212,7 +222,13 @@ export class SSEEventManager {
         }
       }
     } catch (error) {
-      
+      handleError(error, {
+        source: 'SSEEventManager.processStream',
+        operation: 'SSE stream processing'
+      }, {
+        showToast: false, // Don't show toast for stream processing failures
+        logToConsole: true
+      });
     } finally {
       this.isConnected = false;
       this.connectionStartTime = null;
@@ -233,7 +249,14 @@ export class SSEEventManager {
         const event = JSON.parse(data) as AnySSEEvent;
         this.emitEvent(event);
       } catch (error) {
-        
+        handleError(error, {
+          source: 'SSEEventManager.processSSELine',
+          operation: 'SSE event parsing',
+          additionalData: { rawData: data }
+        }, {
+          showToast: false, // Don't show toast for parsing failures
+          logToConsole: true
+        });
       }
     }
     // We can also handle other SSE fields like id:, event:, retry: if needed
@@ -272,7 +295,14 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          
+          handleError(error, {
+            source: 'SSEEventManager.emitEvent',
+            operation: 'specific event listener execution',
+            additionalData: { eventType: event.type }
+          }, {
+            showToast: false, // Don't show toast for listener failures
+            logToConsole: true
+          });
         }
       });
     }
@@ -283,7 +313,14 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          
+          handleError(error, {
+            source: 'SSEEventManager.emitEvent',
+            operation: 'wildcard event listener execution',
+            additionalData: { eventType: event.type }
+          }, {
+            showToast: false, // Don't show toast for listener failures
+            logToConsole: true
+          });
         }
       });
     }
@@ -477,7 +514,14 @@ export class SSEEventManager {
         try {
           listener(event);
         } catch (error) {
-          
+          handleError(error, {
+            source: 'SSEEventManager.emitToCategoryListeners',
+            operation: 'category event listener execution',
+            additionalData: { category, eventType: event.type }
+          }, {
+            showToast: false, // Don't show toast for listener failures
+            logToConsole: true
+          });
         }
       });
     }
@@ -552,10 +596,16 @@ export class SSEEventManager {
         return await sdk.events.triggerTestEventApiV1EventsTestEvent();
       });
       
-      
       return true;
     } catch (error) {
-      
+      handleError(error, {
+        source: 'SSEEventManager.triggerTestEvent',
+        operation: 'trigger test event'
+      }, {
+        showToast: true, // Show toast for test event failures since it's user-initiated
+        logToConsole: true,
+        fallbackMessage: 'Failed to trigger test event'
+      });
       return false;
     }
   }
@@ -571,7 +621,14 @@ export class SSEEventManager {
       
       return response;
     } catch (error) {
-      
+      handleError(error, {
+        source: 'SSEEventManager.getSSEStats',
+        operation: 'get SSE statistics'
+      }, {
+        showToast: false, // Don't show toast for stats failures
+        logToConsole: true,
+        fallbackMessage: 'Failed to get SSE statistics'
+      });
       return null;
     }
   }

@@ -145,8 +145,8 @@ const ChatPage: React.FC = () => {
         enable_retrieval: enableRetrieval,
         system_prompt: systemPrompt,
       };
-      const response = await getSDK().chat.createConversationApiV1ChatConversations(createRequest);
-      setCurrentConversation(response.data);
+      const response = await getSDK().conversations.createConversationApiV1Conversations(createRequest);
+      setCurrentConversation(response);
       setMessages([]);
 
       if (selectedPrompt && selectedPromptData) {
@@ -181,7 +181,7 @@ const ChatPage: React.FC = () => {
       setCurrentConversation(conversation);
       
       // Load messages for this conversation
-      const response = await getSDK().chat.getConversationApiV1ChatConversationsConversationId(
+      const response = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
         conversation.id,
         { includeMessages: true }
       );
@@ -573,34 +573,13 @@ const ChatPage: React.FC = () => {
           : msg
       ));
 
-      // Get authenticated SDK and extract the auth headers
+      // Call the backend API to persist the rating using SDK
       const sdk = getSDK();
-      const headers: Record<string, string> = {
-        'Content-Type': 'application/json',
-      };
-
-      // Add authentication header if available
-      if (sdk.configuration?.apiKey) {
-        headers['Authorization'] = `Bearer ${sdk.configuration.apiKey}`;
-      }
-
-      // Call the backend API to persist the rating
-      const response = await fetch(
-        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/conversations/${currentConversation.id}/messages/${messageId}/rating`,
-        {
-          method: 'PATCH',
-          headers,
-          credentials: 'include',
-          body: JSON.stringify({ rating }),
-        }
+      const result = await sdk.conversations.updateMessageRatingApiV1ConversationsConversationIdMessagesMessageIdRating(
+        currentConversation.id,
+        messageId,
+        { rating }
       );
-
-      if (!response.ok) {
-        const errorText = await response.text();
-        throw new Error(`Rating failed: ${response.status} ${response.statusText} - ${errorText}`);
-      }
-
-      const result = await response.json();
       
       // Update the message with the actual server response (average rating)
       setMessages(prev => prev.map(msg => 

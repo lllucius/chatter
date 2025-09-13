@@ -12,6 +12,7 @@ chatter_sdk/api/agents_api.py
 chatter_sdk/api/analytics_api.py
 chatter_sdk/api/authentication_api.py
 chatter_sdk/api/chat_api.py
+chatter_sdk/api/conversations_api.py
 chatter_sdk/api/data_management_api.py
 chatter_sdk/api/default_api.py
 chatter_sdk/api/documents_api.py
@@ -309,6 +310,7 @@ docs/ConversationStatsResponse.md
 docs/ConversationStatus.md
 docs/ConversationUpdate.md
 docs/ConversationWithMessages.md
+docs/ConversationsApi.md
 docs/CorrelationTraceResponse.md
 docs/DashboardResponse.md
 docs/DataFormat.md
@@ -554,6 +556,7 @@ test/test_conversation_stats_response.py
 test/test_conversation_status.py
 test/test_conversation_update.py
 test/test_conversation_with_messages.py
+test/test_conversations_api.py
 test/test_correlation_trace_response.py
 test/test_dashboard_response.py
 test/test_data_format.py

@@ -79,6 +79,16 @@ class BodyListAgentsApiV1AgentsGet(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of sorting
         if self.sorting:
             _dict['sorting'] = self.sorting.to_dict()
+        # set to None if pagination (nullable) is None
+        # and model_fields_set contains the field
+        if self.pagination is None and "pagination" in self.model_fields_set:
+            _dict['pagination'] = None
+
+        # set to None if sorting (nullable) is None
+        # and model_fields_set contains the field
+        if self.sorting is None and "sorting" in self.model_fields_set:
+            _dict['sorting'] = None
+
         # set to None if tags (nullable) is None
         # and model_fields_set contains the field
         if self.tags is None and "tags" in self.model_fields_set:

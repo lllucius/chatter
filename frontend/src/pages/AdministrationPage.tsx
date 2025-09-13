@@ -356,10 +356,10 @@ const AdministrationPage: React.FC = () => {
       switch (bulkOperationData.operationType) {
         case 'conversations':
           // Get conversations based on filters
-          const conversationsResponse = await getSDK().chat.listConversationsApiV1ChatConversations({
+          const conversationsResponse = await getSDK().conversations.listConversationsApiV1Conversations({
             limit: 1000  // Set a reasonable limit
           });
-          idsToDelete = conversationsResponse.data.conversations
+          idsToDelete = conversationsResponse.conversations
             .filter(conv => {
               // Apply filters
               let matches = true;

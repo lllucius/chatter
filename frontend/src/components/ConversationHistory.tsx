@@ -60,7 +60,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     try {
       setLoading(true);
       setError('');
-      const response = await getSDK().chat.listConversationsApiV1ChatConversations({
+      const response = await getSDK().conversations.listConversationsApiV1Conversations({
         limit: 20
       });
       setConversations(response.conversations || []);
@@ -97,7 +97,7 @@ const ConversationHistory: React.FC<ConversationHistoryProps> = ({
     if (!actionConversation) return;
     
     try {
-      await getSDK().chat.deleteConversationApiV1ChatConversationsConversationId(
+      await getSDK().conversations.deleteConversationApiV1ConversationsConversationId(
         actionConversation.id
       );
       setConversations(prev => prev.filter(c => c.id !== actionConversation.id));

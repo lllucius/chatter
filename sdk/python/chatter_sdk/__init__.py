@@ -24,6 +24,7 @@ __all__ = [
     "AnalyticsApi",
     "AuthenticationApi",
     "ChatApi",
+    "ConversationsApi",
     "DataManagementApi",
     "DocumentsApi",
     "EventsApi",
@@ -274,6 +275,7 @@ from chatter_sdk.api.agents_api import AgentsApi as AgentsApi
 from chatter_sdk.api.analytics_api import AnalyticsApi as AnalyticsApi
 from chatter_sdk.api.authentication_api import AuthenticationApi as AuthenticationApi
 from chatter_sdk.api.chat_api import ChatApi as ChatApi
+from chatter_sdk.api.conversations_api import ConversationsApi as ConversationsApi
 from chatter_sdk.api.data_management_api import DataManagementApi as DataManagementApi
 from chatter_sdk.api.documents_api import DocumentsApi as DocumentsApi
 from chatter_sdk.api.events_api import EventsApi as EventsApi

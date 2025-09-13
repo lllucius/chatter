@@ -423,43 +423,48 @@ class DatabaseSeeder:
         self, skip_existing: bool = True
     ) -> User | None:
         """Create admin user."""
-        if skip_existing:
-            existing = await self.session.execute(
-                select(User).where(User.username == "admin")
+        try:
+            if skip_existing:
+                existing = await self.session.execute(
+                    select(User).where(User.username == "admin")
+                )
+                if existing.scalar_one_or_none():
+                    logger.info("Admin user already exists, skipping")
+                    return existing.scalar_one_or_none()
+
+            # Generate secure random password
+            admin_password = "".join(
+                secrets.choice(
+                    string.ascii_letters + string.digits + "!@#$%^&*"
+                )
+                for _ in range(16)
             )
-            if existing.scalar_one_or_none():
-                logger.info("Admin user already exists, skipping")
-                return None
 
-        # Generate secure random password
-        admin_password = "".join(
-            secrets.choice(
-                string.ascii_letters + string.digits + "!@#$%^&*"
+            admin_user = User(
+                email="admin@admin.net",
+                username="admin",
+                hashed_password=hash_password(admin_password),
+                full_name="System Administrator",
+                is_active=True,
+                is_verified=True,
+                is_superuser=True,
+                bio="Default system administrator account",
             )
-            for _ in range(16)
-        )
 
-        admin_user = User(
-            email="admin@admin.net",
-            username="admin",
-            hashed_password=hash_password(admin_password),
-            full_name="System Administrator",
-            is_active=True,
-            is_verified=True,
-            is_superuser=True,
-            bio="Default system administrator account",
-        )
+            self.session.add(admin_user)
+            await self.session.commit()
+            await self.session.refresh(admin_user)
 
-        self.session.add(admin_user)
-        await self.session.commit()
-        await self.session.refresh(admin_user)
+            logger.warning(
+                f"Admin user created - Email: admin@admin.net, Password: {admin_password}. "
+                "Please change this password immediately!"
+            )
 
-        logger.warning(
-            f"Admin user created - Email: admin@admin.net, Password: {admin_password}. "
-            "Please change this password immediately!"
-        )
-
-        return admin_user
+            return admin_user
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to create admin user: {e}")
+            raise
 
     async def _create_development_users(
         self, skip_existing: bool = True
@@ -490,39 +495,44 @@ class DatabaseSeeder:
         ]
 
         created_users = []
-        for user_data in users_data:
-            if skip_existing:
-                existing = await self.session.execute(
-                    select(User).where(
-                        User.username == user_data["username"]
+        try:
+            for user_data in users_data:
+                if skip_existing:
+                    existing = await self.session.execute(
+                        select(User).where(
+                            User.username == user_data["username"]
+                        )
                     )
+                    if existing.scalar_one_or_none():
+                        continue
+
+                user = User(
+                    email=user_data["email"],
+                    username=user_data["username"],
+                    hashed_password=hash_password(
+                        str(user_data["password"])
+                    ),
+                    full_name=user_data["full_name"],
+                    is_active=True,
+                    is_verified=True,
+                    is_superuser=user_data["is_superuser"],
+                    bio=f"Development user: {user_data['full_name']}",
                 )
-                if existing.scalar_one_or_none():
-                    continue
 
-            user = User(
-                email=user_data["email"],
-                username=user_data["username"],
-                hashed_password=hash_password(
-                    str(user_data["password"])
-                ),
-                full_name=user_data["full_name"],
-                is_active=True,
-                is_verified=True,
-                is_superuser=user_data["is_superuser"],
-                bio=f"Development user: {user_data['full_name']}",
-            )
+                self.session.add(user)
+                created_users.append(user)
 
-            self.session.add(user)
-            created_users.append(user)
+            if created_users:
+                await self.session.commit()
+                for user in created_users:
+                    await self.session.refresh(user)
 
-        if created_users:
-            await self.session.commit()
-            for user in created_users:
-                await self.session.refresh(user)
-
-        logger.info(f"Created {len(created_users)} development users")
-        return created_users
+            logger.info(f"Created {len(created_users)} development users")
+            return created_users
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to create development users: {e}")
+            raise
 
     async def _create_test_users(
         self, skip_existing: bool = True
@@ -579,96 +589,106 @@ class DatabaseSeeder:
         self, skip_existing: bool = True
     ) -> tuple[int, int]:
         """Create basic provider and model registry data."""
-        if skip_existing:
-            existing_provider = await self.session.execute(
-                select(Provider).where(Provider.name == "openai")
-            )
-            if existing_provider.scalar_one_or_none():
-                logger.info(
-                    "Default registry data already exists, skipping"
+        try:
+            if skip_existing:
+                existing_provider = await self.session.execute(
+                    select(Provider).where(Provider.name == "openai")
                 )
-                return 0, 0
+                if existing_provider.scalar_one_or_none():
+                    logger.info(
+                        "Default registry data already exists, skipping"
+                    )
+                    return 0, 0
 
-        await _create_default_registry_data(self.session)
-        return 1, 2  # 1 provider, 2 models
+            await _create_default_registry_data(self.session)
+            return 1, 2  # 1 provider, 2 models
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to create basic registry data: {e}")
+            raise
 
     async def _create_basic_profiles(
         self, admin_user: User | None, skip_existing: bool = True
     ) -> int:
         """Create basic chat profiles."""
-        if not admin_user:
-            # Get admin user if not provided
-            result = await self.session.execute(
-                select(User).where(User.username == "admin")
-            )
-            admin_user = result.scalar_one_or_none()
+        try:
             if not admin_user:
-                logger.warning(
-                    "No admin user found, skipping profile creation"
+                # Get admin user if not provided
+                result = await self.session.execute(
+                    select(User).where(User.username == "admin")
                 )
-                return 0
-
-        profiles_data = [
-            {
-                "name": "Deterministic/Factual Mode",
-                "description": "Low temperature profile for factual, consistent responses",
-                "profile_type": ProfileType.ANALYTICAL,
-                "llm_provider": "openai",
-                "llm_model": "gpt-4",
-                "temperature": 0.1,
-                "max_tokens": 2048,
-            },
-            {
-                "name": "Creative Writing Mode",
-                "description": "High temperature profile for creative and diverse responses",
-                "profile_type": ProfileType.CREATIVE,
-                "llm_provider": "openai",
-                "llm_model": "gpt-4",
-                "temperature": 0.9,
-                "max_tokens": 4096,
-            },
-            {
-                "name": "Balanced Mode",
-                "description": "Balanced temperature for general-purpose conversations",
-                "profile_type": ProfileType.CONVERSATIONAL,
-                "llm_provider": "openai",
-                "llm_model": "gpt-4",
-                "temperature": 0.7,
-                "max_tokens": 2048,
-            },
-        ]
-
-        created_count = 0
-        for profile_data in profiles_data:
-            if skip_existing:
-                existing = await self.session.execute(
-                    select(Profile).where(
-                        Profile.name == profile_data["name"]
+                admin_user = result.scalar_one_or_none()
+                if not admin_user:
+                    logger.warning(
+                        "No admin user found, skipping profile creation"
                     )
+                    return 0
+
+            profiles_data = [
+                {
+                    "name": "Deterministic/Factual Mode",
+                    "description": "Low temperature profile for factual, consistent responses",
+                    "profile_type": ProfileType.ANALYTICAL,
+                    "llm_provider": "openai",
+                    "llm_model": "gpt-4",
+                    "temperature": 0.1,
+                    "max_tokens": 2048,
+                },
+                {
+                    "name": "Creative Writing Mode",
+                    "description": "High temperature profile for creative and diverse responses",
+                    "profile_type": ProfileType.CREATIVE,
+                    "llm_provider": "openai",
+                    "llm_model": "gpt-4",
+                    "temperature": 0.9,
+                    "max_tokens": 4096,
+                },
+                {
+                    "name": "Balanced Mode",
+                    "description": "Balanced temperature for general-purpose conversations",
+                    "profile_type": ProfileType.CONVERSATIONAL,
+                    "llm_provider": "openai",
+                    "llm_model": "gpt-4",
+                    "temperature": 0.7,
+                    "max_tokens": 2048,
+                },
+            ]
+
+            created_count = 0
+            for profile_data in profiles_data:
+                if skip_existing:
+                    existing = await self.session.execute(
+                        select(Profile).where(
+                            Profile.name == profile_data["name"]
+                        )
+                    )
+                    if existing.scalar_one_or_none():
+                        continue
+
+                profile = Profile(
+                    owner_id=admin_user.id,
+                    name=profile_data["name"],
+                    description=profile_data["description"],
+                    profile_type=profile_data["profile_type"],
+                    llm_provider=profile_data["llm_provider"],
+                    llm_model=profile_data["llm_model"],
+                    temperature=profile_data["temperature"],
+                    max_tokens=profile_data["max_tokens"],
+                    is_public=True,
                 )
-                if existing.scalar_one_or_none():
-                    continue
 
-            profile = Profile(
-                owner_id=admin_user.id,
-                name=profile_data["name"],
-                description=profile_data["description"],
-                profile_type=profile_data["profile_type"],
-                llm_provider=profile_data["llm_provider"],
-                llm_model=profile_data["llm_model"],
-                temperature=profile_data["temperature"],
-                max_tokens=profile_data["max_tokens"],
-                is_public=True,
-            )
+                self.session.add(profile)
+                created_count += 1
 
-            self.session.add(profile)
-            created_count += 1
+            if created_count > 0:
+                await self.session.commit()
 
-        if created_count > 0:
-            await self.session.commit()
-
-        logger.info(f"Created {created_count} basic profiles")
-        return created_count
+            logger.info(f"Created {created_count} basic profiles")
+            return created_count
+        except Exception as e:
+            await self.session.rollback()
+            logger.error(f"Failed to create basic profiles: {e}")
+            raise
 
     async def _create_basic_prompts(
         self, admin_user: User | None, skip_existing: bool = True

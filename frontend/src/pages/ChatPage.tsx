@@ -28,6 +28,7 @@ import {
 } from '@mui/icons-material';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
@@ -122,10 +123,11 @@ const ChatPage: React.FC = () => {
         setSelectedProfile(profilesResponse.profiles[0].id);
       }
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to load chat data');
-      if (process.env.NODE_ENV === 'development') {
-         
-      }
+      handleError(err, {
+        source: 'ChatPage.loadInitialData',
+        operation: 'load profiles, prompts and documents',
+        additionalData: { hasProfiles: profilesResponse?.profiles?.length }
+      });
     }
   };
 
@@ -159,10 +161,16 @@ const ChatPage: React.FC = () => {
       }
       return response.data;
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to start new conversation');
-      if (process.env.NODE_ENV === 'development') {
-         
-      }
+      handleError(err, {
+        source: 'ChatPage.startNewConversation',
+        operation: 'create new conversation',
+        additionalData: { 
+          selectedProfile, 
+          selectedPrompt, 
+          enableRetrieval,
+          promptName: selectedPromptData?.name 
+        }
+      });
       return null;
     }
   }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
@@ -191,10 +199,14 @@ const ChatPage: React.FC = () => {
       // Scroll to bottom after messages are set
       setTimeout(() => scrollToBottom(), 100);
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to load conversation');
-      if (process.env.NODE_ENV === 'development') {
-         
-      }
+      handleError(err, {
+        source: 'ChatPage.onSelectConversation',
+        operation: 'load conversation messages',
+        additionalData: { 
+          conversationId: conversation.id,
+          messageCount: conversation.message_count 
+        }
+      });
     }
   }, []);
 
@@ -342,7 +354,14 @@ const ChatPage: React.FC = () => {
       }
 
     } catch (err: unknown) {
-      toastService.error(err, 'Streaming failed');
+      handleError(err, {
+        source: 'ChatPage.handleStreamingResponse',
+        operation: 'process streaming chat response',
+        additionalData: { 
+          conversationId: currentConversation?.id,
+          messageLength: currentMessage.length 
+        }
+      });
     }
   };
 
@@ -422,7 +441,18 @@ const ChatPage: React.FC = () => {
         }
       }
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to send message');
+      handleError(err, {
+        source: 'ChatPage.sendMessage',
+        operation: 'send chat message',
+        additionalData: { 
+          conversationId: currentConversation?.id,
+          messageLength: message.length,
+          streamingEnabled,
+          selectedProfile,
+          temperature,
+          maxTokens 
+        }
+      });
 
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
@@ -508,7 +538,17 @@ const ChatPage: React.FC = () => {
         setMessages(prev => [...prev, assistantMessage]);
       }
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to regenerate message');
+      handleError(err, {
+        source: 'ChatPage.regenerateLastMessage',
+        operation: 'regenerate assistant message',
+        additionalData: { 
+          conversationId: currentConversation?.id,
+          messageId: lastAssistantMessage?.id,
+          selectedProfile,
+          temperature,
+          maxTokens 
+        }
+      });
     } finally {
       setLoading(false);
     }

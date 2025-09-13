@@ -53,6 +53,7 @@ import { TrendingFlat as TrendingFlatIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import {
   ABTestResponse,
   ABTestCreateRequest,
@@ -136,7 +137,10 @@ const ABTestingPage: React.FC = () => {
       const data = response.data;
       setTests(data.tests || []);
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to load AB tests');
+      handleError(err, {
+        source: 'ABTestingPage.loadTests',
+        operation: 'load AB tests'
+      });
     } finally {
       setLoading(false);
     }
@@ -253,7 +257,14 @@ const ABTestingPage: React.FC = () => {
       handleCloseDialog();
       await loadTests();
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to save test');
+      handleError(err, {
+        source: 'ABTestingPage.handleSaveTest',
+        operation: editingTest ? 'update AB test' : 'create AB test',
+        additionalData: { 
+          testId: editingTest?.id,
+          testName: formData.name 
+        }
+      });
     } finally {
       setSaving(false);
     }
@@ -269,7 +280,11 @@ const ABTestingPage: React.FC = () => {
       toastService.success('Test deleted successfully');
       await loadTests();
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to delete test');
+      handleError(err, {
+        source: 'ABTestingPage.handleDeleteTest',
+        operation: 'delete AB test',
+        additionalData: { testId: test.id, testName: test.name }
+      });
     }
   };
 
@@ -294,7 +309,15 @@ const ABTestingPage: React.FC = () => {
       await loadTests();
       handleCloseActionMenu();
     } catch (err: unknown) {
-      toastService.error(err, `Failed to ${action} test`);
+      handleError(err, {
+        source: 'ABTestingPage.handleTestAction',
+        operation: `${action} AB test`,
+        additionalData: { 
+          testId: test.id, 
+          testName: test.name,
+          action 
+        }
+      });
     }
   };
 

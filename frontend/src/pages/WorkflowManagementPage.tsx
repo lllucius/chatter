@@ -68,6 +68,7 @@ import {
 } from '@mui/icons-material';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import { WorkflowTemplateInfo, AvailableToolsResponse, ChatRequest } from 'chatter-sdk';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import WorkflowMonitor from '../components/WorkflowMonitor';
@@ -117,7 +118,10 @@ const WorkflowManagementPage: React.FC = () => {
         setTemplates(response.templates);
       }
     } catch (error: unknown) {
-      toastService.error('Failed to load workflow templates');
+      handleError(error, {
+        source: 'WorkflowManagementPage.loadTemplates',
+        operation: 'load workflow templates'
+      });
     } finally {
       setLoading(false);
     }
@@ -177,7 +181,11 @@ const WorkflowManagementPage: React.FC = () => {
           ? { ...exec, status: 'failed', endTime: new Date(), error: error.message, progress: 100 }
           : exec
       ));
-      toastService.error(`Workflow execution failed: ${error.message}`);
+      handleError(error, {
+        source: 'WorkflowManagementPage.simulateWorkflowExecution',
+        operation: 'execute workflow template',
+        additionalData: { templateName, executionId }
+      });
     }
   };
 
@@ -212,7 +220,11 @@ const WorkflowManagementPage: React.FC = () => {
           toastService.success(`Template "${template.name}" copied to clipboard`);
         })
         .catch(() => {
-          toastService.error('Failed to copy template to clipboard');
+          handleError(new Error('Clipboard operation failed'), {
+            source: 'WorkflowManagementPage.copyTemplate',
+            operation: 'copy template to clipboard',
+            additionalData: { templateName: template.name }
+          });
         });
     }
   };
@@ -709,7 +721,11 @@ const WorkflowManagementPage: React.FC = () => {
                 toastService.success('Workflow saved successfully');
                 setBuilderDialogOpen(false);
               } catch (error) {
-                toastService.error('Failed to save workflow');
+                handleError(error, {
+                  source: 'WorkflowManagementPage.onSave',
+                  operation: 'save custom workflow',
+                  additionalData: { workflowName: newWorkflow.name }
+                });
               }
             }, [])}
             onWorkflowChange={useCallback((workflow) => {

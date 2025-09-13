@@ -178,20 +178,20 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
     <>
       <Card
         sx={{
-          mb: 2,
-          bgcolor: message.role === 'user' ? 'grey.50' : 'background.paper',
-          border: message.role === 'user' ? '1px solid' : 'none',
-          borderColor: 'grey.200',
+          mb: 1,
+          bgcolor: message.role === 'user' ? 'primary.50' : message.role === 'assistant' ? 'grey.100' : 'background.paper',
+          border: '1px solid',
+          borderColor: message.role === 'user' ? 'primary.200' : message.role === 'assistant' ? 'grey.300' : 'grey.200',
         }}
       >
-        <CardContent>
-          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 2 }}>
-            <Avatar sx={{ bgcolor: getAvatarColor(), width: 40, height: 40 }}>
+        <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
+          <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1.5 }}>
+            <Avatar sx={{ bgcolor: getAvatarColor(), width: 36, height: 36 }}>
               {getAvatarIcon()}
             </Avatar>
             
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 1 }}>
+              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="subtitle2" fontWeight="bold">
                     {getRoleLabel()}
@@ -214,12 +214,12 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                 </Box>
               </Box>
               
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 1 }}>
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}>
                 {message.content}
               </Typography>
               
               {message.metadata && (
-                <Box sx={{ display: 'flex', gap: 2, mb: 1 }}>
+                <Box sx={{ display: 'flex', gap: 1.5, mb: 0.5 }}>
                   {message.metadata.tokens && (
                     <Typography variant="caption" color="text.secondary">
                       {message.metadata.tokens} tokens
@@ -234,7 +234,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
               )}
               
               {message.role === 'assistant' && onRate && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                   <Typography variant="caption" color="text.secondary">
                     Rate this response:
                   </Typography>

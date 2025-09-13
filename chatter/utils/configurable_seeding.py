@@ -562,7 +562,7 @@ class ConfigurableSeeder(DatabaseSeeder):
         results["created"]["registry"] = "default_models"
 
         logger.info(
-            f"Production seeding completed: {profiles_created} profiles, {prompts_created} prompts, {workflow_templates_created} workflow templates"
+            f"Minimal seeding completed: {background_jobs_created} background jobs, registry data created"
         )
 
     async def _create_sample_conversations(

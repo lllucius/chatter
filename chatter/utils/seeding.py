@@ -283,9 +283,17 @@ class DatabaseSeeder:
     async def _count_users(self) -> int:
         """Count existing users in database."""
         from sqlalchemy import func
+        from sqlalchemy.exc import ProgrammingError
 
-        result = await self.session.execute(select(func.count(User.id)))
-        return result.scalar() or 0
+        try:
+            result = await self.session.execute(select(func.count(User.id)))
+            return result.scalar() or 0
+        except ProgrammingError as e:
+            # Table doesn't exist yet, return 0
+            if "does not exist" in str(e):
+                logger.debug("Users table does not exist, returning 0 count")
+                return 0
+            raise
 
     async def _seed_minimal_data(
         self, results: dict[str, Any], skip_existing: bool

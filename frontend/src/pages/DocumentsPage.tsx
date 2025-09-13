@@ -33,6 +33,7 @@ import {
 } from '../components/CrudRenderers';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
@@ -83,7 +84,14 @@ const DocumentsPage: React.FC = () => {
 
     const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
       const docEvent = event as DocumentProcessingFailedEvent;
-      toastService.error(`Document processing failed: ${docEvent.data.error}`);
+      handleError(new Error(`Document processing failed: ${docEvent.data.error}`), {
+        source: 'DocumentsPage.onDocumentProcessingFailed',
+        operation: 'process document',
+        additionalData: { 
+          documentId: docEvent.data.document_id,
+          error: docEvent.data.error 
+        }
+      });
       setRefreshKey(prev => prev + 1);
     });
 
@@ -279,7 +287,11 @@ const DocumentsPage: React.FC = () => {
         newWindow.document.close();
       }
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to view document details');
+      handleError(err, {
+        source: 'DocumentsPage.handleViewDocument',
+        operation: 'view document details',
+        additionalData: { documentId: document.id, documentName: document.filename }
+      });
     }
   };
 
@@ -301,7 +313,11 @@ const DocumentsPage: React.FC = () => {
       window.URL.revokeObjectURL(url);
       window.document.body.removeChild(a);
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to download document');
+      handleError(err, {
+        source: 'DocumentsPage.handleDownloadDocument',
+        operation: 'download document',
+        additionalData: { documentId: document.id, documentName: document.filename }
+      });
     }
   };
 
@@ -318,7 +334,11 @@ const DocumentsPage: React.FC = () => {
       const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearch(searchRequest);
       setSearchResults(response.results);
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to search documents');
+      handleError(err, {
+        source: 'DocumentsPage.handleSearch',
+        operation: 'search documents',
+        additionalData: { query: searchQuery }
+      });
     } finally {
       setSearching(false);
     }

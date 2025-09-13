@@ -35,6 +35,7 @@ import {
 import { format } from 'date-fns';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import { ToolServerResponse } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 
@@ -59,7 +60,10 @@ const HealthPage: React.FC = () => {
       setHealth(healthResponse.data);
       setToolServers(toolServerResponse.data);
     } catch (err: unknown) {
-      toastService.error(err, 'Failed to load health data');
+      handleError(err, {
+        source: 'HealthPage.loadHealthData',
+        operation: 'load system health data'
+      });
     } finally {
       setLoading(false);
     }

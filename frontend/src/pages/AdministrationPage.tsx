@@ -51,6 +51,7 @@ import { getSDK } from '../services/auth-service';
 import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from 'chatter-sdk';
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 
@@ -178,8 +179,10 @@ const AdministrationPage: React.FC = () => {
       setLastJobStates(newStates);
       setJobs(newJobs);
     } catch (error: unknown) {
-       
-      toastService.error(error, 'Failed to load jobs');
+      handleError(error, {
+        source: 'AdministrationPage.loadJobs',
+        operation: 'load job data'
+      });
     } finally {
       setDataLoading(false);
     }
@@ -190,7 +193,10 @@ const AdministrationPage: React.FC = () => {
       const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
       setJobStats(response.data);
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to load job stats');
+      handleError(error, {
+        source: 'AdministrationPage.loadJobStats',
+        operation: 'load job statistics'
+      });
     }
   }, []);
 
@@ -201,7 +207,10 @@ const AdministrationPage: React.FC = () => {
       const items = response.backups || [];
       setBackups(items);
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to load backups');
+      handleError(error, {
+        source: 'AdministrationPage.loadBackups',
+        operation: 'load backup data'
+      });
     } finally {
       setDataLoading(false);
     }
@@ -212,7 +221,10 @@ const AdministrationPage: React.FC = () => {
       const response = await getSDK().plugins.listPluginsApiV1Plugins({});
       setPlugins(response.plugins || []);
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to load plugins');
+      handleError(error, {
+        source: 'AdministrationPage.loadPlugins',
+        operation: 'load plugin data'
+      });
     }
   }, []);
 
@@ -309,7 +321,11 @@ const AdministrationPage: React.FC = () => {
           break;
       }
     } catch (error: unknown) {
-      toastService.error(error, `Failed to ${action} job`);
+      handleError(error, {
+        source: 'AdministrationPage.handleJobAction',
+        operation: `${action} job`,
+        additionalData: { jobId, action }
+      });
     } finally {
       setLoading(false);
     }
@@ -439,7 +455,15 @@ const AdministrationPage: React.FC = () => {
       });
 
     } catch (error: unknown) {
-      toastService.error(error, 'Bulk operation failed');
+      handleError(error, {
+        source: 'AdministrationPage.handleBulkAction',
+        operation: 'bulk operation',
+        additionalData: { 
+          operationType: bulkOperationData.operationType,
+          dryRun: bulkOperationData.dryRun,
+          filters: bulkOperationData.filters 
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -468,7 +492,11 @@ const AdministrationPage: React.FC = () => {
       setUserSettingsOpen(false);
       setEditingUser(null);
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to update user settings');
+      handleError(error, {
+        source: 'AdministrationPage.handleUserSettingsSave',
+        operation: 'update user settings',
+        additionalData: { userId: editingUser?.id }
+      });
     }
   };
 
@@ -477,7 +505,11 @@ const AdministrationPage: React.FC = () => {
       setLoading(true);
       toastService.info('Backup download functionality will be available soon');
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to download backup');
+      handleError(error, {
+        source: 'AdministrationPage.handleDownloadBackup',
+        operation: 'download backup',
+        additionalData: { backupId: backup?.id }
+      });
     } finally {
       setLoading(false);
     }
@@ -494,7 +526,11 @@ const AdministrationPage: React.FC = () => {
       }
       loadPlugins();
     } catch (error: unknown) {
-      toastService.error(error, 'Failed to toggle plugin status');
+      handleError(error, {
+        source: 'AdministrationPage.handleTogglePlugin',
+        operation: 'toggle plugin status',
+        additionalData: { pluginId: plugin.id, pluginName: plugin.name }
+      });
     }
   };
 
@@ -602,7 +638,17 @@ const AdministrationPage: React.FC = () => {
         maxRetries: 3,
       });
     } catch (error: unknown) {
-      toastService.error(error, 'An error occurred. Please try again.');
+      handleError(error, {
+        source: 'AdministrationPage.handleCreateItem',
+        operation: 'create item',
+        additionalData: { 
+          type,
+          formData: Object.keys(formData).reduce((acc, key) => ({
+            ...acc, 
+            [key]: typeof formData[key] === 'string' ? formData[key].substring(0, 50) : formData[key]
+          }), {})
+        }
+      });
     } finally {
       setLoading(false);
     }
@@ -632,7 +678,11 @@ const AdministrationPage: React.FC = () => {
             break;
         }
       } catch (error: unknown) {
-        toastService.error(error, `Failed to delete ${type}`);
+        handleError(error, {
+          source: 'AdministrationPage.handleDeleteItem',
+          operation: `delete ${type}`,
+          additionalData: { type, itemId: item?.id }
+        });
       } finally {
         setLoading(false);
       }
@@ -654,7 +704,11 @@ const AdministrationPage: React.FC = () => {
           break;
       }
     } catch (error: unknown) {
-      toastService.error(error, `Failed to edit ${type}`);
+      handleError(error, {
+        source: 'AdministrationPage.handleEditItem',
+        operation: `edit ${type}`,
+        additionalData: { type, itemId: item?.id }
+      });
     } finally {
       setLoading(false);
     }

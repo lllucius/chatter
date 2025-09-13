@@ -36,6 +36,7 @@ import {
 import { format } from 'date-fns';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import { useForm } from '../hooks/useForm';
 import PageLayout from '../components/PageLayout';
 
@@ -92,7 +93,14 @@ const UserSettingsPage: React.FC = () => {
         setUserProfile({ ...userProfile!, ...updatedProfile });
         toastService.success('Profile updated successfully');
       } catch (error: unknown) {
-        toastService.error('Failed to update profile: ' + error.message);
+        handleError(error, {
+          source: 'UserSettingsPage.handleSaveProfile',
+          operation: 'update user profile',
+          additionalData: { 
+            name: profileForm.values.name,
+            email: profileForm.values.email 
+          }
+        });
         throw error;
       }
     },
@@ -132,7 +140,10 @@ const UserSettingsPage: React.FC = () => {
         toastService.success('Password changed successfully');
         passwordForm.reset();
       } catch (error: unknown) {
-        toastService.error('Failed to change password: ' + error.message);
+        handleError(error, {
+          source: 'UserSettingsPage.handleChangePassword',
+          operation: 'change password'
+        });
         throw error;
       }
     },
@@ -151,7 +162,11 @@ const UserSettingsPage: React.FC = () => {
         setApiKeyDialogOpen(false);
         apiKeyForm.reset();
       } catch (error: unknown) {
-        toastService.error('Failed to create API key: ' + error.message);
+        handleError(error, {
+          source: 'UserSettingsPage.handleCreateApiKey',
+          operation: 'create API key',
+          additionalData: { keyName: apiKeyForm.values.name }
+        });
         throw error;
       }
     },
@@ -166,7 +181,10 @@ const UserSettingsPage: React.FC = () => {
         email: profile.email || '',
       });
     } catch (error: unknown) {
-      toastService.error('Failed to load user profile: ' + error.message);
+      handleError(error, {
+        source: 'UserSettingsPage.loadUserProfile',
+        operation: 'load user profile'
+      });
     }
   };
 
@@ -176,7 +194,10 @@ const UserSettingsPage: React.FC = () => {
       const keys = await getSDK().listApiKeys();
       setApiKeys(keys);
     } catch (error: unknown) {
-      toastService.error('Failed to load API keys: ' + error.message);
+      handleError(error, {
+        source: 'UserSettingsPage.loadApiKeys',
+        operation: 'load API keys'
+      });
     } finally {
       setApiKeysLoading(false);
     }
@@ -188,7 +209,11 @@ const UserSettingsPage: React.FC = () => {
       setApiKeys(apiKeys.filter(key => key.id !== keyId));
       toastService.success('API key revoked successfully');
     } catch (error: unknown) {
-      toastService.error('Failed to revoke API key: ' + error.message);
+      handleError(error, {
+        source: 'UserSettingsPage.handleRevokeKey',
+        operation: 'revoke API key',
+        additionalData: { keyId: key.id, keyName: key.name }
+      });
     }
   };
 
@@ -198,7 +223,10 @@ const UserSettingsPage: React.FC = () => {
       toastService.success('Account deactivated successfully');
       // The SDK will handle logout and redirect
     } catch (error: unknown) {
-      toastService.error('Failed to deactivate account: ' + error.message);
+      handleError(error, {
+        source: 'UserSettingsPage.handleDeactivateAccount',
+        operation: 'deactivate user account'
+      });
     } finally {
       setDeactivateDialogOpen(false);
     }

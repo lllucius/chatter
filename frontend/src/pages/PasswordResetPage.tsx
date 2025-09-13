@@ -18,6 +18,7 @@ import { Email, VpnKey, CheckCircle } from '@mui/icons-material';
 import { useForm } from '../hooks/useForm';
 import { getSDK, authService } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 
 interface RequestResetFormValues {
   email: string;
@@ -53,7 +54,11 @@ const PasswordResetPage: React.FC = () => {
         setStep('confirm');
         toastService.success('Password reset instructions sent to your email');
       } catch (error: unknown) {
-        toastService.error('Failed to send reset instructions: ' + error.message);
+        handleError(error, {
+          source: 'PasswordResetPage.handleSendInstructions',
+          operation: 'send password reset instructions',
+          additionalData: { email: formData.email }
+        });
         throw error;
       }
     },
@@ -89,7 +94,11 @@ const PasswordResetPage: React.FC = () => {
         setStep('complete');
         toastService.success('Password reset successfully');
       } catch (error: unknown) {
-        toastService.error('Failed to reset password: ' + error.message);
+        handleError(error, {
+          source: 'PasswordResetPage.handleResetPassword',
+          operation: 'reset password',
+          additionalData: { token: formData.token }
+        });
         throw error;
       }
     },

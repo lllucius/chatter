@@ -11,6 +11,7 @@ import {
 } from '../components/CrudRenderers';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import {
   Provider,
   ProviderCreate,
@@ -166,8 +167,12 @@ const ModelManagementPage: React.FC = () => {
               defaultProviderBody
             );
             toastService.success('Default provider updated');
-          } catch {
-            toastService.error('Failed to set default provider');
+          } catch (error) {
+            handleError(error, {
+              source: 'ModelManagementPage.setDefaultProvider',
+              operation: 'set default provider',
+              additionalData: { providerId: provider.id }
+            });
           }
         }
       },
@@ -288,8 +293,12 @@ const ModelManagementPage: React.FC = () => {
           try {
             await getSDK().models.setDefaultModelApiV1ModelsModelsModelIdSetDefault(model.id);
             toastService.success('Default model updated');
-          } catch {
-            toastService.error('Failed to set default model');
+          } catch (error) {
+            handleError(error, {
+              source: 'ModelManagementPage.setDefaultModel',
+              operation: 'set default model',
+              additionalData: { modelId: model.id }
+            });
           }
         }
       },

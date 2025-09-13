@@ -106,6 +106,11 @@ async def get_conversation_stats(
             most_active_hours=stats.get("most_active_hours", {}),
             popular_models=stats.get("popular_models", {}),
             popular_providers=stats.get("popular_providers", {}),
+            # Rating metrics
+            total_ratings=stats.get("total_ratings", 0),
+            avg_message_rating=stats.get("avg_message_rating", 0.0),
+            messages_with_ratings=stats.get("messages_with_ratings", 0),
+            rating_distribution=stats.get("rating_distribution", {}),
         )
 
     except Exception as e:

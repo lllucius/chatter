@@ -340,6 +340,61 @@ class AnalyticsService:
                 if provider
             }
 
+            # Rating statistics
+            rating_stats_result = await self.session.execute(
+                select(
+                    func.count(Message.rating),  # Count of messages with ratings
+                    func.avg(Message.rating),    # Average rating
+                    func.sum(Message.rating_count), # Total number of ratings
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(
+                    and_(
+                        Conversation.user_id == user_id,
+                        Message.rating.is_not(None),
+                        time_filter,
+                    )
+                )
+            )
+            
+            rating_stats = rating_stats_result.first()
+            if rating_stats:
+                messages_with_ratings = rating_stats[0] or 0
+                avg_message_rating = float(rating_stats[1] or 0.0)
+                total_ratings = rating_stats[2] or 0
+            else:
+                messages_with_ratings = 0
+                avg_message_rating = 0.0
+                total_ratings = 0
+
+            # Rating distribution (1-5 stars)
+            rating_distribution_result = await self.session.execute(
+                select(
+                    func.floor(Message.rating),
+                    func.count(Message.id),
+                )
+                .select_from(Message)
+                .join(Conversation)
+                .where(
+                    and_(
+                        Conversation.user_id == user_id,
+                        Message.rating.is_not(None),
+                        time_filter,
+                    )
+                )
+                .group_by(func.floor(Message.rating))
+                .order_by(func.floor(Message.rating))
+            )
+            
+            rating_distribution = {}
+            for rating_floor, count in rating_distribution_result.all():
+                if rating_floor is not None:
+                    # Convert floor rating to star rating (0-1 = 1 star, 1-2 = 2 stars, etc.)
+                    star_rating = min(5, max(1, int(rating_floor) + 1))
+                    star_key = f"{star_rating}_star{'s' if star_rating != 1 else ''}"
+                    rating_distribution[star_key] = count
+
             return {
                 "total_conversations": total_conversations,
                 "conversations_by_status": conversations_by_status,
@@ -357,6 +412,11 @@ class AnalyticsService:
                 "most_active_hours": most_active_hours,
                 "popular_models": popular_models,
                 "popular_providers": popular_providers,
+                # Rating metrics
+                "total_ratings": total_ratings,
+                "avg_message_rating": avg_message_rating,
+                "messages_with_ratings": messages_with_ratings,
+                "rating_distribution": rating_distribution,
             }
 
         except Exception as e:
@@ -377,6 +437,11 @@ class AnalyticsService:
                 "most_active_hours": {},
                 "popular_models": {},
                 "popular_providers": {},
+                # Default rating metrics
+                "total_ratings": 0,
+                "avg_message_rating": 0.0,
+                "messages_with_ratings": 0,
+                "rating_distribution": {},
             }
 
     async def get_usage_metrics(

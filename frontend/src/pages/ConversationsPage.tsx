@@ -48,9 +48,6 @@ const ConversationsPage: React.FC = () => {
 
     try {
       const sdk = getSDK();
-      if (!sdk || !sdk.conversations) {
-        throw new Error('SDK not properly initialized. Please reload the page.');
-      }
       const response =
         await sdk.conversations.getConversationApiV1ConversationsConversationId(
           conversation.id,
@@ -156,9 +153,6 @@ const ConversationsPage: React.FC = () => {
   const service: CrudService<ConversationResponse, never, never> = {
     list: async (page: number, pageSize: number) => {
       const sdk = getSDK();
-      if (!sdk || !sdk.conversations) {
-        throw new Error('SDK not properly initialized. Please reload the page.');
-      }
       const response = await sdk.conversations.listConversationsApiV1Conversations({
         limit: pageSize,
         offset: page * pageSize,
@@ -171,9 +165,6 @@ const ConversationsPage: React.FC = () => {
 
     delete: async (id: string) => {
       const sdk = getSDK();
-      if (!sdk || !sdk.conversations) {
-        throw new Error('SDK not properly initialized. Please reload the page.');
-      }
       await sdk.conversations.deleteConversationApiV1ConversationsConversationId(id);
     },
   };

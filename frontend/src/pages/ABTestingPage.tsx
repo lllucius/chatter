@@ -62,6 +62,8 @@ import {
   ABTestResultsResponse,
   TestStatus,
   TestType,
+  VariantAllocation,
+  MetricType,
 } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 import ABTestAnalytics from '../components/ABTestAnalytics';
@@ -69,9 +71,11 @@ import ABTestAnalytics from '../components/ABTestAnalytics';
 
 
 interface TestRecommendations {
-  suggestions: string[];
-  nextSteps: string[];
-  improvements: string[];
+  recommendations?: string[];
+  insights?: string[];
+  suggestions?: string[];
+  nextSteps?: string[];
+  improvements?: string[];
 }
 
 interface TestPerformance {
@@ -102,17 +106,13 @@ const ABTestingPage: React.FC = () => {
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    test_type: 'prompt' as TestType,
+    test_type: TestType.prompt,
     variants: [
       { name: 'Control', allocation: 50 },
       { name: 'Variant A', allocation: 50 }
     ],
-    minimum_sample_size: 1000,
+    min_sample_size: 1000,
     confidence_level: 0.95,
-    primary_metric: {
-      name: 'response_quality',
-      improvement_threshold: 0.05,
-    },
     duration_days: 14,
   });
 
@@ -155,10 +155,10 @@ const ABTestingPage: React.FC = () => {
           getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformance(test.id),
         ]);
 
-      setTestMetrics(metricsResponse.status === 'fulfilled' ? metricsResponse.value.data : null);
-      setTestResults(resultsResponse.status === 'fulfilled' ? resultsResponse.value.data : null);
-      setTestRecommendations(recommendationsResponse.status === 'fulfilled' ? recommendationsResponse.value.data : null);
-      setTestPerformance(performanceResponse.status === 'fulfilled' ? performanceResponse.value.data : null);
+      setTestMetrics(metricsResponse.status === 'fulfilled' ? metricsResponse.value : null);
+      setTestResults(resultsResponse.status === 'fulfilled' ? resultsResponse.value : null);
+      setTestRecommendations(recommendationsResponse.status === 'fulfilled' ? recommendationsResponse.value as TestRecommendations : null);
+      setTestPerformance(performanceResponse.status === 'fulfilled' ? performanceResponse.value as unknown as TestPerformance : null);
     } catch {
       // Error loading test details - will show in UI appropriately
     }
@@ -173,11 +173,10 @@ const ABTestingPage: React.FC = () => {
         test_type: test.test_type,
         variants: test.variants.map(v => ({
           name: v.name,
-          allocation: v.allocation * 100, // Convert from decimal to percentage
+          allocation: (v.weight || 0) * 100, // Convert from decimal to percentage
         })),
-        minimum_sample_size: test.minimum_sample_size,
+        min_sample_size: test.min_sample_size,
         confidence_level: test.confidence_level,
-        primary_metric: test.primary_metric,
         duration_days: test.duration_days,
       });
     } else {
@@ -185,17 +184,13 @@ const ABTestingPage: React.FC = () => {
       setFormData({
         name: '',
         description: '',
-        test_type: 'prompt',
+        test_type: TestType.prompt,
         variants: [
           { name: 'Control', allocation: 50 },
           { name: 'Variant A', allocation: 50 }
         ],
-        minimum_sample_size: 1000,
+        min_sample_size: 1000,
         confidence_level: 0.95,
-        primary_metric: {
-          name: 'response_quality',
-          improvement_threshold: 0.05,
-        },
         duration_days: 14,
       });
     }
@@ -231,14 +226,16 @@ const ABTestingPage: React.FC = () => {
         name: formData.name,
         description: formData.description,
         test_type: formData.test_type,
+        allocation_strategy: VariantAllocation.equal, // Default allocation strategy
         variants: formData.variants.map(v => ({
           name: v.name,
-          allocation: v.allocation / 100, // Convert percentage to decimal
+          description: v.name === 'Control' ? 'Control variant for baseline comparison' : `${v.name} test variant`,
+          weight: v.allocation / 100, // Convert percentage to decimal
           configuration: {},
         })),
-        minimum_sample_size: formData.minimum_sample_size,
+        metrics: [MetricType.user_satisfaction], // Default metrics
+        min_sample_size: formData.min_sample_size,
         confidence_level: formData.confidence_level,
-        primary_metric: formData.primary_metric,
         duration_days: formData.duration_days,
       };
 
@@ -348,31 +345,31 @@ const ABTestingPage: React.FC = () => {
 
   const getStatusColor = (status: TestStatus): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
     switch (status) {
-      case 'draft': return 'default';
-      case 'running': return 'primary';
-      case 'paused': return 'warning';
-      case 'completed': return 'success';
-      case 'stopped': return 'error';
+      case TestStatus.draft: return 'default';
+      case TestStatus.running: return 'primary';
+      case TestStatus.paused: return 'warning';
+      case TestStatus.completed: return 'success';
+      case TestStatus.cancelled: return 'error';
       default: return 'default';
     }
   };
 
   const getStatusIcon = (status: TestStatus) => {
     switch (status) {
-      case 'running': return <TrendingUpIcon />;
-      case 'paused': return <PauseIcon />;
-      case 'completed': return <CompleteIcon />;
-      case 'stopped': return <StopIcon />;
+      case TestStatus.running: return <TrendingUpIcon />;
+      case TestStatus.paused: return <PauseIcon />;
+      case TestStatus.completed: return <CompleteIcon />;
+      case TestStatus.cancelled: return <StopIcon />;
       default: return <TrendingFlatIcon />;
     }
   };
 
-  const canStart = (test: ABTestResponse) => test.status === 'draft' || test.status === 'paused';
-  const canPause = (test: ABTestResponse) => test.status === 'running';
-  const canEnd = (test: ABTestResponse) => test.status === 'running' || test.status === 'paused';
-  const canComplete = (test: ABTestResponse) => test.status === 'running' || test.status === 'paused';
+  const canStart = (test: ABTestResponse) => test.status === TestStatus.draft || test.status === TestStatus.paused;
+  const canPause = (test: ABTestResponse) => test.status === TestStatus.running;
+  const canEnd = (test: ABTestResponse) => test.status === TestStatus.running || test.status === TestStatus.paused;
+  const canComplete = (test: ABTestResponse) => test.status === TestStatus.running || test.status === TestStatus.paused;
 
-  const renderTestDialog = (): void => (
+  const renderTestDialog = () => (
     <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
       <DialogTitle>{editingTest ? 'Edit AB Test' : 'Create AB Test'}</DialogTitle>
       <DialogContent>
@@ -396,7 +393,7 @@ const ABTestingPage: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, test_type: e.target.value as TestType })}
                   label="Test Type"
                 >
-                  {testTypes.map((type): void => (
+                  {testTypes.map((type) => (
                     <MenuItem key={type.value} value={type.value}>
                       {type.label}
                     </MenuItem>
@@ -423,7 +420,7 @@ const ABTestingPage: React.FC = () => {
                 Test Variants
               </Typography>
               <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-                {formData.variants.map((variant, index): void => (
+                {formData.variants.map((variant, index) => (
                   <Grid container spacing={2} key={index} alignItems="center">
                     <Grid size={{ xs: 12, sm: 8 }}>
                       <TextField
@@ -482,8 +479,8 @@ const ABTestingPage: React.FC = () => {
                 fullWidth
                 label="Minimum Sample Size"
                 type="number"
-                value={formData.minimum_sample_size}
-                onChange={(e) => setFormData({ ...formData, minimum_sample_size: parseInt(e.target.value) || 1000 })}
+                value={formData.min_sample_size}
+                onChange={(e) => setFormData({ ...formData, min_sample_size: parseInt(e.target.value) || 1000 })}
                 inputProps={{ min: 100 }}
               />
             </Grid>
@@ -507,17 +504,6 @@ const ABTestingPage: React.FC = () => {
                 inputProps={{ min: 0.8, max: 0.99, step: 0.01 }}
               />
             </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="Primary Metric"
-                value={formData.primary_metric.name}
-                onChange={(e) => setFormData({ 
-                  ...formData, 
-                  primary_metric: { ...formData.primary_metric, name: e.target.value }
-                })}
-              />
-            </Grid>
           </Grid>
         </Box>
       </DialogContent>
@@ -534,7 +520,7 @@ const ABTestingPage: React.FC = () => {
     </Dialog>
   );
 
-  const renderDetailDialog = (): void => (
+  const renderDetailDialog = () => (
     <Dialog 
       open={detailDialogOpen} 
       onClose={handleCloseDetailDialog} 
@@ -572,7 +558,7 @@ const ABTestingPage: React.FC = () => {
                   <Typography><strong>Type:</strong> {selectedTest.test_type}</Typography>
                   <Typography><strong>Status:</strong> {selectedTest.status}</Typography>
                   <Typography><strong>Duration:</strong> {selectedTest.duration_days} days</Typography>
-                  <Typography><strong>Sample Size:</strong> {selectedTest.minimum_sample_size.toLocaleString()}</Typography>
+                  <Typography><strong>Sample Size:</strong> {selectedTest.min_sample_size.toLocaleString()}</Typography>
                   <Typography><strong>Confidence:</strong> {(selectedTest.confidence_level * 100).toFixed(1)}%</Typography>
                   {selectedTest.created_at && (
                     <Typography><strong>Created:</strong> {format(new Date(selectedTest.created_at), 'MMM dd, yyyy HH:mm')}</Typography>
@@ -588,15 +574,15 @@ const ABTestingPage: React.FC = () => {
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Test Variants</Typography>
-                  {selectedTest.variants.map((variant): void => (
+                  {selectedTest.variants.map((variant) => (
                     <Box key={variant.name} sx={{ mb: 2 }}>
                       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
                         <Typography variant="subtitle1">{variant.name}</Typography>
-                        <Chip label={`${(variant.allocation * 100).toFixed(1)}%`} size="small" />
+                        <Chip label={`${((variant.weight || 0) * 100).toFixed(1)}%`} size="small" />
                       </Box>
                       <LinearProgress 
                         variant="determinate" 
-                        value={variant.allocation * 100} 
+                        value={(variant.weight || 0) * 100} 
                         sx={{ mt: 1, height: 6, borderRadius: 3 }}
                       />
                     </Box>
@@ -656,7 +642,7 @@ const ABTestingPage: React.FC = () => {
                 <Paper sx={{ p: 2 }}>
                   {testRecommendations.recommendations && testRecommendations.recommendations.length > 0 ? (
                     <List>
-                      {testRecommendations.recommendations.map((rec: string, index: number): void => (
+                      {testRecommendations.recommendations.map((rec: string, index: number) => (
                         <ListItem key={index}>
                           <ListItemText primary={rec} />
                         </ListItem>
@@ -670,7 +656,7 @@ const ABTestingPage: React.FC = () => {
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle1">Insights</Typography>
                       <List>
-                        {testRecommendations.insights.map((insight: string, index: number): void => (
+                        {testRecommendations.insights.map((insight: string, index: number) => (
                           <ListItem key={index}>
                             <ListItemText primary={insight} />
                           </ListItem>
@@ -692,7 +678,7 @@ const ABTestingPage: React.FC = () => {
     </Dialog>
   );
 
-  const renderActionMenu = (): void => (
+  const renderActionMenu = () => (
     <Menu
       anchorEl={actionAnchorEl}
       open={Boolean(actionAnchorEl)}
@@ -776,7 +762,7 @@ const ABTestingPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((test): void => (
+                {tests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((test) => (
                   <TableRow key={test.id} hover>
                     <TableCell>
                       <Box>
@@ -814,7 +800,7 @@ const ABTestingPage: React.FC = () => {
                       />
                     </TableCell>
                     <TableCell>{test.variants.length}</TableCell>
-                    <TableCell>{test.minimum_sample_size.toLocaleString()}</TableCell>
+                    <TableCell>{test.min_sample_size.toLocaleString()}</TableCell>
                     <TableCell>
                       {test.created_at ? format(new Date(test.created_at), 'MMM dd, yyyy') : 'N/A'}
                     </TableCell>

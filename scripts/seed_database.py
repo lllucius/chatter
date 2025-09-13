@@ -115,7 +115,13 @@ def seed(
             _display_results(results)
 
         except Exception as e:
-            console.print(f"❌ Seeding failed: {e}", style="red")
+            error_msg = str(e)
+            if "does not exist" in error_msg and "relation" in error_msg:
+                console.print(f"❌ Seeding failed: {e}", style="red")
+                console.print("💡 Hint: Database tables don't exist. Try adding the --init flag:", style="yellow")
+                console.print(f"   python3.12 scripts/seed_database.py seed --init {' '.join(sys.argv[2:])}", style="cyan")
+            else:
+                console.print(f"❌ Seeding failed: {e}", style="red")
             logger.error("Seeding failed", error=str(e))
             raise typer.Exit(1) from e
 

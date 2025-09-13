@@ -30,10 +30,12 @@ export class SSEEventManager {
    */
   public connect(): void {
     if (!authService.isAuthenticated()) {
+      console.error('SSE: Not authenticated. Please login first.');
       return;
     }
 
     if (this.isConnected || this.connectionStartTime) {
+      console.log('SSE: Already connected or connecting');
       return;
     }
 
@@ -47,6 +49,7 @@ export class SSEEventManager {
    * Disconnect from the SSE stream
    */
   public disconnect(): void {
+    console.log('SSE: Disconnected');
     this.isManuallyDisconnected = true;
     this.isConnected = false;
     this.connectionStartTime = null;
@@ -122,9 +125,11 @@ export class SSEEventManager {
    */
   private createConnection(): void {
     if (!authService.isAuthenticated()) {
-      
+      console.error('SSE: Not authenticated. Please login first.');
       return;
     }
+
+    console.log('SSE: Connecting to', `${authService.getURL()}/api/v1/events/stream`);
 
     try {
       // Use SDK method with automatic authentication and retry
@@ -209,7 +214,7 @@ export class SSEEventManager {
         const { done, value } = await reader.read();
         
         if (done) {
-          
+          console.log('SSE: Stream ended');
           break;
         }
 
@@ -232,6 +237,7 @@ export class SSEEventManager {
     } finally {
       this.isConnected = false;
       this.connectionStartTime = null;
+      console.log('SSE: Disconnected');
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
       }
@@ -370,7 +376,7 @@ export class SSEEventManager {
    */
   private scheduleReconnect(): void {
     if (this.isManuallyDisconnected || this.reconnectAttempts >= this.maxReconnectAttempts) {
-      
+      console.log(`SSE: Max reconnection attempts reached (${this.maxReconnectAttempts})`);
       return;
     }
 
@@ -383,7 +389,7 @@ export class SSEEventManager {
       this.maxReconnectDelay
     );
     
-    
+    console.log(`SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
     
     const timeout = setTimeout(() => {
       // Remove this timeout from tracking

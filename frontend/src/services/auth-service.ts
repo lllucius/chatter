@@ -47,11 +47,28 @@ class AuthService {
     return this.token;
   }
 
+  public isInitialized(): boolean {
+    return this.initialized;
+  }
+
   public getSDK(): ChatterSDK {
-    if (this.token) {
-      return this.baseSDK.withAuth(this.token, 'bearer');
+    if (!this.initialized) {
+      throw new Error('SDK not initialized. Please wait for initialization to complete.');
     }
-    return this.baseSDK;
+    
+    let sdk: ChatterSDK;
+    if (this.token) {
+      sdk = this.baseSDK.withAuth(this.token, 'bearer');
+    } else {
+      sdk = this.baseSDK;
+    }
+    
+    // Verify the SDK is properly constructed with all expected APIs
+    if (!sdk || !sdk.conversations) {
+      throw new Error('SDK not properly initialized. Please reload the page.');
+    }
+    
+    return sdk;
   }
 
   public async login(username: string, password: string): Promise<void> {
@@ -218,6 +235,9 @@ export const authService = new AuthService();
 
 // Export the ChatterSDK instance for direct use
 export const getSDK = (): ChatterSDK => authService.getSDK();
+
+// Export initialization check for safe SDK access
+export const isSDKInitialized = (): boolean => authService.isInitialized();
 
 // Export initialization function for explicit app setup if needed
 export const initializeSDK = async (): Promise<void> => {

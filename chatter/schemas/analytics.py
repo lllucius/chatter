@@ -50,6 +50,20 @@ class ConversationStatsResponse(BaseModel):
         ..., description="Popular LLM providers"
     )
 
+    # Message rating metrics
+    total_ratings: int = Field(
+        default=0, description="Total number of message ratings"
+    )
+    avg_message_rating: float = Field(
+        default=0.0, description="Average message rating"
+    )
+    messages_with_ratings: int = Field(
+        default=0, description="Number of messages with ratings"
+    )
+    rating_distribution: dict[str, int] = Field(
+        default_factory=dict, description="Distribution of ratings (1-5 stars)"
+    )
+
 
 class UsageMetricsResponse(BaseModel):
     """Schema for usage metrics response."""

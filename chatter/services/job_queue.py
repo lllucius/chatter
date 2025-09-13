@@ -998,16 +998,25 @@ job_queue = AdvancedJobQueue(
 
 # Register some default job handlers
 async def document_processing_job(
-    document_id: str, file_content: bytes
+    document_id: str, file_path: str
 ) -> dict[str, Any]:
     """Document processing job handler for background processing."""
     from chatter.utils.database import get_session_maker
+    from pathlib import Path
 
     logger.info(
         f"Starting background processing for document {document_id}"
     )
 
     try:
+        # Read file content from the file path
+        file_path_obj = Path(file_path)
+        if not file_path_obj.exists():
+            raise FileNotFoundError(f"Document file not found: {file_path}")
+
+        with open(file_path_obj, "rb") as f:
+            file_content = f.read()
+
         # Get a database session for background processing
         async_session = get_session_maker()
         async with async_session() as session:

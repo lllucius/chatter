@@ -69,4 +69,94 @@ describe('EnhancedMessage', () => {
       expect(screen.getByText('--:--')).toBeInTheDocument();
     });
   });
+
+  describe('Layout and Token/Time Display', () => {
+    it('should display timestamp in top-right for user messages', () => {
+      const userMessage: ChatMessage = {
+        id: 'user1',
+        role: 'user',
+        content: 'Hello there',
+        timestamp: new Date('2024-01-01T12:00:00Z'),
+      };
+
+      render(<EnhancedMessage message={userMessage} {...mockProps} />);
+
+      // Should show timestamp in top area
+      expect(screen.getByText(/12:00/)).toBeInTheDocument();
+      // Should not show rating section for user messages
+      expect(screen.queryByText('Rate this response:')).not.toBeInTheDocument();
+    });
+
+    it('should display timestamp in top-right and tokens/time with rating for assistant messages', () => {
+      const assistantMessage: ChatMessage = {
+        id: 'assistant1',
+        role: 'assistant',
+        content: 'Hello! How can I help you?',
+        timestamp: new Date('2024-01-01T12:05:00Z'),
+        metadata: {
+          model: 'GPT-4',
+          tokens: 25,
+          processingTime: 500,
+        },
+      };
+
+      render(<EnhancedMessage message={assistantMessage} {...mockProps} />);
+
+      // Should show timestamp in top area
+      expect(screen.getByText(/12:05/)).toBeInTheDocument();
+      
+      // Should show rating section
+      expect(screen.getByText('Rate this response:')).toBeInTheDocument();
+      
+      // Should show tokens and processing time in the same area as rating
+      expect(screen.getByText('25 tokens')).toBeInTheDocument();
+      expect(screen.getByText('500ms')).toBeInTheDocument();
+    });
+
+    it('should display timestamp and rating without tokens/time when metadata is missing', () => {
+      const assistantMessage: ChatMessage = {
+        id: 'assistant2',
+        role: 'assistant',
+        content: 'Response without metadata',
+        timestamp: new Date('2024-01-01T12:10:00Z'),
+      };
+
+      render(<EnhancedMessage message={assistantMessage} {...mockProps} />);
+
+      // Should show timestamp in top area
+      expect(screen.getByText(/12:10/)).toBeInTheDocument();
+      
+      // Should show rating section
+      expect(screen.getByText('Rate this response:')).toBeInTheDocument();
+      
+      // Should not show tokens or processing time
+      expect(screen.queryByText(/tokens/)).not.toBeInTheDocument();
+      expect(screen.queryByText(/ms/)).not.toBeInTheDocument();
+    });
+
+    it('should display only some metadata when partially available', () => {
+      const assistantMessage: ChatMessage = {
+        id: 'assistant3',
+        role: 'assistant',
+        content: 'Response with partial metadata',
+        timestamp: new Date('2024-01-01T12:15:00Z'),
+        metadata: {
+          tokens: 42,
+          // processingTime is missing
+        },
+      };
+
+      render(<EnhancedMessage message={assistantMessage} {...mockProps} />);
+
+      // Should show timestamp in top area
+      expect(screen.getByText(/12:15/)).toBeInTheDocument();
+      
+      // Should show rating section
+      expect(screen.getByText('Rate this response:')).toBeInTheDocument();
+      
+      // Should show only tokens
+      expect(screen.getByText('42 tokens')).toBeInTheDocument();
+      expect(screen.queryByText(/\d+ms/)).not.toBeInTheDocument();
+    });
+  });
 });

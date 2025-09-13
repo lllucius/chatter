@@ -213,7 +213,32 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                 </Box>
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  {message.role === 'assistant' && message.metadata && (message.metadata.tokens || message.metadata.processingTime) ? (
+                  <Typography variant="caption" color="text.secondary">
+                    {formatTimestamp(message.timestamp, 'HH:mm')}
+                  </Typography>
+                  <IconButton size="small" onClick={handleMenuOpen}>
+                    <MoreVertIcon fontSize="small" />
+                  </IconButton>
+                </Box>
+              </Box>
+              
+              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}>
+                {message.content}
+              </Typography>
+              
+              {message.role === 'assistant' && onRate && (
+                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                    <Typography variant="caption" color="text.secondary">
+                      Rate this response:
+                    </Typography>
+                    <Rating
+                      value={rating}
+                      onChange={(_, newValue) => handleRatingChange(newValue)}
+                      size="small"
+                    />
+                  </Box>
+                  {message.metadata && (message.metadata.tokens || message.metadata.processingTime) && (
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                       {message.metadata.tokens && (
                         <Typography variant="caption" color="text.secondary">
@@ -226,31 +251,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                         </Typography>
                       )}
                     </Box>
-                  ) : (
-                    <Typography variant="caption" color="text.secondary">
-                      {formatTimestamp(message.timestamp, 'HH:mm')}
-                    </Typography>
                   )}
-                  <IconButton size="small" onClick={handleMenuOpen}>
-                    <MoreVertIcon fontSize="small" />
-                  </IconButton>
-                </Box>
-              </Box>
-              
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}>
-                {message.content}
-              </Typography>
-              
-              {message.role === 'assistant' && onRate && (
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    Rate this response:
-                  </Typography>
-                  <Rating
-                    value={rating}
-                    onChange={(_, newValue) => handleRatingChange(newValue)}
-                    size="small"
-                  />
                 </Box>
               )}
             </Box>

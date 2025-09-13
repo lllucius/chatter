@@ -26,6 +26,7 @@ import {
   MoreVert as MoreVertIcon,
 } from '@mui/icons-material';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 
 export interface CrudColumn<T> {
   id: keyof T;
@@ -127,7 +128,11 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       setItems(result.items);
       setTotal(result.total);
     } catch {
-      toastService.error(`Failed to load ${config.entityNamePlural.toLowerCase()}`);
+      handleError(error, {
+        source: 'CrudDataTable.loadData',
+        operation: `load ${config.entityNamePlural.toLowerCase()}`,
+        additionalData: { entityType: config.entityName }
+      });
     } finally {
       setLoading(false);
     }
@@ -170,7 +175,14 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         toastService.success(`${config.entityName} deleted successfully`);
         await loadData();
       } catch {
-        toastService.error(`Failed to delete ${config.entityName.toLowerCase()}`);
+        handleError(error, {
+          source: 'CrudDataTable.handleDelete',
+          operation: `delete ${config.entityName.toLowerCase()}`,
+          additionalData: { 
+            entityType: config.entityName,
+            itemId: item?.id 
+          }
+        });
       }
     }
   };
@@ -187,7 +199,15 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       handleDialogClose();
       await loadData();
     } catch {
-      toastService.error(`Failed to ${dialogMode} ${config.entityName.toLowerCase()}`);
+      handleError(error, {
+        source: 'CrudDataTable.handleSave',
+        operation: `${dialogMode} ${config.entityName.toLowerCase()}`,
+        additionalData: { 
+          entityType: config.entityName,
+          dialogMode,
+          itemId: editingItem?.id 
+        }
+      });
     }
   };
 

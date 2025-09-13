@@ -21,6 +21,7 @@ import {
 } from '../components/CrudRenderers';
 import { getSDK } from "../services/auth-service";
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 
 
 
@@ -156,7 +157,11 @@ const ToolsPage: React.FC = () => {
           // Refresh the data after toggle
           serverCrudRef.current?.handleRefresh();
         } catch {
-          toastService.error('Failed to toggle server status');
+          handleError(new Error('Server status toggle failed'), {
+            source: 'ToolsPage.handleServerToggle',
+            operation: 'toggle server status',
+            additionalData: { serverId: server.id, serverName: server.name }
+          });
         }
       },
     },
@@ -170,7 +175,11 @@ const ToolsPage: React.FC = () => {
           // Refresh the data after refreshing tools
           serverCrudRef.current?.handleRefresh();
         } catch {
-          toastService.error('Failed to refresh server tools');
+          handleError(new Error('Server refresh failed'), {
+            source: 'ToolsPage.handleServerRefresh',
+            operation: 'refresh server tools',
+            additionalData: { serverId: server.id, serverName: server.name }
+          });
         }
       },
     },
@@ -266,7 +275,11 @@ const ToolsPage: React.FC = () => {
           // Refresh the data after toggle
           toolCrudRef.current?.handleRefresh();
         } catch {
-          toastService.error('Failed to toggle tool status');
+          handleError(new Error('Tool status toggle failed'), {
+            source: 'ToolsPage.handleToolToggle',
+            operation: 'toggle tool status',
+            additionalData: { toolId: tool.id, toolName: tool.name }
+          });
         }
       },
     },

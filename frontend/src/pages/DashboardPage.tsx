@@ -53,6 +53,7 @@ import {
 import { getSDK } from "../services/auth-service";
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
 import PageLayout from '../components/PageLayout';
 
 interface MetricCardProps {
@@ -315,7 +316,10 @@ const DashboardPage: React.FC = () => {
       setExportDialogOpen(false);
       toastService.success(`Analytics exported as ${fileName}.${exportFormat}`);
     } catch (error) {
-      toastService.error('Failed to export analytics');
+      handleError(new Error('Analytics export failed'), {
+        source: 'DashboardPage.handleExportAnalytics',
+        operation: 'export analytics data'
+      });
     }
   };
 

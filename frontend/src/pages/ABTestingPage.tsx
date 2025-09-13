@@ -133,9 +133,8 @@ const ABTestingPage: React.FC = () => {
   const loadTests = async () => {
     try {
       setLoading(true);
-      const response = await getSDK().abTesting.listAbTestsApiV1AbTests({});
-      const data = response.data;
-      setTests(data.tests || []);
+      const response = await getSDK().abTesting.listAbTestsApiV1AbTests(null);
+      setTests(response.tests || []);
     } catch (err: unknown) {
       handleError(err, {
         source: 'ABTestingPage.loadTests',

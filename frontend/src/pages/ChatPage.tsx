@@ -133,10 +133,10 @@ const ChatPage: React.FC = () => {
 
   // Return the created conversation so callers can use its id immediately
   const startNewConversation = useCallback(async (): Promise<ConversationResponse | null> => {
+    const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
     try {
       await loadData();
       
-      const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
       const systemPrompt = selectedPromptData?.content || undefined;
       
       const createRequest: ConversationCreate = {

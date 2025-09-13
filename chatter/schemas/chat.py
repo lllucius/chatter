@@ -60,6 +60,12 @@ class MessageResponse(MessageBase):
     finish_reason: str | None = Field(
         None, description="Reason for completion"
     )
+    rating: float | None = Field(
+        None, ge=0.0, le=5.0, description="User rating for the message"
+    )
+    rating_count: int = Field(
+        default=0, ge=0, description="Number of ratings for the message"
+    )
     created_at: datetime = Field(..., description="Creation timestamp")
 
     class Config:
@@ -440,6 +446,22 @@ class MessageDeleteResponse(BaseModel):
     """Response schema for message deletion."""
 
     message: str = Field(..., description="Deletion result message")
+
+
+class MessageRatingUpdate(BaseModel):
+    """Schema for updating message rating."""
+
+    rating: float = Field(
+        ..., ge=0.0, le=5.0, description="Rating value from 0.0 to 5.0"
+    )
+
+
+class MessageRatingResponse(BaseModel):
+    """Response schema for message rating update."""
+
+    message: str = Field(..., description="Rating update result message")
+    rating: float = Field(..., description="Updated rating value")
+    rating_count: int = Field(..., description="Total number of ratings")
 
 
 class AvailableToolResponse(BaseModel):

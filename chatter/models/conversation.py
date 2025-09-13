@@ -262,6 +262,14 @@ class Message(Base):
         CheckConstraint(
             "content != ''", name="check_content_not_empty"
         ),
+        CheckConstraint(
+            "rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)",
+            name="check_rating_range",
+        ),
+        CheckConstraint(
+            "rating_count >= 0",
+            name="check_rating_count_non_negative",
+        ),
         UniqueConstraint(
             "conversation_id",
             "sequence_number",
@@ -349,6 +357,12 @@ class Message(Base):
         Integer, nullable=False, index=True
     )
 
+    # Quality and ratings
+    rating: Mapped[float | None] = mapped_column(Float, nullable=True)
+    rating_count: Mapped[int] = mapped_column(
+        Integer, default=0, nullable=False
+    )
+
     # Relationships
     conversation: Mapped[Conversation] = relationship(
         "Conversation", back_populates="messages"
@@ -386,6 +400,8 @@ class Message(Base):
             "context_used": self.context_used,
             "extra_metadata": self.extra_metadata,
             "sequence_number": self.sequence_number,
+            "rating": self.rating,
+            "rating_count": self.rating_count,
             "created_at": (
                 self.created_at.isoformat() if self.created_at else None
             ),

@@ -33,6 +33,8 @@ from chatter.schemas.chat import (
     ConversationWithMessages,
     McpStatusResponse,
     MessageDeleteResponse,
+    MessageRatingResponse,
+    MessageRatingUpdate,
     MessageResponse,
     PerformanceStatsResponse,
     WorkflowTemplateInfo,
@@ -260,6 +262,23 @@ async def delete_message(
     """Delete a message from a conversation."""
     return await handler.delete_message(
         conversation_id, message_id, current_user
+    )
+
+
+@router.patch(
+    "/conversations/{conversation_id}/messages/{message_id}/rating",
+    response_model=MessageRatingResponse,
+)
+async def update_message_rating(
+    conversation_id: ConversationId,
+    message_id: MessageId,
+    rating_update: MessageRatingUpdate,
+    current_user: User = Depends(get_current_user),
+    handler: MessageResourceHandler = Depends(get_message_handler),
+) -> MessageRatingResponse:
+    """Update the rating for a message."""
+    return await handler.update_message_rating(
+        conversation_id, message_id, rating_update, current_user
     )
 
 

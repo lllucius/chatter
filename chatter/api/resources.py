@@ -12,6 +12,8 @@ from chatter.schemas.chat import (
     ConversationUpdate,
     ConversationWithMessages,
     MessageDeleteResponse,
+    MessageRatingResponse,
+    MessageRatingUpdate,
     MessageResponse,
 )
 from chatter.services.chat import ChatService
@@ -180,6 +182,29 @@ class MessageResourceHandler:
             )
             return MessageDeleteResponse(
                 message="Message deleted successfully"
+            )
+        except NotFoundError as e:
+            raise NotFoundProblem(
+                detail="Message not found",
+                resource_type="message",
+            ) from e
+
+    async def update_message_rating(
+        self,
+        conversation_id: ConversationId,
+        message_id: MessageId,
+        rating_update: MessageRatingUpdate,
+        current_user: User,
+    ) -> MessageRatingResponse:
+        """Update the rating for a message."""
+        try:
+            updated_message = await self.chat_service.update_message_rating(
+                conversation_id, message_id, current_user.id, rating_update.rating
+            )
+            return MessageRatingResponse(
+                message="Message rating updated successfully",
+                rating=updated_message.rating or 0.0,
+                rating_count=updated_message.rating_count,
             )
         except NotFoundError as e:
             raise NotFoundProblem(

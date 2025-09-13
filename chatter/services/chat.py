@@ -268,6 +268,14 @@ class ChatService:
             conversation_id, message_id, user_id
         )
 
+    async def update_message_rating(
+        self, conversation_id: str, message_id: str, user_id: str, rating: float
+    ) -> Message:
+        """Update the rating for a message."""
+        return await self.message_service.update_message_rating(
+            conversation_id, message_id, user_id, rating
+        )
+
     # Unified Chat Method
 
     async def chat(

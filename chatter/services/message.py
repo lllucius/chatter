@@ -293,6 +293,95 @@ class MessageService:
             )
             raise
 
+    async def update_message_rating(
+        self, conversation_id: str, message_id: str, user_id: str, rating: float
+    ) -> Message:
+        """Update the rating for a message.
+
+        Args:
+            conversation_id: Conversation ID
+            message_id: Message ID
+            user_id: User ID for access control
+            rating: Rating value (0.0 to 5.0)
+
+        Returns:
+            Updated message
+
+        Raises:
+            NotFoundError: If message not found
+            AuthorizationError: If user doesn't have access
+            ValidationError: If rating is invalid
+        """
+        if rating < 0.0 or rating > 5.0:
+            raise ValidationError("Rating must be between 0.0 and 5.0")
+
+        try:
+            # Verify user has access to conversation
+            from chatter.services.conversation import (
+                ConversationService,
+            )
+
+            conv_service = ConversationService(self.session)
+            await conv_service.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
+
+            # Find the message
+            query = select(Message).where(
+                and_(
+                    Message.id == message_id,
+                    Message.conversation_id == conversation_id,
+                )
+            )
+
+            result = await self.session.execute(query)
+            message = result.scalar_one_or_none()
+
+            if not message:
+                raise NotFoundError(
+                    "Message not found",
+                    resource_type="message",
+                    resource_id=message_id,
+                )
+
+            # Update rating - using simple average for now
+            if message.rating is None:
+                # First rating
+                message.rating = rating
+                message.rating_count = 1
+            else:
+                # Update existing rating with new average
+                total_score = message.rating * message.rating_count + rating
+                message.rating_count += 1
+                message.rating = total_score / message.rating_count
+
+            await self.session.flush()
+
+            logger.info(
+                "Updated message rating",
+                conversation_id=conversation_id,
+                message_id=message_id,
+                user_id=user_id,
+                rating=rating,
+                new_average=message.rating,
+                rating_count=message.rating_count,
+            )
+
+            return message
+
+        except (NotFoundError, AuthorizationError, ValidationError):
+            raise
+        except Exception as e:
+            logger.error(
+                "Failed to update message rating",
+                conversation_id=conversation_id,
+                message_id=message_id,
+                user_id=user_id,
+                rating=rating,
+                error=str(e),
+            )
+            raise
+
     async def get_recent_messages(
         self,
         conversation_id: str,

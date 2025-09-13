@@ -551,13 +551,72 @@ const ChatPage: React.FC = () => {
     setMessages(prev => prev.filter(msg => msg.id !== messageId));
   }, []);
 
-  const handleRateMessage = useCallback((messageId: string, rating: number) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, rating }
-        : msg
-    ));
-  }, []);
+  const handleRateMessage = useCallback(async (messageId: string, rating: number) => {
+    if (!currentConversation?.id) {
+      toastService.error('No conversation selected for rating');
+      return;
+    }
+
+    try {
+      // Store the previous rating for rollback
+      const previousRating = messages.find(msg => msg.id === messageId)?.rating;
+      
+      // Optimistically update the UI
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, rating }
+          : msg
+      ));
+
+      // Get authenticated SDK and extract the auth headers
+      const sdk = getSDK();
+      const headers: Record<string, string> = {
+        'Content-Type': 'application/json',
+      };
+
+      // Add authentication header if available
+      if (sdk.configuration?.apiKey) {
+        headers['Authorization'] = `Bearer ${sdk.configuration.apiKey}`;
+      }
+
+      // Call the backend API to persist the rating
+      const response = await fetch(
+        `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/conversations/${currentConversation.id}/messages/${messageId}/rating`,
+        {
+          method: 'PATCH',
+          headers,
+          credentials: 'include',
+          body: JSON.stringify({ rating }),
+        }
+      );
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Rating failed: ${response.status} ${response.statusText} - ${errorText}`);
+      }
+
+      const result = await response.json();
+      
+      // Update the message with the actual server response (average rating)
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, rating: result.rating }
+          : msg
+      ));
+
+      toastService.success('Message rated successfully');
+    } catch (error) {
+      // Revert the optimistic update on error
+      const previousRating = messages.find(msg => msg.id === messageId)?.rating;
+      setMessages(prev => prev.map(msg => 
+        msg.id === messageId 
+          ? { ...msg, rating: previousRating }
+          : msg
+      ));
+      
+      handleError(error, 'Failed to rate message');
+    }
+  }, [currentConversation?.id, messages]);
 
   const handleSelectConversation = useCallback((conversation: ConversationResponse) => {
     setCurrentConversation(conversation);

@@ -1116,3 +1116,61 @@ production_data:
         max_tool_calls: 10
         system_message: "You are an expert programming assistant. Help users with coding tasks, debugging, code review, and software development best practices. Use available tools to execute code, run tests, and access documentation when needed."
       required_tools: ["execute_code", "search_docs", "generate_tests"]
+# Background Jobs
+# Scheduled maintenance and operational jobs
+background_jobs:
+  # Database maintenance and backup jobs
+  - name: "Daily Database Maintenance"
+    function_name: "database_maintenance"
+    description: "Daily database maintenance including statistics update, cleanup, and backup"
+    schedule: "0 2 * * *"  # Daily at 2 AM
+    priority: "high"
+    max_retries: 2
+    timeout: 1800  # 30 minutes
+    tags: ["maintenance", "database", "backup"]
+    metadata:
+      category: "system_maintenance"
+      owner: "system"
+      critical: true
+
+  # Document archiving jobs  
+  - name: "Weekly Document Archiving"
+    function_name: "document_archiving"
+    description: "Weekly archiving of old and unused documents"
+    schedule: "0 3 * * 0"  # Weekly on Sunday at 3 AM
+    priority: "normal"
+    max_retries: 2
+    timeout: 1200  # 20 minutes
+    tags: ["archiving", "documents", "cleanup"]
+    metadata:
+      category: "content_management"
+      owner: "system"
+      critical: false
+
+  # Conversation cleanup jobs
+  - name: "Weekly Conversation Cleanup"
+    function_name: "conversation_cleanup"
+    description: "Weekly cleanup and archiving of old conversations and messages"
+    schedule: "0 4 * * 0"  # Weekly on Sunday at 4 AM
+    priority: "normal"
+    max_retries: 2
+    timeout: 900  # 15 minutes
+    tags: ["cleanup", "conversations", "archiving"]
+    metadata:
+      category: "content_management"
+      owner: "system"
+      critical: false
+
+  # Additional maintenance job for vector store (existing)
+  - name: "Monthly Vector Store Maintenance"
+    function_name: "vector_store_maintenance"
+    description: "Monthly vector store optimization and maintenance"
+    schedule: "0 1 1 * *"  # Monthly on 1st day at 1 AM
+    priority: "normal"
+    max_retries: 1
+    timeout: 3600  # 1 hour
+    tags: ["maintenance", "vector", "optimization"]
+    metadata:
+      category: "system_maintenance"
+      owner: "system"
+      critical: false

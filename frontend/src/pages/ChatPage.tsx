@@ -336,7 +336,12 @@ const ChatPage: React.FC = () => {
                       )
                     );
                   } else if (chunk.type === 'start') {
-                    // Stream started - no action needed
+                    // Stream started - update conversation if provided
+                    if (chunk.conversation_id && !currentConversation) {
+                      // If we don't have a current conversation but got a conversation_id, 
+                      // we should fetch the conversation details or at least store the ID
+                      setCurrentConversation(prev => prev || { id: chunk.conversation_id } as ConversationResponse);
+                    }
                   } else if (chunk.type === 'end') {
                     // Stream ended - no action needed
                     return; // End the streaming loop
@@ -407,38 +412,26 @@ const ChatPage: React.FC = () => {
         // Use regular API
         const response = await getSDK().chat.chatChat(sendRequest);
 
-        // Narrow the SDK's loosely-typed response
-        type ApiChatMessage = {
-          id: string | number;
-          content: string;
-          createdAt: string | number | Date;
-          totalTokens?: number;
-          responseTimeMs?: number;
-        };
-        const apiMessage = response.message as ApiChatMessage;
+        // Update conversation with the response data
+        if (response.conversation) {
+          setCurrentConversation(response.conversation);
+        }
 
-        const assistantMessage: ChatMessage = {
-          id: String(apiMessage.id),
+        // Use real message data from the API response
+        const assistantMessage: ExtendedChatMessage = {
+          id: String(response.message.id),
           role: 'assistant',
-          content: apiMessage.content,
-          timestamp: new Date(apiMessage.createdAt),
+          content: response.message.content,
+          timestamp: new Date(response.message.created_at),
+          metadata: {
+            model: response.message.model_used || undefined,
+            tokens: response.message.total_tokens || undefined,
+            processingTime: response.message.response_time_ms || undefined,
+          },
         };
         setMessages((prev) => [...prev, assistantMessage]);
 
-        const hasTokens = typeof apiMessage.totalTokens === 'number';
-        const hasTime = typeof apiMessage.responseTimeMs === 'number';
-        if (hasTokens || hasTime) {
-          const parts: string[] = [];
-          if (hasTokens) parts.push(`Tokens: ${apiMessage.totalTokens}`);
-          if (hasTime) parts.push(`Response time: ${apiMessage.responseTimeMs}ms`);
-          const tokenMessage: ChatMessage = {
-            id: `token-${String(apiMessage.id)}`,
-            role: 'system',
-            content: `📊 ${parts.join(' | ')}`,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, tokenMessage]);
-        }
+        // Remove the separate token message creation since we're including it in metadata
       }
     } catch (err: unknown) {
       handleError(err, {

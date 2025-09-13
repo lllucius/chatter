@@ -179,9 +179,17 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
       <Card
         sx={{
           mb: 1,
-          bgcolor: message.role === 'user' ? 'primary.50' : message.role === 'assistant' ? 'grey.100' : 'background.paper',
+          bgcolor: message.role === 'user' 
+            ? 'primary.50' 
+            : message.role === 'assistant' 
+              ? (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'
+              : 'background.paper',
           border: '1px solid',
-          borderColor: message.role === 'user' ? 'primary.200' : message.role === 'assistant' ? 'grey.300' : 'grey.200',
+          borderColor: message.role === 'user' 
+            ? 'primary.200' 
+            : message.role === 'assistant' 
+              ? (theme) => theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300'
+              : 'grey.200',
         }}
       >
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -205,9 +213,24 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                 </Box>
                 
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                  <Typography variant="caption" color="text.secondary">
-                    {formatTimestamp(message.timestamp, 'HH:mm')}
-                  </Typography>
+                  {message.role === 'assistant' && message.metadata && (message.metadata.tokens || message.metadata.processingTime) ? (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                      {message.metadata.tokens && (
+                        <Typography variant="caption" color="text.secondary">
+                          {message.metadata.tokens} tokens
+                        </Typography>
+                      )}
+                      {message.metadata.processingTime && (
+                        <Typography variant="caption" color="text.secondary">
+                          {message.metadata.processingTime}ms
+                        </Typography>
+                      )}
+                    </Box>
+                  ) : (
+                    <Typography variant="caption" color="text.secondary">
+                      {formatTimestamp(message.timestamp, 'HH:mm')}
+                    </Typography>
+                  )}
                   <IconButton size="small" onClick={handleMenuOpen}>
                     <MoreVertIcon fontSize="small" />
                   </IconButton>
@@ -217,21 +240,6 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
               <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}>
                 {message.content}
               </Typography>
-              
-              {message.metadata && (
-                <Box sx={{ display: 'flex', gap: 1.5, mb: 0.5 }}>
-                  {message.metadata.tokens && (
-                    <Typography variant="caption" color="text.secondary">
-                      {message.metadata.tokens} tokens
-                    </Typography>
-                  )}
-                  {message.metadata.processingTime && (
-                    <Typography variant="caption" color="text.secondary">
-                      {message.metadata.processingTime}ms
-                    </Typography>
-                  )}
-                </Box>
-              )}
               
               {message.role === 'assistant' && onRate && (
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>

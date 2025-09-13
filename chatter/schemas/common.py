@@ -30,12 +30,12 @@ class SortingRequest(BaseModel):
 class PaginatedRequest(BaseModel):
     """Base class for paginated requests."""
 
-    pagination: PaginationRequest = Field(
-        default_factory=lambda: PaginationRequest(),
+    pagination: PaginationRequest | None = Field(
+        default=None,
         description="Pagination parameters",
     )
-    sorting: SortingRequest = Field(
-        default_factory=lambda: SortingRequest(),
+    sorting: SortingRequest | None = Field(
+        default=None,
         description="Sorting parameters",
     )
 

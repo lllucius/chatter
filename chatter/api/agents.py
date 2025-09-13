@@ -30,6 +30,7 @@ from chatter.schemas.agents import (
     AgentStatus,
     AgentUpdateRequest,
 )
+from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem, NotFoundProblem
 from chatter.utils.unified_rate_limiter import (
@@ -258,13 +259,17 @@ async def list_agents(
         Paginated list of agents
     """
     try:
+        # Handle None pagination/sorting with defaults
+        pagination = request.pagination or PaginationRequest()
+        sorting = request.sorting or SortingRequest()
+        
         # Validate pagination parameters
         offset = (
-            max(0, request.pagination.offset)
-            if isinstance(request.pagination.offset, int)
+            max(0, pagination.offset)
+            if isinstance(pagination.offset, int)
             else 0
         )
-        limit = request.pagination.limit
+        limit = pagination.limit
         if not isinstance(limit, int) or limit < 1:
             limit = 10
 

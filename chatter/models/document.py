@@ -11,6 +11,7 @@ from sqlalchemy import (
     Boolean,
     CheckConstraint,
     DateTime,
+    event,
 )
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
@@ -21,6 +22,7 @@ from sqlalchemy import (
     UniqueConstraint,
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
+import numpy as np
 
 try:
     from pgvector.sqlalchemy import Vector
@@ -341,12 +343,37 @@ class DocumentChunk(Base):
         String(10), nullable=True
     )
 
-    # Direct embedding storage (simplified approach)
+    # Hybrid vector storage for automatic column selection
+    # Fixed dimension embedding for fast pgvector search (1536 dimensions)
     embedding: Mapped[list[float] | None] = mapped_column(
         Vector(1536) if PGVECTOR_AVAILABLE else JSON,
         nullable=True,
-        comment="Vector embedding for this chunk"
+        comment="Fixed 1536-dim vector embedding for fast search"
     )
+    
+    # Raw embedding storage for any dimension size
+    raw_embedding: Mapped[list[float] | None] = mapped_column(
+        JSON,
+        nullable=True,
+        comment="Raw embedding vector of any dimension"
+    )
+    
+    # Computed embedding for padded/truncated vectors with full indexing
+    computed_embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536) if PGVECTOR_AVAILABLE else JSON,
+        nullable=True,
+        comment="Computed embedding (padded/truncated to 1536) with index"
+    )
+    
+    # Metadata about original embedding dimensions
+    raw_dim: Mapped[int | None] = mapped_column(
+        Integer,
+        nullable=True,
+        index=True,
+        comment="Original embedding dimension for filtering"
+    )
+    
+    # Provider and model metadata
     embedding_provider: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )
@@ -465,3 +492,213 @@ class DocumentChunk(Base):
                 self.updated_at.isoformat() if self.updated_at else None
             ),
         }
+
+
+# Hybrid Vector Search Implementation with Event Listeners
+
+def normalize_embedding_to_fixed_dim(raw_embedding: list[float], target_dim: int = 1536) -> list[float]:
+    """
+    Normalize embedding to fixed dimension by padding with zeros or truncating.
+    
+    Args:
+        raw_embedding: Original embedding vector
+        target_dim: Target dimension size (default 1536)
+        
+    Returns:
+        Normalized embedding of target dimension
+    """
+    if not raw_embedding:
+        return [0.0] * target_dim
+    
+    if len(raw_embedding) == target_dim:
+        return raw_embedding.copy()
+    elif len(raw_embedding) < target_dim:
+        # Pad with zeros
+        result = raw_embedding.copy()
+        result.extend([0.0] * (target_dim - len(raw_embedding)))
+        return result
+    else:
+        # Truncate to target dimension
+        return raw_embedding[:target_dim]
+
+
+@event.listens_for(DocumentChunk.raw_embedding, 'set')
+def update_computed_embedding(target, value, oldvalue, initiator):
+    """
+    Event listener that automatically updates computed_embedding when raw_embedding is set.
+    This ensures computed_embedding is always normalized to 1536 dimensions.
+    """
+    if value is not None:
+        # Store original dimension
+        target.raw_dim = len(value)
+        
+        # Create computed embedding (normalized to 1536)
+        target.computed_embedding = normalize_embedding_to_fixed_dim(value, 1536)
+        
+        # If the raw embedding is exactly 1536 dimensions, also set the main embedding
+        if len(value) == 1536:
+            target.embedding = value
+        else:
+            # Use computed embedding for the main embedding field
+            target.embedding = target.computed_embedding
+
+
+@event.listens_for(DocumentChunk, 'before_insert')
+@event.listens_for(DocumentChunk, 'before_update')
+def ensure_embedding_consistency(mapper, connection, target):
+    """
+    Event listener to ensure embedding consistency before database operations.
+    This handles cases where embeddings are set directly.
+    """
+    # If raw_embedding is set but computed_embedding is not, compute it
+    if target.raw_embedding and not target.computed_embedding:
+        target.raw_dim = len(target.raw_embedding)
+        target.computed_embedding = normalize_embedding_to_fixed_dim(target.raw_embedding, 1536)
+        
+        # Set main embedding based on dimension
+        if len(target.raw_embedding) == 1536:
+            target.embedding = target.raw_embedding
+        else:
+            target.embedding = target.computed_embedding
+    
+    # If only embedding is set, populate raw_embedding and computed_embedding
+    elif target.embedding and not target.raw_embedding:
+        target.raw_embedding = target.embedding
+        target.raw_dim = len(target.embedding)
+        target.computed_embedding = normalize_embedding_to_fixed_dim(target.embedding, 1536)
+
+
+class HybridVectorSearchHelper:
+    """
+    Helper class for hybrid vector search that automatically chooses the correct column
+    based on query vector size and search requirements.
+    """
+    
+    @staticmethod
+    def choose_search_column(query_vector: list[float], prefer_exact_match: bool = True) -> str:
+        """
+        Choose the optimal embedding column for search based on query vector size.
+        
+        Args:
+            query_vector: The query embedding vector
+            prefer_exact_match: Whether to prefer exact dimension matches
+            
+        Returns:
+            Column name to use for search ('embedding', 'computed_embedding', or 'raw_embedding')
+        """
+        query_dim = len(query_vector)
+        
+        if query_dim == 1536:
+            # Perfect match - use the optimized embedding column
+            return 'embedding'
+        elif prefer_exact_match:
+            # Look for exact dimensional match in raw_embedding with raw_dim filter
+            return 'raw_embedding'
+        else:
+            # Use computed_embedding for consistent searches
+            return 'computed_embedding'
+    
+    @staticmethod
+    def prepare_query_vector(query_vector: list[float], target_column: str) -> list[float]:
+        """
+        Prepare query vector for the chosen search column.
+        
+        Args:
+            query_vector: Original query vector
+            target_column: Target column name
+            
+        Returns:
+            Prepared query vector
+        """
+        if target_column == 'embedding' or target_column == 'computed_embedding':
+            # Normalize to 1536 dimensions
+            return normalize_embedding_to_fixed_dim(query_vector, 1536)
+        else:
+            # Use raw vector as-is
+            return query_vector
+    
+    @staticmethod
+    def build_similarity_filter(query_vector: list[float], exact_dim_only: bool = False) -> dict[str, Any]:
+        """
+        Build filter conditions for hybrid search.
+        
+        Args:
+            query_vector: Query embedding vector
+            exact_dim_only: Whether to filter by exact dimension match
+            
+        Returns:
+            Dictionary of filter conditions
+        """
+        filters = {}
+        
+        if exact_dim_only:
+            filters['raw_dim'] = len(query_vector)
+        
+        return filters
+
+
+# Additional helper methods for DocumentChunk
+def _add_hybrid_search_methods():
+    """Add hybrid search methods to DocumentChunk class."""
+    
+    def get_search_embedding(self, query_dim: int) -> list[float] | None:
+        """
+        Get the appropriate embedding for search based on query dimension.
+        
+        Args:
+            query_dim: Dimension of the query vector
+            
+        Returns:
+            Best matching embedding vector or None
+        """
+        if query_dim == 1536 and self.embedding:
+            return self.embedding
+        elif query_dim == self.raw_dim and self.raw_embedding:
+            return self.raw_embedding
+        elif self.computed_embedding:
+            return self.computed_embedding
+        else:
+            return self.embedding
+    
+    def has_embedding_for_dimension(self, target_dim: int) -> bool:
+        """
+        Check if chunk has embedding suitable for the target dimension.
+        
+        Args:
+            target_dim: Target embedding dimension
+            
+        Returns:
+            True if suitable embedding exists
+        """
+        if target_dim == 1536:
+            return self.embedding is not None or self.computed_embedding is not None
+        elif target_dim == self.raw_dim:
+            return self.raw_embedding is not None
+        else:
+            return self.computed_embedding is not None
+    
+    def set_embedding_vector(self, vector: list[float], provider: str = None, model: str = None):
+        """
+        Set embedding vector with automatic normalization.
+        
+        Args:
+            vector: Embedding vector
+            provider: Embedding provider name
+            model: Embedding model name
+        """
+        self.raw_embedding = vector
+        self.embedding_provider = provider
+        self.embedding_model = model
+        self.embedding_dimensions = len(vector)
+        self.embedding_created_at = datetime.now()
+        
+        # Event listeners will handle computed_embedding and embedding updates
+    
+    # Add methods to DocumentChunk
+    DocumentChunk.get_search_embedding = get_search_embedding
+    DocumentChunk.has_embedding_for_dimension = has_embedding_for_dimension
+    DocumentChunk.set_embedding_vector = set_embedding_vector
+
+
+# Initialize hybrid search methods
+_add_hybrid_search_methods()

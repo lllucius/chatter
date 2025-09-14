@@ -21,7 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
 from chatter.core.model_registry import ModelRegistryService
-from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType
+from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType, HybridVectorSearchHelper
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -341,7 +341,7 @@ class SimpleVectorStore:
         embeddings: list[list[float]], 
         metadata: dict[str, Any]
     ) -> bool:
-        """Store embeddings for chunks.
+        """Store embeddings for chunks using hybrid vector storage.
         
         Args:
             chunks: Document chunks
@@ -352,12 +352,14 @@ class SimpleVectorStore:
             True if successful
         """
         try:
-            # Update chunks with embeddings
+            # Update chunks with embeddings using the new hybrid system
             for chunk, embedding in zip(chunks, embeddings, strict=True):
-                chunk.embedding = embedding
-                chunk.embedding_provider = metadata.get("provider")
-                chunk.embedding_model = metadata.get("model")
-                chunk.embedding_dimensions = len(embedding)
+                # Use the new set_embedding_vector method which triggers event listeners
+                chunk.set_embedding_vector(
+                    vector=embedding,
+                    provider=metadata.get("provider"),
+                    model=metadata.get("model")
+                )
                 
             await self.session.commit()
             
@@ -366,10 +368,11 @@ class SimpleVectorStore:
                 await self.session.refresh(chunk)
                 
             logger.info(
-                "Stored embeddings",
+                "Stored embeddings using hybrid vector system",
                 chunk_count=len(chunks),
                 provider=metadata.get("provider"),
-                dimensions=metadata.get("dimensions")
+                dimensions=metadata.get("dimensions"),
+                hybrid_columns=["embedding", "raw_embedding", "computed_embedding"]
             )
             
             return True
@@ -383,43 +386,108 @@ class SimpleVectorStore:
         self, 
         query_embedding: list[float], 
         limit: int = 10,
-        document_ids: list[str] | None = None
+        document_ids: list[str] | None = None,
+        prefer_exact_match: bool = True
     ) -> list[tuple[DocumentChunk, float]]:
-        """Search for similar chunks.
+        """Search for similar chunks using hybrid vector search.
         
         Args:
             query_embedding: Query embedding vector
             limit: Maximum results
             document_ids: Optional document ID filter
+            prefer_exact_match: Whether to prefer exact dimension matches
             
         Returns:
             List of (chunk, similarity_score) tuples
         """
         try:
-            # Build query
-            query = select(DocumentChunk).where(DocumentChunk.embedding.is_not(None))
+            # Use hybrid search helper to choose optimal column
+            search_helper = HybridVectorSearchHelper()
+            search_column = search_helper.choose_search_column(
+                query_embedding, prefer_exact_match
+            )
+            prepared_query = search_helper.prepare_query_vector(
+                query_embedding, search_column
+            )
             
+            logger.debug(
+                "Hybrid vector search initiated",
+                query_dim=len(query_embedding),
+                search_column=search_column,
+                prepared_dim=len(prepared_query)
+            )
+            
+            # Build base query
+            query = select(DocumentChunk)
+            
+            # Apply document filter if provided
             if document_ids:
                 query = query.where(DocumentChunk.document_id.in_(document_ids))
             
-            # Add vector similarity ordering (requires pgvector extension)
-            # Using cosine similarity: 1 - cosine_distance
-            query = query.order_by(
-                DocumentChunk.embedding.cosine_distance(query_embedding)
-            ).limit(limit)
+            # Apply dimension filter for exact matches
+            if prefer_exact_match and search_column == 'raw_embedding':
+                query = query.where(DocumentChunk.raw_dim == len(query_embedding))
+            
+            # Filter out chunks without the required embedding column
+            if search_column == 'embedding':
+                query = query.where(DocumentChunk.embedding.is_not(None))
+            elif search_column == 'computed_embedding':
+                query = query.where(DocumentChunk.computed_embedding.is_not(None))
+            elif search_column == 'raw_embedding':
+                query = query.where(DocumentChunk.raw_embedding.is_not(None))
+            
+            # Add vector similarity ordering using the appropriate column
+            if search_column == 'embedding':
+                query = query.order_by(
+                    DocumentChunk.embedding.cosine_distance(prepared_query)
+                ).limit(limit)
+            elif search_column == 'computed_embedding':
+                query = query.order_by(
+                    DocumentChunk.computed_embedding.cosine_distance(prepared_query)
+                ).limit(limit)
+            else:
+                # For raw_embedding, we need to use a different approach since it's JSON
+                # Fall back to computed_embedding for consistent indexing
+                logger.debug("Falling back to computed_embedding for raw_embedding search")
+                query = query.where(DocumentChunk.computed_embedding.is_not(None))
+                query = query.order_by(
+                    DocumentChunk.computed_embedding.cosine_distance(prepared_query)
+                ).limit(limit)
             
             result = await self.session.execute(query)
             chunks = result.scalars().all()
             
-            # Calculate similarity scores
+            # Calculate similarity scores using the appropriate embedding
             results = []
             for chunk in chunks:
-                if chunk.embedding:
+                embedding_vector = None
+                
+                if search_column == 'embedding' and chunk.embedding:
+                    embedding_vector = chunk.embedding
+                elif search_column == 'computed_embedding' and chunk.computed_embedding:
+                    embedding_vector = chunk.computed_embedding
+                elif search_column == 'raw_embedding' and chunk.raw_embedding:
+                    embedding_vector = chunk.raw_embedding
+                elif chunk.computed_embedding:
+                    # Fallback to computed_embedding
+                    embedding_vector = chunk.computed_embedding
+                
+                if embedding_vector:
                     # Calculate cosine similarity
                     import numpy as np
                     
-                    chunk_vec = np.array(chunk.embedding)
-                    query_vec = np.array(query_embedding)
+                    chunk_vec = np.array(embedding_vector)
+                    query_vec = np.array(prepared_query)
+                    
+                    # Ensure vectors have the same dimension for similarity calculation
+                    if len(chunk_vec) != len(query_vec):
+                        if search_column == 'raw_embedding':
+                            # Use original query for raw embedding comparison
+                            query_vec = np.array(query_embedding)
+                            if len(chunk_vec) != len(query_vec):
+                                continue  # Skip mismatched dimensions
+                        else:
+                            continue  # Skip mismatched dimensions
                     
                     # Cosine similarity
                     similarity = np.dot(chunk_vec, query_vec) / (
@@ -428,11 +496,15 @@ class SimpleVectorStore:
                     
                     results.append((chunk, float(similarity)))
             
-            logger.debug("Vector search completed", results_count=len(results))
+            logger.debug(
+                "Hybrid vector search completed",
+                results_count=len(results),
+                search_column=search_column
+            )
             return results
             
         except Exception as e:
-            logger.error("Vector search failed", error=str(e))
+            logger.error("Hybrid vector search failed", error=str(e))
             return []
 
 
@@ -545,31 +617,39 @@ class EmbeddingPipeline:
         self, 
         query: str, 
         limit: int = 10,
-        document_ids: list[str] | None = None
+        document_ids: list[str] | None = None,
+        prefer_exact_match: bool = True
     ) -> list[tuple[DocumentChunk, float]]:
-        """Search documents using semantic similarity.
+        """Search documents using hybrid semantic similarity.
         
         Args:
             query: Search query text
             limit: Maximum results
             document_ids: Optional document filter
+            prefer_exact_match: Whether to prefer exact dimension matches
             
         Returns:
             List of (chunk, similarity_score) tuples
         """
         try:
             # Generate query embedding
-            embeddings, _ = await self.embedding_service.generate_embeddings([query])
+            embeddings, metadata = await self.embedding_service.generate_embeddings([query])
             query_embedding = embeddings[0]
             
-            # Search vector store
+            # Search vector store using hybrid search
             results = await self.vector_store.search_similar(
-                query_embedding, limit, document_ids
+                query_embedding, limit, document_ids, prefer_exact_match
             )
             
-            logger.info("Document search completed", query=query, results=len(results))
+            logger.info(
+                "Hybrid document search completed", 
+                query=query, 
+                results=len(results),
+                query_dim=len(query_embedding),
+                provider=metadata.get("provider")
+            )
             return results
             
         except Exception as e:
-            logger.error("Document search failed", query=query, error=str(e))
+            logger.error("Hybrid document search failed", query=query, error=str(e))
             return []

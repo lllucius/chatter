@@ -232,6 +232,12 @@ class ModelRegistryService:
         for field, value in update_data.items():
             setattr(provider, field, value)
 
+        # Handle cascading status changes
+        if "is_active" in update_data:
+            await self._handle_provider_status_change(
+                provider, update_data["is_active"]
+            )
+
         await self.session.commit()
         await self.session.refresh(provider)
 
@@ -252,6 +258,45 @@ class ModelRegistryService:
         )
 
         return provider
+
+    async def _handle_provider_status_change(
+        self, provider: Provider, is_active: bool
+    ) -> None:
+        """Handle cascading effects when provider status changes.
+        
+        Args:
+            provider: The provider being updated
+            is_active: New active status
+        """
+        if not is_active:
+            # If provider is being deactivated, deactivate all its models
+            logger.info(
+                f"Deactivating all models for provider {provider.name} "
+                f"due to provider deactivation"
+            )
+            
+            await self.session.execute(
+                update(ModelDef)
+                .where(ModelDef.provider_id == provider.id)
+                .values(is_active=False, is_default=False)
+            )
+            
+            # Also deactivate all embedding spaces for these models
+            await self.session.execute(
+                update(EmbeddingSpace)
+                .where(
+                    EmbeddingSpace.model_id.in_(
+                        select(ModelDef.id).where(
+                            ModelDef.provider_id == provider.id
+                        )
+                    )
+                )
+                .values(is_active=False, is_default=False)
+            )
+            
+            logger.info(
+                f"Deactivated all models and embedding spaces for provider {provider.name}"
+            )
 
     async def delete_provider(self, provider_id: str) -> bool:
         """Delete a provider and its dependent models and embedding spaces."""
@@ -421,7 +466,10 @@ class ModelRegistryService:
             query = query.where(ModelDef.model_type == model_type)
 
         if params.active_only:
-            query = query.where(ModelDef.is_active)
+            # Filter for active models AND active providers
+            query = query.join(Provider).where(
+                ModelDef.is_active, Provider.is_active
+            )
 
         # Order by default first, then by display name
         query = query.order_by(
@@ -442,7 +490,10 @@ class ModelRegistryService:
             )
 
         if params.active_only:
-            count_query = count_query.where(ModelDef.is_active)
+            # Filter for active models AND active providers
+            count_query = count_query.join(Provider).where(
+                ModelDef.is_active, Provider.is_active
+            )
 
         total = await self.session.scalar(count_query)
 

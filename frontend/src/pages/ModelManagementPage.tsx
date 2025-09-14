@@ -33,11 +33,12 @@ const ModelManagementPage: React.FC = () => {
   const loadProviders = async () => {
     try {
       const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
-        activeOnly: false,
+        activeOnly: true, // Only load active providers for model creation
       });
       setProviders(response.providers || []);
-    } catch {
-      // Error loading providers - this is handled elsewhere
+    } catch (error) {
+      console.error('Failed to load providers:', error);
+      setProviders([]);
     }
   };
 

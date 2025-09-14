@@ -3,7 +3,7 @@
 from datetime import UTC, datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
@@ -1028,40 +1028,111 @@ async def get_ab_test_metrics(
 @router.post("/{test_id}/end", response_model=ABTestActionResponse)
 async def end_ab_test(
     test_id: str,
-    winner_variant: str,
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+    winner_variant: str | None = Query(None, description="Winning variant identifier"),
 ) -> ABTestActionResponse:
     """End A/B test and declare winner.
 
     Args:
         test_id: A/B test ID
-        winner_variant: Winning variant identifier
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
+        winner_variant: Optional winning variant identifier
 
     Returns:
         Action response
     """
     try:
+        # Check if test exists and get test details for validation
+        test = await ab_test_manager.get_test(test_id)
+        if not test:
+            raise NotFoundProblem(
+                detail=f"A/B test {test_id} not found"
+            )
+
+        # Create response for access check
+        from chatter.schemas.ab_testing import (
+            TestVariant as ResponseTestVariant,
+        )
+
+        response_variants = []
+        for variant in test.variants:
+            response_variants.append(
+                ResponseTestVariant(
+                    name=variant.name,
+                    description=variant.description,
+                    configuration=variant.configuration,
+                    weight=variant.weight,
+                )
+            )
+
+        # Get metrics from test configuration
+        metrics = [test.primary_metric.metric_type]
+        metrics.extend([m.metric_type for m in test.secondary_metrics])
+
+        test_response = ABTestResponse(
+            id=test.id,
+            name=test.name,
+            description=test.description,
+            test_type=test.test_type,
+            status=test.status,
+            allocation_strategy=test.allocation_strategy,
+            variants=response_variants,
+            metrics=metrics,
+            duration_days=test.duration_days or 7,
+            min_sample_size=test.minimum_sample_size,
+            confidence_level=test.confidence_level,
+            target_audience=test.target_users,
+            traffic_percentage=test.traffic_percentage * 100.0,
+            start_date=test.start_date,
+            end_date=test.end_date,
+            participant_count=0,  # Would need to be calculated
+            created_at=test.created_at,
+            updated_at=test.updated_at,
+            created_by=test.created_by,
+            tags=test.tags,
+            metadata=test.metadata,
+        )
+
+        # Validate test operation (access control and state validation)
+        _validate_test_operation(test_response, "end", current_user)
+
+        # Validate winner variant if provided
+        if winner_variant:
+            variant_exists = any(v.id == winner_variant for v in test.variants)
+            if not variant_exists:
+                # Also check by name for convenience
+                variant_exists = any(v.name == winner_variant for v in test.variants)
+                if not variant_exists:
+                    raise BadRequestProblem(
+                        detail=f"Winner variant '{winner_variant}' not found in test variants"
+                    )
+
         success = await ab_test_manager.end_test(
             test_id, winner_variant
         )
 
         if not success:
-            raise NotFoundProblem(
-                detail="A/B test not found or could not be ended",
-                resource_type="ab_test",
-                resource_id=test_id,
-            ) from None
+            raise InternalServerProblem(
+                detail="Failed to end A/B test - internal error"
+            )
+
+        # Create appropriate message based on whether winner was specified
+        if winner_variant:
+            message = f"A/B test ended with winner: {winner_variant}"
+        else:
+            message = "A/B test ended successfully"
 
         return ABTestActionResponse(
             success=True,
-            message=f"A/B test ended with winner: {winner_variant}",
+            message=message,
             test_id=test_id,
             new_status=TestStatus.COMPLETED,
         )
 
+    except (NotFoundProblem, BadRequestProblem, ForbiddenProblem):
+        raise
     except Exception as e:
         logger.error(
             "Failed to end A/B test", test_id=test_id, error=str(e)

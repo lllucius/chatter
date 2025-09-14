@@ -1,11 +1,12 @@
 """Schemas for SSE events API."""
 
-import uuid
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
+
+from chatter.models.base import generate_ulid
 
 
 class EventType(str, Enum):
@@ -67,7 +68,7 @@ class EventType(str, Enum):
 class Event(BaseModel):
     """Real-time event data."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     type: EventType
     data: dict[str, Any]
     timestamp: datetime = Field(

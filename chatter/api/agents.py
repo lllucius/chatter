@@ -468,11 +468,11 @@ async def update_agent(
         Updated agent data
     """
     try:
-        # Validate agent_id format (UUID)
-        import uuid
+        # Validate agent_id format (ULID)
+        from ulid import ULID
 
         try:
-            uuid.UUID(agent_id)
+            ULID.from_str(agent_id)
         except ValueError as e:
             raise NotFoundProblem(
                 detail=f"Invalid agent ID format: {agent_id}"
@@ -538,11 +538,11 @@ async def delete_agent(
         Deletion result
     """
     try:
-        # Validate agent_id format (UUID)
-        import uuid
+        # Validate agent_id format (ULID)
+        from ulid import ULID
 
         try:
-            uuid.UUID(agent_id)
+            ULID.from_str(agent_id)
         except ValueError as e:
             raise NotFoundProblem(
                 detail=f"Invalid agent ID format: {agent_id}"

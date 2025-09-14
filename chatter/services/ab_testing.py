@@ -1,13 +1,13 @@
 """A/B testing infrastructure for prompts and models."""
 
 import hashlib
-import uuid
 from datetime import UTC, datetime, timedelta
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -58,7 +58,7 @@ class MetricType(str, Enum):
 class TestVariant(BaseModel):
     """A/B test variant configuration."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     name: str
     description: str
     weight: float = 1.0
@@ -81,7 +81,7 @@ class TestMetric(BaseModel):
 class ABTest(BaseModel):
     """A/B test configuration."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     name: str
     description: str
     test_type: TestType
@@ -127,7 +127,7 @@ class ABTest(BaseModel):
 class TestAssignment(BaseModel):
     """User assignment to test variant."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     test_id: str
     user_id: str
     variant_id: str
@@ -141,7 +141,7 @@ class TestAssignment(BaseModel):
 class TestEvent(BaseModel):
     """Event recorded during A/B test."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     test_id: str
     variant_id: str
     user_id: str

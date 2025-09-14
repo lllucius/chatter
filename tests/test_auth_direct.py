@@ -1,11 +1,10 @@
 """Simplified authentication test that bypasses FastAPI HTTP client."""
 
-import uuid
-
 import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.auth import AuthService
+from chatter.models.base import generate_ulid
 from chatter.schemas.auth import UserCreate
 
 
@@ -20,7 +19,7 @@ class TestAuthServiceDirect:
         auth_service = AuthService(db_session)
 
         # Use unique identifiers to avoid conflicts
-        unique_id = str(uuid.uuid4())[:8]
+        unique_id = generate_ulid()[:8]
         user_data = UserCreate(
             username=f"testuser_direct_{unique_id}",
             email=f"test_direct_{unique_id}@example.com",
@@ -55,7 +54,7 @@ class TestAuthServiceDirect:
         auth_service = AuthService(db_session)
 
         # First create a user with unique identifiers
-        unique_id = str(uuid.uuid4())[:8]
+        unique_id = generate_ulid()[:8]
         user_data = UserCreate(
             username=f"testuser_auth_{unique_id}",
             email=f"test_auth_{unique_id}@example.com",

@@ -5,9 +5,9 @@ handling across all layers of the application, implementing RFC 9457 Problem
 Details consistently.
 """
 
-import uuid
 from typing import Any
 
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -51,7 +51,7 @@ class ChatterBaseException(Exception):
             self.error_code = error_code
         self.status_code = status_code
         self.details = details
-        self.error_id = str(uuid.uuid4())
+        self.error_id = generate_ulid()
 
         # Add timestamp
         from datetime import datetime

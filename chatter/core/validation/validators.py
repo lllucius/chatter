@@ -1,11 +1,12 @@
 """Base validator classes and concrete validator implementations."""
 
 import re
-import uuid
 from abc import ABC, abstractmethod
 from collections.abc import Callable
 from typing import Any
 from urllib.parse import urlparse
+
+from ulid import ULID
 
 from .context import ValidationContext
 from .exceptions import (
@@ -945,7 +946,7 @@ class AgentValidator(BaseValidator):
             )
 
         try:
-            uuid.UUID(agent_id.strip())
+            ULID.from_str(agent_id.strip())
             return ValidationResult(
                 is_valid=True, value=agent_id.strip()
             )
@@ -967,7 +968,7 @@ class AgentValidator(BaseValidator):
             )
 
         try:
-            uuid.UUID(conversation_id.strip())
+            ULID.from_str(conversation_id.strip())
             return ValidationResult(
                 is_valid=True, value=conversation_id.strip()
             )

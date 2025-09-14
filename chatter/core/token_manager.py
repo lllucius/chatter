@@ -1,10 +1,10 @@
 """Enhanced token management with proper security features."""
 
-import uuid
 from datetime import UTC, datetime, timedelta
 from typing import Any
 
 from chatter.config import settings
+from chatter.models.base import generate_ulid
 from chatter.models.user import User
 from chatter.utils.logging import get_logger
 from chatter.utils.security_enhanced import (
@@ -32,7 +32,7 @@ class TokenManager:
             Dictionary with tokens and metadata
         """
         # Generate unique JWT ID for tracking
-        jti = str(uuid.uuid4())
+        jti = generate_ulid()
         issued_at = datetime.now(UTC)
 
         # Create access token payload
@@ -44,9 +44,7 @@ class TokenManager:
             "type": "access",
             "iat": issued_at,
             "permissions": await self._get_user_permissions(user),
-            "session_id": str(
-                uuid.uuid4()
-            ),  # Unique session identifier
+            "session_id": generate_ulid(),  # Unique session identifier
         }
 
         # Create refresh token payload
@@ -272,7 +270,7 @@ class TokenManager:
         # This is a simplified version - in practice, you'd inject the auth service
 
         # Create new tokens with same session but new JTI
-        new_jti = str(uuid.uuid4())
+        new_jti = generate_ulid()
         issued_at = datetime.now(UTC)
 
         access_payload = {

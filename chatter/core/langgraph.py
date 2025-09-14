@@ -2,7 +2,6 @@
 
 from collections.abc import Sequence
 from typing import Annotated, Any, Literal, TypedDict
-from uuid import uuid4
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
@@ -17,6 +16,8 @@ from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.pregel import Pregel
+
+from chatter.models.base import generate_ulid
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger
@@ -529,7 +530,7 @@ class LangGraphWorkflowManager:
     ) -> ConversationState:
         """Run a workflow with state management."""
         if not thread_id:
-            thread_id = str(uuid4())
+            thread_id = generate_ulid()
 
         config = {"configurable": {"thread_id": thread_id}}
 
@@ -555,7 +556,7 @@ class LangGraphWorkflowManager:
     ) -> Any:
         """Stream workflow execution for real-time updates."""
         if not thread_id:
-            thread_id = str(uuid4())
+            thread_id = generate_ulid()
 
         config = {"configurable": {"thread_id": thread_id}}
 
@@ -612,7 +613,7 @@ class LangGraphWorkflowManager:
             Thread ID of the new branch
         """
         if not new_thread_id:
-            new_thread_id = str(uuid4())
+            new_thread_id = generate_ulid()
 
         # Get parent conversation state
         parent_state = await self.get_conversation_history(
@@ -639,7 +640,7 @@ class LangGraphWorkflowManager:
         branch_state["branch_id"] = new_thread_id
         branch_state["metadata"] = {
             **parent_state.get("metadata", {}),
-            "branch_created_at": str(uuid4()),  # timestamp-like ID
+            "branch_created_at": generate_ulid(),  # timestamp-like ID
             "branch_point_index": branch_point_message_index,
         }
 
@@ -673,7 +674,7 @@ class LangGraphWorkflowManager:
             Thread ID of the forked conversation
         """
         if not fork_id:
-            fork_id = str(uuid4())
+            fork_id = generate_ulid()
 
         # Get source conversation state
         source_state = await self.get_conversation_history(
@@ -694,7 +695,7 @@ class LangGraphWorkflowManager:
         fork_state["metadata"] = {
             **source_state.get("metadata", {}),
             "forked_from": source_thread_id,
-            "fork_created_at": str(uuid4()),  # timestamp-like ID
+            "fork_created_at": generate_ulid(),  # timestamp-like ID
         }
 
         # Initialize the fork

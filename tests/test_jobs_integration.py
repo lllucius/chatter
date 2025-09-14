@@ -176,7 +176,7 @@ class TestJobsIntegration:
         assert cancel_response.status_code == 404
 
         # Test invalid job ID formats
-        invalid_ids = ["not-a-uuid", "12345", ""]
+        invalid_ids = ["not-a-ulid", "12345", ""]
 
         for invalid_id in invalid_ids:
             if invalid_id:  # Skip empty string for URL path

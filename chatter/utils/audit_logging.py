@@ -1,7 +1,6 @@
 """Enhanced audit logging for security-sensitive operations."""
 
 import json
-import uuid
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
@@ -11,7 +10,7 @@ from sqlalchemy import DateTime, Integer, String, Text
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import Mapped, mapped_column
 
-from chatter.models.base import Base
+from chatter.models.base import Base, generate_ulid
 from chatter.utils.logging import get_logger
 from chatter.utils.security_enhanced import sanitize_log_data
 
@@ -81,7 +80,7 @@ class AuditLog(Base):
 
     # Event identification
     event_id: Mapped[str] = mapped_column(
-        String(36), unique=True, nullable=False, index=True
+        String(26), unique=True, nullable=False, index=True  # ULID length
     )
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
@@ -95,7 +94,7 @@ class AuditLog(Base):
 
     # User and session info
     user_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True
+        String(26), nullable=True, index=True  # ULID length
     )
     session_id: Mapped[str | None] = mapped_column(
         String(100), nullable=True
@@ -109,7 +108,7 @@ class AuditLog(Base):
         String(500), nullable=True
     )
     request_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True
+        String(26), nullable=True, index=True  # ULID length
     )
 
     # Resource info
@@ -117,7 +116,7 @@ class AuditLog(Base):
         String(50), nullable=True
     )
     resource_id: Mapped[str | None] = mapped_column(
-        String(36), nullable=True, index=True
+        String(26), nullable=True, index=True  # ULID length
     )
 
     # Additional data
@@ -168,9 +167,7 @@ class AuditLogger:
         user_agent = request.headers.get("User-Agent", "")
 
         # Extract request ID if available
-        request_id = request.headers.get("X-Request-ID") or str(
-            uuid.uuid4()
-        )
+        request_id = request.headers.get("X-Request-ID") or generate_ulid()
 
         return {
             "ip_address": ip_address,
@@ -209,7 +206,7 @@ class AuditLogger:
         Returns:
             Event ID for correlation
         """
-        event_id = str(uuid.uuid4())
+        event_id = generate_ulid()
         timestamp = datetime.now(UTC)
 
         # Extract request information

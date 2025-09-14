@@ -1,12 +1,12 @@
 """Agent management schemas."""
 
-import uuid
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
+from chatter.models.base import generate_ulid
 from chatter.schemas.common import (
     DeleteRequestBase,
     GetRequestBase,
@@ -52,7 +52,7 @@ class AgentCapability(str, Enum):
 class AgentProfile(BaseModel):
     """Agent profile and configuration."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     name: str
     description: str
     type: AgentType
@@ -99,7 +99,7 @@ class AgentProfile(BaseModel):
 class AgentInteraction(BaseModel):
     """Record of an agent interaction."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     agent_id: str
     conversation_id: str
     user_message: str

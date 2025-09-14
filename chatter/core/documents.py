@@ -2,7 +2,6 @@
 
 import hashlib
 import mimetypes
-import uuid
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -12,6 +11,7 @@ from sqlalchemy import and_, asc, desc, func, or_, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
+from chatter.models.base import generate_ulid
 from chatter.models.document import (
     Document,
     DocumentChunk,
@@ -126,7 +126,7 @@ class DocumentService:
                 ) from None
 
             # Generate unique filename
-            unique_filename = f"{uuid.uuid4()}.{file_ext}"
+            unique_filename = f"{generate_ulid()}.{file_ext}"
 
             # Save file to storage using streaming
             file_path = self.storage_path / unique_filename

@@ -1,12 +1,12 @@
 """Server-Sent Events (SSE) service for real-time updates."""
 
 import asyncio
-import uuid
 from collections.abc import AsyncGenerator
 from datetime import UTC, datetime
 from typing import Any
 
 from chatter.config import settings
+from chatter.models.base import generate_ulid
 from chatter.schemas.events import Event, EventType, validate_event_data
 from chatter.utils.logging import get_logger
 
@@ -167,7 +167,7 @@ class SSEEventService:
                     "Maximum number of connections per user reached"
                 )
 
-        connection_id = str(uuid.uuid4())
+        connection_id = generate_ulid()
         connection = SSEConnection(connection_id, user_id)
 
         self.connections[connection_id] = connection

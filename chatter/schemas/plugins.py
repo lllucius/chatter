@@ -1,12 +1,12 @@
 """Plugin management schemas."""
 
-import uuid
 from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
+from chatter.models.base import generate_ulid
 from chatter.schemas.common import ListRequestBase
 
 
@@ -64,7 +64,7 @@ class PluginManifest(BaseModel):
 class PluginInstance(BaseModel):
     """Plugin instance information."""
 
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = Field(default_factory=generate_ulid)
     manifest: PluginManifest
     status: PluginStatus = PluginStatus.INSTALLED
     installation_path: str

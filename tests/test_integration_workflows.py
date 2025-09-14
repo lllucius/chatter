@@ -871,7 +871,7 @@ class TestIntegrationWorkflows:
             # Scenario 3: Access non-existent resources
             nonexistent_resources = [
                 "/api/v1/chats/nonexistent-id",
-                "/api/v1/documents/invalid-uuid",
+                "/api/v1/documents/invalid-ulid",
                 "/api/v1/agents/999999",
             ]
 

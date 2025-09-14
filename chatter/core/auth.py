@@ -630,11 +630,11 @@ class AuthService:
         Returns:
             Dictionary with tokens and expiration info
         """
-        import uuid
+        from chatter.models.base import generate_ulid
 
         # Generate unique JWT ID for token tracking
-        jti = str(uuid.uuid4())
-        session_id = str(uuid.uuid4())
+        jti = generate_ulid()
+        session_id = generate_ulid()
         issued_at = datetime.now(UTC)
 
         access_token_expires = timedelta(

@@ -21,7 +21,7 @@ from chatter.schemas.document import (
     SearchResultResponse,
 )
 from chatter.services.new_document_service import NewDocumentService, DocumentServiceError
-from chatter.utils.database import get_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -39,7 +39,7 @@ async def upload_document(
     chunk_overlap: int | None = Form(None),
     is_public: bool = Form(False),
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> DocumentResponse:
     """Upload and process a new document.
     
@@ -104,7 +104,7 @@ async def upload_document(
 async def get_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> DocumentResponse:
     """Get a document by ID."""
     try:
@@ -133,7 +133,7 @@ async def get_document(
 async def list_documents(
     list_request: DocumentListRequest,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict[str, Any]:
     """List documents with filtering and pagination."""
     try:
@@ -161,7 +161,7 @@ async def list_documents(
 async def search_documents(
     search_request: DocumentSearchRequest,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> list[SearchResultResponse]:
     """Search documents using semantic similarity."""
     try:
@@ -193,7 +193,7 @@ async def search_documents(
 async def delete_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict[str, str]:
     """Delete a document."""
     try:
@@ -222,7 +222,7 @@ async def delete_document(
 async def reprocess_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict[str, str]:
     """Reprocess a document through the embedding pipeline."""
     try:
@@ -250,7 +250,7 @@ async def reprocess_document(
 @router.get("/stats/user", response_model=DocumentStatsResponse)
 async def get_user_document_stats(
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> DocumentStatsResponse:
     """Get document statistics for the current user."""
     try:

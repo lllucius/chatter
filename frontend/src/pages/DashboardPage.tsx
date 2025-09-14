@@ -203,6 +203,23 @@ const DashboardPage: React.FC = () => {
     }
   }, [toolServerApi.error]);
 
+  // Add API call for chart-ready data (with fallback)
+  const chartDataApi = useApi(
+    async () => {
+      try {
+        // Try the new endpoint, fall back if not available
+        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData) {
+          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
+        }
+        return null;
+      } catch (error) {
+        console.log('Chart data API not available yet');
+        return null;
+      }
+    },
+    { immediate: true }
+  );
+
   const data = dashboardApi.data?.data;
   const performanceData = performanceApi.data?.data;
   const systemData = systemApi.data?.data;
@@ -210,13 +227,22 @@ const DashboardPage: React.FC = () => {
   const documentData = documentApi.data?.data;
   const toolServerData = toolServerApi.data?.data;
 
-  // Enhanced chart data calculations with additional analytics
+  // Use chart-ready data from backend instead of client-side calculations
   const chartData = useMemo(() => {
-    // Always return chart data, even if main dashboard data is missing
+    // If we have chart-ready data from the backend, use it directly
+    if (chartDataApi.data?.data) {
+      const backendChartData = chartDataApi.data.data;
+      return {
+        conversationChartData: backendChartData.conversation_chart_data || [],
+        tokenUsageData: backendChartData.token_usage_data || [],
+        performanceChartData: backendChartData.performance_chart_data || [],
+        systemHealthData: backendChartData.system_health_data || [],
+      };
+    }
+
+    // Fallback to real data if chart API isn't available
     const conversationStats = data?.conversation_stats || {};
     const usageMetrics = usageData || data?.usage_metrics || {};
-    
-    // Use real performance data if available
     const realPerformanceData = performanceData || data?.performance_metrics || {};
 
     // Provide fallback data when APIs fail

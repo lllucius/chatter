@@ -10,9 +10,11 @@ from chatter.api.auth import get_current_user
 from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
+    ChartReadyAnalytics,
     ConversationStatsResponse,
     DashboardResponse,
     DocumentAnalyticsResponse,
+    IntegratedDashboardStats,
     PerformanceMetricsResponse,
     SystemAnalyticsResponse,
     UsageMetricsResponse,
@@ -412,6 +414,104 @@ async def get_system_analytics(
         ) from e
 
 
+@router.get("/dashboard/chart-data", response_model=ChartReadyAnalytics)
+@rate_limit(
+    max_requests=20, window_seconds=60
+)  # 20 requests per minute
+async def get_dashboard_chart_data(
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
+    period: str = Query(
+        "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
+    ),
+    current_user: User = Depends(get_current_user),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
+) -> ChartReadyAnalytics:
+    """Get chart-ready analytics data for dashboard visualization.
+    
+    Args:
+        start_date: Start date for analytics
+        end_date: End date for analytics  
+        period: Predefined period
+        current_user: Current authenticated user
+        analytics_service: Analytics service
+        
+    Returns:
+        Chart-ready analytics data
+    """
+    try:
+        # Create time range object
+        from pydantic import ValidationError
+
+        from chatter.schemas.analytics import AnalyticsTimeRange
+
+        try:
+            time_range = AnalyticsTimeRange(
+                start_date=start_date,
+                end_date=end_date,
+                period=period,
+            )
+        except ValidationError as ve:
+            from chatter.utils.problem import BadRequestProblem
+
+            raise BadRequestProblem(
+                detail=f"Invalid time range parameters: {ve}"
+            ) from ve
+
+        chart_data = await analytics_service.get_chart_ready_data(
+            current_user.id, time_range
+        )
+        return chart_data
+
+    except Exception as e:
+        logger.error(f"Error getting chart data: {e}")
+        from chatter.utils.problem import InternalServerProblem
+
+        raise InternalServerProblem(
+            detail="Failed to retrieve chart data"
+        ) from e
+
+
+@router.get("/dashboard/integrated", response_model=IntegratedDashboardStats)
+@rate_limit(
+    max_requests=20, window_seconds=60
+)  # 20 requests per minute
+async def get_integrated_dashboard_stats(
+    current_user: User = Depends(get_current_user),
+    analytics_service: AnalyticsService = Depends(
+        get_analytics_service
+    ),
+) -> IntegratedDashboardStats:
+    """Get integrated dashboard statistics.
+    
+    Args:
+        current_user: Current authenticated user
+        analytics_service: Analytics service
+        
+    Returns:
+        Integrated dashboard statistics
+    """
+    try:
+        stats = await analytics_service.get_integrated_dashboard_stats(
+            current_user.id
+        )
+        return stats
+
+    except Exception as e:
+        logger.error(f"Error getting integrated dashboard stats: {e}")
+        from chatter.utils.problem import InternalServerProblem
+
+        raise InternalServerProblem(
+            detail="Failed to retrieve integrated dashboard stats"
+        ) from e
+
+
 @router.get("/dashboard", response_model=DashboardResponse)
 @rate_limit(
     max_requests=10, window_seconds=60
@@ -454,6 +554,11 @@ async def get_dashboard(
         dashboard_data = await analytics_service.get_dashboard_data(
             current_user.id, time_range
         )
+        
+        # Get chart-ready data as well
+        chart_data = await analytics_service.get_chart_ready_data(
+            current_user.id, time_range
+        )
 
         return DashboardResponse(
             conversation_stats=ConversationStatsResponse(
@@ -472,6 +577,7 @@ async def get_dashboard(
                 **dashboard_data.get("system_health", {})
             ),
             custom_metrics=dashboard_data.get("custom_metrics", []),
+            chart_data=chart_data,
             generated_at=dashboard_data.get(
                 "generated_at", datetime.now(UTC)
             ),

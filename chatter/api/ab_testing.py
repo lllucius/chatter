@@ -9,6 +9,7 @@ from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.ab_testing import (
     ABTestActionResponse,
+    ABTestAnalyticsResponse,
     ABTestCreateRequest,
     ABTestDeleteResponse,
     ABTestListRequest,
@@ -1252,4 +1253,106 @@ async def get_ab_test_recommendations(
         )
         raise InternalServerProblem(
             detail="Failed to get A/B test recommendations"
+        ) from e
+
+
+@router.get(
+    "/{test_id}/analytics",
+    response_model=ABTestAnalyticsResponse,
+    responses={
+        404: {"description": "A/B test not found"},
+        403: {"description": "Access denied"},
+    },
+)
+async def get_test_analytics(
+    test_id: str,
+    current_user: User = Depends(get_current_user),
+    ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
+) -> ABTestAnalyticsResponse:
+    """Get comprehensive analytics for an A/B test."""
+    try:
+        test = await ab_test_manager.get_test(test_id)
+        if not test:
+            raise NotFoundProblem(
+                detail="A/B test not found",
+                resource_type="ab_test", 
+                resource_id=test_id,
+            )
+
+        # Create response for access check
+        test_response = ABTestResponse(
+            id=test.id,
+            name=test.name,
+            description=test.description,
+            test_type=test.test_type,
+            status=test.status,
+            allocation_strategy=test.allocation_strategy,
+            variants=[],  # Minimal for access check
+            metrics=[test.primary_metric.metric_type],
+            duration_days=test.duration_days or 7,
+            min_sample_size=test.minimum_sample_size,
+            confidence_level=test.confidence_level,
+            target_audience=test.target_users,
+            traffic_percentage=test.traffic_percentage * 100.0,
+            start_date=test.start_date,
+            end_date=test.end_date,
+            participant_count=0,
+            created_at=test.created_at,
+            updated_at=test.updated_at,
+            created_by=test.created_by,
+            tags=test.tags,
+            metadata=test.metadata,
+        )
+
+        _check_test_access(test_response, current_user)
+
+        # Calculate analytics
+        analytics_data = await ab_test_manager.calculate_test_analytics(test_id)
+        if not analytics_data:
+            raise InternalServerProblem(detail="Failed to calculate test analytics")
+
+        # Import schemas for response
+        from chatter.schemas.ab_testing import (
+            ABTestAnalyticsResponse,
+            StatisticalAnalysis,
+            VariantPerformance,
+        )
+
+        # Convert to response format
+        variants = [
+            VariantPerformance(**variant) 
+            for variant in analytics_data["variants"]
+        ]
+        
+        statistical_analysis = StatisticalAnalysis(
+            **analytics_data["statistical_analysis"]
+        )
+
+        return ABTestAnalyticsResponse(
+            test_id=analytics_data["test_id"],
+            test_name=analytics_data["test_name"],
+            status=analytics_data["status"],
+            total_participants=analytics_data["total_participants"],
+            variants=variants,
+            statistical_analysis=statistical_analysis,
+            winner=analytics_data["winner"],
+            improvement=analytics_data["improvement"],
+            recommendation=analytics_data["recommendation"],
+            duration_days=analytics_data["duration_days"],
+            remaining_days=analytics_data["remaining_days"],
+            progress_percentage=analytics_data["progress_percentage"],
+            generated_at=analytics_data["generated_at"],
+            last_updated=analytics_data["last_updated"],
+        )
+
+    except (NotFoundProblem, ForbiddenProblem):
+        raise
+    except Exception as e:
+        logger.error(
+            "Failed to get A/B test analytics",
+            test_id=test_id,
+            error=str(e),
+        )
+        raise InternalServerProblem(
+            detail="Failed to get A/B test analytics"
         ) from e

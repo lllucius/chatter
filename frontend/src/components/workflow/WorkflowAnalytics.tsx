@@ -18,7 +18,8 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
-import { WorkflowDefinition, WorkflowNodeType } from './WorkflowEditor';
+import { WorkflowDefinition, WorkflowNodeType, WorkflowNode } from './WorkflowEditor';
+import { getSDK } from '../../services/client-service';
 
 interface WorkflowAnalyticsProps {
   workflow: WorkflowDefinition;
@@ -34,118 +35,109 @@ interface WorkflowMetrics {
 }
 
 const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
-  const calculateMetrics = (): WorkflowMetrics => {
-    const { nodes, edges } = workflow;
-    
-    // Node type distribution
-    const nodeTypeDistribution = nodes.reduce((acc, node) => {
+  const [analytics, setAnalytics] = React.useState<WorkflowMetrics | null>(null);
+  const [loading, setLoading] = React.useState(false);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    const fetchAnalytics = async () => {
+      // Only fetch analytics if we have a workflow with an ID
+      if (!workflow.id || !workflow.nodes.length) {
+        // Fallback to simple client-side calculation for workflows without ID
+        setAnalytics(calculateSimpleMetrics());
+        return;
+      }
+
+      setLoading(true);
+      setError(null);
+      
+      try {
+        // Use the new server-side analytics API
+        const response = await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
+          workflow.id
+        );
+        
+        // Transform server response to client format
+        const serverAnalytics = response.data;
+        const clientMetrics: WorkflowMetrics = {
+          totalNodes: serverAnalytics.complexity.node_count,
+          nodeTypeDistribution: calculateNodeTypeDistribution(workflow.nodes),
+          complexityScore: serverAnalytics.complexity.score,
+          executionPaths: [], // Server returns count, not paths
+          potentialBottlenecks: serverAnalytics.bottlenecks.map(b => b.reason),
+          recommendations: serverAnalytics.optimization_suggestions.map(s => s.description),
+        };
+        
+        setAnalytics(clientMetrics);
+      } catch (err) {
+        console.error('Failed to fetch workflow analytics:', err);
+        setError('Failed to load analytics. Using fallback calculations.');
+        // Fallback to client-side calculation
+        setAnalytics(calculateSimpleMetrics());
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchAnalytics();
+  }, [workflow.id, workflow.nodes, workflow.edges]);
+
+  const calculateNodeTypeDistribution = (nodes: WorkflowNode[]): Record<WorkflowNodeType, number> => {
+    return nodes.reduce((acc, node) => {
       const nodeType = node.data.nodeType;
       acc[nodeType] = (acc[nodeType] || 0) + 1;
       return acc;
     }, {} as Record<WorkflowNodeType, number>);
+  };
 
-    // Complexity calculation
-    let complexityScore = 0;
-    complexityScore += nodes.length * 2; // Base complexity per node
-    complexityScore += edges.length * 1; // Edge complexity
+  const calculateSimpleMetrics = (): WorkflowMetrics => {
+    const { nodes, edges } = workflow;
     
-    // Add complexity for specific node types
-    nodes.forEach(node => {
-      switch (node.data.nodeType) {
-        case 'conditional':
-          complexityScore += 5;
-          break;
-        case 'loop':
-          complexityScore += 8;
-          break;
-        case 'errorHandler':
-          complexityScore += 3;
-          break;
-        case 'tool': {
-          const toolCount = node.data.config?.tools?.length || 1;
-          complexityScore += toolCount * 2;
-          break;
-        }
-      }
-    });
-
-    // Find execution paths (simplified)
-    const executionPaths: string[][] = [];
-    const startNodes = nodes.filter(node => node.data.nodeType === 'start');
+    // Simple fallback calculation for workflows without server-side analytics
+    const nodeTypeDistribution = calculateNodeTypeDistribution(nodes);
     
-    startNodes.forEach(startNode => {
-      const path = [startNode.id];
-      const visited = new Set([startNode.id]);
-      findPaths(startNode.id, path, visited, executionPaths, edges, nodes);
-    });
-
-    // Identify potential bottlenecks
+    let complexityScore = nodes.length + edges.length;
+    
     const potentialBottlenecks: string[] = [];
-    
-    // High-degree nodes (many connections)
-    const nodeDegrees = new Map<string, number>();
-    edges.forEach(edge => {
-      nodeDegrees.set(edge.source, (nodeDegrees.get(edge.source) || 0) + 1);
-      nodeDegrees.set(edge.target, (nodeDegrees.get(edge.target) || 0) + 1);
-    });
-    
-    nodeDegrees.forEach((degree, nodeId) => {
-      if (degree > 4) {
-        const node = nodes.find(n => n.id === nodeId);
-        if (node) {
-          potentialBottlenecks.push(`High-degree node: ${node.data.label}`);
-        }
-      }
-    });
-
-    // Sequential tool nodes (could be parallelized)
-    for (let i = 0; i < nodes.length - 1; i++) {
-      const current = nodes[i];
-      const next = nodes[i + 1];
-      if (current.data.nodeType === 'tool' && next.data.nodeType === 'tool') {
-        const hasDirectConnection = edges.some(edge => 
-          edge.source === current.id && edge.target === next.id
-        );
-        if (hasDirectConnection) {
-          potentialBottlenecks.push(`Sequential tools: ${current.data.label} → ${next.data.label}`);
-        }
-      }
-    }
-
-    // Generate recommendations
     const recommendations: string[] = [];
     
-    if (nodeTypeDistribution.errorHandler === 0) {
+    if (nodeTypeDistribution.errorHandler === 0 && nodes.length > 5) {
       recommendations.push('Consider adding error handling nodes for better reliability');
     }
     
-    if (nodeTypeDistribution.memory === 0 && nodeTypeDistribution.model > 0) {
-      recommendations.push('Add memory nodes to maintain context across model calls');
-    }
-    
-    if (complexityScore > 50) {
-      recommendations.push('Workflow complexity is high - consider breaking into smaller sub-workflows');
-    }
-    
-    if (nodeTypeDistribution.tool > 3) {
-      recommendations.push('Consider grouping tools or using parallel execution');
-    }
-
-    const toolNodes = nodes.filter(n => n.data.nodeType === 'tool');
-    const parallelTools = toolNodes.filter(n => n.data.config?.parallel);
-    if (toolNodes.length > parallelTools.length) {
-      recommendations.push('Some tool nodes could benefit from parallel execution');
+    if (complexityScore > 20) {
+      recommendations.push('Workflow complexity is moderate - consider optimizing');
     }
 
     return {
       totalNodes: nodes.length,
       nodeTypeDistribution,
       complexityScore,
-      executionPaths,
+      executionPaths: [],
       potentialBottlenecks,
       recommendations,
     };
   };
+
+  if (loading) {
+    return (
+      <div className="workflow-analytics">
+        <h3>Workflow Analytics</h3>
+        <div className="loading">Loading analytics...</div>
+      </div>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <div className="workflow-analytics">
+        <h3>Workflow Analytics</h3>
+        <div className="error">Unable to load analytics</div>
+      </div>
+    );
+  }
+
+  // Use the analytics data (either from server or fallback)
 
   const findPaths = (
     currentNodeId: string,
@@ -185,13 +177,43 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     return 'High';
   };
 
-  const metrics = calculateMetrics();
+  // Use the analytics data (either from server or fallback)
+  if (loading) {
+    return (
+      <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <AnalyticsIcon sx={{ mr: 1 }} />
+          <Typography variant="h6">Workflow Analytics</Typography>
+        </Box>
+        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
+          <LinearProgress sx={{ width: '100%' }} />
+        </Box>
+      </Paper>
+    );
+  }
+
+  if (!analytics) {
+    return (
+      <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <AnalyticsIcon sx={{ mr: 1 }} />
+          <Typography variant="h6">Workflow Analytics</Typography>
+        </Box>
+        <Alert severity="error">Unable to load analytics</Alert>
+      </Paper>
+    );
+  }
 
   return (
     <Paper sx={{ p: 2, height: '100%', overflow: 'auto' }}>
       <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
         <AnalyticsIcon sx={{ mr: 1 }} />
         <Typography variant="h6">Workflow Analytics</Typography>
+        {error && (
+          <Alert severity="warning" sx={{ ml: 2, flex: 1 }}>
+            {error}
+          </Alert>
+        )}
       </Box>
 
       {/* Overview */}
@@ -200,23 +222,23 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           Overview
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
-          <Chip label={`${metrics.totalNodes} Nodes`} color="primary" />
+          <Chip label={`${analytics.totalNodes} Nodes`} color="primary" />
           <Chip label={`${workflow.edges.length} Connections`} color="primary" />
           <Chip 
-            label={`${getComplexityLabel(metrics.complexityScore)} Complexity`} 
-            color={getComplexityColor(metrics.complexityScore)}
+            label={`${getComplexityLabel(analytics.complexityScore)} Complexity`} 
+            color={getComplexityColor(analytics.complexityScore)}
           />
         </Box>
         
         <Typography variant="body2" sx={{ mb: 1 }}>Complexity Score</Typography>
         <LinearProgress 
           variant="determinate" 
-          value={Math.min(metrics.complexityScore, 100)} 
-          color={getComplexityColor(metrics.complexityScore)}
+          value={Math.min(analytics.complexityScore, 100)} 
+          color={getComplexityColor(analytics.complexityScore)}
           sx={{ mb: 1 }}
         />
         <Typography variant="caption" color="textSecondary">
-          {metrics.complexityScore}/100
+          {analytics.complexityScore}/100
         </Typography>
       </Box>
 
@@ -228,7 +250,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           Node Distribution
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {Object.entries(metrics.nodeTypeDistribution).map(([type, count]): void => (
+          {Object.entries(analytics.nodeTypeDistribution).map(([type, count]) => (
             <Chip
               key={type}
               label={`${type}: ${count}`}
@@ -246,17 +268,22 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <PathIcon sx={{ mr: 1, fontSize: 20 }} />
           <Typography variant="subtitle1" fontWeight="bold">
-            Execution Paths ({metrics.executionPaths.length})
+            Execution Paths ({analytics.executionPaths.length})
           </Typography>
         </Box>
-        {metrics.executionPaths.slice(0, 3).map((path, index): void => (
+        {analytics.executionPaths.slice(0, 3).map((path, index) => (
           <Typography key={index} variant="body2" sx={{ mb: 0.5 }}>
             Path {index + 1}: {path.length} nodes
           </Typography>
         ))}
-        {metrics.executionPaths.length > 3 && (
+        {analytics.executionPaths.length > 3 && (
           <Typography variant="body2" color="textSecondary">
-            +{metrics.executionPaths.length - 3} more paths...
+            +{analytics.executionPaths.length - 3} more paths...
+          </Typography>
+        )}
+        {analytics.executionPaths.length === 0 && (
+          <Typography variant="body2" color="textSecondary">
+            No execution paths analyzed
           </Typography>
         )}
       </Box>
@@ -264,7 +291,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
       <Divider sx={{ mb: 2 }} />
 
       {/* Bottlenecks */}
-      {metrics.potentialBottlenecks.length > 0 && (
+      {analytics.potentialBottlenecks.length > 0 && (
         <>
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
@@ -274,7 +301,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
               </Typography>
             </Box>
             <List dense>
-              {metrics.potentialBottlenecks.map((bottleneck, index): void => (
+              {analytics.potentialBottlenecks.map((bottleneck, index) => (
                 <ListItem key={index}>
                   <ListItemIcon>
                     <WarningIcon fontSize="small" color="warning" />
@@ -296,29 +323,26 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
           <CheckIcon sx={{ mr: 1, fontSize: 20, color: 'success.main' }} />
           <Typography variant="subtitle1" fontWeight="bold">
-            Recommendations
+            Optimization Recommendations
           </Typography>
         </Box>
-        {metrics.recommendations.length > 0 ? (
-          <List dense>
-            {metrics.recommendations.map((recommendation, index): void => (
-              <ListItem key={index}>
-                <ListItemIcon>
-                  <CheckIcon fontSize="small" color="success" />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={recommendation}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Alert severity="success">
-            <Typography variant="body2">
-              Your workflow looks well-optimized! No specific recommendations at this time.
-            </Typography>
-          </Alert>
+        <List dense>
+          {analytics.recommendations.map((recommendation, index) => (
+            <ListItem key={index}>
+              <ListItemIcon>
+                <CheckIcon fontSize="small" color="success" />
+              </ListItemIcon>
+              <ListItemText 
+                primary={recommendation}
+                primaryTypographyProps={{ variant: 'body2' }}
+              />
+            </ListItem>
+          ))}
+        </List>
+        {analytics.recommendations.length === 0 && (
+          <Typography variant="body2" color="textSecondary">
+            No specific recommendations available
+          </Typography>
         )}
       </Box>
     </Paper>

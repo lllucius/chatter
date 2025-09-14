@@ -6,12 +6,44 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from chatter.schemas.common import ListRequestBase
-from chatter.services.ab_testing import (
-    MetricType,
-    TestStatus,
-    TestType,
-    VariantAllocation,
-)
+
+
+# Enums defined locally to avoid circular imports
+from enum import Enum
+
+
+class TestStatus(str, Enum):
+    DRAFT = "draft"
+    RUNNING = "running"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class TestType(str, Enum):
+    PROMPT = "prompt"
+    MODEL = "model"
+    PARAMETER = "parameter"
+    WORKFLOW = "workflow"
+    TEMPLATE = "template"
+
+
+class VariantAllocation(str, Enum):
+    EQUAL = "equal"
+    WEIGHTED = "weighted"
+    GRADUAL_ROLLOUT = "gradual_rollout"
+    USER_ATTRIBUTE = "user_attribute"
+
+
+class MetricType(str, Enum):
+    RESPONSE_TIME = "response_time"
+    USER_SATISFACTION = "user_satisfaction"
+    ACCURACY = "accuracy"
+    ENGAGEMENT = "engagement"
+    CONVERSION = "conversion"
+    ERROR_RATE = "error_rate"
+    TOKEN_USAGE = "token_usage"
+    CUSTOM = "custom"
 
 
 class TestVariant(BaseModel):
@@ -274,3 +306,59 @@ class ABTestMetricsResponse(BaseModel):
     last_updated: datetime = Field(
         ..., description="Last metrics update"
     )
+
+
+class VariantPerformance(BaseModel):
+    """Performance data for a specific variant."""
+    
+    name: str = Field(..., description="Variant name")
+    participants: int = Field(..., description="Number of participants")
+    conversions: int = Field(..., description="Number of conversions")
+    conversion_rate: float = Field(..., description="Conversion rate")
+    revenue: float = Field(0.0, description="Total revenue")
+    cost: float = Field(0.0, description="Total cost")
+    roi: float = Field(0.0, description="Return on investment")
+
+
+class StatisticalAnalysis(BaseModel):
+    """Statistical analysis results."""
+    
+    confidence_level: float = Field(..., description="Confidence level used")
+    statistical_significance: bool = Field(..., description="Is result statistically significant")
+    p_value: float = Field(..., description="P-value")
+    effect_size: float = Field(..., description="Effect size")
+    power: float = Field(..., description="Statistical power")
+    confidence_intervals: dict[str, list[float]] = Field(
+        ..., description="Confidence intervals by variant"
+    )
+
+
+class ABTestAnalyticsResponse(BaseModel):
+    """Comprehensive A/B test analytics response."""
+    
+    test_id: str = Field(..., description="Test ID")
+    test_name: str = Field(..., description="Test name")
+    status: TestStatus = Field(..., description="Test status")
+    
+    # Performance data
+    total_participants: int = Field(..., description="Total participants")
+    variants: list[VariantPerformance] = Field(..., description="Variant performance data")
+    
+    # Statistical analysis
+    statistical_analysis: StatisticalAnalysis = Field(
+        ..., description="Statistical analysis results"
+    )
+    
+    # Results and recommendations
+    winner: str | None = Field(None, description="Winning variant")
+    improvement: float | None = Field(None, description="Improvement percentage")
+    recommendation: str = Field(..., description="Recommendation")
+    
+    # Test progress
+    duration_days: int = Field(..., description="Days test has been running")
+    remaining_days: int | None = Field(None, description="Days remaining")
+    progress_percentage: float = Field(..., description="Test progress percentage")
+    
+    # Metadata
+    generated_at: datetime = Field(..., description="Analytics generation timestamp")
+    last_updated: datetime = Field(..., description="Last data update")

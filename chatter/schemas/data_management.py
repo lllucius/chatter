@@ -338,3 +338,40 @@ class BulkDeleteResponse(BaseModel):
     errors: list[str] = Field(
         ..., description="List of error messages for failed deletions"
     )
+
+
+class EntityType(str, Enum):
+    """Supported entity types for bulk operations."""
+    
+    CONVERSATIONS = "conversations"
+    DOCUMENTS = "documents" 
+    PROMPTS = "prompts"
+
+
+class BulkOperationFilters(BaseModel):
+    """Server-side filters for bulk operations."""
+    
+    entity_type: EntityType = Field(..., description="Type of entity to filter")
+    created_before: datetime | None = Field(None, description="Filter items created before this date")
+    created_after: datetime | None = Field(None, description="Filter items created after this date")
+    user_id: str | None = Field(None, description="Filter by user/owner ID")
+    status: str | None = Field(None, description="Filter by status")
+    limit: int = Field(1000, ge=1, le=10000, description="Maximum number of items to process")
+    dry_run: bool = Field(False, description="If true, only return count without deleting")
+
+
+class BulkDeleteFilteredRequest(BaseModel):
+    """Request for server-side filtered bulk delete."""
+    
+    filters: BulkOperationFilters = Field(..., description="Filters to apply")
+
+
+class BulkDeletePreviewResponse(BaseModel):
+    """Response for bulk delete preview (dry run)."""
+    
+    entity_type: EntityType = Field(..., description="Entity type")
+    total_matching: int = Field(..., description="Total items matching filters")
+    sample_items: list[dict[str, Any]] = Field(
+        ..., description="Sample of items that would be deleted (first 10)"
+    )
+    filters_applied: BulkOperationFilters = Field(..., description="Filters that were applied")

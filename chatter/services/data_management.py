@@ -582,6 +582,330 @@ class DataManager:
             "errors": errors,
         }
 
+    # New server-side bulk filtering methods
+
+    async def bulk_delete_with_filters(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> dict[str, Any]:
+        """Perform bulk delete with server-side filtering."""
+        from chatter.schemas.data_management import EntityType
+        from chatter.utils.database import get_session_maker
+        
+        if filters.dry_run:
+            return await self.preview_bulk_delete(filters, user_id)
+
+        # Route to appropriate delete method based on entity type
+        if filters.entity_type == EntityType.CONVERSATIONS:
+            ids = await self._get_filtered_conversation_ids(filters, user_id)
+            return await self.bulk_delete_conversations(ids, user_id)
+        elif filters.entity_type == EntityType.DOCUMENTS:
+            ids = await self._get_filtered_document_ids(filters, user_id)
+            return await self.bulk_delete_documents(ids, user_id)
+        elif filters.entity_type == EntityType.PROMPTS:
+            ids = await self._get_filtered_prompt_ids(filters, user_id)
+            return await self.bulk_delete_prompts(ids, user_id)
+        else:
+            raise ValueError(f"Unsupported entity type: {filters.entity_type}")
+
+    async def preview_bulk_delete(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> dict[str, Any]:
+        """Preview what would be deleted with given filters."""
+        from chatter.schemas.data_management import EntityType
+        
+        if filters.entity_type == EntityType.CONVERSATIONS:
+            items = await self._get_filtered_conversations(filters, user_id, sample_size=10)
+            total = await self._count_filtered_conversations(filters, user_id)
+        elif filters.entity_type == EntityType.DOCUMENTS:
+            items = await self._get_filtered_documents(filters, user_id, sample_size=10)
+            total = await self._count_filtered_documents(filters, user_id)
+        elif filters.entity_type == EntityType.PROMPTS:
+            items = await self._get_filtered_prompts(filters, user_id, sample_size=10)
+            total = await self._count_filtered_prompts(filters, user_id)
+        else:
+            raise ValueError(f"Unsupported entity type: {filters.entity_type}")
+
+        return {
+            "entity_type": filters.entity_type,
+            "total_matching": total,
+            "sample_items": [item.to_dict() for item in items],
+            "filters_applied": filters.dict(),
+        }
+
+    async def _get_filtered_conversation_ids(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> list[str]:
+        """Get conversation IDs that match the filters."""
+        from chatter.models.conversation import Conversation, ConversationStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Conversation.id).where(Conversation.user_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Conversation.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Conversation.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = ConversationStatus(filters.status)
+                    conditions.append(Conversation.status == status_enum)
+                except ValueError:
+                    logger.warning(f"Invalid conversation status: {filters.status}")
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(filters.limit)
+            
+            result = await session.execute(query)
+            return [row[0] for row in result.fetchall()]
+
+    async def _get_filtered_document_ids(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> list[str]:
+        """Get document IDs that match the filters."""
+        from chatter.models.document import Document, DocumentStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Document.id).where(Document.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Document.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Document.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = DocumentStatus(filters.status)
+                    conditions.append(Document.status == status_enum)
+                except ValueError:
+                    logger.warning(f"Invalid document status: {filters.status}")
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(filters.limit)
+            
+            result = await session.execute(query)
+            return [row[0] for row in result.fetchall()]
+
+    async def _get_filtered_prompt_ids(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> list[str]:
+        """Get prompt IDs that match the filters."""
+        from chatter.models.prompt import Prompt
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Prompt.id).where(Prompt.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Prompt.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Prompt.created_at > filters.created_after)
+            # Note: Prompts don't have a standard status field
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(filters.limit)
+            
+            result = await session.execute(query)
+            return [row[0] for row in result.fetchall()]
+
+    async def _get_filtered_conversations(
+        self, filters: "BulkOperationFilters", user_id: str, sample_size: int = 10
+    ) -> list["Conversation"]:
+        """Get sample conversations that match the filters."""
+        from chatter.models.conversation import Conversation, ConversationStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Conversation).where(Conversation.user_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Conversation.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Conversation.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = ConversationStatus(filters.status)
+                    conditions.append(Conversation.status == status_enum)
+                except ValueError:
+                    pass
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(sample_size)
+            
+            result = await session.execute(query)
+            return list(result.scalars().all())
+
+    async def _get_filtered_documents(
+        self, filters: "BulkOperationFilters", user_id: str, sample_size: int = 10
+    ) -> list["Document"]:
+        """Get sample documents that match the filters."""
+        from chatter.models.document import Document, DocumentStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Document).where(Document.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Document.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Document.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = DocumentStatus(filters.status)
+                    conditions.append(Document.status == status_enum)
+                except ValueError:
+                    pass
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(sample_size)
+            
+            result = await session.execute(query)
+            return list(result.scalars().all())
+
+    async def _get_filtered_prompts(
+        self, filters: "BulkOperationFilters", user_id: str, sample_size: int = 10
+    ) -> list["Prompt"]:
+        """Get sample prompts that match the filters."""
+        from chatter.models.prompt import Prompt
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(Prompt).where(Prompt.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Prompt.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Prompt.created_at > filters.created_after)
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            query = query.limit(sample_size)
+            
+            result = await session.execute(query)
+            return list(result.scalars().all())
+
+    async def _count_filtered_conversations(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> int:
+        """Count conversations that match the filters."""
+        from chatter.models.conversation import Conversation, ConversationStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, func, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(func.count(Conversation.id)).where(Conversation.user_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Conversation.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Conversation.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = ConversationStatus(filters.status)
+                    conditions.append(Conversation.status == status_enum)
+                except ValueError:
+                    pass
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+    async def _count_filtered_documents(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> int:
+        """Count documents that match the filters."""
+        from chatter.models.document import Document, DocumentStatus
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, func, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(func.count(Document.id)).where(Document.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Document.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Document.created_at > filters.created_after)
+            if filters.status:
+                try:
+                    status_enum = DocumentStatus(filters.status)
+                    conditions.append(Document.status == status_enum)
+                except ValueError:
+                    pass
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            result = await session.execute(query)
+            return result.scalar() or 0
+
+    async def _count_filtered_prompts(
+        self, filters: "BulkOperationFilters", user_id: str
+    ) -> int:
+        """Count prompts that match the filters."""
+        from chatter.models.prompt import Prompt
+        from chatter.utils.database import get_session_maker
+        from sqlalchemy import and_, func, select
+
+        async_session_factory = get_session_maker()
+        async with async_session_factory() as session:
+            query = select(func.count(Prompt.id)).where(Prompt.owner_id == user_id)
+            
+            # Apply filters
+            conditions = []
+            if filters.created_before:
+                conditions.append(Prompt.created_at < filters.created_before)
+            if filters.created_after:
+                conditions.append(Prompt.created_at > filters.created_after)
+            
+            if conditions:
+                query = query.where(and_(*conditions))
+            
+            result = await session.execute(query)
+            return result.scalar() or 0
+
 
 # Global data manager instance shared across API and job handlers
 data_manager = DataManager()

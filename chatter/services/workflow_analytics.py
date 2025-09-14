@@ -1,8 +1,11 @@
 """Workflow analytics service for complexity analysis and optimization suggestions."""
 
+import hashlib
+import json
 from collections import defaultdict
 from typing import Any
 
+from chatter.core.cache_factory import get_persistent_cache  
 from chatter.schemas.workflows import (
     BottleneckInfo,
     ComplexityMetrics,
@@ -19,14 +22,24 @@ class WorkflowAnalyticsService:
     def __init__(self, session=None):
         # Session not needed for analytics, but keeping for consistency
         self.session = session
+        self.cache = get_persistent_cache()  # Use persistent cache for longer-lived analytics
 
     async def analyze_workflow(
         self,
         nodes: list[dict[str, Any]],
         edges: list[dict[str, Any]],
     ) -> dict[str, Any]:
-        """Perform comprehensive workflow analysis."""
+        """Perform comprehensive workflow analysis with caching."""
         try:
+            # Create cache key from workflow structure
+            cache_key = self._generate_cache_key(nodes, edges)
+            
+            # Check cache first
+            cached_result = await self.cache.get(cache_key)
+            if cached_result:
+                logger.debug("Returning cached workflow analytics")
+                return cached_result
+
             # Build graph representation
             graph = self._build_graph(nodes, edges)
 
@@ -58,7 +71,7 @@ class WorkflowAnalyticsService:
                 nodes, edges, graph
             )
 
-            return {
+            result = {
                 "complexity": complexity,
                 "bottlenecks": bottlenecks,
                 "optimization_suggestions": suggestions,
@@ -67,9 +80,42 @@ class WorkflowAnalyticsService:
                 "risk_factors": risk_factors,
             }
 
+            # Cache the result for 2 hours (longer than before for workflow analytics)
+            await self.cache.set(cache_key, result, ttl=7200)
+            
+            return result
+
         except Exception as e:
             logger.error(f"Failed to analyze workflow: {e}")
             raise
+
+    def _generate_cache_key(
+        self, 
+        nodes: list[dict[str, Any]], 
+        edges: list[dict[str, Any]]
+    ) -> str:
+        """Generate a cache key from workflow structure."""
+        # Create a deterministic representation of the workflow
+        workflow_data = {
+            "nodes": sorted([
+                {
+                    "id": node["id"],
+                    "type": node.get("data", {}).get("nodeType", ""),
+                    "config": node.get("data", {}).get("config", {})
+                }
+                for node in nodes
+            ], key=lambda x: x["id"]),
+            "edges": sorted([
+                {"source": edge["source"], "target": edge["target"]}
+                for edge in edges
+            ], key=lambda x: (x["source"], x["target"]))
+        }
+        
+        # Create hash of the workflow structure
+        workflow_json = json.dumps(workflow_data, sort_keys=True)
+        workflow_hash = hashlib.sha256(workflow_json.encode()).hexdigest()
+        
+        return f"workflow_analytics:{workflow_hash}"
 
     def _build_graph(
         self,

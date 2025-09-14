@@ -568,6 +568,59 @@ class CustomMetricResponse(BaseModel):
     created_at: datetime = Field(..., description="Creation time")
 
 
+# Chart-ready data schemas for Phase 2 dashboard enhancement
+class ChartDataPoint(BaseModel):
+    """Schema for a single chart data point."""
+    
+    name: str = Field(..., description="Data point label")
+    value: float = Field(..., description="Data point value")
+    color: str | None = Field(None, description="Optional color for the data point")
+
+
+class TimeSeriesDataPoint(BaseModel):
+    """Schema for time series chart data point."""
+    
+    date: str = Field(..., description="Date label (e.g., 'Mon', 'Jan 01')")
+    conversations: int | None = Field(None, description="Number of conversations")
+    tokens: int | None = Field(None, description="Token usage")
+    cost: float | None = Field(None, description="Cost")
+    workflows: int | None = Field(None, description="Number of workflows")
+    agents: int | None = Field(None, description="Number of agents")
+    ab_tests: int | None = Field(None, description="Number of A/B tests", alias="abTests")
+
+
+class ChartReadyAnalytics(BaseModel):
+    """Schema for chart-ready analytics data."""
+    
+    conversation_chart_data: list[TimeSeriesDataPoint] = Field(
+        ..., description="Daily conversation data for charts"
+    )
+    token_usage_data: list[TimeSeriesDataPoint] = Field(
+        ..., description="Token usage over time for charts"
+    )
+    performance_chart_data: list[ChartDataPoint] = Field(
+        ..., description="Performance metrics for charts"
+    )
+    system_health_data: list[ChartDataPoint] = Field(
+        ..., description="System health data for charts"
+    )
+    integration_data: list[ChartDataPoint] = Field(
+        ..., description="Integration usage data for charts"
+    )
+    hourly_performance_data: list[dict[str, Any]] = Field(
+        ..., description="24-hour performance breakdown"
+    )
+
+
+class IntegratedDashboardStats(BaseModel):
+    """Schema for integrated dashboard statistics."""
+    
+    workflows: dict[str, Any] = Field(..., description="Workflow statistics")
+    agents: dict[str, Any] = Field(..., description="Agent statistics") 
+    ab_testing: dict[str, Any] = Field(..., description="A/B testing statistics")
+    system: dict[str, Any] = Field(..., description="System statistics")
+
+
 class DashboardResponse(BaseModel):
     """Schema for analytics dashboard response."""
 
@@ -588,6 +641,9 @@ class DashboardResponse(BaseModel):
     )
     custom_metrics: list[dict[str, Any]] = Field(
         ..., description="Custom metrics"
+    )
+    chart_data: ChartReadyAnalytics = Field(
+        ..., description="Chart-ready data for frontend visualization"
     )
     generated_at: datetime = Field(
         ..., description="Dashboard generation time"

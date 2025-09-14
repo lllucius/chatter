@@ -112,14 +112,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
   ];
 
   const defaultCapabilities = [
-    { name: 'web_search', description: 'Search the web for information' },
-    { name: 'document_retrieval', description: 'Access document knowledge base' },
-    { name: 'code_execution', description: 'Execute code snippets' },
-    { name: 'image_analysis', description: 'Analyze and describe images' },
-    { name: 'file_operations', description: 'Read and manipulate files' },
-    { name: 'api_integration', description: 'Call external APIs' },
-    { name: 'email_sending', description: 'Send emails' },
-    { name: 'data_visualization', description: 'Create charts and graphs' },
+    { name: 'natural_language', description: 'Natural language understanding and generation' },
+    { name: 'memory', description: 'Remember conversation context and history' },
+    { name: 'code_generation', description: 'Generate and understand code' },
+    { name: 'tool_use', description: 'Use external tools and APIs' },
+    { name: 'analytical', description: 'Analyze data and provide insights' },
+    { name: 'creative', description: 'Creative content generation' },
+    { name: 'research', description: 'Research and information gathering' },
+    { name: 'support', description: 'Customer support and assistance' },
   ];
 
   useEffect(() => {
@@ -192,7 +192,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
       const submitData: AgentCreateRequest = {
         name: formData.name,
         description: formData.description,
-        type: formData.type,
+        agent_type: formData.type,  // Fix: use agent_type instead of type
         status: formData.status,
         primary_llm: formData.primary_llm,
         fallback_llm: formData.fallback_llm || undefined,
@@ -206,7 +206,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
         memory_enabled: formData.memory_enabled,
         memory_window: formData.memory_window,
         tools: formData.tools,
-        capabilities: formData.capabilities,
+        capabilities: formData.capabilities.map(cap => cap.name),  // Fix: send only capability names as strings
         knowledge_sources: formData.knowledge_sources,
         safety_filters: formData.safety_filters,
         audit_enabled: formData.audit_enabled,

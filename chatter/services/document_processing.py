@@ -167,7 +167,7 @@ class DocumentProcessingService:
             if not embedding_success:
                 # Check if embedding providers are available
                 if (
-                    not self.embedding_service.list_available_providers()
+                    not await self.embedding_service.list_available_providers()
                 ):
                     await self._mark_processing_failed(
                         document, "No embedding providers available"
@@ -632,7 +632,7 @@ class DocumentProcessingService:
         """Generate embeddings for document chunks."""
         try:
             # Check if embedding service is available
-            if not self.embedding_service.list_available_providers():
+            if not await self.embedding_service.list_available_providers():
                 logger.warning(
                     "No embedding providers available, skipping embedding generation"
                 )

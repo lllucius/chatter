@@ -62,6 +62,7 @@ class LangGraphWorkflowManager:
     def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
+        self._postgres_context_manager = None  # Store context manager for PostgresSaver
 
         # Lazy initialization flag to avoid async setup at import time
         self._initialized = False
@@ -88,9 +89,10 @@ class LangGraphWorkflowManager:
                         # Use as-is for other schemes
                         sync_url = settings.database_url
                     
-                    # Use PostgresSaver directly without manual context manager handling
-                    # PostgresSaver.from_conn_string() returns a ready-to-use checkpointer
-                    self.checkpointer = PostgresSaver.from_conn_string(sync_url)
+                    # Use PostgresSaver with proper context manager handling
+                    # PostgresSaver.from_conn_string() returns a context manager
+                    self._postgres_context_manager = PostgresSaver.from_conn_string(sync_url)
+                    self.checkpointer = self._postgres_context_manager.__enter__()
                     self.checkpointer.setup()
                     logger.info("LangGraph PostgreSQL checkpointer initialized")
                         
@@ -99,6 +101,13 @@ class LangGraphWorkflowManager:
                         "Failed to initialize PostgreSQL checkpointer, falling back to memory",
                         error=str(postgres_error),
                     )
+                    # Clean up context manager if it was created
+                    if self._postgres_context_manager:
+                        try:
+                            self._postgres_context_manager.__exit__(None, None, None)
+                        except Exception:
+                            pass  # Ignore cleanup errors
+                        self._postgres_context_manager = None
                     self.checkpointer = MemorySaver()
                     logger.info("LangGraph Memory checkpointer initialized (postgres fallback)")
             else:
@@ -130,6 +139,27 @@ class LangGraphWorkflowManager:
                 ) from fallback_error
 
         self._initialized = True
+
+    def __del__(self) -> None:
+        """Clean up resources when the workflow manager is destroyed."""
+        if self._postgres_context_manager:
+            try:
+                self._postgres_context_manager.__exit__(None, None, None)
+            except Exception:
+                pass  # Ignore cleanup errors in destructor
+
+    def cleanup(self) -> None:
+        """Explicitly clean up PostgreSQL resources."""
+        if self._postgres_context_manager:
+            try:
+                self._postgres_context_manager.__exit__(None, None, None)
+                logger.debug("PostgreSQL checkpointer context manager cleaned up")
+            except Exception as e:
+                logger.warning("Error cleaning up PostgreSQL checkpointer", error=str(e))
+            finally:
+                self._postgres_context_manager = None
+                self.checkpointer = None
+                self._initialized = False
 
     async def create_workflow(
         self,

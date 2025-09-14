@@ -556,3 +556,202 @@ class TestABTestingIntegration:
         await client.delete(
             f"/api/v1/ab-tests/{test_id}", headers=auth_headers
         )
+
+    @pytest.mark.integration
+    async def test_ab_test_end_endpoint(
+        self,
+        client: AsyncClient,
+        auth_headers: dict,
+        db_session: AsyncSession,
+    ):
+        """Test the end AB test endpoint with winner selection."""
+        # Create test
+        test_data = {
+            "name": "End Test AB Test",
+            "description": "Testing end endpoint functionality",
+            "test_type": "prompt",
+            "allocation_strategy": "equal",
+            "variants": [
+                {
+                    "name": "control",
+                    "description": "Control variant",
+                    "configuration": {"param_a": "value1"},
+                    "weight": 1.0,
+                },
+                {
+                    "name": "variant_a",
+                    "description": "Test variant A",
+                    "configuration": {"param_a": "value2"},
+                    "weight": 1.0,
+                },
+            ],
+            "metrics": ["response_time", "user_satisfaction"],
+            "duration_days": 7,
+            "min_sample_size": 100,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0,
+        }
+
+        create_response = await client.post(
+            "/api/v1/ab-tests/", json=test_data, headers=auth_headers
+        )
+        assert create_response.status_code == 201
+        test_id = create_response.json()["id"]
+
+        # Start the test first
+        start_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/start", headers=auth_headers
+        )
+        assert start_response.status_code == 200
+
+        # Test ending with winner variant (query parameter)
+        end_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/end?winner_variant=variant_a", 
+            headers=auth_headers
+        )
+        assert end_response.status_code == 200
+        
+        end_data = end_response.json()
+        assert end_data["success"] is True
+        assert end_data["test_id"] == test_id
+        assert end_data["new_status"] == "completed"
+        assert "variant_a" in end_data["message"]
+
+        # Verify test status is completed
+        get_response = await client.get(
+            f"/api/v1/ab-tests/{test_id}", headers=auth_headers
+        )
+        assert get_response.status_code == 200
+        assert get_response.json()["status"] == "completed"
+
+        # Clean up
+        await client.delete(
+            f"/api/v1/ab-tests/{test_id}", headers=auth_headers
+        )
+
+    @pytest.mark.integration
+    async def test_ab_test_end_endpoint_without_winner(
+        self,
+        client: AsyncClient,
+        auth_headers: dict,
+        db_session: AsyncSession,
+    ):
+        """Test the end AB test endpoint without specifying a winner."""
+        # Create test
+        test_data = {
+            "name": "End Test No Winner",
+            "description": "Testing end endpoint without winner",
+            "test_type": "prompt",
+            "allocation_strategy": "equal",
+            "variants": [
+                {
+                    "name": "control",
+                    "description": "Control variant",
+                    "configuration": {"param_a": "value1"},
+                    "weight": 1.0,
+                },
+                {
+                    "name": "variant_a",
+                    "description": "Test variant A",
+                    "configuration": {"param_a": "value2"},
+                    "weight": 1.0,
+                },
+            ],
+            "metrics": ["response_time"],
+            "duration_days": 7,
+            "min_sample_size": 50,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0,
+        }
+
+        create_response = await client.post(
+            "/api/v1/ab-tests/", json=test_data, headers=auth_headers
+        )
+        assert create_response.status_code == 201
+        test_id = create_response.json()["id"]
+
+        # Start the test first
+        start_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/start", headers=auth_headers
+        )
+        assert start_response.status_code == 200
+
+        # Test ending without winner variant
+        end_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/end", 
+            headers=auth_headers
+        )
+        assert end_response.status_code == 200
+        
+        end_data = end_response.json()
+        assert end_data["success"] is True
+        assert end_data["test_id"] == test_id
+        assert end_data["new_status"] == "completed"
+        assert "ended successfully" in end_data["message"]
+
+        # Clean up
+        await client.delete(
+            f"/api/v1/ab-tests/{test_id}", headers=auth_headers
+        )
+
+    @pytest.mark.integration
+    async def test_ab_test_end_endpoint_invalid_winner(
+        self,
+        client: AsyncClient,
+        auth_headers: dict,
+        db_session: AsyncSession,
+    ):
+        """Test the end AB test endpoint with invalid winner variant."""
+        # Create test
+        test_data = {
+            "name": "End Test Invalid Winner",
+            "description": "Testing end endpoint with invalid winner",
+            "test_type": "prompt",
+            "allocation_strategy": "equal",
+            "variants": [
+                {
+                    "name": "control",
+                    "description": "Control variant",
+                    "configuration": {"param_a": "value1"},
+                    "weight": 1.0,
+                },
+                {
+                    "name": "variant_a",
+                    "description": "Test variant A",
+                    "configuration": {"param_a": "value2"},
+                    "weight": 1.0,
+                },
+            ],
+            "metrics": ["response_time"],
+            "duration_days": 7,
+            "min_sample_size": 50,
+            "confidence_level": 0.95,
+            "traffic_percentage": 100.0,
+        }
+
+        create_response = await client.post(
+            "/api/v1/ab-tests/", json=test_data, headers=auth_headers
+        )
+        assert create_response.status_code == 201
+        test_id = create_response.json()["id"]
+
+        # Start the test first
+        start_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/start", headers=auth_headers
+        )
+        assert start_response.status_code == 200
+
+        # Test ending with invalid winner variant
+        end_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/end?winner_variant=nonexistent_variant", 
+            headers=auth_headers
+        )
+        assert end_response.status_code == 400  # Should return Bad Request
+
+        # Clean up
+        await client.post(
+            f"/api/v1/ab-tests/{test_id}/complete", headers=auth_headers
+        )
+        await client.delete(
+            f"/api/v1/ab-tests/{test_id}", headers=auth_headers
+        )

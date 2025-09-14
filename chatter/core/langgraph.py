@@ -101,7 +101,7 @@ class LangGraphWorkflowManager:
                     # Don't call __enter__ directly - store the context manager
                     self._postgres_context = PostgresSaver.from_conn_string(sync_url)
                     self.checkpointer = self._postgres_context.__enter__()
-                    self._postgres_context.setup()
+                    self.checkpointer.setup()
                     logger.info("LangGraph PostgreSQL checkpointer initialized")
                         
                 except Exception as postgres_error:

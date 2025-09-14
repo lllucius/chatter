@@ -31,6 +31,7 @@ from chatter.schemas.chat import (
 from chatter.services.chat import ChatService
 from chatter.services.llm import LLMService
 from chatter.utils.database import get_session_generator
+from chatter.utils.unified_rate_limiter import rate_limit
 
 router = APIRouter()
 
@@ -82,6 +83,9 @@ async def create_conversation(
     "/",
     response_model=ConversationListResponse,
 )
+@rate_limit(
+    max_requests=60, window_seconds=60
+)  # 60 list requests per minute
 async def list_conversations(
     status: ConversationStatus | None = Query(
         None, description="Filter by conversation status"

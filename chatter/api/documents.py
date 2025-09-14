@@ -42,6 +42,7 @@ from chatter.utils.problem import (
     ProblemException,
     ValidationProblem,
 )
+from chatter.utils.unified_rate_limiter import rate_limit
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -157,6 +158,9 @@ async def upload_document(
         422: {"description": "Validation Error"},
     },
 )
+@rate_limit(
+    max_requests=60, window_seconds=60
+)  # 60 document list requests per minute
 async def list_documents(
     status: DocumentStatus | None = Query(
         None, description="Filter by status"
@@ -386,6 +390,9 @@ async def delete_document(
 
 
 @router.post("/search", response_model=DocumentSearchResponse)
+@rate_limit(
+    max_requests=30, window_seconds=60
+)  # 30 search requests per minute (search is resource intensive)
 async def search_documents(
     search_request: DocumentSearchRequest,
     current_user: User = Depends(get_current_user),

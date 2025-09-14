@@ -14,7 +14,7 @@ from chatter.models.prompt import Prompt
 from chatter.models.user import User
 from chatter.schemas.document import DocumentSearchRequest, DocumentSearchResult
 from chatter.services.dynamic_vector_store import DynamicVectorStoreService
-from chatter.services.embeddings import EmbeddingsService
+from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -26,7 +26,7 @@ class IntelligentSearchService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.vector_store = DynamicVectorStoreService(session)
-        self.embeddings_service = EmbeddingsService()
+        self.embeddings_service = EmbeddingService()
         self.cache = get_general_cache()
         
     async def semantic_search(

@@ -31,6 +31,7 @@ from chatter.utils.problem import (
     InternalServerProblem,
     NotFoundProblem,
 )
+from chatter.utils.unified_rate_limiter import rate_limit
 
 logger = get_logger(__name__)
 router = APIRouter()
@@ -64,6 +65,9 @@ def _map_workflow_type(workflow: str | None) -> str:
     "/chat",
     response_model=ChatResponse,
 )
+@rate_limit(
+    max_requests=30, window_seconds=60
+)  # 30 chat requests per minute
 async def chat(
     chat_request: ChatRequest,
     current_user: User = Depends(get_current_user),
@@ -100,6 +104,9 @@ async def chat(
         }
     },
 )
+@rate_limit(
+    max_requests=20, window_seconds=60
+)  # 20 streaming requests per minute (more resource intensive)
 async def streaming_chat(
     chat_request: ChatRequest,
     request: Request,

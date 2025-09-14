@@ -14,8 +14,6 @@ import {
 } from '../utils/mui';
 import { 
   AgentIcon,
-  RefreshIcon,
-  AddIcon,
   SendIcon
 } from '../utils/icons';
 import PageLayout from '../components/PageLayout';

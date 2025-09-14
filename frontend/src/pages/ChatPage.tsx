@@ -18,10 +18,8 @@ import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 import {
   Send as SendIcon,
-  Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
-  Speed as SpeedIcon,
   History as HistoryIcon,
   Download as DownloadIcon,
   Clear as ClearIcon,

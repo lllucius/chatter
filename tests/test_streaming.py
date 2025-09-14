@@ -42,7 +42,7 @@ class TestStreamingEvent:
     def test_streaming_event_data_creation(self):
         """Test creating StreamingEvent."""
         event_data = StreamingEvent(
-            type=StreamingEventType.TOKEN,
+            event_type=StreamingEventType.TOKEN,
             content="Hello",
             metadata={"token_id": 123},
             timestamp=1234567890.0,
@@ -287,8 +287,8 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, "event_type")
-            and e.event_type == StreamingEventType.TOKEN
+            if hasattr(e, "type")
+            and e.type == "token"
         ]
         assert len(token_events) > 0
 

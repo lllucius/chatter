@@ -105,11 +105,13 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
         for i in range(0, len(texts), chunk_size_):
             batch = texts[i : i + chunk_size_]
             try:
+                # Use the raw OpenAI client to avoid LangChain processing issues
+                # The async_client is already the OpenAI AsyncEmbeddings client
                 response = await self.async_client.create(
                     input=batch, **client_kwargs
                 )
                 
-                # Handle different response formats
+                # Handle different response formats from OpenAI API
                 if isinstance(response, list):
                     # Response is already a list of embedding objects
                     logger.debug("OpenAI response is already a list format")

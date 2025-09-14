@@ -699,7 +699,7 @@ class ABTestManager:
         self, test_id: str
     ) -> dict[str, Any] | None:
         """Calculate comprehensive analytics for an A/B test."""
-        from chatter.core.cache_factory import get_analytics_cache
+        from chatter.core.cache_factory import get_general_cache
         import math
         import random
         
@@ -708,7 +708,7 @@ class ABTestManager:
             return None
         
         # Use caching for expensive analytics calculations
-        cache = get_analytics_cache()
+        cache = get_general_cache()
         cache_key = f"ab_test_analytics:{test_id}"
         
         cached_result = await cache.get(cache_key)

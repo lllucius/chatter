@@ -7,7 +7,7 @@ from typing import Any, Dict, List, Optional, Tuple
 from sqlalchemy import and_, desc, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.caching import get_cache
+from chatter.core.cache_factory import get_general_cache
 from chatter.models.conversation import Conversation
 from chatter.models.document import Document, DocumentChunk
 from chatter.models.prompt import Prompt
@@ -27,7 +27,7 @@ class IntelligentSearchService:
         self.session = session
         self.vector_store = DynamicVectorStoreService(session)
         self.embeddings_service = EmbeddingsService()
-        self.cache = get_cache("intelligent_search")
+        self.cache = get_general_cache()
         
     async def semantic_search(
         self,

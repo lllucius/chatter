@@ -216,7 +216,7 @@ class TestStreamingService:
         assert metrics["tokens_per_second"] > 0
         assert metrics["events_per_second"] > 0
         assert stream_id not in self.service.active_streams
-        assert stream_id not in self.stream_metrics
+        assert stream_id not in self.service.stream_metrics
 
         # Verify workflow metrics were recorded
         mock_record_metrics.assert_called_once()
@@ -372,7 +372,10 @@ class TestStreamingService:
         # Stream source found
         events = []
         async for chunk in self.service.stream_source_found(
-            stream_id, source_info
+            stream_id, 
+            source_info["title"], 
+            source_info["url"], 
+            {"relevance": source_info["relevance"]}
         ):
             events.append(chunk)
 

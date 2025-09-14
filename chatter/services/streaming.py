@@ -84,7 +84,12 @@ class StreamingService:
             correlation_id: Optional correlation ID
         """
         if correlation_id is None:
+            # Try to get from context, otherwise generate new one
             correlation_id = get_correlation_id()
+            if correlation_id is None:
+                # Generate a unique correlation ID using ULID
+                from chatter.models.base import generate_ulid
+                correlation_id = f"stream_{generate_ulid()}"
 
         self.active_streams[stream_id] = {
             "workflow_type": workflow_type,
@@ -554,22 +559,21 @@ class StreamingService:
             raise StreamingError(f"Stream {stream_id} not found")
 
         stream_info = self.active_streams[stream_id]
-        correlation_id = stream_info["correlation_id"]
-
         stream_info["token_count"] += 1
-        stream_info["event_count"] += 1
-        stream_info["last_activity"] = time.time()
 
-        yield StreamingChatChunk(
-            type="token",
+        # Create streaming event and delegate to stream_event
+        event = StreamingEvent(
+            event_type=StreamingEventType.TOKEN,
             content=content,
-            correlation_id=correlation_id,
             metadata={
                 "stream_id": stream_id,
                 "token_count": stream_info["token_count"],
                 "timestamp": time.time(),
             },
         )
+        
+        async for chunk in self.stream_event(stream_id, event):
+            yield chunk
 
     async def stream_tool_call_start(
         self, stream_id: str, tool_name: str, tool_args: dict[str, Any]

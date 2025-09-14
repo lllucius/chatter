@@ -18,6 +18,8 @@ not create an overlapping system.
 
 ALWAYS, I repeat, ALWAYS look for existing classes, interfaces, systems, etc. For example, if you need to add monitoring to an API, look for an established monitoring system.  You may modify it if needed, but DO NOT create another.  The intent here is to keep duplication out of the code and checking before making updates will reduce the amount of rewriting leter.
 
+Fir "id" type fields, this project uses ULIDs, NOT UUIDs!
+
 The project will be using:
  python 3.12+
  vite 7.1.3+

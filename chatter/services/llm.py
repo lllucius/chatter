@@ -311,6 +311,11 @@ class LLMService:
         Raises:
             LLMProviderError: If provider cannot be created
         """
+        # Handle default/null provider
+        if not profile.llm_provider or profile.llm_provider.lower() == "default":
+            logger.debug("Profile uses default provider, delegating to get_default_provider")
+            return await self.get_default_provider()
+
         # Get the provider configuration from registry
         session = await self._get_session()
         registry = get_model_registry()(session)
@@ -319,9 +324,8 @@ class LLMService:
             profile.llm_provider
         )
         if not provider:
-            raise LLMProviderError(
-                f"Provider '{profile.llm_provider}' not found in registry"
-            )
+            logger.warning(f"Provider '{profile.llm_provider}' not found, falling back to default")
+            return await self.get_default_provider()
 
         # Get the specific model from the profile or default
         model_def = None
@@ -356,9 +360,8 @@ class LLMService:
                         break
 
         if not model_def:
-            raise LLMProviderError(
-                f"No suitable model found for provider '{profile.llm_provider}'"
-            )
+            logger.warning(f"No suitable model found for provider '{profile.llm_provider}', falling back to default")
+            return await self.get_default_provider()
 
         # Create provider instance with profile overrides
         try:

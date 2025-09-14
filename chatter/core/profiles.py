@@ -750,7 +750,7 @@ class ProfileService:
         Uses caching to avoid expensive provider lookups on every request.
 
         Returns:
-            Dictionary with provider information
+            Dictionary with provider information including 'default' option
         """
         try:
             current_time = time.time()
@@ -767,6 +767,42 @@ class ProfileService:
             logger.debug("Fetching fresh provider information")
             providers = {}
 
+            # Add "default" option first
+            try:
+                default_provider = await self.llm_service.get_default_provider()
+                if default_provider:
+                    # Get the actual provider name for the default
+                    from chatter.core.model_registry import get_model_registry
+                    from chatter.models.registry import ModelType
+                    
+                    session = await self.llm_service._get_session()
+                    registry = get_model_registry()(session)
+                    default_provider_info = await registry.get_default_provider(
+                        ModelType.LLM
+                    )
+                    if default_provider_info:
+                        provider_info = await self.llm_service.get_provider_info(
+                            default_provider_info.name
+                        )
+                        providers["default"] = {
+                            "display_name": f"Default ({provider_info.get('display_name', default_provider_info.name)})",
+                            "description": f"Use system default provider ({default_provider_info.name})",
+                            "models": provider_info.get("models", []),
+                            "is_default": True,
+                            "actual_provider": default_provider_info.name,
+                        }
+            except Exception as e:
+                logger.warning("Failed to get default provider info", error=str(e))
+                # Add a fallback default option
+                providers["default"] = {
+                    "display_name": "Default",
+                    "description": "Use system default provider",
+                    "models": [],
+                    "is_default": True,
+                    "actual_provider": "openai",
+                }
+
+            # Add all registered providers
             for (
                 provider_name
             ) in await self.llm_service.list_available_providers():

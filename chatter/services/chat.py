@@ -321,7 +321,7 @@ class ChatService:
                 )
                 
                 # Shared conversation setup logic
-                conversation = await self._setup_conversation(
+                conversation, final_request = await self._setup_conversation(
                     user_id, processed_request
                 )
 
@@ -330,14 +330,14 @@ class ChatService:
                     conversation.id,
                     user_id,
                     MessageRole.USER,
-                    processed_request.message,
+                    final_request.message,
                 )
 
                 # Execute workflow to get response
                 response_message, usage_info = (
                     await self.workflow_service.execute_workflow(
                         conversation,
-                        processed_request,
+                        final_request,
                         correlation_id,
                         user_id,
                     )
@@ -402,7 +402,7 @@ class ChatService:
             )
             
             # Shared conversation setup logic
-            conversation = await self._setup_conversation(
+            conversation, final_request = await self._setup_conversation(
                 user_id, processed_request
             )
 
@@ -411,7 +411,7 @@ class ChatService:
                 conversation.id,
                 user_id,
                 MessageRole.USER,
-                processed_request.message,
+                final_request.message,
             )
 
             # Yield start chunk
@@ -426,7 +426,7 @@ class ChatService:
             async for (
                 chunk
             ) in self.workflow_service.execute_workflow_streaming(
-                conversation, processed_request, correlation_id, user_id
+                conversation, final_request, correlation_id, user_id
             ):
                 yield chunk
 
@@ -467,15 +467,18 @@ class ChatService:
     async def _process_chat_request(
         self, user_id: str, chat_request: ChatRequest
     ) -> ChatRequest:
-        """Process chat request to resolve prompt_id and enhance system_prompt_override.
+        """Process chat request to resolve prompt_id, profile provider, and enhance system_prompt_override.
         
         Args:
             user_id: User ID for prompt access control
             chat_request: Original chat request
             
         Returns:
-            Processed chat request with resolved prompt content
+            Processed chat request with resolved prompt content and profile provider
         """
+        modified = False
+        chat_request_dict = chat_request.model_dump()
+        
         # If prompt_id is provided but system_prompt_override is not, resolve the prompt
         if chat_request.prompt_id and not chat_request.system_prompt_override:
             try:
@@ -485,11 +488,8 @@ class ChatService:
                 prompt = await prompt_service.get_prompt(chat_request.prompt_id, user_id)
                 
                 if prompt and prompt.content:
-                    # Create a copy of the chat request with the resolved prompt content
-                    chat_request_dict = chat_request.model_dump()
                     chat_request_dict['system_prompt_override'] = prompt.content
-                    from chatter.schemas.chat import ChatRequest
-                    return ChatRequest(**chat_request_dict)
+                    modified = True
                 else:
                     logger.warning(
                         f"Prompt not found or empty for prompt_id: {chat_request.prompt_id}"
@@ -499,24 +499,83 @@ class ChatService:
                     f"Failed to resolve prompt_id {chat_request.prompt_id}: {e}"
                 )
         
+        # If profile_id is provided and no explicit provider is set, resolve profile provider
+        if chat_request.profile_id and not chat_request.provider:
+            try:
+                from chatter.core.profiles import ProfileService
+                
+                profile_service = ProfileService(self.session)
+                profile = await profile_service.get_profile(chat_request.profile_id, user_id)
+                
+                if profile:
+                    # Use profile's provider if it has one, otherwise use default
+                    if profile.llm_provider and profile.llm_provider.lower() != "default":
+                        chat_request_dict['provider'] = profile.llm_provider
+                        modified = True
+                        logger.debug(
+                            f"Using profile provider: {profile.llm_provider} for profile: {profile.name}"
+                        )
+                    # Note: If profile.llm_provider is None or "default", we let the default provider resolution happen
+                else:
+                    logger.warning(
+                        f"Profile not found for profile_id: {chat_request.profile_id}"
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to resolve profile_id {chat_request.profile_id}: {e}"
+                )
+        
+        # Return modified request if any changes were made, otherwise return original
+        if modified:
+            from chatter.schemas.chat import ChatRequest
+            return ChatRequest(**chat_request_dict)
+        
         return chat_request
 
     async def _setup_conversation(
         self, user_id: str, chat_request: ChatRequest
-    ) -> Conversation:
-        """Setup conversation for both sync and streaming requests with optimization."""
+    ) -> tuple[Conversation, ChatRequest]:
+        """Setup conversation and resolve provider from profile if needed.
+        
+        Returns:
+            Tuple of (conversation, potentially_modified_chat_request)
+        """
         async with self.performance_monitor.measure_query(
             "setup_conversation"
         ):
             if chat_request.conversation_id:
                 # Use optimized conversation retrieval with message limit for better performance
-                return await get_conversation_optimized(
+                conversation = await get_conversation_optimized(
                     self.session,
                     chat_request.conversation_id,
                     user_id=user_id,
                     include_messages=True,
                     message_limit=50,  # Limit context window for performance
                 )
+                
+                # If conversation has a profile and no explicit provider is set, resolve provider
+                if conversation.profile_id and not chat_request.provider:
+                    try:
+                        from chatter.core.profiles import ProfileService
+                        
+                        profile_service = ProfileService(self.session)
+                        profile = await profile_service.get_profile(conversation.profile_id, user_id)
+                        
+                        if profile and profile.llm_provider and profile.llm_provider.lower() != "default":
+                            # Create modified chat request with profile provider
+                            chat_request_dict = chat_request.model_dump()
+                            chat_request_dict['provider'] = profile.llm_provider
+                            from chatter.schemas.chat import ChatRequest
+                            chat_request = ChatRequest(**chat_request_dict)
+                            logger.debug(
+                                f"Using conversation profile provider: {profile.llm_provider} for profile: {profile.name}"
+                            )
+                    except Exception as e:
+                        logger.warning(
+                            f"Failed to resolve conversation profile provider: {e}"
+                        )
+                
+                return conversation, chat_request
             else:
                 # Create new conversation
                 conv_data = ConversationCreateSchema(
@@ -532,9 +591,10 @@ class ChatService:
                     workflow_config=chat_request.workflow_config,
                     extra_metadata=None,
                 )
-                return await self.create_conversation(
+                conversation = await self.create_conversation(
                     user_id, conv_data
                 )
+                return conversation, chat_request
 
     def _apply_usage_to_message(
         self, message: Message, usage: dict[str, Any]

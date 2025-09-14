@@ -435,6 +435,14 @@ class Settings(BaseSettings):
     background_worker_concurrency: int = Field(
         default=4, description="Background worker concurrency"
     )
+    
+    # Default settings for new pipeline
+    default_chunk_size: int = Field(
+        default=1000, description="Default chunk size for new documents"
+    )
+    default_chunk_overlap: int = Field(
+        default=200, description="Default chunk overlap for new documents"
+    )
 
     # =============================================================================
     # LANGCHAIN/LANGGRAPH SETTINGS

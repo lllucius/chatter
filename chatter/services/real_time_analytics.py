@@ -14,7 +14,7 @@ from chatter.schemas.analytics import (
     SystemAnalyticsResponse,
 )
 from chatter.schemas.events import Event, EventType
-from chatter.services.analytics import AnalyticsService
+from chatter.core.analytics import AnalyticsService
 from chatter.services.sse_events import sse_service
 from chatter.utils.logging import get_logger
 

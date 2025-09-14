@@ -155,6 +155,20 @@ class InputValidator(BaseValidator):
                     ],
                     sanitize=True,
                 ),
+                "agent_id": ValidationRule(
+                    name="agent_id",
+                    pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    max_length=36,
+                    min_length=36,
+                    required=True,
+                ),
+                "conversation_id": ValidationRule(
+                    name="conversation_id",
+                    pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    max_length=36,
+                    min_length=36,
+                    required=True,
+                ),
             }
         )
 

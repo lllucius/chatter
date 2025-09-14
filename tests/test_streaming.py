@@ -42,7 +42,7 @@ class TestStreamingEvent:
     def test_streaming_event_data_creation(self):
         """Test creating StreamingEvent."""
         event_data = StreamingEvent(
-            type=StreamingEventType.TOKEN,
+            event_type=StreamingEventType.TOKEN,
             content="Hello",
             metadata={"token_id": 123},
             timestamp=1234567890.0,
@@ -216,7 +216,7 @@ class TestStreamingService:
         assert metrics["tokens_per_second"] > 0
         assert metrics["events_per_second"] > 0
         assert stream_id not in self.service.active_streams
-        assert stream_id not in self.stream_metrics
+        assert stream_id not in self.service.stream_metrics
 
         # Verify workflow metrics were recorded
         mock_record_metrics.assert_called_once()
@@ -287,8 +287,8 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, "event_type")
-            and e.event_type == StreamingEventType.TOKEN
+            if hasattr(e, "type")
+            and e.type == "token"
         ]
         assert len(token_events) > 0
 
@@ -372,7 +372,10 @@ class TestStreamingService:
         # Stream source found
         events = []
         async for chunk in self.service.stream_source_found(
-            stream_id, source_info
+            stream_id, 
+            source_info["title"], 
+            source_info["url"], 
+            {"relevance": source_info["relevance"]}
         ):
             events.append(chunk)
 

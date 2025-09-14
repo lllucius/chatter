@@ -35,8 +35,8 @@ class StreamingEventType(str, Enum):
 class StreamingEvent:
     """Internal streaming event representation."""
 
-    type: StreamingEventType
-    content: str = ""
+    event_type: StreamingEventType
+    content: str | None = None
     metadata: dict[str, Any] | None = None
     timestamp: float | None = None
     correlation_id: str = ""
@@ -45,6 +45,11 @@ class StreamingEvent:
         """Set timestamp if not provided."""
         if self.timestamp is None:
             self.timestamp = time.time()
+    
+    @property
+    def type(self) -> StreamingEventType:
+        """Alias for event_type for backwards compatibility."""
+        return self.event_type
 
 
 class StreamingError(Exception):
@@ -79,7 +84,12 @@ class StreamingService:
             correlation_id: Optional correlation ID
         """
         if correlation_id is None:
+            # Try to get from context, otherwise generate new one
             correlation_id = get_correlation_id()
+            if correlation_id is None:
+                # Generate a unique correlation ID using ULID
+                from chatter.models.base import generate_ulid
+                correlation_id = f"stream_{generate_ulid()}"
 
         self.active_streams[stream_id] = {
             "workflow_type": workflow_type,
@@ -503,6 +513,357 @@ class StreamingService:
                 )
 
         return cleaned_count
+
+    async def stream_event(
+        self, stream_id: str, event: StreamingEvent
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream a single event.
+
+        Args:
+            stream_id: Stream identifier
+            event: Event to stream
+
+        Yields:
+            Streaming chat chunks for the event
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        # Convert StreamingEvent to StreamingChatChunk
+        yield StreamingChatChunk(
+            type=event.event_type.value,
+            content=event.content,
+            correlation_id=correlation_id,
+            metadata=event.metadata or {},
+        )
+
+    async def stream_token(
+        self, stream_id: str, content: str
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream a token event.
+
+        Args:
+            stream_id: Stream identifier
+            content: Token content
+
+        Yields:
+            Streaming chat chunks for the token
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        stream_info["token_count"] += 1
+
+        # Create streaming event and delegate to stream_event
+        event = StreamingEvent(
+            event_type=StreamingEventType.TOKEN,
+            content=content,
+            metadata={
+                "stream_id": stream_id,
+                "token_count": stream_info["token_count"],
+                "timestamp": time.time(),
+            },
+        )
+        
+        async for chunk in self.stream_event(stream_id, event):
+            yield chunk
+
+    async def stream_tool_call_start(
+        self, stream_id: str, tool_name: str, tool_args: dict[str, Any]
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream tool call start event.
+
+        Args:
+            stream_id: Stream identifier
+            tool_name: Name of the tool being called
+            tool_args: Arguments for the tool call
+
+        Yields:
+            Streaming chat chunks for tool call start
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        yield StreamingChatChunk(
+            type="tool_call_start",
+            content=tool_name,
+            correlation_id=correlation_id,
+            metadata={
+                "tool_name": tool_name,
+                "tool_args": tool_args,
+                "stream_id": stream_id,
+                "timestamp": time.time(),
+            },
+        )
+
+    async def stream_tool_call_end(
+        self, stream_id: str, tool_name: str, tool_result: dict[str, Any]
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream tool call end event.
+
+        Args:
+            stream_id: Stream identifier
+            tool_name: Name of the tool that was called
+            tool_result: Result from the tool call
+
+        Yields:
+            Streaming chat chunks for tool call end
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        yield StreamingChatChunk(
+            type="tool_call_end",
+            content=str(tool_result),
+            correlation_id=correlation_id,
+            metadata={
+                "tool_name": tool_name,
+                "tool_result": tool_result,
+                "stream_id": stream_id,
+                "timestamp": time.time(),
+            },
+        )
+
+    async def stream_thinking(
+        self, stream_id: str, thought: str
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream thinking event.
+
+        Args:
+            stream_id: Stream identifier
+            thought: Thought content
+
+        Yields:
+            Streaming chat chunks for thinking
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        yield StreamingChatChunk(
+            type="thinking",
+            content=thought,
+            correlation_id=correlation_id,
+            metadata={
+                "stream_id": stream_id,
+                "timestamp": time.time(),
+            },
+        )
+
+    async def stream_source_found(
+        self, stream_id: str, source_title: str, source_url: str = "", metadata: dict[str, Any] | None = None
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream source found event.
+
+        Args:
+            stream_id: Stream identifier
+            source_title: Title of the source
+            source_url: URL of the source
+            metadata: Additional metadata
+
+        Yields:
+            Streaming chat chunks for source found
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        event_metadata = {
+            "source_title": source_title,
+            "source_url": source_url,
+            "stream_id": stream_id,
+            "timestamp": time.time(),
+        }
+        if metadata:
+            event_metadata.update(metadata)
+
+        yield StreamingChatChunk(
+            type="source_found",
+            content=source_title,
+            correlation_id=correlation_id,
+            metadata=event_metadata,
+        )
+
+    async def stream_error(
+        self, stream_id: str, error_message: str, error_type: str = "general"
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream error event.
+
+        Args:
+            stream_id: Stream identifier
+            error_message: Error message
+            error_type: Type of error
+
+        Yields:
+            Streaming chat chunks for error
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        # Update error count in metrics
+        if stream_id in self.stream_metrics:
+            self.stream_metrics[stream_id]["error_count"] += 1
+
+        yield StreamingChatChunk(
+            type="error",
+            content=error_message,
+            correlation_id=correlation_id,
+            metadata={
+                "error_type": error_type,
+                "stream_id": stream_id,
+                "timestamp": time.time(),
+            },
+        )
+
+    async def stream_complete(
+        self, stream_id: str, usage: dict[str, Any] | None = None
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream completion event.
+
+        Args:
+            stream_id: Stream identifier
+            usage: Usage information
+
+        Yields:
+            Streaming chat chunks for completion
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        yield StreamingChatChunk(
+            type="complete",
+            content="",
+            correlation_id=correlation_id,
+            metadata={
+                "usage": usage or {},
+                "stream_id": stream_id,
+                "timestamp": time.time(),
+            },
+        )
+
+    async def stream_metadata(
+        self, stream_id: str, metadata: dict[str, Any]
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Stream metadata event.
+
+        Args:
+            stream_id: Stream identifier
+            metadata: Metadata to stream
+
+        Yields:
+            Streaming chat chunks for metadata
+        """
+        if stream_id not in self.active_streams:
+            raise StreamingError(f"Stream {stream_id} not found")
+
+        stream_info = self.active_streams[stream_id]
+        correlation_id = stream_info["correlation_id"]
+
+        stream_info["event_count"] += 1
+        stream_info["last_activity"] = time.time()
+
+        yield StreamingChatChunk(
+            type="metadata",
+            content="",
+            correlation_id=correlation_id,
+            metadata=metadata,
+        )
+
+    def get_stream_metrics(self, stream_id: str) -> dict[str, Any] | None:
+        """Get metrics for a specific stream.
+
+        Args:
+            stream_id: Stream identifier
+
+        Returns:
+            Stream metrics or None if not found
+        """
+        if stream_id not in self.active_streams:
+            return None
+
+        stream_info = self.active_streams[stream_id]
+        metrics = self.stream_metrics.get(stream_id, {})
+
+        current_time = time.time()
+        duration = current_time - stream_info["start_time"]
+
+        return {
+            "stream_id": stream_id,
+            "workflow_type": stream_info["workflow_type"],
+            "correlation_id": stream_info["correlation_id"],
+            "status": "active",
+            "duration_seconds": duration,
+            "token_count": stream_info["token_count"],
+            "event_count": stream_info["event_count"],
+            "tokens_per_second": (
+                stream_info["token_count"] / duration if duration > 0 else 0
+            ),
+            "events_per_second": (
+                stream_info["event_count"] / duration if duration > 0 else 0
+            ),
+            "last_activity": stream_info["last_activity"],
+            "error_count": metrics.get("error_count", 0),
+        }
+
+    def list_active_streams(self) -> list[str]:
+        """List all active stream IDs.
+
+        Returns:
+            List of active stream IDs
+        """
+        return list(self.active_streams.keys())
+
+    def is_stream_active(self, stream_id: str) -> bool:
+        """Check if a stream is active.
+
+        Args:
+            stream_id: Stream identifier
+
+        Returns:
+            True if stream is active, False otherwise
+        """
+        return stream_id in self.active_streams
 
     def get_global_streaming_stats(self) -> dict[str, Any]:
         """Get global streaming statistics.

@@ -191,6 +191,7 @@ class TestWorkflowExecutionService:
         """Set up test fixtures."""
         self.llm_service = AsyncMock(spec=LLMService)
         self.message_service = AsyncMock(spec=MessageService)
+        self.session = MagicMock()  # Mock database session
 
         # Add the missing add_message_to_conversation method to the mock
         mock_message = MagicMock()
@@ -204,13 +205,14 @@ class TestWorkflowExecutionService:
         )
 
         self.workflow_service = WorkflowExecutionService(
-            self.llm_service, self.message_service
+            self.llm_service, self.message_service, self.session
         )
 
         # Mock conversation and request
         self.conversation = MagicMock(spec=Conversation)
         self.conversation.id = "conv_123"
         self.conversation.user_id = "user_123"
+        self.conversation.workspace_id = "workspace_123"
 
         self.chat_request = ChatRequest(
             message="Test message",

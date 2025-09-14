@@ -129,13 +129,50 @@ async def get_document(
         )
 
 
+@router.get("", response_model=dict)
+async def list_documents_get(
+    limit: int = 10,
+    offset: int = 0,
+    current_user: User = Depends(get_current_user),
+    session: AsyncSession = Depends(get_session_generator),
+) -> dict[str, Any]:
+    """List documents with pagination (GET endpoint for frontend compatibility)."""
+    try:
+        from chatter.schemas.document import DocumentListRequest
+        
+        # Create request object from query parameters  
+        list_request = DocumentListRequest(
+            limit=limit,
+            offset=offset
+        )
+        
+        service = NewDocumentService(session)
+        documents, total_count = await service.list_documents(
+            current_user.id, list_request
+        )
+        
+        return {
+            "documents": [DocumentResponse.model_validate(doc) for doc in documents],
+            "total_count": total_count,
+            "offset": offset,
+            "limit": limit
+        }
+        
+    except Exception as e:
+        logger.error("Error listing documents", error=str(e))
+        raise HTTPException(
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            detail="Internal server error"
+        )
+
+
 @router.post("/list")
-async def list_documents(
+async def list_documents_post(
     list_request: DocumentListRequest,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
 ) -> dict[str, Any]:
-    """List documents with filtering and pagination."""
+    """List documents with filtering and pagination (POST endpoint for advanced filtering)."""
     try:
         service = NewDocumentService(session)
         documents, total_count = await service.list_documents(

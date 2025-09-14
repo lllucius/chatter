@@ -58,17 +58,16 @@ class NewDocumentService:
             DocumentServiceError: If creation fails
         """
         try:
-            # Validate file size
-            await upload_file.seek(0, 2)  # Seek to end
-            file_size = await upload_file.tell()
-            await upload_file.seek(0)  # Reset
+            # Read file content first
+            file_content = await upload_file.read()
+            file_size = len(file_content)
             
+            # Validate file size
             if file_size > settings.max_file_size:
                 raise DocumentServiceError(f"File too large: {file_size} bytes")
             
-            # Read file content
-            file_content = await upload_file.read()
-            await upload_file.seek(0)  # Reset for metadata
+            # Reset file pointer for any subsequent operations
+            await upload_file.seek(0)
             
             # Calculate hash
             file_hash = hashlib.sha256(file_content).hexdigest()

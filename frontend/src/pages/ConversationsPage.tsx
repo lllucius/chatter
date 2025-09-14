@@ -53,7 +53,7 @@ const ConversationsPage: React.FC = () => {
         );
       const messages = response.messages || [];
       setConversationMessages(messages);
-    } catch (err: unknown) {
+    } catch {
       setConversationMessages([]);
     } finally {
       setLoadingMessages(false);

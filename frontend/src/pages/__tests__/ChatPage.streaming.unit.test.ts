@@ -1,4 +1,4 @@
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Test the core streaming logic from ChatPage
 describe('ChatPage Streaming Logic', () => {

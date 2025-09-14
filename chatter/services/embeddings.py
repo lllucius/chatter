@@ -174,7 +174,7 @@ class EmbeddingService:
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("OPENAI_API_KEY")
                 )
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     logger.warning(
                         f"No API key found for provider {provider.name}. "
                         f"Checked provider config, {provider.name.upper()}_API_KEY, and OPENAI_API_KEY"
@@ -183,7 +183,7 @@ class EmbeddingService:
 
                 config = model_def.default_config or {}
                 base_provider = OpenAIEmbeddings(
-                    api_key=api_key,
+                    api_key=api_key if api_key else "dummy",
                     base_url=provider.base_url,
                     model=model_def.model_name,
                     chunk_size=model_def.chunk_size
@@ -211,7 +211,7 @@ class EmbeddingService:
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("GOOGLE_API_KEY")
                 )
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     logger.warning(
                         f"No API key found for provider {provider.name}. "
                         f"Checked provider config, {provider.name.upper()}_API_KEY, and GOOGLE_API_KEY"
@@ -219,7 +219,7 @@ class EmbeddingService:
                     return None
 
                 return GoogleGenerativeAIEmbeddings(
-                    google_api_key=api_key,
+                    google_api_key=api_key if api_key else "dummy",
                     model=model_def.model_name,
                 )
 
@@ -232,7 +232,7 @@ class EmbeddingService:
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("COHERE_API_KEY")
                 )
-                if not api_key:
+                if provider.api_key_required and not api_key:
                     logger.warning(
                         f"No API key found for provider {provider.name}. "
                         f"Checked provider config, {provider.name.upper()}_API_KEY, and COHERE_API_KEY"
@@ -240,11 +240,11 @@ class EmbeddingService:
                     return None
 
                 return CohereEmbeddings(
-                    cohere_api_key=SecretStr(api_key),
+                    cohere_api_key=SecretStr(api_key) if api_key else SecretStr("dummy"),
                     model=model_def.model_name,
-                    client=cohere.Client(api_key) if cohere else None,
+                    client=cohere.Client(api_key) if cohere and api_key else None,
                     async_client=(
-                        cohere.AsyncClient(api_key) if cohere else None
+                        cohere.AsyncClient(api_key) if cohere and api_key else None
                     ),
                 )
 

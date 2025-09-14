@@ -1,12 +1,13 @@
 """Request correlation ID utilities for tracing requests across services."""
 
-import uuid
 from collections.abc import Awaitable, Callable
 from contextvars import ContextVar
 
 from starlette.middleware.base import BaseHTTPMiddleware
 from starlette.requests import Request
 from starlette.responses import Response
+
+from chatter.models.base import generate_ulid
 
 # Context variable to store correlation ID for the current request
 correlation_id_var: ContextVar[str | None] = ContextVar(
@@ -18,9 +19,9 @@ def generate_correlation_id() -> str:
     """Generate a new correlation ID.
 
     Returns:
-        A new UUID4 string to use as correlation ID
+        A new ULID string to use as correlation ID
     """
-    return str(uuid.uuid4())
+    return generate_ulid()
 
 
 def get_correlation_id() -> str | None:

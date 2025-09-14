@@ -6,8 +6,8 @@ import json
 from datetime import datetime
 from enum import Enum
 from typing import Any
-from uuid import uuid4
 
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -219,7 +219,7 @@ class AuditLogEntry:
             details: Additional event details
             timestamp: Timestamp of the event
         """
-        self.id = str(uuid4())
+        self.id = generate_ulid()
         self.event_type = event_type
         self.user_id = user_id
         self.workflow_id = workflow_id

@@ -6,7 +6,6 @@ orchestration layer that delegates to focused executor classes.
 
 from __future__ import annotations
 
-import uuid
 from collections.abc import AsyncGenerator
 from datetime import datetime
 from typing import Any
@@ -26,6 +25,7 @@ from chatter.core.workflow_performance import (
     workflow_cache,
 )
 from chatter.models.conversation import Conversation, Message
+from chatter.models.base import generate_ulid
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
@@ -249,7 +249,7 @@ class WorkflowExecutionService:
         Returns:
             Dictionary with execution results
         """
-        execution_id = str(uuid.uuid4())
+        execution_id = generate_ulid()
         started_at = datetime.utcnow()
         steps: list[dict[str, Any]] = []
         workflow_context = context or {}

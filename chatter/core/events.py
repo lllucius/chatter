@@ -4,7 +4,6 @@ This module provides a consolidated interface for all event types in the system,
 including SSE events, audit events, and system monitoring events.
 """
 
-import uuid
 from abc import ABC, abstractmethod
 from collections import defaultdict
 from dataclasses import dataclass, field
@@ -12,6 +11,7 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any, Protocol
 
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -58,7 +58,7 @@ class UnifiedEvent:
     event_type: str
 
     # Core identification
-    id: str = field(default_factory=lambda: str(uuid.uuid4()))
+    id: str = field(default_factory=generate_ulid)
     timestamp: datetime = field(
         default_factory=lambda: datetime.now(UTC)
     )
@@ -104,7 +104,7 @@ class UnifiedEvent:
             timestamp = datetime.now(UTC)
 
         return cls(
-            id=data.get("id", str(uuid.uuid4())),
+            id=data.get("id", generate_ulid()),
             timestamp=timestamp,
             category=EventCategory(data["category"]),
             event_type=data["event_type"],
@@ -182,7 +182,7 @@ class EventRouter:
 
     def add_global_handler(self, handler: EventHandler) -> str:
         """Add a handler for all events."""
-        handler_id = str(uuid.uuid4())
+        handler_id = generate_ulid()
         self._global_handlers.append(handler)
         return handler_id
 
@@ -190,7 +190,7 @@ class EventRouter:
         self, category: EventCategory, handler: EventHandler
     ) -> str:
         """Add a handler for a specific category."""
-        handler_id = str(uuid.uuid4())
+        handler_id = generate_ulid()
         if category not in self._category_handlers:
             self._category_handlers[category] = []
         self._category_handlers[category].append(handler)
@@ -200,7 +200,7 @@ class EventRouter:
         self, event_type: str, handler: EventHandler
     ) -> str:
         """Add a handler for a specific event type."""
-        handler_id = str(uuid.uuid4())
+        handler_id = generate_ulid()
         if event_type not in self._type_handlers:
             self._type_handlers[event_type] = []
         self._type_handlers[event_type].append(handler)

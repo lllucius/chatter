@@ -20,8 +20,8 @@ from datetime import UTC, datetime, timedelta
 from enum import Enum
 from functools import wraps
 from typing import Any
-from uuid import uuid4
 
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 from chatter.utils.performance import get_performance_monitor
 
@@ -164,7 +164,7 @@ class LLMMetrics:
 class WorkflowMetrics:
     """Metrics for workflow execution."""
 
-    workflow_id: str = field(default_factory=lambda: str(uuid4()))
+    workflow_id: str = field(default_factory=generate_ulid)
     workflow_type: str = ""
     execution_time: float = 0.0
     token_usage: dict[str, int] = field(default_factory=dict)
@@ -216,7 +216,7 @@ class SecurityEvent:
     timestamp: datetime = field(
         default_factory=lambda: datetime.now(UTC)
     )
-    event_id: str = field(default_factory=lambda: str(uuid4()))
+    event_id: str = field(default_factory=generate_ulid)
 
     def to_dict(self) -> dict[str, Any]:
         """Convert event to dictionary."""

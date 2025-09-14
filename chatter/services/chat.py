@@ -299,7 +299,7 @@ class ChatService:
             For non-streaming: Tuple of (conversation, response_message)
             For streaming: AsyncGenerator of StreamingChatChunk
         """
-        if streaming or chat_request.stream:
+        if streaming:
             return self.chat_streaming(user_id, chat_request)
         else:
             return await self._chat_sync(user_id, chat_request)

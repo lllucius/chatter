@@ -373,6 +373,18 @@ class TestABTestingIntegration:
         )
         assert delete_running_response.status_code == 400
 
+        # Pause the running test (should succeed)
+        pause_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/pause", headers=auth_headers
+        )
+        assert pause_response.status_code == 200
+
+        # Try to start paused test (should succeed - this is the fix being tested)
+        restart_response = await client.post(
+            f"/api/v1/ab-tests/{test_id}/start", headers=auth_headers
+        )
+        assert restart_response.status_code == 200
+
         # Complete test and then delete
         await client.post(
             f"/api/v1/ab-tests/{test_id}/complete", headers=auth_headers

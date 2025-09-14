@@ -83,7 +83,7 @@ def _validate_test_operation(
     _check_test_access(test, current_user)
 
     # Check operation validity based on test status
-    if operation == "start" and test.status != TestStatus.DRAFT:
+    if operation == "start" and test.status not in [TestStatus.DRAFT, TestStatus.PAUSED]:
         raise BadRequestProblem(
             detail=f"Cannot start test in {test.status} status"
         )

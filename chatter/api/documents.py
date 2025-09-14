@@ -37,6 +37,7 @@ from chatter.schemas.document import (
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import (
+    BadRequestProblem,
     InternalServerProblem,
     NotFoundProblem,
     ProblemException,
@@ -116,15 +117,11 @@ async def upload_document(
 
         # Validate file before processing
         if not file.filename:
-            from chatter.utils.problem import BadRequestProblem
-
             raise BadRequestProblem(detail="No filename provided")
 
         # Validate file size (assuming we want to limit to 50MB)
         MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
         if file.size and file.size > MAX_FILE_SIZE:
-            from chatter.utils.problem import BadRequestProblem
-
             raise BadRequestProblem(
                 detail=f"File size ({file.size} bytes) exceeds maximum allowed size ({MAX_FILE_SIZE} bytes)"
             )

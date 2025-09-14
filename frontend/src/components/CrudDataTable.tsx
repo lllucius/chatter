@@ -205,7 +205,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         additionalData: { 
           entityType: config.entityName,
           dialogMode,
-          itemId: editingItem?.id 
+          itemId: selectedItem?.id 
         }
       });
     }

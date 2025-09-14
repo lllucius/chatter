@@ -34,7 +34,6 @@ import {
   Work as JobIcon,
   Extension as PluginIcon,
   People as UsersIcon,
-  Build as ToolsIcon,
   Add as AddIcon,
   Delete as DeleteIcon,
   Download as DownloadIcon,
@@ -44,7 +43,6 @@ import {
   Close as CloseIcon,
   Refresh as RefreshIcon,
   MoreVert as MoreVertIcon,
-  Edit as EditIcon,
   DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
 import { getSDK } from '../services/auth-service';
@@ -65,11 +63,11 @@ const AdministrationPage: React.FC = () => {
   
   // More options menu state
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
-  const [actionUser, setActionUser] = useState<any>(null);
+  const [actionUser, setActionUser] = useState<Record<string, unknown> | null>(null);
   
   // User settings dialog state
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<any>(null);
+  const [editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
   
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
@@ -644,31 +642,6 @@ const AdministrationPage: React.FC = () => {
       } finally {
         setLoading(false);
       }
-    }
-  };
-
-  const handleEditAction = async (type: string) => {
-    try {
-      setLoading(true);
-      switch (type) {
-        case 'user':
-          toastService.warning('User editing functionality requires implementation of admin user management API');
-          break;
-        case 'backup':
-          toastService.warning('Backup editing functionality would be implemented with backup management API');
-          break;
-        case 'plugin':
-          toastService.warning('Plugin editing functionality would be implemented based on plugin architecture');
-          break;
-      }
-    } catch (error: unknown) {
-      handleError(error, {
-        source: 'AdministrationPage.handleEditItem',
-        operation: `edit ${type}`,
-        additionalData: { type, itemId: item?.id }
-      });
-    } finally {
-      setLoading(false);
     }
   };
 

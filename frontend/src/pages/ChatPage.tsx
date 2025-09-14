@@ -18,10 +18,8 @@ import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 import {
   Send as SendIcon,
-  Person as PersonIcon,
   SmartToy as BotIcon,
   Refresh as RefreshIcon,
-  Speed as SpeedIcon,
   History as HistoryIcon,
   Download as DownloadIcon,
   Clear as ClearIcon,
@@ -365,8 +363,8 @@ const ChatPage: React.FC = () => {
                   } else if (chunk.type === 'error') {
                     throw new Error(chunk.content || chunk.error || 'Streaming error');
                   }
-                } catch (parseError) {
-                  console.warn('Failed to parse streaming chunk:', parseError, 'Raw data:', dataStr);
+                } catch {
+                  // Failed to parse streaming chunk - skip invalid data
                 }
               }
             }
@@ -578,9 +576,6 @@ const ChatPage: React.FC = () => {
     }
 
     try {
-      // Store the previous rating for rollback
-      const previousRating = messages.find(msg => msg.id === messageId)?.rating;
-      
       // Optimistically update the UI
       setMessages(prev => prev.map(msg => 
         msg.id === messageId 

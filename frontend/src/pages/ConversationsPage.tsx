@@ -3,7 +3,6 @@ import {
   Box,
   Typography,
   Button,
-  IconButton,
   Chip,
   CircularProgress,
   Dialog,
@@ -15,7 +14,6 @@ import {
 } from '@mui/material';
 import {
   Visibility as ViewIcon,
-  Delete as DeleteIcon,
   Refresh as RefreshIcon,
   Message as MessageIcon,
   Person as PersonIcon,
@@ -55,7 +53,7 @@ const ConversationsPage: React.FC = () => {
         );
       const messages = response.messages || [];
       setConversationMessages(messages);
-    } catch (err: unknown) {
+    } catch {
       setConversationMessages([]);
     } finally {
       setLoadingMessages(false);

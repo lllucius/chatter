@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { vi, describe, test, expect, beforeEach } from 'vitest';
+import { vi, describe, test, expect } from 'vitest';
 import { fireEvent } from '@testing-library/react';
 import ToolsPage from '../ToolsPage';
 

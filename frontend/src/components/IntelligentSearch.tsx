@@ -34,7 +34,6 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK } from '../services/auth-service';
-import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 
 interface SearchResult {
@@ -45,7 +44,7 @@ interface SearchResult {
   personalized_score: number;
   personalization_boost: number;
   personalization_factors: string[];
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 interface SearchRecommendation {
@@ -53,7 +52,7 @@ interface SearchRecommendation {
   title: string;
   description: string;
   suggested_queries?: string[];
-  items?: any[];
+  items?: Record<string, unknown>[];
 }
 
 interface TrendingContent {
@@ -62,7 +61,7 @@ interface TrendingContent {
   title: string;
   content: string;
   trending_score: number;
-  metadata: any;
+  metadata: Record<string, unknown>;
 }
 
 const IntelligentSearch: React.FC = () => {
@@ -74,7 +73,7 @@ const IntelligentSearch: React.FC = () => {
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
   const [expandedRecommendations, setExpandedRecommendations] = useState<Set<number>>(new Set());
-  const [userContext, setUserContext] = useState<any>(null);
+  const [userContext, setUserContext] = useState<Record<string, unknown> | null>(null);
 
   const performSearch = useCallback(async (query: string, type: string) => {
     if (!query.trim()) {
@@ -96,13 +95,7 @@ const IntelligentSearch: React.FC = () => {
       setRecommendations(response.recommendations || []);
       setUserContext(response.user_context);
 
-      // Track search for analytics
-      console.log('Search completed:', {
-        query,
-        type,
-        resultCount: response.results?.length || 0,
-        personalized: response.search_metadata?.personalized
-      });
+      // Track search analytics (future implementation)
 
     } catch (error) {
       handleError(error);
@@ -384,7 +377,7 @@ const IntelligentSearch: React.FC = () => {
 
           {searchQuery && searchResults.length === 0 && !isSearching && (
             <Alert severity="info">
-              No results found for "{searchQuery}". Try different keywords or check the recommendations below.
+              No results found for &ldquo;{searchQuery}&rdquo;. Try different keywords or check the recommendations below.
             </Alert>
           )}
         </Box>

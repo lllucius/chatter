@@ -32,7 +32,7 @@ import { handleError } from '../utils/error-handler';
 interface RealTimeEvent {
   id: string;
   type: string;
-  data: any;
+  data: Record<string, unknown>;
   timestamp: string;
 }
 
@@ -48,8 +48,7 @@ interface AlertData {
 const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [dashboardData, setDashboardData] = useState<any>(null);
-  const [chartData, setChartData] = useState<any>(null);
+  const [dashboardData, setDashboardData] = useState<Record<string, unknown> | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
@@ -81,20 +80,20 @@ const RealTimeDashboard: React.FC = () => {
       eventSource.onopen = () => {
         setConnectionStatus('connected');
         reconnectAttempts.current = 0;
-        console.log('SSE connection established');
+        // SSE connection established
       };
 
       eventSource.onmessage = (event) => {
         try {
           const eventData: RealTimeEvent = JSON.parse(event.data);
           handleRealTimeEvent(eventData);
-        } catch (error) {
-          console.error('Error parsing SSE event:', error);
+        } catch {
+          // Error parsing SSE event - skip invalid events
         }
       };
 
-      eventSource.onerror = (error) => {
-        console.error('SSE connection error:', error);
+      eventSource.onerror = () => {
+        // SSE connection error
         setConnectionStatus('disconnected');
         
         // Attempt to reconnect with exponential backoff
@@ -103,18 +102,18 @@ const RealTimeDashboard: React.FC = () => {
           reconnectAttempts.current++;
           
           reconnectTimeoutRef.current = setTimeout(() => {
-            console.log(`Attempting to reconnect (attempt ${reconnectAttempts.current}/${maxReconnectAttempts})`);
+            // Attempting to reconnect
             connectToSSE();
           }, delay);
         } else {
-          console.error('Max reconnection attempts reached');
+          // Max reconnection attempts reached
           setRealTimeEnabled(false);
           toastService.error('Real-time connection failed. Please refresh the page.');
         }
       };
 
-    } catch (error) {
-      console.error('Error establishing SSE connection:', error);
+    } catch {
+      // Error establishing SSE connection
       setConnectionStatus('disconnected');
       setRealTimeEnabled(false);
     }
@@ -147,7 +146,7 @@ const RealTimeDashboard: React.FC = () => {
         
       case 'workflow':
         // Handle workflow updates
-        console.log('Workflow update:', event.data);
+        // Workflow update received
         break;
         
       case 'system':
@@ -158,7 +157,7 @@ const RealTimeDashboard: React.FC = () => {
         break;
         
       default:
-        console.log('Unknown event type:', event.type, event.data);
+        // Unknown event type - ignore
     }
   }, []);
 

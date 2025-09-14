@@ -30,12 +30,6 @@ import { CrudFormProps } from './CrudDataTable';
 
 interface AgentFormProps extends CrudFormProps<AgentCreateRequest, AgentUpdateRequest> {}
 
-interface Tool {
-  name: string;
-  description?: string;
-  enabled: boolean;
-}
-
 const AgentForm: React.FC<AgentFormProps> = ({
   open,
   mode,

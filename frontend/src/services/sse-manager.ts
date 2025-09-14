@@ -35,7 +35,7 @@ export class SSEEventManager {
     }
 
     if (this.isConnected || this.connectionStartTime) {
-      console.log('SSE: Already connected or connecting');
+      // Already connected or connecting
       return;
     }
 
@@ -49,7 +49,7 @@ export class SSEEventManager {
    * Disconnect from the SSE stream
    */
   public disconnect(): void {
-    console.log('SSE: Disconnected');
+    // Disconnecting SSE
     this.isManuallyDisconnected = true;
     this.isConnected = false;
     this.connectionStartTime = null;
@@ -289,9 +289,7 @@ export class SSEEventManager {
 
     // Extract unified event metadata if available
     const unifiedMetadata = this.extractUnifiedMetadata(event);
-    if (unifiedMetadata) {
-      
-    }
+    // TODO: Process unified metadata when ready
 
     // Route high priority events to special handlers
     if (unifiedMetadata?.priority === 'high' || unifiedMetadata?.priority === 'critical') {
@@ -429,7 +427,7 @@ export class SSEEventManager {
       
       // Log connection stats periodically
       if (this.connectionStartTime) {
-        const connectionDuration = now - this.connectionStartTime;
+        // Connection duration tracking for future use
       }
     }, 30000); // Check every 30 seconds
   }
@@ -605,6 +603,7 @@ export class SSEEventManager {
         return await sdk.events.triggerTestEventApiV1EventsTestEvent();
       });
       
+      // Response processed successfully
       return true;
     } catch (error) {
       handleError(error, {

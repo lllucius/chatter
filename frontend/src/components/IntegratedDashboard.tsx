@@ -51,35 +51,6 @@ import { useNavigate } from 'react-router-dom';
 import { getSDK } from '../services/auth-service';
 import { useApi } from '../hooks/useApi';
 
-interface DashboardStats {
-  workflows: {
-    total: number;
-    active: number;
-    completedToday: number;
-    failureRate: number;
-    avgExecutionTime: number;
-  };
-  agents: {
-    total: number;
-    active: number;
-    conversationsToday: number;
-    avgResponseTime: number;
-    satisfactionScore: number;
-  };
-  abTesting: {
-    activeTests: number;
-    significantResults: number;
-    totalImprovement: number;
-    testsThisMonth: number;
-  };
-  system: {
-    tokensUsed: number;
-    apiCalls: number;
-    cost: number;
-    uptime: number;
-  };
-}
-
 interface IntegratedDashboardProps {
   onNavigate?: (path: string) => void;
 }
@@ -99,8 +70,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated();
         }
         return null;
-      } catch (error) {
-        console.log('Integrated dashboard stats API not available yet');
+      } catch {
+        // Integrated dashboard stats API not available yet
         return null;
       }
     },
@@ -116,8 +87,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
         }
         return null;
-      } catch (error) {
-        console.log('Chart data API not available yet');
+      } catch {
+        // Chart data API not available yet
         return null;
       }
     },

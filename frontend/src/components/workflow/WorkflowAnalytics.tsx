@@ -19,7 +19,7 @@ import {
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
 import { WorkflowDefinition, WorkflowNodeType, WorkflowNode } from './WorkflowEditor';
-import { getSDK } from '../../services/client-service';
+import { getSDK } from '../../services/auth-service';
 
 interface WorkflowAnalyticsProps {
   workflow: WorkflowDefinition;
@@ -69,8 +69,8 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         };
         
         setAnalytics(clientMetrics);
-      } catch (err) {
-        console.error('Failed to fetch workflow analytics:', err);
+      } catch {
+        // Failed to fetch workflow analytics - using fallback
         setError('Failed to load analytics. Using fallback calculations.');
         // Fallback to client-side calculation
         setAnalytics(calculateSimpleMetrics());
@@ -80,7 +80,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     };
 
     fetchAnalytics();
-  }, [workflow.id, workflow.nodes, workflow.edges]);
+  }, [workflow.id, workflow.nodes, workflow.edges, calculateSimpleMetrics]);
 
   const calculateNodeTypeDistribution = (nodes: WorkflowNode[]): Record<WorkflowNodeType, number> => {
     return nodes.reduce((acc, node) => {

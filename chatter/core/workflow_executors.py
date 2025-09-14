@@ -430,13 +430,18 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 workflow_id, self.workflow_type
             )
 
-            # Get retriever from workflow manager
+            # Get retriever from workflow manager with document filtering
             workflow_manager = get_workflow_manager()
-            retriever = workflow_manager.get_retriever(
-                conversation.workspace_id
-                if conversation.workspace_id
-                else "default"
-            )
+            
+            # Only get retriever if retrieval is enabled
+            retriever = None
+            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+                retriever = workflow_manager.get_retriever(
+                    conversation.workspace_id
+                    if conversation.workspace_id
+                    else "default",
+                    document_ids=chat_request.document_ids
+                )
 
             # Create RAG workflow
             workflow = await self.llm_service.create_langgraph_workflow(
@@ -560,13 +565,18 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 workflow_id, self.workflow_type
             )
 
-            # Get retriever from workflow manager
+            # Get retriever from workflow manager with document filtering
             workflow_manager = get_workflow_manager()
-            retriever = workflow_manager.get_retriever(
-                conversation.workspace_id
-                if conversation.workspace_id
-                else "default"
-            )
+            
+            # Only get retriever if retrieval is enabled
+            retriever = None
+            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+                retriever = workflow_manager.get_retriever(
+                    conversation.workspace_id
+                    if conversation.workspace_id
+                    else "default",
+                    document_ids=chat_request.document_ids
+                )
 
             # Create streaming RAG workflow
             workflow = await self.llm_service.create_langgraph_workflow(
@@ -989,11 +999,16 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 if conversation.workspace_id
                 else "default"
             )
-            retriever = workflow_manager.get_retriever(
-                conversation.workspace_id
-                if conversation.workspace_id
-                else "default"
-            )
+            
+            # Only get retriever if retrieval is enabled
+            retriever = None
+            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+                retriever = workflow_manager.get_retriever(
+                    conversation.workspace_id
+                    if conversation.workspace_id
+                    else "default",
+                    document_ids=chat_request.document_ids
+                )
 
             # Create full workflow
             workflow = await self.llm_service.create_langgraph_workflow(
@@ -1126,11 +1141,16 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 if conversation.workspace_id
                 else "default"
             )
-            retriever = workflow_manager.get_retriever(
-                conversation.workspace_id
-                if conversation.workspace_id
-                else "default"
-            )
+            
+            # Only get retriever if retrieval is enabled
+            retriever = None
+            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+                retriever = workflow_manager.get_retriever(
+                    conversation.workspace_id
+                    if conversation.workspace_id
+                    else "default",
+                    document_ids=chat_request.document_ids
+                )
 
             # Create streaming full workflow
             workflow = await self.llm_service.create_langgraph_workflow(

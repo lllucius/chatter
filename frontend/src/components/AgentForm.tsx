@@ -25,7 +25,7 @@ import {
   ExpandMore as ExpandMoreIcon,
   Add as AddIcon,
 } from '@mui/icons-material';
-import { AgentCreateRequest, AgentUpdateRequest, AgentResponse, AgentType, AgentStatus } from 'chatter-sdk';
+import { AgentCreateRequest, AgentUpdateRequest, AgentResponse, AgentType, AgentStatus, AgentCapability } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface AgentFormProps extends CrudFormProps<AgentCreateRequest, AgentUpdateRequest> {}
@@ -34,12 +34,6 @@ interface Tool {
   name: string;
   description?: string;
   enabled: boolean;
-}
-
-interface AgentCapability {
-  name: string;
-  enabled: boolean;
-  config?: Record<string, unknown>;
 }
 
 const AgentForm: React.FC<AgentFormProps> = ({
@@ -52,25 +46,25 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const [formData, setFormData] = useState({
     name: '',
     description: '',
-    type: 'conversational' as 'conversational' | 'task_oriented' | 'analytical' | 'creative',
-    status: 'active' as 'active' | 'inactive' | 'training',
+    agent_type: AgentType.conversational,  // Use correct SDK enum
+    status: AgentStatus.active,  // Use correct SDK enum  
     primary_llm: 'gpt-4',
     fallback_llm: '',
     system_prompt: '',
-    personality: '',
-    expertise_areas: [] as string[],
-    max_iterations: 10,
+    personality_traits: [] as string[],
+    knowledge_domains: [] as string[],
+    response_style: 'professional',
+    max_conversation_length: 50,
     temperature: 0.7,
     max_tokens: 1000,
-    timeout_seconds: 30,
-    memory_enabled: true,
-    memory_window: 20,
-    tools: [] as Tool[],
-    capabilities: [] as AgentCapability[],
-    knowledge_sources: [] as string[],
-    safety_filters: true,
-    audit_enabled: true,
-    is_active: true,
+    response_timeout: 30,
+    learning_enabled: true,
+    feedback_weight: 0.1,
+    adaptation_threshold: 0.8,
+    available_tools: [] as string[],
+    capabilities: [] as AgentCapability[],  // Use correct SDK enum array
+    tags: [] as string[],
+    metadata: {} as Record<string, unknown>,
   });
 
   const [expertiseInput, setExpertiseInput] = useState('');
@@ -87,16 +81,21 @@ const AgentForm: React.FC<AgentFormProps> = ({
 
   // Available options
   const agentTypes = [
-    { value: 'conversational', label: 'Conversational', description: 'General-purpose chat agent' },
-    { value: 'task_oriented', label: 'Task-Oriented', description: 'Focused on specific tasks' },
-    { value: 'analytical', label: 'Analytical', description: 'Data analysis and insights' },
-    { value: 'creative', label: 'Creative', description: 'Content creation and ideation' },
+    { value: AgentType.conversational, label: 'Conversational', description: 'General-purpose chat agent' },
+    { value: AgentType.task_oriented, label: 'Task-Oriented', description: 'Focused on specific tasks' },
+    { value: AgentType.analytical, label: 'Analytical', description: 'Data analysis and insights' },
+    { value: AgentType.creative, label: 'Creative', description: 'Content creation and ideation' },
+    { value: AgentType.research, label: 'Research', description: 'Research and information gathering' },
+    { value: AgentType.support, label: 'Support', description: 'Customer support and assistance' },
+    { value: AgentType.specialized, label: 'Specialized', description: 'Domain-specific expertise' },
   ];
 
   const agentStatuses = [
-    { value: 'active', label: 'Active', color: 'success' },
-    { value: 'inactive', label: 'Inactive', color: 'default' },
-    { value: 'training', label: 'Training', color: 'warning' },
+    { value: AgentStatus.active, label: 'Active', color: 'success' },
+    { value: AgentStatus.inactive, label: 'Inactive', color: 'default' },
+    { value: AgentStatus.training, label: 'Training', color: 'warning' },
+    { value: AgentStatus.error, label: 'Error', color: 'error' },
+    { value: AgentStatus.maintenance, label: 'Maintenance', color: 'warning' },
   ];
 
   const llmModels = [
@@ -112,14 +111,14 @@ const AgentForm: React.FC<AgentFormProps> = ({
   ];
 
   const defaultCapabilities = [
-    { name: 'natural_language', description: 'Natural language understanding and generation' },
-    { name: 'memory', description: 'Remember conversation context and history' },
-    { name: 'code_generation', description: 'Generate and understand code' },
-    { name: 'tool_use', description: 'Use external tools and APIs' },
-    { name: 'analytical', description: 'Analyze data and provide insights' },
-    { name: 'creative', description: 'Creative content generation' },
-    { name: 'research', description: 'Research and information gathering' },
-    { name: 'support', description: 'Customer support and assistance' },
+    { value: AgentCapability.natural_language, description: 'Natural language understanding and generation' },
+    { value: AgentCapability.memory, description: 'Remember conversation context and history' },
+    { value: AgentCapability.code_generation, description: 'Generate and understand code' },
+    { value: AgentCapability.tool_use, description: 'Use external tools and APIs' },
+    { value: AgentCapability.analytical, description: 'Analyze data and provide insights' },
+    { value: AgentCapability.creative, description: 'Creative content generation' },
+    { value: AgentCapability.research, description: 'Research and information gathering' },
+    { value: AgentCapability.support, description: 'Customer support and assistance' },
   ];
 
   useEffect(() => {
@@ -129,58 +128,50 @@ const AgentForm: React.FC<AgentFormProps> = ({
         setFormData({
           name: agent.name || '',
           description: agent.description || '',
-          type: agent.type || 'conversational',
-          status: agent.status || 'active',
+          agent_type: agent.type || AgentType.conversational,
+          status: agent.status || AgentStatus.active,
           primary_llm: agent.primary_llm || 'gpt-4',
           fallback_llm: agent.fallback_llm || '',
-          system_prompt: agent.system_prompt || '',
-          personality: agent.personality || '',
-          expertise_areas: agent.expertise_areas || [],
-          max_iterations: agent.max_iterations || 10,
+          system_prompt: agent.system_message || '',
+          personality_traits: agent.personality_traits || [],
+          knowledge_domains: agent.knowledge_domains || [],
+          response_style: agent.response_style || 'professional',
+          max_conversation_length: agent.max_conversation_length || 50,
           temperature: agent.temperature || 0.7,
           max_tokens: agent.max_tokens || 1000,
-          timeout_seconds: agent.timeout_seconds || 30,
-          memory_enabled: agent.memory_enabled ?? true,
-          memory_window: agent.memory_window || 20,
-          tools: agent.tools?.map(t => ({ 
-            name: t.name || '', 
-            description: t.description,
-            enabled: t.enabled ?? true 
-          })) || [],
-          capabilities: agent.capabilities?.map(c => ({
-            name: c.name || '',
-            enabled: c.enabled ?? true,
-            config: c.config || {}
-          })) || [],
-          knowledge_sources: agent.knowledge_sources || [],
-          safety_filters: agent.safety_filters ?? true,
-          audit_enabled: agent.audit_enabled ?? true,
-          is_active: agent.is_active ?? true,
+          response_timeout: agent.response_timeout || 30,
+          learning_enabled: agent.learning_enabled ?? true,
+          feedback_weight: agent.feedback_weight || 0.1,
+          adaptation_threshold: agent.adaptation_threshold || 0.8,
+          available_tools: agent.available_tools || [],
+          capabilities: agent.capabilities || [],
+          tags: agent.tags || [],
+          metadata: agent.metadata || {},
         });
       } else {
         // Reset form for create mode
         setFormData({
           name: '',
           description: '',
-          type: 'conversational',
-          status: 'active',
+          agent_type: AgentType.conversational,
+          status: AgentStatus.active,
           primary_llm: 'gpt-4',
           fallback_llm: '',
           system_prompt: '',
-          personality: '',
-          expertise_areas: [],
-          max_iterations: 10,
+          personality_traits: [],
+          knowledge_domains: [],
+          response_style: 'professional',
+          max_conversation_length: 50,
           temperature: 0.7,
           max_tokens: 1000,
-          timeout_seconds: 30,
-          memory_enabled: true,
-          memory_window: 20,
-          tools: [],
+          response_timeout: 30,
+          learning_enabled: true,
+          feedback_weight: 0.1,
+          adaptation_threshold: 0.8,
+          available_tools: [],
           capabilities: [],
-          knowledge_sources: [],
-          safety_filters: true,
-          audit_enabled: true,
-          is_active: true,
+          tags: [],
+          metadata: {},
         });
       }
     }
@@ -192,25 +183,25 @@ const AgentForm: React.FC<AgentFormProps> = ({
       const submitData: AgentCreateRequest = {
         name: formData.name,
         description: formData.description,
-        agent_type: formData.type,  // Fix: use agent_type instead of type
-        status: formData.status,
+        agent_type: formData.agent_type,  // Correct field name
+        system_prompt: formData.system_prompt,  // Correct field name
+        personality_traits: formData.personality_traits,
+        knowledge_domains: formData.knowledge_domains,
+        response_style: formData.response_style,
+        capabilities: formData.capabilities,  // Already correct format - enum array
+        available_tools: formData.available_tools,
         primary_llm: formData.primary_llm,
         fallback_llm: formData.fallback_llm || undefined,
-        system_prompt: formData.system_prompt,
-        personality: formData.personality || undefined,
-        expertise_areas: formData.expertise_areas,
-        max_iterations: formData.max_iterations,
         temperature: formData.temperature,
         max_tokens: formData.max_tokens,
-        timeout_seconds: formData.timeout_seconds,
-        memory_enabled: formData.memory_enabled,
-        memory_window: formData.memory_window,
-        tools: formData.tools,
-        capabilities: formData.capabilities.map(cap => cap.name),  // Fix: send only capability names as strings
-        knowledge_sources: formData.knowledge_sources,
-        safety_filters: formData.safety_filters,
-        audit_enabled: formData.audit_enabled,
-        is_active: formData.is_active,
+        max_conversation_length: formData.max_conversation_length,
+        context_window_size: 4000,  // Default value
+        response_timeout: formData.response_timeout,
+        learning_enabled: formData.learning_enabled,
+        feedback_weight: formData.feedback_weight,
+        adaptation_threshold: formData.adaptation_threshold,
+        tags: formData.tags,
+        metadata: formData.metadata,
       };
 
       await onSubmit(submitData);
@@ -222,10 +213,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
   };
 
   const addExpertiseArea = () => {
-    if (expertiseInput.trim() && !formData.expertise_areas.includes(expertiseInput.trim())) {
+    if (expertiseInput.trim() && !formData.knowledge_domains.includes(expertiseInput.trim())) {
       setFormData({
         ...formData,
-        expertise_areas: [...formData.expertise_areas, expertiseInput.trim()]
+        knowledge_domains: [...formData.knowledge_domains, expertiseInput.trim()]
       });
       setExpertiseInput('');
     }
@@ -234,39 +225,21 @@ const AgentForm: React.FC<AgentFormProps> = ({
   const removeExpertiseArea = (area: string) => {
     setFormData({
       ...formData,
-      expertise_areas: formData.expertise_areas.filter(e => e !== area)
+      knowledge_domains: formData.knowledge_domains.filter(e => e !== area)
     });
   };
 
-  // TODO: Implement tool management functionality
-  // const addTool = () => {
-  //   if (toolInput.name.trim()) {
-  //     setFormData({
-  //       ...formData,
-  //       tools: [...formData.tools, { ...toolInput, enabled: true }]
-  //     });
-  //     setToolInput({ name: '', description: '' });
-  //   }
-  // };
-
-  // const removeTool = (index: number) => {
-  //   setFormData({
-  //     ...formData,
-  //     tools: formData.tools.filter((_, i) => i !== index)
-  //   });
-  // };
-
-  const toggleCapability = (capabilityName: string) => {
-    const exists = formData.capabilities.find(c => c.name === capabilityName);
+  const toggleCapability = (capability: AgentCapability) => {
+    const exists = formData.capabilities.includes(capability);
     if (exists) {
       setFormData({
         ...formData,
-        capabilities: formData.capabilities.filter(c => c.name !== capabilityName)
+        capabilities: formData.capabilities.filter(c => c !== capability)
       });
     } else {
       setFormData({
         ...formData,
-        capabilities: [...formData.capabilities, { name: capabilityName, enabled: true }]
+        capabilities: [...formData.capabilities, capability]
       });
     }
   };
@@ -320,11 +293,11 @@ const AgentForm: React.FC<AgentFormProps> = ({
                   <FormControl fullWidth>
                     <InputLabel>Agent Type</InputLabel>
                     <Select
-                      value={formData.type}
-                      onChange={(e) => setFormData({ ...formData, type: e.target.value as AgentType })}
+                      value={formData.agent_type}
+                      onChange={(e) => setFormData({ ...formData, agent_type: e.target.value as AgentType })}
                       label="Agent Type"
                     >
-                      {agentTypes.map((type): void => (
+                      {agentTypes.map((type) => (
                         <MenuItem key={type.value} value={type.value}>
                           <Tooltip title={type.description}>
                             <span>{type.label}</span>
@@ -353,24 +326,13 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       onChange={(e) => setFormData({ ...formData, status: e.target.value as AgentStatus })}
                       label="Status"
                     >
-                      {agentStatuses.map((status): void => (
+                      {agentStatuses.map((status) => (
                         <MenuItem key={status.value} value={status.value}>
                           {status.label}
                         </MenuItem>
                       ))}
                     </Select>
                   </FormControl>
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formData.is_active}
-                        onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
-                      />
-                    }
-                    label="Active"
-                  />
                 </Grid>
               </Grid>
             </AccordionDetails>
@@ -414,7 +376,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     Expertise Areas
                   </Typography>
                   <Box sx={{ display: 'flex', gap: 1, mb: 1, flexWrap: 'wrap' }}>
-                    {formData.expertise_areas.map((area): void => (
+                    {formData.knowledge_domains.map((area) => (
                       <Chip
                         key={area}
                         label={area}
@@ -465,7 +427,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Primary LLM"
                       required
                     >
-                      {llmModels.map((model): void => (
+                      {llmModels.map((model) => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -482,7 +444,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                       label="Fallback LLM"
                     >
                       <MenuItem value="">None</MenuItem>
-                      {llmModels.map((model): void => (
+                      {llmModels.map((model) => (
                         <MenuItem key={model} value={model}>
                           {model}
                         </MenuItem>
@@ -514,10 +476,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
                   <TextField
                     fullWidth
                     type="number"
-                    label="Max Iterations"
-                    value={formData.max_iterations}
-                    onChange={(e) => setFormData({ ...formData, max_iterations: parseInt(e.target.value) })}
-                    inputProps={{ min: 1, max: 100 }}
+                    label="Max Conversation Length"
+                    value={formData.max_conversation_length}
+                    onChange={(e) => setFormData({ ...formData, max_conversation_length: parseInt(e.target.value) })}
+                    inputProps={{ min: 1, max: 1000 }}
                   />
                 </Grid>
               </Grid>
@@ -535,25 +497,25 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={2}>
-                {defaultCapabilities.map((capability): void => (
-                  <Grid item xs={12} sm={6} md={4} key={capability.name}>
+                {defaultCapabilities.map((capability) => (
+                  <Grid item xs={12} sm={6} md={4} key={capability.value}>
                     <Box
                       sx={{
                         p: 2,
                         border: '1px solid',
-                        borderColor: formData.capabilities.find(c => c.name === capability.name) 
+                        borderColor: formData.capabilities.includes(capability.value) 
                           ? 'primary.main' 
                           : 'divider',
                         borderRadius: 1,
                         cursor: 'pointer',
-                        bgcolor: formData.capabilities.find(c => c.name === capability.name) 
+                        bgcolor: formData.capabilities.includes(capability.value) 
                           ? 'primary.50' 
                           : 'transparent',
                       }}
-                      onClick={() => toggleCapability(capability.name)}
+                      onClick={() => toggleCapability(capability.value)}
                     >
                       <Typography variant="subtitle2" gutterBottom>
-                        {capability.name.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                        {capability.value.replace(/_/g, ' ').replace(/\b\w/g, l => l.toUpperCase())}
                       </Typography>
                       <Typography variant="body2" color="text.secondary">
                         {capability.description}
@@ -577,34 +539,12 @@ const AgentForm: React.FC<AgentFormProps> = ({
             <AccordionDetails>
               <Grid container spacing={3}>
                 <Grid item xs={12} sm={6}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formData.memory_enabled}
-                        onChange={(e) => setFormData({ ...formData, memory_enabled: e.target.checked })}
-                      />
-                    }
-                    label="Memory Enabled"
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
                   <TextField
                     fullWidth
                     type="number"
-                    label="Memory Window"
-                    value={formData.memory_window}
-                    onChange={(e) => setFormData({ ...formData, memory_window: parseInt(e.target.value) })}
-                    inputProps={{ min: 1, max: 100 }}
-                    disabled={!formData.memory_enabled}
-                  />
-                </Grid>
-                <Grid item xs={12} sm={6}>
-                  <TextField
-                    fullWidth
-                    type="number"
-                    label="Timeout (seconds)"
-                    value={formData.timeout_seconds}
-                    onChange={(e) => setFormData({ ...formData, timeout_seconds: parseInt(e.target.value) })}
+                    label="Response Timeout (seconds)"
+                    value={formData.response_timeout}
+                    onChange={(e) => setFormData({ ...formData, response_timeout: parseInt(e.target.value) })}
                     inputProps={{ min: 1, max: 300 }}
                   />
                 </Grid>
@@ -612,22 +552,33 @@ const AgentForm: React.FC<AgentFormProps> = ({
                   <FormControlLabel
                     control={
                       <Switch
-                        checked={formData.safety_filters}
-                        onChange={(e) => setFormData({ ...formData, safety_filters: e.target.checked })}
+                        checked={formData.learning_enabled}
+                        onChange={(e) => setFormData({ ...formData, learning_enabled: e.target.checked })}
                       />
                     }
-                    label="Safety Filters"
+                    label="Learning Enabled"
                   />
                 </Grid>
                 <Grid item xs={12} sm={6}>
-                  <FormControlLabel
-                    control={
-                      <Switch
-                        checked={formData.audit_enabled}
-                        onChange={(e) => setFormData({ ...formData, audit_enabled: e.target.checked })}
-                      />
-                    }
-                    label="Audit Logging"
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Feedback Weight"
+                    value={formData.feedback_weight}
+                    onChange={(e) => setFormData({ ...formData, feedback_weight: parseFloat(e.target.value) })}
+                    inputProps={{ min: 0, max: 1, step: 0.1 }}
+                    disabled={!formData.learning_enabled}
+                  />
+                </Grid>
+                <Grid item xs={12} sm={6}>
+                  <TextField
+                    fullWidth
+                    type="number"
+                    label="Adaptation Threshold"
+                    value={formData.adaptation_threshold}
+                    onChange={(e) => setFormData({ ...formData, adaptation_threshold: parseFloat(e.target.value) })}
+                    inputProps={{ min: 0, max: 1, step: 0.1 }}
+                    disabled={!formData.learning_enabled}
                   />
                 </Grid>
               </Grid>

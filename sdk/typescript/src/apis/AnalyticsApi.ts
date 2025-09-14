@@ -65,7 +65,7 @@ Args:
     limit: Maximum number of results to return
     include_recommendations: Whether to include search recommendations
    */
-  public async intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent(options?: { query?: string; searchType?: string; limit?: number; includeRecommendations?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent(options?: { query?: string; searchType?: string; limit?: number; includeRecommendations?: boolean; additionalQuery?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/search/intelligent`,
       method: 'GET' as HTTPMethod,
@@ -77,7 +77,7 @@ Args:
         'search_type': options?.searchType,
         'limit': options?.limit,
         'include_recommendations': options?.includeRecommendations,
-        ...options?.query
+        ...options?.additionalQuery
       },
     };
 

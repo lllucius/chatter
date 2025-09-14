@@ -247,6 +247,10 @@ def generate_method(
         params["query"] or params["header"] or params["cookie"]
     )
     if needs_options:
+        # Check if any query parameter is named 'query' to avoid conflicts
+        has_query_param = any(p['name'] == 'query' for p in params["query"])
+        additional_query_name = "additionalQuery" if has_query_param else "query"
+        
         method_params.append(
             "options?: { "
             + "".join(
@@ -257,7 +261,7 @@ def generate_method(
                     + params["cookie"]
                 ]
             )
-            + "query?: HTTPQuery; headers?: HTTPHeaders; }"
+            + f"{additional_query_name}?: HTTPQuery; headers?: HTTPHeaders; }}"
         )
 
     params_str = ", ".join(method_params)
@@ -305,6 +309,10 @@ def generate_method(
 
     # Add query parameters
     if params["query"]:
+        # Check if any query parameter is named 'query' to avoid conflicts
+        has_query_param = any(p['name'] == 'query' for p in params["query"])
+        additional_query_name = "additionalQuery" if has_query_param else "query"
+        
         method_body += """
       query: {"""
         for query_param in params["query"]:
@@ -312,10 +320,11 @@ def generate_method(
             camel_name = camel_case(param_name)
             method_body += f"""
         '{param_name}': options?.{camel_name},"""
-        method_body += """
-        ...options?.query
-      },"""
+        method_body += f"""
+        ...options?.{additional_query_name}
+      }},"""
     elif needs_options:
+        # Check if we need the alternate naming (though this case shouldn't have conflicts)
         method_body += """
       query: options?.query,"""
 
@@ -376,7 +385,7 @@ def generate_api_class(tag: str, operations: list[tuple]) -> str:
 
         # Check if this method uses HTTPQuery or HTTPHeaders
         params = get_parameters(operation)
-        if params["query"] or "query?: HTTPQuery" in method_code:
+        if params["query"] or "query?: HTTPQuery" in method_code or "additionalQuery?: HTTPQuery" in method_code:
             uses_http_query = True
         if params["header"] or "headers?: HTTPHeaders" in method_code:
             uses_http_headers = True

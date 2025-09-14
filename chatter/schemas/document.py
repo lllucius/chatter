@@ -318,32 +318,6 @@ class SearchResultResponse(BaseModel):
     chunk_index: int = Field(..., description="Chunk index")
 
 
-class DocumentStatsResponse(BaseModel):
-    """Schema for document statistics response."""
-
-    total_documents: int = Field(..., description="Total number of documents")
-    status_counts: dict[str, int] = Field(..., description="Documents by status")
-    type_counts: dict[str, int] = Field(..., description="Documents by type")
-    total_storage_bytes: int = Field(..., description="Total storage used")
-    total_chunks: int = Field(..., description="Total number of chunks")
-    chunk_overlap: int | None = Field(
-        None, ge=0, le=2000, description="Override chunk overlap"
-    )
-    generate_embeddings: bool = Field(
-        True, description="Generate embeddings for chunks"
-    )
-
-
-class DocumentProcessingResponse(BaseModel):
-    """Schema for document processing response."""
-
-    document_id: str = Field(..., description="Document ID")
-    status: DocumentStatus = Field(..., description="Processing status")
-    message: str = Field(..., description="Status message")
-    processing_started_at: datetime | None = Field(
-        None, description="Processing start time"
-    )
-
 
 class DocumentStatsResponse(BaseModel):
     """Schema for document statistics response."""

@@ -1,5 +1,6 @@
 """LangGraph workflows for advanced conversation logic."""
 
+import asyncio
 from collections.abc import Sequence
 from typing import Annotated, Any, Literal, TypedDict
 
@@ -11,6 +12,8 @@ from langchain_core.messages import (
     SystemMessage,
     ToolMessage,
 )
+from langchain_core.runnables import RunnableConfig
+from langgraph.checkpoint.base import CheckpointTuple
 from langgraph.checkpoint.memory import MemorySaver
 from langgraph.checkpoint.postgres import PostgresSaver
 from langgraph.graph import END, StateGraph
@@ -23,6 +26,65 @@ from chatter.config import settings
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+class AsyncPostgresSaver(PostgresSaver):
+    """Wrapper for PostgresSaver that implements the missing aget_tuple method.
+    
+    The langgraph-checkpoint-postgres package's PostgresSaver only implements
+    the synchronous get_tuple method but not the async aget_tuple method,
+    causing NotImplementedError when LangGraph workflows try to use it.
+    
+    This wrapper provides a proper async implementation by running the sync
+    method in a thread pool.
+    """
+    
+    @classmethod
+    def from_conn_string(cls, conn_string: str, *, pipeline: bool = False):
+        """Create AsyncPostgresSaver from connection string.
+        
+        This creates a proper context manager that returns our AsyncPostgresSaver
+        instance instead of the base PostgresSaver.
+        """
+        from contextlib import contextmanager
+        
+        @contextmanager
+        def _async_postgres_context():
+            # Use the parent class to create the base connection
+            with PostgresSaver.from_conn_string(conn_string, pipeline=pipeline) as base_saver:
+                # Create our async wrapper instance
+                async_saver = cls.__new__(cls)
+                
+                # Copy all the connection and state from base_saver to our instance
+                async_saver.__dict__.update(base_saver.__dict__)
+                
+                yield async_saver
+                
+        return _async_postgres_context()
+    
+    async def aget_tuple(self, config: RunnableConfig) -> CheckpointTuple | None:
+        """Asynchronously fetch a checkpoint tuple using the given configuration.
+        
+        This method wraps the synchronous get_tuple method to provide proper
+        async support for PostgreSQL checkpointer.
+        
+        Args:
+            config: Configuration specifying which checkpoint to retrieve.
+            
+        Returns:
+            Optional[CheckpointTuple]: The requested checkpoint tuple, or None if not found.
+        """
+        try:
+            # Run the synchronous get_tuple method in a thread pool
+            return await asyncio.to_thread(self.get_tuple, config)
+        except Exception as e:
+            logger.error(
+                "Failed to get checkpoint tuple",
+                error=str(e),
+                config=config,
+            )
+            raise
+
 
 # Import new workflow components with graceful fallback
 try:
@@ -90,12 +152,11 @@ class LangGraphWorkflowManager:
                         # Use as-is for other schemes
                         sync_url = settings.database_url
                     
-                    # Use PostgresSaver with proper context manager handling
-                    # PostgresSaver.from_conn_string() returns a context manager
-                    self._postgres_context_manager = PostgresSaver.from_conn_string(sync_url)
+                    # Use AsyncPostgresSaver with proper context manager handling
+                    self._postgres_context_manager = AsyncPostgresSaver.from_conn_string(sync_url)
                     self.checkpointer = self._postgres_context_manager.__enter__()
                     self.checkpointer.setup()
-                    logger.info("LangGraph PostgreSQL checkpointer initialized")
+                    logger.info("LangGraph PostgreSQL checkpointer initialized with async support")
                         
                 except Exception as postgres_error:
                     logger.warning(

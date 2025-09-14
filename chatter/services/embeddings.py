@@ -168,11 +168,16 @@ class EmbeddingService:
         """Create an embedding provider instance based on registry data."""
         try:
             if provider.provider_type == ProviderType.OPENAI:
-                # Get API key from environment
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                # Get API key from provider config or environment
+                api_key = (
+                    provider.default_config.get("api_key") 
+                    or os.getenv(f"{provider.name.upper()}_API_KEY")
+                    or os.getenv("OPENAI_API_KEY")
+                )
                 if not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}"
+                        f"No API key found for provider {provider.name}. "
+                        f"Checked provider config, {provider.name.upper()}_API_KEY, and OPENAI_API_KEY"
                     )
                     return None
 
@@ -201,10 +206,15 @@ class EmbeddingService:
                 provider.provider_type == ProviderType.GOOGLE
                 and GOOGLE_AVAILABLE
             ):
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                api_key = (
+                    provider.default_config.get("api_key") 
+                    or os.getenv(f"{provider.name.upper()}_API_KEY")
+                    or os.getenv("GOOGLE_API_KEY")
+                )
                 if not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}"
+                        f"No API key found for provider {provider.name}. "
+                        f"Checked provider config, {provider.name.upper()}_API_KEY, and GOOGLE_API_KEY"
                     )
                     return None
 
@@ -217,10 +227,15 @@ class EmbeddingService:
                 provider.provider_type == ProviderType.COHERE
                 and COHERE_AVAILABLE
             ):
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                api_key = (
+                    provider.default_config.get("api_key") 
+                    or os.getenv(f"{provider.name.upper()}_API_KEY")
+                    or os.getenv("COHERE_API_KEY")
+                )
                 if not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}"
+                        f"No API key found for provider {provider.name}. "
+                        f"Checked provider config, {provider.name.upper()}_API_KEY, and COHERE_API_KEY"
                     )
                     return None
 

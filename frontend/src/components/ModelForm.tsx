@@ -96,11 +96,17 @@ const ModelForm: React.FC<ModelFormProps> = ({
               label="Provider"
               helperText={mode === 'edit' ? "Provider cannot be changed after creation" : ""}
             >
-              {providers.map((p): void => (
-                <MenuItem key={p.id} value={p.id}>
-                  {p.displayName}
+              {providers.length === 0 ? (
+                <MenuItem disabled value="">
+                  No active providers available
                 </MenuItem>
-              ))}
+              ) : (
+                providers.map((p): void => (
+                  <MenuItem key={p.id} value={p.id}>
+                    {p.displayName}
+                  </MenuItem>
+                ))
+              )}
             </Select>
           </FormControl>
           
@@ -196,7 +202,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
         <Button 
           variant="contained" 
           onClick={handleSubmit}
-          disabled={!formData.name || !formData.displayName || !formData.modelName || saving}
+          disabled={!formData.name || !formData.displayName || !formData.modelName || providers.length === 0 || saving}
         >
           {saving ? 'Saving...' : (mode === 'edit' ? 'Update Model' : 'Create Model')}
         </Button>

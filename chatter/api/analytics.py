@@ -22,10 +22,26 @@ from chatter.schemas.analytics import (
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem
+from chatter.services.cache_warming import CacheWarmingService
+from chatter.services.database_optimization import DatabaseOptimizationService
 from chatter.utils.unified_rate_limiter import rate_limit
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+
+async def get_database_optimization_service(
+    session: AsyncSession = Depends(get_session_generator),
+) -> DatabaseOptimizationService:
+    """Get database optimization service instance."""
+    return DatabaseOptimizationService(session)
+
+
+async def get_cache_warming_service(
+    session: AsyncSession = Depends(get_session_generator),
+) -> CacheWarmingService:
+    """Get cache warming service instance."""
+    return CacheWarmingService(session)
 
 
 async def get_analytics_service(
@@ -862,3 +878,258 @@ async def get_analytics_metrics_summary(
         raise InternalServerProblem(
             detail="Failed to get analytics metrics summary"
         ) from e
+
+
+@router.post("/cache/warm")
+@rate_limit(
+    max_requests=2, window_seconds=300
+)  # 2 warming requests per 5 minutes  
+async def warm_analytics_cache(
+    force_refresh: bool = False,
+    current_user: User = Depends(get_current_user),
+    cache_warming_service: CacheWarmingService = Depends(get_cache_warming_service),
+) -> dict[str, Any]:
+    """Warm analytics cache to improve performance.
+    
+    Args:
+        force_refresh: Force refresh of existing cache entries
+        current_user: Current authenticated user
+        cache_warming_service: Cache warming service
+        
+    Returns:
+        Cache warming results
+    """
+    try:
+        # Check if user has admin permissions (you may want to implement proper admin check)
+        if not getattr(current_user, "is_admin", False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(detail="Admin access required for cache warming")
+        
+        logger.info(f"Starting cache warming initiated by user {current_user.id}")
+        
+        warming_results = await cache_warming_service.warm_analytics_cache(force_refresh)
+        
+        return {
+            "message": "Cache warming completed",
+            "results": warming_results,
+            "initiated_by": current_user.id,
+        }
+        
+    except Exception as e:
+        logger.error(f"Cache warming failed: {e}")
+        raise InternalServerProblem(detail="Failed to warm cache") from e
+
+
+@router.get("/cache/status")
+@rate_limit(
+    max_requests=10, window_seconds=60
+)  # 10 requests per minute
+async def get_cache_warming_status(
+    current_user: User = Depends(get_current_user),
+    cache_warming_service: CacheWarmingService = Depends(get_cache_warming_service),
+) -> dict[str, Any]:
+    """Get cache warming status and performance metrics.
+    
+    Args:
+        current_user: Current authenticated user
+        cache_warming_service: Cache warming service
+        
+    Returns:
+        Cache warming status and metrics
+    """
+    try:
+        status = await cache_warming_service.get_cache_warming_status()
+        return status
+        
+    except Exception as e:
+        logger.error(f"Failed to get cache warming status: {e}")
+        raise InternalServerProblem(detail="Failed to get cache status") from e
+
+
+@router.post("/cache/optimize")
+@rate_limit(
+    max_requests=3, window_seconds=600
+)  # 3 optimization requests per 10 minutes
+async def optimize_cache_performance(
+    current_user: User = Depends(get_current_user),
+    cache_warming_service: CacheWarmingService = Depends(get_cache_warming_service),
+) -> dict[str, Any]:
+    """Analyze and optimize cache performance automatically.
+    
+    Args:
+        current_user: Current authenticated user
+        cache_warming_service: Cache warming service
+        
+    Returns:
+        Optimization results and recommendations
+    """
+    try:
+        # Check if user has admin permissions
+        if not getattr(current_user, "is_admin", False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(detail="Admin access required for cache optimization")
+        
+        logger.info(f"Cache optimization initiated by user {current_user.id}")
+        
+        optimization_results = await cache_warming_service.optimize_cache_performance()
+        
+        return {
+            "message": "Cache optimization completed",
+            "results": optimization_results,
+            "initiated_by": current_user.id,
+        }
+        
+    except Exception as e:
+        logger.error(f"Cache optimization failed: {e}")
+        raise InternalServerProblem(detail="Failed to optimize cache") from e
+
+
+@router.post("/cache/invalidate")
+@rate_limit(
+    max_requests=5, window_seconds=300
+)  # 5 invalidation requests per 5 minutes
+async def invalidate_stale_cache(
+    max_age_hours: int = 24,
+    current_user: User = Depends(get_current_user),
+    cache_warming_service: CacheWarmingService = Depends(get_cache_warming_service),
+) -> dict[str, Any]:
+    """Invalidate stale cache entries to free up memory.
+    
+    Args:
+        max_age_hours: Maximum age in hours for cache entries to keep
+        current_user: Current authenticated user
+        cache_warming_service: Cache warming service
+        
+    Returns:
+        Cache invalidation results
+    """
+    try:
+        # Check if user has admin permissions
+        if not getattr(current_user, "is_admin", False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(detail="Admin access required for cache invalidation")
+        
+        # Validate max_age_hours
+        if max_age_hours < 1 or max_age_hours > 168:  # 1 hour to 1 week
+            from chatter.utils.problem import BadRequestProblem
+            raise BadRequestProblem(detail="max_age_hours must be between 1 and 168")
+        
+        logger.info(f"Cache invalidation initiated by user {current_user.id}, max_age={max_age_hours}h")
+        
+        invalidation_results = await cache_warming_service.invalidate_stale_cache_entries(max_age_hours)
+        
+        return {
+            "message": "Cache invalidation completed",
+            "results": invalidation_results,
+            "max_age_hours": max_age_hours,
+            "initiated_by": current_user.id,
+        }
+        
+    except Exception as e:
+        logger.error(f"Cache invalidation failed: {e}")
+        raise InternalServerProblem(detail="Failed to invalidate cache") from e
+
+
+@router.get("/performance/detailed")
+@rate_limit(
+    max_requests=20, window_seconds=60
+)  # 20 requests per minute
+async def get_detailed_performance_metrics(
+    current_user: User = Depends(get_current_user),
+    analytics_service: AnalyticsService = Depends(get_analytics_service),
+) -> dict[str, Any]:
+    """Get detailed performance metrics for analytics service.
+    
+    Args:
+        current_user: Current authenticated user
+        analytics_service: Analytics service
+        
+    Returns:
+        Detailed performance metrics
+    """
+    try:
+        performance_metrics = await analytics_service.get_analytics_performance_metrics()
+        
+        return {
+            "message": "Performance metrics retrieved successfully",
+            "metrics": performance_metrics,
+            "retrieved_by": current_user.id,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get detailed performance metrics: {e}")
+        raise InternalServerProblem(detail="Failed to retrieve performance metrics") from e
+
+
+@router.get("/database/health")
+@rate_limit(
+    max_requests=10, window_seconds=60
+)  # 10 requests per minute
+async def get_database_health_metrics(
+    current_user: User = Depends(get_current_user),
+    db_optimization_service: DatabaseOptimizationService = Depends(get_database_optimization_service),
+) -> dict[str, Any]:
+    """Get comprehensive database health metrics for analytics.
+    
+    Args:
+        current_user: Current authenticated user
+        db_optimization_service: Database optimization service
+        
+    Returns:
+        Database health metrics and recommendations
+    """
+    try:
+        health_metrics = await db_optimization_service.get_database_health_metrics()
+        
+        return {
+            "message": "Database health metrics retrieved successfully",
+            "health_metrics": health_metrics,
+            "retrieved_by": current_user.id,
+            "timestamp": datetime.now(UTC).isoformat(),
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get database health metrics: {e}")
+        raise InternalServerProblem(detail="Failed to retrieve database health metrics") from e
+
+
+@router.post("/database/analyze-queries")
+@rate_limit(
+    max_requests=5, window_seconds=300
+)  # 5 analysis requests per 5 minutes
+async def analyze_query_performance(
+    query_type: str = None,
+    current_user: User = Depends(get_current_user),
+    db_optimization_service: DatabaseOptimizationService = Depends(get_database_optimization_service),
+) -> dict[str, Any]:
+    """Analyze performance of analytics database queries.
+    
+    Args:
+        query_type: Specific query type to analyze (optional)
+        current_user: Current authenticated user
+        db_optimization_service: Database optimization service
+        
+    Returns:
+        Query performance analysis and optimization recommendations
+    """
+    try:
+        # Check if user has admin permissions for detailed analysis
+        if not getattr(current_user, "is_admin", False):
+            from chatter.utils.problem import ForbiddenProblem
+            raise ForbiddenProblem(detail="Admin access required for query analysis")
+        
+        logger.info(f"Query performance analysis initiated by user {current_user.id}")
+        
+        analysis_results = await db_optimization_service.analyze_query_performance(query_type)
+        
+        return {
+            "message": "Query performance analysis completed",
+            "analysis": analysis_results,
+            "query_type_filter": query_type,
+            "initiated_by": current_user.id,
+        }
+        
+    except Exception as e:
+        logger.error(f"Query performance analysis failed: {e}")
+        raise InternalServerProblem(detail="Failed to analyze query performance") from e

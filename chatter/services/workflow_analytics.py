@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 from typing import Any
 
-from chatter.core.cache_factory import get_analytics_cache  
+from chatter.core.cache_factory import get_persistent_cache  
 from chatter.schemas.workflows import (
     BottleneckInfo,
     ComplexityMetrics,
@@ -22,7 +22,7 @@ class WorkflowAnalyticsService:
     def __init__(self, session=None):
         # Session not needed for analytics, but keeping for consistency
         self.session = session
-        self.cache = get_analytics_cache()
+        self.cache = get_persistent_cache()  # Use persistent cache for longer-lived analytics
 
     async def analyze_workflow(
         self,
@@ -80,8 +80,8 @@ class WorkflowAnalyticsService:
                 "risk_factors": risk_factors,
             }
 
-            # Cache the result for 1 hour
-            await self.cache.set(cache_key, result, ttl=3600)
+            # Cache the result for 2 hours (longer than before for workflow analytics)
+            await self.cache.set(cache_key, result, ttl=7200)
             
             return result
 

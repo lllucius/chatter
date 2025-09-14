@@ -51,6 +51,16 @@ class GlobalErrorHandler {
   private handleJavaScriptError = (event: ErrorEvent): void => {
     const { error, message, filename, lineno, colno } = event;
 
+    // Filter out benign ResizeObserver errors that don't require user attention
+    if (this.isResizeObserverError(message, error)) {
+      // Only log in development mode for debugging purposes
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.debug('[Global Error Handler] ResizeObserver loop error (benign):', message);
+      }
+      return;
+    }
+
     errorHandler.handleError(error || new Error(message), {
       source: 'GlobalErrorHandler.handleJavaScriptError',
       operation: 'Uncaught JavaScript error',
@@ -99,10 +109,13 @@ class GlobalErrorHandler {
     const target = event.target as HTMLElement | null;
     
     // Only handle resource loading errors, not JavaScript errors
-    if (target && target !== window) {
+    // Check if target is an element and not the window
+    if (target && target !== (window as unknown as EventTarget) && target !== event.currentTarget) {
       const resourceType = target.tagName?.toLowerCase() || 'unknown';
-      const resourceSrc = (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src || 
-                          (target as HTMLLinkElement).href || 'unknown';
+      const resourceSrc = 
+        (target as HTMLImageElement | HTMLScriptElement).src || 
+        (target as HTMLLinkElement).href || 
+        'unknown';
 
       errorHandler.handleError(
         new Error(`Failed to load ${resourceType}: ${resourceSrc}`),
@@ -129,6 +142,24 @@ class GlobalErrorHandler {
    */
   public isInitialized(): boolean {
     return this.initialized;
+  }
+
+  /**
+   * Check if an error is a benign ResizeObserver error that should be filtered out
+   */
+  private isResizeObserverError(message: string, error?: Error): boolean {
+    const resizeObserverPattern = /ResizeObserver loop completed with undelivered notifications/i;
+    
+    // Check both the message and error object for ResizeObserver patterns
+    if (message && resizeObserverPattern.test(message)) {
+      return true;
+    }
+    
+    if (error && error.message && resizeObserverPattern.test(error.message)) {
+      return true;
+    }
+    
+    return false;
   }
 }
 

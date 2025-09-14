@@ -11,10 +11,14 @@ vi.mock('../error-handler', () => ({
 
 // Mock PromiseRejectionEvent for test environment
 if (typeof PromiseRejectionEvent === 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   (global as any).PromiseRejectionEvent = class PromiseRejectionEvent extends Event {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promise: Promise<any>;
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reason: any;
     
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(type: string, options: { promise: Promise<any>; reason: any }) {
       super(type);
       this.promise = options.promise;
@@ -99,6 +103,93 @@ describe('GlobalErrorHandler', () => {
           fallbackMessage: 'An unexpected error occurred',
         })
       );
+    });
+
+    it('should filter out ResizeObserver errors', () => {
+      initializeGlobalErrorHandling();
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+      
+      // Clear any previous calls
+      vi.clearAllMocks();
+      
+      // Test with ResizeObserver error in message
+      const resizeObserverEvent = new ErrorEvent('error', {
+        message: 'ResizeObserver loop completed with undelivered notifications.',
+        filename: 'test.js',
+        lineno: 0,
+        colno: 0,
+      });
+
+      // Create a custom event handler to directly test the JavaScript error handler
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handler = globalErrorHandler as any;
+      handler.handleJavaScriptError(resizeObserverEvent);
+
+      // Should not call the error handler for ResizeObserver errors
+      expect(errorHandler.handleError).not.toHaveBeenCalled();
+
+      consoleDebugSpy.mockRestore();
+    });
+
+    it('should filter out ResizeObserver errors from Error objects', () => {
+      initializeGlobalErrorHandling();
+
+      // Clear any previous calls
+      vi.clearAllMocks();
+
+      const resizeObserverError = new Error('ResizeObserver loop completed with undelivered notifications.');
+      const errorEvent = new ErrorEvent('error', {
+        error: resizeObserverError,
+        message: 'ResizeObserver loop completed with undelivered notifications.',
+        filename: 'test.js',
+        lineno: 0,
+        colno: 0,
+      });
+
+      // Create a custom event handler to directly test the JavaScript error handler
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handler = globalErrorHandler as any;
+      handler.handleJavaScriptError(errorEvent);
+
+      // Should not call the error handler for ResizeObserver errors
+      expect(errorHandler.handleError).not.toHaveBeenCalled();
+    });
+
+    it('should log ResizeObserver errors in development mode', () => {
+      // Set NODE_ENV to development
+      const originalEnv = process.env.NODE_ENV;
+      process.env.NODE_ENV = 'development';
+
+      initializeGlobalErrorHandling();
+
+      // eslint-disable-next-line @typescript-eslint/no-empty-function
+      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
+      
+      // Clear any previous calls
+      vi.clearAllMocks();
+      
+      const resizeObserverEvent = new ErrorEvent('error', {
+        message: 'ResizeObserver loop completed with undelivered notifications.',
+        filename: 'test.js',
+        lineno: 0,
+        colno: 0,
+      });
+
+      // Create a custom event handler to directly test the JavaScript error handler
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      const handler = globalErrorHandler as any;
+      handler.handleJavaScriptError(resizeObserverEvent);
+
+      // Should log in development mode
+      expect(consoleDebugSpy).toHaveBeenCalledWith(
+        '[Global Error Handler] ResizeObserver loop error (benign):',
+        'ResizeObserver loop completed with undelivered notifications.'
+      );
+
+      consoleDebugSpy.mockRestore();
+      process.env.NODE_ENV = originalEnv;
     });
 
     it('should handle error events without error object', () => {

@@ -19,7 +19,7 @@ import {
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
 import { WorkflowDefinition, WorkflowNodeType, WorkflowNode } from './WorkflowEditor';
-import { getSDK } from '../../services/client-service';
+import { getSDK } from '../../services/auth-service';
 
 interface WorkflowAnalyticsProps {
   workflow: WorkflowDefinition;

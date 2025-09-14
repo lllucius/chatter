@@ -319,6 +319,17 @@ class SearchResultResponse(BaseModel):
 
 
 
+class DocumentProcessingResponse(BaseModel):
+    """Schema for document processing response."""
+
+    document_id: str = Field(..., description="Document ID")
+    status: DocumentStatus = Field(..., description="Processing status")
+    message: str = Field(..., description="Status message")
+    processing_started_at: datetime | None = Field(
+        None, description="Processing start time"
+    )
+
+
 class DocumentStatsResponse(BaseModel):
     """Schema for document statistics response."""
 

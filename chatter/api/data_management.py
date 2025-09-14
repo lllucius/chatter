@@ -12,6 +12,8 @@ from chatter.schemas.data_management import (
     BackupRequest,
     BackupResponse,
     BackupType,
+    BulkDeleteFilteredRequest,
+    BulkDeletePreviewResponse,
     BulkDeleteResponse,
     ExportDataRequest,
     ExportDataResponse,
@@ -315,4 +317,58 @@ async def bulk_delete_prompts(
         logger.error("Failed to bulk delete prompts", error=str(e))
         raise InternalServerProblem(
             detail="Failed to bulk delete prompts"
+        ) from e
+
+
+@router.post("/bulk/delete-filtered", response_model=BulkDeleteResponse)
+async def bulk_delete_with_filters(
+    request: BulkDeleteFilteredRequest,
+    current_user: User = Depends(get_current_user),
+    data_manager: DataManager = Depends(get_data_manager),
+) -> BulkDeleteResponse:
+    """Bulk delete with server-side filtering."""
+    try:
+        results = await data_manager.bulk_delete_with_filters(
+            request.filters, current_user.id
+        )
+
+        return BulkDeleteResponse(
+            total_requested=results.get("total_matching", 0),
+            successful_deletions=results.get("success_count", 0),
+            failed_deletions=results.get("error_count", 0),
+            errors=results.get("errors", []),
+        )
+    except Exception as e:
+        logger.error("Failed to bulk delete with filters", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to bulk delete with filters"
+        ) from e
+
+
+@router.post("/bulk/preview", response_model=BulkDeletePreviewResponse)
+async def preview_bulk_delete(
+    request: BulkDeleteFilteredRequest,
+    current_user: User = Depends(get_current_user),
+    data_manager: DataManager = Depends(get_data_manager),
+) -> BulkDeletePreviewResponse:
+    """Preview bulk delete operation with server-side filtering."""
+    try:
+        # Force dry run for preview
+        filters = request.filters.copy()
+        filters.dry_run = True
+        
+        results = await data_manager.preview_bulk_delete(
+            filters, current_user.id
+        )
+
+        return BulkDeletePreviewResponse(
+            entity_type=results["entity_type"],
+            total_matching=results["total_matching"],
+            sample_items=results["sample_items"],
+            filters_applied=results["filters_applied"],
+        )
+    except Exception as e:
+        logger.error("Failed to preview bulk delete", error=str(e))
+        raise InternalServerProblem(
+            detail="Failed to preview bulk delete"
         ) from e

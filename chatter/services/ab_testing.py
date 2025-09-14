@@ -358,7 +358,7 @@ class ABTestManager:
         if not test:
             return False
 
-        if test.status != TestStatus.DRAFT:
+        if test.status not in [TestStatus.DRAFT, TestStatus.PAUSED]:
             logger.warning(
                 f"Cannot start test {test_id} - status is {test.status}"
             )

@@ -4,6 +4,8 @@ import {
   Box,
   Typography,
   LinearProgress,
+  Alert,
+  AlertTitle,
 } from '../utils/mui';
 import { CrudFormProps } from './CrudDataTable';
 import { FormDialog } from './BaseDialog';
@@ -31,6 +33,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
   onSubmit,
 }) => {
   const [file, setFile] = useState<File | null>(null);
+  const [uploadError, setUploadError] = useState<string | null>(null);
   
   const {
     formData,
@@ -51,16 +54,36 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
   );
 
   const handleFormSubmit = handleSubmit(async (data) => {
-    if (mode === 'create') {
-      if (!file) return;
-      await onSubmit({
-        file,
-        title: data.title || undefined,
-      });
-    } else {
-      await onSubmit({
-        title: data.title || undefined,
-      });
+    try {
+      setUploadError(null); // Clear any previous error
+      if (mode === 'create') {
+        if (!file) return;
+        await onSubmit({
+          file,
+          title: data.title || undefined,
+        });
+      } else {
+        await onSubmit({
+          title: data.title || undefined,
+        });
+      }
+    } catch (error: unknown) {
+      // Check if this is a duplicate document error
+      let errorMessage = '';
+      if (error && typeof error === 'object') {
+        const errorObj = error as { response?: { data?: { detail?: string } }; message?: string };
+        errorMessage = errorObj.response?.data?.detail || errorObj.message || '';
+      } else if (typeof error === 'string') {
+        errorMessage = error;
+      }
+      
+      if (errorMessage.includes('Document with identical content already exists') || 
+          errorMessage.includes('This file has already been uploaded')) {
+        setUploadError('This file has already been uploaded. Documents are identified by their content, so the same file cannot be uploaded twice. Please check your existing documents or upload a different file.');
+      } else {
+        // Let the error propagate to the global handler for other types of errors
+        throw error;
+      }
     }
   });
 
@@ -68,6 +91,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
     const selectedFile = event.target.files?.[0];
     if (selectedFile) {
       setFile(selectedFile);
+      setUploadError(null); // Clear any previous error when selecting a new file
       // Auto-fill title from filename if not already set
       if (!formData.title && selectedFile.name) {
         const nameWithoutExtension = selectedFile.name.replace(/\.[^/.]+$/, '');
@@ -78,6 +102,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
 
   const handleCustomClose = handleClose(() => {
     setFile(null);
+    setUploadError(null); // Clear error when closing
     onClose();
   });
 
@@ -119,6 +144,13 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
                 Selected: {file.name} ({formatFileSize(file.size)})
               </Typography>
             </Box>
+          )}
+          
+          {uploadError && (
+            <Alert severity="warning" sx={{ mt: 2 }}>
+              <AlertTitle>Duplicate File</AlertTitle>
+              {uploadError}
+            </Alert>
           )}
         </>
       )}

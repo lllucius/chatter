@@ -4,7 +4,7 @@ from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_admin_user, get_current_user
-from chatter.api.dependencies import get_db_session
+from chatter.utils.database import get_session_generator
 from chatter.models.user import User
 from chatter.schemas.analytics import SystemAnalyticsResponse
 from chatter.services.intelligent_search import get_intelligent_search_service
@@ -23,7 +23,7 @@ router = APIRouter()
 async def start_real_time_dashboard(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Start real-time dashboard updates for the current user.
     
@@ -60,7 +60,7 @@ async def start_real_time_dashboard(
 @router.post("/real-time/dashboard/stop")
 async def stop_real_time_dashboard(
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Stop real-time dashboard updates for the current user."""
     real_time_service = get_real_time_analytics_service(session)
@@ -79,7 +79,7 @@ async def stop_real_time_dashboard(
 async def get_user_behavior_analytics(
     user_id: str,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Get personalized behavior analytics for a user.
     
@@ -118,7 +118,7 @@ async def intelligent_search(
     limit: int = 10,
     include_recommendations: bool = True,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Perform intelligent semantic search with personalized results.
     
@@ -183,7 +183,7 @@ async def intelligent_search(
 async def get_trending_content(
     limit: int = 10,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Get trending content personalized for the current user."""
     if limit < 1 or limit > 20:
@@ -221,7 +221,7 @@ async def send_workflow_update(
     update_type: str,
     data: dict,
     current_user: User = Depends(get_current_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Send a real-time workflow update to the user."""
     # Validate update type
@@ -266,7 +266,7 @@ async def send_workflow_update(
 async def send_system_health_update(
     health_data: dict,
     current_user: User = Depends(get_current_admin_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Send system health update to all admin users.
     
@@ -301,7 +301,7 @@ async def send_system_health_update(
 @router.post("/real-time/cleanup")
 async def cleanup_inactive_tasks(
     current_user: User = Depends(get_current_admin_user),
-    session: AsyncSession = Depends(get_db_session),
+    session: AsyncSession = Depends(get_session_generator),
 ) -> dict:
     """Clean up inactive real-time tasks.
     

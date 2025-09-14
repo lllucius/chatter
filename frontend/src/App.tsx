@@ -37,6 +37,7 @@ const WorkflowManagementPage = lazy(() => import('./pages/WorkflowManagementPage
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
+const ErrorTestPage = lazy(() => import('./pages/ErrorTestPage'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -165,6 +166,13 @@ function App() {
                     </SuspenseWrapper>
                   </SectionErrorBoundary>
                 } />
+                <Route path="/error-test-public" element={
+                  <SectionErrorBoundary level="page" name="ErrorTestPage" showHomeButton={true}>
+                    <SuspenseWrapper loadingMessage="Loading error test page...">
+                      <ErrorTestPage />
+                    </SuspenseWrapper>
+                  </SectionErrorBoundary>
+                } />
                 
                 {/* Protected routes */}
                 <Route path="/" element={
@@ -263,6 +271,13 @@ function App() {
                     <SuspenseWrapper loadingMessage="Loading demo...">
                       <NotificationDemo />
                     </SuspenseWrapper>
+                  } />
+                  <Route path="error-test" element={
+                    <SectionErrorBoundary level="page" name="ErrorTestPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading error test page...">
+                        <ErrorTestPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                 </Route>
               </Routes>

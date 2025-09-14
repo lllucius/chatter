@@ -1275,7 +1275,7 @@ async def get_test_analytics(
         if not test:
             raise NotFoundProblem(
                 detail="A/B test not found",
-                resource_type="ab_test", 
+                resource_type="ab_test",
                 resource_id=test_id,
             )
 
@@ -1320,10 +1320,10 @@ async def get_test_analytics(
 
         # Convert to response format
         variants = [
-            VariantPerformance(**variant) 
+            VariantPerformance(**variant)
             for variant in analytics_data["variants"]
         ]
-        
+
         statistical_analysis = StatisticalAnalysis(
             **analytics_data["statistical_analysis"]
         )

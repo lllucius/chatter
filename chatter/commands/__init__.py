@@ -8,8 +8,6 @@ from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 from typing import Any, TypeVar
 
-F = TypeVar('F', bound=Callable[..., Any])
-
 # Import all the API classes that commands might need
 from chatter_sdk import (  # type: ignore[import-not-found]
     ABTestingApi,
@@ -34,6 +32,8 @@ from chatter_sdk.exceptions import (
     ApiException,  # type: ignore[import-not-found]
 )
 from rich.console import Console
+
+F = TypeVar('F', bound=Callable[..., Any])
 
 # Initialize console
 console = Console()

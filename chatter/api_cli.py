@@ -7,10 +7,8 @@ without importing any application modules, avoiding initialization issues.
 
 import asyncio
 import functools
-import json
 import os
 import sys
-from pathlib import Path
 
 import typer
 from rich.console import Console

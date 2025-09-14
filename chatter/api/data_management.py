@@ -356,7 +356,7 @@ async def preview_bulk_delete(
         # Force dry run for preview
         filters = request.filters.copy()
         filters.dry_run = True
-        
+
         results = await data_manager.preview_bulk_delete(
             filters, current_user.id
         )

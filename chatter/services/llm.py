@@ -58,15 +58,15 @@ class LLMService:
         return session_maker()
 
     async def _create_custom_provider(
-        self, 
-        provider_name: str | None = None, 
-        temperature: float | None = None, 
+        self,
+        provider_name: str | None = None,
+        temperature: float | None = None,
         max_tokens: int | None = None
     ) -> BaseChatModel:
         """Create a provider instance with custom temperature and max_tokens."""
         session = await self._get_session()
         registry = get_model_registry()
-        
+
         # Get the default model if no provider specified
         if provider_name is None:
             try:
@@ -89,18 +89,18 @@ class LLMService:
                 models = await registry.list_models(session)
                 model_def = None
                 provider_info = None
-                
+
                 for model in models:
                     provider = await registry.get_provider_by_id(session, model.provider_id)
                     if provider.name.lower() == provider_name.lower():
                         model_def = model
                         provider_info = provider
                         break
-                
+
                 if not model_def or not provider_info:
                     raise ValueError(f"Provider {provider_name} not found")
-                    
-            except Exception as e:
+
+            except Exception:
                 # Fallback creation based on provider name
                 if provider_name.lower() == "openai":
                     api_key = os.getenv("OPENAI_API_KEY", "dummy")
@@ -952,8 +952,8 @@ class LLMService:
             if temperature is not None or max_tokens is not None:
                 # Create a custom provider instance with the specified parameters
                 provider = await self._create_custom_provider(
-                    provider_name=None, 
-                    temperature=temperature, 
+                    provider_name=None,
+                    temperature=temperature,
                     max_tokens=max_tokens
                 )
             else:
@@ -962,8 +962,8 @@ class LLMService:
             if temperature is not None or max_tokens is not None:
                 # Create a custom provider instance with the specified parameters
                 provider = await self._create_custom_provider(
-                    provider_name=provider_name, 
-                    temperature=temperature, 
+                    provider_name=provider_name,
+                    temperature=temperature,
                     max_tokens=max_tokens
                 )
             else:

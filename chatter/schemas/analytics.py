@@ -571,7 +571,7 @@ class CustomMetricResponse(BaseModel):
 # Chart-ready data schemas for Phase 2 dashboard enhancement
 class ChartDataPoint(BaseModel):
     """Schema for a single chart data point."""
-    
+
     name: str = Field(..., description="Data point label")
     value: float = Field(..., description="Data point value")
     color: str | None = Field(None, description="Optional color for the data point")
@@ -579,7 +579,7 @@ class ChartDataPoint(BaseModel):
 
 class TimeSeriesDataPoint(BaseModel):
     """Schema for time series chart data point."""
-    
+
     date: str = Field(..., description="Date label (e.g., 'Mon', 'Jan 01')")
     conversations: int | None = Field(None, description="Number of conversations")
     tokens: int | None = Field(None, description="Token usage")
@@ -591,7 +591,7 @@ class TimeSeriesDataPoint(BaseModel):
 
 class ChartReadyAnalytics(BaseModel):
     """Schema for chart-ready analytics data."""
-    
+
     conversation_chart_data: list[TimeSeriesDataPoint] = Field(
         ..., description="Daily conversation data for charts"
     )
@@ -614,9 +614,9 @@ class ChartReadyAnalytics(BaseModel):
 
 class IntegratedDashboardStats(BaseModel):
     """Schema for integrated dashboard statistics."""
-    
+
     workflows: dict[str, Any] = Field(..., description="Workflow statistics")
-    agents: dict[str, Any] = Field(..., description="Agent statistics") 
+    agents: dict[str, Any] = Field(..., description="Agent statistics")
     ab_testing: dict[str, Any] = Field(..., description="A/B testing statistics")
     system: dict[str, Any] = Field(..., description="System statistics")
 

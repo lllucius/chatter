@@ -774,7 +774,7 @@ class ProfileService:
                     # Get the actual provider name for the default
                     from chatter.core.model_registry import get_model_registry
                     from chatter.models.registry import ModelType
-                    
+
                     session = await self.llm_service._get_session()
                     registry = get_model_registry()(session)
                     default_provider_info = await registry.get_default_provider(

@@ -53,12 +53,12 @@ else:
 
 
 # Use standard logging to avoid config dependencies
-from chatter.models.workflow import (
+from chatter.models.workflow import (  # noqa: E402
     WorkflowDefinition,
     WorkflowTemplate,
     WorkflowType,
 )
-from chatter.utils.logging import get_logger
+from chatter.utils.logging import get_logger  # noqa: E402
 
 logger = get_logger(__name__)
 

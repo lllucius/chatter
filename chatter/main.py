@@ -530,7 +530,7 @@ def create_app() -> FastAPI:
         toolserver,
         workflows,
     )
-    
+
     # Import new document API
     from chatter.api import new_documents
 

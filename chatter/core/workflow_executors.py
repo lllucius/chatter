@@ -432,7 +432,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Get retriever from workflow manager with document filtering
             workflow_manager = get_workflow_manager()
-            
+
             # Only get retriever if retrieval is enabled
             retriever = None
             if chat_request.enable_retrieval is not False:  # Default to True if not specified
@@ -567,7 +567,7 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Get retriever from workflow manager with document filtering
             workflow_manager = get_workflow_manager()
-            
+
             # Only get retriever if retrieval is enabled
             retriever = None
             if chat_request.enable_retrieval is not False:  # Default to True if not specified
@@ -999,7 +999,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 if conversation.workspace_id
                 else "default"
             )
-            
+
             # Only get retriever if retrieval is enabled
             retriever = None
             if chat_request.enable_retrieval is not False:  # Default to True if not specified
@@ -1141,7 +1141,7 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 if conversation.workspace_id
                 else "default"
             )
-            
+
             # Only get retriever if retrieval is enabled
             retriever = None
             if chat_request.enable_retrieval is not False:  # Default to True if not specified

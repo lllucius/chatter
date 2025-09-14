@@ -5,7 +5,7 @@ import json
 from collections import defaultdict
 from typing import Any
 
-from chatter.core.cache_factory import get_persistent_cache  
+from chatter.core.cache_factory import get_persistent_cache
 from chatter.schemas.workflows import (
     BottleneckInfo,
     ComplexityMetrics,
@@ -33,7 +33,7 @@ class WorkflowAnalyticsService:
         try:
             # Create cache key from workflow structure
             cache_key = self._generate_cache_key(nodes, edges)
-            
+
             # Check cache first
             cached_result = await self.cache.get(cache_key)
             if cached_result:
@@ -82,7 +82,7 @@ class WorkflowAnalyticsService:
 
             # Cache the result for 2 hours (longer than before for workflow analytics)
             await self.cache.set(cache_key, result, ttl=7200)
-            
+
             return result
 
         except Exception as e:
@@ -90,8 +90,8 @@ class WorkflowAnalyticsService:
             raise
 
     def _generate_cache_key(
-        self, 
-        nodes: list[dict[str, Any]], 
+        self,
+        nodes: list[dict[str, Any]],
         edges: list[dict[str, Any]]
     ) -> str:
         """Generate a cache key from workflow structure."""
@@ -110,11 +110,11 @@ class WorkflowAnalyticsService:
                 for edge in edges
             ], key=lambda x: (x["source"], x["target"]))
         }
-        
+
         # Create hash of the workflow structure
         workflow_json = json.dumps(workflow_data, sort_keys=True)
         workflow_hash = hashlib.sha256(workflow_json.encode()).hexdigest()
-        
+
         return f"workflow_analytics:{workflow_hash}"
 
     def _build_graph(

@@ -45,7 +45,7 @@ class StreamingEvent:
         """Set timestamp if not provided."""
         if self.timestamp is None:
             self.timestamp = time.time()
-    
+
     @property
     def type(self) -> StreamingEventType:
         """Alias for event_type for backwards compatibility."""
@@ -571,7 +571,7 @@ class StreamingService:
                 "timestamp": time.time(),
             },
         )
-        
+
         async for chunk in self.stream_event(stream_id, event):
             yield chunk
 

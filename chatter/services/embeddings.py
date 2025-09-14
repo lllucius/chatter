@@ -12,8 +12,6 @@ from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from langchain_anthropic import AnthropicEmbeddings
-
     ANTHROPIC_EMBEDDINGS_AVAILABLE = True
 except ImportError:
     ANTHROPIC_EMBEDDINGS_AVAILABLE = False
@@ -54,7 +52,7 @@ logger = get_logger(__name__)
 
 class SafeOpenAIEmbeddings(OpenAIEmbeddings):
     """OpenAI embeddings wrapper that handles response format inconsistencies.
-    
+
     This wrapper addresses the issue where OpenAI API responses sometimes
     don't have the expected 'data' attribute structure that LangChain expects.
     """
@@ -99,16 +97,16 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
         """Fallback method that manually handles OpenAI API responses."""
         chunk_size_ = chunk_size or self.chunk_size
         client_kwargs = {**self._invocation_params, **kwargs}
-        
+
         embeddings: list[list[float]] = []
-        
+
         for i in range(0, len(texts), chunk_size_):
             batch = texts[i : i + chunk_size_]
             try:
                 response = await self.async_client.create(
                     input=batch, **client_kwargs
                 )
-                
+
                 # Handle different response formats
                 if isinstance(response, list):
                     # Response is already a list of embedding objects
@@ -134,7 +132,7 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                 else:
                     logger.error("Unhandled OpenAI response format", response_type=type(response))
                     raise ValueError(f"Unhandled OpenAI response format: {type(response)}")
-                    
+
             except Exception as e:
                 logger.error(
                     "Failed to process OpenAI embedding batch",
@@ -142,13 +140,13 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                     error=str(e),
                 )
                 raise
-        
+
         logger.debug(
             "Successfully processed embeddings using fallback method",
             total_texts=len(texts),
             total_embeddings=len(embeddings),
         )
-        
+
         return embeddings
 
 
@@ -270,7 +268,7 @@ class EmbeddingService:
             if provider.provider_type == ProviderType.OPENAI:
                 # Get API key from provider config or environment
                 api_key = (
-                    provider.default_config.get("api_key") 
+                    provider.default_config.get("api_key")
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("OPENAI_API_KEY")
                 )
@@ -307,7 +305,7 @@ class EmbeddingService:
                 and GOOGLE_AVAILABLE
             ):
                 api_key = (
-                    provider.default_config.get("api_key") 
+                    provider.default_config.get("api_key")
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("GOOGLE_API_KEY")
                 )
@@ -328,7 +326,7 @@ class EmbeddingService:
                 and COHERE_AVAILABLE
             ):
                 api_key = (
-                    provider.default_config.get("api_key") 
+                    provider.default_config.get("api_key")
                     or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("COHERE_API_KEY")
                 )

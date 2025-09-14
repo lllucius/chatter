@@ -435,7 +435,7 @@ class Settings(BaseSettings):
     background_worker_concurrency: int = Field(
         default=4, description="Background worker concurrency"
     )
-    
+
     # Default settings for new pipeline
     default_chunk_size: int = Field(
         default=1000, description="Default chunk size for new documents"

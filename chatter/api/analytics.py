@@ -7,6 +7,7 @@ from fastapi import APIRouter, Depends, Query
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
+from chatter.api.real_time_analytics import router as real_time_router
 from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
@@ -28,6 +29,9 @@ from chatter.utils.unified_rate_limiter import rate_limit
 
 logger = get_logger(__name__)
 router = APIRouter()
+
+# Include real-time analytics routes
+router.include_router(real_time_router, prefix="/real-time", tags=["real-time-analytics"])
 
 
 async def get_database_optimization_service(

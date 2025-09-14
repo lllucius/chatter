@@ -348,33 +348,5 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     </Paper>
   );
 };
-            Recommendations
-          </Typography>
-        </Box>
-        {metrics.recommendations.length > 0 ? (
-          <List dense>
-            {metrics.recommendations.map((recommendation, index): void => (
-              <ListItem key={index}>
-                <ListItemIcon>
-                  <CheckIcon fontSize="small" color="success" />
-                </ListItemIcon>
-                <ListItemText 
-                  primary={recommendation}
-                  primaryTypographyProps={{ variant: 'body2' }}
-                />
-              </ListItem>
-            ))}
-          </List>
-        ) : (
-          <Alert severity="success">
-            <Typography variant="body2">
-              Your workflow looks well-optimized! No specific recommendations at this time.
-            </Typography>
-          </Alert>
-        )}
-      </Box>
-    </Paper>
-  );
-};
 
 export default WorkflowAnalytics;

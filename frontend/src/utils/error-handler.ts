@@ -69,6 +69,14 @@ class ErrorHandler {
       const problemDetail = errorResponse?.response?.data as ProblemDetail;
       
       if (problemDetail && typeof problemDetail === 'object') {
+        // Check for specific error cases and provide better messaging
+        const detail = problemDetail.detail || '';
+        
+        // Handle duplicate document error specifically
+        if (detail.includes('Document with identical content already exists')) {
+          return 'This file has already been uploaded. Documents are identified by their content, so uploading the same file again is not allowed. If you need to update the document, please delete the existing one first or upload a modified version.';
+        }
+        
         // Priority order: title + detail, detail only, title only
         if (problemDetail.title && problemDetail.detail) {
           return `${problemDetail.title}: ${problemDetail.detail}`;

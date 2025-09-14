@@ -36,13 +36,8 @@ import ConversationHistory from '../components/ConversationHistory';
 import ChatExport from '../components/ChatExport';
 import EnhancedMessage, { ChatMessage } from '../components/EnhancedMessage';
 
-interface ExtendedChatMessage extends ChatMessage {
-  metadata?: {
-    model?: string;
-    tokens?: number;
-    processingTime?: number;
-  };
-}
+// Use ChatMessage directly as it already has the required fields
+type ExtendedChatMessage = ChatMessage;
 
 const ChatPage: React.FC = () => {
   const [message, setMessage] = useState('');
@@ -108,13 +103,15 @@ const ChatPage: React.FC = () => {
   }, [open]);
 
   const loadData = async () => {
+    let profilesResponse: any = null;
     try {
       const sdk = getSDK();
-      const [profilesResponse, promptsResponse, documentsResponse] = await Promise.all([
+      const [profilesResp, promptsResponse, documentsResponse] = await Promise.all([
         sdk.profiles.listProfilesApiV1Profiles({}),
         sdk.prompts.listPromptsApiV1Prompts({}),
         sdk.documents.listDocumentsApiV1Documents({}),
       ]);
+      profilesResponse = profilesResp;
       setProfiles(profilesResponse.profiles);
       setPrompts(promptsResponse.prompts);
       setDocuments(documentsResponse.documents);
@@ -159,7 +156,7 @@ const ChatPage: React.FC = () => {
           },
         ]);
       }
-      return response.data;
+      return response;
     } catch (err: unknown) {
       handleError(err, {
         source: 'ChatPage.startNewConversation',
@@ -309,7 +306,6 @@ const ChatPage: React.FC = () => {
       let buffer = '';
 
       try {
-         
         while (true) {
           const { done, value } = await reader.read();
           
@@ -347,13 +343,30 @@ const ChatPage: React.FC = () => {
                       // we should fetch the conversation details or at least store the ID
                       setCurrentConversation(prev => prev || { id: chunk.conversation_id } as ConversationResponse);
                     }
-                  } else if (chunk.type === 'end') {
-                    // Stream ended - no action needed
+                  } else if (chunk.type === 'complete') {
+                    // Stream ended - update final message with metadata if available
+                    if (chunk.metadata) {
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === messageId
+                            ? { 
+                                ...msg, 
+                                metadata: {
+                                  model: chunk.metadata.model_used,
+                                  tokens: chunk.metadata.total_tokens,
+                                  processingTime: chunk.metadata.response_time_ms,
+                                }
+                              }
+                            : msg
+                        )
+                      );
+                    }
                     return; // End the streaming loop
                   } else if (chunk.type === 'error') {
                     throw new Error(chunk.content || chunk.error || 'Streaming error');
                   }
                 } catch (parseError) {
+                  console.warn('Failed to parse streaming chunk:', parseError, 'Raw data:', dataStr);
                 }
               }
             }
@@ -369,7 +382,7 @@ const ChatPage: React.FC = () => {
         operation: 'process streaming chat response',
         additionalData: { 
           conversationId: currentConversation?.id,
-          messageLength: currentMessage.length 
+          messageLength: message.length 
         }
       });
     }
@@ -541,7 +554,7 @@ const ChatPage: React.FC = () => {
         operation: 'regenerate assistant message',
         additionalData: { 
           conversationId: currentConversation?.id,
-          messageId: lastAssistantMessage?.id,
+          messageId: messageId,
           selectedProfile,
           temperature,
           maxTokens 
@@ -745,7 +758,7 @@ const ChatPage: React.FC = () => {
                 </Typography>
               </Box>
             ) : (
-              messages.map((msg): void => (
+              messages.map((msg) => (
                 <EnhancedMessage
                   key={msg.id}
                   message={msg}

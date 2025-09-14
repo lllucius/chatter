@@ -12,7 +12,7 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.postgres import PostgresSaver
+from langgraph.checkpoint.redis import RedisSaver
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.pregel import Pregel
@@ -63,7 +63,9 @@ class LangGraphWorkflowManager:
     def __init__(self) -> None:
         """Initialize the workflow manager."""
         self.checkpointer = None
-        self._postgres_context_manager = None  # Store context manager for PostgresSaver
+        self._redis_context_manager = (
+            None  # Store context manager for RedisSaver
+        )
 
         # Lazy initialization flag to avoid async setup at import time
         self._initialized = False
@@ -76,41 +78,43 @@ class LangGraphWorkflowManager:
         # Initialize checkpointer
         self.checkpointer = None
         try:
-            if settings.langgraph_checkpoint_store == "postgres":
-                # Use PostgreSQL checkpointer for production
+            if settings.langgraph_checkpoint_store == "redis":
+                # Use Redis checkpointer for production
                 try:
-                    from urllib.parse import urlparse, urlunparse
-                    
-                    # Convert async URL to sync URL for PostgresSaver
-                    parsed = urlparse(settings.database_url)
-                    if parsed.scheme == "postgresql+asyncpg":
-                        # Convert to sync postgresql URL
-                        sync_url = urlunparse(parsed._replace(scheme="postgresql"))
-                    else:
-                        # Use as-is for other schemes
-                        sync_url = settings.database_url
-                    
-                    # Use PostgresSaver with proper context manager handling
-                    # PostgresSaver.from_conn_string() returns a context manager
-                    self._postgres_context_manager = PostgresSaver.from_conn_string(sync_url)
-                    self.checkpointer = self._postgres_context_manager.__enter__()
+                    # Use Redis URL from settings for checkpoint store
+                    redis_url = settings.redis_url_for_env
+
+                    # Use RedisSaver with proper context manager handling
+                    # RedisSaver.from_conn_string() returns a context manager
+                    self._redis_context_manager = (
+                        RedisSaver.from_conn_string(redis_url)
+                    )
+                    self.checkpointer = (
+                        self._redis_context_manager.__enter__()
+                    )
                     self.checkpointer.setup()
-                    logger.info("LangGraph PostgreSQL checkpointer initialized")
-                        
-                except Exception as postgres_error:
+                    logger.info(
+                        "LangGraph Redis checkpointer initialized"
+                    )
+
+                except Exception as redis_error:
                     logger.warning(
-                        "Failed to initialize PostgreSQL checkpointer, falling back to memory",
-                        error=str(postgres_error),
+                        "Failed to initialize Redis checkpointer, falling back to memory",
+                        error=str(redis_error),
                     )
                     # Clean up context manager if it was created
-                    if self._postgres_context_manager:
+                    if self._redis_context_manager:
                         try:
-                            self._postgres_context_manager.__exit__(None, None, None)
+                            self._redis_context_manager.__exit__(
+                                None, None, None
+                            )
                         except Exception:
                             pass  # Ignore cleanup errors
-                        self._postgres_context_manager = None
+                        self._redis_context_manager = None
                     self.checkpointer = MemorySaver()
-                    logger.info("LangGraph Memory checkpointer initialized (postgres fallback)")
+                    logger.info(
+                        "LangGraph Memory checkpointer initialized (redis fallback)"
+                    )
             else:
                 # Fallback to in-memory checkpointer for development
                 self.checkpointer = MemorySaver()
@@ -122,13 +126,17 @@ class LangGraphWorkflowManager:
             )
             # Always ensure we have a working checkpointer - fallback to MemorySaver directly
             self.checkpointer = MemorySaver()
-            logger.info("LangGraph Memory checkpointer initialized (exception fallback)")
+            logger.info(
+                "LangGraph Memory checkpointer initialized (exception fallback)"
+            )
 
         # Final safety check - ensure we always have a working checkpointer
         if self.checkpointer is None:
             try:
                 self.checkpointer = MemorySaver()
-                logger.info("LangGraph Memory checkpointer initialized (final fallback)")
+                logger.info(
+                    "LangGraph Memory checkpointer initialized (final fallback)"
+                )
             except Exception as fallback_error:
                 logger.error(
                     "Failed to initialize any checkpointer - this will cause workflow failures",
@@ -143,22 +151,26 @@ class LangGraphWorkflowManager:
 
     def __del__(self) -> None:
         """Clean up resources when the workflow manager is destroyed."""
-        if self._postgres_context_manager:
+        if self._redis_context_manager:
             try:
-                self._postgres_context_manager.__exit__(None, None, None)
+                self._redis_context_manager.__exit__(None, None, None)
             except Exception:
                 pass  # Ignore cleanup errors in destructor
 
     def cleanup(self) -> None:
-        """Explicitly clean up PostgreSQL resources."""
-        if self._postgres_context_manager:
+        """Explicitly clean up Redis resources."""
+        if self._redis_context_manager:
             try:
-                self._postgres_context_manager.__exit__(None, None, None)
-                logger.debug("PostgreSQL checkpointer context manager cleaned up")
+                self._redis_context_manager.__exit__(None, None, None)
+                logger.debug(
+                    "Redis checkpointer context manager cleaned up"
+                )
             except Exception as e:
-                logger.warning("Error cleaning up PostgreSQL checkpointer", error=str(e))
+                logger.warning(
+                    "Error cleaning up Redis checkpointer", error=str(e)
+                )
             finally:
-                self._postgres_context_manager = None
+                self._redis_context_manager = None
                 self.checkpointer = None
                 self._initialized = False
 
@@ -818,7 +830,9 @@ class LangGraphWorkflowManager:
             )
             return ""
 
-    def get_retriever(self, workspace_id: str, document_ids: list[str] | None = None) -> Any | None:
+    def get_retriever(
+        self, workspace_id: str, document_ids: list[str] | None = None
+    ) -> Any | None:
         """Get retriever for a workspace based on user documents.
 
         Args:
@@ -855,12 +869,14 @@ class LangGraphWorkflowManager:
 
             # Configure search parameters
             search_kwargs = {"k": 5}  # Return top 5 relevant documents
-            
+
             # Add document filtering if specific document IDs are provided
             if document_ids:
                 # Note: The actual filter implementation depends on the vector store
                 # For pgvector, this would typically be a metadata filter
-                search_kwargs["filter"] = {"document_id": {"$in": document_ids}}
+                search_kwargs["filter"] = {
+                    "document_id": {"$in": document_ids}
+                }
                 logger.debug(
                     f"Filtering retriever to specific documents: {document_ids}"
                 )

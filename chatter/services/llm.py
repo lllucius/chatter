@@ -57,6 +57,104 @@ class LLMService:
         session_maker = get_session_maker()
         return session_maker()
 
+    async def _create_custom_provider(
+        self, 
+        provider_name: str | None = None, 
+        temperature: float | None = None, 
+        max_tokens: int | None = None
+    ) -> BaseChatModel:
+        """Create a provider instance with custom temperature and max_tokens."""
+        session = await self._get_session()
+        registry = get_model_registry()
+        
+        # Get the default model if no provider specified
+        if provider_name is None:
+            try:
+                model_def = await registry.get_default_model(session)
+                provider_info = await registry.get_provider_by_id(session, model_def.provider_id)
+            except Exception:
+                # Fallback to OpenAI if registry fails
+                provider_name = "openai"
+                model_name = "gpt-3.5-turbo"
+                api_key = os.getenv("OPENAI_API_KEY", "dummy")
+                return ChatOpenAI(
+                    api_key=SecretStr(api_key),
+                    model=model_name,
+                    temperature=temperature if temperature is not None else 0.7,
+                    max_completion_tokens=max_tokens if max_tokens is not None else 2048,
+                )
+        else:
+            try:
+                # Find model by provider name
+                models = await registry.list_models(session)
+                model_def = None
+                provider_info = None
+                
+                for model in models:
+                    provider = await registry.get_provider_by_id(session, model.provider_id)
+                    if provider.name.lower() == provider_name.lower():
+                        model_def = model
+                        provider_info = provider
+                        break
+                
+                if not model_def or not provider_info:
+                    raise ValueError(f"Provider {provider_name} not found")
+                    
+            except Exception as e:
+                # Fallback creation based on provider name
+                if provider_name.lower() == "openai":
+                    api_key = os.getenv("OPENAI_API_KEY", "dummy")
+                    return ChatOpenAI(
+                        api_key=SecretStr(api_key),
+                        model="gpt-3.5-turbo",
+                        temperature=temperature if temperature is not None else 0.7,
+                        max_completion_tokens=max_tokens if max_tokens is not None else 2048,
+                    )
+                elif provider_name.lower() == "anthropic":
+                    api_key = os.getenv("ANTHROPIC_API_KEY", "dummy")
+                    return ChatAnthropic(
+                        api_key=SecretStr(api_key),
+                        model_name="claude-3-sonnet-20240229",
+                        temperature=temperature if temperature is not None else 0.7,
+                        max_tokens_to_sample=max_tokens if max_tokens is not None else 2048,
+                    )
+                else:
+                    raise ValueError(f"Unsupported provider: {provider_name}")
+
+        # Create provider instance with custom parameters
+        api_key = os.getenv(f"{provider_info.name.upper()}_API_KEY")
+        if provider_info.api_key_required and not api_key:
+            logger.warning(f"No API key found for provider {provider_info.name}")
+            api_key = "dummy"
+
+        config = model_def.default_config or {}
+
+        if provider_info.provider_type == ProviderType.OPENAI:
+            return ChatOpenAI(
+                api_key=api_key or "dummy",
+                base_url=provider_info.base_url,
+                model=model_def.model_name,
+                temperature=temperature if temperature is not None else config.get("temperature", 0.7),
+                max_completion_tokens=max_tokens if max_tokens is not None else (
+                    model_def.max_tokens or config.get("max_tokens", 2048)
+                ),
+            )
+
+        elif provider_info.provider_type == ProviderType.ANTHROPIC:
+            return ChatAnthropic(
+                api_key=SecretStr(api_key or "dummy"),
+                model_name=model_def.model_name,
+                temperature=temperature if temperature is not None else config.get("temperature", 0.7),
+                max_tokens_to_sample=max_tokens if max_tokens is not None else (
+                    model_def.max_tokens or config.get("max_tokens", 2048)
+                ),
+                timeout=None,
+                stop=None,
+            )
+
+        else:
+            raise ValueError(f"Unsupported provider type: {provider_info.provider_type}")
+
     async def _create_provider_instance(
         self, provider, model_def
     ) -> BaseChatModel | None:
@@ -840,15 +938,33 @@ class LLMService:
         memory_window: int = 20,
         max_tool_calls: int | None = None,
         max_documents: int | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
 
-        # Use default provider if none specified
+        # Use default provider if none specified, but create with custom parameters if provided
         if provider_name is None or provider_name == "":
-            provider = await self.get_default_provider()
+            if temperature is not None or max_tokens is not None:
+                # Create a custom provider instance with the specified parameters
+                provider = await self._create_custom_provider(
+                    provider_name=None, 
+                    temperature=temperature, 
+                    max_tokens=max_tokens
+                )
+            else:
+                provider = await self.get_default_provider()
         else:
-            provider = await self.get_provider(provider_name)
+            if temperature is not None or max_tokens is not None:
+                # Create a custom provider instance with the specified parameters
+                provider = await self._create_custom_provider(
+                    provider_name=provider_name, 
+                    temperature=temperature, 
+                    max_tokens=max_tokens
+                )
+            else:
+                provider = await self.get_provider(provider_name)
 
         # Get default tools if needed
         if workflow_type in ("tools", "full") and not tools:

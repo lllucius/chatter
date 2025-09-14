@@ -178,6 +178,8 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 enable_memory=True,
                 memory_window=20,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation context
@@ -299,6 +301,8 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                 enable_memory=True,
                 memory_window=20,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation state
@@ -443,6 +447,8 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 memory_window=30,
                 max_documents=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation context
@@ -571,6 +577,8 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
                 memory_window=30,
                 max_documents=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation state
@@ -715,6 +723,8 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 memory_window=100,
                 max_tool_calls=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation context
@@ -843,6 +853,8 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
                 memory_window=100,
                 max_tool_calls=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation state
@@ -994,6 +1006,8 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 max_tool_calls=5,
                 max_documents=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation context
@@ -1129,6 +1143,8 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 max_tool_calls=5,
                 max_documents=10,
                 system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
             )
 
             # Prepare conversation state

@@ -520,7 +520,6 @@ def create_app() -> FastAPI:
         chat,
         conversations,
         data_management,
-        documents,
         events,
         health,
         jobs,
@@ -531,6 +530,9 @@ def create_app() -> FastAPI:
         toolserver,
         workflows,
     )
+    
+    # Import new document API
+    from chatter.api import new_documents
 
     app.include_router(health.router, tags=["Health"])
 
@@ -551,8 +553,8 @@ def create_app() -> FastAPI:
     )
 
     app.include_router(
-        documents.router,
-        prefix=f"{settings.api_prefix}/documents",
+        new_documents.router,
+        prefix=f"{settings.api_prefix}",
         tags=["Documents"],
     )
 

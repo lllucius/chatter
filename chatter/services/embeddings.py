@@ -52,6 +52,106 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+class SafeOpenAIEmbeddings(OpenAIEmbeddings):
+    """OpenAI embeddings wrapper that handles response format inconsistencies.
+    
+    This wrapper addresses the issue where OpenAI API responses sometimes
+    don't have the expected 'data' attribute structure that LangChain expects.
+    """
+
+    async def aembed_documents(
+        self, texts: list[str], chunk_size: int | None = None, **kwargs
+    ) -> list[list[float]]:
+        """Safely embed documents with proper response format handling."""
+        try:
+            return await super().aembed_documents(texts, chunk_size, **kwargs)
+        except (AttributeError, KeyError, TypeError) as e:
+            # Check if this is the specific response format error
+            if "model_dump" in str(e) or "data" in str(e) or "'list' object" in str(e):
+                logger.warning(
+                    "OpenAI response format issue detected, attempting manual processing",
+                    error=str(e),
+                    text_count=len(texts),
+                )
+                return await self._safe_embed_documents_fallback(texts, chunk_size, **kwargs)
+            else:
+                # Re-raise other errors
+                raise
+
+    async def aembed_query(self, text: str, **kwargs) -> list[float]:
+        """Safely embed query with proper response format handling."""
+        try:
+            return await super().aembed_query(text, **kwargs)
+        except (AttributeError, KeyError, TypeError) as e:
+            if "model_dump" in str(e) or "data" in str(e) or "'list' object" in str(e):
+                logger.warning(
+                    "OpenAI response format issue detected for query, attempting manual processing",
+                    error=str(e),
+                )
+                result = await self._safe_embed_documents_fallback([text], None, **kwargs)
+                return result[0] if result else []
+            else:
+                raise
+
+    async def _safe_embed_documents_fallback(
+        self, texts: list[str], chunk_size: int | None = None, **kwargs
+    ) -> list[list[float]]:
+        """Fallback method that manually handles OpenAI API responses."""
+        chunk_size_ = chunk_size or self.chunk_size
+        client_kwargs = {**self._invocation_params, **kwargs}
+        
+        embeddings: list[list[float]] = []
+        
+        for i in range(0, len(texts), chunk_size_):
+            batch = texts[i : i + chunk_size_]
+            try:
+                response = await self.async_client.create(
+                    input=batch, **client_kwargs
+                )
+                
+                # Handle different response formats
+                if isinstance(response, list):
+                    # Response is already a list of embedding objects
+                    logger.debug("OpenAI response is already a list format")
+                    embeddings.extend(r["embedding"] for r in response)
+                elif hasattr(response, "data") and response.data:
+                    # Standard OpenAI response format with .data attribute
+                    logger.debug("OpenAI response has .data attribute")
+                    embeddings.extend(r.embedding for r in response.data)
+                elif isinstance(response, dict) and "data" in response:
+                    # Dict format response
+                    logger.debug("OpenAI response is dict with 'data' key")
+                    embeddings.extend(r["embedding"] for r in response["data"])
+                elif hasattr(response, "model_dump"):
+                    # Pydantic model, convert to dict
+                    logger.debug("OpenAI response is Pydantic model")
+                    response_dict = response.model_dump()
+                    if "data" in response_dict:
+                        embeddings.extend(r["embedding"] for r in response_dict["data"])
+                    else:
+                        logger.error("Unexpected OpenAI response format after model_dump", response_keys=list(response_dict.keys()))
+                        raise ValueError(f"Unexpected OpenAI response format: {type(response)}")
+                else:
+                    logger.error("Unhandled OpenAI response format", response_type=type(response))
+                    raise ValueError(f"Unhandled OpenAI response format: {type(response)}")
+                    
+            except Exception as e:
+                logger.error(
+                    "Failed to process OpenAI embedding batch",
+                    batch_size=len(batch),
+                    error=str(e),
+                )
+                raise
+        
+        logger.debug(
+            "Successfully processed embeddings using fallback method",
+            total_texts=len(texts),
+            total_embeddings=len(embeddings),
+        )
+        
+        return embeddings
+
+
 class DimensionalReductionEmbeddings(Embeddings):
     """Embedding wrapper that supports optional dimensional reduction."""
 
@@ -182,7 +282,7 @@ class EmbeddingService:
                     return None
 
                 config = model_def.default_config or {}
-                base_provider = OpenAIEmbeddings(
+                base_provider = SafeOpenAIEmbeddings(
                     api_key=api_key if api_key else "dummy",
                     base_url=provider.base_url,
                     model=model_def.model_name,
@@ -616,7 +716,7 @@ class EmbeddingService:
 
     def _get_provider_name(self, provider: Embeddings) -> str:
         """Get provider name from provider instance."""
-        if isinstance(provider, OpenAIEmbeddings):
+        if isinstance(provider, (OpenAIEmbeddings, SafeOpenAIEmbeddings)):
             return "openai"
         elif (
             GOOGLE_AVAILABLE

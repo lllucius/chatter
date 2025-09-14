@@ -22,6 +22,13 @@ from sqlalchemy import (
 )
 from sqlalchemy.orm import Mapped, mapped_column, relationship
 
+try:
+    from pgvector.sqlalchemy import Vector
+    PGVECTOR_AVAILABLE = True
+except ImportError:
+    Vector = None
+    PGVECTOR_AVAILABLE = False
+
 from chatter.models.base import Base, Keys
 
 if TYPE_CHECKING:
@@ -334,7 +341,26 @@ class DocumentChunk(Base):
         String(10), nullable=True
     )
 
-    # Embedding metadata - tracks which models have been applied
+    # Direct embedding storage (simplified approach)
+    embedding: Mapped[list[float] | None] = mapped_column(
+        Vector(1536) if PGVECTOR_AVAILABLE else JSON,
+        nullable=True,
+        comment="Vector embedding for this chunk"
+    )
+    embedding_provider: Mapped[str | None] = mapped_column(
+        String(50), nullable=True
+    )
+    embedding_model: Mapped[str | None] = mapped_column(
+        String(100), nullable=True
+    )
+    embedding_dimensions: Mapped[int | None] = mapped_column(
+        Integer, nullable=True
+    )
+    embedding_created_at: Mapped[datetime | None] = mapped_column(
+        DateTime(timezone=True), nullable=True
+    )
+    
+    # Legacy embedding metadata - kept for backwards compatibility during transition
     embedding_models: Mapped[list[str] | None] = mapped_column(
         "embedding_models",
         JSON,
@@ -345,12 +371,6 @@ class DocumentChunk(Base):
         String(100),
         nullable=True,
         comment="Primary embedding model for this chunk",
-    )
-    embedding_provider: Mapped[str | None] = mapped_column(
-        String(50), nullable=True
-    )
-    embedding_created_at: Mapped[datetime | None] = mapped_column(
-        DateTime(timezone=True), nullable=True
     )
 
     # Search optimization
@@ -429,9 +449,9 @@ class DocumentChunk(Base):
             "extra_metadata": self.extra_metadata,
             "token_count": self.token_count,
             "language": self.language,
-            "embedding_models": self.embedding_models,
-            "primary_embedding_model": self.primary_embedding_model,
             "embedding_provider": self.embedding_provider,
+            "embedding_model": self.embedding_model,
+            "embedding_dimensions": self.embedding_dimensions,
             "embedding_created_at": (
                 self.embedding_created_at.isoformat()
                 if self.embedding_created_at

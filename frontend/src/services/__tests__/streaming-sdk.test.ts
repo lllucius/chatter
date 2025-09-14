@@ -2,7 +2,7 @@
  * Simple test to verify the streaming method can be called
  */
 
-import { ChatterSDK, ChatRequest } from '../../../sdk/typescript/src';
+import { ChatterSDK, ChatRequest } from 'chatter-sdk';
 
 describe('Streaming SDK Method', () => {
   it('should have streamingChatApiV1ChatStreaming method', () => {

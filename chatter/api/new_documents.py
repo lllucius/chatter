@@ -35,8 +35,8 @@ async def upload_document(
     title: str | None = Form(None),
     description: str | None = Form(None),
     tags: str | None = Form(None),  # JSON string of tags list
-    chunk_size: int | None = Form(None),
-    chunk_overlap: int | None = Form(None),
+    chunk_size: int = Form(1000),
+    chunk_overlap: int = Form(200),
     is_public: bool = Form(False),
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),

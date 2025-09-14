@@ -6,7 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.caching import get_cache
+from chatter.core.cache_factory import get_general_cache
 from chatter.models.base import generate_ulid
 from chatter.schemas.analytics import (
     ChartReadyAnalytics,
@@ -27,7 +27,7 @@ class RealTimeAnalyticsService:
     def __init__(self, session: AsyncSession):
         self.session = session
         self.analytics_service = AnalyticsService(session)
-        self.cache = get_cache("realtime_analytics")
+        self.cache = get_general_cache()
         self._update_tasks: Dict[str, asyncio.Task] = {}
         self._notification_thresholds = {
             "high_cpu_usage": 80.0,

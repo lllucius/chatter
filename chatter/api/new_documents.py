@@ -52,11 +52,11 @@ async def upload_document(
             try:
                 import json
                 parsed_tags = json.loads(tags)
-            except json.JSONDecodeError:
+            except json.JSONDecodeError as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid tags format. Must be valid JSON array."
-                )
+                ) from e
 
         # Create document request
         document_data = DocumentCreate(
@@ -90,13 +90,13 @@ async def upload_document(
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e)
-        )
+        ) from e
     except Exception as e:
         logger.error("Unexpected error in document upload", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
-        )
+        ) from e
 
 
 @router.get("/{document_id}", response_model=DocumentResponse)
@@ -125,7 +125,7 @@ async def get_document(
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error"
-        )
+        ) from e
 
 
 @router.get("", response_model=dict)

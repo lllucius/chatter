@@ -17,6 +17,7 @@ from apscheduler.schedulers.asyncio import AsyncIOScheduler
 
 from chatter.config import settings
 from chatter.schemas.jobs import Job, JobPriority, JobResult, JobStatus
+from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)

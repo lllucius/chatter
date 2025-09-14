@@ -4,9 +4,14 @@ import json
 import tarfile
 from datetime import UTC, datetime, timedelta
 from pathlib import Path
-from typing import Any, Literal
+from typing import TYPE_CHECKING, Any, Literal
 
 import aiofiles
+
+if TYPE_CHECKING:
+    from chatter.models.conversation import Conversation
+    from chatter.models.document import Document
+    from chatter.models.prompt import Prompt
 
 from chatter.config import settings
 from chatter.schemas.data_management import (
@@ -15,6 +20,7 @@ from chatter.schemas.data_management import (
 from chatter.schemas.data_management import (
     BackupRequest,
     BackupType,
+    BulkOperationFilters,
     DataFormat,
     DataOperation,
     DataOperationModel,

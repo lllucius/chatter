@@ -12,8 +12,6 @@ from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
-    from langchain_anthropic import AnthropicEmbeddings
-
     ANTHROPIC_EMBEDDINGS_AVAILABLE = True
 except ImportError:
     ANTHROPIC_EMBEDDINGS_AVAILABLE = False

@@ -107,7 +107,6 @@ class DocumentTextExtractor:
         """Sync DOCX extraction in thread."""
         try:
             from unstructured.partition.docx import partition_docx
-            import io
 
             with tempfile.NamedTemporaryFile() as tmp:
                 tmp.write(content)

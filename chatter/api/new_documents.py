@@ -10,7 +10,6 @@ from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, s
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
-from chatter.models.document import Document, DocumentChunk
 from chatter.models.user import User
 from chatter.schemas.document import (
     DocumentCreate,
@@ -42,7 +41,7 @@ async def upload_document(
     session: AsyncSession = Depends(get_session_generator),
 ) -> DocumentResponse:
     """Upload and process a new document.
-    
+
     This endpoint uploads a file, creates a document record, and starts
     the embedding processing pipeline asynchronously.
     """
@@ -58,7 +57,7 @@ async def upload_document(
                     status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid tags format. Must be valid JSON array."
                 )
-        
+
         # Create document request
         document_data = DocumentCreate(
             title=title,
@@ -68,7 +67,7 @@ async def upload_document(
             chunk_overlap=chunk_overlap,
             is_public=is_public
         )
-        
+
         # Create document using new service
         service = NewDocumentService(session)
         document = await service.create_document(
@@ -76,16 +75,16 @@ async def upload_document(
             upload_file=file,
             document_data=document_data
         )
-        
+
         logger.info(
             "Document uploaded successfully",
             document_id=document.id,
             filename=file.filename,
             user_id=current_user.id
         )
-        
+
         return DocumentResponse.model_validate(document)
-        
+
     except DocumentServiceError as e:
         logger.error("Document upload failed", error=str(e))
         raise HTTPException(
@@ -110,15 +109,15 @@ async def get_document(
     try:
         service = NewDocumentService(session)
         document = await service.get_document(document_id, current_user.id)
-        
+
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found"
             )
-        
+
         return DocumentResponse.model_validate(document)
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -139,25 +138,25 @@ async def list_documents_get(
     """List documents with pagination (GET endpoint for frontend compatibility)."""
     try:
         from chatter.schemas.document import DocumentListRequest
-        
-        # Create request object from query parameters  
+
+        # Create request object from query parameters
         list_request = DocumentListRequest(
             limit=limit,
             offset=offset
         )
-        
+
         service = NewDocumentService(session)
         documents, total_count = await service.list_documents(
             current_user.id, list_request
         )
-        
+
         return {
             "documents": [DocumentResponse.model_validate(doc) for doc in documents],
             "total_count": total_count,
             "offset": offset,
             "limit": limit
         }
-        
+
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
@@ -178,14 +177,14 @@ async def list_documents_post(
         documents, total_count = await service.list_documents(
             current_user.id, list_request
         )
-        
+
         return {
             "documents": [DocumentResponse.model_validate(doc) for doc in documents],
             "total_count": total_count,
             "offset": list_request.offset,
             "limit": list_request.limit
         }
-        
+
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
@@ -204,7 +203,7 @@ async def search_documents(
     try:
         service = NewDocumentService(session)
         results = await service.search_documents(current_user.id, search_request)
-        
+
         return [
             SearchResultResponse(
                 chunk_id=chunk.id,
@@ -217,7 +216,7 @@ async def search_documents(
             )
             for chunk, similarity_score, document in results
         ]
-        
+
     except Exception as e:
         logger.error("Error searching documents", error=str(e))
         raise HTTPException(
@@ -236,15 +235,15 @@ async def delete_document(
     try:
         service = NewDocumentService(session)
         success = await service.delete_document(document_id, current_user.id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found"
             )
-        
+
         return {"message": "Document deleted successfully"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -265,15 +264,15 @@ async def reprocess_document(
     try:
         service = NewDocumentService(session)
         success = await service.reprocess_document(document_id, current_user.id)
-        
+
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found or cannot be reprocessed"
             )
-        
+
         return {"message": "Document reprocessing started"}
-        
+
     except HTTPException:
         raise
     except Exception as e:
@@ -293,9 +292,9 @@ async def get_user_document_stats(
     try:
         service = NewDocumentService(session)
         stats = await service.get_document_stats(current_user.id)
-        
+
         return DocumentStatsResponse(**stats)
-        
+
     except Exception as e:
         logger.error("Error getting document stats", error=str(e))
         raise HTTPException(

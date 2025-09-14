@@ -263,7 +263,7 @@ class ModelRegistryService:
         self, provider: Provider, is_active: bool
     ) -> None:
         """Handle cascading effects when provider status changes.
-        
+
         Args:
             provider: The provider being updated
             is_active: New active status
@@ -274,13 +274,13 @@ class ModelRegistryService:
                 f"Deactivating all models for provider {provider.name} "
                 f"due to provider deactivation"
             )
-            
+
             await self.session.execute(
                 update(ModelDef)
                 .where(ModelDef.provider_id == provider.id)
                 .values(is_active=False, is_default=False)
             )
-            
+
             # Also deactivate all embedding spaces for these models
             await self.session.execute(
                 update(EmbeddingSpace)
@@ -293,7 +293,7 @@ class ModelRegistryService:
                 )
                 .values(is_active=False, is_default=False)
             )
-            
+
             logger.info(
                 f"Deactivated all models and embedding spaces for provider {provider.name}"
             )

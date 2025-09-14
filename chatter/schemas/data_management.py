@@ -342,15 +342,15 @@ class BulkDeleteResponse(BaseModel):
 
 class EntityType(str, Enum):
     """Supported entity types for bulk operations."""
-    
+
     CONVERSATIONS = "conversations"
-    DOCUMENTS = "documents" 
+    DOCUMENTS = "documents"
     PROMPTS = "prompts"
 
 
 class BulkOperationFilters(BaseModel):
     """Server-side filters for bulk operations."""
-    
+
     entity_type: EntityType = Field(..., description="Type of entity to filter")
     created_before: datetime | None = Field(None, description="Filter items created before this date")
     created_after: datetime | None = Field(None, description="Filter items created after this date")
@@ -362,13 +362,13 @@ class BulkOperationFilters(BaseModel):
 
 class BulkDeleteFilteredRequest(BaseModel):
     """Request for server-side filtered bulk delete."""
-    
+
     filters: BulkOperationFilters = Field(..., description="Filters to apply")
 
 
 class BulkDeletePreviewResponse(BaseModel):
     """Response for bulk delete preview (dry run)."""
-    
+
     entity_type: EntityType = Field(..., description="Entity type")
     total_matching: int = Field(..., description="Total items matching filters")
     sample_items: list[dict[str, Any]] = Field(

@@ -589,8 +589,7 @@ class DataManager:
     ) -> dict[str, Any]:
         """Perform bulk delete with server-side filtering."""
         from chatter.schemas.data_management import EntityType
-        from chatter.utils.database import get_session_maker
-        
+
         if filters.dry_run:
             return await self.preview_bulk_delete(filters, user_id)
 
@@ -612,7 +611,7 @@ class DataManager:
     ) -> dict[str, Any]:
         """Preview what would be deleted with given filters."""
         from chatter.schemas.data_management import EntityType
-        
+
         if filters.entity_type == EntityType.CONVERSATIONS:
             items = await self._get_filtered_conversations(filters, user_id, sample_size=10)
             total = await self._count_filtered_conversations(filters, user_id)
@@ -643,7 +642,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Conversation.id).where(Conversation.user_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -656,12 +655,12 @@ class DataManager:
                     conditions.append(Conversation.status == status_enum)
                 except ValueError:
                     logger.warning(f"Invalid conversation status: {filters.status}")
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(filters.limit)
-            
+
             result = await session.execute(query)
             return [row[0] for row in result.fetchall()]
 
@@ -676,7 +675,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Document.id).where(Document.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -689,12 +688,12 @@ class DataManager:
                     conditions.append(Document.status == status_enum)
                 except ValueError:
                     logger.warning(f"Invalid document status: {filters.status}")
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(filters.limit)
-            
+
             result = await session.execute(query)
             return [row[0] for row in result.fetchall()]
 
@@ -709,7 +708,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Prompt.id).where(Prompt.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -717,12 +716,12 @@ class DataManager:
             if filters.created_after:
                 conditions.append(Prompt.created_at > filters.created_after)
             # Note: Prompts don't have a standard status field
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(filters.limit)
-            
+
             result = await session.execute(query)
             return [row[0] for row in result.fetchall()]
 
@@ -737,7 +736,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Conversation).where(Conversation.user_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -750,12 +749,12 @@ class DataManager:
                     conditions.append(Conversation.status == status_enum)
                 except ValueError:
                     pass
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(sample_size)
-            
+
             result = await session.execute(query)
             return list(result.scalars().all())
 
@@ -770,7 +769,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Document).where(Document.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -783,12 +782,12 @@ class DataManager:
                     conditions.append(Document.status == status_enum)
                 except ValueError:
                     pass
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(sample_size)
-            
+
             result = await session.execute(query)
             return list(result.scalars().all())
 
@@ -803,19 +802,19 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(Prompt).where(Prompt.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
                 conditions.append(Prompt.created_at < filters.created_before)
             if filters.created_after:
                 conditions.append(Prompt.created_at > filters.created_after)
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             query = query.limit(sample_size)
-            
+
             result = await session.execute(query)
             return list(result.scalars().all())
 
@@ -830,7 +829,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(func.count(Conversation.id)).where(Conversation.user_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -843,10 +842,10 @@ class DataManager:
                     conditions.append(Conversation.status == status_enum)
                 except ValueError:
                     pass
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             result = await session.execute(query)
             return result.scalar() or 0
 
@@ -861,7 +860,7 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(func.count(Document.id)).where(Document.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
@@ -874,10 +873,10 @@ class DataManager:
                     conditions.append(Document.status == status_enum)
                 except ValueError:
                     pass
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             result = await session.execute(query)
             return result.scalar() or 0
 
@@ -892,17 +891,17 @@ class DataManager:
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
             query = select(func.count(Prompt.id)).where(Prompt.owner_id == user_id)
-            
+
             # Apply filters
             conditions = []
             if filters.created_before:
                 conditions.append(Prompt.created_at < filters.created_before)
             if filters.created_after:
                 conditions.append(Prompt.created_at > filters.created_after)
-            
+
             if conditions:
                 query = query.where(and_(*conditions))
-            
+
             result = await session.execute(query)
             return result.scalar() or 0
 

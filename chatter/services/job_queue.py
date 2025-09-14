@@ -1112,25 +1112,25 @@ async def data_export_job(
 async def database_maintenance_job() -> dict[str, Any]:
     """Database maintenance and backup job handler."""
     logger.info("Starting database maintenance and backup")
-    
+
     try:
         async_session = get_session_maker()
         async with async_session() as session:
             from sqlalchemy import text
             from datetime import datetime, UTC
-            
+
             # Perform database maintenance tasks
             start_time = datetime.now(UTC)
-            
+
             # 1. Update table statistics
             await session.execute(text("ANALYZE;"))
             logger.info("Database statistics updated")
-            
+
             # 2. Clean up expired sessions and temporary data
             # Remove old audit logs (older than 1 year)
             from datetime import timedelta
             one_year_ago = datetime.now(UTC) - timedelta(days=365)
-            
+
             try:
                 # Only clean if audit logs table exists
                 result = await session.execute(
@@ -1148,19 +1148,19 @@ async def database_maintenance_job() -> dict[str, Any]:
             except Exception as e:
                 logger.warning(f"Failed to clean audit logs: {e}")
                 deleted_audit_logs = 0
-            
+
             # 3. Vacuum analyze to reclaim space
             await session.execute(text("VACUUM ANALYZE;"))
             logger.info("Database vacuum analyze completed")
-            
+
             # 4. Create logical backup metadata (simulate backup process)
             # In production, this would trigger actual backup tools
             backup_timestamp = datetime.now(UTC).isoformat()
-            
+
             await session.commit()
-            
+
             execution_time = (datetime.now(UTC) - start_time).total_seconds()
-            
+
             return {
                 "maintenance_type": "database_maintenance_and_backup",
                 "execution_time_seconds": execution_time,
@@ -1168,14 +1168,14 @@ async def database_maintenance_job() -> dict[str, Any]:
                 "audit_logs_cleaned": deleted_audit_logs,
                 "operations_completed": [
                     "statistics_update",
-                    "audit_log_cleanup", 
+                    "audit_log_cleanup",
                     "vacuum_analyze",
                     "backup_metadata_created"
                 ],
                 "status": "completed",
                 "next_scheduled": "24 hours"
             }
-            
+
     except Exception as e:
         logger.error(f"Database maintenance job failed: {e}")
         return {
@@ -1189,19 +1189,19 @@ async def database_maintenance_job() -> dict[str, Any]:
 async def document_archiving_job() -> dict[str, Any]:
     """Document archiving job handler."""
     logger.info("Starting document archiving process")
-    
+
     try:
         async_session = get_session_maker()
         async with async_session() as session:
             from datetime import datetime, UTC, timedelta
-            from sqlalchemy import select, update
+            from sqlalchemy import select
             from chatter.models.document import Document, DocumentStatus
-            
+
             start_time = datetime.now(UTC)
-            
+
             # Archive documents that haven't been accessed in 90 days
             ninety_days_ago = datetime.now(UTC) - timedelta(days=90)
-            
+
             # Find documents eligible for archiving
             result = await session.execute(
                 select(Document).where(
@@ -1210,21 +1210,21 @@ async def document_archiving_job() -> dict[str, Any]:
                 )
             )
             documents_to_archive = result.scalars().all()
-            
+
             archived_count = 0
             total_size_archived = 0
-            
+
             for document in documents_to_archive:
                 # Update document status to archived
                 document.status = DocumentStatus.ARCHIVED
                 total_size_archived += document.file_size or 0
                 archived_count += 1
-                
+
                 logger.debug(f"Archived document {document.id}: {document.filename}")
-            
+
             # Archive very old documents (older than 1 year) that are still processed
             one_year_ago = datetime.now(UTC) - timedelta(days=365)
-            
+
             result = await session.execute(
                 select(Document).where(
                     Document.created_at < one_year_ago,
@@ -1232,19 +1232,19 @@ async def document_archiving_job() -> dict[str, Any]:
                 )
             )
             old_documents = result.scalars().all()
-            
+
             old_archived_count = 0
             for document in old_documents:
                 document.status = DocumentStatus.ARCHIVED
                 total_size_archived += document.file_size or 0
                 old_archived_count += 1
-                
+
                 logger.debug(f"Archived old document {document.id}: {document.filename}")
-            
+
             await session.commit()
-            
+
             execution_time = (datetime.now(UTC) - start_time).total_seconds()
-            
+
             return {
                 "archiving_type": "document_archiving",
                 "execution_time_seconds": execution_time,
@@ -1259,11 +1259,11 @@ async def document_archiving_job() -> dict[str, Any]:
                 "status": "completed",
                 "next_scheduled": "7 days"
             }
-            
+
     except Exception as e:
         logger.error(f"Document archiving job failed: {e}")
         return {
-            "archiving_type": "document_archiving", 
+            "archiving_type": "document_archiving",
             "status": "failed",
             "error": str(e),
             "next_scheduled": "7 days"
@@ -1273,19 +1273,19 @@ async def document_archiving_job() -> dict[str, Any]:
 async def conversation_cleanup_job() -> dict[str, Any]:
     """Conversation cleanup and archiving job handler."""
     logger.info("Starting conversation cleanup and archiving process")
-    
+
     try:
         async_session = get_session_maker()
         async with async_session() as session:
             from datetime import datetime, UTC, timedelta
-            from sqlalchemy import select, delete, func
+            from sqlalchemy import select, delete
             from chatter.models.conversation import Conversation, ConversationStatus, Message
-            
+
             start_time = datetime.now(UTC)
-            
+
             # 1. Archive old conversations (older than 6 months)
             six_months_ago = datetime.now(UTC) - timedelta(days=180)
-            
+
             result = await session.execute(
                 select(Conversation).where(
                     Conversation.updated_at < six_months_ago,
@@ -1293,16 +1293,16 @@ async def conversation_cleanup_job() -> dict[str, Any]:
                 )
             )
             conversations_to_archive = result.scalars().all()
-            
+
             archived_count = 0
             for conversation in conversations_to_archive:
                 conversation.status = ConversationStatus.ARCHIVED
                 archived_count += 1
                 logger.debug(f"Archived conversation {conversation.id}: {conversation.title}")
-            
+
             # 2. Delete very old archived conversations (older than 2 years)
             two_years_ago = datetime.now(UTC) - timedelta(days=730)
-            
+
             # First delete messages from old archived conversations
             old_conversation_ids_result = await session.execute(
                 select(Conversation.id).where(
@@ -1311,23 +1311,23 @@ async def conversation_cleanup_job() -> dict[str, Any]:
                 )
             )
             old_conversation_ids = [row[0] for row in old_conversation_ids_result]
-            
+
             deleted_messages = 0
             deleted_conversations = 0
-            
+
             if old_conversation_ids:
                 # Delete messages first
                 messages_result = await session.execute(
                     delete(Message).where(Message.conversation_id.in_(old_conversation_ids))
                 )
                 deleted_messages = messages_result.rowcount
-                
+
                 # Then delete conversations
                 conversations_result = await session.execute(
                     delete(Conversation).where(Conversation.id.in_(old_conversation_ids))
                 )
                 deleted_conversations = conversations_result.rowcount
-            
+
             # 3. Clean up orphaned messages (messages without conversations)
             orphaned_messages_result = await session.execute(
                 delete(Message).where(
@@ -1335,11 +1335,11 @@ async def conversation_cleanup_job() -> dict[str, Any]:
                 )
             )
             orphaned_messages_cleaned = orphaned_messages_result.rowcount
-            
+
             await session.commit()
-            
+
             execution_time = (datetime.now(UTC) - start_time).total_seconds()
-            
+
             return {
                 "cleanup_type": "conversation_cleanup_and_archiving",
                 "execution_time_seconds": execution_time,
@@ -1354,12 +1354,12 @@ async def conversation_cleanup_job() -> dict[str, Any]:
                 "status": "completed",
                 "next_scheduled": "7 days"
             }
-            
+
     except Exception as e:
         logger.error(f"Conversation cleanup job failed: {e}")
         return {
             "cleanup_type": "conversation_cleanup_and_archiving",
-            "status": "failed", 
+            "status": "failed",
             "error": str(e),
             "next_scheduled": "7 days"
         }

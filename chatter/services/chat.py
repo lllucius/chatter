@@ -319,7 +319,7 @@ class ChatService:
                 processed_request = await self._process_chat_request(
                     user_id, chat_request
                 )
-                
+
                 # Shared conversation setup logic
                 conversation, final_request = await self._setup_conversation(
                     user_id, processed_request
@@ -400,7 +400,7 @@ class ChatService:
             processed_request = await self._process_chat_request(
                 user_id, chat_request
             )
-            
+
             # Shared conversation setup logic
             conversation, final_request = await self._setup_conversation(
                 user_id, processed_request
@@ -468,25 +468,25 @@ class ChatService:
         self, user_id: str, chat_request: ChatRequest
     ) -> ChatRequest:
         """Process chat request to resolve prompt_id, profile provider, and enhance system_prompt_override.
-        
+
         Args:
             user_id: User ID for prompt access control
             chat_request: Original chat request
-            
+
         Returns:
             Processed chat request with resolved prompt content and profile provider
         """
         modified = False
         chat_request_dict = chat_request.model_dump()
-        
+
         # If prompt_id is provided but system_prompt_override is not, resolve the prompt
         if chat_request.prompt_id and not chat_request.system_prompt_override:
             try:
                 from chatter.core.prompts import PromptService
-                
+
                 prompt_service = PromptService(self.session)
                 prompt = await prompt_service.get_prompt(chat_request.prompt_id, user_id)
-                
+
                 if prompt and prompt.content:
                     chat_request_dict['system_prompt_override'] = prompt.content
                     modified = True
@@ -498,15 +498,15 @@ class ChatService:
                 logger.warning(
                     f"Failed to resolve prompt_id {chat_request.prompt_id}: {e}"
                 )
-        
+
         # If profile_id is provided and no explicit provider is set, resolve profile provider
         if chat_request.profile_id and not chat_request.provider:
             try:
                 from chatter.core.profiles import ProfileService
-                
+
                 profile_service = ProfileService(self.session)
                 profile = await profile_service.get_profile(chat_request.profile_id, user_id)
-                
+
                 if profile:
                     # Use profile's provider if it has one, otherwise use default
                     if profile.llm_provider and profile.llm_provider.lower() != "default":
@@ -524,19 +524,19 @@ class ChatService:
                 logger.warning(
                     f"Failed to resolve profile_id {chat_request.profile_id}: {e}"
                 )
-        
+
         # Return modified request if any changes were made, otherwise return original
         if modified:
             from chatter.schemas.chat import ChatRequest
             return ChatRequest(**chat_request_dict)
-        
+
         return chat_request
 
     async def _setup_conversation(
         self, user_id: str, chat_request: ChatRequest
     ) -> tuple[Conversation, ChatRequest]:
         """Setup conversation and resolve provider from profile if needed.
-        
+
         Returns:
             Tuple of (conversation, potentially_modified_chat_request)
         """
@@ -552,15 +552,15 @@ class ChatService:
                     include_messages=True,
                     message_limit=50,  # Limit context window for performance
                 )
-                
+
                 # If conversation has a profile and no explicit provider is set, resolve provider
                 if conversation.profile_id and not chat_request.provider:
                     try:
                         from chatter.core.profiles import ProfileService
-                        
+
                         profile_service = ProfileService(self.session)
                         profile = await profile_service.get_profile(conversation.profile_id, user_id)
-                        
+
                         if profile and profile.llm_provider and profile.llm_provider.lower() != "default":
                             # Create modified chat request with profile provider
                             chat_request_dict = chat_request.model_dump()
@@ -574,7 +574,7 @@ class ChatService:
                         logger.warning(
                             f"Failed to resolve conversation profile provider: {e}"
                         )
-                
+
                 return conversation, chat_request
             else:
                 # Create new conversation

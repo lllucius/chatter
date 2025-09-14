@@ -308,7 +308,7 @@ class DocumentProcessingRequest(BaseModel):
 
 class SearchResultResponse(BaseModel):
     """Schema for individual search result."""
-    
+
     chunk_id: str = Field(..., description="Chunk ID")
     document_id: str = Field(..., description="Document ID")
     content: str = Field(..., description="Matching content")
@@ -320,7 +320,7 @@ class SearchResultResponse(BaseModel):
 
 class DocumentStatsResponse(BaseModel):
     """Schema for document statistics response."""
-    
+
     total_documents: int = Field(..., description="Total number of documents")
     status_counts: dict[str, int] = Field(..., description="Documents by status")
     type_counts: dict[str, int] = Field(..., description="Documents by type")

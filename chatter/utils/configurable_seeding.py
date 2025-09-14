@@ -530,7 +530,7 @@ class ConfigurableSeeder(DatabaseSeeder):
         """Override development seeding to include background jobs."""
         # Call parent implementation first
         await super()._seed_development_data(results, skip_existing)
-        
+
         # Add background jobs
         background_jobs_created = await self._create_background_jobs(skip_existing)
         results["created"]["background_jobs"] = background_jobs_created
@@ -541,7 +541,7 @@ class ConfigurableSeeder(DatabaseSeeder):
         """Override demo seeding to include background jobs."""
         # Call parent implementation first
         await super()._seed_demo_data(results, skip_existing)
-        
+
         # Add background jobs
         background_jobs_created = await self._create_background_jobs(skip_existing)
         results["created"]["background_jobs"] = background_jobs_created
@@ -552,7 +552,7 @@ class ConfigurableSeeder(DatabaseSeeder):
         """Override minimal seeding to include essential background jobs."""
         # Call parent implementation first
         await super()._seed_minimal_data(results, skip_existing)
-        
+
         # Add only critical background jobs for minimal mode
         background_jobs_created = await self._create_background_jobs(skip_existing)
         results["created"]["background_jobs"] = background_jobs_created
@@ -730,23 +730,22 @@ class ConfigurableSeeder(DatabaseSeeder):
 
     async def _create_background_jobs(self, skip_existing: bool = True) -> int:
         """Create background jobs from configuration."""
-        from datetime import datetime, UTC
         from chatter.services.job_queue import job_queue
         from chatter.schemas.jobs import JobPriority
-        
+
         background_jobs_data = self._get_configured_data("background_jobs")
         if not background_jobs_data:
             logger.info("No background jobs in configuration")
             return 0
 
         created_count = 0
-        
+
         for job_data in background_jobs_data:
             try:
                 # Parse schedule to determine next run time
                 # For now, we'll schedule them to run at next occurrence
                 cron_schedule = job_data.get("schedule", "0 2 * * *")
-                
+
                 # Convert priority string to enum
                 priority_str = job_data.get("priority", "normal").upper()
                 try:
@@ -761,17 +760,17 @@ class ConfigurableSeeder(DatabaseSeeder):
                     cron_parts = cron_schedule.split()
                     if len(cron_parts) == 5:
                         minute, hour, day, month, day_of_week = cron_parts
-                        
+
                         # Check if job handler exists
                         function_name = job_data["function_name"]
                         if function_name not in job_queue.job_handlers:
                             logger.warning(f"Job handler {function_name} not found, skipping job {job_data['name']}")
                             continue
-                        
+
                         # Get handler info to determine correct wrapper and executor
                         info = job_queue.job_handlers[function_name]
                         job_func, executor_name = job_queue._select_wrapper_and_executor(info)
-                        
+
                         # Add scheduled job
                         job_queue.scheduler.add_job(
                             func=job_func,
@@ -790,7 +789,7 @@ class ConfigurableSeeder(DatabaseSeeder):
                             misfire_grace_time=300,  # 5 minutes grace time
                             replace_existing=not skip_existing,
                         )
-                        
+
                         # Also add the job to the job_queue's jobs dict for tracking
                         from chatter.schemas.jobs import Job
                         job = Job(
@@ -805,17 +804,17 @@ class ConfigurableSeeder(DatabaseSeeder):
                             scheduled_at=None,  # Will be set by cron trigger
                         )
                         job_queue.jobs[job.id] = job
-                        
+
                         created_count += 1
                         logger.info(f"Scheduled background job: {job_data['name']} with cron {cron_schedule}")
                     else:
                         logger.warning(f"Invalid cron schedule {cron_schedule} for job {job_data['name']}")
                 else:
                     logger.warning("Job queue scheduler not available for background job scheduling")
-                    
+
             except Exception as e:
                 logger.error(f"Failed to create background job {job_data.get('name', 'unknown')}: {e}")
-                
+
         logger.info(f"Created {created_count} background jobs from configuration")
         return created_count
 

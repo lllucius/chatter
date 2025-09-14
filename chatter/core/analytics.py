@@ -2,7 +2,6 @@
 
 import asyncio
 import hashlib
-import json
 import time
 from datetime import UTC, datetime, timedelta
 from typing import Any
@@ -12,7 +11,7 @@ try:
     PSUTIL_AVAILABLE = True
 except ImportError:
     PSUTIL_AVAILABLE = False
-    
+
 from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
@@ -57,16 +56,16 @@ class AnalyticsService:
         self.session = session
         self.performance_monitor = get_performance_monitor()
         self.cache_factory = cache_factory  # Use global singleton instance
-        
+
         # Multi-tier cache instances for different data types
         self._cache_instances: dict[str, CacheInterface] = {}
         self._cache_stats = {"hits": 0, "misses": 0, "errors": 0}
-        
+
         # Query optimization settings
         self._query_timeout = 30  # seconds
         self._max_batch_size = 1000
         self._enable_query_profiling = True
-        
+
         # Cache warming intervals (in seconds)
         self._cache_warming_intervals = {
             "system_health": 300,  # 5 minutes
@@ -81,9 +80,9 @@ class AnalyticsService:
                 cache_config = ANALYTICS_CACHE_CONFIG.get(data_type, {
                     "ttl": 300, "tier": CacheType.GENERAL
                 })
-                
+
                 cache_tier = cache_config["tier"]
-                
+
                 # Create specialized cache instance
                 if cache_tier == CacheType.SESSION:
                     self._cache_instances[data_type] = (
@@ -97,13 +96,13 @@ class AnalyticsService:
                     self._cache_instances[data_type] = (
                         self.cache_factory.create_general_cache()
                     )
-                    
+
                 logger.debug(f"Created cache instance for {data_type} using {cache_tier}")
-                    
+
             except Exception as e:
                 logger.debug(f"Could not get cache instance for {data_type}: {e}")
                 return None
-                
+
         return self._cache_instances.get(data_type)
 
     async def _get_from_cache(self, key: str, data_type: str = "general") -> Any:
@@ -113,7 +112,7 @@ class AnalyticsService:
             if not cache:
                 self._cache_stats["errors"] += 1
                 return None
-                
+
             result = await cache.get(key)
             if result is not None:
                 self._cache_stats["hits"] += 1
@@ -121,9 +120,9 @@ class AnalyticsService:
             else:
                 self._cache_stats["misses"] += 1
                 logger.debug(f"Cache miss for {key} ({data_type})")
-                
+
             return result
-            
+
         except Exception as e:
             self._cache_stats["errors"] += 1
             logger.warning(f"Cache get error for {key}: {e}")
@@ -135,15 +134,15 @@ class AnalyticsService:
             cache = self._get_cache_instance(data_type)
             if not cache:
                 return False
-                
+
             # Use custom TTL or get from configuration
             ttl = custom_ttl or ANALYTICS_CACHE_CONFIG.get(data_type, {}).get("ttl", 300)
-            
+
             success = await cache.set(key, value, ttl)
             if success:
                 logger.debug(f"Cached {key} ({data_type}) with TTL {ttl}s")
             return success
-            
+
         except Exception as e:
             logger.warning(f"Cache set error for {key}: {e}")
             return False
@@ -153,36 +152,36 @@ class AnalyticsService:
         # Create normalized parameter string
         param_items = sorted(params.items())
         param_str = "&".join(f"{k}={v}" for k, v in param_items if v is not None)
-        
+
         # Create hash for long parameter strings
         if len(param_str) > 100:
             param_hash = hashlib.sha256(param_str.encode()).hexdigest()[:16]
             param_str = f"hash_{param_hash}"
-            
+
         return f"analytics:{prefix}:{user_id}:{param_str}"
 
     async def _execute_optimized_query(self, query, description: str = "query"):
         """Execute database query with optimization and monitoring."""
         start_time = time.time()
-        
+
         try:
             # Add query timeout if supported
             result = await asyncio.wait_for(
                 self.session.execute(query),
                 timeout=self._query_timeout
             )
-            
+
             execution_time = (time.time() - start_time) * 1000  # ms
-            
+
             # Log slow queries
             if execution_time > 1000:  # 1 second threshold
                 logger.warning(f"Slow query detected: {description} took {execution_time:.2f}ms")
             else:
                 logger.debug(f"Query {description} completed in {execution_time:.2f}ms")
-                
+
             return result
-            
-        except asyncio.TimeoutError:
+
+        except TimeoutError:
             logger.error(f"Query timeout after {self._query_timeout}s: {description}")
             raise
         except Exception as e:
@@ -287,21 +286,21 @@ class AnalyticsService:
             end_date=time_range.end_date.isoformat() if time_range.end_date else None,
             period=time_range.period
         )
-        
+
         # Try cache first
         cached_result = await self._get_from_cache(cache_key, "conversation_stats")
         if cached_result:
             return cached_result
-            
+
         try:
             # Build optimized query with date filtering
             base_query = select(Conversation).where(Conversation.user_id == user_id)
-            
+
             if time_range.start_date:
                 base_query = base_query.where(Conversation.created_at >= time_range.start_date)
             if time_range.end_date:
                 base_query = base_query.where(Conversation.created_at <= time_range.end_date)
-                
+
             # Execute optimized queries in parallel
             conversations_result, messages_result, rating_result = await asyncio.gather(
                 self._execute_optimized_query(base_query, "conversation_stats_conversations"),
@@ -330,12 +329,12 @@ class AnalyticsService:
                     "conversation_stats_ratings"
                 )
             )
-            
+
             # Process results efficiently
             conversations = conversations_result.scalars().all()
             messages = messages_result.scalars().all()
             rating_data = rating_result.first()
-            
+
             # Calculate statistics
             stats = {
                 "total_conversations": len(conversations),
@@ -355,11 +354,11 @@ class AnalyticsService:
                 "messages_with_ratings": rating_data.total_ratings if rating_data else 0,
                 "rating_distribution": self._calculate_rating_distribution(messages),
             }
-            
+
             # Cache result
             await self._set_in_cache(cache_key, stats, "conversation_stats")
             return stats
-            
+
         except Exception as e:
             logger.error(f"Failed to get conversation stats: {e}")
             return self._get_empty_conversation_stats()
@@ -374,25 +373,25 @@ class AnalyticsService:
             end_date=time_range.end_date.isoformat() if time_range.end_date else None,
             period=time_range.period
         )
-        
+
         # Try cache first
         cached_result = await self._get_from_cache(cache_key, "chart_data")
         if cached_result:
             return cached_result
-            
+
         try:
             # Generate time series data points for charts
             time_series_data = await self._generate_time_series_data(user_id, time_range)
-            
+
             # Get conversation trends
             conversation_trends = await self._get_conversation_trends(user_id, time_range)
-            
+
             # Get token usage trends
             token_trends = await self._get_token_usage_trends(user_id, time_range)
-            
+
             # Get model performance data
             model_performance = await self._get_model_performance_data(user_id, time_range)
-            
+
             chart_data = {
                 "conversation_timeline": time_series_data["conversations"],
                 "message_timeline": time_series_data["messages"],
@@ -405,11 +404,11 @@ class AnalyticsService:
                 "daily_summary_stats": conversation_trends["daily_summary"],
                 "performance_metrics_chart": model_performance["performance_metrics"],
             }
-            
+
             # Cache with shorter TTL for chart data
             await self._set_in_cache(cache_key, chart_data, "chart_data")
             return chart_data
-            
+
         except Exception as e:
             logger.error(f"Failed to get chart ready data: {e}")
             return self._get_empty_chart_data()
@@ -417,19 +416,19 @@ class AnalyticsService:
     async def get_integrated_dashboard_stats(self, user_id: str) -> dict[str, Any]:
         """Get integrated dashboard statistics with real-time caching."""
         cache_key = self._generate_cache_key("integrated_stats", user_id)
-        
+
         # Try cache first
         cached_result = await self._get_from_cache(cache_key, "integrated_stats")
         if cached_result:
             return cached_result
-            
+
         try:
             # Get current system time for real-time stats
             now = datetime.now(UTC)
             today_start = now.replace(hour=0, minute=0, second=0, microsecond=0)
             week_start = today_start - timedelta(days=7)
             month_start = today_start - timedelta(days=30)
-            
+
             # Execute parallel queries for different time ranges
             today_stats, week_stats, month_stats, system_stats = await asyncio.gather(
                 self._get_period_stats(user_id, today_start, now),
@@ -437,7 +436,7 @@ class AnalyticsService:
                 self._get_period_stats(user_id, month_start, now),
                 self._get_system_health_stats()
             )
-            
+
             # Calculate real-time metrics
             stats = {
                 "conversations_today": today_stats["conversation_count"],
@@ -461,11 +460,11 @@ class AnalyticsService:
                 "cost_efficiency_score": self._calculate_cost_efficiency(today_stats, week_stats),
                 "generated_at": now.isoformat(),
             }
-            
+
             # Cache with short TTL for real-time data
             await self._set_in_cache(cache_key, stats, "integrated_stats")
             return stats
-            
+
         except Exception as e:
             logger.error(f"Failed to get integrated dashboard stats: {e}")
             return self._get_empty_integrated_stats()
@@ -520,7 +519,7 @@ class AnalyticsService:
         """Calculate activity trend indicator."""
         today_activity = today_stats.get("message_count", 0)
         avg_weekly_activity = week_stats.get("message_count", 0) / 7
-        
+
         if today_activity > avg_weekly_activity * 1.2:
             return "increasing"
         elif today_activity < avg_weekly_activity * 0.8:
@@ -532,7 +531,7 @@ class AnalyticsService:
         """Calculate cost efficiency score (tokens per dollar)."""
         today_cost = today_stats.get("total_cost", 0)
         today_tokens = today_stats.get("token_count", 0)
-        
+
         if today_cost > 0:
             efficiency = today_tokens / today_cost
             return min(efficiency / 1000, 100)  # Normalize to 0-100 scale
@@ -605,8 +604,8 @@ class AnalyticsService:
         """Generate time series data for chart visualization."""
         try:
             # Create time buckets based on the period
-            time_buckets = self._create_time_buckets(time_range)
-            
+            self._create_time_buckets(time_range)
+
             # Query data grouped by time buckets
             query = select(
                 func.date_trunc('hour', Conversation.created_at).label('time_bucket'),
@@ -624,30 +623,30 @@ class AnalyticsService:
                     Conversation.created_at <= time_range.end_date if time_range.end_date else True
                 )
             ).group_by('time_bucket').order_by('time_bucket')
-            
+
             result = await self._execute_optimized_query(query, "time_series_data")
             rows = result.all()
-            
+
             # Convert to chart-ready format
             conversations = []
             messages = []
             costs = []
             response_times = []
-            
+
             for row in rows:
                 timestamp = row.time_bucket.isoformat()
                 conversations.append({"x": timestamp, "y": row.conversation_count or 0})
                 messages.append({"x": timestamp, "y": row.message_count or 0})
                 costs.append({"x": timestamp, "y": float(row.cost_sum or 0)})
                 response_times.append({"x": timestamp, "y": float(row.avg_response_time or 0)})
-            
+
             return {
                 "conversations": conversations,
                 "messages": messages,
                 "costs": costs,
                 "response_times": response_times
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to generate time series data: {e}")
             return {"conversations": [], "messages": [], "costs": [], "response_times": []}
@@ -667,7 +666,7 @@ class AnalyticsService:
                     Conversation.created_at <= time_range.end_date if time_range.end_date else True
                 )
             ).group_by('hour', 'day_of_week')
-            
+
             # Daily summary stats
             daily_query = select(
                 func.date(Conversation.created_at).label('date'),
@@ -683,18 +682,18 @@ class AnalyticsService:
                     Conversation.created_at <= time_range.end_date if time_range.end_date else True
                 )
             ).group_by('date').order_by('date')
-            
+
             hourly_result, daily_result = await asyncio.gather(
                 self._execute_optimized_query(hourly_query, "hourly_trends"),
                 self._execute_optimized_query(daily_query, "daily_trends")
             )
-            
+
             # Process hourly heatmap data
             hourly_activity = {}
             for row in hourly_result.all():
                 key = f"{int(row.day_of_week)}_{int(row.hour)}"
                 hourly_activity[key] = row.count
-            
+
             # Process daily summary
             daily_summary = []
             for row in daily_result.all():
@@ -704,12 +703,12 @@ class AnalyticsService:
                     "messages": row.messages,
                     "tokens": row.tokens or 0
                 })
-            
+
             return {
                 "hourly_activity": hourly_activity,
                 "daily_summary": daily_summary
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get conversation trends: {e}")
             return {"hourly_activity": {}, "daily_summary": []}
@@ -730,9 +729,9 @@ class AnalyticsService:
                     Message.token_count.isnot(None)
                 )
             ).group_by('date').order_by('date')
-            
+
             result = await self._execute_optimized_query(query, "token_trends")
-            
+
             trends = []
             for row in result.all():
                 trends.append({
@@ -741,9 +740,9 @@ class AnalyticsService:
                     "avg_tokens": float(row.avg_tokens or 0),
                     "max_tokens": row.max_tokens or 0
                 })
-            
+
             return trends
-            
+
         except Exception as e:
             logger.error(f"Failed to get token usage trends: {e}")
             return []
@@ -767,18 +766,18 @@ class AnalyticsService:
                     Message.model_name.isnot(None)
                 )
             ).group_by(Message.model_name, Message.provider_name)
-            
+
             result = await self._execute_optimized_query(usage_query, "model_performance")
-            
+
             usage_distribution = {}
             provider_comparison = {}
             performance_metrics = []
-            
+
             for row in result.all():
                 model_key = f"{row.provider_name}:{row.model_name}" if row.provider_name else row.model_name
-                
+
                 usage_distribution[model_key] = row.usage_count
-                
+
                 if row.provider_name:
                     if row.provider_name not in provider_comparison:
                         provider_comparison[row.provider_name] = {
@@ -787,11 +786,11 @@ class AnalyticsService:
                             "avg_response_time": 0,
                             "total_cost": 0
                         }
-                    
+
                     provider_comparison[row.provider_name]["usage_count"] += row.usage_count
                     provider_comparison[row.provider_name]["total_tokens"] += row.total_tokens or 0
                     provider_comparison[row.provider_name]["total_cost"] += float(row.total_cost or 0)
-                
+
                 performance_metrics.append({
                     "model": model_key,
                     "usage_count": row.usage_count,
@@ -799,22 +798,22 @@ class AnalyticsService:
                     "total_tokens": row.total_tokens or 0,
                     "total_cost": float(row.total_cost or 0)
                 })
-            
+
             # Calculate average response time for providers
             for provider_data in provider_comparison.values():
                 if provider_data["usage_count"] > 0:
                     # This is a simplified calculation - in real implementation you'd need to weight by message count
                     provider_data["avg_response_time"] = sum(
-                        metric["avg_response_time"] for metric in performance_metrics 
+                        metric["avg_response_time"] for metric in performance_metrics
                         if metric["model"].startswith(provider_data.get("name", ""))
                     ) / len([m for m in performance_metrics if m["model"].startswith(provider_data.get("name", ""))])
-            
+
             return {
                 "usage_distribution": usage_distribution,
                 "provider_comparison": provider_comparison,
                 "performance_metrics": performance_metrics
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get model performance data: {e}")
             return {"usage_distribution": {}, "provider_comparison": {}, "performance_metrics": []}
@@ -837,10 +836,10 @@ class AnalyticsService:
                     Conversation.created_at <= end_date
                 )
             )
-            
+
             result = await self._execute_optimized_query(query, f"period_stats_{start_date.date()}")
             row = result.first()
-            
+
             return {
                 "conversation_count": row.conversation_count or 0,
                 "message_count": row.message_count or 0,
@@ -848,7 +847,7 @@ class AnalyticsService:
                 "total_cost": float(row.total_cost or 0),
                 "avg_response_time": float(row.avg_response_time or 0)
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get period stats: {e}")
             return {
@@ -872,17 +871,17 @@ class AnalyticsService:
                 cpu_percent = 0.0
                 memory_percent = 0.0
                 logger.debug("psutil not available, using fallback system metrics")
-            
+
             # Calculate health score based on system metrics
             health_score = 100.0
             if cpu_percent > 80:
                 health_score -= 20
             if memory_percent > 85:
                 health_score -= 15
-                
+
             # Get cache statistics
             cache_stats = await self._get_cache_health_stats()
-            
+
             return {
                 "health_score": max(health_score, 0),
                 "cpu_usage": cpu_percent,
@@ -891,7 +890,7 @@ class AnalyticsService:
                 "cache_performance": cache_stats.get("hit_rate", 0),
                 "psutil_available": PSUTIL_AVAILABLE
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get system health stats: {e}")
             return {
@@ -909,7 +908,7 @@ class AnalyticsService:
             total_hits = 0
             total_misses = 0
             total_errors = 0
-            
+
             # Aggregate stats from all cache instances
             for cache in self._cache_instances.values():
                 try:
@@ -919,17 +918,17 @@ class AnalyticsService:
                     total_errors += stats.errors
                 except Exception:
                     continue
-            
+
             total_requests = total_hits + total_misses
             hit_rate = (total_hits / total_requests * 100) if total_requests > 0 else 0
-            
+
             return {
                 "hit_rate": hit_rate,
                 "total_requests": total_requests,
                 "errors": total_errors,
                 "active_sessions": len(self._cache_instances)
             }
-            
+
         except Exception as e:
             logger.error(f"Failed to get cache health stats: {e}")
             return {"hit_rate": 0, "total_requests": 0, "errors": 0, "active_sessions": 0}
@@ -937,12 +936,12 @@ class AnalyticsService:
     def _create_time_buckets(self, time_range: AnalyticsTimeRange) -> list[datetime]:
         """Create time buckets for time series data based on period."""
         buckets = []
-        
+
         if not time_range.start_date or not time_range.end_date:
             return buckets
-            
+
         current = time_range.start_date
-        
+
         # Determine bucket size based on period
         if time_range.period in ["1h", "24h"]:
             delta = timedelta(minutes=15)  # 15-minute buckets
@@ -950,18 +949,18 @@ class AnalyticsService:
             delta = timedelta(hours=1)     # Hourly buckets
         else:
             delta = timedelta(hours=6)     # 6-hour buckets for longer periods
-        
+
         while current <= time_range.end_date:
             buckets.append(current)
             current += delta
-            
+
         return buckets
 
     # Cache warming and optimization methods
     async def warm_cache(self, user_id: str) -> dict[str, bool]:
         """Warm up cache with commonly accessed data."""
         warming_results = {}
-        
+
         try:
             # Warm up common analytics queries
             common_time_ranges = [
@@ -969,35 +968,35 @@ class AnalyticsService:
                 AnalyticsTimeRange(period="7d"),
                 AnalyticsTimeRange(period="30d")
             ]
-            
+
             warming_tasks = []
             for time_range in common_time_ranges:
                 warming_tasks.extend([
                     self.get_conversation_stats(user_id, time_range),
                     self.get_chart_ready_data(user_id, time_range)
                 ])
-            
+
             # Execute warming tasks
             results = await asyncio.gather(*warming_tasks, return_exceptions=True)
-            
+
             # Track warming success
             successful = sum(1 for result in results if not isinstance(result, Exception))
             warming_results["cache_warming"] = successful == len(results)
             warming_results["warmed_queries"] = successful
-            
+
             logger.info(f"Cache warming completed: {successful}/{len(results)} successful")
-            
+
         except Exception as e:
             logger.error(f"Cache warming failed: {e}")
             warming_results["cache_warming"] = False
-            
+
         return warming_results
 
     async def invalidate_user_cache(self, user_id: str) -> bool:
         """Invalidate all cached data for a specific user."""
         try:
             invalidated = 0
-            
+
             # Invalidate across all cache instances
             for data_type, cache in self._cache_instances.items():
                 try:
@@ -1008,10 +1007,10 @@ class AnalyticsService:
                     invalidated += 1
                 except Exception as e:
                     logger.warning(f"Failed to invalidate {data_type} cache: {e}")
-            
+
             logger.info(f"Invalidated cache for user {user_id} across {invalidated} instances")
             return invalidated > 0
-            
+
         except Exception as e:
             logger.error(f"Cache invalidation failed for user {user_id}: {e}")
             return False
@@ -1240,7 +1239,7 @@ class AnalyticsService:
                     )
                 )
             )
-            
+
             rating_stats = rating_stats_result.first()
             if rating_stats:
                 messages_with_ratings = rating_stats[0] or 0
@@ -1269,7 +1268,7 @@ class AnalyticsService:
                 .group_by(func.floor(Message.rating))
                 .order_by(func.floor(Message.rating))
             )
-            
+
             rating_distribution = {}
             for rating_floor, count in rating_distribution_result.all():
                 if rating_floor is not None:
@@ -3811,11 +3810,11 @@ class UserBehaviorAnalyzer:
         self, user_id: str, time_range: AnalyticsTimeRange | None = None
     ) -> dict[str, Any]:
         """Get chart-ready analytics data for dashboard visualization.
-        
+
         Args:
             user_id: User ID
             time_range: Time range filter
-            
+
         Returns:
             Chart-ready analytics data
         """
@@ -3826,20 +3825,20 @@ class UserBehaviorAnalyzer:
                 TimeSeriesDataPoint,
                 ChartReadyAnalytics,
             )
-            
+
             # Get base analytics data
             conversation_stats = await self.get_conversation_stats(user_id, time_range)
             usage_metrics = await self.get_usage_metrics(user_id, time_range)
             performance_metrics = await self.get_performance_metrics(user_id, time_range)
-            
+
             # Generate time series data for conversations (daily data for last 7 days)
             conversation_chart_data = []
             now = datetime.now(UTC)
-            
+
             for i in range(6, -1, -1):  # Last 7 days
                 date = now - timedelta(days=i)
                 day_name = date.strftime('%a')  # Mon, Tue, etc.
-                
+
                 # Calculate conversations for this day using real data pattern
                 base_conversations = conversation_stats.get('total_conversations', 0)
                 if base_conversations > 0:
@@ -3851,31 +3850,31 @@ class UserBehaviorAnalyzer:
                     conversations = max(int(base_conversations * day_multiplier / 7), 1)
                 else:
                     conversations = 5 + (i % 3)  # Fallback pattern
-                
+
                 conversation_chart_data.append(TimeSeriesDataPoint(
                     date=day_name,
                     conversations=conversations
                 ))
-                
+
             # Generate token usage data (weekly data for last 4 weeks)
             token_usage_data = []
             total_tokens = usage_metrics.get('total_tokens', 0)
-            
+
             for i in range(3, -1, -1):  # Last 4 weeks
                 week_label = f'Week {4-i}'
-                
+
                 if total_tokens > 0:
                     # Create realistic weekly progression
                     week_multiplier = [0.6, 0.8, 1.1, 1.0][3-i]
                     tokens = max(int(total_tokens * week_multiplier / 4), 1000)
                 else:
                     tokens = 1000 + (i * 500)  # Fallback pattern
-                    
+
                 token_usage_data.append(TimeSeriesDataPoint(
                     date=week_label,
                     tokens=tokens
                 ))
-                
+
             # Generate performance chart data
             performance_chart_data = [
                 ChartDataPoint(
@@ -3884,7 +3883,7 @@ class UserBehaviorAnalyzer:
                     color=None
                 ),
                 ChartDataPoint(
-                    name="P95 Latency", 
+                    name="P95 Latency",
                     value=max(performance_metrics.get('p95_response_time_ms', 500), 200),
                     color=None
                 ),
@@ -3894,7 +3893,7 @@ class UserBehaviorAnalyzer:
                     color=None
                 )
             ]
-            
+
             # Generate system health data
             system_health_data = [
                 ChartDataPoint(name="CPU", value=65, color="#8884d8"),
@@ -3902,7 +3901,7 @@ class UserBehaviorAnalyzer:
                 ChartDataPoint(name="Storage", value=30, color="#ffc658"),
                 ChartDataPoint(name="Network", value=80, color="#ff7c7c")
             ]
-            
+
             # Generate integration data for integrated dashboard
             integration_data = [
                 ChartDataPoint(name="Workflow → Agent", value=35, color="#8884d8"),
@@ -3910,7 +3909,7 @@ class UserBehaviorAnalyzer:
                 ChartDataPoint(name="A/B Test → Workflow", value=15, color="#ffc658"),
                 ChartDataPoint(name="Standalone", value=25, color="#ff7300")
             ]
-            
+
             # Generate 24-hour performance data
             hourly_performance_data = []
             for hour in range(24):
@@ -3920,7 +3919,7 @@ class UserBehaviorAnalyzer:
                     "agents": 20 + (hour % 6) * 5,
                     "tests": 1 + (hour % 3)
                 })
-            
+
             return ChartReadyAnalytics(
                 conversation_chart_data=conversation_chart_data,
                 token_usage_data=token_usage_data,
@@ -3929,16 +3928,16 @@ class UserBehaviorAnalyzer:
                 integration_data=integration_data,
                 hourly_performance_data=hourly_performance_data
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get chart ready data: {e}")
             # Return default chart data to prevent frontend errors
             from chatter.schemas.analytics import (
                 ChartDataPoint,
-                TimeSeriesDataPoint, 
+                TimeSeriesDataPoint,
                 ChartReadyAnalytics,
             )
-            
+
             # Minimal fallback data
             return ChartReadyAnalytics(
                 conversation_chart_data=[
@@ -3981,26 +3980,26 @@ class UserBehaviorAnalyzer:
 
     async def get_integrated_dashboard_stats(self, user_id: str) -> dict[str, Any]:
         """Get integrated dashboard statistics.
-        
+
         Args:
             user_id: User ID
-            
+
         Returns:
             Integrated dashboard statistics
         """
         try:
             from chatter.schemas.analytics import IntegratedDashboardStats
-            
+
             # Get base statistics - these could be enhanced with real queries
             conversation_stats = await self.get_conversation_stats(user_id)
-            usage_metrics = await self.get_usage_metrics(user_id) 
-            system_analytics = await self.get_system_analytics()
-            
+            usage_metrics = await self.get_usage_metrics(user_id)
+            await self.get_system_analytics()
+
             # Build integrated stats based on real data
             total_conversations = conversation_stats.get('total_conversations', 0)
             total_tokens = usage_metrics.get('total_tokens', 0)
             total_cost = usage_metrics.get('total_cost', 0)
-            
+
             return IntegratedDashboardStats(
                 workflows={
                     "total": max(total_conversations // 3, 42),  # Derive from conversations
@@ -4009,7 +4008,7 @@ class UserBehaviorAnalyzer:
                     "avgExecutionTime": 2.5
                 },
                 agents={
-                    "total": max(total_conversations // 2, 200), # Derive from conversations  
+                    "total": max(total_conversations // 2, 200), # Derive from conversations
                     "active": max(total_conversations // 5, 8),
                     "conversationsToday": max(total_conversations // 4, 234),
                     "avgResponseTime": 1.2,
@@ -4028,12 +4027,12 @@ class UserBehaviorAnalyzer:
                     "uptime": 99.8
                 }
             )
-            
+
         except Exception as e:
             logger.error(f"Failed to get integrated dashboard stats: {e}")
             # Return default stats
             from chatter.schemas.analytics import IntegratedDashboardStats
-            
+
             return IntegratedDashboardStats(
                 workflows={
                     "total": 42,

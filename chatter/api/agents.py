@@ -261,8 +261,8 @@ async def list_agents(
     try:
         # Handle None pagination/sorting with defaults
         pagination = request.pagination or PaginationRequest()
-        sorting = request.sorting or SortingRequest()
-        
+        request.sorting or SortingRequest()
+
         # Validate pagination parameters
         offset = (
             max(0, pagination.offset)

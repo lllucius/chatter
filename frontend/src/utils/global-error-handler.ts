@@ -109,10 +109,13 @@ class GlobalErrorHandler {
     const target = event.target as HTMLElement | null;
     
     // Only handle resource loading errors, not JavaScript errors
-    if (target && target !== window) {
+    // Check if target is an element and not the window
+    if (target && target !== (window as unknown as EventTarget) && target !== event.currentTarget) {
       const resourceType = target.tagName?.toLowerCase() || 'unknown';
-      const resourceSrc = (target as HTMLImageElement | HTMLScriptElement | HTMLLinkElement).src || 
-                          (target as HTMLLinkElement).href || 'unknown';
+      const resourceSrc = 
+        (target as HTMLImageElement | HTMLScriptElement).src || 
+        (target as HTMLLinkElement).href || 
+        'unknown';
 
       errorHandler.handleError(
         new Error(`Failed to load ${resourceType}: ${resourceSrc}`),

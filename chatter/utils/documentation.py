@@ -99,7 +99,7 @@ Available templates:
 STANDARD_RESPONSE_HEADERS = {
     "x-correlation-id": {
         "description": "Request correlation ID for tracing",
-        "schema": {"type": "string", "format": "uuid"},
+        "schema": {"type": "string", "format": "ulid"},
     },
     "X-RateLimit-Limit-Minute": {
         "description": "Requests allowed per minute",

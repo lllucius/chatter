@@ -242,7 +242,7 @@ class TestJobsUnit:
         self, client: AsyncClient, auth_headers: dict
     ):
         """Test job retrieval with invalid job ID format."""
-        invalid_job_id = "not-a-uuid"
+        invalid_job_id = "not-a-ulid"
 
         response = await client.get(
             f"/api/v1/jobs/{invalid_job_id}", headers=auth_headers
@@ -288,7 +288,7 @@ class TestJobsUnit:
         self, client: AsyncClient, auth_headers: dict
     ):
         """Test job cancellation with invalid job ID format."""
-        invalid_job_id = "not-a-uuid"
+        invalid_job_id = "not-a-ulid"
 
         response = await client.post(
             f"/api/v1/jobs/{invalid_job_id}/cancel",

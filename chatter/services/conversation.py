@@ -67,9 +67,9 @@ class ConversationService:
 
                 # Validate user_id format
                 try:
-                    from uuid import UUID
+                    from ulid import ULID
 
-                    UUID(user_id)
+                    ULID.from_str(user_id)
                 except ValueError as e:
                     raise ValueError("Invalid user ID format") from e
 

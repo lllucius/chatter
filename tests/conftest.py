@@ -390,11 +390,11 @@ async def auth_headers(client) -> dict[str, str]:
     """
     import random
     import string
-    import uuid
+    from chatter.models.base import generate_ulid
 
     # Generate a more username-friendly unique identifier
     # Use only lowercase letters to avoid sequential pattern validation
-    unique_base = str(uuid.uuid4()).replace("-", "")
+    unique_base = generate_ulid().lower()
     # Filter out numbers and use only letters to avoid validation issues
     safe_chars = "".join(c for c in unique_base if c.isalpha()).lower()[
         :8

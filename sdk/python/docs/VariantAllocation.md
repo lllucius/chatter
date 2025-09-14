@@ -1,6 +1,5 @@
 # VariantAllocation
 
-Variant allocation strategies.
 
 ## Enum
 

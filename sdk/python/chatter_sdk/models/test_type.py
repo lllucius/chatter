@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class TestType(str, Enum):
     """
-    Types of A/B tests.
+    TestType
     """
 
     """

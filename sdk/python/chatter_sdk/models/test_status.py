@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class TestStatus(str, Enum):
     """
-    A/B test status.
+    TestStatus
     """
 
     """

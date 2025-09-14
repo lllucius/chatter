@@ -7,10 +7,12 @@ Method | HTTP request | Description
 [**bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post**](DataManagementApi.md#bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post) | **POST** /api/v1/data/bulk/delete-conversations | Bulk Delete Conversations
 [**bulk_delete_documents_api_v1_data_bulk_delete_documents_post**](DataManagementApi.md#bulk_delete_documents_api_v1_data_bulk_delete_documents_post) | **POST** /api/v1/data/bulk/delete-documents | Bulk Delete Documents
 [**bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post**](DataManagementApi.md#bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post) | **POST** /api/v1/data/bulk/delete-prompts | Bulk Delete Prompts
+[**bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post**](DataManagementApi.md#bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post) | **POST** /api/v1/data/bulk/delete-filtered | Bulk Delete With Filters
 [**create_backup_api_v1_data_backup_post**](DataManagementApi.md#create_backup_api_v1_data_backup_post) | **POST** /api/v1/data/backup | Create Backup
 [**export_data_api_v1_data_export_post**](DataManagementApi.md#export_data_api_v1_data_export_post) | **POST** /api/v1/data/export | Export Data
 [**get_storage_stats_api_v1_data_stats_get**](DataManagementApi.md#get_storage_stats_api_v1_data_stats_get) | **GET** /api/v1/data/stats | Get Storage Stats
 [**list_backups_api_v1_data_backups_get**](DataManagementApi.md#list_backups_api_v1_data_backups_get) | **GET** /api/v1/data/backups | List Backups
+[**preview_bulk_delete_api_v1_data_bulk_preview_post**](DataManagementApi.md#preview_bulk_delete_api_v1_data_bulk_preview_post) | **POST** /api/v1/data/bulk/preview | Preview Bulk Delete
 [**restore_from_backup_api_v1_data_restore_post**](DataManagementApi.md#restore_from_backup_api_v1_data_restore_post) | **POST** /api/v1/data/restore | Restore From Backup
 
 
@@ -228,6 +230,86 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **request_body** | [**List[str]**](str.md)|  | 
+
+### Return type
+
+[**BulkDeleteResponse**](BulkDeleteResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post**
+> BulkDeleteResponse bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post(bulk_delete_filtered_request)
+
+Bulk Delete With Filters
+
+Bulk delete with server-side filtering.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest
+from chatter_sdk.models.bulk_delete_response import BulkDeleteResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DataManagementApi(api_client)
+    bulk_delete_filtered_request = chatter_sdk.BulkDeleteFilteredRequest() # BulkDeleteFilteredRequest | 
+
+    try:
+        # Bulk Delete With Filters
+        api_response = await api_instance.bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post(bulk_delete_filtered_request)
+        print("The response of DataManagementApi->bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DataManagementApi->bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **bulk_delete_filtered_request** | [**BulkDeleteFilteredRequest**](BulkDeleteFilteredRequest.md)|  | 
 
 ### Return type
 
@@ -556,6 +638,86 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **preview_bulk_delete_api_v1_data_bulk_preview_post**
+> BulkDeletePreviewResponse preview_bulk_delete_api_v1_data_bulk_preview_post(bulk_delete_filtered_request)
+
+Preview Bulk Delete
+
+Preview bulk delete operation with server-side filtering.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest
+from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DataManagementApi(api_client)
+    bulk_delete_filtered_request = chatter_sdk.BulkDeleteFilteredRequest() # BulkDeleteFilteredRequest | 
+
+    try:
+        # Preview Bulk Delete
+        api_response = await api_instance.preview_bulk_delete_api_v1_data_bulk_preview_post(bulk_delete_filtered_request)
+        print("The response of DataManagementApi->preview_bulk_delete_api_v1_data_bulk_preview_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DataManagementApi->preview_bulk_delete_api_v1_data_bulk_preview_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **bulk_delete_filtered_request** | [**BulkDeleteFilteredRequest**](BulkDeleteFilteredRequest.md)|  | 
+
+### Return type
+
+[**BulkDeletePreviewResponse**](BulkDeletePreviewResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
  - **Accept**: application/json
 
 ### HTTP response details

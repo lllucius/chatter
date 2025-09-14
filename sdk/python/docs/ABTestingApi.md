@@ -13,6 +13,7 @@ Method | HTTP request | Description
 [**get_ab_test_performance_api_v1_ab_tests_test_id_performance_get**](ABTestingApi.md#get_ab_test_performance_api_v1_ab_tests_test_id_performance_get) | **GET** /api/v1/ab-tests/{test_id}/performance | Get Ab Test Performance
 [**get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get**](ABTestingApi.md#get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get) | **GET** /api/v1/ab-tests/{test_id}/recommendations | Get Ab Test Recommendations
 [**get_ab_test_results_api_v1_ab_tests_test_id_results_get**](ABTestingApi.md#get_ab_test_results_api_v1_ab_tests_test_id_results_get) | **GET** /api/v1/ab-tests/{test_id}/results | Get Ab Test Results
+[**get_test_analytics_api_v1_ab_tests_test_id_analytics_get**](ABTestingApi.md#get_test_analytics_api_v1_ab_tests_test_id_analytics_get) | **GET** /api/v1/ab-tests/{test_id}/analytics | Get Test Analytics
 [**list_ab_tests_api_v1_ab_tests_get**](ABTestingApi.md#list_ab_tests_api_v1_ab_tests_get) | **GET** /api/v1/ab-tests/ | List Ab Tests
 [**pause_ab_test_api_v1_ab_tests_test_id_pause_post**](ABTestingApi.md#pause_ab_test_api_v1_ab_tests_test_id_pause_post) | **POST** /api/v1/ab-tests/{test_id}/pause | Pause Ab Test
 [**start_ab_test_api_v1_ab_tests_test_id_start_post**](ABTestingApi.md#start_ab_test_api_v1_ab_tests_test_id_start_post) | **POST** /api/v1/ab-tests/{test_id}/start | Start Ab Test
@@ -282,7 +283,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **end_ab_test_api_v1_ab_tests_test_id_end_post**
-> ABTestActionResponse end_ab_test_api_v1_ab_tests_test_id_end_post(test_id, winner_variant)
+> ABTestActionResponse end_ab_test_api_v1_ab_tests_test_id_end_post(test_id, winner_variant=winner_variant)
 
 End Ab Test
 
@@ -290,9 +291,9 @@ End A/B test and declare winner.
 
 Args:
     test_id: A/B test ID
-    winner_variant: Winning variant identifier
     current_user: Current authenticated user
     ab_test_manager: A/B test manager instance
+    winner_variant: Optional winning variant identifier
 
 Returns:
     Action response
@@ -328,11 +329,11 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ABTestingApi(api_client)
     test_id = 'test_id_example' # str | 
-    winner_variant = 'winner_variant_example' # str | 
+    winner_variant = 'winner_variant_example' # str | Winning variant identifier (optional)
 
     try:
         # End Ab Test
-        api_response = await api_instance.end_ab_test_api_v1_ab_tests_test_id_end_post(test_id, winner_variant)
+        api_response = await api_instance.end_ab_test_api_v1_ab_tests_test_id_end_post(test_id, winner_variant=winner_variant)
         print("The response of ABTestingApi->end_ab_test_api_v1_ab_tests_test_id_end_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -347,7 +348,7 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **test_id** | **str**|  | 
- **winner_variant** | **str**|  | 
+ **winner_variant** | **str**| Winning variant identifier | [optional] 
 
 ### Return type
 
@@ -800,6 +801,87 @@ Name | Type | Description  | Notes
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
 **200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_test_analytics_api_v1_ab_tests_test_id_analytics_get**
+> ABTestAnalyticsResponse get_test_analytics_api_v1_ab_tests_test_id_analytics_get(test_id)
+
+Get Test Analytics
+
+Get comprehensive analytics for an A/B test.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.ab_test_analytics_response import ABTestAnalyticsResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.ABTestingApi(api_client)
+    test_id = 'test_id_example' # str | 
+
+    try:
+        # Get Test Analytics
+        api_response = await api_instance.get_test_analytics_api_v1_ab_tests_test_id_analytics_get(test_id)
+        print("The response of ABTestingApi->get_test_analytics_api_v1_ab_tests_test_id_analytics_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling ABTestingApi->get_test_analytics_api_v1_ab_tests_test_id_analytics_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **test_id** | **str**|  | 
+
+### Return type
+
+[**ABTestAnalyticsResponse**](ABTestAnalyticsResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**404** | A/B test not found |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**403** | Access denied |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
 **422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

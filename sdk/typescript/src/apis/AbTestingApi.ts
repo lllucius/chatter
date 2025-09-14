@@ -1,7 +1,7 @@
 /**
  * Generated API client for A/B Testing
  */
-import { ABTestActionResponse, ABTestCreateRequest, ABTestDeleteResponse, ABTestListResponse, ABTestMetricsResponse, ABTestResponse, ABTestResultsResponse, ABTestUpdateRequest, TestStatus, TestType } from '../models/index';
+import { ABTestActionResponse, ABTestAnalyticsResponse, ABTestCreateRequest, ABTestDeleteResponse, ABTestListResponse, ABTestMetricsResponse, ABTestResponse, ABTestResultsResponse, ABTestUpdateRequest, TestStatus, TestType } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AbTestingApi extends BaseAPI {
@@ -247,14 +247,14 @@ Returns:
 
 Args:
     test_id: A/B test ID
-    winner_variant: Winning variant identifier
     current_user: Current authenticated user
     ab_test_manager: A/B test manager instance
+    winner_variant: Optional winning variant identifier
 
 Returns:
     Action response
    */
-  public async endAbTestApiV1AbTestsTestIdEnd(testId: string, options?: { winnerVariant?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ABTestActionResponse> {
+  public async endAbTestApiV1AbTestsTestIdEnd(testId: string, options?: { winnerVariant?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ABTestActionResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/ab-tests/${testId}/end`,
       method: 'POST' as HTTPMethod,
@@ -313,5 +313,19 @@ Returns:
 
     const response = await this.request(requestContext);
     return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Get Test Analytics
+   * Get comprehensive analytics for an A/B test.
+   */
+  public async getTestAnalyticsApiV1AbTestsTestIdAnalytics(testId: string): Promise<ABTestAnalyticsResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/ab-tests/${testId}/analytics`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<ABTestAnalyticsResponse>;
   }
 }

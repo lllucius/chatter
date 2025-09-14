@@ -1,7 +1,7 @@
 /**
  * Generated API client for Data Management
  */
-import { BackupListResponse, BackupRequest, BackupResponse, BackupType, BulkDeleteResponse, ExportDataRequest, ExportDataResponse, RestoreRequest, RestoreResponse, StorageStatsResponse } from '../models/index';
+import { BackupListResponse, BackupRequest, BackupResponse, BackupType, BulkDeleteFilteredRequest, BulkDeletePreviewResponse, BulkDeleteResponse, ExportDataRequest, ExportDataResponse, RestoreRequest, RestoreResponse, StorageStatsResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DataManagementApi extends BaseAPI {
@@ -138,5 +138,37 @@ export class DataManagementApi extends BaseAPI {
 
     const response = await this.request(requestContext);
     return response.json() as Promise<BulkDeleteResponse>;
+  }
+  /**Bulk Delete With Filters
+   * Bulk delete with server-side filtering.
+   */
+  public async bulkDeleteWithFiltersApiV1DataBulkDeleteFiltered(data: BulkDeleteFilteredRequest): Promise<BulkDeleteResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/data/bulk/delete-filtered`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<BulkDeleteResponse>;
+  }
+  /**Preview Bulk Delete
+   * Preview bulk delete operation with server-side filtering.
+   */
+  public async previewBulkDeleteApiV1DataBulkPreview(data: BulkDeleteFilteredRequest): Promise<BulkDeletePreviewResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/data/bulk/preview`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<BulkDeletePreviewResponse>;
   }
 }

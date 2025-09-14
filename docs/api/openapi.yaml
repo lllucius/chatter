@@ -25,6 +25,87 @@ components:
       - new_status
       title: ABTestActionResponse
       type: object
+    ABTestAnalyticsResponse:
+      description: Comprehensive A/B test analytics response.
+      properties:
+        duration_days:
+          description: Days test has been running
+          title: Duration Days
+          type: integer
+        generated_at:
+          description: Analytics generation timestamp
+          format: date-time
+          title: Generated At
+          type: string
+        improvement:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Improvement percentage
+          title: Improvement
+        last_updated:
+          description: Last data update
+          format: date-time
+          title: Last Updated
+          type: string
+        progress_percentage:
+          description: Test progress percentage
+          title: Progress Percentage
+          type: number
+        recommendation:
+          description: Recommendation
+          title: Recommendation
+          type: string
+        remaining_days:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Days remaining
+          title: Remaining Days
+        statistical_analysis:
+          $ref: '#/components/schemas/StatisticalAnalysis'
+          description: Statistical analysis results
+        status:
+          $ref: '#/components/schemas/TestStatus'
+          description: Test status
+        test_id:
+          description: Test ID
+          title: Test Id
+          type: string
+        test_name:
+          description: Test name
+          title: Test Name
+          type: string
+        total_participants:
+          description: Total participants
+          title: Total Participants
+          type: integer
+        variants:
+          description: Variant performance data
+          items:
+            $ref: '#/components/schemas/VariantPerformance'
+          title: Variants
+          type: array
+        winner:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Winning variant
+          title: Winner
+      required:
+      - test_id
+      - test_name
+      - status
+      - total_participants
+      - variants
+      - statistical_analysis
+      - recommendation
+      - duration_days
+      - progress_percentage
+      - generated_at
+      - last_updated
+      title: ABTestAnalyticsResponse
+      type: object
     ABTestCreateRequest:
       description: Request schema for creating an A/B test.
       properties:
@@ -1510,6 +1591,43 @@ components:
       - suggestions
       title: BottleneckInfo
       type: object
+    BulkDeleteFilteredRequest:
+      description: Request for server-side filtered bulk delete.
+      properties:
+        filters:
+          $ref: '#/components/schemas/BulkOperationFilters'
+          description: Filters to apply
+      required:
+      - filters
+      title: BulkDeleteFilteredRequest
+      type: object
+    BulkDeletePreviewResponse:
+      description: Response for bulk delete preview (dry run).
+      properties:
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+          description: Entity type
+        filters_applied:
+          $ref: '#/components/schemas/BulkOperationFilters'
+          description: Filters that were applied
+        sample_items:
+          description: Sample of items that would be deleted (first 10)
+          items:
+            additionalProperties: true
+            type: object
+          title: Sample Items
+          type: array
+        total_matching:
+          description: Total items matching filters
+          title: Total Matching
+          type: integer
+      required:
+      - entity_type
+      - total_matching
+      - sample_items
+      - filters_applied
+      title: BulkDeletePreviewResponse
+      type: object
     BulkDeleteResponse:
       description: Response schema for bulk delete operations.
       properties:
@@ -1537,6 +1655,54 @@ components:
       - failed_deletions
       - errors
       title: BulkDeleteResponse
+      type: object
+    BulkOperationFilters:
+      description: Server-side filters for bulk operations.
+      properties:
+        created_after:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Filter items created after this date
+          title: Created After
+        created_before:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Filter items created before this date
+          title: Created Before
+        dry_run:
+          default: false
+          description: If true, only return count without deleting
+          title: Dry Run
+          type: boolean
+        entity_type:
+          $ref: '#/components/schemas/EntityType'
+          description: Type of entity to filter
+        limit:
+          default: 1000
+          description: Maximum number of items to process
+          maximum: 10000.0
+          minimum: 1.0
+          title: Limit
+          type: integer
+        status:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by status
+          title: Status
+        user_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Filter by user/owner ID
+          title: User Id
+      required:
+      - entity_type
+      title: BulkOperationFilters
       type: object
     BulkOperationResult:
       description: Schema for bulk operation results.
@@ -1599,6 +1765,77 @@ components:
       - operation
       title: BulkToolServerOperation
       type: object
+    ChartDataPoint:
+      description: Schema for a single chart data point.
+      properties:
+        color:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Optional color for the data point
+          title: Color
+        name:
+          description: Data point label
+          title: Name
+          type: string
+        value:
+          description: Data point value
+          title: Value
+          type: number
+      required:
+      - name
+      - value
+      title: ChartDataPoint
+      type: object
+    ChartReadyAnalytics:
+      description: Schema for chart-ready analytics data.
+      properties:
+        conversation_chart_data:
+          description: Daily conversation data for charts
+          items:
+            $ref: '#/components/schemas/TimeSeriesDataPoint'
+          title: Conversation Chart Data
+          type: array
+        hourly_performance_data:
+          description: 24-hour performance breakdown
+          items:
+            additionalProperties: true
+            type: object
+          title: Hourly Performance Data
+          type: array
+        integration_data:
+          description: Integration usage data for charts
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+          title: Integration Data
+          type: array
+        performance_chart_data:
+          description: Performance metrics for charts
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+          title: Performance Chart Data
+          type: array
+        system_health_data:
+          description: System health data for charts
+          items:
+            $ref: '#/components/schemas/ChartDataPoint'
+          title: System Health Data
+          type: array
+        token_usage_data:
+          description: Token usage over time for charts
+          items:
+            $ref: '#/components/schemas/TimeSeriesDataPoint'
+          title: Token Usage Data
+          type: array
+      required:
+      - conversation_chart_data
+      - token_usage_data
+      - performance_chart_data
+      - system_health_data
+      - integration_data
+      - hourly_performance_data
+      title: ChartReadyAnalytics
+      type: object
     ChatRequest:
       description: Schema for chat request.
       properties:
@@ -1647,18 +1884,18 @@ components:
           - type: 'null'
           description: Profile ID to use
           title: Profile Id
+        prompt_id:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Prompt template ID to use for this request
+          title: Prompt Id
         provider:
           anyOf:
           - type: string
           - type: 'null'
           description: Override LLM provider for this request
           title: Provider
-        stream:
-          default: false
-          description: '[DEPRECATED] Use /streaming endpoint instead. This field is
-            ignored in the new API design.'
-          title: Stream
-          type: boolean
         system_prompt_override:
           anyOf:
           - type: string
@@ -2361,6 +2598,9 @@ components:
     DashboardResponse:
       description: Schema for analytics dashboard response.
       properties:
+        chart_data:
+          $ref: '#/components/schemas/ChartReadyAnalytics'
+          description: Chart-ready data for frontend visualization
         conversation_stats:
           $ref: '#/components/schemas/ConversationStatsResponse'
           description: Conversation statistics
@@ -2395,6 +2635,7 @@ components:
       - document_analytics
       - system_health
       - custom_metrics
+      - chart_data
       - generated_at
       title: DashboardResponse
       type: object
@@ -3443,6 +3684,14 @@ components:
       - model
       title: EmbeddingSpaceWithModel
       type: object
+    EntityType:
+      description: Supported entity types for bulk operations.
+      enum:
+      - conversations
+      - documents
+      - prompts
+      title: EntityType
+      type: string
     ExportDataRequest:
       description: Request schema for data export API.
       properties:
@@ -3612,6 +3861,36 @@ components:
       - unhealthy
       title: HealthStatus
       type: string
+    IntegratedDashboardStats:
+      description: Schema for integrated dashboard statistics.
+      properties:
+        ab_testing:
+          additionalProperties: true
+          description: A/B testing statistics
+          title: Ab Testing
+          type: object
+        agents:
+          additionalProperties: true
+          description: Agent statistics
+          title: Agents
+          type: object
+        system:
+          additionalProperties: true
+          description: System statistics
+          title: System
+          type: object
+        workflows:
+          additionalProperties: true
+          description: Workflow statistics
+          title: Workflows
+          type: object
+      required:
+      - workflows
+      - agents
+      - ab_testing
+      - system
+      title: IntegratedDashboardStats
+      type: object
     JobActionResponse:
       description: Response schema for job actions.
       properties:
@@ -4059,7 +4338,6 @@ components:
       title: MessageRole
       type: string
     MetricType:
-      description: Types of metrics to track.
       enum:
       - response_time
       - user_satisfaction
@@ -5202,17 +5480,20 @@ components:
           title: Is Public
           type: boolean
         llm_model:
-          description: LLM model name
-          maxLength: 100
-          minLength: 1
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          description: LLM model name or None to use provider default
           title: Llm Model
-          type: string
         llm_provider:
-          description: LLM provider (openai, anthropic, etc.)
-          maxLength: 50
-          minLength: 1
+          anyOf:
+          - maxLength: 50
+            type: string
+          - type: 'null'
+          description: LLM provider (openai, anthropic, etc.) or 'default' or None
+            to use system default
           title: Llm Provider
-          type: string
         logit_bias:
           anyOf:
           - additionalProperties:
@@ -5356,8 +5637,6 @@ components:
           title: Top P
       required:
       - name
-      - llm_provider
-      - llm_model
       title: ProfileCreate
       type: object
     ProfileDeleteResponse:
@@ -5491,17 +5770,20 @@ components:
           description: Last usage time
           title: Last Used At
         llm_model:
-          description: LLM model name
-          maxLength: 100
-          minLength: 1
+          anyOf:
+          - maxLength: 100
+            type: string
+          - type: 'null'
+          description: LLM model name or None to use provider default
           title: Llm Model
-          type: string
         llm_provider:
-          description: LLM provider (openai, anthropic, etc.)
-          maxLength: 50
-          minLength: 1
+          anyOf:
+          - maxLength: 50
+            type: string
+          - type: 'null'
+          description: LLM provider (openai, anthropic, etc.) or 'default' or None
+            to use system default
           title: Llm Provider
-          type: string
         logit_bias:
           anyOf:
           - additionalProperties:
@@ -5666,8 +5948,6 @@ components:
           type: integer
       required:
       - name
-      - llm_provider
-      - llm_model
       - id
       - owner_id
       - usage_count
@@ -7483,6 +7763,46 @@ components:
           type: string
       title: SortingRequest
       type: object
+    StatisticalAnalysis:
+      description: Statistical analysis results.
+      properties:
+        confidence_intervals:
+          additionalProperties:
+            items:
+              type: number
+            type: array
+          description: Confidence intervals by variant
+          title: Confidence Intervals
+          type: object
+        confidence_level:
+          description: Confidence level used
+          title: Confidence Level
+          type: number
+        effect_size:
+          description: Effect size
+          title: Effect Size
+          type: number
+        p_value:
+          description: P-value
+          title: P Value
+          type: number
+        power:
+          description: Statistical power
+          title: Power
+          type: number
+        statistical_significance:
+          description: Is result statistically significant
+          title: Statistical Significance
+          type: boolean
+      required:
+      - confidence_level
+      - statistical_significance
+      - p_value
+      - effect_size
+      - power
+      - confidence_intervals
+      title: StatisticalAnalysis
+      type: object
     StorageStatsResponse:
       description: Response schema for storage statistics.
       properties:
@@ -7692,7 +8012,6 @@ components:
       title: TestMetric
       type: object
     TestStatus:
-      description: A/B test status.
       enum:
       - draft
       - running
@@ -7702,7 +8021,6 @@ components:
       title: TestStatus
       type: string
     TestType:
-      description: Types of A/B tests.
       enum:
       - prompt
       - model
@@ -7738,6 +8056,53 @@ components:
       - description
       - configuration
       title: TestVariant
+      type: object
+    TimeSeriesDataPoint:
+      description: Schema for time series chart data point.
+      properties:
+        abTests:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Number of A/B tests
+          title: Abtests
+        agents:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Number of agents
+          title: Agents
+        conversations:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Number of conversations
+          title: Conversations
+        cost:
+          anyOf:
+          - type: number
+          - type: 'null'
+          description: Cost
+          title: Cost
+        date:
+          description: Date label (e.g., 'Mon', 'Jan 01')
+          title: Date
+          type: string
+        tokens:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Token usage
+          title: Tokens
+        workflows:
+          anyOf:
+          - type: integer
+          - type: 'null'
+          description: Number of workflows
+          title: Workflows
+      required:
+      - date
+      title: TimeSeriesDataPoint
       type: object
     TokenRefreshResponse:
       description: Schema for token refresh response.
@@ -8903,7 +9268,6 @@ components:
       title: ValidationError
       type: object
     VariantAllocation:
-      description: Variant allocation strategies.
       enum:
       - equal
       - weighted
@@ -8911,6 +9275,47 @@ components:
       - user_attribute
       title: VariantAllocation
       type: string
+    VariantPerformance:
+      description: Performance data for a specific variant.
+      properties:
+        conversion_rate:
+          description: Conversion rate
+          title: Conversion Rate
+          type: number
+        conversions:
+          description: Number of conversions
+          title: Conversions
+          type: integer
+        cost:
+          default: 0.0
+          description: Total cost
+          title: Cost
+          type: number
+        name:
+          description: Variant name
+          title: Name
+          type: string
+        participants:
+          description: Number of participants
+          title: Participants
+          type: integer
+        revenue:
+          default: 0.0
+          description: Total revenue
+          title: Revenue
+          type: number
+        roi:
+          default: 0.0
+          description: Return on investment
+          title: Roi
+          type: number
+      required:
+      - name
+      - participants
+      - conversions
+      - conversion_rate
+      title: VariantPerformance
+      type: object
     WorkflowAnalyticsResponse:
       description: Schema for workflow analytics response.
       properties:
@@ -9843,7 +10248,7 @@ paths:
             x-correlation-id: &id005
               description: Request correlation ID for tracing
               schema:
-                format: uuid
+                format: ulid
                 type: string
       summary: Root
   /api/v1/ab-tests/:
@@ -10084,6 +10489,63 @@ paths:
       summary: Update Ab Test
       tags:
       - A/B Testing
+  /api/v1/ab-tests/{test_id}/analytics:
+    get:
+      description: Get comprehensive analytics for an A/B test.
+      operationId: get_test_analytics_api_v1_ab_tests__test_id__analytics_get
+      parameters:
+      - in: path
+        name: test_id
+        required: true
+        schema:
+          title: Test Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ABTestAnalyticsResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '403':
+          description: Access denied
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '404':
+          description: A/B test not found
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Test Analytics
+      tags:
+      - A/B Testing
   /api/v1/ab-tests/{test_id}/complete:
     post:
       description: "Complete an A/B test.\n\nArgs:\n    test_id: Test ID\n    current_user:\
@@ -10130,9 +10592,9 @@ paths:
   /api/v1/ab-tests/{test_id}/end:
     post:
       description: "End A/B test and declare winner.\n\nArgs:\n    test_id: A/B test\
-        \ ID\n    winner_variant: Winning variant identifier\n    current_user: Current\
-        \ authenticated user\n    ab_test_manager: A/B test manager instance\n\nReturns:\n\
-        \    Action response"
+        \ ID\n    current_user: Current authenticated user\n    ab_test_manager: A/B\
+        \ test manager instance\n    winner_variant: Optional winning variant identifier\n\
+        \nReturns:\n    Action response"
       operationId: end_ab_test_api_v1_ab_tests__test_id__end_post
       parameters:
       - in: path
@@ -10141,12 +10603,16 @@ paths:
         schema:
           title: Test Id
           type: string
-      - in: query
+      - description: Winning variant identifier
+        in: query
         name: winner_variant
-        required: true
+        required: false
         schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Winning variant identifier
           title: Winner Variant
-          type: string
       responses:
         '200':
           content:
@@ -11434,6 +11900,155 @@ paths:
       tags:
       - Agents
       - agents
+  /api/v1/analytics/cache/invalidate:
+    post:
+      description: "Invalidate stale cache entries to free up memory.\n\nArgs:\n \
+        \   max_age_hours: Maximum age in hours for cache entries to keep\n    current_user:\
+        \ Current authenticated user\n    cache_warming_service: Cache warming service\n\
+        \    \nReturns:\n    Cache invalidation results"
+      operationId: invalidate_stale_cache_api_v1_analytics_cache_invalidate_post
+      parameters:
+      - in: query
+        name: max_age_hours
+        required: false
+        schema:
+          default: 24
+          title: Max Age Hours
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Invalidate Stale Cache Api V1 Analytics Cache Invalidate
+                  Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Invalidate Stale Cache
+      tags:
+      - Analytics
+  /api/v1/analytics/cache/optimize:
+    post:
+      description: "Analyze and optimize cache performance automatically.\n\nArgs:\n\
+        \    current_user: Current authenticated user\n    cache_warming_service:\
+        \ Cache warming service\n    \nReturns:\n    Optimization results and recommendations"
+      operationId: optimize_cache_performance_api_v1_analytics_cache_optimize_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Optimize Cache Performance Api V1 Analytics Cache
+                  Optimize Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Optimize Cache Performance
+      tags:
+      - Analytics
+  /api/v1/analytics/cache/status:
+    get:
+      description: "Get cache warming status and performance metrics.\n\nArgs:\n \
+        \   current_user: Current authenticated user\n    cache_warming_service: Cache\
+        \ warming service\n    \nReturns:\n    Cache warming status and metrics"
+      operationId: get_cache_warming_status_api_v1_analytics_cache_status_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Cache Warming Status Api V1 Analytics Cache Status
+                  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Cache Warming Status
+      tags:
+      - Analytics
+  /api/v1/analytics/cache/warm:
+    post:
+      description: "Warm analytics cache to improve performance.\n\nArgs:\n    force_refresh:\
+        \ Force refresh of existing cache entries\n    current_user: Current authenticated\
+        \ user\n    cache_warming_service: Cache warming service\n    \nReturns:\n\
+        \    Cache warming results"
+      operationId: warm_analytics_cache_api_v1_analytics_cache_warm_post
+      parameters:
+      - in: query
+        name: force_refresh
+        required: false
+        schema:
+          default: false
+          title: Force Refresh
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Warm Analytics Cache Api V1 Analytics Cache Warm Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Warm Analytics Cache
+      tags:
+      - Analytics
   /api/v1/analytics/conversations:
     get:
       description: "Get conversation statistics.\n\nArgs:\n    start_date: Start date\
@@ -11569,6 +12184,176 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Get Dashboard
+      tags:
+      - Analytics
+  /api/v1/analytics/dashboard/chart-data:
+    get:
+      description: "Get chart-ready analytics data for dashboard visualization.\n\n\
+        Args:\n    start_date: Start date for analytics\n    end_date: End date for\
+        \ analytics  \n    period: Predefined period\n    current_user: Current authenticated\
+        \ user\n    analytics_service: Analytics service\n    \nReturns:\n    Chart-ready\
+        \ analytics data"
+      operationId: get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get
+      parameters:
+      - description: Start date for analytics
+        in: query
+        name: start_date
+        required: false
+        schema:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Start date for analytics
+          title: Start Date
+      - description: End date for analytics
+        in: query
+        name: end_date
+        required: false
+        schema:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: End date for analytics
+          title: End Date
+      - description: Predefined period (1h, 24h, 7d, 30d, 90d)
+        in: query
+        name: period
+        required: false
+        schema:
+          default: 7d
+          description: Predefined period (1h, 24h, 7d, 30d, 90d)
+          title: Period
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ChartReadyAnalytics'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Dashboard Chart Data
+      tags:
+      - Analytics
+  /api/v1/analytics/dashboard/integrated:
+    get:
+      description: "Get integrated dashboard statistics.\n\nArgs:\n    current_user:\
+        \ Current authenticated user\n    analytics_service: Analytics service\n \
+        \   \nReturns:\n    Integrated dashboard statistics"
+      operationId: get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/IntegratedDashboardStats'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Integrated Dashboard Stats
+      tags:
+      - Analytics
+  /api/v1/analytics/database/analyze-queries:
+    post:
+      description: "Analyze performance of analytics database queries.\n\nArgs:\n\
+        \    query_type: Specific query type to analyze (optional)\n    current_user:\
+        \ Current authenticated user\n    db_optimization_service: Database optimization\
+        \ service\n    \nReturns:\n    Query performance analysis and optimization\
+        \ recommendations"
+      operationId: analyze_query_performance_api_v1_analytics_database_analyze_queries_post
+      parameters:
+      - in: query
+        name: query_type
+        required: false
+        schema:
+          title: Query Type
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Analyze Query Performance Api V1 Analytics Database
+                  Analyze Queries Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Analyze Query Performance
+      tags:
+      - Analytics
+  /api/v1/analytics/database/health:
+    get:
+      description: "Get comprehensive database health metrics for analytics.\n\nArgs:\n\
+        \    current_user: Current authenticated user\n    db_optimization_service:\
+        \ Database optimization service\n    \nReturns:\n    Database health metrics\
+        \ and recommendations"
+      operationId: get_database_health_metrics_api_v1_analytics_database_health_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Database Health Metrics Api V1 Analytics Database
+                  Health Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Database Health Metrics
       tags:
       - Analytics
   /api/v1/analytics/documents:
@@ -11846,6 +12631,395 @@ paths:
       summary: Get Performance Metrics
       tags:
       - Analytics
+  /api/v1/analytics/performance/detailed:
+    get:
+      description: "Get detailed performance metrics for analytics service.\n\nArgs:\n\
+        \    current_user: Current authenticated user\n    analytics_service: Analytics\
+        \ service\n    \nReturns:\n    Detailed performance metrics"
+      operationId: get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Detailed Performance Metrics Api V1 Analytics
+                  Performance Detailed Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Detailed Performance Metrics
+      tags:
+      - Analytics
+  /api/v1/analytics/real-time/real-time/cleanup:
+    post:
+      description: 'Clean up inactive real-time tasks.
+
+
+        This endpoint is admin-only and performs maintenance on the
+
+        real-time analytics service.'
+      operationId: cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Cleanup Inactive Tasks Api V1 Analytics Real Time
+                  Real Time Cleanup Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Cleanup Inactive Tasks
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/real-time/dashboard/start:
+    post:
+      description: 'Start real-time dashboard updates for the current user.
+
+
+        This endpoint initiates a background task that streams analytics data
+
+        to the user via Server-Sent Events (SSE).'
+      operationId: start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Start Real Time Dashboard Api V1 Analytics Real Time
+                  Real Time Dashboard Start Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Start Real Time Dashboard
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/real-time/dashboard/stop:
+    post:
+      description: Stop real-time dashboard updates for the current user.
+      operationId: stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Stop Real Time Dashboard Api V1 Analytics Real Time
+                  Real Time Dashboard Stop Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Stop Real Time Dashboard
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/real-time/system-health:
+    post:
+      description: 'Send system health update to all admin users.
+
+
+        This endpoint is admin-only and broadcasts health information
+
+        to all connected administrators.'
+      operationId: send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              title: Health Data
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Send System Health Update Api V1 Analytics Real Time
+                  Real Time System Health Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Send System Health Update
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/real-time/workflow/{workflow_id}/update:
+    post:
+      description: Send a real-time workflow update to the user.
+      operationId: send_workflow_update_api_v1_analytics_real_time_real_time_workflow__workflow_id__update_post
+      parameters:
+      - in: path
+        name: workflow_id
+        required: true
+        schema:
+          title: Workflow Id
+          type: string
+      - in: query
+        name: update_type
+        required: true
+        schema:
+          title: Update Type
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              title: Data
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Send Workflow Update Api V1 Analytics Real Time Real
+                  Time Workflow  Workflow Id  Update Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Send Workflow Update
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/search/intelligent:
+    get:
+      description: "Perform intelligent semantic search with personalized results.\n\
+        \nArgs:\n    query: Search query string\n    search_type: Type of content\
+        \ to search (\"documents\", \"conversations\", \"prompts\")\n    limit: Maximum\
+        \ number of results to return\n    include_recommendations: Whether to include\
+        \ search recommendations"
+      operationId: intelligent_search_api_v1_analytics_real_time_search_intelligent_get
+      parameters:
+      - in: query
+        name: query
+        required: true
+        schema:
+          title: Query
+          type: string
+      - in: query
+        name: search_type
+        required: false
+        schema:
+          default: documents
+          title: Search Type
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          title: Limit
+          type: integer
+      - in: query
+        name: include_recommendations
+        required: false
+        schema:
+          default: true
+          title: Include Recommendations
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Intelligent Search Api V1 Analytics Real Time Search
+                  Intelligent Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Intelligent Search
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/search/trending:
+    get:
+      description: Get trending content personalized for the current user.
+      operationId: get_trending_content_api_v1_analytics_real_time_search_trending_get
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          title: Limit
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Trending Content Api V1 Analytics Real Time Search
+                  Trending Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Trending Content
+      tags:
+      - Analytics
+      - real-time-analytics
+  /api/v1/analytics/real-time/user-behavior/{user_id}:
+    get:
+      description: 'Get personalized behavior analytics for a user.
+
+
+        Users can only access their own analytics unless they are admin.'
+      operationId: get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior__user_id__get
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          title: User Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get User Behavior Analytics Api V1 Analytics Real
+                  Time User Behavior  User Id  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get User Behavior Analytics
+      tags:
+      - Analytics
+      - real-time-analytics
   /api/v1/analytics/system:
     get:
       description: "Get system analytics.\n\nArgs:\n    request: System analytics\
@@ -13553,6 +14727,46 @@ paths:
       summary: Bulk Delete Documents
       tags:
       - Data Management
+  /api/v1/data/bulk/delete-filtered:
+    post:
+      description: Bulk delete with server-side filtering.
+      operationId: bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteFilteredRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeleteResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Bulk Delete With Filters
+      tags:
+      - Data Management
   /api/v1/data/bulk/delete-prompts:
     post:
       description: Bulk delete prompts.
@@ -13594,6 +14808,46 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Bulk Delete Prompts
+      tags:
+      - Data Management
+  /api/v1/data/bulk/preview:
+    post:
+      description: Preview bulk delete operation with server-side filtering.
+      operationId: preview_bulk_delete_api_v1_data_bulk_preview_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/BulkDeleteFilteredRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/BulkDeletePreviewResponse'
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Preview Bulk Delete
       tags:
       - Data Management
   /api/v1/data/export:

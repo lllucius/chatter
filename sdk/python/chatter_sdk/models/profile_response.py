@@ -33,8 +33,8 @@ class ProfileResponse(BaseModel):
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Profile name")
     description: Optional[Annotated[str, Field(strict=True, max_length=2000)]] = None
     profile_type: Optional[ProfileType] = None
-    llm_provider: Annotated[str, Field(min_length=1, strict=True, max_length=50)] = Field(description="LLM provider (openai, anthropic, etc.)")
-    llm_model: Annotated[str, Field(min_length=1, strict=True, max_length=100)] = Field(description="LLM model name")
+    llm_provider: Optional[Annotated[str, Field(strict=True, max_length=50)]] = None
+    llm_model: Optional[Annotated[str, Field(strict=True, max_length=100)]] = None
     temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = Field(default=0.7, description="Temperature for generation")
     top_p: Optional[Union[Annotated[float, Field(le=1.0, strict=True, ge=0.0)], Annotated[int, Field(le=1, strict=True, ge=0)]]] = None
     top_k: Optional[Annotated[int, Field(le=1000, strict=True, ge=1)]] = None
@@ -116,6 +116,16 @@ class ProfileResponse(BaseModel):
         # and model_fields_set contains the field
         if self.description is None and "description" in self.model_fields_set:
             _dict['description'] = None
+
+        # set to None if llm_provider (nullable) is None
+        # and model_fields_set contains the field
+        if self.llm_provider is None and "llm_provider" in self.model_fields_set:
+            _dict['llm_provider'] = None
+
+        # set to None if llm_model (nullable) is None
+        # and model_fields_set contains the field
+        if self.llm_model is None and "llm_model" in self.model_fields_set:
+            _dict['llm_model'] = None
 
         # set to None if top_p (nullable) is None
         # and model_fields_set contains the field

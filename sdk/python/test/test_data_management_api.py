@@ -48,6 +48,13 @@ class TestDataManagementApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post(self) -> None:
+        """Test case for bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post
+
+        Bulk Delete With Filters
+        """
+        pass
+
     async def test_create_backup_api_v1_data_backup_post(self) -> None:
         """Test case for create_backup_api_v1_data_backup_post
 
@@ -73,6 +80,13 @@ class TestDataManagementApi(unittest.IsolatedAsyncioTestCase):
         """Test case for list_backups_api_v1_data_backups_get
 
         List Backups
+        """
+        pass
+
+    async def test_preview_bulk_delete_api_v1_data_bulk_preview_post(self) -> None:
+        """Test case for preview_bulk_delete_api_v1_data_bulk_preview_post
+
+        Preview Bulk Delete
         """
         pass
 

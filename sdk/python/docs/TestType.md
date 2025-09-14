@@ -1,6 +1,5 @@
 # TestType
 
-Types of A/B tests.
 
 ## Enum
 

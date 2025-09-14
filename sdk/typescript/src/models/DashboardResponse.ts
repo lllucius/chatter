@@ -1,6 +1,7 @@
 /**
  * Generated from OpenAPI schema: DashboardResponse
  */
+import { ChartReadyAnalytics } from './ChartReadyAnalytics';
 import { ConversationStatsResponse } from './ConversationStatsResponse';
 import { DocumentAnalyticsResponse } from './DocumentAnalyticsResponse';
 import { PerformanceMetricsResponse } from './PerformanceMetricsResponse';
@@ -20,6 +21,8 @@ export interface DashboardResponse {
   system_health: SystemAnalyticsResponse;
   /** Custom metrics */
   custom_metrics: Record<string, unknown>[];
+  /** Chart-ready data for frontend visualization */
+  chart_data: ChartReadyAnalytics;
   /** Dashboard generation time */
   generated_at: string;
 }

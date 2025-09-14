@@ -172,6 +172,45 @@ class TestDashboardResponse(unittest.TestCase):
                 custom_metrics = [
                     { }
                     ],
+                chart_data = chatter_sdk.models.chart_ready_analytics.ChartReadyAnalytics(
+                    conversation_chart_data = [
+                        chatter_sdk.models.time_series_data_point.TimeSeriesDataPoint(
+                            date = '', 
+                            conversations = 56, 
+                            tokens = 56, 
+                            cost = 1.337, 
+                            workflows = 56, 
+                            agents = 56, 
+                            ab_tests = 56, )
+                        ], 
+                    token_usage_data = [
+                        chatter_sdk.models.time_series_data_point.TimeSeriesDataPoint(
+                            date = '', 
+                            conversations = 56, 
+                            tokens = 56, 
+                            cost = 1.337, 
+                            workflows = 56, 
+                            agents = 56, 
+                            ab_tests = 56, )
+                        ], 
+                    performance_chart_data = [
+                        chatter_sdk.models.chart_data_point.ChartDataPoint(
+                            name = '', 
+                            value = 1.337, 
+                            color = '', )
+                        ], 
+                    system_health_data = [
+                        chatter_sdk.models.chart_data_point.ChartDataPoint(
+                            name = '', 
+                            value = 1.337, 
+                            color = '', )
+                        ], 
+                    integration_data = [
+                        
+                        ], 
+                    hourly_performance_data = [
+                        { }
+                        ], ),
                 generated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f')
             )
         else:
@@ -312,6 +351,45 @@ class TestDashboardResponse(unittest.TestCase):
                 custom_metrics = [
                     { }
                     ],
+                chart_data = chatter_sdk.models.chart_ready_analytics.ChartReadyAnalytics(
+                    conversation_chart_data = [
+                        chatter_sdk.models.time_series_data_point.TimeSeriesDataPoint(
+                            date = '', 
+                            conversations = 56, 
+                            tokens = 56, 
+                            cost = 1.337, 
+                            workflows = 56, 
+                            agents = 56, 
+                            ab_tests = 56, )
+                        ], 
+                    token_usage_data = [
+                        chatter_sdk.models.time_series_data_point.TimeSeriesDataPoint(
+                            date = '', 
+                            conversations = 56, 
+                            tokens = 56, 
+                            cost = 1.337, 
+                            workflows = 56, 
+                            agents = 56, 
+                            ab_tests = 56, )
+                        ], 
+                    performance_chart_data = [
+                        chatter_sdk.models.chart_data_point.ChartDataPoint(
+                            name = '', 
+                            value = 1.337, 
+                            color = '', )
+                        ], 
+                    system_health_data = [
+                        chatter_sdk.models.chart_data_point.ChartDataPoint(
+                            name = '', 
+                            value = 1.337, 
+                            color = '', )
+                        ], 
+                    integration_data = [
+                        
+                        ], 
+                    hourly_performance_data = [
+                        { }
+                        ], ),
                 generated_at = datetime.datetime.strptime('2013-10-20 19:20:30.00', '%Y-%m-%d %H:%M:%S.%f'),
         )
         """

@@ -23,6 +23,7 @@ chatter_sdk/api/model_registry_api.py
 chatter_sdk/api/plugins_api.py
 chatter_sdk/api/profiles_api.py
 chatter_sdk/api/prompts_api.py
+chatter_sdk/api/real_time_analytics_api.py
 chatter_sdk/api/tool_servers_api.py
 chatter_sdk/api/workflows0_api.py
 chatter_sdk/api/workflows_api.py
@@ -32,6 +33,7 @@ chatter_sdk/configuration.py
 chatter_sdk/exceptions.py
 chatter_sdk/models/__init__.py
 chatter_sdk/models/ab_test_action_response.py
+chatter_sdk/models/ab_test_analytics_response.py
 chatter_sdk/models/ab_test_create_request.py
 chatter_sdk/models/ab_test_delete_response.py
 chatter_sdk/models/ab_test_list_response.py
@@ -67,9 +69,14 @@ chatter_sdk/models/backup_response.py
 chatter_sdk/models/backup_type.py
 chatter_sdk/models/body_list_agents_api_v1_agents_get.py
 chatter_sdk/models/bottleneck_info.py
+chatter_sdk/models/bulk_delete_filtered_request.py
+chatter_sdk/models/bulk_delete_preview_response.py
 chatter_sdk/models/bulk_delete_response.py
+chatter_sdk/models/bulk_operation_filters.py
 chatter_sdk/models/bulk_operation_result.py
 chatter_sdk/models/bulk_tool_server_operation.py
+chatter_sdk/models/chart_data_point.py
+chatter_sdk/models/chart_ready_analytics.py
 chatter_sdk/models/chat_request.py
 chatter_sdk/models/chat_response.py
 chatter_sdk/models/chatter_schemas_chat_workflow_templates_response.py
@@ -109,12 +116,14 @@ chatter_sdk/models/embedding_space_delete_response.py
 chatter_sdk/models/embedding_space_list.py
 chatter_sdk/models/embedding_space_update.py
 chatter_sdk/models/embedding_space_with_model.py
+chatter_sdk/models/entity_type.py
 chatter_sdk/models/export_data_request.py
 chatter_sdk/models/export_data_response.py
 chatter_sdk/models/export_scope.py
 chatter_sdk/models/health_check_response.py
 chatter_sdk/models/health_status.py
 chatter_sdk/models/http_validation_error.py
+chatter_sdk/models/integrated_dashboard_stats.py
 chatter_sdk/models/job_action_response.py
 chatter_sdk/models/job_create_request.py
 chatter_sdk/models/job_list_response.py
@@ -202,6 +211,7 @@ chatter_sdk/models/server_tool_response.py
 chatter_sdk/models/server_tools_response.py
 chatter_sdk/models/sorting_request.py
 chatter_sdk/models/sse_stats_response.py
+chatter_sdk/models/statistical_analysis.py
 chatter_sdk/models/storage_stats_response.py
 chatter_sdk/models/system_analytics_response.py
 chatter_sdk/models/test_event_response.py
@@ -209,6 +219,7 @@ chatter_sdk/models/test_metric.py
 chatter_sdk/models/test_status.py
 chatter_sdk/models/test_type.py
 chatter_sdk/models/test_variant.py
+chatter_sdk/models/time_series_data_point.py
 chatter_sdk/models/token_refresh_response.py
 chatter_sdk/models/token_response.py
 chatter_sdk/models/tool_access_level.py
@@ -234,6 +245,7 @@ chatter_sdk/models/user_tool_access_check.py
 chatter_sdk/models/user_update.py
 chatter_sdk/models/validation_error.py
 chatter_sdk/models/variant_allocation.py
+chatter_sdk/models/variant_performance.py
 chatter_sdk/models/workflow_analytics_response.py
 chatter_sdk/models/workflow_definition_create.py
 chatter_sdk/models/workflow_definition_response.py
@@ -253,6 +265,7 @@ chatter_sdk/models/workflow_validation_response.py
 chatter_sdk/py.typed
 chatter_sdk/rest.py
 docs/ABTestActionResponse.md
+docs/ABTestAnalyticsResponse.md
 docs/ABTestCreateRequest.md
 docs/ABTestDeleteResponse.md
 docs/ABTestListResponse.md
@@ -293,9 +306,14 @@ docs/BackupResponse.md
 docs/BackupType.md
 docs/BodyListAgentsApiV1AgentsGet.md
 docs/BottleneckInfo.md
+docs/BulkDeleteFilteredRequest.md
+docs/BulkDeletePreviewResponse.md
 docs/BulkDeleteResponse.md
+docs/BulkOperationFilters.md
 docs/BulkOperationResult.md
 docs/BulkToolServerOperation.md
+docs/ChartDataPoint.md
+docs/ChartReadyAnalytics.md
 docs/ChatApi.md
 docs/ChatRequest.md
 docs/ChatResponse.md
@@ -340,6 +358,7 @@ docs/EmbeddingSpaceDeleteResponse.md
 docs/EmbeddingSpaceList.md
 docs/EmbeddingSpaceUpdate.md
 docs/EmbeddingSpaceWithModel.md
+docs/EntityType.md
 docs/EventsApi.md
 docs/ExportDataRequest.md
 docs/ExportDataResponse.md
@@ -348,6 +367,7 @@ docs/HTTPValidationError.md
 docs/HealthApi.md
 docs/HealthCheckResponse.md
 docs/HealthStatus.md
+docs/IntegratedDashboardStats.md
 docs/JobActionResponse.md
 docs/JobCreateRequest.md
 docs/JobListResponse.md
@@ -430,6 +450,7 @@ docs/ProviderType.md
 docs/ProviderUpdate.md
 docs/ReadinessCheckResponse.md
 docs/ReadinessStatus.md
+docs/RealTimeAnalyticsApi.md
 docs/ReductionStrategy.md
 docs/RestoreRequest.md
 docs/RestoreResponse.md
@@ -440,6 +461,7 @@ docs/ServerStatus.md
 docs/ServerToolResponse.md
 docs/ServerToolsResponse.md
 docs/SortingRequest.md
+docs/StatisticalAnalysis.md
 docs/StorageStatsResponse.md
 docs/SystemAnalyticsResponse.md
 docs/TestEventResponse.md
@@ -447,6 +469,7 @@ docs/TestMetric.md
 docs/TestStatus.md
 docs/TestType.md
 docs/TestVariant.md
+docs/TimeSeriesDataPoint.md
 docs/TokenRefreshResponse.md
 docs/TokenResponse.md
 docs/ToolAccessLevel.md
@@ -473,6 +496,7 @@ docs/UserToolAccessCheck.md
 docs/UserUpdate.md
 docs/ValidationError.md
 docs/VariantAllocation.md
+docs/VariantPerformance.md
 docs/WorkflowAnalyticsResponse.md
 docs/WorkflowDefinitionCreate.md
 docs/WorkflowDefinitionResponse.md
@@ -499,6 +523,7 @@ setup.py
 test-requirements.txt
 test/__init__.py
 test/test_ab_test_action_response.py
+test/test_ab_test_analytics_response.py
 test/test_ab_test_create_request.py
 test/test_ab_test_delete_response.py
 test/test_ab_test_list_response.py
@@ -539,9 +564,14 @@ test/test_backup_response.py
 test/test_backup_type.py
 test/test_body_list_agents_api_v1_agents_get.py
 test/test_bottleneck_info.py
+test/test_bulk_delete_filtered_request.py
+test/test_bulk_delete_preview_response.py
 test/test_bulk_delete_response.py
+test/test_bulk_operation_filters.py
 test/test_bulk_operation_result.py
 test/test_bulk_tool_server_operation.py
+test/test_chart_data_point.py
+test/test_chart_ready_analytics.py
 test/test_chat_api.py
 test/test_chat_request.py
 test/test_chat_response.py
@@ -586,6 +616,7 @@ test/test_embedding_space_delete_response.py
 test/test_embedding_space_list.py
 test/test_embedding_space_update.py
 test/test_embedding_space_with_model.py
+test/test_entity_type.py
 test/test_events_api.py
 test/test_export_data_request.py
 test/test_export_data_response.py
@@ -594,6 +625,7 @@ test/test_health_api.py
 test/test_health_check_response.py
 test/test_health_status.py
 test/test_http_validation_error.py
+test/test_integrated_dashboard_stats.py
 test/test_job_action_response.py
 test/test_job_create_request.py
 test/test_job_list_response.py
@@ -676,6 +708,7 @@ test/test_provider_type.py
 test/test_provider_update.py
 test/test_readiness_check_response.py
 test/test_readiness_status.py
+test/test_real_time_analytics_api.py
 test/test_reduction_strategy.py
 test/test_restore_request.py
 test/test_restore_response.py
@@ -686,6 +719,7 @@ test/test_server_tool_response.py
 test/test_server_tools_response.py
 test/test_sorting_request.py
 test/test_sse_stats_response.py
+test/test_statistical_analysis.py
 test/test_storage_stats_response.py
 test/test_system_analytics_response.py
 test/test_test_event_response.py
@@ -693,6 +727,7 @@ test/test_test_metric.py
 test/test_test_status.py
 test/test_test_type.py
 test/test_test_variant.py
+test/test_time_series_data_point.py
 test/test_token_refresh_response.py
 test/test_token_response.py
 test/test_tool_access_level.py
@@ -719,6 +754,7 @@ test/test_user_tool_access_check.py
 test/test_user_update.py
 test/test_validation_error.py
 test/test_variant_allocation.py
+test/test_variant_performance.py
 test/test_workflow_analytics_response.py
 test/test_workflow_definition_create.py
 test/test_workflow_definition_response.py

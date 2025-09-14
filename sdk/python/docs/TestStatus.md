@@ -1,6 +1,5 @@
 # TestStatus
 
-A/B test status.
 
 ## Enum
 

@@ -90,6 +90,13 @@ class TestABTestingApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_test_analytics_api_v1_ab_tests_test_id_analytics_get(self) -> None:
+        """Test case for get_test_analytics_api_v1_ab_tests_test_id_analytics_get
+
+        Get Test Analytics
+        """
+        pass
+
     async def test_list_ab_tests_api_v1_ab_tests_get(self) -> None:
         """Test case for list_ab_tests_api_v1_ab_tests_get
 

@@ -38,6 +38,7 @@ __all__ = [
     "WorkflowsApi",
     "AgentsApi",
     "DefaultApi",
+    "RealTimeAnalyticsApi",
     "WorkflowsApi",
     "ApiResponse",
     "ApiClient",
@@ -49,6 +50,7 @@ __all__ = [
     "ApiAttributeError",
     "ApiException",
     "ABTestActionResponse",
+    "ABTestAnalyticsResponse",
     "ABTestCreateRequest",
     "ABTestDeleteResponse",
     "ABTestListResponse",
@@ -84,9 +86,14 @@ __all__ = [
     "BackupType",
     "BodyListAgentsApiV1AgentsGet",
     "BottleneckInfo",
+    "BulkDeleteFilteredRequest",
+    "BulkDeletePreviewResponse",
     "BulkDeleteResponse",
+    "BulkOperationFilters",
     "BulkOperationResult",
     "BulkToolServerOperation",
+    "ChartDataPoint",
+    "ChartReadyAnalytics",
     "ChatRequest",
     "ChatResponse",
     "ChatterSchemasChatWorkflowTemplatesResponse",
@@ -126,12 +133,14 @@ __all__ = [
     "EmbeddingSpaceList",
     "EmbeddingSpaceUpdate",
     "EmbeddingSpaceWithModel",
+    "EntityType",
     "ExportDataRequest",
     "ExportDataResponse",
     "ExportScope",
     "HTTPValidationError",
     "HealthCheckResponse",
     "HealthStatus",
+    "IntegratedDashboardStats",
     "JobActionResponse",
     "JobCreateRequest",
     "JobListResponse",
@@ -219,6 +228,7 @@ __all__ = [
     "ServerToolResponse",
     "ServerToolsResponse",
     "SortingRequest",
+    "StatisticalAnalysis",
     "StorageStatsResponse",
     "SystemAnalyticsResponse",
     "TestEventResponse",
@@ -226,6 +236,7 @@ __all__ = [
     "TestStatus",
     "TestType",
     "TestVariant",
+    "TimeSeriesDataPoint",
     "TokenRefreshResponse",
     "TokenResponse",
     "ToolAccessLevel",
@@ -251,6 +262,7 @@ __all__ = [
     "UserUpdate",
     "ValidationError",
     "VariantAllocation",
+    "VariantPerformance",
     "WorkflowAnalyticsResponse",
     "WorkflowDefinitionCreate",
     "WorkflowDefinitionResponse",
@@ -289,6 +301,7 @@ from chatter_sdk.api.tool_servers_api import ToolServersApi as ToolServersApi
 from chatter_sdk.api.workflows_api import WorkflowsApi as WorkflowsApi
 from chatter_sdk.api.agents_api import AgentsApi as AgentsApi
 from chatter_sdk.api.default_api import DefaultApi as DefaultApi
+from chatter_sdk.api.real_time_analytics_api import RealTimeAnalyticsApi as RealTimeAnalyticsApi
 from chatter_sdk.api.workflows_api import WorkflowsApi as WorkflowsApi
 
 # import ApiClient
@@ -304,6 +317,7 @@ from chatter_sdk.exceptions import ApiException as ApiException
 
 # import models into sdk package
 from chatter_sdk.models.ab_test_action_response import ABTestActionResponse as ABTestActionResponse
+from chatter_sdk.models.ab_test_analytics_response import ABTestAnalyticsResponse as ABTestAnalyticsResponse
 from chatter_sdk.models.ab_test_create_request import ABTestCreateRequest as ABTestCreateRequest
 from chatter_sdk.models.ab_test_delete_response import ABTestDeleteResponse as ABTestDeleteResponse
 from chatter_sdk.models.ab_test_list_response import ABTestListResponse as ABTestListResponse
@@ -339,9 +353,14 @@ from chatter_sdk.models.backup_response import BackupResponse as BackupResponse
 from chatter_sdk.models.backup_type import BackupType as BackupType
 from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet as BodyListAgentsApiV1AgentsGet
 from chatter_sdk.models.bottleneck_info import BottleneckInfo as BottleneckInfo
+from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest as BulkDeleteFilteredRequest
+from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse as BulkDeletePreviewResponse
 from chatter_sdk.models.bulk_delete_response import BulkDeleteResponse as BulkDeleteResponse
+from chatter_sdk.models.bulk_operation_filters import BulkOperationFilters as BulkOperationFilters
 from chatter_sdk.models.bulk_operation_result import BulkOperationResult as BulkOperationResult
 from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperation as BulkToolServerOperation
+from chatter_sdk.models.chart_data_point import ChartDataPoint as ChartDataPoint
+from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics as ChartReadyAnalytics
 from chatter_sdk.models.chat_request import ChatRequest as ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse as ChatResponse
 from chatter_sdk.models.chatter_schemas_chat_workflow_templates_response import ChatterSchemasChatWorkflowTemplatesResponse as ChatterSchemasChatWorkflowTemplatesResponse
@@ -381,12 +400,14 @@ from chatter_sdk.models.embedding_space_delete_response import EmbeddingSpaceDel
 from chatter_sdk.models.embedding_space_list import EmbeddingSpaceList as EmbeddingSpaceList
 from chatter_sdk.models.embedding_space_update import EmbeddingSpaceUpdate as EmbeddingSpaceUpdate
 from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithModel as EmbeddingSpaceWithModel
+from chatter_sdk.models.entity_type import EntityType as EntityType
 from chatter_sdk.models.export_data_request import ExportDataRequest as ExportDataRequest
 from chatter_sdk.models.export_data_response import ExportDataResponse as ExportDataResponse
 from chatter_sdk.models.export_scope import ExportScope as ExportScope
 from chatter_sdk.models.http_validation_error import HTTPValidationError as HTTPValidationError
 from chatter_sdk.models.health_check_response import HealthCheckResponse as HealthCheckResponse
 from chatter_sdk.models.health_status import HealthStatus as HealthStatus
+from chatter_sdk.models.integrated_dashboard_stats import IntegratedDashboardStats as IntegratedDashboardStats
 from chatter_sdk.models.job_action_response import JobActionResponse as JobActionResponse
 from chatter_sdk.models.job_create_request import JobCreateRequest as JobCreateRequest
 from chatter_sdk.models.job_list_response import JobListResponse as JobListResponse
@@ -474,6 +495,7 @@ from chatter_sdk.models.server_status import ServerStatus as ServerStatus
 from chatter_sdk.models.server_tool_response import ServerToolResponse as ServerToolResponse
 from chatter_sdk.models.server_tools_response import ServerToolsResponse as ServerToolsResponse
 from chatter_sdk.models.sorting_request import SortingRequest as SortingRequest
+from chatter_sdk.models.statistical_analysis import StatisticalAnalysis as StatisticalAnalysis
 from chatter_sdk.models.storage_stats_response import StorageStatsResponse as StorageStatsResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse as SystemAnalyticsResponse
 from chatter_sdk.models.test_event_response import TestEventResponse as TestEventResponse
@@ -481,6 +503,7 @@ from chatter_sdk.models.test_metric import TestMetric as TestMetric
 from chatter_sdk.models.test_status import TestStatus as TestStatus
 from chatter_sdk.models.test_type import TestType as TestType
 from chatter_sdk.models.test_variant import TestVariant as TestVariant
+from chatter_sdk.models.time_series_data_point import TimeSeriesDataPoint as TimeSeriesDataPoint
 from chatter_sdk.models.token_refresh_response import TokenRefreshResponse as TokenRefreshResponse
 from chatter_sdk.models.token_response import TokenResponse as TokenResponse
 from chatter_sdk.models.tool_access_level import ToolAccessLevel as ToolAccessLevel
@@ -506,6 +529,7 @@ from chatter_sdk.models.user_tool_access_check import UserToolAccessCheck as Use
 from chatter_sdk.models.user_update import UserUpdate as UserUpdate
 from chatter_sdk.models.validation_error import ValidationError as ValidationError
 from chatter_sdk.models.variant_allocation import VariantAllocation as VariantAllocation
+from chatter_sdk.models.variant_performance import VariantPerformance as VariantPerformance
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse as WorkflowAnalyticsResponse
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate as WorkflowDefinitionCreate
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse as WorkflowDefinitionResponse

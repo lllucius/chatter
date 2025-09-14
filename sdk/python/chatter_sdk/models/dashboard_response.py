@@ -21,6 +21,7 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field
 from typing import Any, ClassVar, Dict, List
+from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics
 from chatter_sdk.models.conversation_stats_response import ConversationStatsResponse
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
 from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
@@ -39,8 +40,9 @@ class DashboardResponse(BaseModel):
     document_analytics: DocumentAnalyticsResponse
     system_health: SystemAnalyticsResponse
     custom_metrics: List[Dict[str, Any]] = Field(description="Custom metrics")
+    chart_data: ChartReadyAnalytics
     generated_at: datetime = Field(description="Dashboard generation time")
-    __properties: ClassVar[List[str]] = ["conversation_stats", "usage_metrics", "performance_metrics", "document_analytics", "system_health", "custom_metrics", "generated_at"]
+    __properties: ClassVar[List[str]] = ["conversation_stats", "usage_metrics", "performance_metrics", "document_analytics", "system_health", "custom_metrics", "chart_data", "generated_at"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -96,6 +98,9 @@ class DashboardResponse(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of system_health
         if self.system_health:
             _dict['system_health'] = self.system_health.to_dict()
+        # override the default output from pydantic by calling `to_dict()` of chart_data
+        if self.chart_data:
+            _dict['chart_data'] = self.chart_data.to_dict()
         return _dict
 
     @classmethod
@@ -114,6 +119,7 @@ class DashboardResponse(BaseModel):
             "document_analytics": DocumentAnalyticsResponse.from_dict(obj["document_analytics"]) if obj.get("document_analytics") is not None else None,
             "system_health": SystemAnalyticsResponse.from_dict(obj["system_health"]) if obj.get("system_health") is not None else None,
             "custom_metrics": obj.get("custom_metrics"),
+            "chart_data": ChartReadyAnalytics.from_dict(obj["chart_data"]) if obj.get("chart_data") is not None else None,
             "generated_at": obj.get("generated_at")
         })
         return _obj

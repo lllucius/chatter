@@ -1,6 +1,5 @@
 # MetricType
 
-Types of metrics to track.
 
 ## Enum
 

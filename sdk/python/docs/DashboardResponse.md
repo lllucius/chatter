@@ -12,6 +12,7 @@ Name | Type | Description | Notes
 **document_analytics** | [**DocumentAnalyticsResponse**](DocumentAnalyticsResponse.md) |  | 
 **system_health** | [**SystemAnalyticsResponse**](SystemAnalyticsResponse.md) |  | 
 **custom_metrics** | **List[Dict[str, object]]** | Custom metrics | 
+**chart_data** | [**ChartReadyAnalytics**](ChartReadyAnalytics.md) |  | 
 **generated_at** | **datetime** | Dashboard generation time | 
 
 ## Example

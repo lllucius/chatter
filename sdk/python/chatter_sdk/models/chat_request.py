@@ -31,7 +31,6 @@ class ChatRequest(BaseModel):
     message: StrictStr = Field(description="User message")
     conversation_id: Optional[StrictStr] = None
     profile_id: Optional[StrictStr] = None
-    stream: Optional[StrictBool] = Field(default=False, description="[DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design.")
     workflow: Optional[StrictStr] = Field(default='plain', description="Workflow type: plain, rag, tools, or full (rag + tools)")
     provider: Optional[StrictStr] = None
     temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
@@ -39,10 +38,11 @@ class ChatRequest(BaseModel):
     context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     enable_retrieval: Optional[StrictBool] = None
     document_ids: Optional[List[StrictStr]] = None
+    prompt_id: Optional[StrictStr] = None
     system_prompt_override: Optional[StrictStr] = None
     workflow_config: Optional[Dict[str, Any]] = None
     workflow_type: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["message", "conversation_id", "profile_id", "stream", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "system_prompt_override", "workflow_config", "workflow_type"]
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "profile_id", "workflow", "provider", "temperature", "max_tokens", "context_limit", "enable_retrieval", "document_ids", "prompt_id", "system_prompt_override", "workflow_config", "workflow_type"]
 
     @field_validator('workflow')
     def workflow_validate_enum(cls, value):
@@ -133,6 +133,11 @@ class ChatRequest(BaseModel):
         if self.document_ids is None and "document_ids" in self.model_fields_set:
             _dict['document_ids'] = None
 
+        # set to None if prompt_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.prompt_id is None and "prompt_id" in self.model_fields_set:
+            _dict['prompt_id'] = None
+
         # set to None if system_prompt_override (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt_override is None and "system_prompt_override" in self.model_fields_set:
@@ -163,7 +168,6 @@ class ChatRequest(BaseModel):
             "message": obj.get("message"),
             "conversation_id": obj.get("conversation_id"),
             "profile_id": obj.get("profile_id"),
-            "stream": obj.get("stream") if obj.get("stream") is not None else False,
             "workflow": obj.get("workflow") if obj.get("workflow") is not None else 'plain',
             "provider": obj.get("provider"),
             "temperature": obj.get("temperature"),
@@ -171,6 +175,7 @@ class ChatRequest(BaseModel):
             "context_limit": obj.get("context_limit"),
             "enable_retrieval": obj.get("enable_retrieval"),
             "document_ids": obj.get("document_ids"),
+            "prompt_id": obj.get("prompt_id"),
             "system_prompt_override": obj.get("system_prompt_override"),
             "workflow_config": obj.get("workflow_config"),
             "workflow_type": obj.get("workflow_type")

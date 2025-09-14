@@ -10,10 +10,10 @@ export interface ProfileCreate {
   description?: string | null;
   /** Profile type */
   profile_type?: ProfileType;
-  /** LLM provider (openai, anthropic, etc.) */
-  llm_provider: string;
-  /** LLM model name */
-  llm_model: string;
+  /** LLM provider (openai, anthropic, etc.) or 'default' or None to use system default */
+  llm_provider?: string | null;
+  /** LLM model name or None to use provider default */
+  llm_model?: string | null;
   /** Temperature for generation */
   temperature?: number;
   /** Top-p sampling parameter */

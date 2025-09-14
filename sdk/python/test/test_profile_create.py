@@ -39,8 +39,8 @@ class TestProfileCreate(unittest.TestCase):
                 name = '0',
                 description = '',
                 profile_type = 'conversational',
-                llm_provider = '0',
-                llm_model = '0',
+                llm_provider = '',
+                llm_model = '',
                 temperature = 0.0,
                 top_p = 0.0,
                 top_k = 1.0,
@@ -81,8 +81,6 @@ class TestProfileCreate(unittest.TestCase):
         else:
             return ProfileCreate(
                 name = '0',
-                llm_provider = '0',
-                llm_model = '0',
         )
         """
 

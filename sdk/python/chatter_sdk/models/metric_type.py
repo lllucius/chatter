@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class MetricType(str, Enum):
     """
-    Types of metrics to track.
+    MetricType
     """
 
     """

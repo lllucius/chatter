@@ -9,8 +9,8 @@ Name | Type | Description | Notes
 **name** | **str** | Profile name | 
 **description** | **str** |  | [optional] 
 **profile_type** | [**ProfileType**](ProfileType.md) |  | [optional] 
-**llm_provider** | **str** | LLM provider (openai, anthropic, etc.) | 
-**llm_model** | **str** | LLM model name | 
+**llm_provider** | **str** |  | [optional] 
+**llm_model** | **str** |  | [optional] 
 **temperature** | **float** | Temperature for generation | [optional] [default to 0.7]
 **top_p** | **float** |  | [optional] 
 **top_k** | **int** |  | [optional] 

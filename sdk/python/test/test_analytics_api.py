@@ -27,6 +27,20 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self) -> None:
         await self.api.api_client.close()
 
+    async def test_analyze_query_performance_api_v1_analytics_database_analyze_queries_post(self) -> None:
+        """Test case for analyze_query_performance_api_v1_analytics_database_analyze_queries_post
+
+        Analyze Query Performance
+        """
+        pass
+
+    async def test_cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post(self) -> None:
+        """Test case for cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post
+
+        Cleanup Inactive Tasks
+        """
+        pass
+
     async def test_export_analytics_api_v1_analytics_export_post(self) -> None:
         """Test case for export_analytics_api_v1_analytics_export_post
 
@@ -48,6 +62,13 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_cache_warming_status_api_v1_analytics_cache_status_get(self) -> None:
+        """Test case for get_cache_warming_status_api_v1_analytics_cache_status_get
+
+        Get Cache Warming Status
+        """
+        pass
+
     async def test_get_conversation_stats_api_v1_analytics_conversations_get(self) -> None:
         """Test case for get_conversation_stats_api_v1_analytics_conversations_get
 
@@ -62,10 +83,38 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get(self) -> None:
+        """Test case for get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get
+
+        Get Dashboard Chart Data
+        """
+        pass
+
+    async def test_get_database_health_metrics_api_v1_analytics_database_health_get(self) -> None:
+        """Test case for get_database_health_metrics_api_v1_analytics_database_health_get
+
+        Get Database Health Metrics
+        """
+        pass
+
+    async def test_get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get(self) -> None:
+        """Test case for get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get
+
+        Get Detailed Performance Metrics
+        """
+        pass
+
     async def test_get_document_analytics_api_v1_analytics_documents_get(self) -> None:
         """Test case for get_document_analytics_api_v1_analytics_documents_get
 
         Get Document Analytics
+        """
+        pass
+
+    async def test_get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get(self) -> None:
+        """Test case for get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get
+
+        Get Integrated Dashboard Stats
         """
         pass
 
@@ -90,6 +139,13 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_trending_content_api_v1_analytics_real_time_search_trending_get(self) -> None:
+        """Test case for get_trending_content_api_v1_analytics_real_time_search_trending_get
+
+        Get Trending Content
+        """
+        pass
+
     async def test_get_usage_metrics_api_v1_analytics_usage_get(self) -> None:
         """Test case for get_usage_metrics_api_v1_analytics_usage_get
 
@@ -101,6 +157,69 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """Test case for get_user_analytics_api_v1_analytics_users_user_id_get
 
         Get User Analytics
+        """
+        pass
+
+    async def test_get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get(self) -> None:
+        """Test case for get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get
+
+        Get User Behavior Analytics
+        """
+        pass
+
+    async def test_intelligent_search_api_v1_analytics_real_time_search_intelligent_get(self) -> None:
+        """Test case for intelligent_search_api_v1_analytics_real_time_search_intelligent_get
+
+        Intelligent Search
+        """
+        pass
+
+    async def test_invalidate_stale_cache_api_v1_analytics_cache_invalidate_post(self) -> None:
+        """Test case for invalidate_stale_cache_api_v1_analytics_cache_invalidate_post
+
+        Invalidate Stale Cache
+        """
+        pass
+
+    async def test_optimize_cache_performance_api_v1_analytics_cache_optimize_post(self) -> None:
+        """Test case for optimize_cache_performance_api_v1_analytics_cache_optimize_post
+
+        Optimize Cache Performance
+        """
+        pass
+
+    async def test_send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post(self) -> None:
+        """Test case for send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post
+
+        Send System Health Update
+        """
+        pass
+
+    async def test_send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(self) -> None:
+        """Test case for send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post
+
+        Send Workflow Update
+        """
+        pass
+
+    async def test_start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post(self) -> None:
+        """Test case for start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post
+
+        Start Real Time Dashboard
+        """
+        pass
+
+    async def test_stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post(self) -> None:
+        """Test case for stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post
+
+        Stop Real Time Dashboard
+        """
+        pass
+
+    async def test_warm_analytics_cache_api_v1_analytics_cache_warm_post(self) -> None:
+        """Test case for warm_analytics_cache_api_v1_analytics_cache_warm_post
+
+        Warm Analytics Cache
         """
         pass
 

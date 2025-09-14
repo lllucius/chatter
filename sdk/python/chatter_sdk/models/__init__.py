@@ -16,6 +16,7 @@
 
 # import models into model package
 from chatter_sdk.models.ab_test_action_response import ABTestActionResponse
+from chatter_sdk.models.ab_test_analytics_response import ABTestAnalyticsResponse
 from chatter_sdk.models.ab_test_create_request import ABTestCreateRequest
 from chatter_sdk.models.ab_test_delete_response import ABTestDeleteResponse
 from chatter_sdk.models.ab_test_list_response import ABTestListResponse
@@ -51,9 +52,14 @@ from chatter_sdk.models.backup_response import BackupResponse
 from chatter_sdk.models.backup_type import BackupType
 from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 from chatter_sdk.models.bottleneck_info import BottleneckInfo
+from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest
+from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse
 from chatter_sdk.models.bulk_delete_response import BulkDeleteResponse
+from chatter_sdk.models.bulk_operation_filters import BulkOperationFilters
 from chatter_sdk.models.bulk_operation_result import BulkOperationResult
 from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperation
+from chatter_sdk.models.chart_data_point import ChartDataPoint
+from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics
 from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chatter_schemas_chat_workflow_templates_response import ChatterSchemasChatWorkflowTemplatesResponse
@@ -93,12 +99,14 @@ from chatter_sdk.models.embedding_space_delete_response import EmbeddingSpaceDel
 from chatter_sdk.models.embedding_space_list import EmbeddingSpaceList
 from chatter_sdk.models.embedding_space_update import EmbeddingSpaceUpdate
 from chatter_sdk.models.embedding_space_with_model import EmbeddingSpaceWithModel
+from chatter_sdk.models.entity_type import EntityType
 from chatter_sdk.models.export_data_request import ExportDataRequest
 from chatter_sdk.models.export_data_response import ExportDataResponse
 from chatter_sdk.models.export_scope import ExportScope
 from chatter_sdk.models.http_validation_error import HTTPValidationError
 from chatter_sdk.models.health_check_response import HealthCheckResponse
 from chatter_sdk.models.health_status import HealthStatus
+from chatter_sdk.models.integrated_dashboard_stats import IntegratedDashboardStats
 from chatter_sdk.models.job_action_response import JobActionResponse
 from chatter_sdk.models.job_create_request import JobCreateRequest
 from chatter_sdk.models.job_list_response import JobListResponse
@@ -186,6 +194,7 @@ from chatter_sdk.models.server_status import ServerStatus
 from chatter_sdk.models.server_tool_response import ServerToolResponse
 from chatter_sdk.models.server_tools_response import ServerToolsResponse
 from chatter_sdk.models.sorting_request import SortingRequest
+from chatter_sdk.models.statistical_analysis import StatisticalAnalysis
 from chatter_sdk.models.storage_stats_response import StorageStatsResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse
 from chatter_sdk.models.test_event_response import TestEventResponse
@@ -193,6 +202,7 @@ from chatter_sdk.models.test_metric import TestMetric
 from chatter_sdk.models.test_status import TestStatus
 from chatter_sdk.models.test_type import TestType
 from chatter_sdk.models.test_variant import TestVariant
+from chatter_sdk.models.time_series_data_point import TimeSeriesDataPoint
 from chatter_sdk.models.token_refresh_response import TokenRefreshResponse
 from chatter_sdk.models.token_response import TokenResponse
 from chatter_sdk.models.tool_access_level import ToolAccessLevel
@@ -218,6 +228,7 @@ from chatter_sdk.models.user_tool_access_check import UserToolAccessCheck
 from chatter_sdk.models.user_update import UserUpdate
 from chatter_sdk.models.validation_error import ValidationError
 from chatter_sdk.models.variant_allocation import VariantAllocation
+from chatter_sdk.models.variant_performance import VariantPerformance
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse

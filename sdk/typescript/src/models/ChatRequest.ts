@@ -8,8 +8,6 @@ export interface ChatRequest {
   conversation_id?: string | null;
   /** Profile ID to use */
   profile_id?: string | null;
-  /** [DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design. */
-  stream?: boolean;
   /** Workflow type: plain, rag, tools, or full (rag + tools) */
   workflow?: "plain" | "rag" | "tools" | "full";
   /** Override LLM provider for this request */
@@ -24,6 +22,8 @@ export interface ChatRequest {
   enable_retrieval?: boolean | null;
   /** Document IDs to include in context */
   document_ids?: string[] | null;
+  /** Prompt template ID to use for this request */
+  prompt_id?: string | null;
   /** Override system prompt for this request */
   system_prompt_override?: string | null;
   /** Workflow configuration */

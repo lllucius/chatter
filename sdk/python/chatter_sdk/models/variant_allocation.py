@@ -21,7 +21,7 @@ from typing_extensions import Self
 
 class VariantAllocation(str, Enum):
     """
-    Variant allocation strategies.
+    VariantAllocation
     """
 
     """

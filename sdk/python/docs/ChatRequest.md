@@ -9,7 +9,6 @@ Name | Type | Description | Notes
 **message** | **str** | User message | 
 **conversation_id** | **str** |  | [optional] 
 **profile_id** | **str** |  | [optional] 
-**stream** | **bool** | [DEPRECATED] Use /streaming endpoint instead. This field is ignored in the new API design. | [optional] [default to False]
 **workflow** | **str** | Workflow type: plain, rag, tools, or full (rag + tools) | [optional] [default to 'plain']
 **provider** | **str** |  | [optional] 
 **temperature** | **float** |  | [optional] 
@@ -17,6 +16,7 @@ Name | Type | Description | Notes
 **context_limit** | **int** |  | [optional] 
 **enable_retrieval** | **bool** |  | [optional] 
 **document_ids** | **List[str]** |  | [optional] 
+**prompt_id** | **str** |  | [optional] 
 **system_prompt_override** | **str** |  | [optional] 
 **workflow_config** | **Dict[str, object]** |  | [optional] 
 **workflow_type** | **str** |  | [optional] 

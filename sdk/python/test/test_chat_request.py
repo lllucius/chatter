@@ -39,7 +39,6 @@ class TestChatRequest(unittest.TestCase):
                 message = '',
                 conversation_id = '',
                 profile_id = '',
-                stream = True,
                 workflow = 'plain',
                 provider = '',
                 temperature = 0.0,
@@ -49,6 +48,7 @@ class TestChatRequest(unittest.TestCase):
                 document_ids = [
                     ''
                     ],
+                prompt_id = '',
                 system_prompt_override = '',
                 workflow_config = { },
                 workflow_type = ''

@@ -103,6 +103,7 @@ Class | Method | HTTP request | Description
 *ABTestingApi* | [**get_ab_test_performance_api_v1_ab_tests_test_id_performance_get**](docs/ABTestingApi.md#get_ab_test_performance_api_v1_ab_tests_test_id_performance_get) | **GET** /api/v1/ab-tests/{test_id}/performance | Get Ab Test Performance
 *ABTestingApi* | [**get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get**](docs/ABTestingApi.md#get_ab_test_recommendations_api_v1_ab_tests_test_id_recommendations_get) | **GET** /api/v1/ab-tests/{test_id}/recommendations | Get Ab Test Recommendations
 *ABTestingApi* | [**get_ab_test_results_api_v1_ab_tests_test_id_results_get**](docs/ABTestingApi.md#get_ab_test_results_api_v1_ab_tests_test_id_results_get) | **GET** /api/v1/ab-tests/{test_id}/results | Get Ab Test Results
+*ABTestingApi* | [**get_test_analytics_api_v1_ab_tests_test_id_analytics_get**](docs/ABTestingApi.md#get_test_analytics_api_v1_ab_tests_test_id_analytics_get) | **GET** /api/v1/ab-tests/{test_id}/analytics | Get Test Analytics
 *ABTestingApi* | [**list_ab_tests_api_v1_ab_tests_get**](docs/ABTestingApi.md#list_ab_tests_api_v1_ab_tests_get) | **GET** /api/v1/ab-tests/ | List Ab Tests
 *ABTestingApi* | [**pause_ab_test_api_v1_ab_tests_test_id_pause_post**](docs/ABTestingApi.md#pause_ab_test_api_v1_ab_tests_test_id_pause_post) | **POST** /api/v1/ab-tests/{test_id}/pause | Pause Ab Test
 *ABTestingApi* | [**start_ab_test_api_v1_ab_tests_test_id_start_post**](docs/ABTestingApi.md#start_ab_test_api_v1_ab_tests_test_id_start_post) | **POST** /api/v1/ab-tests/{test_id}/start | Start Ab Test
@@ -118,17 +119,34 @@ Class | Method | HTTP request | Description
 *AgentsApi* | [**interact_with_agent_api_v1_agents_agent_id_interact_post**](docs/AgentsApi.md#interact_with_agent_api_v1_agents_agent_id_interact_post) | **POST** /api/v1/agents/{agent_id}/interact | Interact with agent
 *AgentsApi* | [**list_agents_api_v1_agents_get**](docs/AgentsApi.md#list_agents_api_v1_agents_get) | **GET** /api/v1/agents/ | List agents
 *AgentsApi* | [**update_agent_api_v1_agents_agent_id_put**](docs/AgentsApi.md#update_agent_api_v1_agents_agent_id_put) | **PUT** /api/v1/agents/{agent_id} | Update Agent
+*AnalyticsApi* | [**analyze_query_performance_api_v1_analytics_database_analyze_queries_post**](docs/AnalyticsApi.md#analyze_query_performance_api_v1_analytics_database_analyze_queries_post) | **POST** /api/v1/analytics/database/analyze-queries | Analyze Query Performance
+*AnalyticsApi* | [**cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post**](docs/AnalyticsApi.md#cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post) | **POST** /api/v1/analytics/real-time/real-time/cleanup | Cleanup Inactive Tasks
 *AnalyticsApi* | [**export_analytics_api_v1_analytics_export_post**](docs/AnalyticsApi.md#export_analytics_api_v1_analytics_export_post) | **POST** /api/v1/analytics/export | Export Analytics
 *AnalyticsApi* | [**get_analytics_health_api_v1_analytics_health_get**](docs/AnalyticsApi.md#get_analytics_health_api_v1_analytics_health_get) | **GET** /api/v1/analytics/health | Get Analytics Health
 *AnalyticsApi* | [**get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get**](docs/AnalyticsApi.md#get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get) | **GET** /api/v1/analytics/metrics/summary | Get Analytics Metrics Summary
+*AnalyticsApi* | [**get_cache_warming_status_api_v1_analytics_cache_status_get**](docs/AnalyticsApi.md#get_cache_warming_status_api_v1_analytics_cache_status_get) | **GET** /api/v1/analytics/cache/status | Get Cache Warming Status
 *AnalyticsApi* | [**get_conversation_stats_api_v1_analytics_conversations_get**](docs/AnalyticsApi.md#get_conversation_stats_api_v1_analytics_conversations_get) | **GET** /api/v1/analytics/conversations | Get Conversation Stats
 *AnalyticsApi* | [**get_dashboard_api_v1_analytics_dashboard_get**](docs/AnalyticsApi.md#get_dashboard_api_v1_analytics_dashboard_get) | **GET** /api/v1/analytics/dashboard | Get Dashboard
+*AnalyticsApi* | [**get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get**](docs/AnalyticsApi.md#get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get) | **GET** /api/v1/analytics/dashboard/chart-data | Get Dashboard Chart Data
+*AnalyticsApi* | [**get_database_health_metrics_api_v1_analytics_database_health_get**](docs/AnalyticsApi.md#get_database_health_metrics_api_v1_analytics_database_health_get) | **GET** /api/v1/analytics/database/health | Get Database Health Metrics
+*AnalyticsApi* | [**get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get**](docs/AnalyticsApi.md#get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get) | **GET** /api/v1/analytics/performance/detailed | Get Detailed Performance Metrics
 *AnalyticsApi* | [**get_document_analytics_api_v1_analytics_documents_get**](docs/AnalyticsApi.md#get_document_analytics_api_v1_analytics_documents_get) | **GET** /api/v1/analytics/documents | Get Document Analytics
+*AnalyticsApi* | [**get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get**](docs/AnalyticsApi.md#get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get) | **GET** /api/v1/analytics/dashboard/integrated | Get Integrated Dashboard Stats
 *AnalyticsApi* | [**get_performance_metrics_api_v1_analytics_performance_get**](docs/AnalyticsApi.md#get_performance_metrics_api_v1_analytics_performance_get) | **GET** /api/v1/analytics/performance | Get Performance Metrics
 *AnalyticsApi* | [**get_system_analytics_api_v1_analytics_system_get**](docs/AnalyticsApi.md#get_system_analytics_api_v1_analytics_system_get) | **GET** /api/v1/analytics/system | Get System Analytics
 *AnalyticsApi* | [**get_tool_server_analytics_api_v1_analytics_toolservers_get**](docs/AnalyticsApi.md#get_tool_server_analytics_api_v1_analytics_toolservers_get) | **GET** /api/v1/analytics/toolservers | Get Tool Server Analytics
+*AnalyticsApi* | [**get_trending_content_api_v1_analytics_real_time_search_trending_get**](docs/AnalyticsApi.md#get_trending_content_api_v1_analytics_real_time_search_trending_get) | **GET** /api/v1/analytics/real-time/search/trending | Get Trending Content
 *AnalyticsApi* | [**get_usage_metrics_api_v1_analytics_usage_get**](docs/AnalyticsApi.md#get_usage_metrics_api_v1_analytics_usage_get) | **GET** /api/v1/analytics/usage | Get Usage Metrics
 *AnalyticsApi* | [**get_user_analytics_api_v1_analytics_users_user_id_get**](docs/AnalyticsApi.md#get_user_analytics_api_v1_analytics_users_user_id_get) | **GET** /api/v1/analytics/users/{user_id} | Get User Analytics
+*AnalyticsApi* | [**get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get**](docs/AnalyticsApi.md#get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get) | **GET** /api/v1/analytics/real-time/user-behavior/{user_id} | Get User Behavior Analytics
+*AnalyticsApi* | [**intelligent_search_api_v1_analytics_real_time_search_intelligent_get**](docs/AnalyticsApi.md#intelligent_search_api_v1_analytics_real_time_search_intelligent_get) | **GET** /api/v1/analytics/real-time/search/intelligent | Intelligent Search
+*AnalyticsApi* | [**invalidate_stale_cache_api_v1_analytics_cache_invalidate_post**](docs/AnalyticsApi.md#invalidate_stale_cache_api_v1_analytics_cache_invalidate_post) | **POST** /api/v1/analytics/cache/invalidate | Invalidate Stale Cache
+*AnalyticsApi* | [**optimize_cache_performance_api_v1_analytics_cache_optimize_post**](docs/AnalyticsApi.md#optimize_cache_performance_api_v1_analytics_cache_optimize_post) | **POST** /api/v1/analytics/cache/optimize | Optimize Cache Performance
+*AnalyticsApi* | [**send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post**](docs/AnalyticsApi.md#send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post) | **POST** /api/v1/analytics/real-time/real-time/system-health | Send System Health Update
+*AnalyticsApi* | [**send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post**](docs/AnalyticsApi.md#send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post) | **POST** /api/v1/analytics/real-time/real-time/workflow/{workflow_id}/update | Send Workflow Update
+*AnalyticsApi* | [**start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post**](docs/AnalyticsApi.md#start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post) | **POST** /api/v1/analytics/real-time/real-time/dashboard/start | Start Real Time Dashboard
+*AnalyticsApi* | [**stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post**](docs/AnalyticsApi.md#stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post) | **POST** /api/v1/analytics/real-time/real-time/dashboard/stop | Stop Real Time Dashboard
+*AnalyticsApi* | [**warm_analytics_cache_api_v1_analytics_cache_warm_post**](docs/AnalyticsApi.md#warm_analytics_cache_api_v1_analytics_cache_warm_post) | **POST** /api/v1/analytics/cache/warm | Warm Analytics Cache
 *AuthenticationApi* | [**change_password_api_v1_auth_change_password_post**](docs/AuthenticationApi.md#change_password_api_v1_auth_change_password_post) | **POST** /api/v1/auth/change-password | Change Password
 *AuthenticationApi* | [**confirm_password_reset_api_v1_auth_password_reset_confirm_post**](docs/AuthenticationApi.md#confirm_password_reset_api_v1_auth_password_reset_confirm_post) | **POST** /api/v1/auth/password-reset/confirm | Confirm Password Reset
 *AuthenticationApi* | [**create_api_key_api_v1_auth_api_key_post**](docs/AuthenticationApi.md#create_api_key_api_v1_auth_api_key_post) | **POST** /api/v1/auth/api-key | Create Api Key
@@ -160,10 +178,12 @@ Class | Method | HTTP request | Description
 *DataManagementApi* | [**bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post**](docs/DataManagementApi.md#bulk_delete_conversations_api_v1_data_bulk_delete_conversations_post) | **POST** /api/v1/data/bulk/delete-conversations | Bulk Delete Conversations
 *DataManagementApi* | [**bulk_delete_documents_api_v1_data_bulk_delete_documents_post**](docs/DataManagementApi.md#bulk_delete_documents_api_v1_data_bulk_delete_documents_post) | **POST** /api/v1/data/bulk/delete-documents | Bulk Delete Documents
 *DataManagementApi* | [**bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post**](docs/DataManagementApi.md#bulk_delete_prompts_api_v1_data_bulk_delete_prompts_post) | **POST** /api/v1/data/bulk/delete-prompts | Bulk Delete Prompts
+*DataManagementApi* | [**bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post**](docs/DataManagementApi.md#bulk_delete_with_filters_api_v1_data_bulk_delete_filtered_post) | **POST** /api/v1/data/bulk/delete-filtered | Bulk Delete With Filters
 *DataManagementApi* | [**create_backup_api_v1_data_backup_post**](docs/DataManagementApi.md#create_backup_api_v1_data_backup_post) | **POST** /api/v1/data/backup | Create Backup
 *DataManagementApi* | [**export_data_api_v1_data_export_post**](docs/DataManagementApi.md#export_data_api_v1_data_export_post) | **POST** /api/v1/data/export | Export Data
 *DataManagementApi* | [**get_storage_stats_api_v1_data_stats_get**](docs/DataManagementApi.md#get_storage_stats_api_v1_data_stats_get) | **GET** /api/v1/data/stats | Get Storage Stats
 *DataManagementApi* | [**list_backups_api_v1_data_backups_get**](docs/DataManagementApi.md#list_backups_api_v1_data_backups_get) | **GET** /api/v1/data/backups | List Backups
+*DataManagementApi* | [**preview_bulk_delete_api_v1_data_bulk_preview_post**](docs/DataManagementApi.md#preview_bulk_delete_api_v1_data_bulk_preview_post) | **POST** /api/v1/data/bulk/preview | Preview Bulk Delete
 *DataManagementApi* | [**restore_from_backup_api_v1_data_restore_post**](docs/DataManagementApi.md#restore_from_backup_api_v1_data_restore_post) | **POST** /api/v1/data/restore | Restore From Backup
 *DocumentsApi* | [**delete_document_api_v1_documents_document_id_delete**](docs/DocumentsApi.md#delete_document_api_v1_documents_document_id_delete) | **DELETE** /api/v1/documents/{document_id} | Delete Document
 *DocumentsApi* | [**download_document_api_v1_documents_document_id_download_get**](docs/DocumentsApi.md#download_document_api_v1_documents_document_id_download_get) | **GET** /api/v1/documents/{document_id}/download | Download Document
@@ -293,6 +313,14 @@ Class | Method | HTTP request | Description
 *AgentsApi* | [**list_agents_api_v1_agents_get**](docs/AgentsApi.md#list_agents_api_v1_agents_get) | **GET** /api/v1/agents/ | List agents
 *AgentsApi* | [**update_agent_api_v1_agents_agent_id_put**](docs/AgentsApi.md#update_agent_api_v1_agents_agent_id_put) | **PUT** /api/v1/agents/{agent_id} | Update Agent
 *DefaultApi* | [**root_get**](docs/DefaultApi.md#root_get) | **GET** / | Root
+*RealTimeAnalyticsApi* | [**cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post**](docs/RealTimeAnalyticsApi.md#cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post) | **POST** /api/v1/analytics/real-time/real-time/cleanup | Cleanup Inactive Tasks
+*RealTimeAnalyticsApi* | [**get_trending_content_api_v1_analytics_real_time_search_trending_get**](docs/RealTimeAnalyticsApi.md#get_trending_content_api_v1_analytics_real_time_search_trending_get) | **GET** /api/v1/analytics/real-time/search/trending | Get Trending Content
+*RealTimeAnalyticsApi* | [**get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get**](docs/RealTimeAnalyticsApi.md#get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get) | **GET** /api/v1/analytics/real-time/user-behavior/{user_id} | Get User Behavior Analytics
+*RealTimeAnalyticsApi* | [**intelligent_search_api_v1_analytics_real_time_search_intelligent_get**](docs/RealTimeAnalyticsApi.md#intelligent_search_api_v1_analytics_real_time_search_intelligent_get) | **GET** /api/v1/analytics/real-time/search/intelligent | Intelligent Search
+*RealTimeAnalyticsApi* | [**send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post**](docs/RealTimeAnalyticsApi.md#send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post) | **POST** /api/v1/analytics/real-time/real-time/system-health | Send System Health Update
+*RealTimeAnalyticsApi* | [**send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post**](docs/RealTimeAnalyticsApi.md#send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post) | **POST** /api/v1/analytics/real-time/real-time/workflow/{workflow_id}/update | Send Workflow Update
+*RealTimeAnalyticsApi* | [**start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post**](docs/RealTimeAnalyticsApi.md#start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post) | **POST** /api/v1/analytics/real-time/real-time/dashboard/start | Start Real Time Dashboard
+*RealTimeAnalyticsApi* | [**stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post**](docs/RealTimeAnalyticsApi.md#stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post) | **POST** /api/v1/analytics/real-time/real-time/dashboard/stop | Stop Real Time Dashboard
 *WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_workflows_definitions_post) | **POST** /api/v1/workflows/workflows/definitions | Create Workflow Definition
 *WorkflowsApi* | [**create_workflow_template_api_v1_workflows_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_workflows_templates_post) | **POST** /api/v1/workflows/workflows/templates | Create Workflow Template
 *WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/workflows/definitions/{workflow_id} | Delete Workflow Definition
@@ -311,6 +339,7 @@ Class | Method | HTTP request | Description
 ## Documentation For Models
 
  - [ABTestActionResponse](docs/ABTestActionResponse.md)
+ - [ABTestAnalyticsResponse](docs/ABTestAnalyticsResponse.md)
  - [ABTestCreateRequest](docs/ABTestCreateRequest.md)
  - [ABTestDeleteResponse](docs/ABTestDeleteResponse.md)
  - [ABTestListResponse](docs/ABTestListResponse.md)
@@ -346,9 +375,14 @@ Class | Method | HTTP request | Description
  - [BackupType](docs/BackupType.md)
  - [BodyListAgentsApiV1AgentsGet](docs/BodyListAgentsApiV1AgentsGet.md)
  - [BottleneckInfo](docs/BottleneckInfo.md)
+ - [BulkDeleteFilteredRequest](docs/BulkDeleteFilteredRequest.md)
+ - [BulkDeletePreviewResponse](docs/BulkDeletePreviewResponse.md)
  - [BulkDeleteResponse](docs/BulkDeleteResponse.md)
+ - [BulkOperationFilters](docs/BulkOperationFilters.md)
  - [BulkOperationResult](docs/BulkOperationResult.md)
  - [BulkToolServerOperation](docs/BulkToolServerOperation.md)
+ - [ChartDataPoint](docs/ChartDataPoint.md)
+ - [ChartReadyAnalytics](docs/ChartReadyAnalytics.md)
  - [ChatRequest](docs/ChatRequest.md)
  - [ChatResponse](docs/ChatResponse.md)
  - [ChatterSchemasChatWorkflowTemplatesResponse](docs/ChatterSchemasChatWorkflowTemplatesResponse.md)
@@ -388,12 +422,14 @@ Class | Method | HTTP request | Description
  - [EmbeddingSpaceList](docs/EmbeddingSpaceList.md)
  - [EmbeddingSpaceUpdate](docs/EmbeddingSpaceUpdate.md)
  - [EmbeddingSpaceWithModel](docs/EmbeddingSpaceWithModel.md)
+ - [EntityType](docs/EntityType.md)
  - [ExportDataRequest](docs/ExportDataRequest.md)
  - [ExportDataResponse](docs/ExportDataResponse.md)
  - [ExportScope](docs/ExportScope.md)
  - [HTTPValidationError](docs/HTTPValidationError.md)
  - [HealthCheckResponse](docs/HealthCheckResponse.md)
  - [HealthStatus](docs/HealthStatus.md)
+ - [IntegratedDashboardStats](docs/IntegratedDashboardStats.md)
  - [JobActionResponse](docs/JobActionResponse.md)
  - [JobCreateRequest](docs/JobCreateRequest.md)
  - [JobListResponse](docs/JobListResponse.md)
@@ -481,6 +517,7 @@ Class | Method | HTTP request | Description
  - [ServerToolResponse](docs/ServerToolResponse.md)
  - [ServerToolsResponse](docs/ServerToolsResponse.md)
  - [SortingRequest](docs/SortingRequest.md)
+ - [StatisticalAnalysis](docs/StatisticalAnalysis.md)
  - [StorageStatsResponse](docs/StorageStatsResponse.md)
  - [SystemAnalyticsResponse](docs/SystemAnalyticsResponse.md)
  - [TestEventResponse](docs/TestEventResponse.md)
@@ -488,6 +525,7 @@ Class | Method | HTTP request | Description
  - [TestStatus](docs/TestStatus.md)
  - [TestType](docs/TestType.md)
  - [TestVariant](docs/TestVariant.md)
+ - [TimeSeriesDataPoint](docs/TimeSeriesDataPoint.md)
  - [TokenRefreshResponse](docs/TokenRefreshResponse.md)
  - [TokenResponse](docs/TokenResponse.md)
  - [ToolAccessLevel](docs/ToolAccessLevel.md)
@@ -513,6 +551,7 @@ Class | Method | HTTP request | Description
  - [UserUpdate](docs/UserUpdate.md)
  - [ValidationError](docs/ValidationError.md)
  - [VariantAllocation](docs/VariantAllocation.md)
+ - [VariantPerformance](docs/VariantPerformance.md)
  - [WorkflowAnalyticsResponse](docs/WorkflowAnalyticsResponse.md)
  - [WorkflowDefinitionCreate](docs/WorkflowDefinitionCreate.md)
  - [WorkflowDefinitionResponse](docs/WorkflowDefinitionResponse.md)

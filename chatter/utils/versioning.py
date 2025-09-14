@@ -55,6 +55,7 @@ class APIVersionManager:
                 "Changed response format for chat endpoints",
                 "Updated authentication token structure",
                 "Modified error response schema",
+                "Replaced PostgreSQL checkpointing with Redis checkpointing for LangGraph",
             ],
             new_features=[
                 "AI agent management",
@@ -63,7 +64,7 @@ class APIVersionManager:
                 "A/B testing infrastructure",
                 "Enhanced security validation",
                 "Advanced vector store filtering",
-                "PostgreSQL checkpointer for LangGraph",
+                "Redis checkpointer for LangGraph",
             ],
         )
 

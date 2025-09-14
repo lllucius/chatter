@@ -457,7 +457,7 @@ class Settings(BaseSettings):
 
     # LangGraph
     langgraph_checkpoint_store: str = Field(
-        default="postgres", description="LangGraph checkpoint store"
+        default="redis", description="LangGraph checkpoint store"
     )
     langgraph_max_iterations: int = Field(
         default=50, description="LangGraph max iterations"

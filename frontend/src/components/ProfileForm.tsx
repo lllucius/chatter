@@ -68,11 +68,11 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   } = useBaseForm(
     {
       defaultData: defaultProfileData,
-      transformInitialData: (data: ProfileResponse): void => ({
+      transformInitialData: (data: ProfileResponse) => ({
         name: data.name || '',
         description: data.description || '',
-        llmModel: data.llmModel || '',
-        llmProvider: data.llmProvider || '',
+        llmModel: data.llm_model || '',
+        llmProvider: data.llm_provider || '',
         temperature: data.temperature ?? 0.7,
         max_tokens: data.max_tokens ?? 1000,
         top_p: data.top_p ?? 1.0,
@@ -164,7 +164,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth required>
+          <FormControl fullWidth>
             <InputLabel>Provider</InputLabel>
             <Select
               value={formData.llmProvider}
@@ -203,7 +203,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           />
         </Grid>
         <Grid size={{ xs: 12, sm: 6 }}>
-          <FormControl fullWidth required>
+          <FormControl fullWidth>
             <InputLabel>Model</InputLabel>
             <Select
               value={formData.llmModel}
@@ -211,7 +211,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
               onChange={(e) => updateFormData({ llmModel: e.target.value })}
               disabled={!formData.llmProvider || loadingProviders}
             >
-              {getAvailableModels().map((model): void => (
+              {getAvailableModels().map((model) => (
                 <MenuItem key={model.name} value={model.name}>
                       {model.display_name}
                     </MenuItem>

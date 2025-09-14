@@ -30,14 +30,13 @@ class ProfileBase(BaseModel):
     )
 
     # LLM Configuration
-    llm_provider: str = Field(
-        ...,
-        min_length=1,
+    llm_provider: str | None = Field(
+        None,
         max_length=50,
-        description="LLM provider (openai, anthropic, etc.)",
+        description="LLM provider (openai, anthropic, etc.) or 'default' or None to use system default",
     )
-    llm_model: str = Field(
-        ..., min_length=1, max_length=100, description="LLM model name"
+    llm_model: str | None = Field(
+        None, max_length=100, description="LLM model name or None to use provider default"
     )
 
     # Generation parameters
@@ -197,6 +196,9 @@ class ProfileBase(BaseModel):
     def validate_provider_model(cls, v: str | None) -> str | None:
         """Validate provider and model names."""
         if v:
+            # Allow "default" as a special value for providers
+            if v.lower() == "default":
+                return "default"
             # Basic validation for provider/model names
             if (
                 not v.replace("-", "")
@@ -324,15 +326,7 @@ class ProfileCreate(ProfileBase):
     # For now, it inherits all validation from ProfileBase, but this allows
     # for future customization of creation-specific validation rules
 
-    @field_validator("llm_provider", "llm_model")
-    @classmethod
-    def validate_required_llm_fields(cls, v: str) -> str:
-        """Ensure LLM provider and model are provided for new profiles."""
-        if not v or not v.strip():
-            raise ValueError(
-                "LLM provider and model are required for new profiles"
-            )
-        return v.strip()
+    pass
 
 
 class ProfileUpdate(BaseModel):

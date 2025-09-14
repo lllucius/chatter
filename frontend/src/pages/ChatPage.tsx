@@ -421,6 +421,7 @@ const ChatPage: React.FC = () => {
         max_tokens: maxTokens,
         enable_retrieval: enableRetrieval,
         document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        prompt_id: selectedPrompt || undefined,
         system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
 
@@ -525,6 +526,7 @@ const ChatPage: React.FC = () => {
         max_tokens: maxTokens,
         enable_retrieval: enableRetrieval,
         document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        prompt_id: selectedPrompt || undefined,
         system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
       };
 

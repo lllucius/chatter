@@ -315,9 +315,14 @@ class ChatService:
             "chat_sync_request"
         ):
             try:
+                # Process chat request to resolve prompts
+                processed_request = await self._process_chat_request(
+                    user_id, chat_request
+                )
+                
                 # Shared conversation setup logic
                 conversation = await self._setup_conversation(
-                    user_id, chat_request
+                    user_id, processed_request
                 )
 
                 # Add user message
@@ -325,14 +330,14 @@ class ChatService:
                     conversation.id,
                     user_id,
                     MessageRole.USER,
-                    chat_request.message,
+                    processed_request.message,
                 )
 
                 # Execute workflow to get response
                 response_message, usage_info = (
                     await self.workflow_service.execute_workflow(
                         conversation,
-                        chat_request,
+                        processed_request,
                         correlation_id,
                         user_id,
                     )
@@ -391,9 +396,14 @@ class ChatService:
         start_time = __import__("time").time()
 
         try:
+            # Process chat request to resolve prompts
+            processed_request = await self._process_chat_request(
+                user_id, chat_request
+            )
+            
             # Shared conversation setup logic
             conversation = await self._setup_conversation(
-                user_id, chat_request
+                user_id, processed_request
             )
 
             # Add user message
@@ -401,7 +411,7 @@ class ChatService:
                 conversation.id,
                 user_id,
                 MessageRole.USER,
-                chat_request.message,
+                processed_request.message,
             )
 
             # Yield start chunk
@@ -416,7 +426,7 @@ class ChatService:
             async for (
                 chunk
             ) in self.workflow_service.execute_workflow_streaming(
-                conversation, chat_request, correlation_id, user_id
+                conversation, processed_request, correlation_id, user_id
             ):
                 yield chunk
 
@@ -453,6 +463,43 @@ class ChatService:
             )
 
     # Helper Methods
+
+    async def _process_chat_request(
+        self, user_id: str, chat_request: ChatRequest
+    ) -> ChatRequest:
+        """Process chat request to resolve prompt_id and enhance system_prompt_override.
+        
+        Args:
+            user_id: User ID for prompt access control
+            chat_request: Original chat request
+            
+        Returns:
+            Processed chat request with resolved prompt content
+        """
+        # If prompt_id is provided but system_prompt_override is not, resolve the prompt
+        if chat_request.prompt_id and not chat_request.system_prompt_override:
+            try:
+                from chatter.core.prompts import PromptService
+                
+                prompt_service = PromptService(self.session)
+                prompt = await prompt_service.get_prompt(chat_request.prompt_id, user_id)
+                
+                if prompt and prompt.content:
+                    # Create a copy of the chat request with the resolved prompt content
+                    chat_request_dict = chat_request.model_dump()
+                    chat_request_dict['system_prompt_override'] = prompt.content
+                    from chatter.schemas.chat import ChatRequest
+                    return ChatRequest(**chat_request_dict)
+                else:
+                    logger.warning(
+                        f"Prompt not found or empty for prompt_id: {chat_request.prompt_id}"
+                    )
+            except Exception as e:
+                logger.warning(
+                    f"Failed to resolve prompt_id {chat_request.prompt_id}: {e}"
+                )
+        
+        return chat_request
 
     async def _setup_conversation(
         self, user_id: str, chat_request: ChatRequest

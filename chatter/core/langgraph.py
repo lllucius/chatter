@@ -787,11 +787,12 @@ class LangGraphWorkflowManager:
             )
             return ""
 
-    def get_retriever(self, workspace_id: str) -> Any | None:
+    def get_retriever(self, workspace_id: str, document_ids: list[str] | None = None) -> Any | None:
         """Get retriever for a workspace based on user documents.
 
         Args:
             workspace_id: Workspace identifier (interpreted as user_id)
+            document_ids: Optional list of specific document IDs to filter by
 
         Returns:
             Retriever instance or None if not available
@@ -821,17 +822,28 @@ class LangGraphWorkflowManager:
                 collection_name=collection_name,
             )
 
-            # Return retriever with default search parameters
+            # Configure search parameters
+            search_kwargs = {"k": 5}  # Return top 5 relevant documents
+            
+            # Add document filtering if specific document IDs are provided
+            if document_ids:
+                # Note: The actual filter implementation depends on the vector store
+                # For pgvector, this would typically be a metadata filter
+                search_kwargs["filter"] = {"document_id": {"$in": document_ids}}
+                logger.debug(
+                    f"Filtering retriever to specific documents: {document_ids}"
+                )
+
+            # Return retriever with search parameters
             retriever = vector_store.as_retriever(
                 search_type="similarity",
-                search_kwargs={
-                    "k": 5
-                },  # Return top 5 relevant documents
+                search_kwargs=search_kwargs,
             )
 
             logger.debug(
                 f"Created retriever for workspace: {workspace_id}, "
-                f"collection: {collection_name}"
+                f"collection: {collection_name}, "
+                f"filtered: {document_ids is not None}"
             )
             return retriever
 

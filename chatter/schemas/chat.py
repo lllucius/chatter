@@ -309,6 +309,9 @@ class ChatRequest(BaseModel):
     document_ids: list[str] | None = Field(
         None, description="Document IDs to include in context"
     )
+    prompt_id: str | None = Field(
+        None, description="Prompt template ID to use for this request"
+    )
     system_prompt_override: str | None = Field(
         None, description="Override system prompt for this request"
     )

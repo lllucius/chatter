@@ -8,6 +8,7 @@ import { Box, CircularProgress, Typography } from '@mui/material';
 import Layout from './components/Layout';
 import ProtectedRoute from './components/ProtectedRoute';
 import ErrorBoundary from './components/ErrorBoundary';
+import SectionErrorBoundary from './components/SectionErrorBoundary';
 import SuspenseWrapper from './components/SuspenseWrapper';
 import ThemedToastContainer from './components/ThemedToastContainer';
 import { NotificationProvider } from './components/NotificationSystem';
@@ -15,6 +16,9 @@ import { SSEProvider } from './services/sse-context';
 
 // Initialize SDK at app startup
 import { initializeSDK } from './services/auth-service';
+
+// Initialize global error handling
+import { initializeGlobalErrorHandling } from './utils/global-error-handler';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
@@ -53,6 +57,9 @@ function App() {
   useEffect(() => {
     const initAuth = async () => {
       try {
+        // Initialize global error handling first
+        initializeGlobalErrorHandling();
+        
         await initializeSDK();
       } catch {
         // Failed to initialize SDK - handled gracefully by setting authInitialized to true
@@ -152,9 +159,11 @@ function App() {
                 <Routes>
                 {/* Public routes */}
                 <Route path="/login" element={
-                  <SuspenseWrapper loadingMessage="Loading login page...">
-                    <LoginPage />
-                  </SuspenseWrapper>
+                  <SectionErrorBoundary level="page" name="LoginPage" showHomeButton={false}>
+                    <SuspenseWrapper loadingMessage="Loading login page...">
+                      <LoginPage />
+                    </SuspenseWrapper>
+                  </SectionErrorBoundary>
                 } />
                 
                 {/* Protected routes */}
@@ -165,44 +174,60 @@ function App() {
                 }>
                   <Route index element={<Navigate to="/dashboard" replace />} />
                   <Route path="dashboard" element={
-                    <SuspenseWrapper loadingMessage="Loading dashboard...">
-                      <DashboardPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="DashboardPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading dashboard...">
+                        <DashboardPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="chat" element={
-                    <SuspenseWrapper loadingMessage="Loading chat...">
-                      <ChatPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="ChatPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading chat...">
+                        <ChatPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="conversations" element={
-                    <SuspenseWrapper loadingMessage="Loading conversations...">
-                      <ConversationsPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="ConversationsPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading conversations...">
+                        <ConversationsPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="documents" element={
-                    <SuspenseWrapper loadingMessage="Loading documents...">
-                      <DocumentsPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="DocumentsPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading documents...">
+                        <DocumentsPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="profiles" element={
-                    <SuspenseWrapper loadingMessage="Loading profiles...">
-                      <ProfilesPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="ProfilesPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading profiles...">
+                        <ProfilesPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="prompts" element={
-                    <SuspenseWrapper loadingMessage="Loading prompts...">
-                      <PromptsPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="PromptsPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading prompts...">
+                        <PromptsPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="models" element={
-                    <SuspenseWrapper loadingMessage="Loading models...">
-                      <ModelManagementPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="ModelManagementPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading models...">
+                        <ModelManagementPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="agents" element={
-                    <SuspenseWrapper loadingMessage="Loading agents...">
-                      <AgentsPage />
-                    </SuspenseWrapper>
+                    <SectionErrorBoundary level="page" name="AgentsPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading agents...">
+                        <AgentsPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
                   } />
                   <Route path="tools" element={
                     <SuspenseWrapper loadingMessage="Loading tools...">

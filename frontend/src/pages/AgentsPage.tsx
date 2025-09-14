@@ -27,11 +27,14 @@ import {
   createDateRenderer 
 } from '../components/CrudRenderers';
 import AgentForm from '../components/AgentForm';
+import SectionErrorBoundary from '../components/SectionErrorBoundary';
 import { getSDK } from "../services/auth-service";
+import { useAsyncError } from '../hooks/useAsyncError';
 import { AgentResponse, AgentCreateRequest, AgentUpdateRequest, AgentInteractRequest, AgentInteractResponse } from 'chatter-sdk';
 
 const AgentsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
+  const { handleAsyncError } = useAsyncError();
 
   // State for test agent dialog
   const [testDialogOpen, setTestDialogOpen] = useState(false);
@@ -78,7 +81,23 @@ const AgentsPage: React.FC = () => {
       
       setTestResponse(response.data);
     } catch (error: unknown) {
-      setTestError(error.message || 'Failed to test agent');
+      const errorMessage = error instanceof Error ? error.message : 'Failed to test agent';
+      setTestError(errorMessage);
+      
+      // Use standardized error handling
+      handleAsyncError(error, {
+        source: 'AgentsPage.handleSendTestMessage',
+        operation: 'Test agent interaction',
+        additionalData: {
+          agentId: selectedAgent.id,
+          agentName: selectedAgent.name,
+          messageLength: testMessage.length
+        }
+      }, {
+        showToast: false, // We're showing the error in the dialog
+        logToConsole: true,
+        fallbackMessage: 'Failed to test agent interaction'
+      });
     } finally {
       setTesting(false);
     }
@@ -188,33 +207,34 @@ const AgentsPage: React.FC = () => {
         maxWidth="md" 
         fullWidth
       >
-        <DialogTitle>
-          {selectedAgent && (
-            <Box>
-              <Typography variant="h6" component="span">
-                Test Agent: {selectedAgent.name}
-              </Typography>
-              <Box sx={{ mt: 1 }}>
-                <Chip 
-                  label={selectedAgent.type} 
-                  size="small" 
-                  sx={{ mr: 1 }}
-                />
-                <Chip 
-                  label={selectedAgent.status} 
-                  size="small" 
-                  color={selectedAgent.status === 'active' ? 'success' : 'default'}
-                />
-                <Chip 
-                  label={selectedAgent.primary_llm} 
-                  size="small" 
-                  color="info"
-                  sx={{ ml: 1 }}
-                />
+        <SectionErrorBoundary level="section" name="AgentTestDialog">
+          <DialogTitle>
+            {selectedAgent && (
+              <Box>
+                <Typography variant="h6" component="span">
+                  Test Agent: {selectedAgent.name}
+                </Typography>
+                <Box sx={{ mt: 1 }}>
+                  <Chip 
+                    label={selectedAgent.type} 
+                    size="small" 
+                    sx={{ mr: 1 }}
+                  />
+                  <Chip 
+                    label={selectedAgent.status} 
+                    size="small" 
+                    color={selectedAgent.status === 'active' ? 'success' : 'default'}
+                  />
+                  <Chip 
+                    label={selectedAgent.primary_llm} 
+                    size="small" 
+                    color="info"
+                    sx={{ ml: 1 }}
+                  />
+                </Box>
               </Box>
-            </Box>
-          )}
-        </DialogTitle>
+            )}
+          </DialogTitle>
         <DialogContent>
           {selectedAgent && (
             <Box>
@@ -298,6 +318,7 @@ const AgentsPage: React.FC = () => {
             Close
           </Button>
         </DialogActions>
+        </SectionErrorBoundary>
       </Dialog>
     </PageLayout>
   );

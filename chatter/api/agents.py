@@ -123,9 +123,9 @@ async def create_agent(
                 )
             agent_data.name = result.value
 
-            # Validate description (using same rules as agent name)
+            # Validate description
             result = validation_engine.validate_input(
-                agent_data.description, "agent_name", DEFAULT_CONTEXT
+                agent_data.description, "text", DEFAULT_CONTEXT
             )
             if not result.is_valid:
                 raise InternalServerProblem(
@@ -876,7 +876,7 @@ async def bulk_create_agents(
                     # Validate description
                     result = validation_engine.validate_input(
                         agent_data.description,
-                        "agent_name",
+                        "text",
                         DEFAULT_CONTEXT,
                     )
                     if not result.is_valid:

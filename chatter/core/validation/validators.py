@@ -143,6 +143,32 @@ class InputValidator(BaseValidator):
                     max_length=128,
                     required=True,
                 ),
+                "agent_name": ValidationRule(
+                    name="agent_name",
+                    max_length=100,
+                    min_length=1,
+                    required=True,
+                    forbidden_patterns=[
+                        r"<script.*?>.*?</script>",
+                        r"javascript:",
+                        r"on\w+\s*=",
+                    ],
+                    sanitize=True,
+                ),
+                "agent_id": ValidationRule(
+                    name="agent_id",
+                    pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    max_length=36,
+                    min_length=36,
+                    required=True,
+                ),
+                "conversation_id": ValidationRule(
+                    name="conversation_id",
+                    pattern=r"^[0-9a-fA-F]{8}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{4}-[0-9a-fA-F]{12}$",
+                    max_length=36,
+                    min_length=36,
+                    required=True,
+                ),
             }
         )
 

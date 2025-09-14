@@ -143,6 +143,18 @@ class InputValidator(BaseValidator):
                     max_length=128,
                     required=True,
                 ),
+                "agent_name": ValidationRule(
+                    name="agent_name",
+                    max_length=100,
+                    min_length=1,
+                    required=True,
+                    forbidden_patterns=[
+                        r"<script.*?>.*?</script>",
+                        r"javascript:",
+                        r"on\w+\s*=",
+                    ],
+                    sanitize=True,
+                ),
             }
         )
 

@@ -6,12 +6,44 @@ from typing import Any
 from pydantic import BaseModel, Field
 
 from chatter.schemas.common import ListRequestBase
-from chatter.services.ab_testing import (
-    MetricType,
-    TestStatus,
-    TestType,
-    VariantAllocation,
-)
+
+
+# Enums defined locally to avoid circular imports
+from enum import Enum
+
+
+class TestStatus(str, Enum):
+    DRAFT = "draft"
+    RUNNING = "running"
+    PAUSED = "paused"
+    COMPLETED = "completed"
+    CANCELLED = "cancelled"
+
+
+class TestType(str, Enum):
+    PROMPT = "prompt"
+    MODEL = "model"
+    PARAMETER = "parameter"
+    WORKFLOW = "workflow"
+    TEMPLATE = "template"
+
+
+class VariantAllocation(str, Enum):
+    EQUAL = "equal"
+    WEIGHTED = "weighted"
+    GRADUAL_ROLLOUT = "gradual_rollout"
+    USER_ATTRIBUTE = "user_attribute"
+
+
+class MetricType(str, Enum):
+    RESPONSE_TIME = "response_time"
+    USER_SATISFACTION = "user_satisfaction"
+    ACCURACY = "accuracy"
+    ENGAGEMENT = "engagement"
+    CONVERSION = "conversion"
+    ERROR_RATE = "error_rate"
+    TOKEN_USAGE = "token_usage"
+    CUSTOM = "custom"
 
 
 class TestVariant(BaseModel):

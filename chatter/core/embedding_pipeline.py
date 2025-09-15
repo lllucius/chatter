@@ -349,6 +349,36 @@ class SimpleVectorStore:
             True if successful
         """
         try:
+            success = await self.store_embeddings_no_commit(chunks, embeddings, metadata)
+            if success:
+                await self.session.commit()
+                # Refresh chunks to get updated data
+                for chunk in chunks:
+                    await self.session.refresh(chunk)
+            return success
+
+        except Exception as e:
+            await self.session.rollback()
+            logger.error("Failed to store embeddings", error=str(e))
+            return False
+
+    async def store_embeddings_no_commit(
+        self,
+        chunks: list[DocumentChunk],
+        embeddings: list[list[float]],
+        metadata: dict[str, Any]
+    ) -> bool:
+        """Store embeddings for chunks without committing transaction.
+
+        Args:
+            chunks: Document chunks
+            embeddings: Corresponding embeddings
+            metadata: Embedding metadata
+
+        Returns:
+            True if successful
+        """
+        try:
             # Update chunks with embeddings using the new hybrid system
             for chunk, embedding in zip(chunks, embeddings, strict=True):
                 # Use the new set_embedding_vector method which triggers event listeners
@@ -358,14 +388,8 @@ class SimpleVectorStore:
                     model=metadata.get("model")
                 )
 
-            await self.session.commit()
-
-            # Refresh chunks to get updated data
-            for chunk in chunks:
-                await self.session.refresh(chunk)
-
             logger.info(
-                "Stored embeddings using hybrid vector system",
+                "Prepared embeddings for storage using hybrid vector system",
                 chunk_count=len(chunks),
                 provider=metadata.get("provider"),
                 dimensions=metadata.get("dimensions"),
@@ -375,8 +399,7 @@ class SimpleVectorStore:
             return True
 
         except Exception as e:
-            await self.session.rollback()
-            logger.error("Failed to store embeddings", error=str(e))
+            logger.error("Failed to prepare embeddings for storage", error=str(e))
             return False
 
     async def search_similar(
@@ -568,7 +591,8 @@ class EmbeddingPipeline:
                 chunks.append(chunk)
                 self.session.add(chunk)
 
-            await self.session.commit()
+            # Flush to get chunk IDs but don't commit yet
+            await self.session.flush()
 
             # Refresh chunks to get IDs
             for chunk in chunks:
@@ -577,15 +601,17 @@ class EmbeddingPipeline:
             # Step 4: Generate embeddings
             embeddings, metadata = await self.embedding_service.generate_embeddings(chunk_texts)
 
-            # Step 5: Store embeddings
-            success = await self.vector_store.store_embeddings(chunks, embeddings, metadata)
+            # Step 5: Store embeddings (without committing in vector store)
+            success = await self.vector_store.store_embeddings_no_commit(chunks, embeddings, metadata)
             if not success:
                 raise EmbeddingPipelineError("Failed to store embeddings")
 
-            # Update document status
+            # Update document status and commit everything at once
             document.status = DocumentStatus.PROCESSED
             document.processing_completed_at = datetime.now(UTC)
             document.chunk_count = len(chunks)
+            
+            # Single commit for all operations
             await self.session.commit()
 
             logger.info(
@@ -598,14 +624,28 @@ class EmbeddingPipeline:
             return True
 
         except Exception as e:
-            # Mark as failed
+            # Mark as failed and rollback
             try:
-                document.status = DocumentStatus.FAILED
-                document.processing_completed_at = datetime.now(UTC)
-                document.processing_error = str(e)
-                await self.session.commit()
-            except Exception:
-                pass  # Don't fail if we can't update status
+                # Rollback any pending changes first
+                await self.session.rollback()
+                
+                # Then try to mark the document as failed in a separate transaction
+                result = await self.session.execute(
+                    select(Document).where(Document.id == document_id)
+                )
+                document = result.scalar_one_or_none()
+                if document:
+                    document.status = DocumentStatus.FAILED
+                    document.processing_completed_at = datetime.now(UTC)
+                    document.processing_error = str(e)
+                    await self.session.commit()
+            except Exception as cleanup_error:
+                logger.error(
+                    "Failed to mark document as failed after processing error",
+                    document_id=document_id,
+                    original_error=str(e),
+                    cleanup_error=str(cleanup_error)
+                )
 
             logger.error("Document processing failed", document_id=document_id, error=str(e))
             return False

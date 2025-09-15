@@ -333,6 +333,7 @@ class SimpleEmbeddingService:
 
                 api_key = (
                     provider.default_config.get("api_key")
+                    or os.getenv(f"{provider.name.upper()}_API_KEY")
                     or os.getenv("OPENAI_API_KEY")
                 )
                 if not api_key:

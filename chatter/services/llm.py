@@ -72,7 +72,7 @@ class LLMService:
         if provider_name is None:
             try:
                 model_def = await registry.get_default_model()
-                provider_info = await registry.get_provider_by_id(model_def.provider_id)
+                provider_info = await registry.get_provider(model_def.provider_id)
             except Exception:
                 # Fallback to OpenAI if registry fails - but still check API key requirements
                 provider_name = "openai"
@@ -97,7 +97,7 @@ class LLMService:
                 provider_info = None
 
                 for model in models:
-                    provider = await registry.get_provider_by_id(model.provider_id)
+                    provider = await registry.get_provider(model.provider_id)
                     if provider.name.lower() == provider_name.lower():
                         model_def = model
                         provider_info = provider

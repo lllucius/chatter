@@ -317,7 +317,7 @@ class EmbeddingService:
                     return None
 
                 return GoogleGenerativeAIEmbeddings(
-                    google_api_key=api_key if api_key else "dummy",
+                    google_api_key=api_key,
                     model=model_def.model_name,
                 )
 
@@ -338,7 +338,7 @@ class EmbeddingService:
                     return None
 
                 return CohereEmbeddings(
-                    cohere_api_key=SecretStr(api_key) if api_key else SecretStr("dummy"),
+                    cohere_api_key=SecretStr(api_key) if api_key else None,
                     model=model_def.model_name,
                     client=cohere.Client(api_key) if cohere and api_key else None,
                     async_client=(

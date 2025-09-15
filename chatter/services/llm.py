@@ -65,13 +65,14 @@ class LLMService:
     ) -> BaseChatModel:
         """Create a provider instance with custom temperature and max_tokens."""
         session = await self._get_session()
-        registry = get_model_registry()
+        registry_factory = get_model_registry()
+        registry = registry_factory(session)
 
         # Get the default model if no provider specified
         if provider_name is None:
             try:
-                model_def = await registry.get_default_model(session)
-                provider_info = await registry.get_provider_by_id(session, model_def.provider_id)
+                model_def = await registry.get_default_model()
+                provider_info = await registry.get_provider_by_id(model_def.provider_id)
             except Exception:
                 # Fallback to OpenAI if registry fails - but still check API key requirements
                 provider_name = "openai"
@@ -91,12 +92,12 @@ class LLMService:
         else:
             try:
                 # Find model by provider name
-                models = await registry.list_models(session)
+                models, _ = await registry.list_models()
                 model_def = None
                 provider_info = None
 
                 for model in models:
-                    provider = await registry.get_provider_by_id(session, model.provider_id)
+                    provider = await registry.get_provider_by_id(model.provider_id)
                     if provider.name.lower() == provider_name.lower():
                         model_def = model
                         provider_info = provider

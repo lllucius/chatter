@@ -138,27 +138,27 @@ class DocumentProcessingService:
                 
                 monitor.log_memory_usage("after status update")
 
-            # Trigger started event
-            try:
-                from chatter.services.sse_events import (
-                    EventType,
-                    sse_service,
-                )
+                # Trigger started event
+                try:
+                    from chatter.services.sse_events import (
+                        EventType,
+                        sse_service,
+                    )
 
-                await sse_service.trigger_event(
-                    EventType.DOCUMENT_PROCESSING_STARTED,
-                    {
-                        "document_id": document_id,
-                        "filename": document.filename,
-                        "status": "processing",
-                    },
-                    user_id=document.owner_id,
-                )
-            except Exception as e:
-                logger.warning(
-                    "Failed to trigger document processing started event",
-                    error=str(e),
-                )
+                    await sse_service.trigger_event(
+                        EventType.DOCUMENT_PROCESSING_STARTED,
+                        {
+                            "document_id": document_id,
+                            "filename": document.filename,
+                            "status": "processing",
+                        },
+                        user_id=document.owner_id,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Failed to trigger document processing started event",
+                        error=str(e),
+                    )
 
                 # Extract text (memory-efficient with file path)
                 extracted_text = await self._extract_text_from_file(

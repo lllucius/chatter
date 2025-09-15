@@ -78,7 +78,7 @@ class DataManager:
             function_name="data_export",
             args=[operation.id],
             priority=JobPriority.NORMAL,
-            timeout=3600,
+            timeout=settings.data_export_timeout,
             tags=["data", "export"],
             metadata=operation.metadata,
         )
@@ -116,7 +116,7 @@ class DataManager:
             function_name="data_backup",
             args=[operation.id],
             priority=JobPriority.HIGH,
-            timeout=7200,
+            timeout=settings.data_import_timeout,
             tags=["data", "backup"],
             metadata=operation.metadata,
         )
@@ -153,7 +153,7 @@ class DataManager:
             function_name="data_restore",
             args=[operation.id],
             priority=JobPriority.CRITICAL,
-            timeout=7200,
+            timeout=settings.data_migration_timeout,
             tags=["data", "restore"],
             metadata=operation.metadata,
         )

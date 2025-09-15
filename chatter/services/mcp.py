@@ -44,7 +44,7 @@ class RemoteMCPServer:
     transport_type: str  # "http" or "sse" or "stdio" or "websocket"
     oauth_config: OAuthConfig | None = None
     headers: dict[str, str] | None = None
-    timeout: int = 30
+    timeout: int = 30  # Uses settings.mcp_tool_timeout when instantiated
     enabled: bool = True
 
 

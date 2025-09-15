@@ -5,7 +5,7 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async
+from chatter.commands import console, get_client, run_async, get_default_page_size, get_default_max_tokens, get_default_test_count
 
 # Model Registry Commands
 models_app = typer.Typer(help="Model registry and management commands")
@@ -220,7 +220,7 @@ async def list_models(
     provider_id: str = typer.Option(None, help="Filter by provider ID"),
     model_type: str = typer.Option(None, help="Filter by model type"),
     page: int = typer.Option(1, help="Page number"),
-    per_page: int = typer.Option(10, help="Items per page"),
+    per_page: int = typer.Option(get_default_page_size(), help="Items per page"),
     active_only: bool = typer.Option(
         None, help="Show only active models"
     ),
@@ -350,7 +350,7 @@ async def test_model(
         "Hello, this is a test message", help="Test prompt"
     ),
     max_tokens: int = typer.Option(
-        100, help="Maximum tokens to generate"
+        get_default_max_tokens(), help="Maximum tokens to generate"
     ),
 ):
     """Test a model with a sample prompt."""
@@ -777,7 +777,7 @@ async def model_usage(
 async def benchmark_model(
     model_id: str = typer.Argument(..., help="Model ID to benchmark"),
     test_count: int = typer.Option(
-        5, help="Number of test requests"
+        get_default_test_count(), help="Number of test requests"
     ),  # noqa: ARG001
     prompt: str = typer.Option(  # noqa: ARG001
         "Generate a short paragraph about artificial intelligence",

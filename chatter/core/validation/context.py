@@ -4,6 +4,8 @@ from dataclasses import dataclass, field
 from enum import Enum
 from typing import Any
 
+from chatter.config import settings
+
 
 class ValidationMode(Enum):
     """Validation modes."""
@@ -46,7 +48,7 @@ class ValidationContext:
     extra_context: dict[str, Any] = field(default_factory=dict)
 
     # Performance settings
-    timeout_seconds: int = 30
+    timeout_seconds: int = field(default_factory=lambda: settings.validation_timeout)
     max_recursion_depth: int = 10
 
     def is_validator_enabled(self, validator_name: str) -> bool:

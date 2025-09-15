@@ -38,9 +38,64 @@ F = TypeVar('F', bound=Callable[..., Any])
 # Initialize console
 console = Console()
 
-# Configuration from environment variables
-DEFAULT_API_BASE_URL = "http://localhost:8000"
-DEFAULT_TIMEOUT = 30.0
+from chatter.config import get_settings
+
+# Configuration from environment variables and settings
+def get_default_api_base_url() -> str:
+    """Get default API base URL from settings."""
+    try:
+        return get_settings().chatter_api_base_url
+    except Exception:
+        return "http://localhost:8000"  # Fallback if settings can't be loaded
+
+def get_default_timeout() -> float:
+    """Get default timeout from settings."""
+    try:
+        return get_settings().cli_default_timeout
+    except Exception:
+        return 30.0  # Fallback if settings can't be loaded
+
+def get_default_page_size() -> int:
+    """Get default page size from settings."""
+    try:
+        return get_settings().cli_default_page_size
+    except Exception:
+        return 10  # Fallback if settings can't be loaded
+
+def get_max_page_size() -> int:
+    """Get maximum page size from settings."""
+    try:
+        return get_settings().cli_max_page_size
+    except Exception:
+        return 100  # Fallback if settings can't be loaded
+
+def get_default_max_tokens() -> int:
+    """Get default max tokens from settings."""
+    try:
+        return get_settings().cli_default_max_tokens
+    except Exception:
+        return 100  # Fallback if settings can't be loaded
+
+def get_default_test_count() -> int:
+    """Get default test count from settings."""
+    try:
+        return get_settings().cli_default_test_count
+    except Exception:
+        return 5  # Fallback if settings can't be loaded
+
+def get_profile_max_tokens() -> int:
+    """Get profile max tokens from settings."""
+    try:
+        return get_settings().cli_profile_max_tokens
+    except Exception:
+        return 1000  # Fallback if settings can't be loaded
+
+def get_message_display_limit() -> int:
+    """Get message display limit from settings."""
+    try:
+        return get_settings().cli_message_display_limit
+    except Exception:
+        return 20  # Fallback if settings can't be loaded
 
 
 class ChatterSDKClient:
@@ -50,15 +105,15 @@ class ChatterSDKClient:
         self,
         base_url: str | None = None,
         access_token: str | None = None,
-        timeout: float = DEFAULT_TIMEOUT,
+        timeout: float | None = None,
     ):
         self.base_url = base_url or os.getenv(
-            "CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL
+            "CHATTER_API_BASE_URL", get_default_api_base_url()
         )
         self.access_token = access_token or os.getenv(
             "CHATTER_ACCESS_TOKEN"
         )
-        self.timeout = timeout
+        self.timeout = timeout or get_default_timeout()
 
         # Configure the SDK
         self.configuration = Configuration(

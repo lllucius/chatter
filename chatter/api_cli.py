@@ -60,12 +60,12 @@ from chatter.commands.plugins import plugins_app
 from chatter.commands.profiles import profiles_app
 from chatter.commands.prompts import prompts_app
 
+from chatter.commands import ChatterSDKClient, get_default_api_base_url, get_default_timeout
+
 # Initialize console
 console = Console()
 
-# Configuration from environment variables
-DEFAULT_API_BASE_URL = "http://localhost:8000"
-DEFAULT_TIMEOUT = 30.0
+# Using the shared configuration functions from commands module
 
 
 # Using ChatterSDKClient imported from chatter.commands module

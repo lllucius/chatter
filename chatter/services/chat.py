@@ -7,6 +7,7 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.config import settings
 from chatter.core.exceptions import ChatServiceError
 from chatter.core.monitoring import record_request_metrics
 from chatter.models.conversation import (
@@ -126,10 +127,10 @@ class ChatAnalyticsService:
         # Simplified efficiency calculation - would use real metrics in production
         try:
             # Mock calculation based on response time, success rate, cost efficiency
-            base_score = 85.0
-            return min(100.0, max(0.0, base_score))
+            base_score = settings.chat_base_score
+            return min(settings.chat_max_score, max(settings.chat_min_score, base_score))
         except Exception:
-            return 50.0  # Default score
+            return settings.chat_default_score
 
 
 class ChatService:
@@ -168,7 +169,7 @@ class ChatService:
     async def list_conversations(
         self,
         user_id: str,
-        limit: int = 20,
+        limit: int = settings.chat_default_limit,
         offset: int = 0,
         status: ConversationStatus | None = None,
         llm_provider: str | None = None,
@@ -239,7 +240,7 @@ class ChatService:
         self,
         conversation_id: str,
         user_id: str,
-        limit: int = 50,
+        limit: int = settings.chat_max_limit,
         offset: int = 0,
     ) -> list[Message]:
         """Get messages from conversation."""
@@ -550,7 +551,7 @@ class ChatService:
                     chat_request.conversation_id,
                     user_id=user_id,
                     include_messages=True,
-                    message_limit=50,  # Limit context window for performance
+                    message_limit=settings.chat_context_message_limit,
                 )
 
                 # If conversation has a profile and no explicit provider is set, resolve provider

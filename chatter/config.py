@@ -354,7 +354,7 @@ class Settings(BaseSettings):
     document_storage_path: str = Field(
         default="./data/documents", description="Document storage path"
     )
-    
+
     # Memory-efficient processing settings
     file_chunk_size: int = Field(
         default=65536, description="File chunk size for streaming (64KB)"
@@ -365,7 +365,7 @@ class Settings(BaseSettings):
     enable_memory_monitoring: bool = Field(
         default=True, description="Enable memory usage monitoring during processing"
     )
-    
+
     # Memory-efficient text extraction settings
     text_extraction_chunk_size: int = Field(
         default=8192, description="Text extraction chunk size (8KB)"
@@ -373,7 +373,7 @@ class Settings(BaseSettings):
     max_text_length: int = Field(
         default=10485760, description="Maximum extracted text length (10MB)"
     )
-    
+
     # Processing limits to prevent memory exhaustion
     max_concurrent_uploads: int = Field(
         default=5, description="Maximum concurrent file uploads"
@@ -582,6 +582,124 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
+    # CHAT SERVICE SETTINGS
+    # =============================================================================
+
+    # Chat response limits and defaults
+    chat_default_limit: int = Field(
+        default=20, description="Default limit for chat responses"
+    )
+    chat_max_limit: int = Field(
+        default=50, description="Maximum limit for chat responses"
+    )
+    chat_context_message_limit: int = Field(
+        default=50, description="Message limit for chat context window"
+    )
+
+    # Chat scoring defaults
+    chat_base_score: float = Field(
+        default=85.0, description="Base score for chat responses"
+    )
+    chat_default_score: float = Field(
+        default=50.0, description="Default score for chat responses"
+    )
+    chat_max_score: float = Field(
+        default=100.0, description="Maximum score for chat responses"
+    )
+    chat_min_score: float = Field(
+        default=0.0, description="Minimum score for chat responses"
+    )
+
+    # =============================================================================
+    # VALIDATION AND COMPLIANCE SETTINGS
+    # =============================================================================
+
+    # Validation limits
+    max_name_length: int = Field(
+        default=50, description="Maximum length for names"
+    )
+    max_description_length: int = Field(
+        default=100, description="Maximum length for descriptions"
+    )
+    max_agent_name_length: int = Field(
+        default=100, description="Maximum length for agent names"
+    )
+
+    # Validation timeouts
+    validation_timeout: int = Field(
+        default=30, description="Validation timeout in seconds"
+    )
+
+    # Security compliance scoring
+    compliance_full_score: int = Field(
+        default=100, description="Full compliance score"
+    )
+    compliance_partial_score: int = Field(
+        default=60, description="Partial compliance score"
+    )
+    compliance_passing_threshold: int = Field(
+        default=60, description="Minimum score for passing compliance"
+    )
+
+    # Token expiration warnings (minutes)
+    token_expire_warning_threshold: int = Field(
+        default=60, description="Token expiration warning threshold in minutes"
+    )
+    refresh_token_expire_warning_threshold: int = Field(
+        default=30, description="Refresh token expiration warning threshold in minutes"
+    )
+
+    # =============================================================================
+    # SERVICE OPERATION SETTINGS
+    # =============================================================================
+
+    # Plugin service timeouts
+    plugin_operation_timeout: float = Field(
+        default=60.0, description="Plugin operation timeout in seconds"
+    )
+    plugin_shutdown_timeout: float = Field(
+        default=30.0, description="Plugin shutdown timeout in seconds"
+    )
+    plugin_health_check_timeout: float = Field(
+        default=30.0, description="Plugin health check timeout in seconds"
+    )
+
+    # Data management operation timeouts
+    data_export_timeout: int = Field(
+        default=3600, description="Data export timeout in seconds"
+    )
+    data_import_timeout: int = Field(
+        default=7200, description="Data import timeout in seconds"
+    )
+    data_migration_timeout: int = Field(
+        default=7200, description="Data migration timeout in seconds"
+    )
+
+    # Health check settings
+    health_check_timeout: float = Field(
+        default=5.0, description="Health check timeout in seconds"
+    )
+
+    # Analytics and monitoring settings
+    analytics_query_timeout: int = Field(
+        default=30, description="Analytics query timeout in seconds"
+    )
+    analytics_max_batch_size: int = Field(
+        default=1000, description="Maximum analytics batch size"
+    )
+    analytics_cache_ttl: int = Field(
+        default=300, description="Analytics cache TTL in seconds"
+    )
+
+    # System monitoring intervals
+    cpu_monitoring_interval: float = Field(
+        default=1.0, description="CPU monitoring interval in seconds"
+    )
+    cpu_avg_monitoring_interval: float = Field(
+        default=0.1, description="CPU average monitoring interval in seconds"
+    )
+
+    # =============================================================================
     # CLI SETTINGS
     # =============================================================================
 
@@ -590,6 +708,29 @@ class Settings(BaseSettings):
     )
     chatter_access_token: str | None = Field(
         default=None, description="CLI access token"
+    )
+
+    # CLI command defaults
+    cli_default_timeout: float = Field(
+        default=30.0, description="Default CLI operation timeout in seconds"
+    )
+    cli_default_page_size: int = Field(
+        default=10, description="Default pagination size for CLI commands"
+    )
+    cli_max_page_size: int = Field(
+        default=100, description="Maximum pagination size for CLI commands"
+    )
+    cli_default_max_tokens: int = Field(
+        default=100, description="Default maximum tokens for CLI model testing"
+    )
+    cli_profile_max_tokens: int = Field(
+        default=1000, description="Default maximum tokens for profile creation"
+    )
+    cli_message_display_limit: int = Field(
+        default=20, description="Default number of messages to display in CLI"
+    )
+    cli_default_test_count: int = Field(
+        default=5, description="Default number of test requests for benchmarking"
     )
 
     # =============================================================================

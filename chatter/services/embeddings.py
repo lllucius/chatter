@@ -111,21 +111,57 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                 if isinstance(response, list):
                     # Response is already a list of embedding objects
                     logger.debug("OpenAI response is already a list format")
-                    embeddings.extend(r["embedding"] for r in response)
+                    batch_embeddings = []
+                    for r in response:
+                        if isinstance(r, dict) and "embedding" in r:
+                            batch_embeddings.append(r["embedding"])
+                        elif hasattr(r, "embedding"):
+                            batch_embeddings.append(r.embedding)
+                        else:
+                            logger.error("Invalid embedding object in list response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
+                            raise ValueError(f"Invalid embedding object in response: {type(r)}")
+                    embeddings.extend(batch_embeddings)
                 elif hasattr(response, "data") and response.data:
                     # Standard OpenAI response format with .data attribute
                     logger.debug("OpenAI response has .data attribute")
-                    embeddings.extend(r.embedding for r in response.data)
+                    batch_embeddings = []
+                    for r in response.data:
+                        if hasattr(r, "embedding"):
+                            batch_embeddings.append(r.embedding)
+                        elif isinstance(r, dict) and "embedding" in r:
+                            batch_embeddings.append(r["embedding"])
+                        else:
+                            logger.error("Invalid embedding object in .data response", object_type=type(r))
+                            raise ValueError(f"Invalid embedding object in response.data: {type(r)}")
+                    embeddings.extend(batch_embeddings)
                 elif isinstance(response, dict) and "data" in response:
                     # Dict format response
                     logger.debug("OpenAI response is dict with 'data' key")
-                    embeddings.extend(r["embedding"] for r in response["data"])
+                    batch_embeddings = []
+                    for r in response["data"]:
+                        if isinstance(r, dict) and "embedding" in r:
+                            batch_embeddings.append(r["embedding"])
+                        elif hasattr(r, "embedding"):
+                            batch_embeddings.append(r.embedding)
+                        else:
+                            logger.error("Invalid embedding object in dict response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
+                            raise ValueError(f"Invalid embedding object in response['data']: {type(r)}")
+                    embeddings.extend(batch_embeddings)
                 elif hasattr(response, "model_dump"):
                     # Pydantic model, convert to dict
                     logger.debug("OpenAI response is Pydantic model")
                     response_dict = response.model_dump()
                     if "data" in response_dict:
-                        embeddings.extend(r["embedding"] for r in response_dict["data"])
+                        batch_embeddings = []
+                        for r in response_dict["data"]:
+                            if isinstance(r, dict) and "embedding" in r:
+                                batch_embeddings.append(r["embedding"])
+                            elif hasattr(r, "embedding"):
+                                batch_embeddings.append(r.embedding)
+                            else:
+                                logger.error("Invalid embedding object in model_dump response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
+                                raise ValueError(f"Invalid embedding object in model_dump['data']: {type(r)}")
+                        embeddings.extend(batch_embeddings)
                     else:
                         logger.error("Unexpected OpenAI response format after model_dump", response_keys=list(response_dict.keys()))
                         raise ValueError(f"Unexpected OpenAI response format: {type(response)}")

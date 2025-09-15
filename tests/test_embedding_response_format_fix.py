@@ -96,9 +96,9 @@ class TestEmbeddingResponseFormatFix:
         # Mock provider and model
         provider = Mock()
         provider.provider_type = ProviderType.OPENAI
-        provider.api_key_required = False
+        provider.api_key_required = True  # Set to True but we have the env var
         provider.base_url = "https://api.openai.com/v1"
-        provider.default_config = {}
+        provider.name = "openai"
         
         model_def = Mock()
         model_def.model_name = "text-embedding-ada-002"

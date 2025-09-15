@@ -50,7 +50,11 @@ class TestEmbeddingServiceApiKeyHandling:
 
     def clear_api_key_env_vars(self):
         """Clear API key environment variables."""
-        for key in ['OPENAI_API_KEY', 'GOOGLE_API_KEY', 'COHERE_API_KEY']:
+        for key in [
+            'OPENAI_API_KEY',
+            'GOOGLE_API_KEY',
+            'COHERE_API_KEY',
+        ]:
             if key in os.environ:
                 del os.environ[key]
 
@@ -64,23 +68,30 @@ class TestEmbeddingServiceApiKeyHandling:
 
     @pytest.mark.asyncio
     async def test_openai_provider_no_api_key_required_succeeds(
-        self, embedding_service, openai_provider_no_key_required, model_def
+        self,
+        embedding_service,
+        openai_provider_no_key_required,
+        model_def,
     ):
         """Test OpenAI provider with api_key_required=False succeeds without API key."""
         # Save original environment
-        original_vars = {key: os.environ.get(key) for key in ['OPENAI_API_KEY']}
-        
+        original_vars = {
+            key: os.environ.get(key) for key in ['OPENAI_API_KEY']
+        }
+
         try:
             # Clear API key environment variables
             self.clear_api_key_env_vars()
-            
+
             # This should succeed because api_key_required=False
             instance = await embedding_service._create_embedding_provider_instance(
                 openai_provider_no_key_required, model_def
             )
-            
-            assert instance is not None, "Should create provider instance when api_key_required=False"
-            
+
+            assert (
+                instance is not None
+            ), "Should create provider instance when api_key_required=False"
+
         finally:
             self.restore_env_vars(original_vars)
 
@@ -90,19 +101,23 @@ class TestEmbeddingServiceApiKeyHandling:
     ):
         """Test OpenAI provider with api_key_required=True fails without API key."""
         # Save original environment
-        original_vars = {key: os.environ.get(key) for key in ['OPENAI_API_KEY']}
-        
+        original_vars = {
+            key: os.environ.get(key) for key in ['OPENAI_API_KEY']
+        }
+
         try:
             # Clear API key environment variables
             self.clear_api_key_env_vars()
-            
+
             # This should fail because api_key_required=True and no API key
             instance = await embedding_service._create_embedding_provider_instance(
                 openai_provider_key_required, model_def
             )
-            
-            assert instance is None, "Should not create provider instance when api_key_required=True and no API key"
-            
+
+            assert (
+                instance is None
+            ), "Should not create provider instance when api_key_required=True and no API key"
+
         finally:
             self.restore_env_vars(original_vars)
 
@@ -112,30 +127,37 @@ class TestEmbeddingServiceApiKeyHandling:
     ):
         """Test OpenAI provider with api_key_required=True succeeds with API key."""
         # Save original environment
-        original_vars = {key: os.environ.get(key) for key in ['OPENAI_API_KEY']}
-        
+        original_vars = {
+            key: os.environ.get(key) for key in ['OPENAI_API_KEY']
+        }
+
         try:
             # Set API key in environment
             os.environ['OPENAI_API_KEY'] = 'test-api-key'
-            
+
             # This should succeed because api_key_required=True and API key is present
             instance = await embedding_service._create_embedding_provider_instance(
                 openai_provider_key_required, model_def
             )
-            
-            assert instance is not None, "Should create provider instance when api_key_required=True and API key present"
-            
+
+            assert (
+                instance is not None
+            ), "Should create provider instance when api_key_required=True and API key present"
+
         finally:
             self.restore_env_vars(original_vars)
 
     @pytest.mark.asyncio
-    async def test_google_provider_no_api_key_required_succeeds(self, embedding_service, model_def):
+    async def test_google_provider_no_api_key_required_succeeds(
+        self, embedding_service, model_def
+    ):
         """Test Google provider with api_key_required=False succeeds without API key."""
         # Skip if Google embeddings not available
         from chatter.services.embeddings import GOOGLE_AVAILABLE
+
         if not GOOGLE_AVAILABLE:
             pytest.skip("Google embeddings not available")
-            
+
         # Mock Google provider with api_key_required=False
         provider = Mock()
         provider.name = "google"
@@ -143,32 +165,39 @@ class TestEmbeddingServiceApiKeyHandling:
         provider.api_key_required = False
         provider.base_url = None
         provider.default_config = {}
-        
+
         # Save original environment
-        original_vars = {key: os.environ.get(key) for key in ['GOOGLE_API_KEY']}
-        
+        original_vars = {
+            key: os.environ.get(key) for key in ['GOOGLE_API_KEY']
+        }
+
         try:
             # Clear API key environment variables
             self.clear_api_key_env_vars()
-            
+
             # This should succeed because api_key_required=False
             instance = await embedding_service._create_embedding_provider_instance(
                 provider, model_def
             )
-            
-            assert instance is not None, "Should create Google provider instance when api_key_required=False"
-            
+
+            assert (
+                instance is not None
+            ), "Should create Google provider instance when api_key_required=False"
+
         finally:
             self.restore_env_vars(original_vars)
 
     @pytest.mark.asyncio
-    async def test_cohere_provider_no_api_key_required_succeeds(self, embedding_service, model_def):
+    async def test_cohere_provider_no_api_key_required_succeeds(
+        self, embedding_service, model_def
+    ):
         """Test Cohere provider with api_key_required=False succeeds without API key."""
         # Skip if Cohere embeddings not available
         from chatter.services.embeddings import COHERE_AVAILABLE
+
         if not COHERE_AVAILABLE:
             pytest.skip("Cohere embeddings not available")
-            
+
         # Mock Cohere provider with api_key_required=False
         provider = Mock()
         provider.name = "cohere"
@@ -176,20 +205,24 @@ class TestEmbeddingServiceApiKeyHandling:
         provider.api_key_required = False
         provider.base_url = None
         provider.default_config = {}
-        
+
         # Save original environment
-        original_vars = {key: os.environ.get(key) for key in ['COHERE_API_KEY']}
-        
+        original_vars = {
+            key: os.environ.get(key) for key in ['COHERE_API_KEY']
+        }
+
         try:
             # Clear API key environment variables
             self.clear_api_key_env_vars()
-            
+
             # This should succeed because api_key_required=False
             instance = await embedding_service._create_embedding_provider_instance(
                 provider, model_def
             )
-            
-            assert instance is not None, "Should create Cohere provider instance when api_key_required=False"
-            
+
+            assert (
+                instance is not None
+            ), "Should create Cohere provider instance when api_key_required=False"
+
         finally:
             self.restore_env_vars(original_vars)

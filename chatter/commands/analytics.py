@@ -3,7 +3,12 @@
 import typer
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+)
 
 # Analytics Commands
 analytics_app = typer.Typer(help="Analytics and metrics commands")
@@ -49,7 +54,9 @@ async def usage_stats(
     breakdown: str = typer.Option(
         "daily", help="Breakdown type: daily, hourly"
     ),
-    limit: int = typer.Option(get_default_page_size(), help="Number of periods to show"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of periods to show"
+    ),
 ):
     """Show usage statistics with breakdown."""
     async with get_client() as sdk_client:

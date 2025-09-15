@@ -4,7 +4,12 @@ import typer
 from rich.panel import Panel
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+)
 
 # Plugins Commands
 plugins_app = typer.Typer(help="Plugin management commands")
@@ -13,7 +18,9 @@ plugins_app = typer.Typer(help="Plugin management commands")
 @plugins_app.command("list")
 @run_async
 async def list_plugins(
-    limit: int = typer.Option(get_default_page_size(), help="Number of plugins to list"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of plugins to list"
+    ),
     status: str = typer.Option(None, help="Filter by status"),
 ):
     """List installed plugins."""

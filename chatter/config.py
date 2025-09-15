@@ -357,13 +357,16 @@ class Settings(BaseSettings):
 
     # Memory-efficient processing settings
     file_chunk_size: int = Field(
-        default=65536, description="File chunk size for streaming (64KB)"
+        default=65536,
+        description="File chunk size for streaming (64KB)",
     )
     max_memory_per_document: int = Field(
-        default=104857600, description="Max memory per document processing (100MB)"
+        default=104857600,
+        description="Max memory per document processing (100MB)",
     )
     enable_memory_monitoring: bool = Field(
-        default=True, description="Enable memory usage monitoring during processing"
+        default=True,
+        description="Enable memory usage monitoring during processing",
     )
 
     # Memory-efficient text extraction settings
@@ -371,7 +374,8 @@ class Settings(BaseSettings):
         default=8192, description="Text extraction chunk size (8KB)"
     )
     max_text_length: int = Field(
-        default=10485760, description="Maximum extracted text length (10MB)"
+        default=10485760,
+        description="Maximum extracted text length (10MB)",
     )
 
     # Processing limits to prevent memory exhaustion
@@ -468,7 +472,8 @@ class Settings(BaseSettings):
         default=1000, description="Default chunk size for new documents"
     )
     default_chunk_overlap: int = Field(
-        default=200, description="Default chunk overlap for new documents"
+        default=200,
+        description="Default chunk overlap for new documents",
     )
 
     # =============================================================================
@@ -643,10 +648,12 @@ class Settings(BaseSettings):
 
     # Token expiration warnings (minutes)
     token_expire_warning_threshold: int = Field(
-        default=60, description="Token expiration warning threshold in minutes"
+        default=60,
+        description="Token expiration warning threshold in minutes",
     )
     refresh_token_expire_warning_threshold: int = Field(
-        default=30, description="Refresh token expiration warning threshold in minutes"
+        default=30,
+        description="Refresh token expiration warning threshold in minutes",
     )
 
     # =============================================================================
@@ -661,7 +668,8 @@ class Settings(BaseSettings):
         default=30.0, description="Plugin shutdown timeout in seconds"
     )
     plugin_health_check_timeout: float = Field(
-        default=30.0, description="Plugin health check timeout in seconds"
+        default=30.0,
+        description="Plugin health check timeout in seconds",
     )
 
     # Data management operation timeouts
@@ -696,7 +704,8 @@ class Settings(BaseSettings):
         default=1.0, description="CPU monitoring interval in seconds"
     )
     cpu_avg_monitoring_interval: float = Field(
-        default=0.1, description="CPU average monitoring interval in seconds"
+        default=0.1,
+        description="CPU average monitoring interval in seconds",
     )
 
     # =============================================================================
@@ -712,25 +721,32 @@ class Settings(BaseSettings):
 
     # CLI command defaults
     cli_default_timeout: float = Field(
-        default=30.0, description="Default CLI operation timeout in seconds"
+        default=30.0,
+        description="Default CLI operation timeout in seconds",
     )
     cli_default_page_size: int = Field(
-        default=10, description="Default pagination size for CLI commands"
+        default=10,
+        description="Default pagination size for CLI commands",
     )
     cli_max_page_size: int = Field(
-        default=100, description="Maximum pagination size for CLI commands"
+        default=100,
+        description="Maximum pagination size for CLI commands",
     )
     cli_default_max_tokens: int = Field(
-        default=100, description="Default maximum tokens for CLI model testing"
+        default=100,
+        description="Default maximum tokens for CLI model testing",
     )
     cli_profile_max_tokens: int = Field(
-        default=1000, description="Default maximum tokens for profile creation"
+        default=1000,
+        description="Default maximum tokens for profile creation",
     )
     cli_message_display_limit: int = Field(
-        default=20, description="Default number of messages to display in CLI"
+        default=20,
+        description="Default number of messages to display in CLI",
     )
     cli_default_test_count: int = Field(
-        default=5, description="Default number of test requests for benchmarking"
+        default=5,
+        description="Default number of test requests for benchmarking",
     )
 
     # =============================================================================

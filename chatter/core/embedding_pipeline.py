@@ -11,7 +11,6 @@ NO backwards compatibility - completely new implementation.
 
 import asyncio
 import hashlib
-import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -20,7 +19,13 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.model_registry import ModelRegistryService
-from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType, HybridVectorSearchHelper
+from chatter.models.document import (
+    Document,
+    DocumentChunk,
+    DocumentStatus,
+    DocumentType,
+    HybridVectorSearchHelper,
+)
 from chatter.models.registry import ModelType
 from chatter.utils.logging import get_logger
 
@@ -29,13 +34,16 @@ logger = get_logger(__name__)
 
 class EmbeddingPipelineError(Exception):
     """Error in the embedding pipeline."""
+
     pass
 
 
 class DocumentTextExtractor:
     """Handles text extraction from various document formats."""
 
-    async def extract_text_from_file(self, document: Document, file_path: Path) -> str:
+    async def extract_text_from_file(
+        self, document: Document, file_path: Path
+    ) -> str:
         """Extract text from document file using memory-efficient processing.
 
         Args:
@@ -50,46 +58,78 @@ class DocumentTextExtractor:
         """
         try:
             if document.document_type == DocumentType.TEXT:
-                return await self._extract_text_plain_from_file(file_path)
+                return await self._extract_text_plain_from_file(
+                    file_path
+                )
             elif document.document_type == DocumentType.PDF:
                 return await self._extract_text_pdf_from_file(file_path)
-            elif document.document_type in [DocumentType.DOC, DocumentType.DOCX]:
-                return await self._extract_text_docx_from_file(file_path)
+            elif document.document_type in [
+                DocumentType.DOC,
+                DocumentType.DOCX,
+            ]:
+                return await self._extract_text_docx_from_file(
+                    file_path
+                )
             elif document.document_type == DocumentType.HTML:
-                return await self._extract_text_html_from_file(file_path)
+                return await self._extract_text_html_from_file(
+                    file_path
+                )
             elif document.document_type == DocumentType.MARKDOWN:
-                return await self._extract_text_markdown_from_file(file_path)
+                return await self._extract_text_markdown_from_file(
+                    file_path
+                )
             elif document.document_type == DocumentType.JSON:
-                return await self._extract_text_json_from_file(file_path)
+                return await self._extract_text_json_from_file(
+                    file_path
+                )
             else:
                 # Try unstructured as fallback
-                return await self._extract_text_unstructured_from_file(file_path)
+                return await self._extract_text_unstructured_from_file(
+                    file_path
+                )
 
         except Exception as e:
-            logger.error("Text extraction from file failed", document_id=document.id, file_path=str(file_path), error=str(e))
-            raise EmbeddingPipelineError(f"Failed to extract text from file: {e}") from e
+            logger.error(
+                "Text extraction from file failed",
+                document_id=document.id,
+                file_path=str(file_path),
+                error=str(e),
+            )
+            raise EmbeddingPipelineError(
+                f"Failed to extract text from file: {e}"
+            ) from e
 
-    async def _extract_text_plain_from_file(self, file_path: Path) -> str:
+    async def _extract_text_plain_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract from plain text files using memory-efficient reading."""
         for encoding in ["utf-8", "latin-1", "cp1252"]:
             try:
                 try:
                     import aiofiles
-                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+
+                    async with aiofiles.open(
+                        file_path, encoding=encoding
+                    ) as f:
                         return await f.read()
                 except ImportError:
                     # Fallback to sync reading in thread
                     def read_sync():
-                        with open(file_path, 'r', encoding=encoding) as f:
+                        with open(file_path, encoding=encoding) as f:
                             return f.read()
+
                     return await asyncio.to_thread(read_sync)
             except UnicodeDecodeError:
                 continue
-        raise EmbeddingPipelineError("Could not decode text file with any encoding")
+        raise EmbeddingPipelineError(
+            "Could not decode text file with any encoding"
+        )
 
     async def _extract_text_pdf_from_file(self, file_path: Path) -> str:
         """Extract from PDF files using memory-efficient processing."""
-        return await asyncio.to_thread(self._extract_pdf_sync_from_file, str(file_path))
+        return await asyncio.to_thread(
+            self._extract_pdf_sync_from_file, str(file_path)
+        )
 
     def _extract_pdf_sync_from_file(self, file_path: str) -> str:
         """Sync PDF extraction from file path."""
@@ -104,13 +144,21 @@ class DocumentTextExtractor:
                     text_parts.append(text)
             return "\n".join(text_parts)
         except ImportError:
-            raise EmbeddingPipelineError("pypdf not available for PDF extraction")
+            raise EmbeddingPipelineError(
+                "pypdf not available for PDF extraction"
+            ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"PDF extraction failed: {e}")
+            raise EmbeddingPipelineError(
+                f"PDF extraction failed: {e}"
+            ) from e
 
-    async def _extract_text_docx_from_file(self, file_path: Path) -> str:
+    async def _extract_text_docx_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract from DOCX files using memory-efficient processing."""
-        return await asyncio.to_thread(self._extract_docx_sync_from_file, str(file_path))
+        return await asyncio.to_thread(
+            self._extract_docx_sync_from_file, str(file_path)
+        )
 
     def _extract_docx_sync_from_file(self, file_path: str) -> str:
         """Sync DOCX extraction from file path."""
@@ -118,13 +166,21 @@ class DocumentTextExtractor:
             from unstructured.partition.docx import partition_docx
 
             elements = partition_docx(filename=file_path)
-            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
+            return "\n".join(
+                [e.text for e in elements if hasattr(e, 'text')]
+            )
         except ImportError:
-            raise EmbeddingPipelineError("unstructured not available for DOCX extraction")
+            raise EmbeddingPipelineError(
+                "unstructured not available for DOCX extraction"
+            ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"DOCX extraction failed: {e}")
+            raise EmbeddingPipelineError(
+                f"DOCX extraction failed: {e}"
+            ) from e
 
-    async def _extract_text_html_from_file(self, file_path: Path) -> str:
+    async def _extract_text_html_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract from HTML files using memory-efficient processing."""
         try:
             # Read HTML content efficiently
@@ -132,42 +188,69 @@ class DocumentTextExtractor:
             for encoding in ["utf-8", "latin-1", "cp1252"]:
                 try:
                     import aiofiles
-                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+
+                    async with aiofiles.open(
+                        file_path, encoding=encoding
+                    ) as f:
                         html_text = await f.read()
                     break
                 except (UnicodeDecodeError, ImportError):
                     continue
-            
+
             if not html_text:
+
                 def read_sync():
-                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    with open(
+                        file_path,
+                        encoding='utf-8',
+                        errors='ignore',
+                    ) as f:
                         return f.read()
+
                 html_text = await asyncio.to_thread(read_sync)
-            
+
             # Extract text using unstructured
             from unstructured.partition.html import partition_html
-            elements = partition_html(text=html_text)
-            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
-        except ImportError:
-            raise EmbeddingPipelineError("unstructured not available for HTML extraction")
-        except Exception as e:
-            raise EmbeddingPipelineError(f"HTML extraction failed: {e}")
 
-    async def _extract_text_markdown_from_file(self, file_path: Path) -> str:
+            elements = partition_html(text=html_text)
+            return "\n".join(
+                [e.text for e in elements if hasattr(e, 'text')]
+            )
+        except ImportError:
+            raise EmbeddingPipelineError(
+                "unstructured not available for HTML extraction"
+            ) from None
+        except Exception as e:
+            raise EmbeddingPipelineError(
+                f"HTML extraction failed: {e}"
+            ) from e
+
+    async def _extract_text_markdown_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract from Markdown files using memory-efficient processing."""
         try:
             import aiofiles
-            async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+
+            async with aiofiles.open(file_path, encoding='utf-8') as f:
                 return await f.read()
         except ImportError:
+
             def read_sync():
-                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                with open(
+                    file_path, encoding='utf-8', errors='ignore'
+                ) as f:
                     return f.read()
+
             return await asyncio.to_thread(read_sync)
 
-    async def _extract_text_json_from_file(self, file_path: Path) -> str:
+    async def _extract_text_json_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract from JSON files using memory-efficient processing."""
-        return await asyncio.to_thread(self._extract_json_sync_from_file, str(file_path))
+        return await asyncio.to_thread(
+            self._extract_json_sync_from_file, str(file_path)
+        )
 
     def _extract_json_sync_from_file(self, file_path: str) -> str:
         """Sync JSON extraction from file path."""
@@ -178,33 +261,51 @@ class DocumentTextExtractor:
                 if isinstance(obj, str):
                     return obj
                 elif isinstance(obj, dict):
-                    return " ".join(extract_text_recursive(v) for v in obj.values())
+                    return " ".join(
+                        extract_text_recursive(v) for v in obj.values()
+                    )
                 elif isinstance(obj, list):
-                    return " ".join(extract_text_recursive(item) for item in obj)
+                    return " ".join(
+                        extract_text_recursive(item) for item in obj
+                    )
                 else:
                     return str(obj)
 
-            with open(file_path, 'r', encoding='utf-8') as f:
+            with open(file_path, encoding='utf-8') as f:
                 data = json.load(f)
             return extract_text_recursive(data)
         except Exception as e:
-            raise EmbeddingPipelineError(f"JSON extraction failed: {e}")
+            raise EmbeddingPipelineError(
+                f"JSON extraction failed: {e}"
+            ) from e
 
-    async def _extract_text_unstructured_from_file(self, file_path: Path) -> str:
+    async def _extract_text_unstructured_from_file(
+        self, file_path: Path
+    ) -> str:
         """Extract using unstructured library from file path."""
-        return await asyncio.to_thread(self._extract_unstructured_sync_from_file, str(file_path))
+        return await asyncio.to_thread(
+            self._extract_unstructured_sync_from_file, str(file_path)
+        )
 
-    def _extract_unstructured_sync_from_file(self, file_path: str) -> str:
+    def _extract_unstructured_sync_from_file(
+        self, file_path: str
+    ) -> str:
         """Sync unstructured extraction from file path."""
         try:
             from unstructured.partition.auto import partition
 
             elements = partition(filename=file_path)
-            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
+            return "\n".join(
+                [e.text for e in elements if hasattr(e, 'text')]
+            )
         except ImportError:
-            raise EmbeddingPipelineError("unstructured not available")
+            raise EmbeddingPipelineError(
+                "unstructured not available"
+            ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"Unstructured extraction failed: {e}")
+            raise EmbeddingPipelineError(
+                f"Unstructured extraction failed: {e}"
+            ) from e
 
 
 class DocumentChunker:
@@ -221,20 +322,38 @@ class DocumentChunker:
             List of text chunks
         """
         try:
-            from langchain_text_splitters import RecursiveCharacterTextSplitter
+            from langchain_text_splitters import (
+                RecursiveCharacterTextSplitter,
+            )
 
             # Choose separators based on document type
             if document.document_type == DocumentType.MARKDOWN:
-                separators = ["\n# ", "\n## ", "\n### ", "\n\n", "\n", ".", " "]
+                separators = [
+                    "\n# ",
+                    "\n## ",
+                    "\n### ",
+                    "\n\n",
+                    "\n",
+                    ".",
+                    " ",
+                ]
             elif document.document_type == DocumentType.HTML:
-                separators = ["\n\n", "\n", "<p>", "<div>", "<br>", ".", " "]
+                separators = [
+                    "\n\n",
+                    "\n",
+                    "<p>",
+                    "<div>",
+                    "<br>",
+                    ".",
+                    " ",
+                ]
             else:
                 separators = ["\n\n", "\n", ".", "!", "?", " "]
 
             splitter = RecursiveCharacterTextSplitter(
                 chunk_size=document.chunk_size,
                 chunk_overlap=document.chunk_overlap,
-                separators=separators
+                separators=separators,
             )
 
             chunks = splitter.split_text(text)
@@ -242,7 +361,8 @@ class DocumentChunker:
             # Filter out very short chunks
             min_length = max(50, document.chunk_size // 10)
             filtered_chunks = [
-                chunk.strip() for chunk in chunks
+                chunk.strip()
+                for chunk in chunks
                 if len(chunk.strip()) >= min_length
             ]
 
@@ -250,14 +370,20 @@ class DocumentChunker:
                 "Created text chunks",
                 document_id=document.id,
                 total_chunks=len(filtered_chunks),
-                chunk_size=document.chunk_size
+                chunk_size=document.chunk_size,
             )
 
             return filtered_chunks
 
         except Exception as e:
-            logger.error("Chunk creation failed", document_id=document.id, error=str(e))
-            raise EmbeddingPipelineError(f"Failed to create chunks: {e}") from e
+            logger.error(
+                "Chunk creation failed",
+                document_id=document.id,
+                error=str(e),
+            )
+            raise EmbeddingPipelineError(
+                f"Failed to create chunks: {e}"
+            ) from e
 
 
 class SimpleEmbeddingService:
@@ -267,7 +393,9 @@ class SimpleEmbeddingService:
         self.session = session
         self.registry = ModelRegistryService(session)
 
-    async def generate_embeddings(self, texts: list[str]) -> tuple[list[list[float]], dict[str, Any]]:
+    async def generate_embeddings(
+        self, texts: list[str]
+    ) -> tuple[list[list[float]], dict[str, Any]]:
         """Generate embeddings for texts.
 
         Args:
@@ -281,31 +409,48 @@ class SimpleEmbeddingService:
         """
         try:
             # Get default embedding provider
-            provider = await self.registry.get_default_provider(model_type=ModelType.EMBEDDING)
+            provider = await self.registry.get_default_provider(
+                model_type=ModelType.EMBEDDING
+            )
             if not provider:
-                raise EmbeddingPipelineError("No default embedding provider configured")
+                raise EmbeddingPipelineError(
+                    "No default embedding provider configured"
+                )
 
             # Get default embedding model
-            models, _ = await self.registry.list_models(provider.id, model_type=ModelType.EMBEDDING)
-            model = next((m for m in models if m.is_default and m.is_active), None)
+            models, _ = await self.registry.list_models(
+                provider.id, model_type=ModelType.EMBEDDING
+            )
+            model = next(
+                (m for m in models if m.is_default and m.is_active),
+                None,
+            )
             if not model:
                 model = next((m for m in models if m.is_active), None)
             if not model:
-                raise EmbeddingPipelineError(f"No active embedding model for provider {provider.name}")
+                raise EmbeddingPipelineError(
+                    f"No active embedding model for provider {provider.name}"
+                )
 
             # Create embedding instance
-            embedding_instance = await self._create_embedding_instance(provider, model)
+            embedding_instance = await self._create_embedding_instance(
+                provider, model
+            )
             if not embedding_instance:
-                raise EmbeddingPipelineError(f"Failed to create embedding instance for {provider.name}")
+                raise EmbeddingPipelineError(
+                    f"Failed to create embedding instance for {provider.name}"
+                )
 
             # Generate embeddings
-            embeddings = await embedding_instance.aembed_documents(texts)
+            embeddings = await embedding_instance.aembed_documents(
+                texts
+            )
 
             metadata = {
                 "provider": provider.name,
                 "model": model.model_name,
                 "dimensions": len(embeddings[0]) if embeddings else 0,
-                "text_count": len(texts)
+                "text_count": len(texts),
             }
 
             logger.info(
@@ -313,14 +458,16 @@ class SimpleEmbeddingService:
                 provider=provider.name,
                 model=model.model_name,
                 text_count=len(texts),
-                dimensions=metadata["dimensions"]
+                dimensions=metadata["dimensions"],
             )
 
             return embeddings, metadata
 
         except Exception as e:
             logger.error("Embedding generation failed", error=str(e))
-            raise EmbeddingPipelineError(f"Failed to generate embeddings: {e}") from e
+            raise EmbeddingPipelineError(
+                f"Failed to generate embeddings: {e}"
+            ) from e
 
     async def _create_embedding_instance(self, provider, model):
         """Create embedding provider instance."""
@@ -329,14 +476,16 @@ class SimpleEmbeddingService:
 
         try:
             if provider.provider_type == ProviderType.OPENAI:
-                from chatter.services.embeddings import SafeOpenAIEmbeddings
+                from chatter.services.embeddings import (
+                    SafeOpenAIEmbeddings,
+                )
 
                 try:
                     settings = get_settings()
                     api_key = settings.openai_api_key
                 except Exception:
                     api_key = None
-                    
+
                 if not api_key:
                     return None
 
@@ -344,14 +493,16 @@ class SimpleEmbeddingService:
                     api_key=api_key,
                     base_url=provider.base_url,
                     model=model.model_name,
-                    chunk_size=model.chunk_size or 1000
+                    chunk_size=model.chunk_size or 1000,
                 )
 
             # Add other providers as needed
             return None
 
         except Exception as e:
-            logger.error("Failed to create embedding instance", error=str(e))
+            logger.error(
+                "Failed to create embedding instance", error=str(e)
+            )
             return None
 
 
@@ -365,7 +516,7 @@ class SimpleVectorStore:
         self,
         chunks: list[DocumentChunk],
         embeddings: list[list[float]],
-        metadata: dict[str, Any]
+        metadata: dict[str, Any],
     ) -> bool:
         """Store embeddings for chunks using hybrid vector storage.
 
@@ -378,7 +529,9 @@ class SimpleVectorStore:
             True if successful
         """
         try:
-            success = await self.store_embeddings_no_commit(chunks, embeddings, metadata)
+            success = await self.store_embeddings_no_commit(
+                chunks, embeddings, metadata
+            )
             if success:
                 await self.session.commit()
                 # Refresh chunks to get updated data
@@ -395,7 +548,7 @@ class SimpleVectorStore:
         self,
         chunks: list[DocumentChunk],
         embeddings: list[list[float]],
-        metadata: dict[str, Any]
+        metadata: dict[str, Any],
     ) -> bool:
         """Store embeddings for chunks without committing transaction.
 
@@ -409,12 +562,14 @@ class SimpleVectorStore:
         """
         try:
             # Update chunks with embeddings using the new hybrid system
-            for chunk, embedding in zip(chunks, embeddings, strict=True):
+            for chunk, embedding in zip(
+                chunks, embeddings, strict=True
+            ):
                 # Use the new set_embedding_vector method which triggers event listeners
                 chunk.set_embedding_vector(
                     vector=embedding,
                     provider=metadata.get("provider"),
-                    model=metadata.get("model")
+                    model=metadata.get("model"),
                 )
 
             logger.info(
@@ -422,13 +577,19 @@ class SimpleVectorStore:
                 chunk_count=len(chunks),
                 provider=metadata.get("provider"),
                 dimensions=metadata.get("dimensions"),
-                hybrid_columns=["embedding", "raw_embedding", "computed_embedding"]
+                hybrid_columns=[
+                    "embedding",
+                    "raw_embedding",
+                    "computed_embedding",
+                ],
             )
 
             return True
 
         except Exception as e:
-            logger.error("Failed to prepare embeddings for storage", error=str(e))
+            logger.error(
+                "Failed to prepare embeddings for storage", error=str(e)
+            )
             return False
 
     async def search_similar(
@@ -436,7 +597,7 @@ class SimpleVectorStore:
         query_embedding: list[float],
         limit: int = 10,
         document_ids: list[str] | None = None,
-        prefer_exact_match: bool = True
+        prefer_exact_match: bool = True,
     ) -> list[tuple[DocumentChunk, float]]:
         """Search for similar chunks using hybrid vector search.
 
@@ -463,7 +624,7 @@ class SimpleVectorStore:
                 "Hybrid vector search initiated",
                 query_dim=len(query_embedding),
                 search_column=search_column,
-                prepared_dim=len(prepared_query)
+                prepared_dim=len(prepared_query),
             )
 
             # Build base query
@@ -471,36 +632,56 @@ class SimpleVectorStore:
 
             # Apply document filter if provided
             if document_ids:
-                query = query.where(DocumentChunk.document_id.in_(document_ids))
+                query = query.where(
+                    DocumentChunk.document_id.in_(document_ids)
+                )
 
             # Apply dimension filter for exact matches
             if prefer_exact_match and search_column == 'raw_embedding':
-                query = query.where(DocumentChunk.raw_dim == len(query_embedding))
+                query = query.where(
+                    DocumentChunk.raw_dim == len(query_embedding)
+                )
 
             # Filter out chunks without the required embedding column
             if search_column == 'embedding':
-                query = query.where(DocumentChunk.embedding.is_not(None))
+                query = query.where(
+                    DocumentChunk.embedding.is_not(None)
+                )
             elif search_column == 'computed_embedding':
-                query = query.where(DocumentChunk.computed_embedding.is_not(None))
+                query = query.where(
+                    DocumentChunk.computed_embedding.is_not(None)
+                )
             elif search_column == 'raw_embedding':
-                query = query.where(DocumentChunk.raw_embedding.is_not(None))
+                query = query.where(
+                    DocumentChunk.raw_embedding.is_not(None)
+                )
 
             # Add vector similarity ordering using the appropriate column
             if search_column == 'embedding':
                 query = query.order_by(
-                    DocumentChunk.embedding.cosine_distance(prepared_query)
+                    DocumentChunk.embedding.cosine_distance(
+                        prepared_query
+                    )
                 ).limit(limit)
             elif search_column == 'computed_embedding':
                 query = query.order_by(
-                    DocumentChunk.computed_embedding.cosine_distance(prepared_query)
+                    DocumentChunk.computed_embedding.cosine_distance(
+                        prepared_query
+                    )
                 ).limit(limit)
             else:
                 # For raw_embedding, we need to use a different approach since it's JSON
                 # Fall back to computed_embedding for consistent indexing
-                logger.debug("Falling back to computed_embedding for raw_embedding search")
-                query = query.where(DocumentChunk.computed_embedding.is_not(None))
+                logger.debug(
+                    "Falling back to computed_embedding for raw_embedding search"
+                )
+                query = query.where(
+                    DocumentChunk.computed_embedding.is_not(None)
+                )
                 query = query.order_by(
-                    DocumentChunk.computed_embedding.cosine_distance(prepared_query)
+                    DocumentChunk.computed_embedding.cosine_distance(
+                        prepared_query
+                    )
                 ).limit(limit)
 
             result = await self.session.execute(query)
@@ -513,9 +694,15 @@ class SimpleVectorStore:
 
                 if search_column == 'embedding' and chunk.embedding:
                     embedding_vector = chunk.embedding
-                elif search_column == 'computed_embedding' and chunk.computed_embedding:
+                elif (
+                    search_column == 'computed_embedding'
+                    and chunk.computed_embedding
+                ):
                     embedding_vector = chunk.computed_embedding
-                elif search_column == 'raw_embedding' and chunk.raw_embedding:
+                elif (
+                    search_column == 'raw_embedding'
+                    and chunk.raw_embedding
+                ):
                     embedding_vector = chunk.raw_embedding
                 elif chunk.computed_embedding:
                     # Fallback to computed_embedding
@@ -540,7 +727,8 @@ class SimpleVectorStore:
 
                     # Cosine similarity
                     similarity = np.dot(chunk_vec, query_vec) / (
-                        np.linalg.norm(chunk_vec) * np.linalg.norm(query_vec)
+                        np.linalg.norm(chunk_vec)
+                        * np.linalg.norm(query_vec)
                     )
 
                     results.append((chunk, float(similarity)))
@@ -548,7 +736,7 @@ class SimpleVectorStore:
             logger.debug(
                 "Hybrid vector search completed",
                 results_count=len(results),
-                search_column=search_column
+                search_column=search_column,
             )
             return results
 
@@ -567,7 +755,9 @@ class EmbeddingPipeline:
         self.embedding_service = SimpleEmbeddingService(session)
         self.vector_store = SimpleVectorStore(session)
 
-    async def process_document_from_file(self, document_id: str, file_path: Path) -> bool:
+    async def process_document_from_file(
+        self, document_id: str, file_path: Path
+    ) -> bool:
         """Process a document through the complete embedding pipeline using file path.
 
         Args:
@@ -584,11 +774,15 @@ class EmbeddingPipeline:
             )
             document = result.scalar_one_or_none()
             if not document:
-                raise EmbeddingPipelineError(f"Document {document_id} not found")
+                raise EmbeddingPipelineError(
+                    f"Document {document_id} not found"
+                )
 
             # Verify file exists
             if not file_path.exists():
-                raise EmbeddingPipelineError(f"File not found: {file_path}")
+                raise EmbeddingPipelineError(
+                    f"File not found: {file_path}"
+                )
 
             # Update status
             document.status = DocumentStatus.PROCESSING
@@ -600,13 +794,17 @@ class EmbeddingPipeline:
                 "Starting memory-efficient document processing",
                 document_id=document_id,
                 file_path=str(file_path),
-                file_size=file_path.stat().st_size
+                file_size=file_path.stat().st_size,
             )
 
             # Step 1: Extract text from file (memory efficient)
-            text = await self.text_extractor.extract_text_from_file(document, file_path)
+            text = await self.text_extractor.extract_text_from_file(
+                document, file_path
+            )
             if not text.strip():
-                raise EmbeddingPipelineError("No text extracted from document")
+                raise EmbeddingPipelineError(
+                    "No text extracted from document"
+                )
 
             document.extracted_text = text
             await self.session.commit()
@@ -614,7 +812,9 @@ class EmbeddingPipeline:
             # Step 2: Create chunks
             chunk_texts = self.chunker.create_chunks(document, text)
             if not chunk_texts:
-                raise EmbeddingPipelineError("No chunks created from text")
+                raise EmbeddingPipelineError(
+                    "No chunks created from text"
+                )
 
             # Step 3: Store chunks in database
             chunks = []
@@ -623,8 +823,12 @@ class EmbeddingPipeline:
                     document_id=document.id,
                     content=chunk_text,
                     chunk_index=i,
-                    content_hash=hashlib.sha256(chunk_text.encode()).hexdigest(),
-                    token_count=len(chunk_text.split())  # Simple approximation
+                    content_hash=hashlib.sha256(
+                        chunk_text.encode()
+                    ).hexdigest(),
+                    token_count=len(
+                        chunk_text.split()
+                    ),  # Simple approximation
                 )
                 chunks.append(chunk)
                 self.session.add(chunk)
@@ -637,18 +841,28 @@ class EmbeddingPipeline:
                 await self.session.refresh(chunk)
 
             # Step 4: Generate embeddings
-            embeddings, metadata = await self.embedding_service.generate_embeddings(chunk_texts)
+            embeddings, metadata = (
+                await self.embedding_service.generate_embeddings(
+                    chunk_texts
+                )
+            )
 
             # Step 5: Store embeddings (without committing in vector store)
-            success = await self.vector_store.store_embeddings_no_commit(chunks, embeddings, metadata)
+            success = (
+                await self.vector_store.store_embeddings_no_commit(
+                    chunks, embeddings, metadata
+                )
+            )
             if not success:
-                raise EmbeddingPipelineError("Failed to store embeddings")
+                raise EmbeddingPipelineError(
+                    "Failed to store embeddings"
+                )
 
             # Update document status and commit everything at once
             document.status = DocumentStatus.PROCESSED
             document.processing_completed_at = datetime.now(UTC)
             document.chunk_count = len(chunks)
-            
+
             # Single commit for all operations
             await self.session.commit()
 
@@ -657,7 +871,7 @@ class EmbeddingPipeline:
                 document_id=document_id,
                 chunks=len(chunks),
                 text_length=len(text),
-                file_size=file_path.stat().st_size
+                file_size=file_path.stat().st_size,
             )
 
             return True
@@ -667,7 +881,7 @@ class EmbeddingPipeline:
             try:
                 # Rollback any pending changes first
                 await self.session.rollback()
-                
+
                 # Then try to mark the document as failed in a separate transaction
                 result = await self.session.execute(
                     select(Document).where(Document.id == document_id)
@@ -683,10 +897,14 @@ class EmbeddingPipeline:
                     "Failed to mark document as failed after processing error",
                     document_id=document_id,
                     original_error=str(e),
-                    cleanup_error=str(cleanup_error)
+                    cleanup_error=str(cleanup_error),
                 )
 
-            logger.error("Memory-efficient document processing failed", document_id=document_id, error=str(e))
+            logger.error(
+                "Memory-efficient document processing failed",
+                document_id=document_id,
+                error=str(e),
+            )
             return False
 
     async def search_documents(
@@ -694,7 +912,7 @@ class EmbeddingPipeline:
         query: str,
         limit: int = 10,
         document_ids: list[str] | None = None,
-        prefer_exact_match: bool = True
+        prefer_exact_match: bool = True,
     ) -> list[tuple[DocumentChunk, float]]:
         """Search documents using hybrid semantic similarity.
 
@@ -709,7 +927,11 @@ class EmbeddingPipeline:
         """
         try:
             # Generate query embedding
-            embeddings, metadata = await self.embedding_service.generate_embeddings([query])
+            embeddings, metadata = (
+                await self.embedding_service.generate_embeddings(
+                    [query]
+                )
+            )
             query_embedding = embeddings[0]
 
             # Search vector store using hybrid search
@@ -722,10 +944,14 @@ class EmbeddingPipeline:
                 query=query,
                 results=len(results),
                 query_dim=len(query_embedding),
-                provider=metadata.get("provider")
+                provider=metadata.get("provider"),
             )
             return results
 
         except Exception as e:
-            logger.error("Hybrid document search failed", query=query, error=str(e))
+            logger.error(
+                "Hybrid document search failed",
+                query=query,
+                error=str(e),
+            )
             return []

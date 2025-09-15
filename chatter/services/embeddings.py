@@ -1,7 +1,6 @@
 """Embedding generation service."""
 
 import hashlib
-import os
 import time
 from typing import Any
 
@@ -62,16 +61,24 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
     ) -> list[list[float]]:
         """Safely embed documents with proper response format handling."""
         try:
-            return await super().aembed_documents(texts, chunk_size, **kwargs)
+            return await super().aembed_documents(
+                texts, chunk_size, **kwargs
+            )
         except (AttributeError, KeyError, TypeError) as e:
             # Check if this is the specific response format error
-            if "model_dump" in str(e) or "data" in str(e) or "'list' object" in str(e):
+            if (
+                "model_dump" in str(e)
+                or "data" in str(e)
+                or "'list' object" in str(e)
+            ):
                 logger.warning(
                     "OpenAI response format issue detected, attempting manual processing",
                     error=str(e),
                     text_count=len(texts),
                 )
-                return await self._safe_embed_documents_fallback(texts, chunk_size, **kwargs)
+                return await self._safe_embed_documents_fallback(
+                    texts, chunk_size, **kwargs
+                )
             else:
                 # Re-raise other errors
                 raise
@@ -81,12 +88,18 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
         try:
             return await super().aembed_query(text, **kwargs)
         except (AttributeError, KeyError, TypeError) as e:
-            if "model_dump" in str(e) or "data" in str(e) or "'list' object" in str(e):
+            if (
+                "model_dump" in str(e)
+                or "data" in str(e)
+                or "'list' object" in str(e)
+            ):
                 logger.warning(
                     "OpenAI response format issue detected for query, attempting manual processing",
                     error=str(e),
                 )
-                result = await self._safe_embed_documents_fallback([text], None, **kwargs)
+                result = await self._safe_embed_documents_fallback(
+                    [text], None, **kwargs
+                )
                 return result[0] if result else []
             else:
                 raise
@@ -110,7 +123,9 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                 # Handle different response formats
                 if isinstance(response, list):
                     # Response is already a list of embedding objects
-                    logger.debug("OpenAI response is already a list format")
+                    logger.debug(
+                        "OpenAI response is already a list format"
+                    )
                     batch_embeddings = []
                     for r in response:
                         if isinstance(r, dict) and "embedding" in r:
@@ -118,8 +133,18 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                         elif hasattr(r, "embedding"):
                             batch_embeddings.append(r.embedding)
                         else:
-                            logger.error("Invalid embedding object in list response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
-                            raise ValueError(f"Invalid embedding object in response: {type(r)}")
+                            logger.error(
+                                "Invalid embedding object in list response",
+                                object_type=type(r),
+                                object_keys=(
+                                    list(r.keys())
+                                    if isinstance(r, dict)
+                                    else "N/A"
+                                ),
+                            )
+                            raise ValueError(
+                                f"Invalid embedding object in response: {type(r)}"
+                            )
                     embeddings.extend(batch_embeddings)
                 elif hasattr(response, "data") and response.data:
                     # Standard OpenAI response format with .data attribute
@@ -131,12 +156,19 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                         elif isinstance(r, dict) and "embedding" in r:
                             batch_embeddings.append(r["embedding"])
                         else:
-                            logger.error("Invalid embedding object in .data response", object_type=type(r))
-                            raise ValueError(f"Invalid embedding object in response.data: {type(r)}")
+                            logger.error(
+                                "Invalid embedding object in .data response",
+                                object_type=type(r),
+                            )
+                            raise ValueError(
+                                f"Invalid embedding object in response.data: {type(r)}"
+                            )
                     embeddings.extend(batch_embeddings)
                 elif isinstance(response, dict) and "data" in response:
                     # Dict format response
-                    logger.debug("OpenAI response is dict with 'data' key")
+                    logger.debug(
+                        "OpenAI response is dict with 'data' key"
+                    )
                     batch_embeddings = []
                     for r in response["data"]:
                         if isinstance(r, dict) and "embedding" in r:
@@ -144,8 +176,18 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                         elif hasattr(r, "embedding"):
                             batch_embeddings.append(r.embedding)
                         else:
-                            logger.error("Invalid embedding object in dict response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
-                            raise ValueError(f"Invalid embedding object in response['data']: {type(r)}")
+                            logger.error(
+                                "Invalid embedding object in dict response",
+                                object_type=type(r),
+                                object_keys=(
+                                    list(r.keys())
+                                    if isinstance(r, dict)
+                                    else "N/A"
+                                ),
+                            )
+                            raise ValueError(
+                                f"Invalid embedding object in response['data']: {type(r)}"
+                            )
                     embeddings.extend(batch_embeddings)
                 elif hasattr(response, "model_dump"):
                     # Pydantic model, convert to dict
@@ -159,15 +201,35 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             elif hasattr(r, "embedding"):
                                 batch_embeddings.append(r.embedding)
                             else:
-                                logger.error("Invalid embedding object in model_dump response", object_type=type(r), object_keys=list(r.keys()) if isinstance(r, dict) else "N/A")
-                                raise ValueError(f"Invalid embedding object in model_dump['data']: {type(r)}")
+                                logger.error(
+                                    "Invalid embedding object in model_dump response",
+                                    object_type=type(r),
+                                    object_keys=(
+                                        list(r.keys())
+                                        if isinstance(r, dict)
+                                        else "N/A"
+                                    ),
+                                )
+                                raise ValueError(
+                                    f"Invalid embedding object in model_dump['data']: {type(r)}"
+                                )
                         embeddings.extend(batch_embeddings)
                     else:
-                        logger.error("Unexpected OpenAI response format after model_dump", response_keys=list(response_dict.keys()))
-                        raise ValueError(f"Unexpected OpenAI response format: {type(response)}")
+                        logger.error(
+                            "Unexpected OpenAI response format after model_dump",
+                            response_keys=list(response_dict.keys()),
+                        )
+                        raise ValueError(
+                            f"Unexpected OpenAI response format: {type(response)}"
+                        )
                 else:
-                    logger.error("Unhandled OpenAI response format", response_type=type(response))
-                    raise ValueError(f"Unhandled OpenAI response format: {type(response)}")
+                    logger.error(
+                        "Unhandled OpenAI response format",
+                        response_type=type(response),
+                    )
+                    raise ValueError(
+                        f"Unhandled OpenAI response format: {type(response)}"
+                    )
 
             except Exception as e:
                 logger.error(
@@ -308,7 +370,7 @@ class EmbeddingService:
                     api_key = current_settings.openai_api_key
                 except Exception:
                     api_key = None
-                    
+
                 if provider.api_key_required and not api_key:
                     logger.warning(
                         f"API key required for provider {provider.name} but not found in settings"
@@ -348,7 +410,7 @@ class EmbeddingService:
                     api_key = None  # TODO: Add google_api_key to Settings class
                 except Exception:
                     api_key = None
-                    
+
                 if provider.api_key_required and not api_key:
                     logger.warning(
                         f"No API key found for provider {provider.name} in settings (google_api_key field needed)"
@@ -372,7 +434,7 @@ class EmbeddingService:
                     api_key = None  # TODO: Add cohere_api_key to Settings class
                 except Exception:
                     api_key = None
-                    
+
                 if provider.api_key_required and not api_key:
                     logger.warning(
                         f"No API key found for provider {provider.name} in settings (cohere_api_key field needed)"
@@ -380,11 +442,19 @@ class EmbeddingService:
                     return None
 
                 return CohereEmbeddings(
-                    cohere_api_key=SecretStr(api_key) if api_key else None,
+                    cohere_api_key=(
+                        SecretStr(api_key) if api_key else None
+                    ),
                     model=model_def.model_name,
-                    client=cohere.Client(api_key) if cohere and api_key else None,
+                    client=(
+                        cohere.Client(api_key)
+                        if cohere and api_key
+                        else None
+                    ),
                     async_client=(
-                        cohere.AsyncClient(api_key) if cohere and api_key else None
+                        cohere.AsyncClient(api_key)
+                        if cohere and api_key
+                        else None
                     ),
                 )
 
@@ -756,7 +826,9 @@ class EmbeddingService:
 
     def _get_provider_name(self, provider: Embeddings) -> str:
         """Get provider name from provider instance."""
-        if isinstance(provider, (OpenAIEmbeddings, SafeOpenAIEmbeddings)):
+        if isinstance(
+            provider, (OpenAIEmbeddings, SafeOpenAIEmbeddings)
+        ):
             return "openai"
         elif (
             GOOGLE_AVAILABLE
@@ -782,7 +854,9 @@ class EmbeddingService:
         elif provider_name == "google":
             return "embedding-001"  # Default Google embedding model
         elif provider_name == "cohere":
-            return "embed-english-v2.0"  # Default Cohere embedding model
+            return (
+                "embed-english-v2.0"  # Default Cohere embedding model
+            )
         else:
             return "unknown"
 

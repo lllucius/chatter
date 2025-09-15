@@ -108,7 +108,9 @@ class Profile(Base):
     llm_provider: Mapped[str | None] = mapped_column(
         String(50), nullable=True
     )
-    llm_model: Mapped[str | None] = mapped_column(String(100), nullable=True)
+    llm_model: Mapped[str | None] = mapped_column(
+        String(100), nullable=True
+    )
 
     # Generation parameters
     temperature: Mapped[float] = mapped_column(

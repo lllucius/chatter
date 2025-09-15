@@ -7,7 +7,12 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+)
 
 # Prompts Commands
 prompts_app = typer.Typer(help="Prompt management commands")
@@ -16,7 +21,9 @@ prompts_app = typer.Typer(help="Prompt management commands")
 @prompts_app.command("list")
 @run_async
 async def list_prompts(
-    limit: int = typer.Option(get_default_page_size(), help="Number of prompts to list"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of prompts to list"
+    ),
     offset: int = typer.Option(0, help="Number of prompts to skip"),
     prompt_type: str = typer.Option(None, help="Filter by prompt type"),
 ) -> None:

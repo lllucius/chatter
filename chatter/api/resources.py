@@ -198,8 +198,13 @@ class MessageResourceHandler:
     ) -> MessageRatingResponse:
         """Update the rating for a message."""
         try:
-            updated_message = await self.chat_service.update_message_rating(
-                conversation_id, message_id, current_user.id, rating_update.rating
+            updated_message = (
+                await self.chat_service.update_message_rating(
+                    conversation_id,
+                    message_id,
+                    current_user.id,
+                    rating_update.rating,
+                )
             )
             return MessageRatingResponse(
                 message="Message rating updated successfully",

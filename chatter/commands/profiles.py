@@ -5,7 +5,13 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size, get_profile_max_tokens
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+    get_profile_max_tokens,
+)
 
 # Profiles Commands
 profiles_app = typer.Typer(help="Profile management commands")
@@ -14,7 +20,9 @@ profiles_app = typer.Typer(help="Profile management commands")
 @profiles_app.command("list")
 @run_async
 async def list_profiles(
-    limit: int = typer.Option(get_default_page_size(), help="Number of profiles to list"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of profiles to list"
+    ),
     offset: int = typer.Option(0, help="Number of profiles to skip"),
 ):
     """List user profiles."""
@@ -87,7 +95,9 @@ async def create_profile(
     temperature: float = typer.Option(
         0.7, help="Temperature (0.0-1.0)"
     ),
-    max_tokens: int = typer.Option(get_profile_max_tokens(), help="Maximum tokens"),
+    max_tokens: int = typer.Option(
+        get_profile_max_tokens(), help="Maximum tokens"
+    ),
     system_prompt: str = typer.Option(None, help="System prompt"),
 ):
     """Create a new profile."""

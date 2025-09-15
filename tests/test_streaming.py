@@ -287,8 +287,7 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, "type")
-            and e.type == "token"
+            if hasattr(e, "type") and e.type == "token"
         ]
         assert len(token_events) > 0
 
@@ -372,10 +371,10 @@ class TestStreamingService:
         # Stream source found
         events = []
         async for chunk in self.service.stream_source_found(
-            stream_id, 
-            source_info["title"], 
-            source_info["url"], 
-            {"relevance": source_info["relevance"]}
+            stream_id,
+            source_info["title"],
+            source_info["url"],
+            {"relevance": source_info["relevance"]},
         ):
             events.append(chunk)
 

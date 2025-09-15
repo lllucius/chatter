@@ -458,9 +458,13 @@ class MessageRatingUpdate(BaseModel):
 class MessageRatingResponse(BaseModel):
     """Response schema for message rating update."""
 
-    message: str = Field(..., description="Rating update result message")
+    message: str = Field(
+        ..., description="Rating update result message"
+    )
     rating: float = Field(..., description="Updated rating value")
-    rating_count: int = Field(..., description="Total number of ratings")
+    rating_count: int = Field(
+        ..., description="Total number of ratings"
+    )
 
 
 class AvailableToolResponse(BaseModel):

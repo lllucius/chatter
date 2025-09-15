@@ -8,7 +8,12 @@ from rich.progress import track
 from rich.prompt import Prompt
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+)
 
 # Documents Commands
 documents_app = typer.Typer(help="Document management commands")
@@ -17,7 +22,9 @@ documents_app = typer.Typer(help="Document management commands")
 @documents_app.command("list")
 @run_async
 async def list_documents(
-    limit: int = typer.Option(get_default_page_size(), help="Number of documents to list"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of documents to list"
+    ),
     offset: int = typer.Option(0, help="Number of documents to skip"),
 ):
     """List documents."""
@@ -181,7 +188,9 @@ async def delete_document(
 @run_async
 async def search_documents(
     query: str = typer.Argument(..., help="Search query"),
-    limit: int = typer.Option(get_default_page_size(), help="Number of results to return"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of results to return"
+    ),
     threshold: float = typer.Option(
         0.7, help="Similarity threshold (0.0-1.0)"
     ),
@@ -266,7 +275,9 @@ async def process_document(
 @run_async
 async def list_document_chunks(
     document_id: str = typer.Argument(..., help="Document ID"),
-    limit: int = typer.Option(get_default_page_size(), help="Number of chunks to list"),
+    limit: int = typer.Option(
+        get_default_page_size(), help="Number of chunks to list"
+    ),
 ):
     """List chunks for a document."""
     async with get_client() as sdk_client:

@@ -294,7 +294,11 @@ class MessageService:
             raise
 
     async def update_message_rating(
-        self, conversation_id: str, message_id: str, user_id: str, rating: float
+        self,
+        conversation_id: str,
+        message_id: str,
+        user_id: str,
+        rating: float,
     ) -> Message:
         """Update the rating for a message.
 
@@ -351,7 +355,9 @@ class MessageService:
                 message.rating_count = 1
             else:
                 # Update existing rating with new average
-                total_score = message.rating * message.rating_count + rating
+                total_score = (
+                    message.rating * message.rating_count + rating
+                )
                 message.rating_count += 1
                 message.rating = total_score / message.rating_count
 

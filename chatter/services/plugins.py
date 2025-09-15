@@ -611,7 +611,8 @@ class PluginManager:
 
                     try:
                         await asyncio.wait_for(
-                            plugin.shutdown(), timeout=settings.plugin_shutdown_timeout
+                            plugin.shutdown(),
+                            timeout=settings.plugin_shutdown_timeout,
                         )  # 30 second timeout
                     except TimeoutError:
                         logger.warning(
@@ -820,7 +821,8 @@ class PluginManager:
 
                 # Add timeout to health checks
                 health = await asyncio.wait_for(
-                    plugin.health_check(), timeout=settings.plugin_health_check_timeout
+                    plugin.health_check(),
+                    timeout=settings.plugin_health_check_timeout,
                 )
                 results[plugin_id] = health
 

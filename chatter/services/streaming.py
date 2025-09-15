@@ -89,6 +89,7 @@ class StreamingService:
             if correlation_id is None:
                 # Generate a unique correlation ID using ULID
                 from chatter.models.base import generate_ulid
+
                 correlation_id = f"stream_{generate_ulid()}"
 
         self.active_streams[stream_id] = {
@@ -610,7 +611,10 @@ class StreamingService:
         )
 
     async def stream_tool_call_end(
-        self, stream_id: str, tool_name: str, tool_result: dict[str, Any]
+        self,
+        stream_id: str,
+        tool_name: str,
+        tool_result: dict[str, Any],
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream tool call end event.
 
@@ -675,7 +679,11 @@ class StreamingService:
         )
 
     async def stream_source_found(
-        self, stream_id: str, source_title: str, source_url: str = "", metadata: dict[str, Any] | None = None
+        self,
+        stream_id: str,
+        source_title: str,
+        source_url: str = "",
+        metadata: dict[str, Any] | None = None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream source found event.
 
@@ -714,7 +722,10 @@ class StreamingService:
         )
 
     async def stream_error(
-        self, stream_id: str, error_message: str, error_type: str = "general"
+        self,
+        stream_id: str,
+        error_message: str,
+        error_type: str = "general",
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Stream error event.
 
@@ -810,7 +821,9 @@ class StreamingService:
             metadata=metadata,
         )
 
-    def get_stream_metrics(self, stream_id: str) -> dict[str, Any] | None:
+    def get_stream_metrics(
+        self, stream_id: str
+    ) -> dict[str, Any] | None:
         """Get metrics for a specific stream.
 
         Args:
@@ -837,10 +850,14 @@ class StreamingService:
             "token_count": stream_info["token_count"],
             "event_count": stream_info["event_count"],
             "tokens_per_second": (
-                stream_info["token_count"] / duration if duration > 0 else 0
+                stream_info["token_count"] / duration
+                if duration > 0
+                else 0
             ),
             "events_per_second": (
-                stream_info["event_count"] / duration if duration > 0 else 0
+                stream_info["event_count"] / duration
+                if duration > 0
+                else 0
             ),
             "last_activity": stream_info["last_activity"],
             "error_count": metrics.get("error_count", 0),

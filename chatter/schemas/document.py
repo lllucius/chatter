@@ -313,10 +313,11 @@ class SearchResultResponse(BaseModel):
     document_id: str = Field(..., description="Document ID")
     content: str = Field(..., description="Matching content")
     similarity_score: float = Field(..., description="Similarity score")
-    document_title: str | None = Field(None, description="Document title")
+    document_title: str | None = Field(
+        None, description="Document title"
+    )
     document_filename: str = Field(..., description="Document filename")
     chunk_index: int = Field(..., description="Chunk index")
-
 
 
 class DocumentProcessingResponse(BaseModel):

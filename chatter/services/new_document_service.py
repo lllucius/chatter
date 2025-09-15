@@ -44,7 +44,7 @@ class NewDocumentService:
         upload_file: UploadFile,
         document_data: DocumentCreate
     ) -> Document:
-        """Create and process a new document.
+        """Create and process a new document with memory-efficient handling.
 
         Args:
             user_id: Document owner ID
@@ -58,19 +58,15 @@ class NewDocumentService:
             DocumentServiceError: If creation fails
         """
         try:
-            # Read file content first
-            file_content = await upload_file.read()
-            file_size = len(file_content)
+            # Memory-efficient file processing using streaming
+            hasher = hashlib.sha256()
+            file_size = 0
+            CHUNK_SIZE = 64 * 1024  # 64KB chunks for better performance
 
-            # Validate file size
-            if file_size > settings.max_file_size:
-                raise DocumentServiceError(f"File too large: {file_size} bytes")
-
-            # Reset file pointer for any subsequent operations
-            await upload_file.seek(0)
-
-            # Calculate hash
-            file_hash = hashlib.sha256(file_content).hexdigest()
+            # Validate file extension early
+            file_ext = Path(upload_file.filename).suffix.lower().lstrip(".")
+            if file_ext not in settings.allowed_file_types:
+                raise DocumentServiceError(f"File type not allowed: {file_ext}")
 
             # Detect document type
             mime_type = (
@@ -80,17 +76,45 @@ class NewDocumentService:
             )
             document_type = self._detect_document_type(upload_file.filename, mime_type)
 
-            # Validate file extension
-            file_ext = Path(upload_file.filename).suffix.lower().lstrip(".")
-            if file_ext not in settings.allowed_file_types:
-                raise DocumentServiceError(f"File type not allowed: {file_ext}")
-
-            # Generate unique filename and save file
+            # Generate unique filename and prepare path
             unique_filename = f"{generate_ulid()}.{file_ext}"
             file_path = self.storage_path / unique_filename
 
-            with open(file_path, "wb") as f:
-                f.write(file_content)
+            # Stream file directly to disk while hashing (memory efficient)
+            await upload_file.seek(0)
+            
+            try:
+                with open(file_path, "wb") as f:
+                    while True:
+                        chunk = await upload_file.read(CHUNK_SIZE)
+                        if not chunk:
+                            break
+
+                        # Check size incrementally
+                        file_size += len(chunk)
+                        if file_size > settings.max_file_size:
+                            # Clean up and fail
+                            f.close()
+                            try:
+                                file_path.unlink()
+                            except OSError:
+                                pass
+                            raise DocumentServiceError(f"File too large: {file_size} bytes")
+
+                        # Hash and write
+                        hasher.update(chunk)
+                        f.write(chunk)
+
+                file_hash = hasher.hexdigest()
+
+            except Exception as e:
+                # Clean up on error
+                try:
+                    if file_path.exists():
+                        file_path.unlink()
+                except OSError:
+                    pass
+                raise e
 
             # Create document record
             document = Document(
@@ -123,9 +147,9 @@ class NewDocumentService:
                 user_id=user_id
             )
 
-            # Start processing asynchronously
+            # Start processing asynchronously using file path (not content)
             import asyncio
-            asyncio.create_task(self._process_document_async(document.id, file_content))
+            asyncio.create_task(self._process_document_async(document.id, file_path))
 
             return document
 
@@ -517,8 +541,8 @@ class NewDocumentService:
 
         return DocumentType.OTHER
 
-    async def _process_document_async(self, document_id: str, file_content: bytes) -> None:
-        """Process document asynchronously with dedicated session."""
+    async def _process_document_async(self, document_id: str, file_path: Path) -> None:
+        """Process document asynchronously with dedicated session using file path."""
         from chatter.utils.database import get_session_maker
         
         # Create a fresh session for background processing to avoid session state issues
@@ -527,7 +551,8 @@ class NewDocumentService:
             try:
                 # Create a new pipeline with the dedicated session
                 processing_pipeline = EmbeddingPipeline(processing_session)
-                success = await processing_pipeline.process_document(document_id, file_content)
+                # Pass file path instead of file content for memory efficiency
+                success = await processing_pipeline.process_document_from_file(document_id, file_path)
                 
                 if success:
                     logger.info("Document processing completed successfully", document_id=document_id)

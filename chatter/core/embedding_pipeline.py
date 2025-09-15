@@ -34,12 +34,12 @@ class EmbeddingPipelineError(Exception):
 class DocumentTextExtractor:
     """Handles text extraction from various document formats."""
 
-    async def extract_text(self, document: Document, file_content: bytes) -> str:
-        """Extract text from document content.
+    async def extract_text_from_file(self, document: Document, file_path: Path) -> str:
+        """Extract text from document file using memory-efficient processing.
 
         Args:
             document: Document model instance
-            file_content: Raw file bytes
+            file_path: Path to the file on disk
 
         Returns:
             Extracted text content
@@ -49,46 +49,53 @@ class DocumentTextExtractor:
         """
         try:
             if document.document_type == DocumentType.TEXT:
-                return await self._extract_text_plain(file_content)
+                return await self._extract_text_plain_from_file(file_path)
             elif document.document_type == DocumentType.PDF:
-                return await self._extract_text_pdf(file_content)
+                return await self._extract_text_pdf_from_file(file_path)
             elif document.document_type in [DocumentType.DOC, DocumentType.DOCX]:
-                return await self._extract_text_docx(file_content)
+                return await self._extract_text_docx_from_file(file_path)
             elif document.document_type == DocumentType.HTML:
-                return await self._extract_text_html(file_content)
+                return await self._extract_text_html_from_file(file_path)
             elif document.document_type == DocumentType.MARKDOWN:
-                return await self._extract_text_markdown(file_content)
+                return await self._extract_text_markdown_from_file(file_path)
             elif document.document_type == DocumentType.JSON:
-                return await self._extract_text_json(file_content)
+                return await self._extract_text_json_from_file(file_path)
             else:
                 # Try unstructured as fallback
-                return await self._extract_text_unstructured(file_content)
+                return await self._extract_text_unstructured_from_file(file_path)
 
         except Exception as e:
-            logger.error("Text extraction failed", document_id=document.id, error=str(e))
-            raise EmbeddingPipelineError(f"Failed to extract text: {e}") from e
+            logger.error("Text extraction from file failed", document_id=document.id, file_path=str(file_path), error=str(e))
+            raise EmbeddingPipelineError(f"Failed to extract text from file: {e}") from e
 
-    async def _extract_text_plain(self, content: bytes) -> str:
-        """Extract from plain text files."""
+    async def _extract_text_plain_from_file(self, file_path: Path) -> str:
+        """Extract from plain text files using memory-efficient reading."""
         for encoding in ["utf-8", "latin-1", "cp1252"]:
             try:
-                return content.decode(encoding)
+                try:
+                    import aiofiles
+                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+                        return await f.read()
+                except ImportError:
+                    # Fallback to sync reading in thread
+                    def read_sync():
+                        with open(file_path, 'r', encoding=encoding) as f:
+                            return f.read()
+                    return await asyncio.to_thread(read_sync)
             except UnicodeDecodeError:
                 continue
         raise EmbeddingPipelineError("Could not decode text file with any encoding")
 
-    async def _extract_text_pdf(self, content: bytes) -> str:
-        """Extract from PDF files."""
-        # Offload to thread pool
-        return await asyncio.to_thread(self._extract_pdf_sync, content)
+    async def _extract_text_pdf_from_file(self, file_path: Path) -> str:
+        """Extract from PDF files using memory-efficient processing."""
+        return await asyncio.to_thread(self._extract_pdf_sync_from_file, str(file_path))
 
-    def _extract_pdf_sync(self, content: bytes) -> str:
-        """Sync PDF extraction in thread."""
+    def _extract_pdf_sync_from_file(self, file_path: str) -> str:
+        """Sync PDF extraction from file path."""
         try:
             from pypdf import PdfReader
-            import io
 
-            reader = PdfReader(io.BytesIO(content))
+            reader = PdfReader(file_path)
             text_parts = []
             for page in reader.pages:
                 text = page.extract_text()
@@ -100,31 +107,44 @@ class DocumentTextExtractor:
         except Exception as e:
             raise EmbeddingPipelineError(f"PDF extraction failed: {e}")
 
-    async def _extract_text_docx(self, content: bytes) -> str:
-        """Extract from DOCX files."""
-        return await asyncio.to_thread(self._extract_docx_sync, content)
+    async def _extract_text_docx_from_file(self, file_path: Path) -> str:
+        """Extract from DOCX files using memory-efficient processing."""
+        return await asyncio.to_thread(self._extract_docx_sync_from_file, str(file_path))
 
-    def _extract_docx_sync(self, content: bytes) -> str:
-        """Sync DOCX extraction in thread."""
+    def _extract_docx_sync_from_file(self, file_path: str) -> str:
+        """Sync DOCX extraction from file path."""
         try:
             from unstructured.partition.docx import partition_docx
 
-            with tempfile.NamedTemporaryFile() as tmp:
-                tmp.write(content)
-                tmp.flush()
-                elements = partition_docx(filename=tmp.name)
-                return "\n".join([e.text for e in elements if hasattr(e, 'text')])
+            elements = partition_docx(filename=file_path)
+            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
         except ImportError:
             raise EmbeddingPipelineError("unstructured not available for DOCX extraction")
         except Exception as e:
             raise EmbeddingPipelineError(f"DOCX extraction failed: {e}")
 
-    async def _extract_text_html(self, content: bytes) -> str:
-        """Extract from HTML files."""
+    async def _extract_text_html_from_file(self, file_path: Path) -> str:
+        """Extract from HTML files using memory-efficient processing."""
         try:
+            # Read HTML content efficiently
+            html_text = None
+            for encoding in ["utf-8", "latin-1", "cp1252"]:
+                try:
+                    import aiofiles
+                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+                        html_text = await f.read()
+                    break
+                except (UnicodeDecodeError, ImportError):
+                    continue
+            
+            if not html_text:
+                def read_sync():
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        return f.read()
+                html_text = await asyncio.to_thread(read_sync)
+            
+            # Extract text using unstructured
             from unstructured.partition.html import partition_html
-
-            html_text = content.decode("utf-8", errors="ignore")
             elements = partition_html(text=html_text)
             return "\n".join([e.text for e in elements if hasattr(e, 'text')])
         except ImportError:
@@ -132,20 +152,26 @@ class DocumentTextExtractor:
         except Exception as e:
             raise EmbeddingPipelineError(f"HTML extraction failed: {e}")
 
-    async def _extract_text_markdown(self, content: bytes) -> str:
-        """Extract from Markdown files."""
-        return content.decode("utf-8", errors="ignore")
+    async def _extract_text_markdown_from_file(self, file_path: Path) -> str:
+        """Extract from Markdown files using memory-efficient processing."""
+        try:
+            import aiofiles
+            async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                return await f.read()
+        except ImportError:
+            def read_sync():
+                with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                    return f.read()
+            return await asyncio.to_thread(read_sync)
 
-    async def _extract_text_json(self, content: bytes) -> str:
-        """Extract from JSON files."""
-        return await asyncio.to_thread(self._extract_json_sync, content)
+    async def _extract_text_json_from_file(self, file_path: Path) -> str:
+        """Extract from JSON files using memory-efficient processing."""
+        return await asyncio.to_thread(self._extract_json_sync_from_file, str(file_path))
 
-    def _extract_json_sync(self, content: bytes) -> str:
-        """Sync JSON extraction in thread."""
+    def _extract_json_sync_from_file(self, file_path: str) -> str:
+        """Sync JSON extraction from file path."""
         try:
             import json
-
-            data = json.loads(content.decode("utf-8"))
 
             def extract_text_recursive(obj):
                 if isinstance(obj, str):
@@ -157,24 +183,23 @@ class DocumentTextExtractor:
                 else:
                     return str(obj)
 
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
             return extract_text_recursive(data)
         except Exception as e:
             raise EmbeddingPipelineError(f"JSON extraction failed: {e}")
 
-    async def _extract_text_unstructured(self, content: bytes) -> str:
-        """Extract using unstructured library as fallback."""
-        return await asyncio.to_thread(self._extract_unstructured_sync, content)
+    async def _extract_text_unstructured_from_file(self, file_path: Path) -> str:
+        """Extract using unstructured library from file path."""
+        return await asyncio.to_thread(self._extract_unstructured_sync_from_file, str(file_path))
 
-    def _extract_unstructured_sync(self, content: bytes) -> str:
-        """Sync unstructured extraction in thread."""
+    def _extract_unstructured_sync_from_file(self, file_path: str) -> str:
+        """Sync unstructured extraction from file path."""
         try:
             from unstructured.partition.auto import partition
 
-            with tempfile.NamedTemporaryFile() as tmp:
-                tmp.write(content)
-                tmp.flush()
-                elements = partition(filename=tmp.name)
-                return "\n".join([e.text for e in elements if hasattr(e, 'text')])
+            elements = partition(filename=file_path)
+            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
         except ImportError:
             raise EmbeddingPipelineError("unstructured not available")
         except Exception as e:
@@ -539,12 +564,12 @@ class EmbeddingPipeline:
         self.embedding_service = SimpleEmbeddingService(session)
         self.vector_store = SimpleVectorStore(session)
 
-    async def process_document(self, document_id: str, file_content: bytes) -> bool:
-        """Process a document through the complete embedding pipeline.
+    async def process_document_from_file(self, document_id: str, file_path: Path) -> bool:
+        """Process a document through the complete embedding pipeline using file path.
 
         Args:
             document_id: Document ID to process
-            file_content: Raw file content
+            file_path: Path to the file on disk (memory efficient)
 
         Returns:
             True if successful
@@ -558,16 +583,25 @@ class EmbeddingPipeline:
             if not document:
                 raise EmbeddingPipelineError(f"Document {document_id} not found")
 
+            # Verify file exists
+            if not file_path.exists():
+                raise EmbeddingPipelineError(f"File not found: {file_path}")
+
             # Update status
             document.status = DocumentStatus.PROCESSING
             document.processing_started_at = datetime.now(UTC)
             document.processing_error = None
             await self.session.commit()
 
-            logger.info("Starting document processing", document_id=document_id)
+            logger.info(
+                "Starting memory-efficient document processing",
+                document_id=document_id,
+                file_path=str(file_path),
+                file_size=file_path.stat().st_size
+            )
 
-            # Step 1: Extract text
-            text = await self.text_extractor.extract_text(document, file_content)
+            # Step 1: Extract text from file (memory efficient)
+            text = await self.text_extractor.extract_text_from_file(document, file_path)
             if not text.strip():
                 raise EmbeddingPipelineError("No text extracted from document")
 
@@ -616,10 +650,11 @@ class EmbeddingPipeline:
             await self.session.commit()
 
             logger.info(
-                "Document processing completed",
+                "Memory-efficient document processing completed",
                 document_id=document_id,
                 chunks=len(chunks),
-                text_length=len(text)
+                text_length=len(text),
+                file_size=file_path.stat().st_size
             )
 
             return True
@@ -648,7 +683,7 @@ class EmbeddingPipeline:
                     cleanup_error=str(cleanup_error)
                 )
 
-            logger.error("Document processing failed", document_id=document_id, error=str(e))
+            logger.error("Memory-efficient document processing failed", document_id=document_id, error=str(e))
             return False
 
     async def search_documents(

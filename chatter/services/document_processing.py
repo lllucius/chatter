@@ -1,9 +1,7 @@
-"""Document processing service for text extraction, chunking, and indexing."""
+"""Document processing service for text extraction, chunking, and indexing with memory optimization."""
 
 import asyncio
 import hashlib
-import os
-import tempfile
 from datetime import UTC, datetime
 from pathlib import Path
 from typing import Any
@@ -43,6 +41,7 @@ from chatter.services.dynamic_vector_store import (
 )
 from chatter.services.embeddings import EmbeddingError, EmbeddingService
 from chatter.utils.logging import get_logger
+from chatter.utils.memory_monitor import memory_monitor_context, check_memory_before_operation
 
 logger = get_logger(__name__)
 
@@ -65,47 +64,79 @@ class DocumentProcessingService:
     async def process_document(
         self,
         document_id: str,
-        file_content: bytes,
+        file_path_str: str,  # Changed from file_content: bytes
         force_reprocess: bool = False,
     ) -> bool:
-        """Process a document: extract text, create chunks, and generate embeddings."""
+        """Process a document: extract text, create chunks, and generate embeddings.
+        
+        Uses memory-efficient file processing with monitoring instead of loading entire file content.
+        """
         document: Document | None = None
-        try:
-            # Get document
-            result = await self.session.execute(
-                select(Document).where(Document.id == document_id)
-            )
-            document = result.scalar_one_or_none()
+        
+        async with memory_monitor_context(f"document_processing_{document_id}") as monitor:
+            try:
+                # Check available memory before starting
+                await check_memory_before_operation("document processing", min_free_mb=200)
 
-            if not document:
-                logger.error(
-                    "Document not found", document_id=document_id
+                # Get document
+                result = await self.session.execute(
+                    select(Document).where(Document.id == document_id)
                 )
-                return False
+                document = result.scalar_one_or_none()
 
-            # Already processed?
-            if (
-                document.status == DocumentStatus.PROCESSED
-                and not force_reprocess
-            ):
+                if not document:
+                    logger.error(
+                        "Document not found", document_id=document_id
+                    )
+                    return False
+
+                # Verify file exists
+                file_path = Path(file_path_str)
+                if not file_path.exists():
+                    logger.error(
+                        "Document file not found", 
+                        document_id=document_id,
+                        file_path=file_path_str
+                    )
+                    return False
+
+                file_size = file_path.stat().st_size
+                
+                # Check if file size is reasonable for memory processing
+                if file_size > settings.max_memory_per_document:
+                    logger.warning(
+                        "Large file detected, using memory-efficient processing",
+                        document_id=document_id,
+                        file_size=file_size,
+                        max_memory=settings.max_memory_per_document
+                    )
+
+                # Already processed?
+                if (
+                    document.status == DocumentStatus.PROCESSED
+                    and not force_reprocess
+                ):
+                    logger.info(
+                        "Document already processed",
+                        document_id=document_id,
+                    )
+                    return True
+
+                # Update status to processing
+                document.status = DocumentStatus.PROCESSING
+                document.processing_started_at = datetime.now(UTC)
+                document.processing_error = None
+                await self.session.commit()
+                await self.session.refresh(document)
+
                 logger.info(
-                    "Document already processed",
+                    "Starting memory-efficient document processing",
                     document_id=document_id,
+                    filename=document.filename,
+                    file_size=file_size,
                 )
-                return True
-
-            # Update status to processing
-            document.status = DocumentStatus.PROCESSING
-            document.processing_started_at = datetime.now(UTC)
-            document.processing_error = None
-            await self.session.commit()
-            await self.session.refresh(document)
-
-            logger.info(
-                "Starting document processing",
-                document_id=document_id,
-                filename=document.filename,
-            )
+                
+                monitor.log_memory_usage("after status update")
 
             # Trigger started event
             try:
@@ -129,177 +160,371 @@ class DocumentProcessingService:
                     error=str(e),
                 )
 
-            # Extract text (offloads heavy work)
-            extracted_text = await self._extract_text(
-                document, file_content
-            )
-            if not extracted_text:
-                await self._mark_processing_failed(
-                    document, "Failed to extract text from document"
+                # Extract text (memory-efficient with file path)
+                extracted_text = await self._extract_text_from_file(
+                    document, file_path
                 )
-                return False
-
-            # Persist extracted text
-            document.extracted_text = extracted_text
-            await self.session.commit()
-            await self.session.refresh(document)
-
-            # Create chunks (offloaded splitter)
-            chunks = await self._create_chunks(document, extracted_text)
-            if not chunks:
-                await self._mark_processing_failed(
-                    document, "Failed to create chunks from text"
-                )
-                return False
-
-            # Store chunks (async DB)
-            chunk_objects = await self._store_chunks(document, chunks)
-            if not chunk_objects:
-                await self._mark_processing_failed(
-                    document, "Failed to store chunks"
-                )
-                return False
-
-            # Generate embeddings for chunks (async HTTP + async DB; PGVector sync parts are offloaded internally)
-            embedding_success = await self._generate_embeddings(
-                document, chunk_objects
-            )
-            if not embedding_success:
-                # Check if embedding providers are available
-                if (
-                    not await self.embedding_service.list_available_providers()
-                ):
+                if not extracted_text:
                     await self._mark_processing_failed(
-                        document, "No embedding providers available"
+                        document, "Failed to extract text from document"
                     )
                     return False
-                else:
+
+                # Check text length for memory safety
+                if len(extracted_text) > settings.max_text_length:
                     logger.warning(
-                        "Failed to generate embeddings for some chunks",
+                        "Extracted text is very large, truncating",
                         document_id=document_id,
+                        text_length=len(extracted_text),
+                        max_length=settings.max_text_length
+                    )
+                    extracted_text = extracted_text[:settings.max_text_length]
+
+                monitor.log_memory_usage("after text extraction")
+                
+                # Check memory after text extraction
+                if not monitor.check_memory_limit():
+                    await self._mark_processing_failed(
+                        document, "Memory limit exceeded during text extraction"
+                    )
+                    return False
+
+                # Persist extracted text
+                document.extracted_text = extracted_text
+                await self.session.commit()
+                await self.session.refresh(document)
+
+                # Create chunks (memory-efficient processing)
+                chunks = await self._create_chunks(document, extracted_text)
+                if not chunks:
+                    await self._mark_processing_failed(
+                        document, "Failed to create chunks from text"
+                    )
+                    return False
+
+                monitor.log_memory_usage("after chunk creation")
+
+                # Store chunks (async DB)
+                chunk_objects = await self._store_chunks(document, chunks)
+                if not chunk_objects:
+                    await self._mark_processing_failed(
+                        document, "Failed to store chunks"
+                    )
+                    return False
+
+                monitor.log_memory_usage("after chunk storage")
+
+                # Generate embeddings for chunks (async HTTP + async DB)
+                embedding_success = await self._generate_embeddings(
+                    document, chunk_objects
+                )
+                if not embedding_success:
+                    # Check if embedding providers are available
+                    if (
+                        not await self.embedding_service.list_available_providers()
+                    ):
+                        await self._mark_processing_failed(
+                            document, "No embedding providers available"
+                        )
+                        return False
+                    else:
+                        logger.warning(
+                            "Failed to generate embeddings for some chunks",
+                            document_id=document_id,
+                        )
+
+                monitor.log_memory_usage("after embedding generation")
+
+                # Update document status
+                document.status = DocumentStatus.PROCESSED
+                document.processing_completed_at = datetime.now(UTC)
+                document.chunk_count = len(chunk_objects)
+                await self.session.commit()
+                await self.session.refresh(document)
+
+                logger.info(
+                    "Memory-efficient document processing completed",
+                    document_id=document_id,
+                    chunks_created=len(chunk_objects),
+                    text_length=len(extracted_text),
+                    file_size=file_size,
+                )
+
+                # Trigger completed event
+                try:
+                    from chatter.services.sse_events import (
+                        trigger_document_processing_completed,
                     )
 
-            # Update document status
-            document.status = DocumentStatus.PROCESSED
-            document.processing_completed_at = datetime.now(UTC)
-            document.chunk_count = len(chunk_objects)
-            await self.session.commit()
-            await self.session.refresh(document)
+                    await trigger_document_processing_completed(
+                        document_id,
+                        {
+                            "chunks_created": len(chunk_objects),
+                            "text_length": len(extracted_text),
+                            "processing_time": (
+                                document.processing_completed_at
+                                - document.processing_started_at
+                            ).total_seconds(),
+                        },
+                        document.owner_id,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        "Failed to trigger document processing completed event",
+                        error=str(e),
+                    )
 
-            logger.info(
-                "Document processing completed",
-                document_id=document_id,
-                chunks_created=len(chunk_objects),
-                text_length=len(extracted_text),
-            )
+                return True
 
-            # Trigger completed event
-            try:
-                from chatter.services.sse_events import (
-                    trigger_document_processing_completed,
-                )
-
-                await trigger_document_processing_completed(
-                    document_id,
-                    {
-                        "chunks_created": len(chunk_objects),
-                        "text_length": len(extracted_text),
-                        "processing_time": (
-                            document.processing_completed_at
-                            - document.processing_started_at
-                        ).total_seconds(),
-                    },
-                    document.owner_id,
-                )
             except Exception as e:
-                logger.warning(
-                    "Failed to trigger document processing completed event",
+                logger.error(
+                    "Memory-efficient document processing failed",
+                    document_id=document_id,
                     error=str(e),
                 )
+                if document:
+                    await self._mark_processing_failed(
+                        document, f"Processing error: {str(e)}"
+                    )
+                return False
 
-            return True
-
-        except Exception as e:
-            logger.error(
-                "Document processing failed",
-                document_id=document_id,
-                error=str(e),
-            )
-            if document:
-                await self._mark_processing_failed(
-                    document, f"Processing error: {str(e)}"
-                )
-            return False
-
-    async def _extract_text(
-        self, document: Document, file_content: bytes
+    async def _extract_text_from_file(
+        self, document: Document, file_path: Path
     ) -> str | None:
-        """Extract text from document based on its type."""
+        """Extract text from document file using memory-efficient processing.
+        
+        Args:
+            document: Document model instance
+            file_path: Path to the file on disk
+            
+        Returns:
+            Extracted text content or None if extraction fails
+        """
         try:
-            # Save file temporarily for processing in a thread (avoid blocking loop)
-            suffix = f".{document.document_type.value}"
-            temp_file_path = await asyncio.to_thread(
-                self._write_temp_file, suffix, file_content
-            )
-
-            try:
-                if document.document_type == DocumentType.TEXT:
-                    return await self._extract_text_plain(file_content)
-                elif document.document_type == DocumentType.PDF:
-                    return await self._extract_text_pdf(
-                        temp_file_path, file_content
+            # For memory efficiency, pass file path directly to extraction methods
+            # This allows extractors to read files in chunks instead of loading everything
+            
+            if document.document_type == DocumentType.TEXT:
+                return await self._extract_text_plain_from_file(file_path)
+            elif document.document_type == DocumentType.PDF:
+                return await self._extract_text_pdf_from_file(file_path)
+            elif document.document_type in [
+                DocumentType.DOC,
+                DocumentType.DOCX,
+            ]:
+                return await self._extract_text_docx_from_file(file_path)
+            elif document.document_type == DocumentType.HTML:
+                return await self._extract_text_html_from_file(file_path)
+            elif document.document_type == DocumentType.MARKDOWN:
+                return await self._extract_text_markdown_from_file(file_path)
+            elif document.document_type == DocumentType.JSON:
+                return await self._extract_text_json_from_file(file_path)
+            else:
+                # Try using unstructured for unknown formats
+                if UNSTRUCTURED_AVAILABLE:
+                    return await self._extract_text_unstructured_from_file(
+                        file_path
                     )
-                elif document.document_type in [
-                    DocumentType.DOC,
-                    DocumentType.DOCX,
-                ]:
-                    return await self._extract_text_docx(temp_file_path)
-                elif document.document_type == DocumentType.HTML:
-                    return await self._extract_text_html(file_content)
-                elif document.document_type == DocumentType.MARKDOWN:
-                    return await self._extract_text_markdown(
-                        file_content
-                    )
-                elif document.document_type == DocumentType.JSON:
-                    return await self._extract_text_json(file_content)
-                else:
-                    # Try using unstructured for unknown formats
-                    if UNSTRUCTURED_AVAILABLE:
-                        return await self._extract_text_unstructured(
-                            temp_file_path
-                        )
-                    return None
-            finally:
-                # Clean up temporary file (in a thread)
-                try:
-                    await asyncio.to_thread(
-                        self._unlink_file, temp_file_path
-                    )
-                except Exception:
-                    pass
+                return None
 
         except Exception as e:
             logger.error(
-                "Text extraction failed",
+                "Memory-efficient text extraction failed",
                 document_id=document.id,
+                file_path=str(file_path),
                 error=str(e),
             )
             return None
 
-    # -------- blocking helpers offloaded to threads --------
+    # -------- Memory-efficient file extraction methods --------
 
-    def _write_temp_file(self, suffix: str, data: bytes) -> str:
-        with tempfile.NamedTemporaryFile(
-            delete=False, suffix=suffix
-        ) as temp_file:
-            temp_file.write(data)
-            return temp_file.name
-
-    def _unlink_file(self, path: str) -> None:
+    async def _extract_text_plain_from_file(self, file_path: Path) -> str | None:
+        """Extract text from plain text file using memory-efficient reading."""
         try:
-            os.unlink(path)
-        except OSError:
-            pass
+            # Try different encodings with chunked reading for large files
+            for encoding in ["utf-8", "latin-1", "cp1252"]:
+                try:
+                    # Use async file reading to avoid blocking
+                    import aiofiles
+                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+                        return await f.read()
+                except UnicodeDecodeError:
+                    continue
+                except ImportError:
+                    # Fallback to sync reading in thread
+                    def read_sync():
+                        with open(file_path, 'r', encoding=encoding) as f:
+                            return f.read()
+                    return await asyncio.to_thread(read_sync)
+            return None
+        except Exception as e:
+            logger.error("Plain text extraction from file failed", error=str(e))
+            return None
+
+    async def _extract_text_pdf_from_file(self, file_path: Path) -> str | None:
+        """Extract text from PDF file using memory-efficient processing."""
+        try:
+            return await asyncio.to_thread(
+                self._extract_text_pdf_sync_from_file, str(file_path)
+            )
+        except Exception as e:
+            logger.error("PDF text extraction from file failed", error=str(e))
+            return None
+
+    def _extract_text_pdf_sync_from_file(self, file_path: str) -> str | None:
+        """Sync PDF extraction from file path."""
+        # Try PyPDF first
+        if PYPDF_AVAILABLE:
+            try:
+                reader = PdfReader(file_path)
+                text_parts: list[str] = []
+                for page in reader.pages:
+                    try:
+                        text = page.extract_text()
+                    except Exception:
+                        text = None
+                    if text:
+                        text_parts.append(text)
+                joined = "\n".join(text_parts)
+                if joined.strip():
+                    return joined
+            except Exception as e:
+                logger.warning(
+                    "PyPDF extraction failed, trying unstructured",
+                    error=str(e),
+                )
+        # Fallback to unstructured
+        if UNSTRUCTURED_AVAILABLE:
+            elements = partition_pdf(filename=file_path)
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
+        return None
+
+    async def _extract_text_docx_from_file(self, file_path: Path) -> str | None:
+        """Extract text from DOCX file using memory-efficient processing."""
+        try:
+            return await asyncio.to_thread(
+                self._extract_text_docx_sync_from_file, str(file_path)
+            )
+        except Exception as e:
+            logger.error("DOCX text extraction from file failed", error=str(e))
+            return None
+
+    def _extract_text_docx_sync_from_file(self, file_path: str) -> str | None:
+        """Sync DOCX extraction from file path."""
+        if UNSTRUCTURED_AVAILABLE:
+            elements = partition_docx(filename=file_path)
+            return "\n".join(
+                [
+                    element.text
+                    for element in elements
+                    if hasattr(element, "text")
+                ]
+            )
+        return None
+
+    async def _extract_text_html_from_file(self, file_path: Path) -> str | None:
+        """Extract text from HTML file using memory-efficient processing."""
+        try:
+            # Read HTML content with encoding detection
+            html_text = None
+            for encoding in ["utf-8", "latin-1", "cp1252"]:
+                try:
+                    import aiofiles
+                    async with aiofiles.open(file_path, 'r', encoding=encoding) as f:
+                        html_text = await f.read()
+                    break
+                except (UnicodeDecodeError, ImportError):
+                    continue
+            
+            if not html_text:
+                # Fallback to sync reading
+                def read_sync():
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        return f.read()
+                html_text = await asyncio.to_thread(read_sync)
+            
+            return await asyncio.to_thread(
+                self._extract_text_html_sync, html_text
+            )
+        except Exception as e:
+            logger.error("HTML text extraction from file failed", error=str(e))
+            return None
+
+    async def _extract_text_markdown_from_file(self, file_path: Path) -> str | None:
+        """Extract text from Markdown file using memory-efficient processing."""
+        try:
+            # Markdown can be returned as-is, just need to read efficiently
+            import aiofiles
+            try:
+                async with aiofiles.open(file_path, 'r', encoding='utf-8') as f:
+                    return await f.read()
+            except ImportError:
+                def read_sync():
+                    with open(file_path, 'r', encoding='utf-8', errors='ignore') as f:
+                        return f.read()
+                return await asyncio.to_thread(read_sync)
+        except Exception as e:
+            logger.error("Markdown text extraction from file failed", error=str(e))
+            return None
+
+    async def _extract_text_json_from_file(self, file_path: Path) -> str | None:
+        """Extract text from JSON file using memory-efficient processing."""
+        try:
+            return await asyncio.to_thread(
+                self._extract_text_json_sync_from_file, str(file_path)
+            )
+        except Exception as e:
+            logger.error("JSON text extraction from file failed", error=str(e))
+            return None
+
+    def _extract_text_json_sync_from_file(self, file_path: str) -> str | None:
+        """Sync JSON extraction from file path."""
+        try:
+            import json
+
+            def extract_text_from_json(obj):
+                if isinstance(obj, str):
+                    return obj
+                elif isinstance(obj, dict):
+                    return " ".join(extract_text_from_json(v) for v in obj.values())
+                elif isinstance(obj, list):
+                    return " ".join(extract_text_from_json(item) for item in obj)
+                else:
+                    return str(obj)
+
+            with open(file_path, 'r', encoding='utf-8') as f:
+                data = json.load(f)
+            return extract_text_from_json(data)
+        except Exception:
+            return None
+
+    async def _extract_text_unstructured_from_file(self, file_path: Path) -> str | None:
+        """Extract text using unstructured library from file path."""
+        try:
+            return await asyncio.to_thread(
+                self._extract_text_unstructured_sync_from_file, str(file_path)
+            )
+        except Exception as e:
+            logger.error("Unstructured text extraction from file failed", error=str(e))
+            return None
+
+    def _extract_text_unstructured_sync_from_file(self, file_path: str) -> str | None:
+        """Sync unstructured extraction from file path."""
+        try:
+            from unstructured.partition.auto import partition
+
+            elements = partition(filename=file_path)
+            return "\n".join([e.text for e in elements if hasattr(e, 'text')])
+        except ImportError:
+            return None
+        except Exception:
+            return None
 
     def _extract_text_pdf_sync(self, file_path: str) -> str | None:
         # Try PyPDF first

@@ -20,6 +20,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.model_registry import ModelRegistryService
 from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType, HybridVectorSearchHelper
+from chatter.models.registry import ModelType
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -254,12 +255,12 @@ class SimpleEmbeddingService:
         """
         try:
             # Get default embedding provider
-            provider = await self.registry.get_default_provider(model_type="embedding")
+            provider = await self.registry.get_default_provider(model_type=ModelType.EMBEDDING)
             if not provider:
                 raise EmbeddingPipelineError("No default embedding provider configured")
 
             # Get default embedding model
-            models, _ = await self.registry.list_models(provider.id, model_type="embedding")
+            models, _ = await self.registry.list_models(provider.id, model_type=ModelType.EMBEDDING)
             model = next((m for m in models if m.is_default and m.is_active), None)
             if not model:
                 model = next((m for m in models if m.is_active), None)

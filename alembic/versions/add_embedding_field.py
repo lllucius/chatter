@@ -11,7 +11,7 @@ from sqlalchemy.dialects import postgresql
 
 # revision identifiers, used by Alembic.
 revision = 'add_embedding_field'
-down_revision = None  # Set to appropriate revision when integrating
+down_revision = 'c7a2069f99cb'
 branch_labels = None
 depends_on = None
 

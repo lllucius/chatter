@@ -41,7 +41,7 @@ try:
 except ImportError:
     JOBLIB_AVAILABLE = False
 
-from chatter.config import settings
+from chatter.config import get_settings, settings
 from chatter.core.model_registry import ModelRegistryService
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
@@ -266,16 +266,16 @@ class EmbeddingService:
         """Create an embedding provider instance based on registry data."""
         try:
             if provider.provider_type == ProviderType.OPENAI:
-                # Get API key from provider config or environment
-                api_key = (
-                    provider.default_config.get("api_key")
-                    or os.getenv(f"{provider.name.upper()}_API_KEY")
-                    or os.getenv("OPENAI_API_KEY")
-                )
+                # Get API key from settings
+                try:
+                    current_settings = get_settings()
+                    api_key = current_settings.openai_api_key
+                except Exception:
+                    api_key = None
+                    
                 if provider.api_key_required and not api_key:
                     logger.warning(
-                        f"API key required for provider {provider.name} but not found. "
-                        f"Checked provider config, {provider.name.upper()}_API_KEY, and OPENAI_API_KEY"
+                        f"API key required for provider {provider.name} but not found in settings"
                     )
                     return None
 
@@ -304,15 +304,18 @@ class EmbeddingService:
                 provider.provider_type == ProviderType.GOOGLE
                 and GOOGLE_AVAILABLE
             ):
-                api_key = (
-                    provider.default_config.get("api_key")
-                    or os.getenv(f"{provider.name.upper()}_API_KEY")
-                    or os.getenv("GOOGLE_API_KEY")
-                )
+                # Get API key from settings (Google uses a different field name)
+                try:
+                    current_settings = get_settings()
+                    # For now, we don't have a google_api_key field in settings
+                    # This would need to be added to the Settings class
+                    api_key = None  # TODO: Add google_api_key to Settings class
+                except Exception:
+                    api_key = None
+                    
                 if provider.api_key_required and not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}. "
-                        f"Checked provider config, {provider.name.upper()}_API_KEY, and GOOGLE_API_KEY"
+                        f"No API key found for provider {provider.name} in settings (google_api_key field needed)"
                     )
                     return None
 
@@ -325,15 +328,18 @@ class EmbeddingService:
                 provider.provider_type == ProviderType.COHERE
                 and COHERE_AVAILABLE
             ):
-                api_key = (
-                    provider.default_config.get("api_key")
-                    or os.getenv(f"{provider.name.upper()}_API_KEY")
-                    or os.getenv("COHERE_API_KEY")
-                )
+                # Get API key from settings (Cohere uses a different field name)
+                try:
+                    current_settings = get_settings()
+                    # For now, we don't have a cohere_api_key field in settings
+                    # This would need to be added to the Settings class
+                    api_key = None  # TODO: Add cohere_api_key to Settings class
+                except Exception:
+                    api_key = None
+                    
                 if provider.api_key_required and not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}. "
-                        f"Checked provider config, {provider.name.upper()}_API_KEY, and COHERE_API_KEY"
+                        f"No API key found for provider {provider.name} in settings (cohere_api_key field needed)"
                     )
                     return None
 

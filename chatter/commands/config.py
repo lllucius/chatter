@@ -1,14 +1,13 @@
 """Configuration and utility commands for the CLI."""
 
-import os
-
 from rich.table import Table
 
 from chatter.commands import (
-    DEFAULT_API_BASE_URL,
     ChatterSDKClient,
     console,
+    get_default_api_base_url,
 )
+from chatter.config import get_settings
 
 # Create standalone commands (these are added directly to the main app)
 
@@ -19,13 +18,22 @@ def config_command():
     table.add_column("Setting", style="cyan")
     table.add_column("Value", style="green")
 
+    try:
+        settings = get_settings()
+        api_base_url = settings.chatter_api_base_url
+        access_token = settings.chatter_access_token
+    except Exception:
+        # Fallback if settings can't be loaded
+        api_base_url = get_default_api_base_url()
+        access_token = None
+
     table.add_row(
         "API Base URL",
-        os.getenv("CHATTER_API_BASE_URL", DEFAULT_API_BASE_URL),
+        api_base_url,
     )
     table.add_row(
         "Access Token",
-        "Set" if os.getenv("CHATTER_ACCESS_TOKEN") else "Not set",
+        "Set" if access_token else "Not set",
     )
 
     # Check for local token

@@ -25,6 +25,7 @@ from chatter.core.dependencies import (
 )
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
+from chatter.config import get_settings
 from chatter.utils.logging import get_logger
 
 # Use TYPE_CHECKING to avoid circular imports at runtime
@@ -77,7 +78,11 @@ class LLMService:
                 # Fallback to OpenAI if registry fails - but still check API key requirements
                 provider_name = "openai"
                 model_name = "gpt-3.5-turbo"
-                api_key = os.getenv("OPENAI_API_KEY")
+                try:
+                    settings = get_settings()
+                    api_key = settings.openai_api_key
+                except Exception:
+                    api_key = None
                 # Don't use dummy API key - fail if no key is available for a fallback
                 if not api_key:
                     raise LLMProviderError(
@@ -109,7 +114,11 @@ class LLMService:
             except Exception:
                 # Fallback creation based on provider name - but respect API key requirements
                 if provider_name.lower() == "openai":
-                    api_key = os.getenv("OPENAI_API_KEY")
+                    try:
+                        settings = get_settings()
+                        api_key = settings.openai_api_key
+                    except Exception:
+                        api_key = None
                     if not api_key:
                         raise LLMProviderError(
                             f"Provider {provider_name} not found in registry and no OPENAI_API_KEY found for fallback"
@@ -121,7 +130,11 @@ class LLMService:
                         max_completion_tokens=max_tokens if max_tokens is not None else 2048,
                     )
                 elif provider_name.lower() == "anthropic":
-                    api_key = os.getenv("ANTHROPIC_API_KEY")
+                    try:
+                        settings = get_settings()
+                        api_key = settings.anthropic_api_key
+                    except Exception:
+                        api_key = None
                     if not api_key:
                         raise LLMProviderError(
                             f"Provider {provider_name} not found in registry and no ANTHROPIC_API_KEY found for fallback"
@@ -136,9 +149,19 @@ class LLMService:
                     raise ValueError(f"Unsupported provider: {provider_name}")
 
         # Create provider instance with custom parameters
-        api_key = os.getenv(f"{provider_info.name.upper()}_API_KEY")
+        try:
+            settings = get_settings()
+            if provider_info.name.lower() == "openai":
+                api_key = settings.openai_api_key
+            elif provider_info.name.lower() == "anthropic":
+                api_key = settings.anthropic_api_key
+            else:
+                api_key = None
+        except Exception:
+            api_key = None
+        
         if provider_info.api_key_required and not api_key:
-            raise LLMProviderError(f"API key required for provider {provider_info.name} but not found in environment variable {provider_info.name.upper()}_API_KEY")
+            raise LLMProviderError(f"API key required for provider {provider_info.name} but not found in settings")
 
         config = model_def.default_config or {}
 
@@ -173,11 +196,21 @@ class LLMService:
     ) -> BaseChatModel | None:
         """Create a provider instance based on registry data."""
         try:
-            # Get API key from environment - registry doesn't store sensitive data
-            api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+            # Get API key from settings - registry doesn't store sensitive data
+            try:
+                settings = get_settings()
+                if provider.name.lower() == "openai":
+                    api_key = settings.openai_api_key
+                elif provider.name.lower() == "anthropic":
+                    api_key = settings.anthropic_api_key
+                else:
+                    api_key = None
+            except Exception:
+                api_key = None
+                
             if provider.api_key_required and not api_key:
                 logger.warning(
-                    f"API key required for provider {provider.name} but not found in environment variable {provider.name.upper()}_API_KEY"
+                    f"API key required for provider {provider.name} but not found in settings"
                 )
                 return None
 
@@ -379,10 +412,14 @@ class LLMService:
         # Create provider instance with profile overrides
         try:
             if provider.provider_type == ProviderType.OPENAI:
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                try:
+                    settings = get_settings()
+                    api_key = settings.openai_api_key
+                except Exception:
+                    api_key = None
                 if provider.api_key_required and not api_key:
                     raise LLMProviderError(
-                        f"API key required for provider {provider.name} but not found in environment variable {provider.name.upper()}_API_KEY"
+                        f"API key required for provider {provider.name} but not found in settings"
                     )
 
                 return ChatOpenAI(
@@ -399,10 +436,14 @@ class LLMService:
                     logit_bias=profile.logit_bias,
                 )
             elif provider.provider_type == ProviderType.ANTHROPIC:
-                api_key = os.getenv(f"{provider.name.upper()}_API_KEY")
+                try:
+                    settings = get_settings()
+                    api_key = settings.anthropic_api_key
+                except Exception:
+                    api_key = None
                 if provider.api_key_required and not api_key:
                     raise LLMProviderError(
-                        f"API key required for provider {provider.name} but not found in environment variable {provider.name.upper()}_API_KEY"
+                        f"API key required for provider {provider.name} but not found in settings"
                     )
 
                 return ChatAnthropic(

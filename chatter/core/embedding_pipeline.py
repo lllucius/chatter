@@ -324,18 +324,19 @@ class SimpleEmbeddingService:
 
     async def _create_embedding_instance(self, provider, model):
         """Create embedding provider instance."""
-        import os
+        from chatter.config import get_settings
         from chatter.models.registry import ProviderType
 
         try:
             if provider.provider_type == ProviderType.OPENAI:
                 from chatter.services.embeddings import SafeOpenAIEmbeddings
 
-                api_key = (
-                    provider.default_config.get("api_key")
-                    or os.getenv(f"{provider.name.upper()}_API_KEY")
-                    or os.getenv("OPENAI_API_KEY")
-                )
+                try:
+                    settings = get_settings()
+                    api_key = settings.openai_api_key
+                except Exception:
+                    api_key = None
+                    
                 if not api_key:
                     return None
 

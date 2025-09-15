@@ -73,8 +73,15 @@ console = Console()
 
 def get_client() -> ChatterSDKClient:
     """Get client instance with token loading."""
-    # Load token from config if not provided via env
-    token = os.getenv("CHATTER_ACCESS_TOKEN")
+    # Load token from settings if available
+    try:
+        from chatter.config import get_settings
+        settings = get_settings()
+        token = settings.chatter_access_token
+    except Exception:
+        # Fallback to None if settings can't be loaded
+        token = None
+    
     if not token:
         temp_client = ChatterSDKClient()
         token = temp_client.load_token()

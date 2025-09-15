@@ -107,12 +107,15 @@ class ChatterSDKClient:
         access_token: str | None = None,
         timeout: float | None = None,
     ):
-        self.base_url = base_url or os.getenv(
-            "CHATTER_API_BASE_URL", get_default_api_base_url()
-        )
-        self.access_token = access_token or os.getenv(
-            "CHATTER_ACCESS_TOKEN"
-        )
+        try:
+            settings = get_settings()
+            self.base_url = base_url or settings.chatter_api_base_url
+            self.access_token = access_token or settings.chatter_access_token
+        except Exception:
+            # Fallback if settings can't be loaded
+            self.base_url = base_url or get_default_api_base_url()
+            self.access_token = access_token
+        
         self.timeout = timeout or get_default_timeout()
 
         # Configure the SDK

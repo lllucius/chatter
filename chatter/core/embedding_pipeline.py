@@ -329,7 +329,7 @@ class SimpleEmbeddingService:
 
         try:
             if provider.provider_type == ProviderType.OPENAI:
-                from langchain_openai import OpenAIEmbeddings
+                from chatter.services.embeddings import SafeOpenAIEmbeddings
 
                 api_key = (
                     provider.default_config.get("api_key")
@@ -338,7 +338,7 @@ class SimpleEmbeddingService:
                 if not api_key:
                     return None
 
-                return OpenAIEmbeddings(
+                return SafeOpenAIEmbeddings(
                     api_key=api_key,
                     base_url=provider.base_url,
                     model=model.model_name,

@@ -59,7 +59,7 @@ class DocumentService:
         upload_file: UploadFile,
         document_data: DocumentCreate,
     ) -> Document:
-        """Create a new document from uploaded file.
+        """Create a new document from uploaded file with memory-efficient processing.
 
         Args:
             user_id: Owner user ID
@@ -73,36 +73,19 @@ class DocumentService:
             DocumentError: If document creation fails
         """
         try:
-            # Create a hash object for streaming calculation
+            # Memory-efficient file processing using streams
             hasher = hashlib.sha256()
             file_size = 0
-
-            # Read file in chunks to avoid memory exhaustion
-            CHUNK_SIZE = 8192  # 8KB chunks
-
-            # Reset file pointer to beginning
-            await upload_file.seek(0)
-
-            # Read and hash file in chunks
-            while True:
-                chunk = await upload_file.read(CHUNK_SIZE)
-                if not chunk:
-                    break
-
-                hasher.update(chunk)
-                file_size += len(chunk)
-
-                # Check file size limit early to avoid reading entire large files
-                if file_size > settings.max_file_size:
-                    raise DocumentError(
-                        f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
-                    ) from None
-
-            # Calculate final hash
-            file_hash = hasher.hexdigest()
-
-            # Reset file pointer for later processing
-            await upload_file.seek(0)
+            CHUNK_SIZE = 64 * 1024  # 64KB chunks for better performance
+            
+            # Validate file type early before processing
+            file_ext = (
+                Path(upload_file.filename).suffix.lower().lstrip(".")
+            )
+            if file_ext not in settings.allowed_file_types:
+                raise DocumentError(
+                    f"File type '{file_ext}' is not allowed"
+                ) from None
 
             # Detect MIME type and document type
             mime_type = (
@@ -116,30 +99,49 @@ class DocumentService:
                 )
             )
 
-            # Validate file type
-            file_ext = (
-                Path(upload_file.filename).suffix.lower().lstrip(".")
-            )
-            if file_ext not in settings.allowed_file_types:
-                raise DocumentError(
-                    f"File type '{file_ext}' is not allowed"
-                ) from None
-
-            # Generate unique filename
+            # Generate unique filename for direct storage
             unique_filename = f"{generate_ulid()}.{file_ext}"
-
-            # Save file to storage using streaming
             file_path = self.storage_path / unique_filename
-            with open(file_path, "wb") as f:
-                # Reset file pointer to beginning
-                await upload_file.seek(0)
 
-                # Copy file in chunks
-                while True:
-                    chunk = await upload_file.read(CHUNK_SIZE)
-                    if not chunk:
-                        break
-                    f.write(chunk)
+            # Stream file directly to disk while hashing and measuring size
+            # This avoids loading the entire file into memory
+            await upload_file.seek(0)
+            
+            try:
+                with open(file_path, "wb") as f:
+                    while True:
+                        chunk = await upload_file.read(CHUNK_SIZE)
+                        if not chunk:
+                            break
+
+                        # Check file size limit incrementally
+                        file_size += len(chunk)
+                        if file_size > settings.max_file_size:
+                            # Clean up partial file before raising error
+                            f.close()
+                            try:
+                                file_path.unlink()
+                            except OSError:
+                                pass
+                            raise DocumentError(
+                                f"File size exceeds maximum allowed size of {settings.max_file_size} bytes"
+                            ) from None
+
+                        # Update hash and write to disk
+                        hasher.update(chunk)
+                        f.write(chunk)
+
+                # Calculate final hash
+                file_hash = hasher.hexdigest()
+
+            except Exception as e:
+                # Clean up file on any error during streaming
+                try:
+                    if file_path.exists():
+                        file_path.unlink()
+                except OSError:
+                    pass
+                raise e
 
             # Create document record
             document = Document(
@@ -192,7 +194,7 @@ class DocumentService:
                     error=str(e),
                 )
 
-            # Start background processing (non-blocking)
+            # Start background processing (non-blocking) using file path instead of content
             import asyncio
 
             asyncio.create_task(
@@ -778,11 +780,11 @@ class DocumentService:
     async def _process_document_async(
         self, document_id: str, file_path: Path
     ) -> None:
-        """Process document asynchronously using job queue.
+        """Process document asynchronously using job queue with file path.
 
         Args:
             document_id: Document ID
-            file_path: Path to the file on disk
+            file_path: Path to the file on disk (avoids loading into memory)
         """
         try:
             from chatter.services.job_queue import (
@@ -791,6 +793,7 @@ class DocumentService:
             )
 
             # Add document processing job to the queue
+            # Pass file path instead of file content to avoid memory usage
             job_id = await job_queue.add_job(
                 name=f"Document Processing: {document_id}",
                 function_name="document_processing",
@@ -801,9 +804,10 @@ class DocumentService:
             )
 
             logger.info(
-                "Document processing job queued",
+                "Document processing job queued with file path",
                 document_id=document_id,
                 job_id=job_id,
+                file_path=str(file_path),
             )
 
         except Exception as e:

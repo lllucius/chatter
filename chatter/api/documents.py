@@ -1,4 +1,4 @@
-"""Document management endpoints."""
+"""Document management endpoints with memory-efficient processing."""
 
 from pathlib import Path
 
@@ -36,6 +36,7 @@ from chatter.schemas.document import (
 )
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
+from chatter.utils.memory_monitor import check_memory_before_operation
 from chatter.utils.problem import (
     BadRequestProblem,
     InternalServerProblem,
@@ -72,7 +73,7 @@ async def upload_document(
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentResponse:
-    """Upload a document.
+    """Upload a document with memory-efficient processing.
 
     Args:
         file: Document file to upload
@@ -89,6 +90,21 @@ async def upload_document(
         Created document information
     """
     try:
+        # Check memory availability before starting upload
+        await check_memory_before_operation("document upload", min_free_mb=100)
+
+        # Validate file before processing
+        if not file.filename:
+            raise BadRequestProblem(detail="No filename provided")
+
+        # Validate file size early (check file.size if available)
+        if hasattr(file, 'size') and file.size:
+            from chatter.config import settings
+            if file.size > settings.max_file_size:
+                raise BadRequestProblem(
+                    detail=f"File size ({file.size} bytes) exceeds maximum allowed size ({settings.max_file_size} bytes)"
+                )
+
         # Parse tags if provided
         parsed_tags = None
         if tags:
@@ -115,20 +131,16 @@ async def upload_document(
             is_public=is_public,
         )
 
-        # Validate file before processing
-        if not file.filename:
-            raise BadRequestProblem(detail="No filename provided")
-
-        # Validate file size (assuming we want to limit to 50MB)
-        MAX_FILE_SIZE = 50 * 1024 * 1024  # 50MB in bytes
-        if file.size and file.size > MAX_FILE_SIZE:
-            raise BadRequestProblem(
-                detail=f"File size ({file.size} bytes) exceeds maximum allowed size ({MAX_FILE_SIZE} bytes)"
-            )
-
-        # Create document
+        # Create document using memory-efficient processing
         document = await document_service.create_document(
             current_user.id, file, document_data
+        )
+
+        logger.info(
+            "Document uploaded successfully with memory-efficient processing",
+            document_id=document.id,
+            filename=file.filename,
+            user_id=current_user.id
         )
 
         return DocumentResponse.model_validate(document)
@@ -136,7 +148,7 @@ async def upload_document(
     except DocumentError as e:
         raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
-        logger.error("Document upload failed", error=str(e))
+        logger.error("Memory-efficient document upload failed", error=str(e))
         raise InternalServerProblem(
             detail="Failed to upload document"
         ) from e

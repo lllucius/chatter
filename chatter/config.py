@@ -341,7 +341,7 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
-    # FILE UPLOAD SETTINGS
+    # FILE UPLOAD SETTINGS (MEMORY OPTIMIZED)
     # =============================================================================
 
     max_file_size: int = Field(
@@ -353,6 +353,33 @@ class Settings(BaseSettings):
     )
     document_storage_path: str = Field(
         default="./data/documents", description="Document storage path"
+    )
+    
+    # Memory-efficient processing settings
+    file_chunk_size: int = Field(
+        default=65536, description="File chunk size for streaming (64KB)"
+    )
+    max_memory_per_document: int = Field(
+        default=104857600, description="Max memory per document processing (100MB)"
+    )
+    enable_memory_monitoring: bool = Field(
+        default=True, description="Enable memory usage monitoring during processing"
+    )
+    
+    # Memory-efficient text extraction settings
+    text_extraction_chunk_size: int = Field(
+        default=8192, description="Text extraction chunk size (8KB)"
+    )
+    max_text_length: int = Field(
+        default=10485760, description="Maximum extracted text length (10MB)"
+    )
+    
+    # Processing limits to prevent memory exhaustion
+    max_concurrent_uploads: int = Field(
+        default=5, description="Maximum concurrent file uploads"
+    )
+    max_concurrent_processing: int = Field(
+        default=3, description="Maximum concurrent document processing"
     )
 
     # =============================================================================

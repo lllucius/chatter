@@ -8,6 +8,7 @@ from urllib.parse import urlparse
 
 from ulid import ULID
 
+from chatter.config import settings
 from .context import ValidationContext
 from .exceptions import (
     BusinessValidationError,
@@ -107,7 +108,7 @@ class InputValidator(BaseValidator):
                 "username": ValidationRule(
                     name="username",
                     pattern=r"^[a-zA-Z0-9_-]{3,50}$",
-                    max_length=50,
+                    max_length=settings.max_name_length,
                     min_length=3,
                     required=True,
                     allowed_chars="abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789_-",
@@ -146,7 +147,7 @@ class InputValidator(BaseValidator):
                 ),
                 "agent_name": ValidationRule(
                     name="agent_name",
-                    max_length=100,
+                    max_length=settings.max_description_length,
                     min_length=1,
                     required=True,
                     forbidden_patterns=[
@@ -999,12 +1000,12 @@ class AgentValidator(BaseValidator):
                 errors=[ValidationError("Agent name cannot be empty")],
             )
 
-        if len(name) > 100:
+        if len(name) > settings.max_agent_name_length:
             return ValidationResult(
                 is_valid=False,
                 errors=[
                     ValidationError(
-                        "Agent name too long (max 100 characters)"
+                        f"Agent name too long (max {settings.max_agent_name_length} characters)"
                     )
                 ],
             )

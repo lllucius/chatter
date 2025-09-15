@@ -62,7 +62,7 @@ async def readiness_check(
 
         # Use the provided session and add timeout
         db_health = await asyncio.wait_for(
-            health_check(session), timeout=5.0  # 5 second timeout
+            health_check(session), timeout=settings.health_check_timeout
         )
     except TimeoutError:
         db_health = {

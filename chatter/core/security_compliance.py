@@ -426,7 +426,7 @@ class SecurityComplianceChecker:
             settings, "refresh_token_expire_days", 7
         )
 
-        if access_expire <= 60 and refresh_expire <= 30:
+        if access_expire <= settings.token_expire_warning_threshold and refresh_expire <= settings.refresh_token_expire_warning_threshold:
             return ComplianceLevel.COMPLIANT
         elif access_expire <= 240 and refresh_expire <= 90:
             return ComplianceLevel.PARTIALLY_COMPLIANT
@@ -451,10 +451,10 @@ class SecurityComplianceChecker:
         weighted_score = 0
 
         compliance_scores = {
-            ComplianceLevel.COMPLIANT: 100,
-            ComplianceLevel.PARTIALLY_COMPLIANT: 60,
+            ComplianceLevel.COMPLIANT: settings.compliance_full_score,
+            ComplianceLevel.PARTIALLY_COMPLIANT: settings.compliance_partial_score,
             ComplianceLevel.NON_COMPLIANT: 0,
-            ComplianceLevel.NOT_APPLICABLE: 100,  # Don't penalize for N/A
+            ComplianceLevel.NOT_APPLICABLE: settings.compliance_full_score,  # Don't penalize for N/A
         }
 
         for check in checks:
@@ -507,7 +507,7 @@ class SecurityComplianceChecker:
             return "Good"
         elif score >= 70:
             return "Acceptable"
-        elif score >= 60:
+        elif score >= settings.compliance_passing_threshold:
             return "Needs Improvement"
         else:
             return "Poor"

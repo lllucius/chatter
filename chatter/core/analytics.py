@@ -17,6 +17,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.cache_factory import cache_factory, CacheType
 from chatter.core.cache_interface import CacheInterface
+from chatter.config import settings
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,
@@ -62,14 +63,14 @@ class AnalyticsService:
         self._cache_stats = {"hits": 0, "misses": 0, "errors": 0}
 
         # Query optimization settings
-        self._query_timeout = 30  # seconds
-        self._max_batch_size = 1000
+        self._query_timeout = settings.analytics_query_timeout
+        self._max_batch_size = settings.analytics_max_batch_size
         self._enable_query_profiling = True
 
         # Cache warming intervals (in seconds)
         self._cache_warming_intervals = {
-            "system_health": 300,  # 5 minutes
-            "popular_metrics": 600,  # 10 minutes
+            "system_health": settings.analytics_cache_ttl,
+            "popular_metrics": settings.analytics_cache_ttl * 2,  # Double for popular metrics
         }
 
     def _get_cache_instance(self, data_type: str = "general") -> CacheInterface | None:
@@ -78,7 +79,7 @@ class AnalyticsService:
             try:
                 # Get cache configuration for this data type
                 cache_config = ANALYTICS_CACHE_CONFIG.get(data_type, {
-                    "ttl": 300, "tier": CacheType.GENERAL
+                    "ttl": settings.analytics_cache_ttl, "tier": CacheType.GENERAL
                 })
 
                 cache_tier = cache_config["tier"]
@@ -776,7 +777,7 @@ class AnalyticsService:
         try:
             # Get current system metrics if psutil is available
             if PSUTIL_AVAILABLE:
-                cpu_percent = psutil.cpu_percent(interval=1)
+                cpu_percent = psutil.cpu_percent(interval=settings.cpu_monitoring_interval)
                 memory = psutil.virtual_memory()
                 memory_percent = memory.percent
             else:
@@ -2004,7 +2005,7 @@ class AnalyticsService:
             system_health = {
                 "system_uptime_seconds": time.time()
                 - psutil.boot_time(),
-                "avg_cpu_usage": psutil.cpu_percent(interval=0.1),
+                "avg_cpu_usage": psutil.cpu_percent(interval=settings.cpu_avg_monitoring_interval),
                 "avg_memory_usage": psutil.virtual_memory().percent,
                 "database_connections": self.session.get_bind().pool.checkedout(),
             }

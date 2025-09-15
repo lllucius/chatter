@@ -274,14 +274,14 @@ class EmbeddingService:
                 )
                 if provider.api_key_required and not api_key:
                     logger.warning(
-                        f"No API key found for provider {provider.name}. "
+                        f"API key required for provider {provider.name} but not found. "
                         f"Checked provider config, {provider.name.upper()}_API_KEY, and OPENAI_API_KEY"
                     )
                     return None
 
                 config = model_def.default_config or {}
                 base_provider = SafeOpenAIEmbeddings(
-                    api_key=api_key if api_key else "dummy",
+                    api_key=SecretStr(api_key) if api_key else None,
                     base_url=provider.base_url,
                     model=model_def.model_name,
                     chunk_size=model_def.chunk_size
@@ -317,7 +317,7 @@ class EmbeddingService:
                     return None
 
                 return GoogleGenerativeAIEmbeddings(
-                    google_api_key=api_key if api_key else "dummy",
+                    google_api_key=api_key,
                     model=model_def.model_name,
                 )
 
@@ -338,7 +338,7 @@ class EmbeddingService:
                     return None
 
                 return CohereEmbeddings(
-                    cohere_api_key=SecretStr(api_key) if api_key else SecretStr("dummy"),
+                    cohere_api_key=SecretStr(api_key) if api_key else None,
                     model=model_def.model_name,
                     client=cohere.Client(api_key) if cohere and api_key else None,
                     async_client=(
@@ -733,12 +733,14 @@ class EmbeddingService:
 
     def _get_model_name(self, provider_name: str) -> str:
         """Get model name for provider."""
+        # For now, return generic model names since specific model settings
+        # are managed through the model registry, not global settings
         if provider_name == "openai":
-            return settings.openai_embedding_model
+            return "text-embedding-ada-002"  # Default OpenAI embedding model
         elif provider_name == "google":
-            return settings.google_embedding_model
+            return "embedding-001"  # Default Google embedding model
         elif provider_name == "cohere":
-            return settings.cohere_embedding_model
+            return "embed-english-v2.0"  # Default Cohere embedding model
         else:
             return "unknown"
 

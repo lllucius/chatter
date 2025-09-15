@@ -22,7 +22,9 @@ class WorkflowAnalyticsService:
     def __init__(self, session=None):
         # Session not needed for analytics, but keeping for consistency
         self.session = session
-        self.cache = get_persistent_cache()  # Use persistent cache for longer-lived analytics
+        self.cache = (
+            get_persistent_cache()
+        )  # Use persistent cache for longer-lived analytics
 
     async def analyze_workflow(
         self,
@@ -90,30 +92,40 @@ class WorkflowAnalyticsService:
             raise
 
     def _generate_cache_key(
-        self,
-        nodes: list[dict[str, Any]],
-        edges: list[dict[str, Any]]
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
     ) -> str:
         """Generate a cache key from workflow structure."""
         # Create a deterministic representation of the workflow
         workflow_data = {
-            "nodes": sorted([
-                {
-                    "id": node["id"],
-                    "type": node.get("data", {}).get("nodeType", ""),
-                    "config": node.get("data", {}).get("config", {})
-                }
-                for node in nodes
-            ], key=lambda x: x["id"]),
-            "edges": sorted([
-                {"source": edge["source"], "target": edge["target"]}
-                for edge in edges
-            ], key=lambda x: (x["source"], x["target"]))
+            "nodes": sorted(
+                [
+                    {
+                        "id": node["id"],
+                        "type": node.get("data", {}).get(
+                            "nodeType", ""
+                        ),
+                        "config": node.get("data", {}).get(
+                            "config", {}
+                        ),
+                    }
+                    for node in nodes
+                ],
+                key=lambda x: x["id"],
+            ),
+            "edges": sorted(
+                [
+                    {"source": edge["source"], "target": edge["target"]}
+                    for edge in edges
+                ],
+                key=lambda x: (x["source"], x["target"]),
+            ),
         }
 
         # Create hash of the workflow structure
         workflow_json = json.dumps(workflow_data, sort_keys=True)
-        workflow_hash = hashlib.sha256(workflow_json.encode()).hexdigest()
+        workflow_hash = hashlib.sha256(
+            workflow_json.encode()
+        ).hexdigest()
 
         return f"workflow_analytics:{workflow_hash}"
 

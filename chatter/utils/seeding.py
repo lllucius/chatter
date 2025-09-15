@@ -249,11 +249,15 @@ class DatabaseSeeder:
                         logger.info(
                             f"Database has {existing_users} users, skipping seeding"
                         )
-                        results["skipped"]["reason"] = "Database not empty"
+                        results["skipped"][
+                            "reason"
+                        ] = "Database not empty"
                         return results
                 except Exception as e:
                     # If we can't count users, rollback and let seeding continue
-                    logger.warning(f"Could not count existing users: {e}")
+                    logger.warning(
+                        f"Could not count existing users: {e}"
+                    )
                     await self.session.rollback()
 
             # Begin fresh transaction for consistent seeding
@@ -286,7 +290,9 @@ class DatabaseSeeder:
             try:
                 await self.session.rollback()
             except Exception as rollback_error:
-                logger.error(f"Failed to rollback transaction: {rollback_error}")
+                logger.error(
+                    f"Failed to rollback transaction: {rollback_error}"
+                )
             raise
 
     async def _count_users(self) -> int:
@@ -295,12 +301,16 @@ class DatabaseSeeder:
         from sqlalchemy.exc import ProgrammingError
 
         try:
-            result = await self.session.execute(select(func.count(User.id)))
+            result = await self.session.execute(
+                select(func.count(User.id))
+            )
             return result.scalar() or 0
         except ProgrammingError as e:
             # Table doesn't exist yet, return 0
             if "does not exist" in str(e):
-                logger.debug("Users table does not exist, returning 0 count")
+                logger.debug(
+                    "Users table does not exist, returning 0 count"
+                )
                 # Rollback transaction to reset failed state for PostgreSQL
                 await self.session.rollback()
                 return 0
@@ -449,12 +459,16 @@ class DatabaseSeeder:
                     )
                     existing_user = existing.scalar_one_or_none()
                     if existing_user:
-                        logger.info("Admin user already exists, skipping")
+                        logger.info(
+                            "Admin user already exists, skipping"
+                        )
                         return existing_user
                 except Exception as e:
                     # If query fails (e.g., table doesn't exist), rollback and continue
                     await self.session.rollback()
-                    logger.debug(f"Could not check for existing admin user: {e}")
+                    logger.debug(
+                        f"Could not check for existing admin user: {e}"
+                    )
 
             # Generate secure random password
             admin_password = "".join(
@@ -533,7 +547,9 @@ class DatabaseSeeder:
                     except Exception as e:
                         # If query fails, rollback and continue
                         await self.session.rollback()
-                        logger.debug(f"Could not check for existing user {user_data['username']}: {e}")
+                        logger.debug(
+                            f"Could not check for existing user {user_data['username']}: {e}"
+                        )
 
                 user = User(
                     email=user_data["email"],
@@ -556,7 +572,9 @@ class DatabaseSeeder:
                 for user in created_users:
                     await self.session.refresh(user)
 
-            logger.info(f"Created {len(created_users)} development users")
+            logger.info(
+                f"Created {len(created_users)} development users"
+            )
             return created_users
         except Exception as e:
             await self.session.rollback()
@@ -596,7 +614,9 @@ class DatabaseSeeder:
                 except Exception as e:
                     # If query fails, rollback and continue
                     await self.session.rollback()
-                    logger.debug(f"Could not check for existing test user {user_data['username']}: {e}")
+                    logger.debug(
+                        f"Could not check for existing test user {user_data['username']}: {e}"
+                    )
 
             user = User(
                 email=user_data["email"],
@@ -1524,7 +1544,9 @@ async def seed_database(
     """Convenience function to seed database."""
     try:
         async with DatabaseSeeder() as seeder:
-            return await seeder.seed_database(mode, force, skip_existing)
+            return await seeder.seed_database(
+                mode, force, skip_existing
+            )
     except Exception as e:
         logger.error(f"Database seeding failed: {e}")
         raise

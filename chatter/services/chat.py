@@ -128,7 +128,10 @@ class ChatAnalyticsService:
         try:
             # Mock calculation based on response time, success rate, cost efficiency
             base_score = settings.chat_base_score
-            return min(settings.chat_max_score, max(settings.chat_min_score, base_score))
+            return min(
+                settings.chat_max_score,
+                max(settings.chat_min_score, base_score),
+            )
         except Exception:
             return settings.chat_default_score
 
@@ -270,7 +273,11 @@ class ChatService:
         )
 
     async def update_message_rating(
-        self, conversation_id: str, message_id: str, user_id: str, rating: float
+        self,
+        conversation_id: str,
+        message_id: str,
+        user_id: str,
+        rating: float,
     ) -> Message:
         """Update the rating for a message."""
         return await self.message_service.update_message_rating(
@@ -322,8 +329,10 @@ class ChatService:
                 )
 
                 # Shared conversation setup logic
-                conversation, final_request = await self._setup_conversation(
-                    user_id, processed_request
+                conversation, final_request = (
+                    await self._setup_conversation(
+                        user_id, processed_request
+                    )
                 )
 
                 # Add user message
@@ -403,8 +412,10 @@ class ChatService:
             )
 
             # Shared conversation setup logic
-            conversation, final_request = await self._setup_conversation(
-                user_id, processed_request
+            conversation, final_request = (
+                await self._setup_conversation(
+                    user_id, processed_request
+                )
             )
 
             # Add user message
@@ -481,15 +492,22 @@ class ChatService:
         chat_request_dict = chat_request.model_dump()
 
         # If prompt_id is provided but system_prompt_override is not, resolve the prompt
-        if chat_request.prompt_id and not chat_request.system_prompt_override:
+        if (
+            chat_request.prompt_id
+            and not chat_request.system_prompt_override
+        ):
             try:
                 from chatter.core.prompts import PromptService
 
                 prompt_service = PromptService(self.session)
-                prompt = await prompt_service.get_prompt(chat_request.prompt_id, user_id)
+                prompt = await prompt_service.get_prompt(
+                    chat_request.prompt_id, user_id
+                )
 
                 if prompt and prompt.content:
-                    chat_request_dict['system_prompt_override'] = prompt.content
+                    chat_request_dict['system_prompt_override'] = (
+                        prompt.content
+                    )
                     modified = True
                 else:
                     logger.warning(
@@ -506,12 +524,19 @@ class ChatService:
                 from chatter.core.profiles import ProfileService
 
                 profile_service = ProfileService(self.session)
-                profile = await profile_service.get_profile(chat_request.profile_id, user_id)
+                profile = await profile_service.get_profile(
+                    chat_request.profile_id, user_id
+                )
 
                 if profile:
                     # Use profile's provider if it has one, otherwise use default
-                    if profile.llm_provider and profile.llm_provider.lower() != "default":
-                        chat_request_dict['provider'] = profile.llm_provider
+                    if (
+                        profile.llm_provider
+                        and profile.llm_provider.lower() != "default"
+                    ):
+                        chat_request_dict['provider'] = (
+                            profile.llm_provider
+                        )
                         modified = True
                         logger.debug(
                             f"Using profile provider: {profile.llm_provider} for profile: {profile.name}"
@@ -529,6 +554,7 @@ class ChatService:
         # Return modified request if any changes were made, otherwise return original
         if modified:
             from chatter.schemas.chat import ChatRequest
+
             return ChatRequest(**chat_request_dict)
 
         return chat_request
@@ -555,19 +581,36 @@ class ChatService:
                 )
 
                 # If conversation has a profile and no explicit provider is set, resolve provider
-                if conversation.profile_id and not chat_request.provider:
+                if (
+                    conversation.profile_id
+                    and not chat_request.provider
+                ):
                     try:
                         from chatter.core.profiles import ProfileService
 
                         profile_service = ProfileService(self.session)
-                        profile = await profile_service.get_profile(conversation.profile_id, user_id)
+                        profile = await profile_service.get_profile(
+                            conversation.profile_id, user_id
+                        )
 
-                        if profile and profile.llm_provider and profile.llm_provider.lower() != "default":
+                        if (
+                            profile
+                            and profile.llm_provider
+                            and profile.llm_provider.lower()
+                            != "default"
+                        ):
                             # Create modified chat request with profile provider
-                            chat_request_dict = chat_request.model_dump()
-                            chat_request_dict['provider'] = profile.llm_provider
+                            chat_request_dict = (
+                                chat_request.model_dump()
+                            )
+                            chat_request_dict['provider'] = (
+                                profile.llm_provider
+                            )
                             from chatter.schemas.chat import ChatRequest
-                            chat_request = ChatRequest(**chat_request_dict)
+
+                            chat_request = ChatRequest(
+                                **chat_request_dict
+                            )
                             logger.debug(
                                 f"Using conversation profile provider: {profile.llm_provider} for profile: {profile.name}"
                             )

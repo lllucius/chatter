@@ -36,7 +36,9 @@ class ProfileBase(BaseModel):
         description="LLM provider (openai, anthropic, etc.) or 'default' or None to use system default",
     )
     llm_model: str | None = Field(
-        None, max_length=100, description="LLM model name or None to use provider default"
+        None,
+        max_length=100,
+        description="LLM model name or None to use provider default",
     )
 
     # Generation parameters

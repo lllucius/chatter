@@ -77,7 +77,7 @@ class DocumentService:
             hasher = hashlib.sha256()
             file_size = 0
             CHUNK_SIZE = 64 * 1024  # 64KB chunks for better performance
-            
+
             # Validate file type early before processing
             file_ext = (
                 Path(upload_file.filename).suffix.lower().lstrip(".")
@@ -106,7 +106,7 @@ class DocumentService:
             # Stream file directly to disk while hashing and measuring size
             # This avoids loading the entire file into memory
             await upload_file.seek(0)
-            
+
             try:
                 with open(file_path, "wb") as f:
                     while True:

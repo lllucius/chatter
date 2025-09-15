@@ -7,7 +7,6 @@ without importing any application modules, avoiding initialization issues.
 
 import asyncio
 import functools
-import os
 import sys
 
 import typer
@@ -15,25 +14,6 @@ from rich.console import Console
 
 # Import the Chatter SDK
 try:
-    from chatter_sdk import (
-        ABTestingApi,
-        AgentsApi,
-        AnalyticsApi,
-        ApiClient,
-        AuthenticationApi,
-        ChatApi,
-        Configuration,
-        DataManagementApi,
-        DocumentsApi,
-        EventsApi,
-        HealthApi,
-        JobsApi,
-        ModelRegistryApi,
-        PluginsApi,
-        ProfilesApi,
-        PromptsApi,
-        ToolServersApi,
-    )
     from chatter_sdk.exceptions import ApiException
 except ImportError as e:
     print(f"Error importing chatter_sdk: {e}")
@@ -60,8 +40,6 @@ from chatter.commands.plugins import plugins_app
 from chatter.commands.profiles import profiles_app
 from chatter.commands.prompts import prompts_app
 
-from chatter.commands import ChatterSDKClient, get_default_api_base_url, get_default_timeout
-
 # Initialize console
 console = Console()
 
@@ -76,12 +54,13 @@ def get_client() -> ChatterSDKClient:
     # Load token from settings if available
     try:
         from chatter.config import get_settings
+
         settings = get_settings()
         token = settings.chatter_access_token
     except Exception:
         # Fallback to None if settings can't be loaded
         token = None
-    
+
     if not token:
         temp_client = ChatterSDKClient()
         token = temp_client.load_token()

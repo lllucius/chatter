@@ -7,7 +7,13 @@ from rich.panel import Panel
 from rich.prompt import Prompt
 from rich.table import Table
 
-from chatter.commands import console, get_client, run_async, get_default_page_size, get_message_display_limit
+from chatter.commands import (
+    console,
+    get_client,
+    run_async,
+    get_default_page_size,
+    get_message_display_limit,
+)
 
 # Chat Commands
 chat_app = typer.Typer(help="Chat and conversation management commands")
@@ -114,7 +120,9 @@ async def list_conversations(
 @run_async
 async def show_conversation(
     conversation_id: str = typer.Argument(..., help="Conversation ID"),
-    limit: int = typer.Option(get_message_display_limit(), help="Number of messages to show"),
+    limit: int = typer.Option(
+        get_message_display_limit(), help="Number of messages to show"
+    ),
 ):
     """Show conversation details and messages."""
     async with get_client() as sdk_client:

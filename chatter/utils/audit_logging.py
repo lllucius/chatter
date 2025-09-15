@@ -80,7 +80,10 @@ class AuditLog(Base):
 
     # Event identification
     event_id: Mapped[str] = mapped_column(
-        String(26), unique=True, nullable=False, index=True  # ULID length
+        String(26),
+        unique=True,
+        nullable=False,
+        index=True,  # ULID length
     )
     timestamp: Mapped[datetime] = mapped_column(
         DateTime(timezone=True), nullable=False, index=True
@@ -167,7 +170,9 @@ class AuditLogger:
         user_agent = request.headers.get("User-Agent", "")
 
         # Extract request ID if available
-        request_id = request.headers.get("X-Request-ID") or generate_ulid()
+        request_id = (
+            request.headers.get("X-Request-ID") or generate_ulid()
+        )
 
         return {
             "ip_address": ip_address,

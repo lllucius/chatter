@@ -186,17 +186,18 @@ def _lazy_import_mcp_service():
 
 def _lazy_import_model_registry():
     """Lazy import of model registry to avoid circular imports."""
+
     def get_model_registry_instance(session=None):
         """Get a ModelRegistryService instance with the provided session."""
         from chatter.core.model_registry import ModelRegistryService
         from chatter.utils.database import get_session_maker
-        
+
         if session is None:
             session_maker = get_session_maker()
             session = session_maker()
-        
+
         return ModelRegistryService(session)
-    
+
     return get_model_registry_instance
 
 

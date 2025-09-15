@@ -426,7 +426,11 @@ class SecurityComplianceChecker:
             settings, "refresh_token_expire_days", 7
         )
 
-        if access_expire <= settings.token_expire_warning_threshold and refresh_expire <= settings.refresh_token_expire_warning_threshold:
+        if (
+            access_expire <= settings.token_expire_warning_threshold
+            and refresh_expire
+            <= settings.refresh_token_expire_warning_threshold
+        ):
             return ComplianceLevel.COMPLIANT
         elif access_expire <= 240 and refresh_expire <= 90:
             return ComplianceLevel.PARTIALLY_COMPLIANT

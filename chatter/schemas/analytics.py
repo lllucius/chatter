@@ -61,7 +61,8 @@ class ConversationStatsResponse(BaseModel):
         default=0, description="Number of messages with ratings"
     )
     rating_distribution: dict[str, int] = Field(
-        default_factory=dict, description="Distribution of ratings (1-5 stars)"
+        default_factory=dict,
+        description="Distribution of ratings (1-5 stars)",
     )
 
 
@@ -574,19 +575,29 @@ class ChartDataPoint(BaseModel):
 
     name: str = Field(..., description="Data point label")
     value: float = Field(..., description="Data point value")
-    color: str | None = Field(None, description="Optional color for the data point")
+    color: str | None = Field(
+        None, description="Optional color for the data point"
+    )
 
 
 class TimeSeriesDataPoint(BaseModel):
     """Schema for time series chart data point."""
 
-    date: str = Field(..., description="Date label (e.g., 'Mon', 'Jan 01')")
-    conversations: int | None = Field(None, description="Number of conversations")
+    date: str = Field(
+        ..., description="Date label (e.g., 'Mon', 'Jan 01')"
+    )
+    conversations: int | None = Field(
+        None, description="Number of conversations"
+    )
     tokens: int | None = Field(None, description="Token usage")
     cost: float | None = Field(None, description="Cost")
-    workflows: int | None = Field(None, description="Number of workflows")
+    workflows: int | None = Field(
+        None, description="Number of workflows"
+    )
     agents: int | None = Field(None, description="Number of agents")
-    ab_tests: int | None = Field(None, description="Number of A/B tests", alias="abTests")
+    ab_tests: int | None = Field(
+        None, description="Number of A/B tests", alias="abTests"
+    )
 
 
 class ChartReadyAnalytics(BaseModel):
@@ -615,9 +626,13 @@ class ChartReadyAnalytics(BaseModel):
 class IntegratedDashboardStats(BaseModel):
     """Schema for integrated dashboard statistics."""
 
-    workflows: dict[str, Any] = Field(..., description="Workflow statistics")
+    workflows: dict[str, Any] = Field(
+        ..., description="Workflow statistics"
+    )
     agents: dict[str, Any] = Field(..., description="Agent statistics")
-    ab_testing: dict[str, Any] = Field(..., description="A/B testing statistics")
+    ab_testing: dict[str, Any] = Field(
+        ..., description="A/B testing statistics"
+    )
     system: dict[str, Any] = Field(..., description="System statistics")
 
 

@@ -45,8 +45,6 @@ async def get_chat_service(
     return ChatService(session, llm_service)
 
 
-
-
 def _map_workflow_type(workflow: str | None) -> str:
     """Map API workflow to internal workflow types."""
     workflow_mapping = {

@@ -178,7 +178,7 @@ class TestErrorHandling:
         result = await seeder.seed_database(
             mode=SeedingMode.MINIMAL, force=False
         )
-        
+
         # Should have succeeded despite the count error
         assert "created" in result
         assert result["mode"] == SeedingMode.MINIMAL

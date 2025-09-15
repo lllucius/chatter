@@ -2,11 +2,12 @@
 
 import asyncio
 import functools
-import os
 import sys
 from collections.abc import AsyncGenerator, Callable
 from contextlib import asynccontextmanager
 from typing import Any, TypeVar
+
+from chatter.config import get_settings
 
 # Import all the API classes that commands might need
 from chatter_sdk import (  # type: ignore[import-not-found]
@@ -38,7 +39,6 @@ F = TypeVar('F', bound=Callable[..., Any])
 # Initialize console
 console = Console()
 
-from chatter.config import get_settings
 
 # Configuration from environment variables and settings
 def get_default_api_base_url() -> str:
@@ -48,12 +48,14 @@ def get_default_api_base_url() -> str:
     except Exception:
         return "http://localhost:8000"  # Fallback if settings can't be loaded
 
+
 def get_default_timeout() -> float:
     """Get default timeout from settings."""
     try:
         return get_settings().cli_default_timeout
     except Exception:
         return 30.0  # Fallback if settings can't be loaded
+
 
 def get_default_page_size() -> int:
     """Get default page size from settings."""
@@ -62,12 +64,14 @@ def get_default_page_size() -> int:
     except Exception:
         return 10  # Fallback if settings can't be loaded
 
+
 def get_max_page_size() -> int:
     """Get maximum page size from settings."""
     try:
         return get_settings().cli_max_page_size
     except Exception:
         return 100  # Fallback if settings can't be loaded
+
 
 def get_default_max_tokens() -> int:
     """Get default max tokens from settings."""
@@ -76,6 +80,7 @@ def get_default_max_tokens() -> int:
     except Exception:
         return 100  # Fallback if settings can't be loaded
 
+
 def get_default_test_count() -> int:
     """Get default test count from settings."""
     try:
@@ -83,12 +88,14 @@ def get_default_test_count() -> int:
     except Exception:
         return 5  # Fallback if settings can't be loaded
 
+
 def get_profile_max_tokens() -> int:
     """Get profile max tokens from settings."""
     try:
         return get_settings().cli_profile_max_tokens
     except Exception:
         return 1000  # Fallback if settings can't be loaded
+
 
 def get_message_display_limit() -> int:
     """Get message display limit from settings."""
@@ -110,12 +117,14 @@ class ChatterSDKClient:
         try:
             settings = get_settings()
             self.base_url = base_url or settings.chatter_api_base_url
-            self.access_token = access_token or settings.chatter_access_token
+            self.access_token = (
+                access_token or settings.chatter_access_token
+            )
         except Exception:
             # Fallback if settings can't be loaded
             self.base_url = base_url or get_default_api_base_url()
             self.access_token = access_token
-        
+
         self.timeout = timeout or get_default_timeout()
 
         # Configure the SDK

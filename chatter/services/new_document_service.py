@@ -17,8 +17,17 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.config import settings
 from chatter.core.embedding_pipeline import EmbeddingPipeline
 from chatter.models.base import generate_ulid
-from chatter.models.document import Document, DocumentChunk, DocumentStatus, DocumentType
-from chatter.schemas.document import DocumentCreate, DocumentListRequest, DocumentSearchRequest
+from chatter.models.document import (
+    Document,
+    DocumentChunk,
+    DocumentStatus,
+    DocumentType,
+)
+from chatter.schemas.document import (
+    DocumentCreate,
+    DocumentListRequest,
+    DocumentSearchRequest,
+)
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -26,6 +35,7 @@ logger = get_logger(__name__)
 
 class DocumentServiceError(Exception):
     """Document service error."""
+
     pass
 
 
@@ -42,7 +52,7 @@ class NewDocumentService:
         self,
         user_id: str,
         upload_file: UploadFile,
-        document_data: DocumentCreate
+        document_data: DocumentCreate,
     ) -> Document:
         """Create and process a new document with memory-efficient handling.
 
@@ -64,9 +74,13 @@ class NewDocumentService:
             CHUNK_SIZE = 64 * 1024  # 64KB chunks for better performance
 
             # Validate file extension early
-            file_ext = Path(upload_file.filename).suffix.lower().lstrip(".")
+            file_ext = (
+                Path(upload_file.filename).suffix.lower().lstrip(".")
+            )
             if file_ext not in settings.allowed_file_types:
-                raise DocumentServiceError(f"File type not allowed: {file_ext}")
+                raise DocumentServiceError(
+                    f"File type not allowed: {file_ext}"
+                )
 
             # Detect document type
             mime_type = (
@@ -74,7 +88,9 @@ class NewDocumentService:
                 or mimetypes.guess_type(upload_file.filename)[0]
                 or "application/octet-stream"
             )
-            document_type = self._detect_document_type(upload_file.filename, mime_type)
+            document_type = self._detect_document_type(
+                upload_file.filename, mime_type
+            )
 
             # Generate unique filename and prepare path
             unique_filename = f"{generate_ulid()}.{file_ext}"
@@ -82,7 +98,7 @@ class NewDocumentService:
 
             # Stream file directly to disk while hashing (memory efficient)
             await upload_file.seek(0)
-            
+
             try:
                 with open(file_path, "wb") as f:
                     while True:
@@ -99,7 +115,9 @@ class NewDocumentService:
                                 file_path.unlink()
                             except OSError:
                                 pass
-                            raise DocumentServiceError(f"File too large: {file_size} bytes")
+                            raise DocumentServiceError(
+                                f"File too large: {file_size} bytes"
+                            )
 
                         # Hash and write
                         hasher.update(chunk)
@@ -130,10 +148,12 @@ class NewDocumentService:
                 description=document_data.description,
                 tags=document_data.tags or [],
                 extra_metadata=document_data.extra_metadata or {},
-                chunk_size=document_data.chunk_size or settings.default_chunk_size,
-                chunk_overlap=document_data.chunk_overlap or settings.default_chunk_overlap,
+                chunk_size=document_data.chunk_size
+                or settings.default_chunk_size,
+                chunk_overlap=document_data.chunk_overlap
+                or settings.default_chunk_overlap,
                 is_public=document_data.is_public or False,
-                status=DocumentStatus.PENDING
+                status=DocumentStatus.PENDING,
             )
 
             self.session.add(document)
@@ -144,12 +164,15 @@ class NewDocumentService:
                 "Document created",
                 document_id=document.id,
                 filename=upload_file.filename,
-                user_id=user_id
+                user_id=user_id,
             )
 
             # Start processing asynchronously using file path (not content)
             import asyncio
-            asyncio.create_task(self._process_document_async(document.id, file_path))
+
+            asyncio.create_task(
+                self._process_document_async(document.id, file_path)
+            )
 
             return document
 
@@ -157,9 +180,13 @@ class NewDocumentService:
             raise
         except Exception as e:
             logger.error("Document creation failed", error=str(e))
-            raise DocumentServiceError(f"Failed to create document: {e}") from e
+            raise DocumentServiceError(
+                f"Failed to create document: {e}"
+            ) from e
 
-    async def get_document(self, document_id: str, user_id: str) -> Document | None:
+    async def get_document(
+        self, document_id: str, user_id: str
+    ) -> Document | None:
         """Get a document by ID with access control.
 
         Args:
@@ -176,8 +203,8 @@ class NewDocumentService:
                         Document.id == document_id,
                         or_(
                             Document.owner_id == user_id,
-                            Document.is_public
-                        )
+                            Document.is_public,
+                        ),
                     )
                 )
             )
@@ -193,13 +220,15 @@ class NewDocumentService:
             return document
 
         except Exception as e:
-            logger.error("Failed to get document", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to get document",
+                document_id=document_id,
+                error=str(e),
+            )
             return None
 
     async def list_documents(
-        self,
-        user_id: str,
-        list_request: DocumentListRequest
+        self, user_id: str, list_request: DocumentListRequest
     ) -> tuple[list[Document], int]:
         """List documents with filtering and pagination.
 
@@ -213,36 +242,43 @@ class NewDocumentService:
         try:
             # Base query with access control
             query = select(Document).where(
-                or_(
-                    Document.owner_id == user_id,
-                    Document.is_public
-                )
+                or_(Document.owner_id == user_id, Document.is_public)
             )
 
             # Apply filters
             if list_request.status:
-                query = query.where(Document.status == list_request.status)
+                query = query.where(
+                    Document.status == list_request.status
+                )
 
             if list_request.document_type:
-                query = query.where(Document.document_type == list_request.document_type)
+                query = query.where(
+                    Document.document_type == list_request.document_type
+                )
 
             if list_request.tags:
                 for tag in list_request.tags:
                     query = query.where(Document.tags.contains([tag]))
 
             # Get total count
-            count_query = select(func.count()).select_from(query.subquery())
+            count_query = select(func.count()).select_from(
+                query.subquery()
+            )
             count_result = await self.session.execute(count_query)
             total_count = count_result.scalar()
 
             # Apply sorting and pagination
-            sort_column = getattr(Document, list_request.sort_by, Document.created_at)
+            sort_column = getattr(
+                Document, list_request.sort_by, Document.created_at
+            )
             if list_request.sort_order == "desc":
                 query = query.order_by(desc(sort_column))
             else:
                 query = query.order_by(sort_column)
 
-            query = query.offset(list_request.offset).limit(list_request.limit)
+            query = query.offset(list_request.offset).limit(
+                list_request.limit
+            )
 
             # Execute query
             result = await self.session.execute(query)
@@ -255,9 +291,7 @@ class NewDocumentService:
             return [], 0
 
     async def search_documents(
-        self,
-        user_id: str,
-        search_request: DocumentSearchRequest
+        self, user_id: str, search_request: DocumentSearchRequest
     ) -> list[tuple[DocumentChunk, float, Document]]:
         """Search documents using semantic similarity.
 
@@ -273,12 +307,13 @@ class NewDocumentService:
             accessible_docs_result = await self.session.execute(
                 select(Document.id).where(
                     or_(
-                        Document.owner_id == user_id,
-                        Document.is_public
+                        Document.owner_id == user_id, Document.is_public
                     )
                 )
             )
-            accessible_doc_ids = [doc_id for (doc_id,) in accessible_docs_result.all()]
+            accessible_doc_ids = [
+                doc_id for (doc_id,) in accessible_docs_result.all()
+            ]
 
             if not accessible_doc_ids:
                 return []
@@ -289,11 +324,15 @@ class NewDocumentService:
                     select(Document.id).where(
                         and_(
                             Document.id.in_(accessible_doc_ids),
-                            Document.document_type.in_(search_request.document_types)
+                            Document.document_type.in_(
+                                search_request.document_types
+                            ),
                         )
                     )
                 )
-                accessible_doc_ids = [doc_id for (doc_id,) in filtered_docs_result.all()]
+                accessible_doc_ids = [
+                    doc_id for (doc_id,) in filtered_docs_result.all()
+                ]
 
             # Apply tags filter
             if search_request.tags:
@@ -302,11 +341,14 @@ class NewDocumentService:
                         select(Document.id).where(
                             and_(
                                 Document.id.in_(accessible_doc_ids),
-                                Document.tags.contains([tag])
+                                Document.tags.contains([tag]),
                             )
                         )
                     )
-                    accessible_doc_ids = [doc_id for (doc_id,) in filtered_docs_result.all()]
+                    accessible_doc_ids = [
+                        doc_id
+                        for (doc_id,) in filtered_docs_result.all()
+                    ]
 
             if not accessible_doc_ids:
                 return []
@@ -315,7 +357,7 @@ class NewDocumentService:
             chunk_results = await self.pipeline.search_documents(
                 query=search_request.query,
                 limit=search_request.limit,
-                document_ids=accessible_doc_ids
+                document_ids=accessible_doc_ids,
             )
 
             # Filter by score threshold and get document info
@@ -324,11 +366,15 @@ class NewDocumentService:
                 if similarity_score >= search_request.score_threshold:
                     # Get document (should be cached or fast lookup)
                     doc_result = await self.session.execute(
-                        select(Document).where(Document.id == chunk.document_id)
+                        select(Document).where(
+                            Document.id == chunk.document_id
+                        )
                     )
                     document = doc_result.scalar_one_or_none()
                     if document:
-                        results.append((chunk, similarity_score, document))
+                        results.append(
+                            (chunk, similarity_score, document)
+                        )
                         # Update search statistics
                         document.search_count += 1
 
@@ -338,7 +384,7 @@ class NewDocumentService:
                 "Document search completed",
                 query=search_request.query,
                 results=len(results),
-                user_id=user_id
+                user_id=user_id,
             )
 
             return results
@@ -347,7 +393,9 @@ class NewDocumentService:
             logger.error("Document search failed", error=str(e))
             return []
 
-    async def delete_document(self, document_id: str, user_id: str) -> bool:
+    async def delete_document(
+        self, document_id: str, user_id: str
+    ) -> bool:
         """Delete a document and its data.
 
         Args:
@@ -363,7 +411,7 @@ class NewDocumentService:
                 select(Document).where(
                     and_(
                         Document.id == document_id,
-                        Document.owner_id == user_id
+                        Document.owner_id == user_id,
                     )
                 )
             )
@@ -377,21 +425,35 @@ class NewDocumentService:
                 try:
                     Path(document.file_path).unlink()
                 except OSError as e:
-                    logger.warning("Failed to delete file", file_path=document.file_path, error=str(e))
+                    logger.warning(
+                        "Failed to delete file",
+                        file_path=document.file_path,
+                        error=str(e),
+                    )
 
             # Delete document (cascades to chunks)
             await self.session.delete(document)
             await self.session.commit()
 
-            logger.info("Document deleted", document_id=document_id, user_id=user_id)
+            logger.info(
+                "Document deleted",
+                document_id=document_id,
+                user_id=user_id,
+            )
             return True
 
         except Exception as e:
             await self.session.rollback()
-            logger.error("Failed to delete document", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to delete document",
+                document_id=document_id,
+                error=str(e),
+            )
             return False
 
-    async def reprocess_document(self, document_id: str, user_id: str) -> bool:
+    async def reprocess_document(
+        self, document_id: str, user_id: str
+    ) -> bool:
         """Reprocess a document through the embedding pipeline.
 
         Args:
@@ -407,7 +469,7 @@ class NewDocumentService:
                 select(Document).where(
                     and_(
                         Document.id == document_id,
-                        Document.owner_id == user_id
+                        Document.owner_id == user_id,
                     )
                 )
             )
@@ -417,13 +479,20 @@ class NewDocumentService:
                 return False
 
             # Check if file exists
-            if not document.file_path or not Path(document.file_path).exists():
-                logger.error("Document file not found", document_id=document_id)
+            if (
+                not document.file_path
+                or not Path(document.file_path).exists()
+            ):
+                logger.error(
+                    "Document file not found", document_id=document_id
+                )
                 return False
 
             # Delete existing chunks
             await self.session.execute(
-                select(DocumentChunk).where(DocumentChunk.document_id == document_id)
+                select(DocumentChunk).where(
+                    DocumentChunk.document_id == document_id
+                )
             )
             await self.session.commit()
 
@@ -432,13 +501,22 @@ class NewDocumentService:
                 file_content = f.read()
 
             import asyncio
-            asyncio.create_task(self._process_document_async(document.id, file_content))
 
-            logger.info("Document reprocessing started", document_id=document_id)
+            asyncio.create_task(
+                self._process_document_async(document.id, file_content)
+            )
+
+            logger.info(
+                "Document reprocessing started", document_id=document_id
+            )
             return True
 
         except Exception as e:
-            logger.error("Failed to start document reprocessing", document_id=document_id, error=str(e))
+            logger.error(
+                "Failed to start document reprocessing",
+                document_id=document_id,
+                error=str(e),
+            )
             return False
 
     async def get_document_stats(self, user_id: str) -> dict[str, Any]:
@@ -458,7 +536,7 @@ class NewDocumentService:
                     select(func.count(Document.id)).where(
                         and_(
                             Document.owner_id == user_id,
-                            Document.status == status
+                            Document.status == status,
                         )
                     )
                 )
@@ -471,7 +549,7 @@ class NewDocumentService:
                     select(func.count(Document.id)).where(
                         and_(
                             Document.owner_id == user_id,
-                            Document.document_type == doc_type
+                            Document.document_type == doc_type,
                         )
                     )
                 )
@@ -499,14 +577,16 @@ class NewDocumentService:
                 "status_counts": status_counts,
                 "type_counts": type_counts,
                 "total_storage_bytes": total_storage,
-                "total_chunks": total_chunks
+                "total_chunks": total_chunks,
             }
 
         except Exception as e:
             logger.error("Failed to get document stats", error=str(e))
             return {}
 
-    def _detect_document_type(self, filename: str, mime_type: str) -> DocumentType:
+    def _detect_document_type(
+        self, filename: str, mime_type: str
+    ) -> DocumentType:
         """Detect document type from filename and MIME type."""
         file_ext = Path(filename).suffix.lower()
 
@@ -537,26 +617,46 @@ class NewDocumentService:
             elif "xml" in mime_type:
                 return DocumentType.XML
             elif "word" in mime_type or "msword" in mime_type:
-                return DocumentType.DOCX if "openxml" in mime_type else DocumentType.DOC
+                return (
+                    DocumentType.DOCX
+                    if "openxml" in mime_type
+                    else DocumentType.DOC
+                )
 
         return DocumentType.OTHER
 
-    async def _process_document_async(self, document_id: str, file_path: Path) -> None:
+    async def _process_document_async(
+        self, document_id: str, file_path: Path
+    ) -> None:
         """Process document asynchronously with dedicated session using file path."""
         from chatter.utils.database import get_session_maker
-        
+
         # Create a fresh session for background processing to avoid session state issues
         session_maker = get_session_maker()
         async with session_maker() as processing_session:
             try:
                 # Create a new pipeline with the dedicated session
-                processing_pipeline = EmbeddingPipeline(processing_session)
+                processing_pipeline = EmbeddingPipeline(
+                    processing_session
+                )
                 # Pass file path instead of file content for memory efficiency
-                success = await processing_pipeline.process_document_from_file(document_id, file_path)
-                
+                success = await processing_pipeline.process_document_from_file(
+                    document_id, file_path
+                )
+
                 if success:
-                    logger.info("Document processing completed successfully", document_id=document_id)
+                    logger.info(
+                        "Document processing completed successfully",
+                        document_id=document_id,
+                    )
                 else:
-                    logger.error("Document processing failed", document_id=document_id)
+                    logger.error(
+                        "Document processing failed",
+                        document_id=document_id,
+                    )
             except Exception as e:
-                logger.error("Document processing exception", document_id=document_id, error=str(e))
+                logger.error(
+                    "Document processing exception",
+                    document_id=document_id,
+                    error=str(e),
+                )

@@ -618,11 +618,11 @@ class TestABTestingIntegration:
 
         # Test ending with winner variant (query parameter)
         end_response = await client.post(
-            f"/api/v1/ab-tests/{test_id}/end?winner_variant=variant_a", 
-            headers=auth_headers
+            f"/api/v1/ab-tests/{test_id}/end?winner_variant=variant_a",
+            headers=auth_headers,
         )
         assert end_response.status_code == 200
-        
+
         end_data = end_response.json()
         assert end_data["success"] is True
         assert end_data["test_id"] == test_id
@@ -690,11 +690,10 @@ class TestABTestingIntegration:
 
         # Test ending without winner variant
         end_response = await client.post(
-            f"/api/v1/ab-tests/{test_id}/end", 
-            headers=auth_headers
+            f"/api/v1/ab-tests/{test_id}/end", headers=auth_headers
         )
         assert end_response.status_code == 200
-        
+
         end_data = end_response.json()
         assert end_data["success"] is True
         assert end_data["test_id"] == test_id
@@ -755,10 +754,12 @@ class TestABTestingIntegration:
 
         # Test ending with invalid winner variant
         end_response = await client.post(
-            f"/api/v1/ab-tests/{test_id}/end?winner_variant=nonexistent_variant", 
-            headers=auth_headers
+            f"/api/v1/ab-tests/{test_id}/end?winner_variant=nonexistent_variant",
+            headers=auth_headers,
         )
-        assert end_response.status_code == 400  # Should return Bad Request
+        assert (
+            end_response.status_code == 400
+        )  # Should return Bad Request
 
         # Clean up
         await client.post(

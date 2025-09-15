@@ -84,7 +84,10 @@ def _validate_test_operation(
     _check_test_access(test, current_user)
 
     # Check operation validity based on test status
-    if operation == "start" and test.status not in [TestStatus.DRAFT, TestStatus.PAUSED]:
+    if operation == "start" and test.status not in [
+        TestStatus.DRAFT,
+        TestStatus.PAUSED,
+    ]:
         raise BadRequestProblem(
             detail=f"Cannot start test in {test.status} status"
         )
@@ -1031,7 +1034,9 @@ async def end_ab_test(
     test_id: str,
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
-    winner_variant: str | None = Query(None, description="Winning variant identifier"),
+    winner_variant: str | None = Query(
+        None, description="Winning variant identifier"
+    ),
 ) -> ABTestActionResponse:
     """End A/B test and declare winner.
 
@@ -1101,10 +1106,14 @@ async def end_ab_test(
 
         # Validate winner variant if provided
         if winner_variant:
-            variant_exists = any(v.id == winner_variant for v in test.variants)
+            variant_exists = any(
+                v.id == winner_variant for v in test.variants
+            )
             if not variant_exists:
                 # Also check by name for convenience
-                variant_exists = any(v.name == winner_variant for v in test.variants)
+                variant_exists = any(
+                    v.name == winner_variant for v in test.variants
+                )
                 if not variant_exists:
                     raise BadRequestProblem(
                         detail=f"Winner variant '{winner_variant}' not found in test variants"
@@ -1307,9 +1316,13 @@ async def get_test_analytics(
         _check_test_access(test_response, current_user)
 
         # Calculate analytics
-        analytics_data = await ab_test_manager.calculate_test_analytics(test_id)
+        analytics_data = await ab_test_manager.calculate_test_analytics(
+            test_id
+        )
         if not analytics_data:
-            raise InternalServerProblem(detail="Failed to calculate test analytics")
+            raise InternalServerProblem(
+                detail="Failed to calculate test analytics"
+            )
 
         # Import schemas for response
         from chatter.schemas.ab_testing import (

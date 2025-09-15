@@ -254,6 +254,7 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
 
         except Exception as e:
             import traceback
+
             traceback.print_exc()
             # Record error metrics
             await self._record_metrics(
@@ -435,12 +436,16 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Only get retriever if retrieval is enabled
             retriever = None
-            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+            if (
+                chat_request.enable_retrieval is not False
+            ):  # Default to True if not specified
                 retriever = workflow_manager.get_retriever(
-                    conversation.workspace_id
-                    if conversation.workspace_id
-                    else "default",
-                    document_ids=chat_request.document_ids
+                    (
+                        conversation.workspace_id
+                        if conversation.workspace_id
+                        else "default"
+                    ),
+                    document_ids=chat_request.document_ids,
                 )
 
             # Create RAG workflow
@@ -570,12 +575,16 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
 
             # Only get retriever if retrieval is enabled
             retriever = None
-            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+            if (
+                chat_request.enable_retrieval is not False
+            ):  # Default to True if not specified
                 retriever = workflow_manager.get_retriever(
-                    conversation.workspace_id
-                    if conversation.workspace_id
-                    else "default",
-                    document_ids=chat_request.document_ids
+                    (
+                        conversation.workspace_id
+                        if conversation.workspace_id
+                        else "default"
+                    ),
+                    document_ids=chat_request.document_ids,
                 )
 
             # Create streaming RAG workflow
@@ -1002,12 +1011,16 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
 
             # Only get retriever if retrieval is enabled
             retriever = None
-            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+            if (
+                chat_request.enable_retrieval is not False
+            ):  # Default to True if not specified
                 retriever = workflow_manager.get_retriever(
-                    conversation.workspace_id
-                    if conversation.workspace_id
-                    else "default",
-                    document_ids=chat_request.document_ids
+                    (
+                        conversation.workspace_id
+                        if conversation.workspace_id
+                        else "default"
+                    ),
+                    document_ids=chat_request.document_ids,
                 )
 
             # Create full workflow
@@ -1144,12 +1157,16 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
 
             # Only get retriever if retrieval is enabled
             retriever = None
-            if chat_request.enable_retrieval is not False:  # Default to True if not specified
+            if (
+                chat_request.enable_retrieval is not False
+            ):  # Default to True if not specified
                 retriever = workflow_manager.get_retriever(
-                    conversation.workspace_id
-                    if conversation.workspace_id
-                    else "default",
-                    document_ids=chat_request.document_ids
+                    (
+                        conversation.workspace_id
+                        if conversation.workspace_id
+                        else "default"
+                    ),
+                    document_ids=chat_request.document_ids,
                 )
 
             # Create streaming full workflow

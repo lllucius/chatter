@@ -769,20 +769,28 @@ class ProfileService:
 
             # Add "default" option first
             try:
-                default_provider = await self.llm_service.get_default_provider()
+                default_provider = (
+                    await self.llm_service.get_default_provider()
+                )
                 if default_provider:
                     # Get the actual provider name for the default
-                    from chatter.core.dependencies import get_model_registry
+                    from chatter.core.dependencies import (
+                        get_model_registry,
+                    )
                     from chatter.models.registry import ModelType
 
                     session = await self.llm_service._get_session()
                     registry = get_model_registry()(session)
-                    default_provider_info = await registry.get_default_provider(
-                        ModelType.LLM
+                    default_provider_info = (
+                        await registry.get_default_provider(
+                            ModelType.LLM
+                        )
                     )
                     if default_provider_info:
-                        provider_info = await self.llm_service.get_provider_info(
-                            default_provider_info.name
+                        provider_info = (
+                            await self.llm_service.get_provider_info(
+                                default_provider_info.name
+                            )
                         )
                         providers["default"] = {
                             "display_name": f"Default ({provider_info.get('display_name', default_provider_info.name)})",
@@ -792,7 +800,9 @@ class ProfileService:
                             "actual_provider": default_provider_info.name,
                         }
             except Exception as e:
-                logger.warning("Failed to get default provider info", error=str(e))
+                logger.warning(
+                    "Failed to get default provider info", error=str(e)
+                )
                 # Add a fallback default option
                 providers["default"] = {
                     "display_name": "Default",

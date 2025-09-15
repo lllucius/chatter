@@ -91,7 +91,9 @@ async def upload_document(
     """
     try:
         # Check memory availability before starting upload
-        await check_memory_before_operation("document upload", min_free_mb=100)
+        await check_memory_before_operation(
+            "document upload", min_free_mb=100
+        )
 
         # Validate file before processing
         if not file.filename:
@@ -100,6 +102,7 @@ async def upload_document(
         # Validate file size early (check file.size if available)
         if hasattr(file, 'size') and file.size:
             from chatter.config import settings
+
             if file.size > settings.max_file_size:
                 raise BadRequestProblem(
                     detail=f"File size ({file.size} bytes) exceeds maximum allowed size ({settings.max_file_size} bytes)"
@@ -140,7 +143,7 @@ async def upload_document(
             "Document uploaded successfully with memory-efficient processing",
             document_id=document.id,
             filename=file.filename,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         return DocumentResponse.model_validate(document)
@@ -148,7 +151,9 @@ async def upload_document(
     except DocumentError as e:
         raise BadRequestProblem(detail=str(e)) from e
     except Exception as e:
-        logger.error("Memory-efficient document upload failed", error=str(e))
+        logger.error(
+            "Memory-efficient document upload failed", error=str(e)
+        )
         raise InternalServerProblem(
             detail="Failed to upload document"
         ) from e

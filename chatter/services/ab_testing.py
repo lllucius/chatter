@@ -722,19 +722,34 @@ class ABTestManager:
         variants_data = []
         for variant in test.variants:
             # In a real implementation, this would query actual data
-            participants = max(10, int(total_participants * variant.weight / sum(v.weight for v in test.variants)))
-            conversion_rate = 0.10 + (random.random() - 0.5) * 0.05  # Simulate data
+            participants = max(
+                10,
+                int(
+                    total_participants
+                    * variant.weight
+                    / sum(v.weight for v in test.variants)
+                ),
+            )
+            conversion_rate = (
+                0.10 + (random.random() - 0.5) * 0.05
+            )  # Simulate data
             conversions = int(participants * conversion_rate)
 
-            variants_data.append({
-                "name": variant.name,
-                "participants": participants,
-                "conversions": conversions,
-                "conversion_rate": conversion_rate,
-                "revenue": conversions * 50.0,  # Simulate revenue
-                "cost": participants * 2.0,    # Simulate cost
-                "roi": (conversions * 50.0) / (participants * 2.0) if participants > 0 else 0.0,
-            })
+            variants_data.append(
+                {
+                    "name": variant.name,
+                    "participants": participants,
+                    "conversions": conversions,
+                    "conversion_rate": conversion_rate,
+                    "revenue": conversions * 50.0,  # Simulate revenue
+                    "cost": participants * 2.0,  # Simulate cost
+                    "roi": (
+                        (conversions * 50.0) / (participants * 2.0)
+                        if participants > 0
+                        else 0.0
+                    ),
+                }
+            )
 
         # Calculate statistical significance
         if len(variants_data) >= 2:
@@ -748,12 +763,18 @@ class ABTestManager:
             n2 = variant["participants"]
 
             if n1 > 0 and n2 > 0:
-                p_pool = (control["conversions"] + variant["conversions"]) / (n1 + n2)
-                se = math.sqrt(p_pool * (1 - p_pool) * (1/n1 + 1/n2))
+                p_pool = (
+                    control["conversions"] + variant["conversions"]
+                ) / (n1 + n2)
+                se = math.sqrt(
+                    p_pool * (1 - p_pool) * (1 / n1 + 1 / n2)
+                )
                 z_score = abs(p2 - p1) / se if se > 0 else 0
                 p_value = 2 * (1 - self._normal_cdf(abs(z_score)))
 
-                statistical_significance = p_value < (1 - test.confidence_level)
+                statistical_significance = p_value < (
+                    1 - test.confidence_level
+                )
                 effect_size = (p2 - p1) / p1 if p1 > 0 else 0
 
                 # Determine winner
@@ -773,15 +794,29 @@ class ABTestManager:
             improvement = None
 
         # Calculate test progress
-        days_running = (datetime.now(UTC) - test.start_date).days if test.start_date else 0
-        remaining_days = test.duration_days - days_running if test.duration_days else None
-        progress = min(100, (days_running / test.duration_days) * 100) if test.duration_days else 0
+        days_running = (
+            (datetime.now(UTC) - test.start_date).days
+            if test.start_date
+            else 0
+        )
+        remaining_days = (
+            test.duration_days - days_running
+            if test.duration_days
+            else None
+        )
+        progress = (
+            min(100, (days_running / test.duration_days) * 100)
+            if test.duration_days
+            else 0
+        )
 
         # Generate recommendation
         if total_participants < test.minimum_sample_size:
             recommendation = "Continue test - insufficient sample size"
         elif not statistical_significance:
-            recommendation = "Continue test - no significant difference detected"
+            recommendation = (
+                "Continue test - no significant difference detected"
+            )
         elif improvement and improvement > 5:
             recommendation = f"Consider implementing {winner} - significant improvement detected"
         else:
@@ -800,7 +835,10 @@ class ABTestManager:
                 "effect_size": effect_size,
                 "power": 0.8,  # Simplified
                 "confidence_intervals": {
-                    variant["name"]: [variant["conversion_rate"] - 0.02, variant["conversion_rate"] + 0.02]
+                    variant["name"]: [
+                        variant["conversion_rate"] - 0.02,
+                        variant["conversion_rate"] + 0.02,
+                    ]
                     for variant in variants_data
                 },
             },
@@ -822,6 +860,7 @@ class ABTestManager:
     def _normal_cdf(self, z: float) -> float:
         """Approximate standard normal CDF using error function."""
         import math
+
         return 0.5 * (1 + math.erf(z / math.sqrt(2)))
 
     def _matches_targeting_criteria(

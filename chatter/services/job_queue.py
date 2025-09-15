@@ -1013,7 +1013,9 @@ async def document_processing_job(
         # Read file content from the file path
         file_path_obj = Path(file_path)
         if not file_path_obj.exists():
-            raise FileNotFoundError(f"Document file not found: {file_path}")
+            raise FileNotFoundError(
+                f"Document file not found: {file_path}"
+            )
 
         with open(file_path_obj, "rb") as f:
             file_content = f.read()
@@ -1130,20 +1132,27 @@ async def database_maintenance_job() -> dict[str, Any]:
             # 2. Clean up expired sessions and temporary data
             # Remove old audit logs (older than 1 year)
             from datetime import timedelta
+
             one_year_ago = datetime.now(UTC) - timedelta(days=365)
 
             try:
                 # Only clean if audit logs table exists
                 result = await session.execute(
-                    text("SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'audit_logs')")
+                    text(
+                        "SELECT EXISTS (SELECT FROM information_schema.tables WHERE table_name = 'audit_logs')"
+                    )
                 )
                 if result.scalar():
                     cleanup_result = await session.execute(
-                        text("DELETE FROM audit_logs WHERE created_at < :cutoff"),
-                        {"cutoff": one_year_ago}
+                        text(
+                            "DELETE FROM audit_logs WHERE created_at < :cutoff"
+                        ),
+                        {"cutoff": one_year_ago},
                     )
                     deleted_audit_logs = cleanup_result.rowcount
-                    logger.info(f"Cleaned up {deleted_audit_logs} old audit logs")
+                    logger.info(
+                        f"Cleaned up {deleted_audit_logs} old audit logs"
+                    )
                 else:
                     deleted_audit_logs = 0
             except Exception as e:
@@ -1160,7 +1169,9 @@ async def database_maintenance_job() -> dict[str, Any]:
 
             await session.commit()
 
-            execution_time = (datetime.now(UTC) - start_time).total_seconds()
+            execution_time = (
+                datetime.now(UTC) - start_time
+            ).total_seconds()
 
             return {
                 "maintenance_type": "database_maintenance_and_backup",
@@ -1171,10 +1182,10 @@ async def database_maintenance_job() -> dict[str, Any]:
                     "statistics_update",
                     "audit_log_cleanup",
                     "vacuum_analyze",
-                    "backup_metadata_created"
+                    "backup_metadata_created",
                 ],
                 "status": "completed",
-                "next_scheduled": "24 hours"
+                "next_scheduled": "24 hours",
             }
 
     except Exception as e:
@@ -1183,7 +1194,7 @@ async def database_maintenance_job() -> dict[str, Any]:
             "maintenance_type": "database_maintenance_and_backup",
             "status": "failed",
             "error": str(e),
-            "next_scheduled": "24 hours"
+            "next_scheduled": "24 hours",
         }
 
 
@@ -1207,7 +1218,7 @@ async def document_archiving_job() -> dict[str, Any]:
             result = await session.execute(
                 select(Document).where(
                     Document.last_accessed_at < ninety_days_ago,
-                    Document.status == DocumentStatus.PROCESSED
+                    Document.status == DocumentStatus.PROCESSED,
                 )
             )
             documents_to_archive = result.scalars().all()
@@ -1221,7 +1232,9 @@ async def document_archiving_job() -> dict[str, Any]:
                 total_size_archived += document.file_size or 0
                 archived_count += 1
 
-                logger.debug(f"Archived document {document.id}: {document.filename}")
+                logger.debug(
+                    f"Archived document {document.id}: {document.filename}"
+                )
 
             # Archive very old documents (older than 1 year) that are still processed
             one_year_ago = datetime.now(UTC) - timedelta(days=365)
@@ -1229,7 +1242,7 @@ async def document_archiving_job() -> dict[str, Any]:
             result = await session.execute(
                 select(Document).where(
                     Document.created_at < one_year_ago,
-                    Document.status == DocumentStatus.PROCESSED
+                    Document.status == DocumentStatus.PROCESSED,
                 )
             )
             old_documents = result.scalars().all()
@@ -1240,25 +1253,32 @@ async def document_archiving_job() -> dict[str, Any]:
                 total_size_archived += document.file_size or 0
                 old_archived_count += 1
 
-                logger.debug(f"Archived old document {document.id}: {document.filename}")
+                logger.debug(
+                    f"Archived old document {document.id}: {document.filename}"
+                )
 
             await session.commit()
 
-            execution_time = (datetime.now(UTC) - start_time).total_seconds()
+            execution_time = (
+                datetime.now(UTC) - start_time
+            ).total_seconds()
 
             return {
                 "archiving_type": "document_archiving",
                 "execution_time_seconds": execution_time,
-                "documents_archived": archived_count + old_archived_count,
+                "documents_archived": archived_count
+                + old_archived_count,
                 "inactive_documents_archived": archived_count,
                 "old_documents_archived": old_archived_count,
-                "total_size_archived_mb": round(total_size_archived / (1024 * 1024), 2),
+                "total_size_archived_mb": round(
+                    total_size_archived / (1024 * 1024), 2
+                ),
                 "archive_criteria": {
                     "inactive_threshold_days": 90,
-                    "old_threshold_days": 365
+                    "old_threshold_days": 365,
                 },
                 "status": "completed",
-                "next_scheduled": "7 days"
+                "next_scheduled": "7 days",
             }
 
     except Exception as e:
@@ -1267,7 +1287,7 @@ async def document_archiving_job() -> dict[str, Any]:
             "archiving_type": "document_archiving",
             "status": "failed",
             "error": str(e),
-            "next_scheduled": "7 days"
+            "next_scheduled": "7 days",
         }
 
 
@@ -1280,7 +1300,11 @@ async def conversation_cleanup_job() -> dict[str, Any]:
         async with async_session() as session:
             from datetime import datetime, UTC, timedelta
             from sqlalchemy import select, delete
-            from chatter.models.conversation import Conversation, ConversationStatus, Message
+            from chatter.models.conversation import (
+                Conversation,
+                ConversationStatus,
+                Message,
+            )
 
             start_time = datetime.now(UTC)
 
@@ -1290,7 +1314,7 @@ async def conversation_cleanup_job() -> dict[str, Any]:
             result = await session.execute(
                 select(Conversation).where(
                     Conversation.updated_at < six_months_ago,
-                    Conversation.status == ConversationStatus.ACTIVE
+                    Conversation.status == ConversationStatus.ACTIVE,
                 )
             )
             conversations_to_archive = result.scalars().all()
@@ -1299,7 +1323,9 @@ async def conversation_cleanup_job() -> dict[str, Any]:
             for conversation in conversations_to_archive:
                 conversation.status = ConversationStatus.ARCHIVED
                 archived_count += 1
-                logger.debug(f"Archived conversation {conversation.id}: {conversation.title}")
+                logger.debug(
+                    f"Archived conversation {conversation.id}: {conversation.title}"
+                )
 
             # 2. Delete very old archived conversations (older than 2 years)
             two_years_ago = datetime.now(UTC) - timedelta(days=730)
@@ -1308,10 +1334,12 @@ async def conversation_cleanup_job() -> dict[str, Any]:
             old_conversation_ids_result = await session.execute(
                 select(Conversation.id).where(
                     Conversation.updated_at < two_years_ago,
-                    Conversation.status == ConversationStatus.ARCHIVED
+                    Conversation.status == ConversationStatus.ARCHIVED,
                 )
             )
-            old_conversation_ids = [row[0] for row in old_conversation_ids_result]
+            old_conversation_ids = [
+                row[0] for row in old_conversation_ids_result
+            ]
 
             deleted_messages = 0
             deleted_conversations = 0
@@ -1319,27 +1347,39 @@ async def conversation_cleanup_job() -> dict[str, Any]:
             if old_conversation_ids:
                 # Delete messages first
                 messages_result = await session.execute(
-                    delete(Message).where(Message.conversation_id.in_(old_conversation_ids))
+                    delete(Message).where(
+                        Message.conversation_id.in_(
+                            old_conversation_ids
+                        )
+                    )
                 )
                 deleted_messages = messages_result.rowcount
 
                 # Then delete conversations
                 conversations_result = await session.execute(
-                    delete(Conversation).where(Conversation.id.in_(old_conversation_ids))
+                    delete(Conversation).where(
+                        Conversation.id.in_(old_conversation_ids)
+                    )
                 )
                 deleted_conversations = conversations_result.rowcount
 
             # 3. Clean up orphaned messages (messages without conversations)
             orphaned_messages_result = await session.execute(
                 delete(Message).where(
-                    ~Message.conversation_id.in_(select(Conversation.id))
+                    ~Message.conversation_id.in_(
+                        select(Conversation.id)
+                    )
                 )
             )
-            orphaned_messages_cleaned = orphaned_messages_result.rowcount
+            orphaned_messages_cleaned = (
+                orphaned_messages_result.rowcount
+            )
 
             await session.commit()
 
-            execution_time = (datetime.now(UTC) - start_time).total_seconds()
+            execution_time = (
+                datetime.now(UTC) - start_time
+            ).total_seconds()
 
             return {
                 "cleanup_type": "conversation_cleanup_and_archiving",
@@ -1350,10 +1390,10 @@ async def conversation_cleanup_job() -> dict[str, Any]:
                 "orphaned_messages_cleaned": orphaned_messages_cleaned,
                 "cleanup_criteria": {
                     "archive_threshold_days": 180,
-                    "delete_threshold_days": 730
+                    "delete_threshold_days": 730,
                 },
                 "status": "completed",
-                "next_scheduled": "7 days"
+                "next_scheduled": "7 days",
             }
 
     except Exception as e:
@@ -1362,7 +1402,7 @@ async def conversation_cleanup_job() -> dict[str, Any]:
             "cleanup_type": "conversation_cleanup_and_archiving",
             "status": "failed",
             "error": str(e),
-            "next_scheduled": "7 days"
+            "next_scheduled": "7 days",
         }
 
 
@@ -1384,9 +1424,7 @@ job_queue.register_handler("data_export", data_export_job)
 job_queue.register_handler(
     "database_maintenance", database_maintenance_job
 )
-job_queue.register_handler(
-    "document_archiving", document_archiving_job
-)
+job_queue.register_handler("document_archiving", document_archiving_job)
 job_queue.register_handler(
     "conversation_cleanup", conversation_cleanup_job
 )

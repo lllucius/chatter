@@ -42,6 +42,19 @@ def upgrade() -> None:
                  comment='Original embedding dimension for filtering')
     )
     
+    # Add embedding provider and creation timestamp columns
+    op.add_column(
+        'document_chunks',
+        sa.Column('embedding_provider', sa.String(50), nullable=True,
+                 comment='Embedding provider name')
+    )
+    
+    op.add_column(
+        'document_chunks',
+        sa.Column('embedding_created_at', sa.DateTime(timezone=True), nullable=True,
+                 comment='When embedding was created')
+    )
+    
     # Create vector similarity indexes
     op.execute(
         'CREATE INDEX IF NOT EXISTS idx_document_chunks_computed_embedding_cosine '
@@ -74,6 +87,8 @@ def downgrade() -> None:
     op.execute('DROP INDEX IF EXISTS idx_document_chunks_raw_dim')
     
     # Drop the new columns
+    op.drop_column('document_chunks', 'embedding_created_at')
+    op.drop_column('document_chunks', 'embedding_provider')
     op.drop_column('document_chunks', 'raw_dim')
     op.drop_column('document_chunks', 'computed_embedding')
     op.drop_column('document_chunks', 'raw_embedding')

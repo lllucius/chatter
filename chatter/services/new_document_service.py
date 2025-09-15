@@ -403,7 +403,7 @@ class NewDocumentService:
             )
             await self.session.commit()
 
-            # Read file and start processing
+            # Read file and start processing with dedicated session
             with open(document.file_path, "rb") as f:
                 file_content = f.read()
 
@@ -518,12 +518,20 @@ class NewDocumentService:
         return DocumentType.OTHER
 
     async def _process_document_async(self, document_id: str, file_content: bytes) -> None:
-        """Process document asynchronously."""
-        try:
-            success = await self.pipeline.process_document(document_id, file_content)
-            if success:
-                logger.info("Document processing completed successfully", document_id=document_id)
-            else:
-                logger.error("Document processing failed", document_id=document_id)
-        except Exception as e:
-            logger.error("Document processing exception", document_id=document_id, error=str(e))
+        """Process document asynchronously with dedicated session."""
+        from chatter.utils.database import get_session_maker
+        
+        # Create a fresh session for background processing to avoid session state issues
+        session_maker = get_session_maker()
+        async with session_maker() as processing_session:
+            try:
+                # Create a new pipeline with the dedicated session
+                processing_pipeline = EmbeddingPipeline(processing_session)
+                success = await processing_pipeline.process_document(document_id, file_content)
+                
+                if success:
+                    logger.info("Document processing completed successfully", document_id=document_id)
+                else:
+                    logger.error("Document processing failed", document_id=document_id)
+            except Exception as e:
+                logger.error("Document processing exception", document_id=document_id, error=str(e))

@@ -624,14 +624,28 @@ class EmbeddingPipeline:
             return True
 
         except Exception as e:
-            # Mark as failed
+            # Mark as failed and rollback
             try:
-                document.status = DocumentStatus.FAILED
-                document.processing_completed_at = datetime.now(UTC)
-                document.processing_error = str(e)
-                await self.session.commit()
-            except Exception:
-                pass  # Don't fail if we can't update status
+                # Rollback any pending changes first
+                await self.session.rollback()
+                
+                # Then try to mark the document as failed in a separate transaction
+                result = await self.session.execute(
+                    select(Document).where(Document.id == document_id)
+                )
+                document = result.scalar_one_or_none()
+                if document:
+                    document.status = DocumentStatus.FAILED
+                    document.processing_completed_at = datetime.now(UTC)
+                    document.processing_error = str(e)
+                    await self.session.commit()
+            except Exception as cleanup_error:
+                logger.error(
+                    "Failed to mark document as failed after processing error",
+                    document_id=document_id,
+                    original_error=str(e),
+                    cleanup_error=str(cleanup_error)
+                )
 
             logger.error("Document processing failed", document_id=document_id, error=str(e))
             return False

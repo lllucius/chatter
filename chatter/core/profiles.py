@@ -772,7 +772,7 @@ class ProfileService:
                 default_provider = await self.llm_service.get_default_provider()
                 if default_provider:
                     # Get the actual provider name for the default
-                    from chatter.core.model_registry import get_model_registry
+                    from chatter.core.dependencies import get_model_registry
                     from chatter.models.registry import ModelType
 
                     session = await self.llm_service._get_session()

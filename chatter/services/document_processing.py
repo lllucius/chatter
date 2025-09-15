@@ -384,9 +384,7 @@ class DocumentProcessingService:
                 except ImportError:
                     # Fallback to sync reading in thread
                     def read_sync():
-                        with open(
-                            file_path, encoding=encoding
-                        ) as f:
+                        with open(file_path, encoding=encoding) as f:
                             return f.read()
 
                     return await asyncio.to_thread(read_sync)

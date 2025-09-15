@@ -10,7 +10,7 @@ from typing import Any, TypeVar
 from chatter.config import get_settings
 
 # Import all the API classes that commands might need
-from chatter_sdk import (  # type: ignore[import-not-found]
+from chatter_sdk import (
     ABTestingApi,
     AgentsApi,
     AnalyticsApi,
@@ -30,7 +30,7 @@ from chatter_sdk import (  # type: ignore[import-not-found]
     ToolServersApi,
 )
 from chatter_sdk.exceptions import (
-    ApiException,  # type: ignore[import-not-found]
+    ApiException,
 )
 from rich.console import Console
 

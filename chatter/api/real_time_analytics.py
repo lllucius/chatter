@@ -7,8 +7,12 @@ from chatter.api.auth import get_current_admin_user, get_current_user
 from chatter.utils.database import get_session_generator
 from chatter.models.user import User
 from chatter.schemas.analytics import SystemAnalyticsResponse
-from chatter.services.intelligent_search import get_intelligent_search_service
-from chatter.services.real_time_analytics import get_real_time_analytics_service
+from chatter.services.intelligent_search import (
+    get_intelligent_search_service,
+)
+from chatter.services.real_time_analytics import (
+    get_real_time_analytics_service,
+)
 from chatter.utils.logging import get_logger
 from chatter.utils.unified_rate_limiter import (
     RateLimitExceeded,
@@ -36,7 +40,7 @@ async def start_real_time_dashboard(
         await rate_limiter.check_rate_limit(
             user_id=current_user.id,
             category="real_time_dashboard",
-            action="start"
+            action="start",
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
@@ -45,15 +49,16 @@ async def start_real_time_dashboard(
 
     # Start real-time updates in background
     background_tasks.add_task(
-        real_time_service.start_real_time_dashboard,
-        current_user.id
+        real_time_service.start_real_time_dashboard, current_user.id
     )
 
-    logger.info(f"Started real-time dashboard for user {current_user.id}")
+    logger.info(
+        f"Started real-time dashboard for user {current_user.id}"
+    )
     return {
         "status": "started",
         "user_id": current_user.id,
-        "message": "Real-time dashboard updates have been initiated. Connect to /events/stream to receive updates."
+        "message": "Real-time dashboard updates have been initiated. Connect to /events/stream to receive updates.",
     }
 
 
@@ -67,11 +72,13 @@ async def stop_real_time_dashboard(
 
     await real_time_service.stop_real_time_dashboard(current_user.id)
 
-    logger.info(f"Stopped real-time dashboard for user {current_user.id}")
+    logger.info(
+        f"Stopped real-time dashboard for user {current_user.id}"
+    )
     return {
         "status": "stopped",
         "user_id": current_user.id,
-        "message": "Real-time dashboard updates have been stopped."
+        "message": "Real-time dashboard updates have been stopped.",
     }
 
 
@@ -89,7 +96,7 @@ async def get_user_behavior_analytics(
     if user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
             status_code=403,
-            detail="Users can only access their own behavior analytics"
+            detail="Users can only access their own behavior analytics",
         )
 
     # Rate limit user behavior requests
@@ -100,13 +107,15 @@ async def get_user_behavior_analytics(
             category="user_behavior",
             action="get_analytics",
             max_requests=20,  # 20 requests per hour
-            window_seconds=3600
+            window_seconds=3600,
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
 
     real_time_service = get_real_time_analytics_service(session)
-    analytics = await real_time_service.get_user_behavior_analytics(user_id)
+    analytics = await real_time_service.get_user_behavior_analytics(
+        user_id
+    )
 
     return analytics
 
@@ -130,18 +139,19 @@ async def intelligent_search(
     """
     # Validate search parameters
     if not query.strip():
-        raise HTTPException(status_code=400, detail="Query cannot be empty")
+        raise HTTPException(
+            status_code=400, detail="Query cannot be empty"
+        )
 
     if search_type not in ["documents", "conversations", "prompts"]:
         raise HTTPException(
             status_code=400,
-            detail="search_type must be one of: documents, conversations, prompts"
+            detail="search_type must be one of: documents, conversations, prompts",
         )
 
     if limit < 1 or limit > 50:
         raise HTTPException(
-            status_code=400,
-            detail="limit must be between 1 and 50"
+            status_code=400, detail="limit must be between 1 and 50"
         )
 
     # Rate limit search requests
@@ -152,7 +162,7 @@ async def intelligent_search(
             category="intelligent_search",
             action="search",
             max_requests=100,  # 100 searches per hour
-            window_seconds=3600
+            window_seconds=3600,
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
@@ -165,17 +175,19 @@ async def intelligent_search(
             user_id=current_user.id,
             search_type=search_type,
             limit=limit,
-            include_recommendations=include_recommendations
+            include_recommendations=include_recommendations,
         )
 
-        logger.info(f"Intelligent search completed for user {current_user.id}: '{query}'")
+        logger.info(
+            f"Intelligent search completed for user {current_user.id}: '{query}'"
+        )
         return results
 
     except Exception as e:
         logger.error(f"Error in intelligent search: {e}")
         raise HTTPException(
             status_code=500,
-            detail="An error occurred during search. Please try again."
+            detail="An error occurred during search. Please try again.",
         )
 
 
@@ -188,8 +200,7 @@ async def get_trending_content(
     """Get trending content personalized for the current user."""
     if limit < 1 or limit > 20:
         raise HTTPException(
-            status_code=400,
-            detail="limit must be between 1 and 20"
+            status_code=400, detail="limit must be between 1 and 20"
         )
 
     # Rate limit trending content requests
@@ -200,18 +211,24 @@ async def get_trending_content(
             category="trending_content",
             action="get",
             max_requests=30,  # 30 requests per hour
-            window_seconds=3600
+            window_seconds=3600,
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
 
     search_service = get_intelligent_search_service(session)
-    trending = await search_service.get_trending_content(current_user.id, limit)
+    trending = await search_service.get_trending_content(
+        current_user.id, limit
+    )
 
     return {
         "trending_content": trending,
         "user_id": current_user.id,
-        "generated_at": SystemAnalyticsResponse.model_fields["generated_at"].default_factory().isoformat()
+        "generated_at": SystemAnalyticsResponse.model_fields[
+            "generated_at"
+        ]
+        .default_factory()
+        .isoformat(),
     }
 
 
@@ -225,11 +242,16 @@ async def send_workflow_update(
 ) -> dict:
     """Send a real-time workflow update to the user."""
     # Validate update type
-    valid_update_types = ["status_change", "progress_update", "completion", "error"]
+    valid_update_types = [
+        "status_change",
+        "progress_update",
+        "completion",
+        "error",
+    ]
     if update_type not in valid_update_types:
         raise HTTPException(
             status_code=400,
-            detail=f"update_type must be one of: {', '.join(valid_update_types)}"
+            detail=f"update_type must be one of: {', '.join(valid_update_types)}",
         )
 
     # Rate limit workflow updates
@@ -240,7 +262,7 @@ async def send_workflow_update(
             category="workflow_updates",
             action="send",
             max_requests=50,  # 50 updates per hour
-            window_seconds=3600
+            window_seconds=3600,
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
@@ -251,14 +273,14 @@ async def send_workflow_update(
         workflow_id=workflow_id,
         user_id=current_user.id,
         update_type=update_type,
-        data=data
+        data=data,
     )
 
     return {
         "status": "sent",
         "workflow_id": workflow_id,
         "update_type": update_type,
-        "user_id": current_user.id
+        "user_id": current_user.id,
     }
 
 
@@ -281,7 +303,7 @@ async def send_system_health_update(
             category="system_health",
             action="broadcast",
             max_requests=20,  # 20 broadcasts per hour
-            window_seconds=3600
+            window_seconds=3600,
         )
     except RateLimitExceeded as e:
         raise HTTPException(status_code=429, detail=str(e))
@@ -290,11 +312,15 @@ async def send_system_health_update(
 
     await real_time_service.send_system_health_update(health_data)
 
-    logger.info(f"System health update broadcasted by admin {current_user.id}")
+    logger.info(
+        f"System health update broadcasted by admin {current_user.id}"
+    )
     return {
         "status": "broadcasted",
         "admin_id": current_user.id,
-        "health_severity": real_time_service._determine_health_severity(health_data)
+        "health_severity": real_time_service._determine_health_severity(
+            health_data
+        ),
     }
 
 
@@ -312,9 +338,11 @@ async def cleanup_inactive_tasks(
 
     await real_time_service.cleanup_inactive_tasks()
 
-    logger.info(f"Real-time task cleanup performed by admin {current_user.id}")
+    logger.info(
+        f"Real-time task cleanup performed by admin {current_user.id}"
+    )
     return {
         "status": "completed",
         "admin_id": current_user.id,
-        "message": "Inactive real-time tasks have been cleaned up"
+        "message": "Inactive real-time tasks have been cleaned up",
     }

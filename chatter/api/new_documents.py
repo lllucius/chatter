@@ -6,7 +6,15 @@ NO backwards compatibility - completely new design.
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, File, Form, HTTPException, UploadFile, status
+from fastapi import (
+    APIRouter,
+    Depends,
+    File,
+    Form,
+    HTTPException,
+    UploadFile,
+    status,
+)
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -19,7 +27,10 @@ from chatter.schemas.document import (
     DocumentStatsResponse,
     SearchResultResponse,
 )
-from chatter.services.new_document_service import NewDocumentService, DocumentServiceError
+from chatter.services.new_document_service import (
+    NewDocumentService,
+    DocumentServiceError,
+)
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 
@@ -51,11 +62,12 @@ async def upload_document(
         if tags:
             try:
                 import json
+
                 parsed_tags = json.loads(tags)
             except json.JSONDecodeError as e:
                 raise HTTPException(
                     status_code=status.HTTP_400_BAD_REQUEST,
-                    detail="Invalid tags format. Must be valid JSON array."
+                    detail="Invalid tags format. Must be valid JSON array.",
                 ) from e
 
         # Create document request
@@ -65,7 +77,7 @@ async def upload_document(
             tags=parsed_tags,
             chunk_size=chunk_size,
             chunk_overlap=chunk_overlap,
-            is_public=is_public
+            is_public=is_public,
         )
 
         # Create document using new service
@@ -73,14 +85,14 @@ async def upload_document(
         document = await service.create_document(
             user_id=current_user.id,
             upload_file=file,
-            document_data=document_data
+            document_data=document_data,
         )
 
         logger.info(
             "Document uploaded successfully",
             document_id=document.id,
             filename=file.filename,
-            user_id=current_user.id
+            user_id=current_user.id,
         )
 
         return DocumentResponse.model_validate(document)
@@ -88,14 +100,15 @@ async def upload_document(
     except DocumentServiceError as e:
         logger.error("Document upload failed", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e)
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         ) from e
     except Exception as e:
-        logger.error("Unexpected error in document upload", error=str(e))
+        logger.error(
+            "Unexpected error in document upload", error=str(e)
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         ) from e
 
 
@@ -108,12 +121,14 @@ async def get_document(
     """Get a document by ID."""
     try:
         service = NewDocumentService(session)
-        document = await service.get_document(document_id, current_user.id)
+        document = await service.get_document(
+            document_id, current_user.id
+        )
 
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
+                detail="Document not found",
             )
 
         return DocumentResponse.model_validate(document)
@@ -121,10 +136,14 @@ async def get_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error getting document", document_id=document_id, error=str(e))
+        logger.error(
+            "Error getting document",
+            document_id=document_id,
+            error=str(e),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         ) from e
 
 
@@ -140,10 +159,7 @@ async def list_documents_get(
         from chatter.schemas.document import DocumentListRequest
 
         # Create request object from query parameters
-        list_request = DocumentListRequest(
-            limit=limit,
-            offset=offset
-        )
+        list_request = DocumentListRequest(limit=limit, offset=offset)
 
         service = NewDocumentService(session)
         documents, total_count = await service.list_documents(
@@ -151,17 +167,20 @@ async def list_documents_get(
         )
 
         return {
-            "documents": [DocumentResponse.model_validate(doc) for doc in documents],
+            "documents": [
+                DocumentResponse.model_validate(doc)
+                for doc in documents
+            ],
             "total_count": total_count,
             "offset": offset,
-            "limit": limit
+            "limit": limit,
         }
 
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -179,17 +198,20 @@ async def list_documents_post(
         )
 
         return {
-            "documents": [DocumentResponse.model_validate(doc) for doc in documents],
+            "documents": [
+                DocumentResponse.model_validate(doc)
+                for doc in documents
+            ],
             "total_count": total_count,
             "offset": list_request.offset,
-            "limit": list_request.limit
+            "limit": list_request.limit,
         }
 
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -202,7 +224,9 @@ async def search_documents(
     """Search documents using semantic similarity."""
     try:
         service = NewDocumentService(session)
-        results = await service.search_documents(current_user.id, search_request)
+        results = await service.search_documents(
+            current_user.id, search_request
+        )
 
         return [
             SearchResultResponse(
@@ -212,7 +236,7 @@ async def search_documents(
                 similarity_score=similarity_score,
                 document_title=document.title,
                 document_filename=document.original_filename,
-                chunk_index=chunk.chunk_index
+                chunk_index=chunk.chunk_index,
             )
             for chunk, similarity_score, document in results
         ]
@@ -221,7 +245,7 @@ async def search_documents(
         logger.error("Error searching documents", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -234,12 +258,14 @@ async def delete_document(
     """Delete a document."""
     try:
         service = NewDocumentService(session)
-        success = await service.delete_document(document_id, current_user.id)
+        success = await service.delete_document(
+            document_id, current_user.id
+        )
 
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found"
+                detail="Document not found",
             )
 
         return {"message": "Document deleted successfully"}
@@ -247,10 +273,14 @@ async def delete_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error deleting document", document_id=document_id, error=str(e))
+        logger.error(
+            "Error deleting document",
+            document_id=document_id,
+            error=str(e),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -263,12 +293,14 @@ async def reprocess_document(
     """Reprocess a document through the embedding pipeline."""
     try:
         service = NewDocumentService(session)
-        success = await service.reprocess_document(document_id, current_user.id)
+        success = await service.reprocess_document(
+            document_id, current_user.id
+        )
 
         if not success:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
-                detail="Document not found or cannot be reprocessed"
+                detail="Document not found or cannot be reprocessed",
             )
 
         return {"message": "Document reprocessing started"}
@@ -276,10 +308,14 @@ async def reprocess_document(
     except HTTPException:
         raise
     except Exception as e:
-        logger.error("Error reprocessing document", document_id=document_id, error=str(e))
+        logger.error(
+            "Error reprocessing document",
+            document_id=document_id,
+            error=str(e),
+        )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )
 
 
@@ -299,5 +335,5 @@ async def get_user_document_stats(
         logger.error("Error getting document stats", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error"
+            detail="Internal server error",
         )

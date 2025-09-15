@@ -115,9 +115,7 @@ class DocumentTextExtractor:
                 except ImportError:
                     # Fallback to sync reading in thread
                     def read_sync():
-                        with open(
-                            file_path, encoding=encoding
-                        ) as f:
+                        with open(file_path, encoding=encoding) as f:
                             return f.read()
 
                     return await asyncio.to_thread(read_sync)
@@ -150,7 +148,9 @@ class DocumentTextExtractor:
                 "pypdf not available for PDF extraction"
             ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"PDF extraction failed: {e}") from e
+            raise EmbeddingPipelineError(
+                f"PDF extraction failed: {e}"
+            ) from e
 
     async def _extract_text_docx_from_file(
         self, file_path: Path
@@ -174,7 +174,9 @@ class DocumentTextExtractor:
                 "unstructured not available for DOCX extraction"
             ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"DOCX extraction failed: {e}") from e
+            raise EmbeddingPipelineError(
+                f"DOCX extraction failed: {e}"
+            ) from e
 
     async def _extract_text_html_from_file(
         self, file_path: Path
@@ -219,7 +221,9 @@ class DocumentTextExtractor:
                 "unstructured not available for HTML extraction"
             ) from None
         except Exception as e:
-            raise EmbeddingPipelineError(f"HTML extraction failed: {e}") from e
+            raise EmbeddingPipelineError(
+                f"HTML extraction failed: {e}"
+            ) from e
 
     async def _extract_text_markdown_from_file(
         self, file_path: Path
@@ -228,9 +232,7 @@ class DocumentTextExtractor:
         try:
             import aiofiles
 
-            async with aiofiles.open(
-                file_path, encoding='utf-8'
-            ) as f:
+            async with aiofiles.open(file_path, encoding='utf-8') as f:
                 return await f.read()
         except ImportError:
 
@@ -273,7 +275,9 @@ class DocumentTextExtractor:
                 data = json.load(f)
             return extract_text_recursive(data)
         except Exception as e:
-            raise EmbeddingPipelineError(f"JSON extraction failed: {e}") from e
+            raise EmbeddingPipelineError(
+                f"JSON extraction failed: {e}"
+            ) from e
 
     async def _extract_text_unstructured_from_file(
         self, file_path: Path
@@ -295,7 +299,9 @@ class DocumentTextExtractor:
                 [e.text for e in elements if hasattr(e, 'text')]
             )
         except ImportError:
-            raise EmbeddingPipelineError("unstructured not available") from None
+            raise EmbeddingPipelineError(
+                "unstructured not available"
+            ) from None
         except Exception as e:
             raise EmbeddingPipelineError(
                 f"Unstructured extraction failed: {e}"

@@ -122,7 +122,80 @@ class BaseWorkflowExecutor(ABC):
 
         return workflow_id, limits
 
-    async def _record_metrics(
+    async def _create_streaming_message(
+        self,
+        conversation: Conversation,
+        user_id: str,
+        correlation_id: str,
+    ) -> Message:
+        """Create a placeholder message for streaming and return proper ULID."""
+        return await self.message_service.add_message_to_conversation(
+            conversation_id=conversation.id,
+            user_id=user_id,
+            role=MessageRole.ASSISTANT,
+            content="",  # Empty content initially
+            metadata=(
+                {"correlation_id": correlation_id}
+                if correlation_id
+                else None
+            ),
+        )
+
+    async def _send_streaming_start_chunk(
+        self,
+        message: Message,
+        conversation: Conversation,
+        correlation_id: str,
+    ) -> StreamingChatChunk:
+        """Send start chunk with proper message ID."""
+        return StreamingChatChunk(
+            type="start",
+            content="",
+            message_id=message.id,
+            conversation_id=conversation.id,
+            correlation_id=correlation_id,
+        )
+
+    async def _send_streaming_token_chunk(
+        self,
+        content: str,
+        message: Message,
+        conversation: Conversation,
+        correlation_id: str,
+    ) -> StreamingChatChunk:
+        """Send token chunk with proper message ID."""
+        return StreamingChatChunk(
+            type="token",
+            content=content,
+            message_id=message.id,
+            conversation_id=conversation.id,
+            correlation_id=correlation_id,
+        )
+
+    async def _finalize_streaming_message(
+        self,
+        message: Message,
+        final_content: str,
+        conversation: Conversation,
+        correlation_id: str,
+    ) -> StreamingChatChunk:
+        """Update message with final content and send completion chunk."""
+        if final_content:
+            await self.message_service.update_message_content(
+                message.id, final_content
+            )
+
+        return StreamingChatChunk(
+            type="complete",
+            content="",
+            message_id=message.id,
+            conversation_id=conversation.id,
+            correlation_id=correlation_id,
+            metadata={
+                "final_content": final_content,
+                "message_complete": True
+            }
+        )
         self,
         workflow_id: str,
         step: str,

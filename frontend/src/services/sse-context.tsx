@@ -10,6 +10,7 @@ import { AnySSEEvent, SSEEventListener } from './sse-types';
 import { authService } from '../services/auth-service';
 
 interface SSEContextValue {
+  manager: typeof sseEventManager;
   isConnected: boolean;
   connectionState: 'connecting' | 'open' | 'closed';
   connect: () => void;
@@ -102,6 +103,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
   }, []);
 
   const value: SSEContextValue = useMemo(() => ({
+    manager: sseEventManager,
     isConnected,
     connectionState,
     connect,

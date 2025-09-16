@@ -256,7 +256,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 <Alert severity="info">No active workflow executions.</Alert>
               ) : (
                 <List>
-                  {runningExecutions.map((execution): void => (
+                  {runningExecutions.map((execution) => (
                     <React.Fragment key={execution.id}>
                       <ListItem sx={{ px: 0 }}>
                         <ListItemIcon>
@@ -485,7 +485,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>Execution Logs</Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
-                    {selectedExecution.logs.map((log, index): void => (
+                    {selectedExecution.logs.map((log, index) => (
                       <Box key={index} sx={{ mb: 1 }}>
                         <Typography 
                           variant="body2" 

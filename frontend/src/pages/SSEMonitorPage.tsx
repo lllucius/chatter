@@ -45,12 +45,21 @@ const SSEMonitorPage: React.FC = () => {
   const { manager, isConnected } = useSSE();
   const [messages, setMessages] = useState<SSEMessageEntry[]>([]);
   const [isMonitoring, setIsMonitoring] = useState(false);
-  const [consoleLogging, setConsoleLogging] = useState(false);
+  const [consoleLogging, setConsoleLogging] = useState(() => {
+    // Load console logging setting from localStorage
+    const saved = localStorage.getItem('sse-monitor-console-logging');
+    return saved ? JSON.parse(saved) : false;
+  });
   const [filterType, setFilterType] = useState<string>('all');
   const [maxMessages, setMaxMessages] = useState(100);
   const [showRawData, setShowRawData] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
+
+  // Persist console logging setting to localStorage
+  useEffect(() => {
+    localStorage.setItem('sse-monitor-console-logging', JSON.stringify(consoleLogging));
+  }, [consoleLogging]);
 
   // Get unique event types from messages for filter dropdown
   const eventTypes = React.useMemo(() => {

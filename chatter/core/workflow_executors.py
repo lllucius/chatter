@@ -196,6 +196,8 @@ class BaseWorkflowExecutor(ABC):
                 "message_complete": True
             }
         )
+
+    async def _record_metrics(
         self,
         workflow_id: str,
         step: str,

@@ -75,7 +75,7 @@ class WorkflowExecutionService:
         Raises:
             WorkflowExecutionError: If workflow execution fails
         """
-        workflow_type = chat_request.workflow or "plain"
+        workflow_type = chat_request.workflow_type or chat_request.workflow or "plain"
 
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
@@ -113,7 +113,7 @@ class WorkflowExecutionService:
         Raises:
             WorkflowExecutionError: If workflow execution fails
         """
-        workflow_type = chat_request.workflow or "plain"
+        workflow_type = chat_request.workflow_type or chat_request.workflow or "plain"
 
         # Get appropriate executor
         executor = self.executor_factory.create_executor(
@@ -162,7 +162,7 @@ class WorkflowExecutionService:
         Returns:
             Dictionary with validation results
         """
-        workflow_type = chat_request.workflow or "plain"
+        workflow_type = chat_request.workflow_type or chat_request.workflow or "plain"
 
         # Check if workflow type is supported
         supported_types = self.executor_factory.get_supported_types()

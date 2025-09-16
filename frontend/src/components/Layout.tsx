@@ -46,6 +46,7 @@ import {
   ABTestIcon,
   ExpandLess,
   ExpandMore,
+  MonitorIcon,
 } from '../utils/icons';
 import { authService } from '../services/auth-service';
 import { ThemeContext } from '../App';
@@ -105,6 +106,7 @@ const navSections: NavSection[] = [
     items: [
       { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
       { label: 'Health', path: '/health', icon: <HealthIcon /> },
+      { label: 'SSE Monitor', path: '/sse-monitor', icon: <MonitorIcon /> },
     ]
   }
 ];

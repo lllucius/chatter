@@ -38,6 +38,7 @@ const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
 const ErrorTestPage = lazy(() => import('./pages/ErrorTestPage'));
+const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -276,6 +277,13 @@ function App() {
                     <SectionErrorBoundary level="page" name="ErrorTestPage" showHomeButton={true}>
                       <SuspenseWrapper loadingMessage="Loading error test page...">
                         <ErrorTestPage />
+                      </SuspenseWrapper>
+                    </SectionErrorBoundary>
+                  } />
+                  <Route path="sse-monitor" element={
+                    <SectionErrorBoundary level="page" name="SSEMonitorPage" showHomeButton={true}>
+                      <SuspenseWrapper loadingMessage="Loading SSE monitor...">
+                        <SSEMonitorPage />
                       </SuspenseWrapper>
                     </SectionErrorBoundary>
                   } />

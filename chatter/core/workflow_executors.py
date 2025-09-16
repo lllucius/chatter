@@ -70,10 +70,12 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute plain workflow."""
-        # Force workflow type to plain
-        chat_request.workflow = "plain"
-        chat_request.workflow_type = "plain"
-        return await super().execute(conversation, chat_request, correlation_id, user_id, limits)
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "plain"
+        request_copy.workflow_type = "plain"
+        return await super().execute(conversation, request_copy, correlation_id, user_id, limits)
     
     async def execute_streaming(
         self,
@@ -84,10 +86,12 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute plain workflow with streaming."""
-        # Force workflow type to plain
-        chat_request.workflow = "plain"
-        chat_request.workflow_type = "plain"
-        async for chunk in super().execute_streaming(conversation, chat_request, correlation_id, user_id, limits):
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "plain"
+        request_copy.workflow_type = "plain"
+        async for chunk in super().execute_streaming(conversation, request_copy, correlation_id, user_id, limits):
             yield chunk
 
 
@@ -103,10 +107,12 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute RAG workflow."""
-        # Force workflow type to rag
-        chat_request.workflow = "rag"
-        chat_request.workflow_type = "rag"
-        return await super().execute(conversation, chat_request, correlation_id, user_id, limits)
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "rag"
+        request_copy.workflow_type = "rag"
+        return await super().execute(conversation, request_copy, correlation_id, user_id, limits)
     
     async def execute_streaming(
         self,
@@ -117,10 +123,12 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute RAG workflow with streaming."""
-        # Force workflow type to rag
-        chat_request.workflow = "rag"
-        chat_request.workflow_type = "rag"
-        async for chunk in super().execute_streaming(conversation, chat_request, correlation_id, user_id, limits):
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "rag"
+        request_copy.workflow_type = "rag"
+        async for chunk in super().execute_streaming(conversation, request_copy, correlation_id, user_id, limits):
             yield chunk
 
 
@@ -136,10 +144,12 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute tools workflow."""
-        # Force workflow type to tools
-        chat_request.workflow = "tools"
-        chat_request.workflow_type = "tools"
-        return await super().execute(conversation, chat_request, correlation_id, user_id, limits)
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "tools"
+        request_copy.workflow_type = "tools"
+        return await super().execute(conversation, request_copy, correlation_id, user_id, limits)
     
     async def execute_streaming(
         self,
@@ -150,10 +160,12 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute tools workflow with streaming."""
-        # Force workflow type to tools
-        chat_request.workflow = "tools"
-        chat_request.workflow_type = "tools"
-        async for chunk in super().execute_streaming(conversation, chat_request, correlation_id, user_id, limits):
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "tools"
+        request_copy.workflow_type = "tools"
+        async for chunk in super().execute_streaming(conversation, request_copy, correlation_id, user_id, limits):
             yield chunk
 
 
@@ -169,10 +181,12 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute full workflow."""
-        # Force workflow type to full
-        chat_request.workflow = "full"
-        chat_request.workflow_type = "full"
-        return await super().execute(conversation, chat_request, correlation_id, user_id, limits)
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "full"
+        request_copy.workflow_type = "full"
+        return await super().execute(conversation, request_copy, correlation_id, user_id, limits)
     
     async def execute_streaming(
         self,
@@ -183,8 +197,10 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
         limits=None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute full workflow with streaming."""
-        # Force workflow type to full
-        chat_request.workflow = "full"
-        chat_request.workflow_type = "full"
-        async for chunk in super().execute_streaming(conversation, chat_request, correlation_id, user_id, limits):
+        # Create a copy of the request to avoid mutating the original
+        from copy import copy
+        request_copy = copy(chat_request)
+        request_copy.workflow = "full"
+        request_copy.workflow_type = "full"
+        async for chunk in super().execute_streaming(conversation, request_copy, correlation_id, user_id, limits):
             yield chunk

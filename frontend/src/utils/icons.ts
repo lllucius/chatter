@@ -54,6 +54,7 @@ export {
   AdminPanelSettings as AdminIcon,
   HealthAndSafety as HealthIcon,
   Group as GroupIcon,
+  Monitor as MonitorIcon,
 } from '@mui/icons-material';
 
 // Directional icons

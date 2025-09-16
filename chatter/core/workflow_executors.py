@@ -413,6 +413,14 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             )
             state = ConversationState(messages=messages)
 
+            # Create message for streaming and send start chunk
+            streaming_message = await self._create_streaming_message(
+                conversation, user_id, correlation_id
+            )
+            yield await self._send_streaming_start_chunk(
+                streaming_message, conversation, correlation_id
+            )
+
             # Stream workflow execution
             content_buffer = ""
             async for event in workflow.astream(
@@ -428,26 +436,14 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
                             ]
                             content_buffer = message.content
 
-                            yield StreamingChatChunk(
-                                type="token",
-                                content=new_content,
-                                message_id=correlation_id,
-                                conversation_id=conversation.id,
+                            yield await self._send_streaming_token_chunk(
+                                new_content, streaming_message, conversation, correlation_id
                             )
 
-            # Create final message
-            if content_buffer:
-                await self.message_service.add_message_to_conversation(
-                    conversation_id=conversation.id,
-                    user_id=user_id,
-                    role=MessageRole.ASSISTANT,
-                    content=content_buffer,
-                    metadata=(
-                        {"correlation_id": correlation_id}
-                        if correlation_id
-                        else None
-                    ),
-                )
+            # Finalize streaming message and send completion chunk
+            yield await self._finalize_streaming_message(
+                streaming_message, content_buffer, conversation, correlation_id
+            )
 
             # Record success metrics
             await self._record_metrics(
@@ -1362,6 +1358,7 @@ class WorkflowExecutorFactory:
 
     _executors = {
         "plain": PlainWorkflowExecutor,
+        "basic": PlainWorkflowExecutor,  # Alias for plain workflow
         "rag": RAGWorkflowExecutor,
         "tools": ToolsWorkflowExecutor,
         "full": FullWorkflowExecutor,

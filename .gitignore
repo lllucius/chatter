@@ -224,3 +224,6 @@ data/
 
 # Test files should not be committed
 /tmp/
+.env*
+*.log
+/tmp/

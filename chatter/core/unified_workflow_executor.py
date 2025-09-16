@@ -251,7 +251,8 @@ class UnifiedWorkflowExecutor:
         }
 
         # Get workspace ID for tool and retriever lookup
-        workspace_id = conversation.workspace_id or "default"
+        # Use user_id as workspace_id since the Conversation model doesn't have workspace_id
+        workspace_id = conversation.user_id or "default"
         workflow_manager = get_workflow_manager()
 
         # Configure based on workflow type

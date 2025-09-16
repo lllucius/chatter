@@ -1007,6 +1007,54 @@ class EmbeddingService:
             )
             return []
 
+    async def get_embedding_stats(self) -> dict[str, Any]:
+        """Get statistics about stored embeddings.
+        
+        Simplified version consolidating functionality from DynamicVectorStoreService.
+        
+        Returns:
+            Dictionary with embedding statistics
+        """
+        try:
+            from sqlalchemy import func
+            
+            stats: dict[str, Any] = {
+                "total_chunks": 0,
+                "embedded_chunks": 0,
+                "vector_store_type": "hybrid",
+            }
+            
+            # Total chunks
+            total_result = await self._session.execute(
+                select(func.count(DocumentChunk.id))
+            )
+            stats["total_chunks"] = int(total_result.scalar() or 0)
+            
+            # Chunks with embeddings (using hybrid vector fields)
+            embedded_result = await self._session.execute(
+                select(func.count(DocumentChunk.id)).where(
+                    DocumentChunk.raw_embedding.is_not(None)
+                )
+            )
+            stats["embedded_chunks"] = int(embedded_result.scalar() or 0)
+            
+            logger.debug(
+                "Generated embedding statistics",
+                total_chunks=stats["total_chunks"],
+                embedded_chunks=stats["embedded_chunks"],
+            )
+            
+            return stats
+            
+        except Exception as e:
+            logger.error("Failed to get embedding stats", error=str(e))
+            return {
+                "total_chunks": 0,
+                "embedded_chunks": 0,
+                "vector_store_type": "hybrid",
+                "error": str(e),
+            }
+
 
 class EmbeddingError(Exception):
     """Embedding generation error."""

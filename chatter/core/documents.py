@@ -28,9 +28,6 @@ from chatter.schemas.document import (
 from chatter.services.document_processing import (
     DocumentProcessingService,
 )
-from chatter.services.dynamic_vector_store import (
-    DynamicVectorStoreService,
-)
 from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 
@@ -48,8 +45,7 @@ class DocumentService:
         """
         self.session = session
         self.processing_service = DocumentProcessingService(session)
-        self.vector_store_service = DynamicVectorStoreService(session)
-        self.embedding_service = EmbeddingService()
+        self.embedding_service = EmbeddingService(session)
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
@@ -533,12 +529,11 @@ class DocumentService:
             if not accessible_doc_ids:
                 return []
 
-            # Perform vector search with dynamic store (parity: returns tuples)
+            # Perform vector search with unified embedding service
             similar_chunks = (
-                await self.vector_store_service.similarity_search(
+                await self.embedding_service.similarity_search(
                     query_embedding=query_embedding,
                     provider_name=provider or "provider",
-                    model_name=model,
                     limit=search_request.limit,
                     score_threshold=search_request.score_threshold,
                     document_ids=accessible_doc_ids,
@@ -758,9 +753,9 @@ class DocumentService:
             )
             total_chunks = chunks_result.scalar()
 
-            # Vector store embedding stats (from dynamic service)
+            # Embedding stats from unified embedding service
             embedding_stats = (
-                await self.vector_store_service.get_embedding_stats()
+                await self.embedding_service.get_embedding_stats()
             )
 
             return {

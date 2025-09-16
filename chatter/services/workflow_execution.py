@@ -19,7 +19,7 @@ from chatter.core.workflow_limits import (
     WorkflowLimits,
     workflow_limit_manager,
 )
-from chatter.core.workflow_performance import (
+from chatter.core.streamlined_workflow_performance import (
     performance_monitor,
     workflow_cache,
 )

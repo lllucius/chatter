@@ -278,12 +278,12 @@ const ChatPage: React.FC = () => {
 
   const handleStreamingResponse = async (chatRequest: ChatRequest, assistantMessageId?: string) => {
     try {
-      const messageId = assistantMessageId || `stream-${Date.now()}`;
+      let currentMessageId = assistantMessageId || `stream-${Date.now()}`;
       
       // If no assistantMessageId provided, create a placeholder message
       if (!assistantMessageId) {
         const assistantMessage: ExtendedChatMessage = {
-          id: messageId,
+          id: currentMessageId,
           role: 'assistant',
           content: '',
           timestamp: new Date(),
@@ -325,42 +325,41 @@ const ChatPage: React.FC = () => {
                 try {
                   const chunk = JSON.parse(dataStr);
                   
-                  // Update message content based on chunk type
-                  if (chunk.type === 'token' && chunk.content) {
-                    // Use the message_id from the chunk if available, otherwise fall back to messageId
-                    const targetMessageId = chunk.message_id || messageId;
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === targetMessageId
-                          ? { ...msg, content: msg.content + chunk.content }
-                          : msg
-                      )
-                    );
-                  } else if (chunk.type === 'start') {
-                    // Stream started - update conversation if provided
+                  // Handle start chunk first to get the real message ID
+                  if (chunk.type === 'start') {
+                    // Update conversation if provided
                     if (chunk.conversation_id && !currentConversation) {
-                      // If we don't have a current conversation but got a conversation_id, 
-                      // we should fetch the conversation details or at least store the ID
                       setCurrentConversation(prev => prev || { id: chunk.conversation_id } as ConversationResponse);
                     }
                     
-                    // If we have a message_id from backend, update the temporary ID
-                    if (chunk.message_id && chunk.message_id !== messageId) {
+                    // Update to real message ID from backend if provided
+                    if (chunk.message_id && chunk.message_id !== currentMessageId) {
+                      const oldMessageId = currentMessageId;
+                      currentMessageId = chunk.message_id;
+                      
                       setMessages((prev) =>
                         prev.map((msg) =>
-                          msg.id === messageId
-                            ? { ...msg, id: chunk.message_id }
+                          msg.id === oldMessageId
+                            ? { ...msg, id: currentMessageId }
                             : msg
                         )
                       );
                     }
-                  } else if (chunk.type === 'complete') {
+                  } else if (chunk.type === 'token' && chunk.content) {
+                    // Append token content to the message
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === currentMessageId
+                          ? { ...msg, content: msg.content + chunk.content }
+                          : msg
+                      )
+                    );
+                  } else if (chunk.type === 'complete' || chunk.type === 'end') {
                     // Stream ended - update final message with metadata if available
-                    const targetMessageId = chunk.message_id || messageId;
                     if (chunk.metadata) {
                       setMessages((prev) =>
                         prev.map((msg) =>
-                          msg.id === targetMessageId
+                          msg.id === currentMessageId
                             ? { 
                                 ...msg, 
                                 metadata: {
@@ -377,8 +376,9 @@ const ChatPage: React.FC = () => {
                   } else if (chunk.type === 'error') {
                     throw new Error(chunk.content || chunk.error || 'Streaming error');
                   }
-                } catch {
-                  // Failed to parse streaming chunk - skip invalid data
+                } catch (parseError) {
+                  // Failed to parse streaming chunk - log and skip invalid data
+                  console.warn('Failed to parse streaming chunk:', dataStr, parseError);
                 }
               }
             }
@@ -427,7 +427,6 @@ const ChatPage: React.FC = () => {
       const sendRequest: ChatRequest = {
         message: text,
         conversation_id: conversationId,
-        stream: streamingEnabled,
         profile_id: selectedProfile && selectedProfile !== currentConversation?.profile_id ? selectedProfile : undefined,
         temperature,
         max_tokens: maxTokens,
@@ -532,7 +531,6 @@ const ChatPage: React.FC = () => {
       const sendRequest: ChatRequest = {
         message: userMessageContent,
         conversation_id: currentConversation?.id,
-        stream: streamingEnabled,
         profile_id: selectedProfile,
         temperature,
         max_tokens: maxTokens,
@@ -622,7 +620,14 @@ const ChatPage: React.FC = () => {
           : msg
       ));
       
-      handleError(error, 'Failed to rate message');
+      handleError(error, {
+        source: 'ChatPage.handleRateMessage',
+        operation: 'rate message',
+        additionalData: { 
+          conversationId: currentConversation?.id,
+          messageId 
+        }
+      });
     }
   }, [currentConversation?.id, messages]);
 

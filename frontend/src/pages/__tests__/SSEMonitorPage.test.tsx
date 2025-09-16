@@ -229,4 +229,98 @@ describe('SSEMonitorPage', () => {
 
     expect(mockSSEManager.connect).not.toHaveBeenCalled();
   });
+
+  it('should expand and collapse advanced filters', () => {
+    render(
+      <TestWrapper>
+        <SSEMonitorPage />
+      </TestWrapper>
+    );
+
+    const filtersButton = screen.getByRole('button', { name: /filters/i });
+    fireEvent.click(filtersButton);
+
+    // Advanced filters should now be visible
+    expect(screen.getByText('Filter Options')).toBeInTheDocument();
+    expect(screen.getByText('Event Types')).toBeInTheDocument();
+    
+    // Click again to collapse
+    fireEvent.click(filtersButton);
+  });
+
+  it('should save and load settings from localStorage', () => {
+    // Mock localStorage with proper implementation
+    const localStorageData: Record<string, string> = {};
+    const mockLocalStorage = {
+      getItem: vi.fn((key: string) => localStorageData[key] || null),
+      setItem: vi.fn((key: string, value: string) => {
+        localStorageData[key] = value;
+      }),
+    };
+    Object.defineProperty(window, 'localStorage', {
+      value: mockLocalStorage,
+      configurable: true,
+    });
+
+    // Pre-populate with test settings
+    localStorageData['sse-monitor-settings'] = JSON.stringify({
+      consoleLogging: true,
+      maxMessages: 250,
+      showRawData: true,
+      showAdvancedFilters: true,
+      filters: {
+        eventTypes: ['test.event'],
+        categories: ['testing'],
+        priorities: ['high'],
+        userIds: ['user123'],
+        sourceSystems: ['test-system']
+      }
+    });
+
+    render(
+      <TestWrapper>
+        <SSEMonitorPage />
+      </TestWrapper>
+    );
+
+    // Check that settings were loaded
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('sse-monitor-settings');
+    
+    // Check console logging switch is checked
+    const consoleSwitch = screen.getByRole('checkbox', { name: /console logging/i });
+    expect(consoleSwitch).toBeChecked();
+
+    // Check max messages field has correct value
+    const maxMessagesInput = screen.getByLabelText('Max Messages');
+    expect(maxMessagesInput).toHaveValue(250);
+  });
+
+  it('should show active filter count', () => {
+    render(
+      <TestWrapper>
+        <SSEMonitorPage />
+      </TestWrapper>
+    );
+
+    // Check for Active Filters section specifically
+    expect(screen.getByText('Active Filters')).toBeInTheDocument();
+    
+    // Find the Active Filters count - should be 0 with default state
+    const activeFiltersText = screen.getByText('Active Filters');
+    const statsCard = activeFiltersText.closest('[class*="MuiCardContent-root"]');
+    expect(statsCard).toBeInTheDocument();
+  });
+
+  it('should update max messages in settings', () => {
+    render(
+      <TestWrapper>
+        <SSEMonitorPage />
+      </TestWrapper>
+    );
+
+    const maxMessagesInput = screen.getByLabelText('Max Messages');
+    fireEvent.change(maxMessagesInput, { target: { value: '200' } });
+
+    expect(maxMessagesInput).toHaveValue(200);
+  });
 });

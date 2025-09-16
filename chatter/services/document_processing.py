@@ -36,9 +36,6 @@ from chatter.models.document import (
     DocumentStatus,
     DocumentType,
 )
-from chatter.services.dynamic_vector_store import (
-    DynamicVectorStoreService,
-)
 from chatter.services.embeddings import EmbeddingError, EmbeddingService
 from chatter.utils.logging import get_logger
 from chatter.utils.memory_monitor import (
@@ -59,8 +56,7 @@ class DocumentProcessingService:
             session: Database session
         """
         self.session = session
-        self.embedding_service = EmbeddingService()
-        self.vector_store_service = DynamicVectorStoreService(session)
+        self.embedding_service = EmbeddingService(session)
         self.storage_path = Path(settings.document_storage_path)
         self.storage_path.mkdir(parents=True, exist_ok=True)
 
@@ -985,12 +981,11 @@ class DocumentProcessingService:
                             "dimensions": len(embedding),
                         }
 
-                        # Update chunk with embedding metadata in vector store (offloads sync parts internally)
-                        success = await self.vector_store_service.store_embedding(
+                        # Update chunk with embedding metadata using enhanced embedding service
+                        success = await self.embedding_service.store_embedding(
                             chunk_id=chunk.id,
                             embedding=embedding,
                             provider_name=provider or "provider",
-                            model_name=model,
                             metadata=embedding_metadata,
                         )
 

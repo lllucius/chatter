@@ -3,11 +3,13 @@
 import hashlib
 import time
 from typing import Any
+import asyncio
 
 import numpy as np
 from langchain_core.embeddings import Embeddings
 from langchain_openai import OpenAIEmbeddings
 from pydantic import SecretStr
+from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 try:
@@ -43,6 +45,7 @@ except ImportError:
 from chatter.config import get_settings, settings
 from chatter.core.model_registry import ModelRegistryService
 from chatter.models.registry import ModelType, ProviderType
+from chatter.models.document import DocumentChunk
 from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
@@ -882,6 +885,175 @@ class EmbeddingService:
             )
         else:
             return "unknown"
+
+    # Vector storage and search methods for consolidation
+    async def store_embedding(
+        self,
+        chunk_id: str,
+        embedding: list[float],
+        provider_name: str | None = None,
+        metadata: dict[str, Any] | None = None,
+    ) -> bool:
+        """Store embedding for a document chunk using hybrid vector storage.
+        
+        This method consolidates functionality from DynamicVectorStoreService.
+        
+        Args:
+            chunk_id: Document chunk ID
+            embedding: Embedding vector
+            provider_name: Provider name (optional, uses default if not provided)
+            metadata: Additional metadata
+            
+        Returns:
+            True if successful
+        """
+        try:
+            # Get the chunk
+            result = await self._session.execute(
+                select(DocumentChunk).where(DocumentChunk.id == chunk_id)
+            )
+            chunk = result.scalar_one_or_none()
+            
+            if not chunk:
+                logger.error("Chunk not found", chunk_id=chunk_id)
+                return False
+            
+            # Use hybrid vector storage approach from document_chunks table
+            chunk.set_embedding_vector(
+                vector=embedding,
+                provider=provider_name,
+                model=metadata.get("model") if metadata else None,
+            )
+            
+            await self._session.commit()
+            await self._session.refresh(chunk)
+            
+            logger.debug(
+                "Stored embedding using hybrid vector system",
+                chunk_id=chunk_id,
+                provider=provider_name,
+                dimensions=len(embedding),
+            )
+            
+            return True
+            
+        except Exception as e:
+            await self._session.rollback()
+            logger.error(
+                "Failed to store embedding",
+                chunk_id=chunk_id,
+                error=str(e),
+            )
+            return False
+
+    async def similarity_search(
+        self,
+        query_embedding: list[float],
+        provider_name: str | None = None,
+        limit: int = 10,
+        score_threshold: float = 0.5,
+        document_ids: list[str] | None = None,
+    ) -> list[tuple[DocumentChunk, float]]:
+        """Perform similarity search using hybrid vector storage.
+        
+        This method consolidates functionality from DynamicVectorStoreService.
+        
+        Args:
+            query_embedding: Query vector
+            provider_name: Provider name for filtering (optional)
+            limit: Maximum number of results
+            score_threshold: Minimum similarity score
+            document_ids: Filter by document IDs (optional)
+            
+        Returns:
+            List of (chunk, similarity_score) tuples
+        """
+        try:
+            # Use the hybrid vector search helper from document chunks
+            from chatter.models.document import HybridVectorSearchHelper
+            
+            # Get session for the helper
+            session = await self._get_session()
+            helper = HybridVectorSearchHelper(session)
+            
+            # Perform hybrid search
+            results = await helper.hybrid_search(
+                query_vector=query_embedding,
+                limit=limit,
+                document_ids=document_ids,
+                provider_filter=provider_name,
+            )
+            
+            # Filter by score threshold
+            filtered_results = [
+                (chunk, score) for chunk, score in results
+                if score >= score_threshold
+            ]
+            
+            logger.debug(
+                "Similarity search completed",
+                results_count=len(filtered_results),
+                limit=limit,
+                score_threshold=score_threshold,
+            )
+            
+            return filtered_results
+            
+        except Exception as e:
+            logger.error(
+                "Similarity search failed",
+                error=str(e),
+                query_dimensions=len(query_embedding),
+            )
+            return []
+
+    async def get_embedding_stats(self) -> dict[str, Any]:
+        """Get statistics about stored embeddings.
+        
+        Simplified version consolidating functionality from DynamicVectorStoreService.
+        
+        Returns:
+            Dictionary with embedding statistics
+        """
+        try:
+            from sqlalchemy import func
+            
+            stats: dict[str, Any] = {
+                "total_chunks": 0,
+                "embedded_chunks": 0,
+                "vector_store_type": "hybrid",
+            }
+            
+            # Total chunks
+            total_result = await self._session.execute(
+                select(func.count(DocumentChunk.id))
+            )
+            stats["total_chunks"] = int(total_result.scalar() or 0)
+            
+            # Chunks with embeddings (using hybrid vector fields)
+            embedded_result = await self._session.execute(
+                select(func.count(DocumentChunk.id)).where(
+                    DocumentChunk.raw_embedding.is_not(None)
+                )
+            )
+            stats["embedded_chunks"] = int(embedded_result.scalar() or 0)
+            
+            logger.debug(
+                "Generated embedding statistics",
+                total_chunks=stats["total_chunks"],
+                embedded_chunks=stats["embedded_chunks"],
+            )
+            
+            return stats
+            
+        except Exception as e:
+            logger.error("Failed to get embedding stats", error=str(e))
+            return {
+                "total_chunks": 0,
+                "embedded_chunks": 0,
+                "vector_store_type": "hybrid",
+                "error": str(e),
+            }
 
 
 class EmbeddingError(Exception):

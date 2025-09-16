@@ -10,9 +10,6 @@ from chatter.core.cache_factory import get_general_cache
 from chatter.models.conversation import Conversation
 from chatter.models.document import Document
 from chatter.models.prompt import Prompt
-from chatter.services.dynamic_vector_store import (
-    DynamicVectorStoreService,
-)
 from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 
@@ -24,8 +21,7 @@ class IntelligentSearchService:
 
     def __init__(self, session: AsyncSession):
         self.session = session
-        self.vector_store = DynamicVectorStoreService(session)
-        self.embeddings_service = EmbeddingService()
+        self.embeddings_service = EmbeddingService(session)
         self.cache = get_general_cache()
 
     async def semantic_search(
@@ -104,10 +100,10 @@ class IntelligentSearchService:
             if search_type == "documents" and query_embedding:
                 # Vector similarity search for documents
                 vector_results = (
-                    await self.vector_store.similarity_search(
+                    await self.embeddings_service.similarity_search(
                         query_embedding=query_embedding,
-                        k=limit,
-                        threshold=0.7,
+                        limit=limit,
+                        score_threshold=0.7,
                     )
                 )
 

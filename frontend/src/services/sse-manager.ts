@@ -341,7 +341,7 @@ export class SSEEventManager {
   /**
    * Validate event structure for security
    */
-  private isValidEvent(event: unknown): event is SSEEvent {
+  private isValidEvent(event: unknown): event is AnySSEEvent {
     // Basic validation to prevent malicious events
     if (!event || typeof event !== 'object') {
       return false;
@@ -355,17 +355,17 @@ export class SSEEventManager {
     }
 
     // Type validation
-    if (typeof event.id !== 'string' || typeof event.type !== 'string' || typeof event.timestamp !== 'string') {
+    if (typeof obj.id !== 'string' || typeof obj.type !== 'string' || typeof obj.timestamp !== 'string') {
       return false;
     }
 
     // Data should be an object
-    if (event.data && typeof event.data !== 'object') {
+    if (obj.data && typeof obj.data !== 'object') {
       return false;
     }
 
     // Metadata should be an object if present
-    if (event.metadata && typeof event.metadata !== 'object') {
+    if (obj.metadata && typeof obj.metadata !== 'object') {
       return false;
     }
 

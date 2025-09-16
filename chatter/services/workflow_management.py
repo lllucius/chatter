@@ -8,7 +8,9 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from chatter.core.workflow_validation import workflow_validation_service
+from chatter.core.simplified_workflow_validation import (
+    simplified_workflow_validation_service,
+)
 from chatter.models.workflow import (
     TemplateCategory,
     WorkflowDefinition,
@@ -16,7 +18,6 @@ from chatter.models.workflow import (
     WorkflowTemplate,
     WorkflowType,
 )
-from chatter.schemas.workflows import ValidationError
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -27,20 +28,13 @@ def _get_validation_errors_as_strings(validation_result) -> list[str]:
     errors = validation_result.errors
     if not errors:
         return []
-
-    # If first error is a string, assume all are strings (fallback interface)
-    if isinstance(errors[0], str):
-        return errors
-
-    # Otherwise, extract message from ValidationError objects
-    return [getattr(error, 'message', str(error)) for error in errors]
+    # Always return strings directly from simplified validation
+    return errors
 
 
 def _is_validation_result_valid(validation_result) -> bool:
-    """Check if validation result is valid, handling both interfaces."""
-    if hasattr(validation_result, 'is_valid'):
-        return validation_result.is_valid
-    return validation_result.valid
+    """Check if validation result is valid."""
+    return validation_result.is_valid
 
 
 class WorkflowManagementService:
@@ -104,7 +98,7 @@ class WorkflowManagementService:
                 "metadata": metadata or {},
             }
 
-            validation_result = workflow_validation_service.validate_workflow_definition(
+            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
                 definition_data, owner_id
             )
 
@@ -382,7 +376,7 @@ class WorkflowManagementService:
     ) -> dict[str, Any]:
         """Validate a workflow definition and return validation results."""
         try:
-            validation_result = workflow_validation_service.validate_workflow_definition(
+            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
                 definition=definition_data, owner_id=owner_id
             )
 
@@ -608,138 +602,23 @@ class WorkflowManagementService:
             await self.session.rollback()
             raise
 
-    # Validation
+    # Simplified validation
     async def validate_workflow_structure(
         self,
         nodes: list[dict[str, Any]],
         edges: list[dict[str, Any]],
     ) -> dict[str, Any]:
-        """Validate a workflow definition."""
+        """Validate a workflow definition using simplified validation."""
         try:
-            errors = []
-            warnings = []
-            suggestions = []
-
-            # Basic validation
-            if not nodes:
-                errors.append(
-                    ValidationError(
-                        type="missing_nodes",
-                        message="Workflow must have at least one node",
-                        node_id=None,
-                        edge_id=None,
-                        severity="error",
-                    )
-                )
-
-            # Check for start node
-            start_nodes = [
-                node
-                for node in nodes
-                if node.get("data", {}).get("nodeType") == "start"
-            ]
-            if not start_nodes:
-                errors.append(
-                    ValidationError(
-                        type="missing_start_node",
-                        message="Workflow must have a start node",
-                        node_id=None,
-                        edge_id=None,
-                        severity="error",
-                    )
-                )
-            elif len(start_nodes) > 1:
-                errors.append(
-                    ValidationError(
-                        type="multiple_start_nodes",
-                        message="Workflow can only have one start node",
-                        node_id=None,
-                        edge_id=None,
-                        severity="error",
-                    )
-                )
-
-            # Validate node references in edges
-            node_ids = {node["id"] for node in nodes}
-            for edge in edges:
-                if edge["source"] not in node_ids:
-                    errors.append(
-                        ValidationError(
-                            type="invalid_edge_source",
-                            message=f"Edge source '{edge['source']}' references non-existent node",
-                            node_id=None,
-                            edge_id=edge["id"],
-                            severity="error",
-                        )
-                    )
-                if edge["target"] not in node_ids:
-                    errors.append(
-                        ValidationError(
-                            type="invalid_edge_target",
-                            message=f"Edge target '{edge['target']}' references non-existent node",
-                            node_id=None,
-                            edge_id=edge["id"],
-                            severity="error",
-                        )
-                    )
-
-            # Check for orphaned nodes (except start)
-            connected_nodes = set()
-            for edge in edges:
-                connected_nodes.add(edge["source"])
-                connected_nodes.add(edge["target"])
-
-            for node in nodes:
-                if (
-                    node["id"] not in connected_nodes
-                    and node.get("data", {}).get("nodeType") != "start"
-                ):
-                    warnings.append(
-                        ValidationError(
-                            type="orphaned_node",
-                            message=f"Node '{node['id']}' is not connected to any other nodes",
-                            node_id=node["id"],
-                            edge_id=None,
-                            severity="warning",
-                        )
-                    )
-
-            # Performance suggestions
-            if len(nodes) > 20:
-                suggestions.append(
-                    "Consider breaking down large workflows into smaller, reusable components"
-                )
-
-            # Check for potential infinite loops
-            loop_nodes = [
-                node
-                for node in nodes
-                if node.get("data", {}).get("nodeType") == "loop"
-            ]
-            for loop_node in loop_nodes:
-                loop_config = loop_node.get("data", {}).get(
-                    "config", {}
-                )
-                if not loop_config.get(
-                    "maxIterations"
-                ) and not loop_config.get("condition"):
-                    warnings.append(
-                        ValidationError(
-                            type="potential_infinite_loop",
-                            message=f"Loop node '{loop_node['id']}' may cause infinite loop without max iterations or exit condition",
-                            node_id=loop_node["id"],
-                            edge_id=None,
-                            severity="warning",
-                        )
-                    )
+            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
+                {"nodes": nodes, "edges": edges, "name": "validation_check"}
+            )
 
             return {
-                "is_valid": len(errors) == 0,
-                "errors": [error.model_dump() for error in errors],
-                "warnings": [
-                    warning.model_dump() for warning in warnings
-                ],
-                "suggestions": suggestions,
+                "is_valid": validation_result.is_valid,
+                "errors": validation_result.errors,
+                "warnings": validation_result.warnings,
+                "suggestions": [],  # No suggestions in simplified version
             }
 
         except Exception as e:

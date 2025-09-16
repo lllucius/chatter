@@ -39,7 +39,7 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useSSE } from '../services/sse-context';
-import { AnySSEEvent, SSEEventType } from '../services/sse-types';
+import { AnySSEEvent, SSEEventType, STATIC_EVENT_TYPES, STATIC_CATEGORIES, STATIC_PRIORITIES } from '../services/sse-types';
 
 interface SSEMessageEntry {
   id: string;
@@ -83,7 +83,12 @@ const defaultSettings: SSEMonitorSettings = {
 const SSEMonitorPage: React.FC = () => {
   const { manager, isConnected } = useSSE();
   const [messages, setMessages] = useState<SSEMessageEntry[]>([]);
-  const [isMonitoring, setIsMonitoring] = useState(false);
+  
+  // Load monitoring state from localStorage with persistence
+  const [isMonitoring, setIsMonitoring] = useState(() => {
+    const savedMonitoring = localStorage.getItem('sse-monitor-active');
+    return savedMonitoring === 'true';
+  });
   
   // Load all settings from localStorage with defaults
   const [settings, setSettings] = useState<SSEMonitorSettings>(() => {
@@ -101,6 +106,11 @@ const SSEMonitorPage: React.FC = () => {
 
   const messagesEndRef = useRef<HTMLDivElement>(null);
   const messageCountRef = useRef(0);
+
+  // Persist monitoring state to localStorage whenever it changes
+  useEffect(() => {
+    localStorage.setItem('sse-monitor-active', isMonitoring.toString());
+  }, [isMonitoring]);
 
   // Persist all settings to localStorage whenever they change
   useEffect(() => {
@@ -120,16 +130,16 @@ const SSEMonitorPage: React.FC = () => {
     }));
   }, []);
 
-  // Get unique values for each filter type from messages
+  // Get filter options - combine static types with dynamic ones from messages
   const filterOptions = React.useMemo(() => {
-    const eventTypes = new Set<string>();
-    const categories = new Set<string>();
-    const priorities = new Set<string>();
+    const eventTypes = new Set<string>(STATIC_EVENT_TYPES); // Start with all static types
+    const categories = new Set<string>(STATIC_CATEGORIES); // Start with static categories
+    const priorities = new Set<string>(STATIC_PRIORITIES); // Start with static priorities
     const userIds = new Set<string>();
     const sourceSystems = new Set<string>();
 
     messages.forEach(msg => {
-      eventTypes.add(msg.event.type);
+      eventTypes.add(msg.event.type); // Add any additional types from actual messages
       
       if (msg.event.user_id) {
         userIds.add(msg.event.user_id);
@@ -232,6 +242,7 @@ const SSEMonitorPage: React.FC = () => {
   const startMonitoring = useCallback(() => {
     if (!manager) return;
     
+    console.log('Starting SSE monitoring...');
     setIsMonitoring(true);
     // Listen to all events using wildcard
     manager.addEventListener('*', handleSSEEvent);
@@ -246,8 +257,10 @@ const SSEMonitorPage: React.FC = () => {
   const stopMonitoring = useCallback(() => {
     if (!manager) return;
     
+    console.log('Stopping SSE monitoring...');
     setIsMonitoring(false);
     manager.removeEventListener('*', handleSSEEvent);
+    // Note: We don't disconnect here to allow other parts of the app to use SSE
   }, [manager, handleSSEEvent]);
 
   // Clear messages
@@ -285,6 +298,20 @@ const SSEMonitorPage: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [filteredMessages]);
 
+  // Auto-restore monitoring state on mount if it was previously active
+  useEffect(() => {
+    if (isMonitoring && manager && !isConnected) {
+      // If monitoring was active but we're not connected, try to reconnect
+      console.log('Restoring SSE monitoring state and connecting...');
+      manager.connect();
+      manager.addEventListener('*', handleSSEEvent);
+    } else if (isMonitoring && manager && isConnected) {
+      // If monitoring was active and we're connected, just add the listener
+      console.log('Restoring SSE monitoring state...');
+      manager.addEventListener('*', handleSSEEvent);
+    }
+  }, []); // Only run on mount
+
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {
     if (messagesEndRef.current && messagesEndRef.current.scrollIntoView) {
@@ -292,14 +319,15 @@ const SSEMonitorPage: React.FC = () => {
     }
   }, [messages]);
 
-  // Cleanup on unmount
+  // Cleanup on unmount - but don't stop monitoring if it should persist
   useEffect(() => {
     return () => {
-      if (isMonitoring) {
-        stopMonitoring();
+      // Only clean up the listener, don't stop monitoring to preserve state across navigation
+      if (manager) {
+        manager.removeEventListener('*', handleSSEEvent);
       }
     };
-  }, [isMonitoring, stopMonitoring]);
+  }, [manager, handleSSEEvent]);
 
   const getEventTypeColor = (type: string): 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' => {
     if (type.includes('error') || type.includes('failed')) return 'error';
@@ -395,6 +423,17 @@ const SSEMonitorPage: React.FC = () => {
             <Grid item>
               <Button
                 variant="outlined"
+                size="small"
+                onClick={() => manager?.triggerTestEvent()}
+                disabled={!manager || !isConnected}
+              >
+                Test Event
+              </Button>
+            </Grid>
+
+            <Grid item>
+              <Button
+                variant="outlined"
                 startIcon={<FilterIcon />}
                 onClick={() => updateSettings({ showAdvancedFilters: !settings.showAdvancedFilters })}
                 endIcon={settings.showAdvancedFilters ? <ExpandLessIcon /> : <ExpandMoreIcon />}
@@ -482,7 +521,7 @@ const SSEMonitorPage: React.FC = () => {
                         />
                       ))
                     }
-                    disabled={filterOptions.categories.length === 0}
+                    disabled={false} // Always enabled, even with no dynamic categories yet
                   />
                 </Grid>
 
@@ -512,7 +551,7 @@ const SSEMonitorPage: React.FC = () => {
                         />
                       ))
                     }
-                    disabled={filterOptions.priorities.length === 0}
+                    disabled={false} // Always enabled, even with no dynamic priorities yet
                   />
                 </Grid>
 
@@ -542,7 +581,7 @@ const SSEMonitorPage: React.FC = () => {
                         />
                       ))
                     }
-                    disabled={filterOptions.userIds.length === 0}
+                    disabled={false} // Always enabled, even with no dynamic user IDs yet
                   />
                 </Grid>
 
@@ -572,7 +611,7 @@ const SSEMonitorPage: React.FC = () => {
                         />
                       ))
                     }
-                    disabled={filterOptions.sourceSystems.length === 0}
+                    disabled={false} // Always enabled, even with no dynamic source systems yet
                   />
                 </Grid>
               </Grid>

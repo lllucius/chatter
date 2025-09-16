@@ -59,12 +59,16 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     };
   }, []);
 
-  // Auto-connect when authenticated
+  // Auto-connect when authenticated and monitor connection state changes
   useEffect(() => {
-    if (autoConnect && authService.isAuthenticated() && !isConnected) {
-      sseEventManager.connect();
+    if (autoConnect && authService.isAuthenticated()) {
+      // Always try to connect if authenticated, regardless of current state
+      if (!isConnected && sseEventManager.getConnectionState() === 'closed') {
+        console.log('Auto-connecting SSE...');
+        sseEventManager.connect();
+      }
     }
-  }, [autoConnect, isConnected]);
+  }, [autoConnect]); // Removed isConnected dependency to prevent unnecessary reconnections
 
   const connect = useCallback(() => {
     sseEventManager.connect();

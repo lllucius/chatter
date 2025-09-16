@@ -161,64 +161,18 @@ class UnifiedWorkflowExecutor:
             # Get workflow configuration based on type
             workflow_config = self._get_workflow_config(workflow_type, conversation, chat_request)
             
-            # Create unified streaming workflow
-            workflow = await self.llm_service.create_langgraph_workflow(
-                provider_name=chat_request.provider,
-                workflow_type=workflow_type,
-                **workflow_config,
-                system_message=chat_request.system_prompt_override,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-            )
-
-            # Prepare conversation context
-            user_id = user_id or conversation.user_id
-            if user_id is None:
-                raise WorkflowExecutionError(
-                    "No user_id provided and conversation has no associated user_id"
-                )
-
-            messages = await self._prepare_messages(
-                conversation, chat_request, user_id, workflow_config["memory_window"]
-            )
-            state = ConversationState(messages=messages)
-
-            # Create message for streaming and send start chunk
-            streaming_message = await self._create_streaming_message(
-                conversation, user_id, correlation_id
-            )
-            yield await self._send_streaming_start_chunk(
-                streaming_message, conversation, correlation_id
-            )
-
-            # Stream workflow execution
-            content_buffer = ""
-            async for event in workflow.astream(
-                state, {"configurable": {"thread_id": conversation.id}}
-            ):
-                # Look for messages in any node's output
-                messages_found = None
-                for node_name, node_output in event.items():
-                    if isinstance(node_output, dict) and "messages" in node_output:
-                        messages_found = node_output["messages"]
-                        break
-                
-                if messages_found:
-                    message = messages_found[-1]
-                    if hasattr(message, "content") and message.content:
-                        # Extract new content since last chunk
-                        if len(message.content) > len(content_buffer):
-                            new_content = message.content[len(content_buffer):]
-                            content_buffer = message.content
-
-                            yield await self._send_streaming_token_chunk(
-                                new_content, streaming_message, conversation, correlation_id
-                            )
-
-            # Finalize streaming message and send completion chunk
-            yield await self._finalize_streaming_message(
-                streaming_message, content_buffer, conversation, correlation_id
-            )
+            # For plain workflows, use direct streaming to avoid unnecessary workflow orchestration
+            if workflow_type == "plain":
+                async for chunk in self._execute_direct_streaming(
+                    conversation, chat_request, correlation_id, user_id, workflow_config
+                ):
+                    yield chunk
+            else:
+                # For complex workflows (rag, tools, full), use full workflow orchestration
+                async for chunk in self._execute_workflow_streaming(
+                    conversation, chat_request, correlation_id, user_id, workflow_config, workflow_type
+                ):
+                    yield chunk
 
             # Record success metrics
             await self._record_metrics(
@@ -238,6 +192,130 @@ class UnifiedWorkflowExecutor:
             # Clean up resource tracking
             if user_id:
                 self.limit_manager.end_workflow_tracking(workflow_id, user_id)
+
+    async def _execute_direct_streaming(
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
+        user_id: str | None,
+        workflow_config: dict[str, Any],
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute plain workflow with direct LLM streaming, bypassing workflow orchestration."""
+        # Prepare conversation context
+        user_id = user_id or conversation.user_id
+        if user_id is None:
+            raise WorkflowExecutionError(
+                "No user_id provided and conversation has no associated user_id"
+            )
+
+        messages = await self._prepare_messages(
+            conversation, chat_request, user_id, workflow_config["memory_window"]
+        )
+
+        # Create message for streaming and send start chunk
+        streaming_message = await self._create_streaming_message(
+            conversation, user_id, correlation_id
+        )
+        yield await self._send_streaming_start_chunk(
+            streaming_message, conversation, correlation_id
+        )
+
+        # Get LLM provider for direct streaming with custom parameters
+        provider = await self.llm_service._create_custom_provider(
+            provider_name=chat_request.provider,
+            temperature=chat_request.temperature,
+            max_tokens=chat_request.max_tokens,
+        )
+
+        # Apply system message if provided
+        final_messages = messages
+        if chat_request.system_prompt_override:
+            from langchain_core.messages import SystemMessage
+            final_messages = [SystemMessage(content=chat_request.system_prompt_override)] + messages
+
+        # Stream directly from LLM without workflow orchestration
+        content_buffer = ""
+        async for chunk in provider.astream(final_messages):
+            if hasattr(chunk, "content") and chunk.content:
+                content_buffer += chunk.content
+                yield await self._send_streaming_token_chunk(
+                    chunk.content, streaming_message, conversation, correlation_id
+                )
+
+        # Finalize streaming message and send completion chunk
+        yield await self._finalize_streaming_message(
+            streaming_message, content_buffer, conversation, correlation_id
+        )
+
+    async def _execute_workflow_streaming(
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
+        user_id: str | None,
+        workflow_config: dict[str, Any],
+        workflow_type: str,
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute complex workflow with full LangGraph orchestration for RAG, tools, etc."""
+        # Create unified streaming workflow
+        workflow = await self.llm_service.create_langgraph_workflow(
+            provider_name=chat_request.provider,
+            workflow_type=workflow_type,
+            **workflow_config,
+            system_message=chat_request.system_prompt_override,
+            temperature=chat_request.temperature,
+            max_tokens=chat_request.max_tokens,
+        )
+
+        # Prepare conversation context
+        user_id = user_id or conversation.user_id
+        if user_id is None:
+            raise WorkflowExecutionError(
+                "No user_id provided and conversation has no associated user_id"
+            )
+
+        messages = await self._prepare_messages(
+            conversation, chat_request, user_id, workflow_config["memory_window"]
+        )
+        state = ConversationState(messages=messages)
+
+        # Create message for streaming and send start chunk
+        streaming_message = await self._create_streaming_message(
+            conversation, user_id, correlation_id
+        )
+        yield await self._send_streaming_start_chunk(
+            streaming_message, conversation, correlation_id
+        )
+
+        # Stream workflow execution
+        content_buffer = ""
+        async for event in workflow.astream(
+            state, {"configurable": {"thread_id": conversation.id}}
+        ):
+            # Look for messages in any node's output
+            messages_found = None
+            for node_name, node_output in event.items():
+                if isinstance(node_output, dict) and "messages" in node_output:
+                    messages_found = node_output["messages"]
+                    break
+            
+            if messages_found:
+                message = messages_found[-1]
+                if hasattr(message, "content") and message.content:
+                    # Extract new content since last chunk
+                    if len(message.content) > len(content_buffer):
+                        new_content = message.content[len(content_buffer):]
+                        content_buffer = message.content
+
+                        yield await self._send_streaming_token_chunk(
+                            new_content, streaming_message, conversation, correlation_id
+                        )
+
+        # Finalize streaming message and send completion chunk
+        yield await self._finalize_streaming_message(
+            streaming_message, content_buffer, conversation, correlation_id
+        )
 
     def _get_workflow_config(
         self, workflow_type: str, conversation: Conversation, chat_request: ChatRequest

@@ -14,7 +14,7 @@ from typing import Any
 from langchain_core.messages import AIMessage
 
 from chatter.core.dependencies import get_workflow_manager
-from chatter.core.langgraph import ConversationState
+from chatter.core.langgraph import ConversationState, workflow_manager
 from chatter.core.monitoring import record_workflow_metrics
 from chatter.core.workflow_limits import (
     WorkflowLimits,
@@ -169,6 +169,7 @@ class UnifiedWorkflowExecutor:
                 system_message=chat_request.system_prompt_override,
                 temperature=chat_request.temperature,
                 max_tokens=chat_request.max_tokens,
+                enable_streaming=True,  # Enable streaming for streaming execution
             )
 
             # Prepare conversation context
@@ -193,8 +194,11 @@ class UnifiedWorkflowExecutor:
 
             # Stream workflow execution
             content_buffer = ""
-            async for event in workflow.astream(
-                state, {"configurable": {"thread_id": conversation.id}}
+            async for event in workflow_manager.stream_workflow(
+                workflow, 
+                state, 
+                thread_id=conversation.id,
+                enable_llm_streaming=True  # Enable token-by-token LLM streaming
             ):
                 # Look for messages in any node's output
                 messages_found = None

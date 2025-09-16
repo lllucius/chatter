@@ -1020,6 +1020,7 @@ class LLMService:
         max_documents: int | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
+        enable_streaming: bool = False,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
@@ -1069,6 +1070,7 @@ class LLMService:
             memory_window=memory_window,
             max_tool_calls=max_tool_calls,
             max_documents=max_documents,
+            enable_streaming=enable_streaming,
         )
 
     async def generate_with_fallback(

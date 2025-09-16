@@ -260,7 +260,7 @@ class Message(Base):
             name="check_sequence_number_non_negative",
         ),
         CheckConstraint(
-            "content != ''", name="check_content_not_empty"
+            "content IS NOT NULL", name="check_content_not_empty"
         ),
         CheckConstraint(
             "rating IS NULL OR (rating >= 0.0 AND rating <= 5.0)",

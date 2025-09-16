@@ -902,6 +902,41 @@ class LangGraphWorkflowManager:
             )
             return None
 
+    def get_tools(self, workspace_id: str | None = None) -> list[Any]:
+        """Get available tools for a workspace.
+
+        Args:
+            workspace_id: Workspace identifier (optional, for future tool filtering)
+
+        Returns:
+            List of available tool objects
+        """
+        try:
+            from chatter.core.dependencies import get_builtin_tools
+
+            tools = []
+            
+            # Get builtin tools
+            builtin_tools = get_builtin_tools()
+            if builtin_tools:
+                tools.extend(builtin_tools)
+                logger.debug(f"Added {len(builtin_tools)} builtin tools")
+
+            # Note: MCP tools are loaded asynchronously in the LLM service
+            # when creating workflows, so we don't load them here to avoid
+            # blocking synchronous calls
+            logger.debug(f"Configured tools for workspace: {workspace_id}, total: {len(tools)}")
+            
+            return tools
+
+        except Exception as e:
+            logger.error(
+                "Failed to get tools for workspace",
+                workspace_id=workspace_id,
+                error=str(e),
+            )
+            return []
+
 
 # Global workflow manager instance
 workflow_manager = LangGraphWorkflowManager()

@@ -158,15 +158,15 @@ describe('SSEMonitorPage', () => {
     expect(screen.getByText(/Click "Start Monitoring" to begin capturing SSE messages/)).toBeInTheDocument();
   });
 
-  it('should filter event types correctly', () => {
+  it('should show filter controls correctly', () => {
     render(
       <TestWrapper>
         <SSEMonitorPage />
       </TestWrapper>
     );
 
-    // Check that filter select is present
-    expect(screen.getByLabelText('Filter by Type')).toBeInTheDocument();
+    // Check that filter button is present by looking for the button with FilterList icon
+    expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
   });
 
   it('should toggle raw data view', () => {

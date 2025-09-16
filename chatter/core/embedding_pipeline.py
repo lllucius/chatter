@@ -27,6 +27,7 @@ from chatter.models.document import (
     HybridVectorSearchHelper,
 )
 from chatter.models.registry import ModelType
+from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -386,124 +387,6 @@ class DocumentChunker:
             ) from e
 
 
-class SimpleEmbeddingService:
-    """Simple embedding service using model registry."""
-
-    def __init__(self, session: AsyncSession):
-        self.session = session
-        self.registry = ModelRegistryService(session)
-
-    async def generate_embeddings(
-        self, texts: list[str]
-    ) -> tuple[list[list[float]], dict[str, Any]]:
-        """Generate embeddings for texts.
-
-        Args:
-            texts: List of texts to embed
-
-        Returns:
-            Tuple of (embeddings, metadata)
-
-        Raises:
-            EmbeddingPipelineError: If embedding generation fails
-        """
-        try:
-            # Get default embedding provider
-            provider = await self.registry.get_default_provider(
-                model_type=ModelType.EMBEDDING
-            )
-            if not provider:
-                raise EmbeddingPipelineError(
-                    "No default embedding provider configured"
-                )
-
-            # Get default embedding model
-            models, _ = await self.registry.list_models(
-                provider.id, model_type=ModelType.EMBEDDING
-            )
-            model = next(
-                (m for m in models if m.is_default and m.is_active),
-                None,
-            )
-            if not model:
-                model = next((m for m in models if m.is_active), None)
-            if not model:
-                raise EmbeddingPipelineError(
-                    f"No active embedding model for provider {provider.name}"
-                )
-
-            # Create embedding instance
-            embedding_instance = await self._create_embedding_instance(
-                provider, model
-            )
-            if not embedding_instance:
-                raise EmbeddingPipelineError(
-                    f"Failed to create embedding instance for {provider.name}"
-                )
-
-            # Generate embeddings
-            embeddings = await embedding_instance.aembed_documents(
-                texts
-            )
-
-            metadata = {
-                "provider": provider.name,
-                "model": model.model_name,
-                "dimensions": len(embeddings[0]) if embeddings else 0,
-                "text_count": len(texts),
-            }
-
-            logger.info(
-                "Generated embeddings",
-                provider=provider.name,
-                model=model.model_name,
-                text_count=len(texts),
-                dimensions=metadata["dimensions"],
-            )
-
-            return embeddings, metadata
-
-        except Exception as e:
-            logger.error("Embedding generation failed", error=str(e))
-            raise EmbeddingPipelineError(
-                f"Failed to generate embeddings: {e}"
-            ) from e
-
-    async def _create_embedding_instance(self, provider, model):
-        """Create embedding provider instance."""
-        from chatter.config import get_settings
-        from chatter.models.registry import ProviderType
-
-        try:
-            if provider.provider_type == ProviderType.OPENAI:
-                from chatter.services.embeddings import (
-                    SafeOpenAIEmbeddings,
-                )
-
-                try:
-                    settings = get_settings()
-                    api_key = settings.openai_api_key
-                except Exception:
-                    api_key = None
-
-                if not api_key:
-                    return None
-
-                return SafeOpenAIEmbeddings(
-                    api_key=api_key,
-                    base_url=provider.base_url,
-                    model=model.model_name,
-                    chunk_size=model.chunk_size or 1000,
-                )
-
-            # Add other providers as needed
-            return None
-
-        except Exception as e:
-            logger.error(
-                "Failed to create embedding instance", error=str(e)
-            )
-            return None
 
 
 class SimpleVectorStore:
@@ -752,7 +635,7 @@ class EmbeddingPipeline:
         self.session = session
         self.text_extractor = DocumentTextExtractor()
         self.chunker = DocumentChunker()
-        self.embedding_service = SimpleEmbeddingService(session)
+        self.embedding_service = EmbeddingService(session)
         self.vector_store = SimpleVectorStore(session)
 
     async def process_document_from_file(

@@ -275,3 +275,77 @@ export type SSEEventListeners = {
 } & {
   '*'?: SSEEventListener[]; // wildcard listener for all events
 };
+
+// Static list of all possible event types for filtering (derived from backend EventType enum)
+export const STATIC_EVENT_TYPES = [
+  // Backup events
+  'backup.started',
+  'backup.completed', 
+  'backup.failed',
+  'backup.progress',
+  
+  // Job events
+  'job.started',
+  'job.completed',
+  'job.failed', 
+  'job.progress',
+  
+  // Tool server events
+  'tool_server.started',
+  'tool_server.stopped',
+  'tool_server.health_changed',
+  'tool_server.error',
+  
+  // Document events
+  'document.uploaded',
+  'document.processing_started',
+  'document.processing_completed',
+  'document.processing_failed',
+  'document.processing_progress',
+  
+  // Chat events
+  'conversation.started',
+  'conversation.ended',
+  'message.received',
+  'message.sent',
+  
+  // User events
+  'user.registered',
+  'user.updated',
+  'user.connected',
+  'user.disconnected',
+  'user.status_changed',
+  
+  // Plugin events
+  'plugin.installed',
+  'plugin.activated',
+  'plugin.deactivated',
+  'plugin.error',
+  
+  // Agent events
+  'agent.created',
+  'agent.updated',
+  
+  // System events
+  'system.alert',
+  'system.status',
+  'connection.established',
+] as const;
+
+// Static filter options for common values
+export const STATIC_CATEGORIES = [
+  'realtime',
+  'security', 
+  'audit',
+  'monitoring',
+  'streaming',
+  'analytics',
+  'workflow'
+] as const;
+
+export const STATIC_PRIORITIES = [
+  'low',
+  'normal',
+  'high', 
+  'critical'
+] as const;

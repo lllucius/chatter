@@ -197,6 +197,13 @@ class MessageResourceHandler:
         current_user: User,
     ) -> MessageRatingResponse:
         """Update the rating for a message."""
+        # Check if this is a temporary stream ID
+        if str(message_id).startswith("stream-"):
+            raise NotFoundProblem(
+                detail="Cannot rate message while it is still being streamed. Please wait for the message to complete.",
+                resource_type="message",
+            )
+            
         try:
             updated_message = (
                 await self.chat_service.update_message_rating(

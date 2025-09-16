@@ -696,3 +696,53 @@ class MessageService:
                 error=str(e),
             )
             raise
+
+    async def update_message_content(
+        self, message_id: str, content: str
+    ) -> Message:
+        """Update message content.
+
+        Args:
+            message_id: Message ID to update
+            content: New content
+
+        Returns:
+            Updated message
+
+        Raises:
+            NotFoundError: If message not found
+        """
+        async with self.performance_monitor.measure_query(
+            "update_message_content"
+        ):
+            try:
+                # Get the message
+                query = select(Message).where(Message.id == message_id)
+                result = await self.session.execute(query)
+                message = result.scalar_one_or_none()
+
+                if not message:
+                    raise NotFoundError(f"Message {message_id} not found")
+
+                # Update the content
+                message.content = content
+                await self.session.flush()
+                await self.session.refresh(message)
+
+                logger.debug(
+                    "Updated message content",
+                    message_id=message_id,
+                    content_length=len(content),
+                )
+
+                return message
+
+            except NotFoundError:
+                raise
+            except Exception as e:
+                logger.error(
+                    "Failed to update message content",
+                    message_id=message_id,
+                    error=str(e),
+                )
+                raise

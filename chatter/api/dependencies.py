@@ -20,11 +20,18 @@ class ValidatedULID(str):
         """Generate Pydantic v2 core schema for OpenAPI compatibility."""
 
         def validate_ulid(v: str) -> str:
-            """Validate ULID format."""
+            """Validate ULID format, with temporary allowance for stream IDs."""
             if not isinstance(v, str):
                 raise BadRequestProblem(
                     detail="Invalid ULID format: must be a string"
                 )
+            
+            # Temporary allowance for stream-prefixed IDs during streaming
+            if v.startswith("stream-"):
+                # For now, allow stream IDs to pass through
+                # TODO: Remove this once streaming properly provides ULIDs
+                return v
+                
             try:
                 ULID.from_str(v)
                 return v

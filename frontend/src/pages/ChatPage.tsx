@@ -327,9 +327,11 @@ const ChatPage: React.FC = () => {
                   
                   // Update message content based on chunk type
                   if (chunk.type === 'token' && chunk.content) {
+                    // Use the message_id from the chunk if available, otherwise fall back to messageId
+                    const targetMessageId = chunk.message_id || messageId;
                     setMessages((prev) =>
                       prev.map((msg) =>
-                        msg.id === messageId
+                        msg.id === targetMessageId
                           ? { ...msg, content: msg.content + chunk.content }
                           : msg
                       )
@@ -341,12 +343,24 @@ const ChatPage: React.FC = () => {
                       // we should fetch the conversation details or at least store the ID
                       setCurrentConversation(prev => prev || { id: chunk.conversation_id } as ConversationResponse);
                     }
-                  } else if (chunk.type === 'complete') {
-                    // Stream ended - update final message with metadata if available
-                    if (chunk.metadata) {
+                    
+                    // If we have a message_id from backend, update the temporary ID
+                    if (chunk.message_id && chunk.message_id !== messageId) {
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === messageId
+                            ? { ...msg, id: chunk.message_id }
+                            : msg
+                        )
+                      );
+                    }
+                  } else if (chunk.type === 'complete') {
+                    // Stream ended - update final message with metadata if available
+                    const targetMessageId = chunk.message_id || messageId;
+                    if (chunk.metadata) {
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === targetMessageId
                             ? { 
                                 ...msg, 
                                 metadata: {

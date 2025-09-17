@@ -163,16 +163,18 @@ const ChatConfigPanel: React.FC<Props> = ({
           <ProfileIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Profile Settings</Typography>
           <Tooltip title="Reset to defaults">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetProfileSettings();
-              }}
-              sx={{ ml: 1 }}
-            >
-              <ResetIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetProfileSettings();
+                }}
+                sx={{ ml: 1 }}
+              >
+                <ResetIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
         </AccordionSummary>
         <AccordionDetails>
@@ -228,16 +230,18 @@ const ChatConfigPanel: React.FC<Props> = ({
           <PromptIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Prompt Templates</Typography>
           <Tooltip title="Reset to defaults">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetPromptSettings();
-              }}
-              sx={{ ml: 1 }}
-            >
-              <ResetIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetPromptSettings();
+                }}
+                sx={{ ml: 1 }}
+              >
+                <ResetIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
         </AccordionSummary>
         <AccordionDetails>
@@ -272,16 +276,18 @@ const ChatConfigPanel: React.FC<Props> = ({
           <DocumentIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Knowledge Base</Typography>
           <Tooltip title="Reset to defaults">
-            <IconButton
-              size="small"
-              onClick={(e) => {
-                e.stopPropagation();
-                resetKnowledgeSettings();
-              }}
-              sx={{ ml: 1 }}
-            >
-              <ResetIcon fontSize="small" />
-            </IconButton>
+            <span>
+              <IconButton
+                size="small"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  resetKnowledgeSettings();
+                }}
+                sx={{ ml: 1 }}
+              >
+                <ResetIcon fontSize="small" />
+              </IconButton>
+            </span>
           </Tooltip>
         </AccordionSummary>
         <AccordionDetails>

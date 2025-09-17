@@ -68,6 +68,7 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
         sseEventManager.connect();
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [autoConnect]); // Removed isConnected dependency to prevent unnecessary reconnections
 
   const connect = useCallback(() => {

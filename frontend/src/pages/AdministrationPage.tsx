@@ -38,8 +38,6 @@ import {
   Download as DownloadIcon,
   Upload as UploadIcon,
   Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
-  Close as CloseIcon,
   Refresh as RefreshIcon,
   MoreVert as MoreVertIcon,
   DeleteSweep as BulkDeleteIcon,
@@ -57,11 +55,12 @@ import {
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
-import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
+import { useNotifications } from '../components/NotificationSystem';
 
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
+  const { showNotification } = useNotifications();
 
   const [activeTab, setActiveTab] = useState<
     'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'
@@ -115,16 +114,6 @@ const AdministrationPage: React.FC = () => {
     },
   ]);
 
-  const [notifications, setNotifications] = useState<
-    Array<{
-      id: string;
-      title: string;
-      message: string;
-      type: 'success' | 'error' | 'info' | 'warning';
-      timestamp: Date;
-      jobId?: string;
-    }>
-  >([]);
   const [lastJobStates, setLastJobStates] = useState<Map<string, JobStatus>>(
     new Map()
   );
@@ -160,22 +149,6 @@ const AdministrationPage: React.FC = () => {
     dryRun: true,
   });
 
-  const addNotification = useCallback(
-    (notification: Omit<(typeof notifications)[0], 'id' | 'timestamp'>) => {
-      const newNotification = {
-        ...notification,
-        id: Math.random().toString(36).substr(2, 9),
-        timestamp: new Date(),
-      };
-      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
-    },
-    []
-  );
-
-  const removeNotification = (id: string) => {
-    setNotifications((prev) => prev.filter((n) => n.id !== id));
-  };
-
   const loadJobs = useCallback(async () => {
     try {
       setDataLoading(true);
@@ -190,7 +163,7 @@ const AdministrationPage: React.FC = () => {
       newJobs.forEach((job) => {
         const previousState = lastJobStates.get(job.id);
         if (previousState && previousState !== job.status) {
-          addNotification({
+          showNotification({
             title: 'Job Status Update',
             message: `Job "${job.name || job.id.substring(0, 8)}" changed from ${previousState} to ${job.status}`,
             type:
@@ -201,7 +174,7 @@ const AdministrationPage: React.FC = () => {
                   : job.status === 'cancelled'
                     ? 'warning'
                     : 'info',
-            jobId: job.id,
+            category: 'system',
           });
         }
       });
@@ -217,7 +190,7 @@ const AdministrationPage: React.FC = () => {
     } finally {
       setDataLoading(false);
     }
-  }, [lastJobStates, addNotification]);
+  }, [lastJobStates, showNotification]);
 
   const loadJobStats = useCallback(async () => {
     try {
@@ -272,61 +245,64 @@ const AdministrationPage: React.FC = () => {
     if (!isConnected) return;
 
     const unsubscribeJobStarted = on('job.started', (event) => {
-      addNotification({
+      showNotification({
         title: 'Job Started',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" has started`,
         type: 'info',
-        jobId: (event as any).data.job_id,
+        category: 'system',
       });
       loadJobs();
       loadJobStats();
     });
 
     const unsubscribeJobCompleted = on('job.completed', (event) => {
-      addNotification({
+      showNotification({
         title: 'Job Completed',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" completed successfully`,
         type: 'success',
-        jobId: (event as any).data.job_id,
+        category: 'system',
       });
       loadJobs();
       loadJobStats();
     });
 
     const unsubscribeJobFailed = on('job.failed', (event) => {
-      addNotification({
+      showNotification({
         title: 'Job Failed',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" failed: ${(event as any).data.error}`,
         type: 'error',
-        jobId: (event as any).data.job_id,
+        category: 'system',
       });
       loadJobs();
       loadJobStats();
     });
 
     const unsubscribeBackupStarted = on('backup.started', (event) => {
-      addNotification({
+      showNotification({
         title: 'Backup Started',
         message: `Backup "${(event as any).data.backup_id}" has started`,
         type: 'info',
+        category: 'system',
       });
       loadBackups();
     });
 
     const unsubscribeBackupCompleted = on('backup.completed', (event) => {
-      addNotification({
+      showNotification({
         title: 'Backup Completed',
         message: `Backup "${(event as any).data.backup_id}" completed successfully`,
         type: 'success',
+        category: 'system',
       });
       loadBackups();
     });
 
     const unsubscribeBackupFailed = on('backup.failed', (event) => {
-      addNotification({
+      showNotification({
         title: 'Backup Failed',
         message: `Backup "${(event as any).data.backup_id}" failed: ${(event as any).data.error}`,
         type: 'error',
+        category: 'system',
       });
       loadBackups();
     });
@@ -339,7 +315,7 @@ const AdministrationPage: React.FC = () => {
       unsubscribeBackupCompleted();
       unsubscribeBackupFailed();
     };
-  }, [isConnected, on, addNotification, loadJobs, loadJobStats, loadBackups]);
+  }, [isConnected, on, showNotification, loadJobs, loadJobStats, loadBackups]);
 
   const handleJobAction = async (action: 'cancel', jobId: string) => {
     try {
@@ -443,10 +419,11 @@ const AdministrationPage: React.FC = () => {
         `${operation}: ${affectedCount} ${bulkOperationData.operationType}`
       );
 
-      addNotification({
+      showNotification({
         title: 'Bulk Operation Complete',
         message: `${operation} ${affectedCount} ${bulkOperationData.operationType}`,
         type: bulkOperationData.dryRun ? 'info' : 'success',
+        category: 'system',
       });
     } catch (error: unknown) {
       handleError(error, {
@@ -603,10 +580,11 @@ const AdministrationPage: React.FC = () => {
             };
             await getSDK().jobs.createJobApiV1Jobs(jobCreateRequest);
             toastService.success('Job created successfully!');
-            addNotification({
+            showNotification({
               title: 'Job Created',
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
               type: 'success',
+              category: 'system',
             });
             loadJobs();
             loadJobStats();
@@ -771,57 +749,6 @@ const AdministrationPage: React.FC = () => {
 
   return (
     <PageLayout title="Administration" toolbar={toolbar}>
-      {/* Notifications Panel */}
-      {notifications.length > 0 && (
-        <Box sx={{ mb: 3 }}>
-          <Typography
-            variant="h6"
-            sx={{ mb: 2, display: 'flex', alignItems: 'center' }}
-          >
-            <NotificationsIcon sx={{ mr: 1 }} />
-            Recent Notifications ({notifications.length})
-          </Typography>
-          <Box sx={{ maxHeight: 200 }}>
-            <CustomScrollbar>
-              <List>
-                {notifications.map((notification): void => (
-                  <ListItem
-                    key={notification.id}
-                    sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}
-                  >
-                    <ListItemText
-                      primary={notification.title}
-                      secondary={`${notification.message} • ${new Date(notification.timestamp).toLocaleString()}`}
-                    />
-                    <Chip
-                      label={notification.type}
-                      color={
-                        notification.type === 'success'
-                          ? 'success'
-                          : notification.type === 'error'
-                            ? 'error'
-                            : notification.type === 'warning'
-                              ? 'warning'
-                              : 'info'
-                      }
-                      size="small"
-                      sx={{ mr: 1 }}
-                    />
-                    <IconButton
-                      size="small"
-                      onClick={() => removeNotification(notification.id)}
-                      title="Dismiss"
-                    >
-                      <CloseIcon fontSize="small" />
-                    </IconButton>
-                  </ListItem>
-                ))}
-              </List>
-            </CustomScrollbar>
-          </Box>
-        </Box>
-      )}
-
       <Tabs
         value={activeTab}
         onChange={(_, v) => setActiveTab(v)}

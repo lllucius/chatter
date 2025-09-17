@@ -176,7 +176,7 @@ const RealTimeDashboard: React.FC = () => {
       // Stop real-time updates
       setIsConnecting(true);
       try {
-        await getSDK().analytics.stopRealTimeDashboard();
+        await getSDK().analytics.stopRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStop();
 
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
@@ -200,7 +200,7 @@ const RealTimeDashboard: React.FC = () => {
       // Start real-time updates
       setIsConnecting(true);
       try {
-        await getSDK().analytics.startRealTimeDashboard();
+        await getSDK().analytics.startRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStart();
         setRealTimeEnabled(true);
 
         // Connect to SSE stream
@@ -222,8 +222,8 @@ const RealTimeDashboard: React.FC = () => {
     try {
       // Fetch latest data manually
       const [dashboardResponse, chartResponse] = await Promise.all([
-        getSDK().analytics.getIntegratedDashboardStats(),
-        getSDK().analytics.getChartReadyData(),
+        getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated(),
+        getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData(),
       ]);
 
       setDashboardData(dashboardResponse);

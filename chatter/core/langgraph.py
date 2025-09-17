@@ -295,9 +295,12 @@ class LangGraphWorkflowManager:
             older_messages = messages[:-memory_window]
 
             if not state.get("conversation_summary"):
-                # Create a more focused summary prompt
+                # Create a more focused summary prompt with strict formatting instructions
                 summary_prompt = (
-                    "Summarize the key points from this conversation history concisely:\n\n"
+                    "You are a conversation summarizer. Your task is to create a concise, factual summary of the conversation below. "
+                    "Do not engage in conversation or ask questions. Only provide a summary in the format: "
+                    "'Summary: [key topics and facts discussed]'. If there is insufficient content to summarize, respond only with 'Summary: Conversation just started.'\n\n"
+                    "Conversation to summarize:\n"
                 )
                 for msg in older_messages:
                     role = (
@@ -307,17 +310,36 @@ class LangGraphWorkflowManager:
                     )
                     summary_prompt += f"{role}: {msg.content}\n"
 
-                summary_prompt += "\nProvide a brief summary focusing on main topics discussed:"
+                summary_prompt += "\nProvide only a factual summary without conversational elements:"
 
                 try:
                     summary_response = await llm.ainvoke(
                         [HumanMessage(content=summary_prompt)]
                     )
-                    summary = getattr(
+                    raw_summary = getattr(
                         summary_response,
                         "content",
                         str(summary_response),
                     )
+                    
+                    # Clean the summary to ensure it's just factual content
+                    # Remove conversational elements that might confuse the main model
+                    summary = raw_summary.strip()
+                    
+                    # If the summary looks like a conversational response rather than a summary,
+                    # replace it with a simple summary
+                    if any(phrase in summary.lower() for phrase in [
+                        "there is no conversation history",
+                        "conversation just started", 
+                        "what would you like",
+                        "i can help",
+                        "how can i assist"
+                    ]):
+                        summary = "Summary: Initial conversation with basic greetings and introductions."
+                    
+                    # Ensure summary is prefixed appropriately for context use
+                    if not summary.lower().startswith("summary:"):
+                        summary = f"Summary: {summary}"
 
                     logger.debug(
                         "Created conversation summary",
@@ -361,10 +383,13 @@ class LangGraphWorkflowManager:
                 if last_human_message:
                     # Create a focused context with just system message and last user input
                     if state.get("conversation_summary"):
+                        summary = state["conversation_summary"]
+                        # Ensure the summary is properly formatted for context use
+                        if summary and not summary.lower().startswith(("summary:", "context:", "previous conversation:")):
+                            summary = f"Context from previous conversation: {summary}"
+                        
                         prefixed.append(
-                            SystemMessage(
-                                content=f"Previous conversation summary: {state['conversation_summary']}"
-                            )
+                            SystemMessage(content=summary)
                         )
 
                     if use_retriever and state.get("retrieval_context"):
@@ -387,9 +412,14 @@ class LangGraphWorkflowManager:
 
             # Normal processing: include conversation summary if available
             if state.get("conversation_summary"):
+                summary = state["conversation_summary"]
+                # Ensure the summary is properly formatted for context use
+                if summary and not summary.lower().startswith(("summary:", "context:", "previous conversation:")):
+                    summary = f"Context from previous conversation: {summary}"
+                
                 prefixed.append(
                     SystemMessage(
-                        content=f"Previous conversation summary: {state['conversation_summary']}"
+                        content=summary
                     )
                 )
 

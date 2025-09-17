@@ -1015,12 +1015,13 @@ class LLMService:
         retriever=None,
         tools: list[Any] | None = None,
         enable_memory: bool = False,
-        memory_window: int = 20,
+        memory_window: int = 4,
         max_tool_calls: int | None = None,
         max_documents: int | None = None,
         temperature: float | None = None,
         max_tokens: int | None = None,
         enable_streaming: bool = False,
+        focus_mode: bool = False,
     ):
         """Create a LangGraph workflow."""
         from chatter.core.langgraph import workflow_manager
@@ -1071,6 +1072,7 @@ class LLMService:
             max_tool_calls=max_tool_calls,
             max_documents=max_documents,
             enable_streaming=enable_streaming,
+            focus_mode=focus_mode,
         )
 
     async def generate_with_fallback(

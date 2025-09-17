@@ -17,8 +17,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+  Grid,
+} from '../utils/mui';
 import {
   XAxis,
   YAxis,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useCallback } from 'react';
 import {
   Paper,
   Typography,
@@ -106,7 +106,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     );
   };
 
-  const calculateSimpleMetrics = (): WorkflowMetrics => {
+  const calculateSimpleMetrics = useCallback((): WorkflowMetrics => {
     const { nodes, edges } = workflow;
 
     // Simple fallback calculation for workflows without server-side analytics
@@ -137,7 +137,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
       potentialBottlenecks,
       recommendations,
     };
-  };
+  }, [workflow]);
 
   if (loading) {
     return (

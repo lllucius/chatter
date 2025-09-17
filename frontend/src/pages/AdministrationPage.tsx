@@ -26,22 +26,22 @@ import {
   FormControl,
   InputLabel,
   Select,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+  Grid,
+} from '../utils/mui';
 import {
-  Backup as BackupIcon,
-  Work as JobIcon,
-  Extension as PluginIcon,
-  People as UsersIcon,
-  Add as AddIcon,
-  Delete as DeleteIcon,
-  Download as DownloadIcon,
-  Upload as UploadIcon,
-  Settings as SettingsIcon,
-  Refresh as RefreshIcon,
-  MoreVert as MoreVertIcon,
-  DeleteSweep as BulkDeleteIcon,
-} from '@mui/icons-material';
+  BackupIcon,
+  JobIcon,
+  PluginIcon,
+  UsersIcon,
+  RefreshIcon,
+  AddIcon,
+  DeleteIcon,
+  DownloadIcon,
+  UploadIcon,
+  SettingsIcon,
+  MoreIcon,
+  BulkDeleteIcon,
+} from '../utils/icons';
 import { getSDK } from '../services/auth-service';
 import {
   BackupResponse,
@@ -1028,7 +1028,7 @@ const AdministrationPage: React.FC = () => {
                     edge="end"
                     onClick={(e) => openUserActionsMenu(e, user)}
                   >
-                    <MoreVertIcon />
+                    <MoreIcon />
                   </IconButton>
                 </ListItemSecondaryAction>
               </ListItem>

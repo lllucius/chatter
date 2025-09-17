@@ -125,7 +125,7 @@ const RealTimeDashboard: React.FC = () => {
       setConnectionStatus('disconnected');
       setRealTimeEnabled(false);
     }
-  }, []);
+  }, [handleRealTimeEvent]);
 
   const handleRealTimeEvent = useCallback((event: RealTimeEvent) => {
     setLastUpdate(new Date());

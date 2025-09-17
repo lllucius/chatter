@@ -785,6 +785,17 @@ class UnifiedWorkflowExecutor:
                 message.id, final_content
             )
 
+        # Clear the placeholder flag to ensure the message is not filtered out
+        if message.extra_metadata and message.extra_metadata.get("is_placeholder"):
+            # Create a copy of metadata without the placeholder flag
+            updated_metadata = message.extra_metadata.copy()
+            updated_metadata.pop("is_placeholder", None)
+            
+            # Update the message metadata directly in the database
+            message.extra_metadata = updated_metadata
+            await self.message_service.session.flush()
+            await self.message_service.session.refresh(message)
+
         return StreamingChatChunk(
             type="complete",
             content="",

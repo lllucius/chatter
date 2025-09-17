@@ -125,19 +125,17 @@ class UnifiedWorkflowExecutor:
             # Extract response
             response_content = self._extract_response_content(result)
 
-            # Create response message
-            assistant_message = (
-                await self.message_service.add_message_to_conversation(
-                    conversation_id=conversation.id,
-                    user_id=user_id,
-                    role=MessageRole.ASSISTANT,
-                    content=response_content,
-                    metadata=(
-                        {"correlation_id": correlation_id}
-                        if correlation_id
-                        else None
-                    ),
-                )
+            # Create response message object (not persisted yet - will be saved by chat service)
+            assistant_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=response_content,
+                extra_metadata=(
+                    {"correlation_id": correlation_id}
+                    if correlation_id
+                    else {}
+                ),
+                sequence_number=0,  # Will be set by message service
             )
 
             # Record success metrics
@@ -784,6 +782,17 @@ class UnifiedWorkflowExecutor:
             await self.message_service.update_message_content(
                 message.id, final_content
             )
+
+        # Clear the placeholder flag to ensure the message is not filtered out
+        if message.extra_metadata and message.extra_metadata.get("is_placeholder"):
+            # Create a copy of metadata without the placeholder flag
+            updated_metadata = message.extra_metadata.copy()
+            updated_metadata.pop("is_placeholder", None)
+            
+            # Update the message metadata directly in the database
+            message.extra_metadata = updated_metadata
+            await self.message_service.session.flush()
+            await self.message_service.session.refresh(message)
 
         return StreamingChatChunk(
             type="complete",

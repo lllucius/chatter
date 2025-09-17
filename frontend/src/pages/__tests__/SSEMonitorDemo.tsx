@@ -68,7 +68,7 @@ const SSEMonitorDemo: React.FC = () => {
     const userIds = ['user-123', 'user-456', 'admin-789'];
     const sourceSystems = ['api-service', 'worker-service', 'backup-service'];
 
-    const randomChoice = <T>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+    const randomChoice = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
 
     const event: AnySSEEvent = {
       id: `event-${Date.now()}-${eventCount}`,

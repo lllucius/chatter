@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Box,
   Typography,
@@ -19,7 +19,7 @@ interface BackupsTabProps {
   onDownloadBackup: (backup: BackupResponse) => void;
 }
 
-const BackupsTab: React.FC<BackupsTabProps> = ({
+const BackupsTab: React.FC<BackupsTabProps> = memo(({
   backups,
   loading,
   onCreateBackup,
@@ -89,6 +89,8 @@ const BackupsTab: React.FC<BackupsTabProps> = ({
       </List>
     </Box>
   );
-};
+});
+
+BackupsTab.displayName = 'BackupsTab';
 
 export default BackupsTab;

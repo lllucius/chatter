@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Box,
   Typography,
@@ -36,7 +36,7 @@ interface UsersTabProps {
   onCloseActions: () => void;
 }
 
-const UsersTab: React.FC<UsersTabProps> = ({
+const UsersTab: React.FC<UsersTabProps> = memo(({
   users,
   loading,
   onAddUser,
@@ -126,6 +126,8 @@ const UsersTab: React.FC<UsersTabProps> = ({
       </Menu>
     </Box>
   );
-};
+});
+
+UsersTab.displayName = 'UsersTab';
 
 export default UsersTab;

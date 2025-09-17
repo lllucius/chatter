@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Box,
   Typography,
@@ -21,7 +21,7 @@ interface JobsTabProps {
   onCreateJob: () => void;
 }
 
-const JobsTab: React.FC<JobsTabProps> = ({
+const JobsTab: React.FC<JobsTabProps> = memo(({
   jobs,
   jobStats,
   loading,
@@ -158,6 +158,8 @@ const JobsTab: React.FC<JobsTabProps> = ({
       </List>
     </Box>
   );
-};
+});
+
+JobsTab.displayName = 'JobsTab';
 
 export default JobsTab;

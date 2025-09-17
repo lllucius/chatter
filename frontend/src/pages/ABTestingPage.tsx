@@ -682,7 +682,7 @@ const ABTestingPage: React.FC = () => {
         <TabPanel value={activeTab} index={0} idPrefix="ab-testing">
           {selectedTest && (
             <Grid container spacing={3}>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>
                     Test Details
@@ -723,7 +723,7 @@ const ABTestingPage: React.FC = () => {
                   )}
                 </Paper>
               </Grid>
-              <Grid item xs={12} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Paper sx={{ p: 2 }}>
                   <Typography variant="h6" gutterBottom>
                     Test Variants
@@ -804,7 +804,7 @@ const ABTestingPage: React.FC = () => {
         <TabPanel value={activeTab} index={4} idPrefix="ab-testing">
           {testRecommendations ? (
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <Typography variant="h6" gutterBottom>
                   AI Recommendations
                 </Typography>

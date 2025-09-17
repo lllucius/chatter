@@ -341,7 +341,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     label="Agent Name"
@@ -352,7 +352,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     required
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl fullWidth>
                     <InputLabel>Agent Type</InputLabel>
                     <Select
@@ -375,7 +375,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     multiline
@@ -388,7 +388,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     placeholder="Describe what this agent does and its primary purpose..."
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl fullWidth>
                     <InputLabel>Status</InputLabel>
                     <Select
@@ -424,7 +424,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     multiline
@@ -440,7 +440,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     placeholder="Define the agent's role, behavior, and guidelines..."
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <TextField
                     fullWidth
                     multiline
@@ -453,7 +453,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     placeholder="Describe the agent's personality traits and communication style..."
                   />
                 </Grid>
-                <Grid item xs={12}>
+                <Grid size={{ xs: 12 }}>
                   <Typography variant="subtitle2" gutterBottom>
                     Expertise Areas
                   </Typography>
@@ -504,7 +504,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl fullWidth>
                     <InputLabel>Primary LLM</InputLabel>
                     <Select
@@ -526,7 +526,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControl fullWidth>
                     <InputLabel>Fallback LLM</InputLabel>
                     <Select
@@ -548,7 +548,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     </Select>
                   </FormControl>
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <TextField
                     fullWidth
                     type="number"
@@ -563,7 +563,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     inputProps={{ min: 0, max: 2, step: 0.1 }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <TextField
                     fullWidth
                     type="number"
@@ -578,7 +578,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     inputProps={{ min: 1, max: 32000 }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={4}>
+                <Grid size={{ xs: 12, sm: 4 }}>
                   <TextField
                     fullWidth
                     type="number"
@@ -609,7 +609,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             <AccordionDetails>
               <Grid container spacing={2}>
                 {defaultCapabilities.map((capability) => (
-                  <Grid item xs={12} sm={6} md={4} key={capability.value}>
+                  <Grid size={{ xs: 12, sm: 6, md: 4 }} key={capability.value}>
                     <Box
                       sx={{
                         p: 2,
@@ -655,7 +655,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
             </AccordionSummary>
             <AccordionDetails>
               <Grid container spacing={3}>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     type="number"
@@ -670,7 +670,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     inputProps={{ min: 1, max: 300 }}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <FormControlLabel
                     control={
                       <Switch
@@ -686,7 +686,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     label="Learning Enabled"
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     type="number"
@@ -702,7 +702,7 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     disabled={!formData.learning_enabled}
                   />
                 </Grid>
-                <Grid item xs={12} sm={6}>
+                <Grid size={{ xs: 12, sm: 6 }}>
                   <TextField
                     fullWidth
                     type="number"

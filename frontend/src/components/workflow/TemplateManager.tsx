@@ -433,7 +433,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
         <DialogContent>
           <Grid container spacing={2}>
             {templates.map((template): void => (
-              <Grid item xs={12} sm={6} md={4} key={template.id}>
+              <Grid size={{ xs: 12, sm: 6 }} md={4} key={template.id}>
                 <Card>
                   <CardContent>
                     <Box

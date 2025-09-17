@@ -261,7 +261,7 @@ const NotificationDemo: React.FC = () => {
       </Typography>
       <Grid container spacing={3}>
         {demoNotifications.map((demo, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -309,7 +309,7 @@ const NotificationDemo: React.FC = () => {
 
       <Grid container spacing={3}>
         {errorDemos.map((demo, index) => (
-          <Grid item xs={12} sm={6} md={4} key={index}>
+          <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>

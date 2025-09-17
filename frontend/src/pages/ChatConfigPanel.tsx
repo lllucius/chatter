@@ -159,25 +159,39 @@ const ChatConfigPanel: React.FC<Props> = ({
       <Accordion
         expanded={expandedPanel === 'profile'}
         onChange={handlePanelChange('profile')}
+        sx={{ position: 'relative' }}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary 
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            '& .MuiAccordionSummary-content': { 
+              alignItems: 'center' 
+            } 
+          }}
+        >
           <ProfileIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Profile Settings</Typography>
-          <Tooltip title="Reset to defaults">
-            <span>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetProfileSettings();
-                }}
-                sx={{ ml: 1 }}
-              >
-                <ResetIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
         </AccordionSummary>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 48, // Position to the left of the expand icon
+            zIndex: 1,
+          }}
+        >
+          <Tooltip title="Reset to defaults">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetProfileSettings();
+              }}
+            >
+              <ResetIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <AccordionDetails>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel>AI Profile</InputLabel>
@@ -229,25 +243,39 @@ const ChatConfigPanel: React.FC<Props> = ({
       <Accordion
         expanded={expandedPanel === 'prompts'}
         onChange={handlePanelChange('prompts')}
+        sx={{ position: 'relative' }}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary 
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            '& .MuiAccordionSummary-content': { 
+              alignItems: 'center' 
+            } 
+          }}
+        >
           <PromptIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Prompt Templates</Typography>
-          <Tooltip title="Reset to defaults">
-            <span>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetPromptSettings();
-                }}
-                sx={{ ml: 1 }}
-              >
-                <ResetIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
         </AccordionSummary>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 48, // Position to the left of the expand icon
+            zIndex: 1,
+          }}
+        >
+          <Tooltip title="Reset to defaults">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetPromptSettings();
+              }}
+            >
+              <ResetIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <AccordionDetails>
           <FormControl fullWidth size="small" sx={{ mb: 2 }}>
             <InputLabel>Prompt Template</InputLabel>
@@ -281,25 +309,39 @@ const ChatConfigPanel: React.FC<Props> = ({
       <Accordion
         expanded={expandedPanel === 'knowledge'}
         onChange={handlePanelChange('knowledge')}
+        sx={{ position: 'relative' }}
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
+        <AccordionSummary 
+          expandIcon={<ExpandMoreIcon />}
+          sx={{ 
+            '& .MuiAccordionSummary-content': { 
+              alignItems: 'center' 
+            } 
+          }}
+        >
           <DocumentIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Knowledge Base</Typography>
-          <Tooltip title="Reset to defaults">
-            <span>
-              <IconButton
-                size="small"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  resetKnowledgeSettings();
-                }}
-                sx={{ ml: 1 }}
-              >
-                <ResetIcon fontSize="small" />
-              </IconButton>
-            </span>
-          </Tooltip>
         </AccordionSummary>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 48, // Position to the left of the expand icon
+            zIndex: 1,
+          }}
+        >
+          <Tooltip title="Reset to defaults">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetKnowledgeSettings();
+              }}
+            >
+              <ResetIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
         <AccordionDetails>
           <FormControlLabel
             control={

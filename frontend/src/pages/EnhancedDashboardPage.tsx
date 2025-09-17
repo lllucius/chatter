@@ -129,7 +129,7 @@ const EnhancedDashboardPage: React.FC = () => {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <IntegratedDashboard />
               </Grid>
             </Grid>
@@ -147,7 +147,7 @@ const EnhancedDashboardPage: React.FC = () => {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <RealTimeDashboard />
               </Grid>
             </Grid>
@@ -166,7 +166,7 @@ const EnhancedDashboardPage: React.FC = () => {
             </Typography>
 
             <Grid container spacing={3}>
-              <Grid item xs={12}>
+              <Grid size={{ xs: 12 }}>
                 <IntelligentSearch />
               </Grid>
             </Grid>
@@ -180,7 +180,7 @@ const EnhancedDashboardPage: React.FC = () => {
               Phase 4 Enhancements
             </Typography>
             <Grid container spacing={2}>
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="h6" color="primary" gutterBottom>
@@ -198,7 +198,7 @@ const EnhancedDashboardPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="h6" color="primary" gutterBottom>
@@ -216,7 +216,7 @@ const EnhancedDashboardPage: React.FC = () => {
                 </Card>
               </Grid>
 
-              <Grid item xs={12} md={4}>
+              <Grid size={{ xs: 12, md: 4 }}>
                 <Card variant="outlined">
                   <CardContent>
                     <Typography variant="h6" color="primary" gutterBottom>

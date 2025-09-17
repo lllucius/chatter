@@ -200,7 +200,7 @@ const ErrorTestPage: React.FC = () => {
 
         <Grid container spacing={3}>
           {/* Global Error Testing */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -235,7 +235,7 @@ const ErrorTestPage: React.FC = () => {
           </Grid>
 
           {/* Component Error Boundaries */}
-          <Grid item xs={12} md={6}>
+          <Grid size={{ xs: 12, md: 6 }}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -277,7 +277,7 @@ const ErrorTestPage: React.FC = () => {
           </Grid>
 
           {/* Async Error Testing */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card>
               <CardContent>
                 <AsyncErrorTestComponent />
@@ -286,12 +286,12 @@ const ErrorTestPage: React.FC = () => {
           </Grid>
 
           {/* Network Status */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <NetworkStatusComponent />
           </Grid>
 
           {/* Section-level Error Boundary Test */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card>
               <CardContent>
                 <Typography variant="h6" gutterBottom>
@@ -328,7 +328,7 @@ const ErrorTestPage: React.FC = () => {
           </Grid>
 
           {/* Instructions */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Alert severity="info" sx={{ mt: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
                 How to Test Error Handling:

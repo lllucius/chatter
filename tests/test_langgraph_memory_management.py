@@ -48,7 +48,8 @@ class TestLangGraphMemoryManagement:
                 AIMessage(content=f"Assistant response {i}")
             )
 
-        mock_state: ConversationState = {
+        # Create mock state with many messages
+        _mock_state: ConversationState = {
             'messages': messages,
             'user_id': 'test_user',
             'conversation_id': 'test_conv',
@@ -297,7 +298,7 @@ class TestMemoryManagementConfiguration:
         focus_mode_param = sig.parameters.get('focus_mode')
         assert focus_mode_param is not None
         assert (
-            focus_mode_param.default == False
+            not focus_mode_param.default
         )  # Default should be False
 
     def test_llm_service_memory_window_default(self):

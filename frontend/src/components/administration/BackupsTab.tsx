@@ -19,77 +19,74 @@ interface BackupsTabProps {
   onDownloadBackup: (backup: BackupResponse) => void;
 }
 
-const BackupsTab: React.FC<BackupsTabProps> = memo(({
-  backups,
-  loading,
-  onCreateBackup,
-  onDownloadBackup,
-}) => {
-  return (
-    <Box>
-      <Box sx={{ mb: 2 }}>
-        <Button
-          variant="contained"
-          startIcon={<BackupIcon />}
-          onClick={onCreateBackup}
-          disabled={loading}
-        >
-          Create Backup
-        </Button>
-      </Box>
-
-      <List>
-        {backups.map((backup) => (
-          <ListItem
-            key={backup.id}
-            secondaryAction={
-              <Button
-                size="small"
-                startIcon={<DownloadIcon />}
-                onClick={() => onDownloadBackup(backup)}
-              >
-                Download
-              </Button>
-            }
+const BackupsTab: React.FC<BackupsTabProps> = memo(
+  ({ backups, loading, onCreateBackup, onDownloadBackup }) => {
+    return (
+      <Box>
+        <Box sx={{ mb: 2 }}>
+          <Button
+            variant="contained"
+            startIcon={<BackupIcon />}
+            onClick={onCreateBackup}
+            disabled={loading}
           >
-            <ListItemIcon>
-              <BackupIcon />
-            </ListItemIcon>
-            <ListItemText
-              primary={backup.name}
-              secondary={
-                <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
-                  <Chip
-                    size="small"
-                    label={backup.status}
-                    color={
-                      backup.status === 'completed'
-                        ? 'success'
-                        : backup.status === 'failed'
-                          ? 'error'
-                          : 'default'
-                    }
-                  />
-                  <Typography variant="caption" color="text.secondary">
-                    {new Date(backup.created_at).toLocaleString()}
-                  </Typography>
-                </Box>
+            Create Backup
+          </Button>
+        </Box>
+
+        <List>
+          {backups.map((backup) => (
+            <ListItem
+              key={backup.id}
+              secondaryAction={
+                <Button
+                  size="small"
+                  startIcon={<DownloadIcon />}
+                  onClick={() => onDownloadBackup(backup)}
+                >
+                  Download
+                </Button>
               }
-            />
-          </ListItem>
-        ))}
-        {backups.length === 0 && (
-          <ListItem>
-            <ListItemText
-              primary="No backups found"
-              secondary="Create your first backup to get started"
-            />
-          </ListItem>
-        )}
-      </List>
-    </Box>
-  );
-});
+            >
+              <ListItemIcon>
+                <BackupIcon />
+              </ListItemIcon>
+              <ListItemText
+                primary={backup.name}
+                secondary={
+                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                    <Chip
+                      size="small"
+                      label={backup.status}
+                      color={
+                        backup.status === 'completed'
+                          ? 'success'
+                          : backup.status === 'failed'
+                            ? 'error'
+                            : 'default'
+                      }
+                    />
+                    <Typography variant="caption" color="text.secondary">
+                      {new Date(backup.created_at).toLocaleString()}
+                    </Typography>
+                  </Box>
+                }
+              />
+            </ListItem>
+          ))}
+          {backups.length === 0 && (
+            <ListItem>
+              <ListItemText
+                primary="No backups found"
+                secondary="Create your first backup to get started"
+              />
+            </ListItem>
+          )}
+        </List>
+      </Box>
+    );
+  }
+);
 
 BackupsTab.displayName = 'BackupsTab';
 

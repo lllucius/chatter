@@ -83,7 +83,8 @@ export const useAdministrationData = () => {
   // Data loading functions
   const loadBackups = useCallback(async () => {
     try {
-      const response = await getSDK().dataManagement.listBackupsApiV1DataBackups();
+      const response =
+        await getSDK().dataManagement.listBackupsApiV1DataBackups();
       setBackups(response || []);
     } catch (error) {
       handleError(error, {
@@ -213,16 +214,19 @@ export const useAdministrationData = () => {
       loadBackups();
     });
 
-    const unsubscribeBackupCompleted = on('backup.completed', (event: SSEEvent) => {
-      const backupData = event.data as BackupSSEEventData;
-      showNotification({
-        title: 'Backup Completed',
-        message: `Backup "${backupData.backup_id}" completed successfully`,
-        type: 'success',
-        category: 'system',
-      });
-      loadBackups();
-    });
+    const unsubscribeBackupCompleted = on(
+      'backup.completed',
+      (event: SSEEvent) => {
+        const backupData = event.data as BackupSSEEventData;
+        showNotification({
+          title: 'Backup Completed',
+          message: `Backup "${backupData.backup_id}" completed successfully`,
+          type: 'success',
+          category: 'system',
+        });
+        loadBackups();
+      }
+    );
 
     const unsubscribeBackupFailed = on('backup.failed', (event: SSEEvent) => {
       const backupData = event.data as BackupSSEEventData;
@@ -261,7 +265,7 @@ export const useAdministrationData = () => {
     jobStats,
     users,
     dataLoading,
-    
+
     // Actions
     loadBackups,
     loadPlugins,

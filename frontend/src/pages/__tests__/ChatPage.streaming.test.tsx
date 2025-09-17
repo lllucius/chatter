@@ -12,7 +12,9 @@ vi.mock('../../services/auth-service', () => {
         chatChat: vi.fn(),
       },
       profiles: {
-        listProfilesApiV1Profiles: vi.fn(() => Promise.resolve({ profiles: [] })),
+        listProfilesApiV1Profiles: vi.fn(() =>
+          Promise.resolve({ profiles: [] })
+        ),
       },
       prompts: {
         listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
@@ -70,7 +72,7 @@ describe('ChatPage Streaming Functionality', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Get the streaming method mock from the auth service
     const { getSDK } = require('../../services/auth-service');
     mockStreamingMethod = getSDK().chat.streamingChatApiV1ChatStreaming;

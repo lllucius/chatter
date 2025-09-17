@@ -269,7 +269,7 @@ class UnifiedWorkflowExecutor:
                 ):
                     # Look for messages in any node's output (fallback for non-streaming)
                     messages_found = None
-                    for node_name, node_output in event.items():
+                    for _node_name, node_output in event.items():
                         if (
                             isinstance(node_output, dict)
                             and "messages" in node_output
@@ -505,7 +505,7 @@ class UnifiedWorkflowExecutor:
                     for key in event.keys()
                 ):
                     messages_found = None
-                    for node_name, node_output in event.items():
+                    for _node_name, node_output in event.items():
                         if (
                             isinstance(node_output, dict)
                             and "messages" in node_output
@@ -733,7 +733,10 @@ class UnifiedWorkflowExecutor:
             role=MessageRole.ASSISTANT,
             content="...",  # Minimal placeholder content to pass validation
             metadata=(
-                {"correlation_id": correlation_id, "is_placeholder": True}
+                {
+                    "correlation_id": correlation_id,
+                    "is_placeholder": True,
+                }
                 if correlation_id
                 else {"is_placeholder": True}
             ),
@@ -784,11 +787,13 @@ class UnifiedWorkflowExecutor:
             )
 
         # Clear the placeholder flag to ensure the message is not filtered out
-        if message.extra_metadata and message.extra_metadata.get("is_placeholder"):
+        if message.extra_metadata and message.extra_metadata.get(
+            "is_placeholder"
+        ):
             # Create a copy of metadata without the placeholder flag
             updated_metadata = message.extra_metadata.copy()
             updated_metadata.pop("is_placeholder", None)
-            
+
             # Update the message metadata directly in the database
             message.extra_metadata = updated_metadata
             await self.message_service.session.flush()

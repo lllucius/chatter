@@ -19,11 +19,7 @@ import {
   TabPanel,
   Chip,
 } from '../utils/mui';
-import {
-  AddIcon,
-  RefreshIcon,
-  TrendingUpIcon,
-} from '../utils/icons';
+import { AddIcon, RefreshIcon, TrendingUpIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import ABTestTable from '../components/abtesting/ABTestTable';
 import ABTestOverviewTab from '../components/abtesting/ABTestOverviewTab';
@@ -106,7 +102,9 @@ const ABTestingPage: React.FC = () => {
     setPage(newPage);
   };
 
-  const handleRowsPerPageChange = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleRowsPerPageChange = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -216,8 +214,8 @@ const ABTestingPage: React.FC = () => {
             A/B Testing Dashboard
           </Typography>
           <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-            Create, manage, and analyze your A/B tests to optimize user experience
-            and conversion rates.
+            Create, manage, and analyze your A/B tests to optimize user
+            experience and conversion rates.
           </Typography>
 
           {loading ? (
@@ -250,7 +248,12 @@ const ABTestingPage: React.FC = () => {
       </Card>
 
       {/* Create/Edit Dialog */}
-      <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
+      <Dialog
+        open={dialogOpen}
+        onClose={handleCloseDialog}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>
           {editingTest ? 'Edit A/B Test' : 'Create New A/B Test'}
         </DialogTitle>
@@ -265,7 +268,7 @@ const ABTestingPage: React.FC = () => {
               helperText={form.errors.name}
               sx={{ mb: 2 }}
             />
-            
+
             <TextField
               fullWidth
               label="Description"
@@ -304,7 +307,12 @@ const ABTestingPage: React.FC = () => {
               label="Duration (days)"
               type="number"
               value={form.values.duration_days}
-              onChange={(e) => form.handleChange('duration_days', parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                form.handleChange(
+                  'duration_days',
+                  parseInt(e.target.value) || 0
+                )
+              }
               sx={{ mb: 2 }}
             />
 
@@ -313,7 +321,12 @@ const ABTestingPage: React.FC = () => {
               label="Minimum Sample Size"
               type="number"
               value={form.values.min_sample_size}
-              onChange={(e) => form.handleChange('min_sample_size', parseInt(e.target.value) || 0)}
+              onChange={(e) =>
+                form.handleChange(
+                  'min_sample_size',
+                  parseInt(e.target.value) || 0
+                )
+              }
               sx={{ mb: 2 }}
             />
           </Box>

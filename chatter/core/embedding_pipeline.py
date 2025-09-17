@@ -113,8 +113,8 @@ class DocumentTextExtractor:
                         return await f.read()
                 except ImportError:
                     # Fallback to sync reading in thread
-                    def read_sync():
-                        with open(file_path, encoding=encoding) as f:
+                    def read_sync(enc=encoding):
+                        with open(file_path, encoding=enc) as f:
                             return f.read()
 
                     return await asyncio.to_thread(read_sync)

@@ -132,7 +132,9 @@ describe('ChatPage sendMessage Fix', () => {
 
     // Verify that the assistant response is displayed
     await waitFor(() => {
-      expect(screen.getByText('Hello! How can I help you?')).toBeInTheDocument();
+      expect(
+        screen.getByText('Hello! How can I help you?')
+      ).toBeInTheDocument();
     });
   });
 

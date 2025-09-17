@@ -16,6 +16,9 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chatter.core.simplified_workflow_validation import (
+    simplified_workflow_validation_service as workflow_validation_service,
+)
 from chatter.core.validation.exceptions import ValidationError
 
 # Use the centralized validation result from the workflow validation service

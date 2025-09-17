@@ -106,12 +106,12 @@ class TestDocumentMemoryUsage:
 
         from fastapi import UploadFile
 
-        upload_file = UploadFile(
+        UploadFile(
             filename="test.txt", file=mock_file, size=len(test_content)
         )
 
         # Mock document data
-        document_data = DocumentCreate(
+        DocumentCreate(
             title="Memory Test Document",
             description="Testing memory efficiency",
             chunk_size=100,

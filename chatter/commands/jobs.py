@@ -116,8 +116,12 @@ async def create_job(
         "normal", help="Job priority: low, normal, high"
     ),
     data: str = typer.Option(None, help="Job data as JSON string"),
-    document_id: str = typer.Option(None, help="Document ID (required for document_processing jobs)"),
-    file_path: str = typer.Option(None, help="File path (required for document_processing jobs)"),
+    document_id: str = typer.Option(
+        None, help="Document ID (required for document_processing jobs)"
+    ),
+    file_path: str = typer.Option(
+        None, help="File path (required for document_processing jobs)"
+    ),
 ):
     """Create a new job."""
     from chatter_sdk.models.job_create_request import JobCreateRequest
@@ -134,7 +138,9 @@ async def create_job(
     args = []
     if job_type == "document_processing":
         if not document_id or not file_path:
-            console.print(f"❌ [red]document_processing jobs require --document-id and --file-path arguments[/red]")
+            console.print(
+                "❌ [red]document_processing jobs require --document-id and --file-path arguments[/red]"
+            )
             return
         args = [document_id, file_path]
 

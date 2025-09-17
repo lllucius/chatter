@@ -88,7 +88,7 @@ class LLMService:
                 if not api_key:
                     raise LLMProviderError(
                         "No default model available from registry and no OPENAI_API_KEY found for fallback"
-                    )
+                    ) from None
                 return ChatOpenAI(
                     api_key=SecretStr(api_key),
                     model=model_name,
@@ -131,7 +131,7 @@ class LLMService:
                     if not api_key:
                         raise LLMProviderError(
                             f"Provider {provider_name} not found in registry and no OPENAI_API_KEY found for fallback"
-                        )
+                        ) from None
                     return ChatOpenAI(
                         api_key=SecretStr(api_key),
                         model="gpt-3.5-turbo",
@@ -155,7 +155,7 @@ class LLMService:
                     if not api_key:
                         raise LLMProviderError(
                             f"Provider {provider_name} not found in registry and no ANTHROPIC_API_KEY found for fallback"
-                        )
+                        ) from None
                     return ChatAnthropic(
                         api_key=SecretStr(api_key),
                         model_name="claude-3-sonnet-20240229",
@@ -173,7 +173,7 @@ class LLMService:
                 else:
                     raise ValueError(
                         f"Unsupported provider: {provider_name}"
-                    )
+                    ) from None
 
         # Create provider instance with custom parameters
         try:

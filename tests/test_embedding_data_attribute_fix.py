@@ -106,11 +106,11 @@ class TestSafeOpenAIEmbeddingsDataFix:
                                 else:
                                     raise ValueError(
                                         f"Invalid embedding object: {type(r)}"
-                                    )
+                                    ) from None
                         else:
                             raise ValueError(
                                 f"Unhandled response format: {type(response)}"
-                            )
+                            ) from None
 
                 return embeddings
 
@@ -209,11 +209,11 @@ class TestSafeOpenAIEmbeddingsDataFix:
                                 else:
                                     raise ValueError(
                                         f"Invalid embedding object: {type(r)}"
-                                    )
+                                    ) from None
                         else:
                             raise ValueError(
                                 f"Unhandled response format: {type(response)}"
-                            )
+                            ) from None
 
                 return embeddings
 

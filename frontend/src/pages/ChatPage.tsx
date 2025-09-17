@@ -1,11 +1,5 @@
 import React, { useState, useCallback, useEffect } from 'react';
-import {
-  Box,
-  Card,
-  CardContent,
-  Typography,
-  Button,
-} from '../utils/mui';
+import { Box, Card, CardContent, Typography, Button } from '../utils/mui';
 import {
   BotIcon,
   HistoryIcon,
@@ -27,10 +21,9 @@ import type { ConversationResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
-  
   // Use right sidebar context
   const { setPanelContent, setTitle, setOpen } = useRightSidebar();
-  
+
   // Use custom hooks for data and message management
   const {
     profiles,
@@ -74,343 +67,382 @@ const ChatPage: React.FC = () => {
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
   // Message handlers
-  const handleEditMessage = useCallback((messageId: string, newContent: string) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, content: newContent }
-        : msg
-    ));
-  }, [setMessages]);
+  const handleEditMessage = useCallback(
+    (messageId: string, newContent: string) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId ? { ...msg, content: newContent } : msg
+        )
+      );
+    },
+    [setMessages]
+  );
 
-  const handleDeleteMessage = useCallback((messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
-  }, [setMessages]);
+  const handleDeleteMessage = useCallback(
+    (messageId: string) => {
+      setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
+    },
+    [setMessages]
+  );
 
-  const handleRateMessage = useCallback((messageId: string, rating: 'good' | 'bad') => {
-    // Implementation for message rating
-    toastService.info(`Message rated as ${rating}`);
-  }, []);
+  const handleRateMessage = useCallback(
+    (messageId: string, rating: 'good' | 'bad') => {
+      // Implementation for message rating
+      toastService.info(`Message rated as ${rating}`);
+    },
+    []
+  );
 
-  const handleRegenerateMessage = useCallback(async (messageId: string) => {
-    try {
-      setLoading(true);
-      // Find the message and regenerate from the previous user message
-      const messageIndex = messages.findIndex(msg => msg.id === messageId);
-      if (messageIndex > 0) {
-        const userMessage = messages[messageIndex - 1];
-        if (userMessage.role === 'user') {
-          // Call sendMessage directly here to avoid circular dependency
-          const textToSend = userMessage.content;
-          if (!textToSend) return;
+  const handleRegenerateMessage = useCallback(
+    async (messageId: string) => {
+      try {
+        setLoading(true);
+        // Find the message and regenerate from the previous user message
+        const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+        if (messageIndex > 0) {
+          const userMessage = messages[messageIndex - 1];
+          if (userMessage.role === 'user') {
+            // Call sendMessage directly here to avoid circular dependency
+            const textToSend = userMessage.content;
+            if (!textToSend) return;
 
-          // Prepare chat request
-          const chatRequest = {
-            message: textToSend,
-            profile_id: selectedProfile || undefined,
-            prompt_id: selectedPrompt || undefined,
-            document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-            temperature,
-            max_tokens: maxTokens,
-            stream: streamingEnabled,
-            enable_retrieval: enableRetrieval,
-          };
+            // Prepare chat request
+            const chatRequest = {
+              message: textToSend,
+              profile_id: selectedProfile || undefined,
+              prompt_id: selectedPrompt || undefined,
+              document_ids:
+                selectedDocuments.length > 0 ? selectedDocuments : undefined,
+              temperature,
+              max_tokens: maxTokens,
+              stream: streamingEnabled,
+              enable_retrieval: enableRetrieval,
+            };
 
-          // Send message to API
-          let response;
-          if (streamingEnabled) {
-            // Use streaming endpoint 
-            await handleStreamingResponse(chatRequest, true);
-            return; // Streaming handling is complete
-          } else {
-            // Use non-streaming endpoint  
-            response = await getSDK().chat.chatChat(chatRequest);
-          }
+            // Send message to API
+            let response;
+            if (streamingEnabled) {
+              // Use streaming endpoint
+              await handleStreamingResponse(chatRequest, true);
+              return; // Streaming handling is complete
+            } else {
+              // Use non-streaming endpoint
+              response = await getSDK().chat.chatChat(chatRequest);
+            }
 
-          // Validate response structure
-          if (!response || !response.message || typeof response.message.content !== 'string') {
-            throw new Error('Invalid response from chat API');
-          }
+            // Validate response structure
+            if (
+              !response ||
+              !response.message ||
+              typeof response.message.content !== 'string'
+            ) {
+              throw new Error('Invalid response from chat API');
+            }
 
-          // Create assistant message
-          const assistantMessage: ChatMessage = {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content: response.message.content,
-            timestamp: new Date(),
-            metadata: {
-              model: response.message.model_used || undefined,
-              tokens: response.message.total_tokens || undefined,
-              processingTime: response.message.response_time_ms || undefined,
-              workflow: {
-                stage: 'Complete',
-                currentStep: 0,
-                totalSteps: 1,
-                stepDescriptions: ['Message processed'],
+            // Create assistant message
+            const assistantMessage: ChatMessage = {
+              id: `assistant-${Date.now()}`,
+              role: 'assistant',
+              content: response.message.content,
+              timestamp: new Date(),
+              metadata: {
+                model: response.message.model_used || undefined,
+                tokens: response.message.total_tokens || undefined,
+                processingTime: response.message.response_time_ms || undefined,
+                workflow: {
+                  stage: 'Complete',
+                  currentStep: 0,
+                  totalSteps: 1,
+                  stepDescriptions: ['Message processed'],
+                },
               },
-            },
-            onEdit: handleEditMessage,
-            onRegenerate: handleRegenerateMessage,
-            onDelete: handleDeleteMessage,
-            onRate: handleRateMessage,
-          };
+              onEdit: handleEditMessage,
+              onRegenerate: handleRegenerateMessage,
+              onDelete: handleDeleteMessage,
+              onRate: handleRateMessage,
+            };
 
-          // Replace the last assistant message
-          setMessages(prev => {
+            // Replace the last assistant message
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              const lastAssistantIndex = newMessages.findLastIndex(
+                (msg) => msg.role === 'assistant'
+              );
+              if (lastAssistantIndex !== -1) {
+                newMessages[lastAssistantIndex] = assistantMessage;
+              }
+              return newMessages;
+            });
+          }
+        }
+      } catch (error) {
+        handleError(error, {
+          source: 'ChatPage.handleRegenerateMessage',
+          operation: 'regenerate message',
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      messages,
+      setLoading,
+      selectedProfile,
+      selectedPrompt,
+      selectedDocuments,
+      temperature,
+      maxTokens,
+      streamingEnabled,
+      enableRetrieval,
+      setMessages,
+      handleEditMessage,
+      handleDeleteMessage,
+      handleRateMessage,
+      handleStreamingResponse,
+    ]
+  );
+
+  const handleSelectConversation = useCallback(
+    async (conversation: ConversationResponse) => {
+      try {
+        const conversationWithMessages =
+          await getSDK().conversations.getConversationApiV1ConversationsConversationId(
+            conversation.id
+          );
+        setCurrentConversation(conversationWithMessages);
+        await loadMessagesForConversation(conversation.id);
+        setHistoryDialogOpen(false);
+      } catch (error) {
+        handleError(error, {
+          source: 'ChatPage.handleSelectConversation',
+          operation: 'select conversation',
+        });
+      }
+    },
+    [setCurrentConversation, loadMessagesForConversation]
+  );
+
+  // Handle streaming response from chat API
+  const handleStreamingResponse = useCallback(
+    async (chatRequest: Record<string, unknown>, isRegeneration: boolean) => {
+      try {
+        // Get the streaming response
+        const stream =
+          await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
+
+        // Create a text decoder to handle the stream
+        const decoder = new TextDecoder();
+        const reader = stream.getReader();
+
+        let streamedContent = '';
+        let assistantMessageId = `assistant-${Date.now()}`;
+
+        // Create initial assistant message with empty content
+        const initialAssistantMessage: ChatMessage = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: 'Streaming',
+              currentStep: 0,
+              totalSteps: 1,
+              stepDescriptions: ['Receiving response...'],
+            },
+          },
+          onEdit: handleEditMessage,
+          onRegenerate: handleRegenerateMessage,
+          onDelete: handleDeleteMessage,
+          onRate: handleRateMessage,
+        };
+
+        // Add the initial message to the chat
+        if (isRegeneration) {
+          setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
+            const lastAssistantIndex = newMessages.findLastIndex(
+              (msg) => msg.role === 'assistant'
+            );
             if (lastAssistantIndex !== -1) {
-              newMessages[lastAssistantIndex] = assistantMessage;
+              newMessages[lastAssistantIndex] = initialAssistantMessage;
             }
             return newMessages;
           });
+        } else {
+          setMessages((prev) => [...prev, initialAssistantMessage]);
         }
-      }
-    } catch (error) {
-      handleError(error, {
-        source: 'ChatPage.handleRegenerateMessage',
-        operation: 'regenerate message',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    messages, 
-    setLoading, 
-    selectedProfile,
-    selectedPrompt,
-    selectedDocuments,
-    temperature,
-    maxTokens,
-    streamingEnabled,
-    enableRetrieval,
-    setMessages,
-    handleEditMessage,
-    handleDeleteMessage,
-    handleRateMessage,
-    handleStreamingResponse,
-  ]);
 
-  const handleSelectConversation = useCallback(async (conversation: ConversationResponse) => {
-    try {
-      const conversationWithMessages = await getSDK().conversations.getConversationApiV1ConversationsConversationId(conversation.id);
-      setCurrentConversation(conversationWithMessages);
-      await loadMessagesForConversation(conversation.id);
-      setHistoryDialogOpen(false);
-    } catch (error) {
-      handleError(error, {
-        source: 'ChatPage.handleSelectConversation',
-        operation: 'select conversation',
-      });
-    }
-  }, [setCurrentConversation, loadMessagesForConversation]);
+        let buffer = '';
+        let totalTokens: number | undefined;
+        let model: string | undefined;
+        let processingTime: number | undefined;
+        let conversationId: string | undefined;
 
-  // Handle streaming response from chat API
-  const handleStreamingResponse = useCallback(async (chatRequest: Record<string, unknown>, isRegeneration: boolean) => {
-    try {
-      // Get the streaming response
-      const stream = await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
-      
-      // Create a text decoder to handle the stream
-      const decoder = new TextDecoder();
-      const reader = stream.getReader();
-      
-      let streamedContent = '';
-      let assistantMessageId = `assistant-${Date.now()}`;
-      
-      // Create initial assistant message with empty content
-      const initialAssistantMessage: ChatMessage = {
-        id: assistantMessageId,
-        role: 'assistant',
-        content: '',
-        timestamp: new Date(),
-        metadata: {
-          workflow: {
-            stage: 'Streaming',
-            currentStep: 0,
-            totalSteps: 1,
-            stepDescriptions: ['Receiving response...'],
-          },
-        },
-        onEdit: handleEditMessage,
-        onRegenerate: handleRegenerateMessage,
-        onDelete: handleDeleteMessage,
-        onRate: handleRateMessage,
-      };
+        // Process the stream
+        while (true) {
+          const { done, value } = await reader.read();
 
-      // Add the initial message to the chat
-      if (isRegeneration) {
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
-          if (lastAssistantIndex !== -1) {
-            newMessages[lastAssistantIndex] = initialAssistantMessage;
+          if (done) {
+            break;
           }
-          return newMessages;
-        });
-      } else {
-        setMessages(prev => [...prev, initialAssistantMessage]);
-      }
 
-      let buffer = '';
-      let totalTokens: number | undefined;
-      let model: string | undefined;
-      let processingTime: number | undefined;
-      let conversationId: string | undefined;
+          // Decode the chunk and add to buffer
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
 
-      // Process the stream
-      while (true) {
-        const { done, value } = await reader.read();
-        
-        if (done) {
-          break;
-        }
+          // Process each complete line
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const raw = line.slice(6).trim();
 
-        // Decode the chunk and add to buffer
-        buffer += decoder.decode(value, { stream: true });
-        const lines = buffer.split('\n');
-        buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
-
-        // Process each complete line
-        for (const line of lines) {
-          if (line.startsWith('data: ')) {
-            const raw = line.slice(6).trim();
-            
-            // Handle special cases
-            if (raw === '[DONE]') {
-              // End of stream
-              continue;
-            }
-
-            try {
-              const eventData = JSON.parse(raw);
-              
-              switch (eventData.type) {
-                case 'start':
-                  conversationId = eventData.conversation_id;
-                  break;
-                  
-                case 'token':
-                  // Add the token to our streamed content
-                  streamedContent += eventData.content || '';
-                  
-                  // Update the message with the new content
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessageId 
-                      ? {
-                          ...msg,
-                          content: streamedContent,
-                          metadata: {
-                            ...msg.metadata,
-                            workflow: {
-                              stage: 'Streaming',
-                              currentStep: 0,
-                              totalSteps: 1,
-                              stepDescriptions: ['Receiving response...'],
-                            },
-                          },
-                        }
-                      : msg
-                  ));
-                  break;
-                  
-                case 'complete':
-                  // Extract final metadata
-                  if (eventData.metadata) {
-                    totalTokens = eventData.metadata.total_tokens;
-                    model = eventData.metadata.model_used;
-                    processingTime = eventData.metadata.response_time_ms;
-                  }
-                  
-                  // Update the message with final metadata
-                  setMessages(prev => prev.map(msg => 
-                    msg.id === assistantMessageId 
-                      ? {
-                          ...msg,
-                          content: streamedContent,
-                          metadata: {
-                            model,
-                            tokens: totalTokens,
-                            processingTime,
-                            workflow: {
-                              stage: 'Complete',
-                              currentStep: 1,
-                              totalSteps: 1,
-                              stepDescriptions: ['Response completed'],
-                            },
-                          },
-                        }
-                      : msg
-                  ));
-                  break;
-                  
-                case 'error':
-                  throw new Error(eventData.message || 'Streaming error occurred');
-                  
-                default:
-                  // Handle other event types if needed
-                  // console.log('Unknown streaming event type:', eventData.type);
-                  break;
+              // Handle special cases
+              if (raw === '[DONE]') {
+                // End of stream
+                continue;
               }
-            } catch (parseError) {
-              // console.warn('Failed to parse streaming data:', raw, parseError);
+
+              try {
+                const eventData = JSON.parse(raw);
+
+                switch (eventData.type) {
+                  case 'start':
+                    conversationId = eventData.conversation_id;
+                    break;
+
+                  case 'token':
+                    // Add the token to our streamed content
+                    streamedContent += eventData.content || '';
+
+                    // Update the message with the new content
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantMessageId
+                          ? {
+                              ...msg,
+                              content: streamedContent,
+                              metadata: {
+                                ...msg.metadata,
+                                workflow: {
+                                  stage: 'Streaming',
+                                  currentStep: 0,
+                                  totalSteps: 1,
+                                  stepDescriptions: ['Receiving response...'],
+                                },
+                              },
+                            }
+                          : msg
+                      )
+                    );
+                    break;
+
+                  case 'complete':
+                    // Extract final metadata
+                    if (eventData.metadata) {
+                      totalTokens = eventData.metadata.total_tokens;
+                      model = eventData.metadata.model_used;
+                      processingTime = eventData.metadata.response_time_ms;
+                    }
+
+                    // Update the message with final metadata
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantMessageId
+                          ? {
+                              ...msg,
+                              content: streamedContent,
+                              metadata: {
+                                model,
+                                tokens: totalTokens,
+                                processingTime,
+                                workflow: {
+                                  stage: 'Complete',
+                                  currentStep: 1,
+                                  totalSteps: 1,
+                                  stepDescriptions: ['Response completed'],
+                                },
+                              },
+                            }
+                          : msg
+                      )
+                    );
+                    break;
+
+                  case 'error':
+                    throw new Error(
+                      eventData.message || 'Streaming error occurred'
+                    );
+
+                  default:
+                    // Handle other event types if needed
+                    // console.log('Unknown streaming event type:', eventData.type);
+                    break;
+                }
+              } catch (parseError) {
+                // console.warn('Failed to parse streaming data:', raw, parseError);
+              }
             }
           }
         }
-      }
 
-      // Clean up
-      reader.releaseLock();
-      
-      // Focus input after streaming is complete
-      focusInput();
-      
-    } catch (error) {
-      // Handle streaming errors by showing an error message
-      const errorMessage: ChatMessage = {
-        id: `assistant-error-${Date.now()}`,
-        role: 'assistant',
-        content: 'Sorry, I encountered an error while processing your request. Please try again.',
-        timestamp: new Date(),
-        metadata: {
-          workflow: {
-            stage: 'Error',
-            currentStep: 0,
-            totalSteps: 1,
-            stepDescriptions: ['Error occurred during streaming'],
+        // Clean up
+        reader.releaseLock();
+
+        // Focus input after streaming is complete
+        focusInput();
+      } catch (error) {
+        // Handle streaming errors by showing an error message
+        const errorMessage: ChatMessage = {
+          id: `assistant-error-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Sorry, I encountered an error while processing your request. Please try again.',
+          timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: 'Error',
+              currentStep: 0,
+              totalSteps: 1,
+              stepDescriptions: ['Error occurred during streaming'],
+            },
           },
-        },
-        onEdit: handleEditMessage,
-        onRegenerate: handleRegenerateMessage,
-        onDelete: handleDeleteMessage,
-        onRate: handleRateMessage,
-      };
+          onEdit: handleEditMessage,
+          onRegenerate: handleRegenerateMessage,
+          onDelete: handleDeleteMessage,
+          onRate: handleRateMessage,
+        };
 
-      if (isRegeneration) {
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
-          if (lastAssistantIndex !== -1) {
-            newMessages[lastAssistantIndex] = errorMessage;
-          }
-          return newMessages;
+        if (isRegeneration) {
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            const lastAssistantIndex = newMessages.findLastIndex(
+              (msg) => msg.role === 'assistant'
+            );
+            if (lastAssistantIndex !== -1) {
+              newMessages[lastAssistantIndex] = errorMessage;
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => [...prev, errorMessage]);
+        }
+
+        handleError(error, {
+          source: 'ChatPage.handleStreamingResponse',
+          operation: 'stream chat response',
         });
-      } else {
-        setMessages(prev => [...prev, errorMessage]);
       }
-      
-      handleError(error, {
-        source: 'ChatPage.handleStreamingResponse',
-        operation: 'stream chat response',
-      });
-    }
-  }, [
-    setMessages,
-    handleEditMessage,
-    handleRegenerateMessage,
-    handleDeleteMessage,
-    handleRateMessage,
-    focusInput,
-  ]);
+    },
+    [
+      setMessages,
+      handleEditMessage,
+      handleRegenerateMessage,
+      handleDeleteMessage,
+      handleRateMessage,
+      focusInput,
+    ]
+  );
 
   // Set up right sidebar content
   useEffect(() => {
@@ -438,8 +470,8 @@ const ChatPage: React.FC = () => {
     );
     setOpen(true);
   }, [
-    setPanelContent, 
-    setTitle, 
+    setPanelContent,
+    setTitle,
     setOpen,
     profiles,
     prompts,
@@ -454,138 +486,152 @@ const ChatPage: React.FC = () => {
     handleSelectConversation,
   ]);
 
-  const sendMessage = useCallback(async (messageText?: string, isRegeneration = false) => {
-    const textToSend = messageText || message.trim();
-    if (!textToSend || loading) return;
+  const sendMessage = useCallback(
+    async (messageText?: string, isRegeneration = false) => {
+      const textToSend = messageText || message.trim();
+      if (!textToSend || loading) return;
 
-    try {
-      setLoading(true);
-      
-      if (!isRegeneration) {
-        setMessage('');
-      }
+      try {
+        setLoading(true);
 
-      // Create user message
-      const userMessage: ChatMessage = {
-        id: `user-${Date.now()}`,
-        role: 'user',
-        content: textToSend,
-        timestamp: new Date(),
-        onEdit: handleEditMessage,
-        onRegenerate: handleRegenerateMessage,
-        onDelete: handleDeleteMessage,
-        onRate: handleRateMessage,
-      };
+        if (!isRegeneration) {
+          setMessage('');
+        }
 
-      if (!isRegeneration) {
-        setMessages(prev => [...prev, userMessage]);
-      }
+        // Create user message
+        const userMessage: ChatMessage = {
+          id: `user-${Date.now()}`,
+          role: 'user',
+          content: textToSend,
+          timestamp: new Date(),
+          onEdit: handleEditMessage,
+          onRegenerate: handleRegenerateMessage,
+          onDelete: handleDeleteMessage,
+          onRate: handleRateMessage,
+        };
 
-      // Prepare chat request
-      const chatRequest = {
-        message: textToSend,
-        profile_id: selectedProfile || undefined,
-        prompt_id: selectedPrompt || undefined,
-        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-        temperature,
-        max_tokens: maxTokens,
-        stream: streamingEnabled,
-        enable_retrieval: enableRetrieval,
-      };
+        if (!isRegeneration) {
+          setMessages((prev) => [...prev, userMessage]);
+        }
 
-      // Send message to API
-      let response;
-      if (streamingEnabled) {
-        // Use streaming endpoint
-        await handleStreamingResponse(chatRequest, isRegeneration);
-        return; // Streaming handling is complete
-      } else {
-        // Use non-streaming endpoint  
-        response = await getSDK().chat.chatChat(chatRequest);
-      }
+        // Prepare chat request
+        const chatRequest = {
+          message: textToSend,
+          profile_id: selectedProfile || undefined,
+          prompt_id: selectedPrompt || undefined,
+          document_ids:
+            selectedDocuments.length > 0 ? selectedDocuments : undefined,
+          temperature,
+          max_tokens: maxTokens,
+          stream: streamingEnabled,
+          enable_retrieval: enableRetrieval,
+        };
 
-      // Validate response structure
-      if (!response || !response.message || typeof response.message.content !== 'string') {
-        throw new Error('Invalid response from chat API');
-      }
+        // Send message to API
+        let response;
+        if (streamingEnabled) {
+          // Use streaming endpoint
+          await handleStreamingResponse(chatRequest, isRegeneration);
+          return; // Streaming handling is complete
+        } else {
+          // Use non-streaming endpoint
+          response = await getSDK().chat.chatChat(chatRequest);
+        }
 
-      // Create assistant message
-      const assistantMessage: ChatMessage = {
-        id: `assistant-${Date.now()}`,
-        role: 'assistant',
-        content: response.message.content,
-        timestamp: new Date(),
-        metadata: {
-          model: response.message.model_used || undefined,
-          tokens: response.message.total_tokens || undefined,
-          processingTime: response.message.response_time_ms || undefined,
-          workflow: {
-            stage: 'Complete',
-            currentStep: 0,
-            totalSteps: 1,
-            stepDescriptions: ['Message processed'],
+        // Validate response structure
+        if (
+          !response ||
+          !response.message ||
+          typeof response.message.content !== 'string'
+        ) {
+          throw new Error('Invalid response from chat API');
+        }
+
+        // Create assistant message
+        const assistantMessage: ChatMessage = {
+          id: `assistant-${Date.now()}`,
+          role: 'assistant',
+          content: response.message.content,
+          timestamp: new Date(),
+          metadata: {
+            model: response.message.model_used || undefined,
+            tokens: response.message.total_tokens || undefined,
+            processingTime: response.message.response_time_ms || undefined,
+            workflow: {
+              stage: 'Complete',
+              currentStep: 0,
+              totalSteps: 1,
+              stepDescriptions: ['Message processed'],
+            },
           },
-        },
-        onEdit: handleEditMessage,
-        onRegenerate: handleRegenerateMessage,
-        onDelete: handleDeleteMessage,
-        onRate: handleRateMessage,
-      };
+          onEdit: handleEditMessage,
+          onRegenerate: handleRegenerateMessage,
+          onDelete: handleDeleteMessage,
+          onRate: handleRateMessage,
+        };
 
-      if (isRegeneration) {
-        // Replace the last assistant message
-        setMessages(prev => {
-          const newMessages = [...prev];
-          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
-          if (lastAssistantIndex !== -1) {
-            newMessages[lastAssistantIndex] = assistantMessage;
-          }
-          return newMessages;
+        if (isRegeneration) {
+          // Replace the last assistant message
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            const lastAssistantIndex = newMessages.findLastIndex(
+              (msg) => msg.role === 'assistant'
+            );
+            if (lastAssistantIndex !== -1) {
+              newMessages[lastAssistantIndex] = assistantMessage;
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+
+        focusInput();
+      } catch (error) {
+        handleError(error, {
+          source: 'ChatPage.sendMessage',
+          operation: 'send message',
         });
-      } else {
-        setMessages(prev => [...prev, assistantMessage]);
+      } finally {
+        setLoading(false);
       }
+    },
+    [
+      message,
+      loading,
+      selectedProfile,
+      selectedPrompt,
+      selectedDocuments,
+      temperature,
+      maxTokens,
+      streamingEnabled,
+      enableRetrieval,
+      setMessage,
+      setMessages,
+      setLoading,
+      handleEditMessage,
+      handleRegenerateMessage,
+      handleDeleteMessage,
+      handleRateMessage,
+      focusInput,
+      handleStreamingResponse,
+    ]
+  );
 
-      focusInput();
-    } catch (error) {
-      handleError(error, {
-        source: 'ChatPage.sendMessage',
-        operation: 'send message',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [
-    message,
-    loading,
-    selectedProfile,
-    selectedPrompt,
-    selectedDocuments,
-    temperature,
-    maxTokens,
-    streamingEnabled,
-    enableRetrieval,
-    setMessage,
-    setMessages,
-    setLoading,
-    handleEditMessage,
-    handleRegenerateMessage,
-    handleDeleteMessage,
-    handleRateMessage,
-    focusInput,
-    handleStreamingResponse,
-  ]);
-
-  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (
-      e.key === 'Enter' &&
-      !e.shiftKey &&
-      !(e.nativeEvent as KeyboardEvent & { isComposing?: boolean }).isComposing
-    ) {
-      e.preventDefault();
-      sendMessage();
-    }
-  }, [sendMessage]);
+  const handleKeyDown = useCallback(
+    (e: React.KeyboardEvent<HTMLDivElement>) => {
+      if (
+        e.key === 'Enter' &&
+        !e.shiftKey &&
+        !(e.nativeEvent as KeyboardEvent & { isComposing?: boolean })
+          .isComposing
+      ) {
+        e.preventDefault();
+        sendMessage();
+      }
+    },
+    [sendMessage]
+  );
 
   const handleClearMessages = useCallback(() => {
     clearMessages();
@@ -639,11 +685,7 @@ const ChatPage: React.FC = () => {
   );
 
   return (
-    <PageLayout 
-      title="Chat" 
-      toolbar={toolbar} 
-      fixedBottom={messageInput}
-    >
+    <PageLayout title="Chat" toolbar={toolbar} fixedBottom={messageInput}>
       {/* Messages Area */}
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <CardContent
@@ -673,7 +715,7 @@ const ChatPage: React.FC = () => {
                 Welcome to Chatter!
               </Typography>
               <Typography variant="body2" textAlign="center">
-                Configure your settings in the right panel and start chatting. 
+                Configure your settings in the right panel and start chatting.
                 Use the streaming toggle for real-time responses.
               </Typography>
             </Box>

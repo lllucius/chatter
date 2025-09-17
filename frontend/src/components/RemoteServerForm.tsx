@@ -173,7 +173,7 @@ const RemoteServerForm: React.FC<RemoteServerFormProps> = ({
 
       if (mode === 'edit') {
         // For edit mode, remove fields that can't be updated
-        // eslint-disable-next-line @typescript-eslint/no-unused-vars
+
         const {
           name: _name,
           base_url: _base_url,

@@ -23,7 +23,12 @@ import {
   Description as DocumentIcon,
   RestartAlt as ResetIcon,
 } from '@mui/icons-material';
-import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from 'chatter-sdk';
+import {
+  ProfileResponse,
+  PromptResponse,
+  DocumentResponse,
+  ConversationResponse,
+} from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 interface Props {
@@ -161,12 +166,12 @@ const ChatConfigPanel: React.FC<Props> = ({
         onChange={handlePanelChange('profile')}
         sx={{ position: 'relative' }}
       >
-        <AccordionSummary 
+        <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          sx={{ 
-            '& .MuiAccordionSummary-content': { 
-              alignItems: 'center' 
-            } 
+          sx={{
+            '& .MuiAccordionSummary-content': {
+              alignItems: 'center',
+            },
           }}
         >
           <ProfileIcon sx={{ mr: 1 }} />
@@ -245,12 +250,12 @@ const ChatConfigPanel: React.FC<Props> = ({
         onChange={handlePanelChange('prompts')}
         sx={{ position: 'relative' }}
       >
-        <AccordionSummary 
+        <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          sx={{ 
-            '& .MuiAccordionSummary-content': { 
-              alignItems: 'center' 
-            } 
+          sx={{
+            '& .MuiAccordionSummary-content': {
+              alignItems: 'center',
+            },
           }}
         >
           <PromptIcon sx={{ mr: 1 }} />
@@ -311,12 +316,12 @@ const ChatConfigPanel: React.FC<Props> = ({
         onChange={handlePanelChange('knowledge')}
         sx={{ position: 'relative' }}
       >
-        <AccordionSummary 
+        <AccordionSummary
           expandIcon={<ExpandMoreIcon />}
-          sx={{ 
-            '& .MuiAccordionSummary-content': { 
-              alignItems: 'center' 
-            } 
+          sx={{
+            '& .MuiAccordionSummary-content': {
+              alignItems: 'center',
+            },
           }}
         >
           <DocumentIcon sx={{ mr: 1 }} />

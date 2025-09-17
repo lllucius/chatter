@@ -68,7 +68,8 @@ const ChatBubbleDemo: React.FC = () => {
     {
       id: 'assistant-1',
       role: 'assistant',
-      content: 'Machine learning is a subset of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed for every task. It works by using algorithms to identify patterns in large datasets, then uses these patterns to make predictions or decisions about new, unseen data.',
+      content:
+        'Machine learning is a subset of artificial intelligence that enables computers to learn and make decisions from data without being explicitly programmed for every task. It works by using algorithms to identify patterns in large datasets, then uses these patterns to make predictions or decisions about new, unseen data.',
       timestamp: new Date(),
       metadata: {
         model: 'gpt-4',
@@ -88,7 +89,7 @@ const ChatBubbleDemo: React.FC = () => {
     if (demoStep < demoSteps.length - 1) {
       const nextStepIndex = demoStep + 1;
       setDemoStep(nextStepIndex);
-      
+
       // Update the messages array
       if (nextStepIndex === 1) {
         // Add user message and initial assistant placeholder
@@ -128,20 +129,21 @@ const ChatBubbleDemo: React.FC = () => {
         <Typography variant="h5" gutterBottom>
           Chat Bubble Demo: Merged Working State
         </Typography>
-        
+
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          This demo shows how the chat &quot;working&quot; indicator is now merged with the assistant response bubble,
-          displaying workflow progress directly in the message.
+          This demo shows how the chat &quot;working&quot; indicator is now
+          merged with the assistant response bubble, displaying workflow
+          progress directly in the message.
         </Typography>
 
         <Box sx={{ mb: 2 }}>
           <Typography variant="subtitle2" gutterBottom>
             Current Step: {getCurrentStepDescription()}
           </Typography>
-          
+
           <Box sx={{ display: 'flex', gap: 1, mb: 2 }}>
-            <Button 
-              variant="contained" 
+            <Button
+              variant="contained"
               onClick={nextStep}
               disabled={demoStep >= demoSteps.length - 1}
             >
@@ -166,16 +168,20 @@ const ChatBubbleDemo: React.FC = () => {
               canDelete={false}
             />
           ))}
-          
+
           {demoMessages.length === 0 && (
-            <Box sx={{ 
-              display: 'flex', 
-              alignItems: 'center', 
-              justifyContent: 'center',
-              height: 150,
-              color: 'text.secondary'
-            }}>
-              <Typography>Click &quot;Next Step&quot; to start the demo</Typography>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: 150,
+                color: 'text.secondary',
+              }}
+            >
+              <Typography>
+                Click &quot;Next Step&quot; to start the demo
+              </Typography>
             </Box>
           )}
         </Box>
@@ -191,13 +197,16 @@ const ChatBubbleDemo: React.FC = () => {
               <strong>Space Efficient:</strong> No separate loading indicator
             </Typography>
             <Typography component="li" variant="body2">
-              <strong>Progress Visibility:</strong> Workflow stage shown in assistant title
+              <strong>Progress Visibility:</strong> Workflow stage shown in
+              assistant title
             </Typography>
             <Typography component="li" variant="body2">
-              <strong>Real-time Updates:</strong> Progress updates appear in the message bubble
+              <strong>Real-time Updates:</strong> Progress updates appear in the
+              message bubble
             </Typography>
             <Typography component="li" variant="body2">
-              <strong>Consistent UI:</strong> Same bubble format for all assistant states
+              <strong>Consistent UI:</strong> Same bubble format for all
+              assistant states
             </Typography>
           </Box>
         </Box>

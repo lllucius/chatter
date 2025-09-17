@@ -215,7 +215,7 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                                     )
                                     raise ValueError(
                                         f"Invalid embedding object in response['data']: {type(r)}"
-                                    )
+                                    ) from None
                             embeddings.extend(batch_embeddings)
                         elif hasattr(response, "model_dump"):
                             # Pydantic model, convert to dict
@@ -249,7 +249,7 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                                         )
                                         raise ValueError(
                                             f"Invalid embedding object in model_dump['data']: {type(r)}"
-                                        )
+                                        ) from None
                                 embeddings.extend(batch_embeddings)
                             else:
                                 logger.error(
@@ -260,7 +260,7 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                                 )
                                 raise ValueError(
                                     f"Unexpected OpenAI response format: {type(response)}"
-                                )
+                                ) from None
                         else:
                             logger.error(
                                 "Unhandled OpenAI response format",
@@ -268,7 +268,7 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             )
                             raise ValueError(
                                 f"Unhandled OpenAI response format: {type(response)}"
-                            )
+                            ) from None
 
             except Exception as e:
                 logger.error(

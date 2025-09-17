@@ -11,19 +11,30 @@ import {
   ABTestRecommendationsResponse,
 } from 'chatter-sdk';
 
-export type TestStatus = 'draft' | 'running' | 'paused' | 'completed' | 'cancelled';
+export type TestStatus =
+  | 'draft'
+  | 'running'
+  | 'paused'
+  | 'completed'
+  | 'cancelled';
 
 export const useABTestingData = () => {
   const [tests, setTests] = useState<ABTestResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [selectedTest, setSelectedTest] = useState<ABTestResponse | null>(null);
-  
+
   // Test metrics and analysis data
-  const [testMetrics, setTestMetrics] = useState<ABTestMetricsResponse | null>(null);
-  const [testResults, setTestResults] = useState<ABTestResultsResponse | null>(null);
-  const [testPerformance, setTestPerformance] = useState<ABTestPerformanceResponse | null>(null);
-  const [testRecommendations, setTestRecommendations] = useState<ABTestRecommendationsResponse | null>(null);
+  const [testMetrics, setTestMetrics] = useState<ABTestMetricsResponse | null>(
+    null
+  );
+  const [testResults, setTestResults] = useState<ABTestResultsResponse | null>(
+    null
+  );
+  const [testPerformance, setTestPerformance] =
+    useState<ABTestPerformanceResponse | null>(null);
+  const [testRecommendations, setTestRecommendations] =
+    useState<ABTestRecommendationsResponse | null>(null);
 
   const loadTests = useCallback(async () => {
     try {
@@ -42,12 +53,17 @@ export const useABTestingData = () => {
 
   const loadTestDetails = useCallback(async (testId: string) => {
     try {
-      const [metricsResp, resultsResp, performanceResp, recommendationsResp] = await Promise.allSettled([
-        getSDK().abTesting.getABTestMetricsApiV1AbTestsTestIdMetrics(testId),
-        getSDK().abTesting.getABTestResultsApiV1AbTestsTestIdResults(testId),
-        getSDK().abTesting.getABTestPerformanceApiV1AbTestsTestIdPerformance(testId),
-        getSDK().abTesting.getABTestRecommendationsApiV1AbTestsTestIdRecommendations(testId),
-      ]);
+      const [metricsResp, resultsResp, performanceResp, recommendationsResp] =
+        await Promise.allSettled([
+          getSDK().abTesting.getABTestMetricsApiV1AbTestsTestIdMetrics(testId),
+          getSDK().abTesting.getABTestResultsApiV1AbTestsTestIdResults(testId),
+          getSDK().abTesting.getABTestPerformanceApiV1AbTestsTestIdPerformance(
+            testId
+          ),
+          getSDK().abTesting.getABTestRecommendationsApiV1AbTestsTestIdRecommendations(
+            testId
+          ),
+        ]);
 
       // Handle metrics
       if (metricsResp.status === 'fulfilled') {
@@ -87,8 +103,9 @@ export const useABTestingData = () => {
   const createTest = useCallback(async (testData: ABTestCreate) => {
     try {
       setSaving(true);
-      const newTest = await getSDK().abTesting.createABTestApiV1AbTests(testData);
-      setTests(prev => [newTest, ...prev]);
+      const newTest =
+        await getSDK().abTesting.createABTestApiV1AbTests(testData);
+      setTests((prev) => [newTest, ...prev]);
       return newTest;
     } catch (error) {
       handleError(error, {
@@ -101,68 +118,86 @@ export const useABTestingData = () => {
     }
   }, []);
 
-  const updateTest = useCallback(async (testId: string, testData: ABTestUpdate) => {
-    try {
-      setSaving(true);
-      const updatedTest = await getSDK().abTesting.updateABTestApiV1AbTestsTestId(testId, testData);
-      setTests(prev => prev.map(test => test.id === testId ? updatedTest : test));
-      if (selectedTest?.id === testId) {
-        setSelectedTest(updatedTest);
+  const updateTest = useCallback(
+    async (testId: string, testData: ABTestUpdate) => {
+      try {
+        setSaving(true);
+        const updatedTest =
+          await getSDK().abTesting.updateABTestApiV1AbTestsTestId(
+            testId,
+            testData
+          );
+        setTests((prev) =>
+          prev.map((test) => (test.id === testId ? updatedTest : test))
+        );
+        if (selectedTest?.id === testId) {
+          setSelectedTest(updatedTest);
+        }
+        return updatedTest;
+      } catch (error) {
+        handleError(error, {
+          source: 'useABTestingData.updateTest',
+          operation: 'update AB test',
+        });
+        throw error;
+      } finally {
+        setSaving(false);
       }
-      return updatedTest;
-    } catch (error) {
-      handleError(error, {
-        source: 'useABTestingData.updateTest',
-        operation: 'update AB test',
-      });
-      throw error;
-    } finally {
-      setSaving(false);
-    }
-  }, [selectedTest]);
+    },
+    [selectedTest]
+  );
 
-  const deleteTest = useCallback(async (testId: string) => {
-    try {
-      setSaving(true);
-      await getSDK().abTesting.deleteABTestApiV1AbTestsTestId(testId);
-      setTests(prev => prev.filter(test => test.id !== testId));
-      if (selectedTest?.id === testId) {
-        setSelectedTest(null);
+  const deleteTest = useCallback(
+    async (testId: string) => {
+      try {
+        setSaving(true);
+        await getSDK().abTesting.deleteABTestApiV1AbTestsTestId(testId);
+        setTests((prev) => prev.filter((test) => test.id !== testId));
+        if (selectedTest?.id === testId) {
+          setSelectedTest(null);
+        }
+      } catch (error) {
+        handleError(error, {
+          source: 'useABTestingData.deleteTest',
+          operation: 'delete AB test',
+        });
+        throw error;
+      } finally {
+        setSaving(false);
       }
-    } catch (error) {
-      handleError(error, {
-        source: 'useABTestingData.deleteTest',
-        operation: 'delete AB test',
-      });
-      throw error;
-    } finally {
-      setSaving(false);
-    }
-  }, [selectedTest]);
+    },
+    [selectedTest]
+  );
 
-  const startTest = useCallback(async (testId: string) => {
-    try {
-      await getSDK().abTesting.startABTestApiV1AbTestsTestIdStart(testId);
-      await loadTests(); // Reload to get updated status
-    } catch (error) {
-      handleError(error, {
-        source: 'useABTestingData.startTest',
-        operation: 'start AB test',
-      });
-    }
-  }, [loadTests]);
+  const startTest = useCallback(
+    async (testId: string) => {
+      try {
+        await getSDK().abTesting.startABTestApiV1AbTestsTestIdStart(testId);
+        await loadTests(); // Reload to get updated status
+      } catch (error) {
+        handleError(error, {
+          source: 'useABTestingData.startTest',
+          operation: 'start AB test',
+        });
+      }
+    },
+    [loadTests]
+  );
 
-  const stopTest = useCallback(async (testId: string) => {
-    try {
-      await getSDK().abTesting.stopABTestApiV1AbTestsTestIdStop(testId);
-      await loadTests(); // Reload to get updated status
-    } catch (error) {
-      handleError(error, {
-        source: 'useABTestingData.stopTest',
-        operation: 'stop AB test',
-      });
-    }
-  }, [loadTests]);
+  const stopTest = useCallback(
+    async (testId: string) => {
+      try {
+        await getSDK().abTesting.stopABTestApiV1AbTestsTestIdStop(testId);
+        await loadTests(); // Reload to get updated status
+      } catch (error) {
+        handleError(error, {
+          source: 'useABTestingData.stopTest',
+          operation: 'stop AB test',
+        });
+      }
+    },
+    [loadTests]
+  );
 
   // Load tests on mount
   useEffect(() => {
@@ -191,7 +226,7 @@ export const useABTestingData = () => {
     testResults,
     testPerformance,
     testRecommendations,
-    
+
     // Actions
     setSelectedTest,
     loadTests,

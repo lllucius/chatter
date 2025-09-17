@@ -43,8 +43,7 @@ async def start_real_time_dashboard(
             action="start",
         )
     except RateLimitExceeded as e:
-        raise HTTPException(status_code=429, detail=str(e))
- from e
+        raise HTTPException(status_code=429, detail=str(e)) from e
     real_time_service = get_real_time_analytics_service(session)
 
     # Start real-time updates in background
@@ -95,7 +94,7 @@ async def get_user_behavior_analytics(
     # Check authorization
     if user_id != current_user.id and not current_user.is_admin:
         raise HTTPException(
-            status_code=403, from e
+            status_code=403,
             detail="Users can only access their own behavior analytics",
         )
 
@@ -110,8 +109,7 @@ async def get_user_behavior_analytics(
             window_seconds=3600,
         )
     except RateLimitExceeded as e:
-        raise HTTPException(status_code=429, detail=str(e))
- from e
+        raise HTTPException(status_code=429, detail=str(e)) from e
     real_time_service = get_real_time_analytics_service(session)
     analytics = await real_time_service.get_user_behavior_analytics(
         user_id
@@ -140,19 +138,19 @@ async def intelligent_search(
     # Validate search parameters
     if not query.strip():
         raise HTTPException(
-            status_code=400, detail="Query cannot be empty" from e
+            status_code=400, detail="Query cannot be empty"
         )
 
     if search_type not in ["documents", "conversations", "prompts"]:
         raise HTTPException(
             status_code=400,
-            detail="search_type must be one of: documents, conversations, prompts", from e
+            detail="search_type must be one of: documents, conversations, prompts",
         )
 
     if limit < 1 or limit > 50:
         raise HTTPException(
             status_code=400, detail="limit must be between 1 and 50"
-        ) from e
+        )
 
     # Rate limit search requests
     rate_limiter = get_unified_rate_limiter()
@@ -165,8 +163,7 @@ async def intelligent_search(
             window_seconds=3600,
         )
     except RateLimitExceeded as e:
-        raise HTTPException(status_code=429, detail=str(e))
- from e
+        raise HTTPException(status_code=429, detail=str(e)) from e
     search_service = get_intelligent_search_service(session)
 
     try:
@@ -186,9 +183,9 @@ async def intelligent_search(
     except Exception as e:
         logger.error(f"Error in intelligent search: {e}")
         raise HTTPException(
-            status_code=500, from e
+            status_code=500,
             detail="An error occurred during search. Please try again.",
-        )
+        ) from e
 
 
 @router.get("/search/trending")
@@ -200,7 +197,7 @@ async def get_trending_content(
     """Get trending content personalized for the current user."""
     if limit < 1 or limit > 20:
         raise HTTPException(
-            status_code=400, detail="limit must be between 1 and 20" from e
+            status_code=400, detail="limit must be between 1 and 20"
         )
 
     # Rate limit trending content requests
@@ -250,7 +247,7 @@ async def send_workflow_update(
     ]
     if update_type not in valid_update_types:
         raise HTTPException(
-            status_code=400, from e
+            status_code=400,
             detail=f"update_type must be one of: {', '.join(valid_update_types)}",
         )
 
@@ -265,8 +262,7 @@ async def send_workflow_update(
             window_seconds=3600,
         )
     except RateLimitExceeded as e:
-        raise HTTPException(status_code=429, detail=str(e))
- from e
+        raise HTTPException(status_code=429, detail=str(e)) from e
     real_time_service = get_real_time_analytics_service(session)
 
     await real_time_service.send_workflow_update(
@@ -306,8 +302,7 @@ async def send_system_health_update(
             window_seconds=3600,
         )
     except RateLimitExceeded as e:
-        raise HTTPException(status_code=429, detail=str(e))
- from e
+        raise HTTPException(status_code=429, detail=str(e)) from e
     real_time_service = get_real_time_analytics_service(session)
 
     await real_time_service.send_system_health_update(health_data)

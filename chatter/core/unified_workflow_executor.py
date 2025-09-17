@@ -125,19 +125,17 @@ class UnifiedWorkflowExecutor:
             # Extract response
             response_content = self._extract_response_content(result)
 
-            # Create response message
-            assistant_message = (
-                await self.message_service.add_message_to_conversation(
-                    conversation_id=conversation.id,
-                    user_id=user_id,
-                    role=MessageRole.ASSISTANT,
-                    content=response_content,
-                    metadata=(
-                        {"correlation_id": correlation_id}
-                        if correlation_id
-                        else None
-                    ),
-                )
+            # Create response message object (not persisted yet - will be saved by chat service)
+            assistant_message = Message(
+                conversation_id=conversation.id,
+                role=MessageRole.ASSISTANT,
+                content=response_content,
+                extra_metadata=(
+                    {"correlation_id": correlation_id}
+                    if correlation_id
+                    else {}
+                ),
+                sequence_number=0,  # Will be set by message service
             )
 
             # Record success metrics

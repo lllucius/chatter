@@ -183,7 +183,7 @@ class LangGraphWorkflowManager:
         retriever: Any | None = None,
         tools: list[Any] | None = None,
         enable_memory: bool = False,
-        memory_window: int = 20,
+        memory_window: int = 4,
         user_id: str | None = None,
         conversation_id: str | None = None,
         provider_name: str | None = None,
@@ -191,6 +191,7 @@ class LangGraphWorkflowManager:
         max_tool_calls: int | None = None,
         max_documents: int | None = None,
         enable_streaming: bool = False,
+        focus_mode: bool = False,
     ) -> Pregel:
         """Create a unified conversation workflow.
 
@@ -203,6 +204,7 @@ class LangGraphWorkflowManager:
         Optional:
         - enable_memory: summarize older messages and prepend summary as context
         - enable_streaming: use streaming model node for token-by-token output
+        - focus_mode: use only the last user message for focused responses
 
         Args:
             llm: Language model to use
@@ -211,7 +213,7 @@ class LangGraphWorkflowManager:
             retriever: Optional retriever for RAG
             tools: Optional tools for tool-calling
             enable_memory: Whether to enable memory management
-            memory_window: Number of recent messages to keep
+            memory_window: Number of recent messages to keep (default: 4 for 2 exchanges)
             user_id: ID of the user (for metrics and security)
             conversation_id: ID of the conversation (for metrics)
             provider_name: Name of the LLM provider (for metrics)
@@ -219,6 +221,7 @@ class LangGraphWorkflowManager:
             max_tool_calls: Maximum number of tool calls allowed (optional)
             max_documents: Maximum number of documents to retrieve for RAG (optional)
             enable_streaming: Whether to use streaming model node for token-by-token output
+            focus_mode: If True, only use the last user message for focused responses
         """
         # Start metrics tracking if enabled (store config for later async initialization)
         workflow_tracking_config = None
@@ -292,8 +295,9 @@ class LangGraphWorkflowManager:
             older_messages = messages[:-memory_window]
 
             if not state.get("conversation_summary"):
+                # Create a more focused summary prompt
                 summary_prompt = (
-                    "Summarize this conversation history:\n\n"
+                    "Summarize the key points from this conversation history concisely:\n\n"
                 )
                 for msg in older_messages:
                     role = (
@@ -302,6 +306,8 @@ class LangGraphWorkflowManager:
                         else "Assistant"
                     )
                     summary_prompt += f"{role}: {msg.content}\n"
+
+                summary_prompt += "\nProvide a brief summary focusing on main topics discussed:"
 
                 try:
                     summary_response = await llm.ainvoke(
@@ -312,11 +318,21 @@ class LangGraphWorkflowManager:
                         "content",
                         str(summary_response),
                     )
+                    
+                    logger.debug(
+                        "Created conversation summary",
+                        summary_length=len(summary),
+                        older_messages_count=len(older_messages),
+                        recent_messages_count=len(recent_messages)
+                    )
+                    
                     return {
                         "messages": recent_messages,
                         "conversation_summary": summary,
                         "memory_context": {
-                            "summarized_messages": len(older_messages)
+                            "summarized_messages": len(older_messages),
+                            "kept_messages": len(recent_messages),
+                            "summary_created": True
                         },
                     }
                 except Exception as e:
@@ -333,6 +349,45 @@ class LangGraphWorkflowManager:
             """Apply system message, memory summary, and retrieval context if present."""
             prefixed: list[BaseMessage] = []
 
+            # In focus mode, only use the last human message for focused responses
+            if focus_mode:
+                # Find the last human message
+                last_human_message = None
+                for msg in reversed(messages):
+                    if isinstance(msg, HumanMessage):
+                        last_human_message = msg
+                        break
+                
+                if last_human_message:
+                    # Create a focused context with just system message and last user input
+                    if state.get("conversation_summary"):
+                        prefixed.append(
+                            SystemMessage(
+                                content=f"Previous conversation summary: {state['conversation_summary']}"
+                            )
+                        )
+                    
+                    if use_retriever and state.get("retrieval_context"):
+                        context = state.get("retrieval_context") or ""
+                        base = system_message or (
+                            "You are a helpful assistant. Use the following context to answer questions. "
+                            "If the context doesn't contain relevant information, say so clearly."
+                        )
+                        focused_system_message = base + (
+                            f"\n\nContext:\n{context}" if context else ""
+                        )
+                        prefixed.append(SystemMessage(content=focused_system_message))
+                    elif system_message:
+                        prefixed.append(SystemMessage(content=system_message))
+                    
+                    # Only include the last user message for focused response
+                    prefixed.append(last_human_message)
+                    return prefixed
+                else:
+                    # Fallback to normal processing if no human message found
+                    focus_mode = False
+
+            # Normal processing: include conversation summary if available
             if state.get("conversation_summary"):
                 prefixed.append(
                     SystemMessage(

@@ -169,13 +169,13 @@ class BaseAgent(ABC):
         return interaction
 
     async def get_conversation_context(
-        self, conversation_id: str, max_interactions: int = 10
+        self, conversation_id: str, max_interactions: int = 2
     ) -> list[AgentInteraction]:
         """Get recent conversation context.
 
         Args:
             conversation_id: Conversation identifier
-            max_interactions: Maximum number of interactions to return
+            max_interactions: Maximum number of interactions to return (default: 2 for 4 messages)
 
         Returns:
             List of recent interactions
@@ -324,7 +324,7 @@ class ConversationalAgent(BaseAgent):
         start_time = datetime.now(UTC)
 
         try:
-            # Get conversation context
+            # Get conversation context (limited to recent interactions)
             recent_interactions = await self.get_conversation_context(
                 conversation_id
             )
@@ -334,13 +334,13 @@ class ConversationalAgent(BaseAgent):
                 SystemMessage(content=self.profile.system_message)
             ]
 
-            # Add recent conversation history
+            # Add recent conversation history only
             for interaction in recent_interactions:
                 messages.append(
                     HumanMessage(content=interaction.user_message)
                 )
                 messages.append(
-                    SystemMessage(content=interaction.agent_response)
+                    AIMessage(content=interaction.agent_response)
                 )
 
             # Add current message

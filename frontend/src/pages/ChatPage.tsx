@@ -114,7 +114,7 @@ const ChatPage: React.FC = () => {
   }, [open]);
 
   const loadData = async () => {
-    let profilesResponse: any = null;
+    let profilesResponse: ProfileResponse[] | null = null;
     try {
       const sdk = getSDK();
       const [profilesResp, promptsResponse, documentsResponse, conversationsResp] =
@@ -504,7 +504,7 @@ const ChatPage: React.FC = () => {
                         setMessages(chatMessages);
                       } catch (_reloadError) {
                         // Fall back to updating the current message
-                        const updateData: any = {};
+                        const updateData: Partial<ExtendedChatMessage> = {};
                         
                         if (chunk.metadata) {
                           updateData.metadata = {
@@ -721,7 +721,7 @@ const ChatPage: React.FC = () => {
     if (
       e.key === 'Enter' &&
       !e.shiftKey &&
-      !(e.nativeEvent as any).isComposing
+      !(e.nativeEvent as KeyboardEvent & { isComposing?: boolean }).isComposing
     ) {
       e.preventDefault();
       sendMessage();

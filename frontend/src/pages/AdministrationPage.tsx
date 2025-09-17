@@ -58,6 +58,39 @@ import { handleError } from '../utils/error-handler';
 import PageLayout from '../components/PageLayout';
 import { useNotifications } from '../components/NotificationSystem';
 
+// SSE Event interfaces for type safety
+interface JobSSEEventData {
+  job_id: string;
+  job_name?: string;
+  error?: string;
+}
+
+interface BackupSSEEventData {
+  backup_id: string;
+  backup_name?: string;
+  error?: string;
+}
+
+interface PluginSSEEventData {
+  plugin_id: string;
+  plugin_name?: string;
+  error?: string;
+}
+
+interface SSEEvent {
+  data: JobSSEEventData | BackupSSEEventData | PluginSSEEventData;
+}
+
+interface User {
+  id: string;
+  email: string;
+  role: string;
+  lastLogin: string;
+  status: string;
+  name: string;
+  isActive: boolean;
+}
+
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
   const { showNotification } = useNotifications();
@@ -75,16 +108,13 @@ const AdministrationPage: React.FC = () => {
   const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(
     null
   );
-  const [actionUser, setActionUser] = useState<Record<string, unknown> | null>(
+  const [actionUser, setActionUser] = useState<User | null>(
     null
   );
 
   // User settings dialog state
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [editingUser, setEditingUser] = useState<User | null>(null);
 
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
@@ -93,7 +123,7 @@ const AdministrationPage: React.FC = () => {
   const [dataLoading, setDataLoading] = useState(false);
 
   // Mock user data - in real app this would come from API
-  const [users] = useState([
+  const [users] = useState<User[]>([
     {
       id: 'admin@chatter.ai',
       email: 'admin@chatter.ai',
@@ -244,10 +274,11 @@ const AdministrationPage: React.FC = () => {
   useEffect(() => {
     if (!isConnected) return;
 
-    const unsubscribeJobStarted = on('job.started', (event) => {
+    const unsubscribeJobStarted = on('job.started', (event: SSEEvent) => {
+      const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Started',
-        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" has started`,
+        message: `Job "${jobData.job_name || jobData.job_id}" has started`,
         type: 'info',
         category: 'system',
       });
@@ -255,10 +286,11 @@ const AdministrationPage: React.FC = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobCompleted = on('job.completed', (event) => {
+    const unsubscribeJobCompleted = on('job.completed', (event: SSEEvent) => {
+      const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Completed',
-        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" completed successfully`,
+        message: `Job "${jobData.job_name || jobData.job_id}" completed successfully`,
         type: 'success',
         category: 'system',
       });
@@ -266,10 +298,11 @@ const AdministrationPage: React.FC = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobFailed = on('job.failed', (event) => {
+    const unsubscribeJobFailed = on('job.failed', (event: SSEEvent) => {
+      const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Failed',
-        message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" failed: ${(event as any).data.error}`,
+        message: `Job "${jobData.job_name || jobData.job_id}" failed: ${jobData.error}`,
         type: 'error',
         category: 'system',
       });
@@ -277,30 +310,33 @@ const AdministrationPage: React.FC = () => {
       loadJobStats();
     });
 
-    const unsubscribeBackupStarted = on('backup.started', (event) => {
+    const unsubscribeBackupStarted = on('backup.started', (event: SSEEvent) => {
+      const backupData = event.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Started',
-        message: `Backup "${(event as any).data.backup_id}" has started`,
+        message: `Backup "${backupData.backup_id}" has started`,
         type: 'info',
         category: 'system',
       });
       loadBackups();
     });
 
-    const unsubscribeBackupCompleted = on('backup.completed', (event) => {
+    const unsubscribeBackupCompleted = on('backup.completed', (event: SSEEvent) => {
+      const backupData = event.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Completed',
-        message: `Backup "${(event as any).data.backup_id}" completed successfully`,
+        message: `Backup "${backupData.backup_id}" completed successfully`,
         type: 'success',
         category: 'system',
       });
       loadBackups();
     });
 
-    const unsubscribeBackupFailed = on('backup.failed', (event) => {
+    const unsubscribeBackupFailed = on('backup.failed', (event: SSEEvent) => {
+      const backupData = event.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Failed',
-        message: `Backup "${(event as any).data.backup_id}" failed: ${(event as any).data.error}`,
+        message: `Backup "${backupData.backup_id}" failed: ${backupData.error}`,
         type: 'error',
         category: 'system',
       });
@@ -344,7 +380,7 @@ const AdministrationPage: React.FC = () => {
     try {
       setLoading(true);
 
-      const filters: any = {};
+      const filters: Record<string, string | boolean> = {};
 
       // Build filters based on form data
       if (bulkOperationData.filters.olderThan) {
@@ -440,7 +476,7 @@ const AdministrationPage: React.FC = () => {
     }
   };
 
-  const openUserActionsMenu = (e: React.MouseEvent<HTMLElement>, user: any) => {
+  const openUserActionsMenu = (e: React.MouseEvent<HTMLElement>, user: User) => {
     setActionAnchorEl(e.currentTarget);
     setActionUser(user);
   };
@@ -450,7 +486,7 @@ const AdministrationPage: React.FC = () => {
     setActionUser(null);
   };
 
-  const handleUserSettings = (user: any) => {
+  const handleUserSettings = (user: User) => {
     setEditingUser(user);
     setUserSettingsOpen(true);
     closeActionsMenu();
@@ -531,7 +567,7 @@ const AdministrationPage: React.FC = () => {
     });
   };
 
-  const handleFormChange = (field: string, value: any) => {
+  const handleFormChange = (field: string, value: string | number | boolean) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
@@ -551,7 +587,7 @@ const AdministrationPage: React.FC = () => {
           await getSDK().dataManagement.createBackupApiV1DataBackup({
             name: formData.backupName,
             description: formData.description,
-            backup_type: 'full' as any,
+            backup_type: 'full' as const,
             include_files: formData.includeDocuments,
           });
           toastService.success('Backup created successfully!');
@@ -1026,7 +1062,7 @@ const AdministrationPage: React.FC = () => {
                     onChange={(e) =>
                       setBulkOperationData((prev) => ({
                         ...prev,
-                        operationType: e.target.value as any,
+                        operationType: e.target.value as 'conversations' | 'documents' | 'prompts',
                       }))
                     }
                   >

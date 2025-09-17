@@ -322,7 +322,7 @@ const ToolsPage: React.FC = () => {
     pageSize: 10,
   };
 
-  const toolService: CrudService<Tool, any, any> = {
+  const toolService: CrudService<Tool, never, never> = {
     list: async () => {
       const response =
         await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();

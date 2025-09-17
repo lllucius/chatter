@@ -11,10 +11,18 @@ import EnhancedMessage, { ChatMessage } from '../EnhancedMessage';
 
 describe('EnhancedMessage Metadata Display Fix', () => {
   const mockProps = {
-    onEdit: () => {},
-    onRegenerate: () => {},
-    onDelete: () => {},
-    onRate: () => {},
+    onEdit: () => {
+      // Mock function for testing
+    },
+    onRegenerate: () => {
+      // Mock function for testing
+    },
+    onDelete: () => {
+      // Mock function for testing
+    },
+    onRate: () => {
+      // Mock function for testing
+    },
   };
 
   describe('Fix validation: Response time and token counts should display', () => {

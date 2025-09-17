@@ -51,7 +51,7 @@ const ModelManagementPage: React.FC = () => {
         });
       setProviders(response.providers || []);
     } catch (error) {
-      console.error('Failed to load providers:', error);
+      // Failed to load providers - set empty array and continue
       setProviders([]);
     }
   };

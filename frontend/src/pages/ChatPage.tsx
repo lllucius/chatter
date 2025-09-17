@@ -309,13 +309,20 @@ const ChatPage: React.FC = () => {
     try {
       let currentMessageId = assistantMessageId || `stream-${Date.now()}`;
 
-      // If no assistantMessageId provided, create a placeholder message
+      // If no assistantMessageId provided, create a placeholder message with workflow indicator
       if (!assistantMessageId) {
         const assistantMessage: ExtendedChatMessage = {
           id: currentMessageId,
           role: 'assistant',
           content: '',
           timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: streamingEnabled ? 'Streaming' : 'Thinking',
+              status: streamingEnabled ? 'streaming' : 'thinking',
+              isStreaming: true,
+            },
+          },
         };
         setMessages((prev) => [...prev, assistantMessage]);
       }
@@ -384,12 +391,63 @@ const ChatPage: React.FC = () => {
                         )
                       );
                     }
+
+                    // Update workflow stage if provided
+                    if (chunk.workflow_stage) {
+                      setMessages((prev) =>
+                        prev.map((msg) =>
+                          msg.id === currentMessageId
+                            ? {
+                                ...msg,
+                                metadata: {
+                                  ...msg.metadata,
+                                  workflow: {
+                                    ...msg.metadata?.workflow,
+                                    stage: chunk.workflow_stage,
+                                    status: 'processing',
+                                  },
+                                },
+                              }
+                            : msg
+                        )
+                      );
+                    }
                   } else if (chunk.type === 'token' && chunk.content) {
-                    // Append token content to the message
+                    // Append token content to the message and update workflow status
                     setMessages((prev) =>
                       prev.map((msg) =>
                         msg.id === currentMessageId
-                          ? { ...msg, content: msg.content + chunk.content }
+                          ? { 
+                              ...msg, 
+                              content: msg.content + chunk.content,
+                              metadata: {
+                                ...msg.metadata,
+                                workflow: {
+                                  ...msg.metadata?.workflow,
+                                  status: 'streaming',
+                                },
+                              },
+                            }
+                          : msg
+                      )
+                    );
+                  } else if (chunk.type === 'workflow_progress') {
+                    // Handle workflow progress updates
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === currentMessageId
+                          ? {
+                              ...msg,
+                              metadata: {
+                                ...msg.metadata,
+                                workflow: {
+                                  ...msg.metadata?.workflow,
+                                  stage: chunk.stage || msg.metadata?.workflow?.stage,
+                                  progress: chunk.progress,
+                                  status: chunk.status || 'processing',
+                                },
+                              },
+                            }
                           : msg
                       )
                     );
@@ -398,23 +456,36 @@ const ChatPage: React.FC = () => {
                     chunk.type === 'end'
                   ) {
                     // Stream ended - update final message with metadata if available
+                    const updateData: any = {};
+                    
                     if (chunk.metadata) {
-                      setMessages((prev) =>
-                        prev.map((msg) =>
-                          msg.id === currentMessageId
-                            ? {
-                                ...msg,
-                                metadata: {
-                                  model: chunk.metadata.model_used,
-                                  tokens: chunk.metadata.total_tokens,
-                                  processingTime:
-                                    chunk.metadata.response_time_ms,
-                                },
-                              }
-                            : msg
-                        )
-                      );
+                      updateData.metadata = {
+                        model: chunk.metadata.model_used,
+                        tokens: chunk.metadata.total_tokens,
+                        processingTime: chunk.metadata.response_time_ms,
+                        workflow: {
+                          stage: 'Complete',
+                          status: 'complete',
+                          isStreaming: false,
+                        },
+                      };
+                    } else {
+                      updateData.metadata = {
+                        workflow: {
+                          stage: 'Complete',
+                          status: 'complete',
+                          isStreaming: false,
+                        },
+                      };
                     }
+
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === currentMessageId
+                          ? { ...msg, ...updateData }
+                          : msg
+                      )
+                    );
                     return; // End the streaming loop
                   } else if (chunk.type === 'error') {
                     throw new Error(
@@ -493,6 +564,22 @@ const ChatPage: React.FC = () => {
       if (streamingEnabled) {
         await handleStreamingResponse(sendRequest);
       } else {
+        // Create a placeholder message with workflow indicator for non-streaming
+        const placeholderMessage: ExtendedChatMessage = {
+          id: `placeholder-${Date.now()}`,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: 'Thinking',
+              status: 'thinking',
+              isStreaming: false,
+            },
+          },
+        };
+        setMessages((prev) => [...prev, placeholderMessage]);
+
         // Use regular API
         const response = await getSDK().chat.chatChat(sendRequest);
 
@@ -501,7 +588,7 @@ const ChatPage: React.FC = () => {
           setCurrentConversation(response.conversation);
         }
 
-        // Use real message data from the API response
+        // Replace placeholder with real message data from the API response
         const assistantMessage: ExtendedChatMessage = {
           id: String(response.message.id),
           role: 'assistant',
@@ -511,11 +598,20 @@ const ChatPage: React.FC = () => {
             model: response.message.model_used || undefined,
             tokens: response.message.total_tokens || undefined,
             processingTime: response.message.response_time_ms || undefined,
+            workflow: {
+              stage: 'Complete',
+              status: 'complete',
+              isStreaming: false,
+            },
           },
         };
-        setMessages((prev) => [...prev, assistantMessage]);
-
-        // Remove the separate token message creation since we're including it in metadata
+        
+        // Replace the placeholder message with the real response
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === placeholderMessage.id ? assistantMessage : msg
+          )
+        );
       }
     } catch (err: unknown) {
       handleError(err, {
@@ -889,19 +985,6 @@ const ChatPage: React.FC = () => {
                       canDelete={true}
                     />
                   ))
-                )}
-                {loading && (
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>
-                      <BotIcon />
-                    </Avatar>
-                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                      <CircularProgress size={20} sx={{ mr: 1 }} />
-                      <Typography variant="body2" color="text.secondary">
-                        {streamingEnabled ? 'Streaming...' : 'Thinking...'}
-                      </Typography>
-                    </Box>
-                  </Box>
                 )}
                 <div ref={messagesEndRef} />
               </Box>

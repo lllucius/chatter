@@ -187,7 +187,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
     <Box sx={{ p: 3 }}>
       {/* Summary Cards */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -203,7 +203,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -226,7 +226,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -243,7 +243,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} sm={6} md={3}>
+        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
           <Card>
             <CardContent>
               <Typography color="text.secondary" gutterBottom>
@@ -278,7 +278,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
       {/* Conversion Rate Trend */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} lg={8}>
+        <Grid size={{ xs: 12 }} lg={8}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -336,7 +336,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} lg={4}>
+        <Grid size={{ xs: 12 }} lg={4}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -393,7 +393,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
       {/* Detailed Charts */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12 }} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -427,7 +427,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid item xs={12} md={6}>
+        <Grid size={{ xs: 12 }} md={6}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -465,7 +465,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
         (recommendations.recommendations.length > 0 ||
           recommendations.insights.length > 0) && (
           <Grid container spacing={3}>
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12 }} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -485,7 +485,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               </Card>
             </Grid>
 
-            <Grid item xs={12} md={6}>
+            <Grid size={{ xs: 12 }} md={6}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -509,14 +509,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
       {/* Statistical Details */}
       <Grid container spacing={3} sx={{ mt: 2 }}>
-        <Grid item xs={12}>
+        <Grid size={{ xs: 12 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Statistical Analysis
               </Typography>
               <Grid container spacing={2}>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
                       {((sampleMetrics.confidence_level || 0) * 100).toFixed(0)}
@@ -527,7 +527,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     </Typography>
                   </Paper>
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
                       {((sampleMetrics.effect_size || 0) * 100).toFixed(1)}%
@@ -537,7 +537,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     </Typography>
                   </Paper>
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
                       {((sampleMetrics.power || 0) * 100).toFixed(0)}%
@@ -547,7 +547,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     </Typography>
                   </Paper>
                 </Grid>
-                <Grid item xs={6} sm={3}>
+                <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
                       {sampleMetrics.p_value?.toFixed(4) || 'N/A'}

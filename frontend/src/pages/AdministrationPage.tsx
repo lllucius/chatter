@@ -38,8 +38,6 @@ import {
   Download as DownloadIcon,
   Upload as UploadIcon,
   Settings as SettingsIcon,
-  Notifications as NotificationsIcon,
-  Close as CloseIcon,
   Refresh as RefreshIcon,
   MoreVert as MoreVertIcon,
   DeleteSweep as BulkDeleteIcon,
@@ -57,7 +55,6 @@ import {
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
-import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
 import { useNotifications } from '../components/NotificationSystem';
 

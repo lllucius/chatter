@@ -117,11 +117,17 @@ const ChatPage: React.FC = () => {
           // Send message to API
           let response;
           if (streamingEnabled) {
-            // Use streaming endpoint
-            response = await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
+            // TODO: Streaming functionality is not yet implemented
+            // For now, fall back to non-streaming to prevent errors
+            response = await getSDK().chat.chatChat(chatRequest);
           } else {
             // Use non-streaming endpoint  
-            response = await getSDK().chat.chatApiV1Chat(chatRequest);
+            response = await getSDK().chat.chatChat(chatRequest);
+          }
+
+          // Validate response structure
+          if (!response || !response.message || typeof response.message.content !== 'string') {
+            throw new Error('Invalid response from chat API');
           }
 
           // Create assistant message
@@ -280,11 +286,17 @@ const ChatPage: React.FC = () => {
       // Send message to API
       let response;
       if (streamingEnabled) {
-        // Use streaming endpoint
-        response = await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
+        // TODO: Streaming functionality is not yet implemented
+        // For now, fall back to non-streaming to prevent errors
+        response = await getSDK().chat.chatChat(chatRequest);
       } else {
         // Use non-streaming endpoint  
-        response = await getSDK().chat.chatApiV1Chat(chatRequest);
+        response = await getSDK().chat.chatChat(chatRequest);
+      }
+
+      // Validate response structure
+      if (!response || !response.message || typeof response.message.content !== 'string') {
+        throw new Error('Invalid response from chat API');
       }
 
       // Create assistant message

@@ -81,6 +81,15 @@ const ChatPage: React.FC = () => {
     ));
   }, [setMessages]);
 
+  const handleDeleteMessage = useCallback((messageId: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  }, [setMessages]);
+
+  const handleRateMessage = useCallback((messageId: string, rating: 'good' | 'bad') => {
+    // Implementation for message rating
+    toastService.info(`Message rated as ${rating}`);
+  }, []);
+
   const handleRegenerateMessage = useCallback(async (messageId: string) => {
     try {
       setLoading(true);
@@ -172,15 +181,6 @@ const ChatPage: React.FC = () => {
     handleDeleteMessage,
     handleRateMessage,
   ]);
-
-  const handleDeleteMessage = useCallback((messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
-  }, [setMessages]);
-
-  const handleRateMessage = useCallback((messageId: string, rating: 'good' | 'bad') => {
-    // Implementation for message rating
-    toastService.info(`Message rated as ${rating}`);
-  }, []);
 
   const handleSelectConversation = useCallback(async (conversationId: string) => {
     try {

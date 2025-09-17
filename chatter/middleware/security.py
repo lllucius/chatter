@@ -132,7 +132,7 @@ class ContentTypeValidationMiddleware(BaseHTTPMiddleware):
                 from fastapi import HTTPException
 
                 raise HTTPException(
-                    status_code=415, from e
+                    status_code=415,
                     detail=f"Content type '{content_type}' not allowed",
                 )
 

@@ -66,7 +66,7 @@ async def upload_document(
                 parsed_tags = json.loads(tags)
             except json.JSONDecodeError as e:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST, from e
+                    status_code=status.HTTP_400_BAD_REQUEST,
                     detail="Invalid tags format. Must be valid JSON array.",
                 ) from e
 
@@ -100,14 +100,14 @@ async def upload_document(
     except DocumentServiceError as e:
         logger.error("Document upload failed", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e) from e
+            status_code=status.HTTP_400_BAD_REQUEST, detail=str(e)
         ) from e
     except Exception as e:
         logger.error(
             "Unexpected error in document upload", error=str(e)
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
         ) from e
 
@@ -127,7 +127,7 @@ async def get_document(
 
         if not document:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, from e
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found",
             )
 
@@ -143,7 +143,7 @@ async def get_document(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error", from e
+            detail="Internal server error",
         ) from e
 
 
@@ -179,9 +179,9 @@ async def list_documents_get(
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from e
 
 
 @router.post("/list")
@@ -211,8 +211,8 @@ async def list_documents_post(
         logger.error("Error listing documents", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error", from e
-        )
+            detail="Internal server error",
+        ) from e
 
 
 @router.post("/search", response_model=list[SearchResultResponse])
@@ -244,9 +244,9 @@ async def search_documents(
     except Exception as e:
         logger.error("Error searching documents", error=str(e))
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Internal server error",
-        )
+        ) from e
 
 
 @router.delete("/{document_id}")
@@ -264,7 +264,7 @@ async def delete_document(
 
         if not success:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, from e
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found",
             )
 
@@ -280,8 +280,8 @@ async def delete_document(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error", from e
-        )
+            detail="Internal server error",
+        ) from e
 
 
 @router.post("/{document_id}/reprocess")
@@ -299,7 +299,7 @@ async def reprocess_document(
 
         if not success:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND, from e
+                status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found or cannot be reprocessed",
             )
 
@@ -315,8 +315,8 @@ async def reprocess_document(
         )
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error", from e
-        )
+            detail="Internal server error",
+        ) from e
 
 
 @router.get("/stats/user", response_model=DocumentStatsResponse)
@@ -335,5 +335,5 @@ async def get_user_document_stats(
         logger.error("Error getting document stats", error=str(e))
         raise HTTPException(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-            detail="Internal server error", from e
-        )
+            detail="Internal server error",
+        ) from e

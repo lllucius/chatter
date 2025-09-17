@@ -318,14 +318,14 @@ class LangGraphWorkflowManager:
                         "content",
                         str(summary_response),
                     )
-                    
+
                     logger.debug(
                         "Created conversation summary",
                         summary_length=len(summary),
                         older_messages_count=len(older_messages),
                         recent_messages_count=len(recent_messages)
                     )
-                    
+
                     return {
                         "messages": recent_messages,
                         "conversation_summary": summary,
@@ -357,7 +357,7 @@ class LangGraphWorkflowManager:
                     if isinstance(msg, HumanMessage):
                         last_human_message = msg
                         break
-                
+
                 if last_human_message:
                     # Create a focused context with just system message and last user input
                     if state.get("conversation_summary"):
@@ -366,7 +366,7 @@ class LangGraphWorkflowManager:
                                 content=f"Previous conversation summary: {state['conversation_summary']}"
                             )
                         )
-                    
+
                     if use_retriever and state.get("retrieval_context"):
                         context = state.get("retrieval_context") or ""
                         base = system_message or (
@@ -379,13 +379,11 @@ class LangGraphWorkflowManager:
                         prefixed.append(SystemMessage(content=focused_system_message))
                     elif system_message:
                         prefixed.append(SystemMessage(content=system_message))
-                    
+
                     # Only include the last user message for focused response
                     prefixed.append(last_human_message)
                     return prefixed
-                else:
-                    # Fallback to normal processing if no human message found
-                    focus_mode = False
+                # If no human message found in focus mode, fall through to normal processing
 
             # Normal processing: include conversation summary if available
             if state.get("conversation_summary"):
@@ -657,7 +655,7 @@ class LangGraphWorkflowManager:
         enable_node_tracing: bool = False,
     ) -> Any:
         """Stream workflow execution using astream_events() for real-time updates.
-        
+
         Args:
             workflow: The LangGraph workflow to execute
             initial_state: Initial conversation state
@@ -687,15 +685,15 @@ class LangGraphWorkflowManager:
             raise
 
     async def _stream_with_astream_events(
-        self, 
-        workflow: Pregel, 
-        initial_state: ConversationState, 
+        self,
+        workflow: Pregel,
+        initial_state: ConversationState,
         config: dict,
         enable_llm_streaming: bool = False,
         enable_node_tracing: bool = False,
     ) -> Any:
         """Stream workflow using astream_events() for rich event processing.
-        
+
         Args:
             workflow: The LangGraph workflow to execute
             initial_state: Initial conversation state
@@ -706,25 +704,25 @@ class LangGraphWorkflowManager:
         # Configure event filtering based on requirements
         include_types = []
         include_names = []
-        
+
         if enable_llm_streaming:
             include_types.append("chat_model")
             # Focus on the final model call for token streaming
             include_names.append("call_model")
-        
+
         if enable_node_tracing:
             # Include all workflow nodes for development tracing
             include_types.extend(["chain", "tool", "runnable"])
-        
-        # If neither specific streaming nor tracing is enabled, 
+
+        # If neither specific streaming nor tracing is enabled,
         # fall back to node completion events
         if not include_types:
             include_types = ["chain"]
-        
+
         try:
             async for event in workflow.astream_events(
-                initial_state, 
-                config=config, 
+                initial_state,
+                config=config,
                 version="v2",
                 include_types=include_types,
                 include_names=include_names if include_names else None,
@@ -733,13 +731,13 @@ class LangGraphWorkflowManager:
                 converted_event = await self._convert_astream_event(
                     event, enable_llm_streaming, enable_node_tracing
                 )
-                
+
                 if converted_event:
                     yield converted_event
-                    
+
         except Exception as e:
             logger.error(
-                "astream_events streaming failed", 
+                "astream_events streaming failed",
                 error=str(e),
                 enable_llm_streaming=enable_llm_streaming,
                 enable_node_tracing=enable_node_tracing,
@@ -748,27 +746,27 @@ class LangGraphWorkflowManager:
             logger.info("Falling back to regular astream")
             async for event in workflow.astream(initial_state, config=config):
                 yield event
-    
+
     async def _convert_astream_event(
-        self, 
-        event: dict[str, Any], 
+        self,
+        event: dict[str, Any],
         enable_llm_streaming: bool = False,
         enable_node_tracing: bool = False,
     ) -> dict[str, Any] | None:
         """Convert astream_events format to expected workflow event format.
-        
+
         Args:
             event: Event from astream_events
             enable_llm_streaming: Whether LLM streaming is enabled
             enable_node_tracing: Whether node tracing is enabled
-            
+
         Returns:
             Converted event or None if event should be filtered
         """
         event_type = event.get("event", "")
         event_name = event.get("name", "")
         event_data = event.get("data", {})
-        
+
         # Handle LLM streaming events
         if enable_llm_streaming and event_type == "on_chat_model_stream":
             # Extract token content from the streaming chunk
@@ -785,8 +783,8 @@ class LangGraphWorkflowManager:
                         "parent_ids": event.get("parent_ids", []),
                     }
                 }
-        
-        # Handle LLM completion events  
+
+        # Handle LLM completion events
         if event_type == "on_chat_model_end":
             # Extract the final message from the model call
             output = event_data.get("output")
@@ -802,7 +800,7 @@ class LangGraphWorkflowManager:
                         }
                     }
                 }
-        
+
         # Handle node tracing events
         if enable_node_tracing:
             if event_type == "on_chain_start":
@@ -818,7 +816,7 @@ class LangGraphWorkflowManager:
             elif event_type == "on_chain_end":
                 return {
                     "_node_trace": {
-                        "type": "node_end", 
+                        "type": "node_end",
                         "node": event_name,
                         "run_id": event.get("run_id"),
                         "parent_ids": event.get("parent_ids", []),
@@ -839,19 +837,19 @@ class LangGraphWorkflowManager:
                 return {
                     "_node_trace": {
                         "type": "tool_end",
-                        "tool": event_name, 
+                        "tool": event_name,
                         "run_id": event.get("run_id"),
                         "parent_ids": event.get("parent_ids", []),
                         "output": event_data.get("output"),
                     }
                 }
-        
+
         # Handle regular node completion events (fallback)
         if event_type == "on_chain_end" and event_name and not enable_node_tracing:
             output = event_data.get("output")
             if output:
                 return {event_name: output}
-        
+
         # Filter out events we don't need
         return None
 
@@ -1155,7 +1153,7 @@ class LangGraphWorkflowManager:
             from chatter.core.dependencies import get_builtin_tools
 
             tools = []
-            
+
             # Get builtin tools
             builtin_tools = get_builtin_tools()
             if builtin_tools:
@@ -1166,7 +1164,7 @@ class LangGraphWorkflowManager:
             # when creating workflows, so we don't load them here to avoid
             # blocking synchronous calls
             logger.debug(f"Configured tools for workspace: {workspace_id}, total: {len(tools)}")
-            
+
             return tools
 
         except Exception as e:

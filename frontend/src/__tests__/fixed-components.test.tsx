@@ -5,8 +5,8 @@ import WorkflowManagementPage from '../pages/WorkflowManagementPage';
 import ChatConfigPanel from '../pages/ChatConfigPanel';
 
 // Mock the client to prevent actual API calls
-vi.mock('../services/auth-service', (): void => ({
-  getSDK: vi.fn((): void => ({
+vi.mock('../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     chat: {
       getWorkflowTemplatesApiV1ChatTemplatesGet: vi
         .fn()
@@ -25,7 +25,7 @@ vi.mock('../services/auth-service', (): void => ({
 }));
 
 // Mock toast service
-vi.mock('../services/toast-service', (): void => ({
+vi.mock('../services/toast-service', () => ({
   toastService: {
     success: vi.fn(),
     error: vi.fn(),
@@ -33,14 +33,14 @@ vi.mock('../services/toast-service', (): void => ({
 }));
 
 // Mock PageLayout
-vi.mock('../components/PageLayout', (): void => ({
+vi.mock('../components/PageLayout', () => ({
   default: ({
     children,
     title,
   }: {
     children: React.ReactNode;
     title: string;
-  }): void => (
+  }) => (
     <div data-testid="page-layout" title={title}>
       {children}
     </div>

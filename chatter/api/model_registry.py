@@ -82,7 +82,7 @@ async def get_provider(
 
     if not provider:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND, from e
             detail="Provider not found",
         )
 
@@ -92,7 +92,7 @@ async def get_provider(
 @router.post(
     "/providers",
     response_model=Provider,
-    status_code=status.HTTP_201_CREATED,
+    status_code=status.HTTP_201_CREATED, from e
 )
 async def create_provider(
     provider_data: ProviderCreate,
@@ -128,7 +128,7 @@ async def create_provider(
             )
             raise HTTPException(
                 status_code=status.HTTP_400_BAD_REQUEST,
-                detail="Provider with this name already exists",
+                detail="Provider with this name already exists", from e
             )
 
         provider = await service.create_provider(provider_data)
@@ -164,7 +164,7 @@ async def create_provider(
             error_message=str(e),
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
             detail="Failed to create provider",
         ) from e
 
@@ -188,7 +188,7 @@ async def update_provider(
 
         if not provider:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND, from e
                 detail="Provider not found",
             )
 
@@ -204,7 +204,7 @@ async def update_provider(
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            detail=str(e), from e
         ) from e
 
 
@@ -223,7 +223,7 @@ async def delete_provider(
 
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND, from e
                 detail="Provider not found",
             )
 
@@ -239,7 +239,7 @@ async def delete_provider(
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST, from e
             detail="Cannot delete provider due to existing dependencies",
         ) from e
 
@@ -269,11 +269,11 @@ async def set_default_provider(
             if not provider:
                 raise HTTPException(
                     status_code=status.HTTP_404_NOT_FOUND,
-                    detail="Provider not found",
+                    detail="Provider not found", from e
                 )
             else:
                 raise HTTPException(
-                    status_code=status.HTTP_400_BAD_REQUEST,
+                    status_code=status.HTTP_400_BAD_REQUEST, from e
                     detail=f"Provider {provider.name} has no active models of type {default_data.model_type}",
                 )
 
@@ -299,7 +299,7 @@ async def set_default_provider(
         if isinstance(e, HTTPException):
             raise
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
             detail="Failed to set default provider",
         ) from e
 
@@ -347,7 +347,7 @@ async def get_model(
     if not model:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Model not found",
+            detail="Model not found", from e
         )
 
     return model
@@ -357,7 +357,7 @@ async def get_model(
     "/models",
     response_model=ModelDefWithProvider,
     status_code=status.HTTP_201_CREATED,
-)
+) from e
 async def create_model(
     model_data: ModelDefCreate,
     session: AsyncSession = Depends(get_session_generator),
@@ -375,7 +375,7 @@ async def create_model(
         )
         if existing:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST, from e
                 detail="Model with this name already exists for this provider",
             )
 
@@ -387,7 +387,7 @@ async def create_model(
         if not model:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to retrieve created model",
+                detail="Failed to retrieve created model", from e
             )
 
         logger.info(
@@ -403,7 +403,7 @@ async def create_model(
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            detail=str(e), from e
         ) from e
     except Exception as e:
         await session.rollback()
@@ -415,7 +415,7 @@ async def create_model(
             user_id=current_user.id,
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
             detail="Failed to create model",
         ) from e
 
@@ -437,7 +437,7 @@ async def update_model(
 
         if not model:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND, from e
                 detail="Model not found",
             )
 
@@ -447,7 +447,7 @@ async def update_model(
         if not model:
             raise HTTPException(
                 status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
-                detail="Failed to retrieve updated model",
+                detail="Failed to retrieve updated model", from e
             )
 
         logger.info(
@@ -461,7 +461,7 @@ async def update_model(
 
     except ValidationError as e:
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST, from e
             detail=str(e),
         ) from e
 
@@ -479,7 +479,7 @@ async def delete_model(
 
         if not deleted:
             raise HTTPException(
-                status_code=status.HTTP_404_NOT_FOUND,
+                status_code=status.HTTP_404_NOT_FOUND, from e
                 detail="Model not found",
             )
 
@@ -495,7 +495,7 @@ async def delete_model(
     except IntegrityError as e:
         await session.rollback()
         raise HTTPException(
-            status_code=status.HTTP_400_BAD_REQUEST,
+            status_code=status.HTTP_400_BAD_REQUEST, from e
             detail="Cannot delete model due to existing dependencies",
         ) from e
 
@@ -515,7 +515,7 @@ async def set_default_model(
 
     if not success:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND, from e
             detail="Model not found",
         )
 
@@ -571,7 +571,7 @@ async def get_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found",
+            detail="Embedding space not found", from e
         )
 
     return space
@@ -581,7 +581,7 @@ async def get_embedding_space(
     "/embedding-spaces",
     response_model=EmbeddingSpaceWithModel,
     status_code=status.HTTP_201_CREATED,
-)
+) from e
 async def create_embedding_space(
     space_data: EmbeddingSpaceCreate,
     session: AsyncSession = Depends(get_session_generator),
@@ -599,7 +599,7 @@ async def create_embedding_space(
         )
         if existing:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST, from e
                 detail="Embedding space with this name already exists",
             )
 
@@ -611,7 +611,7 @@ async def create_embedding_space(
         )
         if existing_table:
             raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST,
+                status_code=status.HTTP_400_BAD_REQUEST, from e
                 detail="Embedding space with this table name already exists",
             )
 
@@ -625,7 +625,7 @@ async def create_embedding_space(
 
         if not space:
             raise HTTPException(
-                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
                 detail="Failed to retrieve created embedding space",
             )
 
@@ -643,7 +643,7 @@ async def create_embedding_space(
     except ValidationError as e:
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=str(e),
+            detail=str(e), from e
         ) from e
     except Exception as e:
         logger.error(
@@ -653,7 +653,7 @@ async def create_embedding_space(
             user_id=current_user.id,
         )
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
             detail=f"Failed to create embedding space: {str(e)}",
         ) from e
 
@@ -675,7 +675,7 @@ async def update_embedding_space(
     if not space:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found",
+            detail="Embedding space not found", from e
         )
 
     # Refresh to get full relationships
@@ -683,7 +683,7 @@ async def update_embedding_space(
 
     if not space:
         raise HTTPException(
-            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            status_code=status.HTTP_500_INTERNAL_SERVER_ERROR, from e
             detail="Failed to retrieve updated embedding space",
         )
 
@@ -713,7 +713,7 @@ async def delete_embedding_space(
     if not deleted:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found",
+            detail="Embedding space not found", from e
         )
 
     logger.info(
@@ -743,7 +743,7 @@ async def set_default_embedding_space(
     if not success:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail="Embedding space not found",
+            detail="Embedding space not found", from e
         )
 
     logger.info(
@@ -771,7 +771,7 @@ async def get_default_provider(
     if not provider:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
-            detail=f"No default provider found for {model_type}",
+            detail=f"No default provider found for {model_type}", from e
         )
 
     return provider
@@ -791,7 +791,7 @@ async def get_default_model(
 
     if not model:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND, from e
             detail=f"No default model found for {model_type}",
         )
 
@@ -811,7 +811,7 @@ async def get_default_embedding_space(
 
     if not space:
         raise HTTPException(
-            status_code=status.HTTP_404_NOT_FOUND,
+            status_code=status.HTTP_404_NOT_FOUND, from e
             detail="No default embedding space found",
         )
 

@@ -77,6 +77,7 @@ export {
   ListItemIcon,
   ListItemText,
   ListItemAvatar,
+  ListItemSecondaryAction,
   ListSubheader,
 } from '@mui/material';
 

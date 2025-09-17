@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getSDK } from '../../services/auth-service';
-import { useSSE } from '../../services/sse-context';
-import { useNotifications } from '../NotificationSystem';
-import { handleError } from '../../utils/error-handler';
+import { getSDK } from '../services/auth-service';
+import { useSSE } from '../services/sse-context';
+import { useNotifications } from '../components/NotificationSystem';
+import { handleError } from '../utils/error-handler';
 import {
   BackupResponse,
   PluginResponse,

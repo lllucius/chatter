@@ -21,85 +21,93 @@ vi.mock('../../services/auth-service', () => ({
       listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
     },
     documents: {
-      listDocumentsApiV1Documents: vi.fn(() => Promise.resolve({ documents: [] })),
+      listDocumentsApiV1Documents: vi.fn(() =>
+        Promise.resolve({ documents: [] })
+      ),
     },
     conversations: {
-      listConversationsApiV1Conversations: vi.fn(() => Promise.resolve({ 
-        conversations: [
-          {
-            id: 'conv-123',
-            title: 'Test Conversation',
-            created_at: '2024-01-01T10:00:00Z',
-            updated_at: '2024-01-01T10:05:00Z',
-            user_id: 'user-123',
-            status: 'active',
-            message_count: 2,
-            total_tokens: 150,
-            total_cost: 0.01,
-            enable_retrieval: false,
-            context_window: 4096,
-            memory_enabled: true,
-            retrieval_limit: 5,
-            retrieval_score_threshold: 0.7,
-          }
-        ] 
-      })),
-      getConversationApiV1ConversationsConversationId: vi.fn(() => Promise.resolve({
-        id: 'conv-123',
-        title: 'Test Conversation',
-        user_id: 'user-123',
-        status: 'active',
-        message_count: 2,
-        total_tokens: 150,
-        total_cost: 0.01,
-        enable_retrieval: false,
-        context_window: 4096,
-        memory_enabled: true,
-        retrieval_limit: 5,
-        retrieval_score_threshold: 0.7,
-        created_at: '2024-01-01T10:00:00Z',
-        updated_at: '2024-01-01T10:05:00Z',
-        messages: [
-          {
-            id: 'msg-user-1',
-            role: 'user',
-            content: 'Hello, how are you?',
-            created_at: '2024-01-01T10:00:00Z',
-            sequence_number: 1,
-            rating_count: 0,
-          },
-          {
-            id: 'msg-assistant-1',
-            role: 'assistant',
-            content: 'Hello! I am doing well, thank you for asking.',
-            created_at: '2024-01-01T10:01:00Z',
-            sequence_number: 2,
-            total_tokens: 150,
-            response_time_ms: 1500,
-            model_used: 'gpt-4',
-            rating_count: 0,
-          }
-        ]
-      })),
-    },
-    chat: {
-      chatChat: vi.fn(() => Promise.resolve({
-        conversation_id: 'conv-123',
-        message: {
-          id: 'msg-assistant-2',
-          role: 'assistant',
-          content: 'This is a new response.',
-          created_at: '2024-01-01T10:02:00Z',
-          total_tokens: 75,
-          response_time_ms: 1200,
-          model_used: 'gpt-4',
-        },
-        conversation: {
+      listConversationsApiV1Conversations: vi.fn(() =>
+        Promise.resolve({
+          conversations: [
+            {
+              id: 'conv-123',
+              title: 'Test Conversation',
+              created_at: '2024-01-01T10:00:00Z',
+              updated_at: '2024-01-01T10:05:00Z',
+              user_id: 'user-123',
+              status: 'active',
+              message_count: 2,
+              total_tokens: 150,
+              total_cost: 0.01,
+              enable_retrieval: false,
+              context_window: 4096,
+              memory_enabled: true,
+              retrieval_limit: 5,
+              retrieval_score_threshold: 0.7,
+            },
+          ],
+        })
+      ),
+      getConversationApiV1ConversationsConversationId: vi.fn(() =>
+        Promise.resolve({
           id: 'conv-123',
           title: 'Test Conversation',
           user_id: 'user-123',
-        }
-      })),
+          status: 'active',
+          message_count: 2,
+          total_tokens: 150,
+          total_cost: 0.01,
+          enable_retrieval: false,
+          context_window: 4096,
+          memory_enabled: true,
+          retrieval_limit: 5,
+          retrieval_score_threshold: 0.7,
+          created_at: '2024-01-01T10:00:00Z',
+          updated_at: '2024-01-01T10:05:00Z',
+          messages: [
+            {
+              id: 'msg-user-1',
+              role: 'user',
+              content: 'Hello, how are you?',
+              created_at: '2024-01-01T10:00:00Z',
+              sequence_number: 1,
+              rating_count: 0,
+            },
+            {
+              id: 'msg-assistant-1',
+              role: 'assistant',
+              content: 'Hello! I am doing well, thank you for asking.',
+              created_at: '2024-01-01T10:01:00Z',
+              sequence_number: 2,
+              total_tokens: 150,
+              response_time_ms: 1500,
+              model_used: 'gpt-4',
+              rating_count: 0,
+            },
+          ],
+        })
+      ),
+    },
+    chat: {
+      chatChat: vi.fn(() =>
+        Promise.resolve({
+          conversation_id: 'conv-123',
+          message: {
+            id: 'msg-assistant-2',
+            role: 'assistant',
+            content: 'This is a new response.',
+            created_at: '2024-01-01T10:02:00Z',
+            total_tokens: 75,
+            response_time_ms: 1200,
+            model_used: 'gpt-4',
+          },
+          conversation: {
+            id: 'conv-123',
+            title: 'Test Conversation',
+            user_id: 'user-123',
+          },
+        })
+      ),
     },
   })),
 }));
@@ -128,10 +136,10 @@ vi.mock('../../components/RightSidebarContext', () => ({
 describe('ChatPage Improvements', () => {
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Mock scrollIntoView for test environment
     Element.prototype.scrollIntoView = vi.fn();
-    
+
     // Mock localStorage
     Object.defineProperty(window, 'localStorage', {
       value: {
@@ -159,7 +167,9 @@ describe('ChatPage Improvements', () => {
       });
 
       await waitFor(() => {
-        expect(screen.getByText('Hello! I am doing well, thank you for asking.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Hello! I am doing well, thank you for asking.')
+        ).toBeInTheDocument();
       });
     });
   });
@@ -170,7 +180,9 @@ describe('ChatPage Improvements', () => {
 
       // Wait for messages to load
       await waitFor(() => {
-        expect(screen.getByText('Hello! I am doing well, thank you for asking.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Hello! I am doing well, thank you for asking.')
+        ).toBeInTheDocument();
       });
 
       // Check that token and timing stats are displayed
@@ -190,7 +202,9 @@ describe('ChatPage Improvements', () => {
 
       // Wait for messages to load
       await waitFor(() => {
-        expect(screen.getByText('Hello! I am doing well, thank you for asking.')).toBeInTheDocument();
+        expect(
+          screen.getByText('Hello! I am doing well, thank you for asking.')
+        ).toBeInTheDocument();
       });
 
       // Check that rating section is present
@@ -213,7 +227,7 @@ describe('ChatPage Improvements', () => {
       const inputField = screen.getByPlaceholderText(/Type your message here/);
       expect(inputField).toBeInTheDocument();
 
-      // Check that input field gets focus (testing focus can be tricky in jsdom, 
+      // Check that input field gets focus (testing focus can be tricky in jsdom,
       // so we mainly verify the input field exists and is not disabled)
       expect(inputField).not.toBeDisabled();
     });
@@ -226,15 +240,15 @@ describe('ChatPage Improvements', () => {
       });
 
       const inputField = screen.getByPlaceholderText(/Type your message here/);
-      
+
       // Type a message and send it - find the send button by its SendIcon test id
       fireEvent.change(inputField, { target: { value: 'New test message' } });
-      
+
       // Find the send button by looking for the SendIcon
       const sendButton = screen.getByTestId('SendIcon').closest('button');
       expect(sendButton).toBeTruthy();
       expect(sendButton).not.toBeDisabled();
-      
+
       if (sendButton) {
         fireEvent.click(sendButton);
       }
@@ -302,15 +316,15 @@ describe('ChatPage Improvements', () => {
             response_time_ms: 1200,
             model_used: 'gpt-4',
             rating_count: 0,
-          }
-        ]
+          },
+        ],
       });
 
       const { getSDK } = await import('../../services/auth-service');
       (getSDK as any).mockReturnValue({
-        ...((getSDK as any)()),
+        ...(getSDK as any)(),
         conversations: {
-          ...((getSDK as any)()).conversations,
+          ...(getSDK as any)().conversations,
           getConversationApiV1ConversationsConversationId: mockGetConversation,
         },
       });
@@ -326,12 +340,12 @@ describe('ChatPage Improvements', () => {
 
       // Send a new message
       fireEvent.change(inputField, { target: { value: 'New test message' } });
-      
+
       // Find the send button by looking for the SendIcon
       const sendButton = screen.getByTestId('SendIcon').closest('button');
       expect(sendButton).toBeTruthy();
       expect(sendButton).not.toBeDisabled();
-      
+
       if (sendButton) {
         fireEvent.click(sendButton);
       }
@@ -346,7 +360,9 @@ describe('ChatPage Improvements', () => {
       });
 
       // Verify that the conversation reload was called
-      expect(mockGetConversation).toHaveBeenCalledWith('conv-123', { includeMessages: true });
+      expect(mockGetConversation).toHaveBeenCalledWith('conv-123', {
+        includeMessages: true,
+      });
     });
   });
 });

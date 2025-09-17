@@ -19,7 +19,8 @@ export const useChatData = () => {
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<ConversationResponse | null>(null);
+  const [currentConversation, setCurrentConversation] =
+    useState<ConversationResponse | null>(null);
 
   // Chat configuration state with localStorage persistence
   const [streamingEnabled, setStreamingEnabled] = useState(() => {
@@ -47,16 +48,20 @@ export const useChatData = () => {
     let profilesResponse: ProfileResponse[] | null = null;
     try {
       const sdk = getSDK();
-      const [profilesResp, promptsResponse, documentsResponse, conversationsResp] =
-        await Promise.all([
-          sdk.profiles.listProfilesApiV1Profiles({}),
-          sdk.prompts.listPromptsApiV1Prompts({}),
-          sdk.documents.listDocumentsApiV1Documents({}),
-          sdk.conversations.listConversationsApiV1Conversations({
-            limit: 1,
-            offset: 0,
-          }),
-        ]);
+      const [
+        profilesResp,
+        promptsResponse,
+        documentsResponse,
+        conversationsResp,
+      ] = await Promise.all([
+        sdk.profiles.listProfilesApiV1Profiles({}),
+        sdk.prompts.listPromptsApiV1Prompts({}),
+        sdk.documents.listDocumentsApiV1Documents({}),
+        sdk.conversations.listConversationsApiV1Conversations({
+          limit: 1,
+          offset: 0,
+        }),
+      ]);
 
       profilesResponse = profilesResp.profiles || [];
       setProfiles(profilesResponse);
@@ -83,7 +88,10 @@ export const useChatData = () => {
 
   // Persist settings to localStorage
   useEffect(() => {
-    localStorage.setItem('chatter_streamingEnabled', JSON.stringify(streamingEnabled));
+    localStorage.setItem(
+      'chatter_streamingEnabled',
+      JSON.stringify(streamingEnabled)
+    );
   }, [streamingEnabled]);
 
   useEffect(() => {
@@ -95,7 +103,10 @@ export const useChatData = () => {
   }, [maxTokens]);
 
   useEffect(() => {
-    localStorage.setItem('chatter_enableRetrieval', JSON.stringify(enableRetrieval));
+    localStorage.setItem(
+      'chatter_enableRetrieval',
+      JSON.stringify(enableRetrieval)
+    );
   }, [enableRetrieval]);
 
   // Load data on mount
@@ -109,18 +120,18 @@ export const useChatData = () => {
     prompts,
     documents,
     currentConversation,
-    
+
     // Selected items
     selectedProfile,
     selectedPrompt,
     selectedDocuments,
-    
+
     // Configuration
     streamingEnabled,
     temperature,
     maxTokens,
     enableRetrieval,
-    
+
     // Actions
     setSelectedProfile,
     setSelectedPrompt,
@@ -162,53 +173,58 @@ export const useChatMessages = () => {
   }, []);
 
   // Load messages for a conversation
-  const loadMessagesForConversation = useCallback(async (conversationId: string) => {
-    try {
-      const response = await getSDK().conversations.getConversationMessagesApiV1ConversationsConversationIdMessages(
-        conversationId
-      );
-      
-      const chatMessages: ExtendedChatMessage[] = response.messages?.map((msg, index) => ({
-        id: msg.id,
-        role: msg.role as 'user' | 'assistant',
-        content: msg.content,
-        timestamp: new Date(msg.created_at),
-        metadata: {
-          model: msg.model_used || undefined,
-          tokens: msg.total_tokens || undefined,
-          processingTime: msg.response_time_ms || undefined,
-          workflow: {
-            stage: 'Complete',
-            currentStep: 0,
-            totalSteps: 1,
-            stepDescriptions: ['Message processed'],
-          },
-        },
-        isStreaming: false,
-        streamingContent: '',
-        onEdit: () => {
-          // Placeholder for edit functionality
-        },
-        onRegenerate: () => {
-          // Placeholder for regenerate functionality
-        },
-        onDelete: () => {
-          // Placeholder for delete functionality
-        },
-        onRate: (rating: 'good' | 'bad') => {
-          // Placeholder for rating functionality
-          console.log('Rate message', index, rating);
-        },
-      })) || [];
-      
-      setMessages(chatMessages);
-    } catch (error) {
-      handleError(error, {
-        source: 'useChatMessages.loadMessagesForConversation',
-        operation: 'load conversation messages',
-      });
-    }
-  }, []);
+  const loadMessagesForConversation = useCallback(
+    async (conversationId: string) => {
+      try {
+        const response =
+          await getSDK().conversations.getConversationMessagesApiV1ConversationsConversationIdMessages(
+            conversationId
+          );
+
+        const chatMessages: ExtendedChatMessage[] =
+          response.messages?.map((msg, index) => ({
+            id: msg.id,
+            role: msg.role as 'user' | 'assistant',
+            content: msg.content,
+            timestamp: new Date(msg.created_at),
+            metadata: {
+              model: msg.model_used || undefined,
+              tokens: msg.total_tokens || undefined,
+              processingTime: msg.response_time_ms || undefined,
+              workflow: {
+                stage: 'Complete',
+                currentStep: 0,
+                totalSteps: 1,
+                stepDescriptions: ['Message processed'],
+              },
+            },
+            isStreaming: false,
+            streamingContent: '',
+            onEdit: () => {
+              // Placeholder for edit functionality
+            },
+            onRegenerate: () => {
+              // Placeholder for regenerate functionality
+            },
+            onDelete: () => {
+              // Placeholder for delete functionality
+            },
+            onRate: (rating: 'good' | 'bad') => {
+              // Placeholder for rating functionality
+              console.log('Rate message', index, rating);
+            },
+          })) || [];
+
+        setMessages(chatMessages);
+      } catch (error) {
+        handleError(error, {
+          source: 'useChatMessages.loadMessagesForConversation',
+          operation: 'load conversation messages',
+        });
+      }
+    },
+    []
+  );
 
   // Clear all messages
   const clearMessages = useCallback(() => {
@@ -221,11 +237,11 @@ export const useChatMessages = () => {
     message,
     messages,
     loading,
-    
+
     // Refs
     messagesEndRef,
     inputRef,
-    
+
     // Actions
     setMessage,
     setMessages,

@@ -269,7 +269,7 @@ class UnifiedWorkflowExecutor:
                 ):
                     # Look for messages in any node's output (fallback for non-streaming)
                     messages_found = None
-                    for node_name, node_output in event.items():
+                    for _node_name, node_output in event.items():
                         if (
                             isinstance(node_output, dict)
                             and "messages" in node_output
@@ -505,7 +505,7 @@ class UnifiedWorkflowExecutor:
                     for key in event.keys()
                 ):
                     messages_found = None
-                    for node_name, node_output in event.items():
+                    for _node_name, node_output in event.items():
                         if (
                             isinstance(node_output, dict)
                             and "messages" in node_output

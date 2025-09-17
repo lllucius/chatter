@@ -30,14 +30,16 @@ interface WorkflowExecution {
 export const useWorkflowData = () => {
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
-  const [availableTools, setAvailableTools] = useState<AvailableToolsResponse | null>(null);
+  const [availableTools, setAvailableTools] =
+    useState<AvailableToolsResponse | null>(null);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 
   const loadTemplates = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
+      const response =
+        await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
       setTemplates(response.templates || []);
     } catch (error) {
       handleError(error, {
@@ -51,7 +53,8 @@ export const useWorkflowData = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      const response = await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
+      const response =
+        await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
       setAvailableTools(response);
     } catch (error) {
       handleError(error, {
@@ -63,7 +66,8 @@ export const useWorkflowData = () => {
 
   const loadExecutions = useCallback(async () => {
     try {
-      const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsExecutions();
+      const response =
+        await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsExecutions();
       setExecutions(response.executions || []);
     } catch (error) {
       handleError(error, {
@@ -76,8 +80,11 @@ export const useWorkflowData = () => {
   const createTemplate = useCallback(async (templateData: any) => {
     try {
       setLoading(true);
-      const newTemplate = await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(templateData);
-      setTemplates(prev => [newTemplate, ...prev]);
+      const newTemplate =
+        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
+          templateData
+        );
+      setTemplates((prev) => [newTemplate, ...prev]);
       return newTemplate;
     } catch (error) {
       handleError(error, {
@@ -90,30 +97,36 @@ export const useWorkflowData = () => {
     }
   }, []);
 
-  const executeWorkflow = useCallback(async (templateId: string, input: any) => {
-    try {
-      setLoading(true);
-      const execution = await getSDK().workflows.executeWorkflowApiV1WorkflowsExecute({
-        template_id: templateId,
-        input: input,
-      });
-      setExecutions(prev => [execution, ...prev]);
-      return execution;
-    } catch (error) {
-      handleError(error, {
-        source: 'useWorkflowData.executeWorkflow',
-        operation: 'execute workflow',
-      });
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const executeWorkflow = useCallback(
+    async (templateId: string, input: any) => {
+      try {
+        setLoading(true);
+        const execution =
+          await getSDK().workflows.executeWorkflowApiV1WorkflowsExecute({
+            template_id: templateId,
+            input: input,
+          });
+        setExecutions((prev) => [execution, ...prev]);
+        return execution;
+      } catch (error) {
+        handleError(error, {
+          source: 'useWorkflowData.executeWorkflow',
+          operation: 'execute workflow',
+        });
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId);
-      setTemplates(prev => prev.filter(t => t.id !== templateId));
+      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
+        templateId
+      );
+      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.deleteTemplate',
@@ -136,7 +149,7 @@ export const useWorkflowData = () => {
     availableTools,
     executions,
     selectedTemplate,
-    
+
     // Actions
     setSelectedTemplate,
     loadTemplates,

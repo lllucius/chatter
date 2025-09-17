@@ -51,15 +51,8 @@ interface User {
 
 const AdministrationPage: React.FC = () => {
   // Use custom hook for data management
-  const {
-    backups,
-    jobs,
-    jobStats,
-    users,
-    dataLoading,
-    loadBackups,
-    loadJobs,
-  } = useAdministrationData();
+  const { backups, jobs, jobStats, users, dataLoading, loadBackups, loadJobs } =
+    useAdministrationData();
 
   const [activeTab, setActiveTab] = useState<
     'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'
@@ -134,12 +127,18 @@ const AdministrationPage: React.FC = () => {
     });
   };
 
-  const handleFormChange = (field: string, value: string | number | boolean) => {
+  const handleFormChange = (
+    field: string,
+    value: string | number | boolean
+  ) => {
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   // Action handlers
-  const openUserActionsMenu = (e: React.MouseEvent<HTMLElement>, user: User) => {
+  const openUserActionsMenu = (
+    e: React.MouseEvent<HTMLElement>,
+    user: User
+  ) => {
     setActionAnchorEl(e.currentTarget);
     setActionUser(user);
   };
@@ -171,7 +170,7 @@ const AdministrationPage: React.FC = () => {
   const handleCreateItem = async () => {
     try {
       setLoading(true);
-      
+
       switch (dialogType) {
         case 'backup':
           await getSDK().dataManagement.createBackupApiV1DataBackup({
@@ -249,7 +248,7 @@ const AdministrationPage: React.FC = () => {
       const message = bulkOperationData.dryRun
         ? `Dry run completed for ${bulkOperationData.operationType}`
         : `Bulk operation completed for ${bulkOperationData.operationType}`;
-      
+
       toastService.success(message);
     } catch (error) {
       handleError(error, {
@@ -407,7 +406,10 @@ const AdministrationPage: React.FC = () => {
                     onChange={(e) =>
                       setBulkOperationData((prev) => ({
                         ...prev,
-                        operationType: e.target.value as 'conversations' | 'documents' | 'prompts',
+                        operationType: e.target.value as
+                          | 'conversations'
+                          | 'documents'
+                          | 'prompts',
                       }))
                     }
                   >
@@ -441,7 +443,9 @@ const AdministrationPage: React.FC = () => {
               disabled={loading}
               sx={{ mt: 2 }}
             >
-              {bulkOperationData.dryRun ? 'Preview Operation' : 'Execute Operation'}
+              {bulkOperationData.dryRun
+                ? 'Preview Operation'
+                : 'Execute Operation'}
             </Button>
           </Box>
         </Box>
@@ -471,14 +475,18 @@ const AdministrationPage: React.FC = () => {
                 multiline
                 rows={3}
                 value={formData.description}
-                onChange={(e) => handleFormChange('description', e.target.value)}
+                onChange={(e) =>
+                  handleFormChange('description', e.target.value)
+                }
                 sx={{ mb: 2 }}
               />
               <FormControlLabel
                 control={
                   <Switch
                     checked={formData.includeUserData}
-                    onChange={(e) => handleFormChange('includeUserData', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange('includeUserData', e.target.checked)
+                    }
                   />
                 }
                 label="Include User Data"
@@ -487,7 +495,9 @@ const AdministrationPage: React.FC = () => {
                 control={
                   <Switch
                     checked={formData.includeDocuments}
-                    onChange={(e) => handleFormChange('includeDocuments', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange('includeDocuments', e.target.checked)
+                    }
                   />
                 }
                 label="Include Documents"
@@ -496,7 +506,12 @@ const AdministrationPage: React.FC = () => {
                 control={
                   <Switch
                     checked={formData.includeConfigurations}
-                    onChange={(e) => handleFormChange('includeConfigurations', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange(
+                        'includeConfigurations',
+                        e.target.checked
+                      )
+                    }
                   />
                 }
                 label="Include Configurations"
@@ -517,7 +532,9 @@ const AdministrationPage: React.FC = () => {
                 fullWidth
                 label="Function"
                 value={formData.jobFunction}
-                onChange={(e) => handleFormChange('jobFunction', e.target.value)}
+                onChange={(e) =>
+                  handleFormChange('jobFunction', e.target.value)
+                }
                 sx={{ mb: 2 }}
               />
               <FormControl fullWidth sx={{ mb: 2 }}>
@@ -525,7 +542,9 @@ const AdministrationPage: React.FC = () => {
                 <Select
                   value={formData.jobPriority}
                   label="Priority"
-                  onChange={(e) => handleFormChange('jobPriority', e.target.value)}
+                  onChange={(e) =>
+                    handleFormChange('jobPriority', e.target.value)
+                  }
                 >
                   <MenuItem value="low">Low</MenuItem>
                   <MenuItem value="normal">Normal</MenuItem>
@@ -548,7 +567,12 @@ const AdministrationPage: React.FC = () => {
       </Dialog>
 
       {/* User Settings Dialog */}
-      <Dialog open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={userSettingsOpen}
+        onClose={() => setUserSettingsOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>User Settings</DialogTitle>
         <DialogContent>
           {editingUser && (

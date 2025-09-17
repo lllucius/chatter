@@ -1,11 +1,5 @@
 import React, { memo } from 'react';
-import {
-  Grid,
-  Paper,
-  Typography,
-  Box,
-  Chip,
-} from '../../utils/mui';
+import { Grid, Paper, Typography, Box, Chip } from '../../utils/mui';
 import { ABTestResponse } from 'chatter-sdk';
 import { format } from 'date-fns';
 
@@ -41,10 +35,7 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
           {test.created_at && (
             <Typography>
               <strong>Created:</strong>{' '}
-              {format(
-                new Date(test.created_at),
-                'MMM dd, yyyy HH:mm'
-              )}
+              {format(new Date(test.created_at), 'MMM dd, yyyy HH:mm')}
             </Typography>
           )}
           {test.description && (
@@ -63,7 +54,7 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
           <Typography variant="h6" gutterBottom>
             Test Configuration
           </Typography>
-          
+
           {test.variants && test.variants.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
@@ -118,9 +109,7 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
             <Typography variant="h6" gutterBottom>
               Hypothesis
             </Typography>
-            <Typography variant="body1">
-              {test.hypothesis}
-            </Typography>
+            <Typography variant="body1">{test.hypothesis}</Typography>
           </Paper>
         </Grid>
       )}

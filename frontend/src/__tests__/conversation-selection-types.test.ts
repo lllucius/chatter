@@ -68,7 +68,7 @@ describe('Conversation Selection Type Safety', () => {
 
     // This is what ChatPage.handleSelectConversation does now
     const extractedId = conversation.id;
-    
+
     expect(extractedId).toBe('test-id-ulid-format');
     expect(typeof extractedId).toBe('string');
     expect(extractedId).not.toBe('[object Object]');
@@ -76,7 +76,7 @@ describe('Conversation Selection Type Safety', () => {
 
   it('should verify interface consistency between ConversationHistory and ChatPage', () => {
     // This test ensures the interfaces are properly aligned
-    
+
     // ConversationHistory calls this with a ConversationResponse
     const onSelectConversation = vi.fn((conversation: ConversationResponse) => {
       // ChatPage handler now correctly receives ConversationResponse
@@ -106,7 +106,7 @@ describe('Conversation Selection Type Safety', () => {
 
     // This simulates the fixed flow
     onSelectConversation(mockConversation);
-    
+
     expect(onSelectConversation).toHaveBeenCalledWith(mockConversation);
     expect(onSelectConversation).toHaveBeenCalledTimes(1);
   });

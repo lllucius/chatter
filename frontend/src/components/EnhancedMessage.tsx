@@ -233,25 +233,31 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                     {getRoleLabel()}
                   </Typography>
                   {/* Workflow progress indicator for assistant messages */}
-                  {message.role === 'assistant' && message.metadata?.workflow && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
-                      {message.metadata.workflow.isStreaming && (
-                        <CircularProgress size={16} sx={{ mr: 0.5 }} />
-                      )}
-                      {message.metadata.workflow.stage && (
-                        <Chip
-                          label={message.metadata.workflow.stage}
-                          size="small"
-                          variant="outlined"
-                          color={
-                            message.metadata.workflow.status === 'complete' ? 'success' :
-                            message.metadata.workflow.status === 'streaming' ? 'primary' :
-                            'default'
-                          }
-                        />
-                      )}
-                    </Box>
-                  )}
+                  {message.role === 'assistant' &&
+                    message.metadata?.workflow && (
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}
+                      >
+                        {message.metadata.workflow.isStreaming && (
+                          <CircularProgress size={16} sx={{ mr: 0.5 }} />
+                        )}
+                        {message.metadata.workflow.stage && (
+                          <Chip
+                            label={message.metadata.workflow.stage}
+                            size="small"
+                            variant="outlined"
+                            color={
+                              message.metadata.workflow.status === 'complete'
+                                ? 'success'
+                                : message.metadata.workflow.status ===
+                                    'streaming'
+                                  ? 'primary'
+                                  : 'default'
+                            }
+                          />
+                        )}
+                      </Box>
+                    )}
                   {message.edited && (
                     <Chip label="Edited" size="small" variant="outlined" />
                   )}

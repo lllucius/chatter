@@ -114,7 +114,6 @@ describe('GlobalErrorHandler', () => {
     it('should filter out ResizeObserver errors', () => {
       initializeGlobalErrorHandling();
 
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const consoleDebugSpy = vi
         .spyOn(console, 'debug')
         .mockImplementation(() => {});
@@ -176,7 +175,6 @@ describe('GlobalErrorHandler', () => {
 
       initializeGlobalErrorHandling();
 
-      // eslint-disable-next-line @typescript-eslint/no-empty-function
       const consoleDebugSpy = vi
         .spyOn(console, 'debug')
         .mockImplementation(() => {});

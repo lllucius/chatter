@@ -7,7 +7,7 @@ import { describe, it, expect } from 'vitest';
 function parseStreamingChunk(line: string): Record<string, unknown> | null {
   if (line.startsWith('data: ')) {
     const raw = line.slice(6).trim();
-    
+
     // Handle special cases
     if (raw === '[DONE]') {
       return { type: 'done' };
@@ -67,51 +67,51 @@ describe('Streaming Parser Logic', () => {
   it('should parse streaming start event', () => {
     const line = 'data: {"type":"start","conversation_id":"test-conv"}';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toEqual({
       type: 'start',
-      conversation_id: 'test-conv'
+      conversation_id: 'test-conv',
     });
   });
 
   it('should parse streaming token event', () => {
     const line = 'data: {"type":"token","content":"Hello"}';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toEqual({
       type: 'token',
-      content: 'Hello'
+      content: 'Hello',
     });
   });
 
   it('should parse streaming complete event', () => {
     const line = 'data: {"type":"complete","metadata":{"total_tokens":5}}';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toEqual({
       type: 'complete',
-      metadata: { total_tokens: 5 }
+      metadata: { total_tokens: 5 },
     });
   });
 
   it('should handle DONE marker', () => {
     const line = 'data: [DONE]';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toEqual({ type: 'done' });
   });
 
   it('should ignore non-data lines', () => {
     const line = 'id: 12345';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toBeNull();
   });
 
   it('should handle malformed JSON gracefully', () => {
     const line = 'data: {invalid json}';
     const result = parseStreamingChunk(line);
-    
+
     expect(result).toBeNull();
   });
 
@@ -129,7 +129,7 @@ describe('Streaming Parser Logic', () => {
     expect(result).toEqual({
       content: 'Hello there',
       metadata: { total_tokens: 5 },
-      conversationId: 'test-conv'
+      conversationId: 'test-conv',
     });
   });
 

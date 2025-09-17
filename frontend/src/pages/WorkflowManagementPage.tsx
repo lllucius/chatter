@@ -164,7 +164,11 @@ const WorkflowManagementPage: React.FC = () => {
             variant="scrollable"
             scrollButtons="auto"
           >
-            <Tab label="Templates" icon={<WorkflowIcon />} iconPosition="start" />
+            <Tab
+              label="Templates"
+              icon={<WorkflowIcon />}
+              iconPosition="start"
+            />
             <Tab label="Builder" icon={<BuildIcon />} iconPosition="start" />
             <Tab label="Executions" icon={<SpeedIcon />} iconPosition="start" />
           </Tabs>
@@ -182,15 +186,13 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={1} idPrefix="workflow">
           <Alert severity="info" sx={{ mb: 2 }}>
-            Use the "Create Template" button to open the workflow builder in a dialog.
+            Use the "Create Template" button to open the workflow builder in a
+            dialog.
           </Alert>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          <WorkflowExecutionsTab
-            executions={executions}
-            loading={loading}
-          />
+          <WorkflowExecutionsTab executions={executions} loading={loading} />
         </TabPanel>
       </Box>
 
@@ -238,7 +240,9 @@ const WorkflowManagementPage: React.FC = () => {
         PaperProps={{ sx: { height: '90vh' } }}
       >
         <DialogTitle>
-          {editingTemplate ? 'Edit Workflow Template' : 'Create Workflow Template'}
+          {editingTemplate
+            ? 'Edit Workflow Template'
+            : 'Create Workflow Template'}
         </DialogTitle>
         <DialogContent>
           <Box sx={{ mb: 3 }}>
@@ -246,19 +250,23 @@ const WorkflowManagementPage: React.FC = () => {
               fullWidth
               label="Template Name"
               value={templateForm.values.name}
-              onChange={(e) => templateForm.handleChange('name', e.target.value)}
+              onChange={(e) =>
+                templateForm.handleChange('name', e.target.value)
+              }
               error={Boolean(templateForm.errors.name)}
               helperText={templateForm.errors.name}
               sx={{ mb: 2 }}
             />
-            
+
             <TextField
               fullWidth
               label="Description"
               multiline
               rows={2}
               value={templateForm.values.description}
-              onChange={(e) => templateForm.handleChange('description', e.target.value)}
+              onChange={(e) =>
+                templateForm.handleChange('description', e.target.value)
+              }
               sx={{ mb: 2 }}
             />
 
@@ -266,11 +274,20 @@ const WorkflowManagementPage: React.FC = () => {
               fullWidth
               label="Category"
               value={templateForm.values.category}
-              onChange={(e) => templateForm.handleChange('category', e.target.value)}
+              onChange={(e) =>
+                templateForm.handleChange('category', e.target.value)
+              }
             />
           </Box>
 
-          <Box sx={{ height: '60vh', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+          <Box
+            sx={{
+              height: '60vh',
+              border: 1,
+              borderColor: 'divider',
+              borderRadius: 1,
+            }}
+          >
             <WorkflowEditor
               availableTools={availableTools?.tools || []}
               initialWorkflow={editingTemplate?.workflow}

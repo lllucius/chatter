@@ -599,14 +599,16 @@ class LangGraphWorkflowManager:
         initial_state: ConversationState,
         thread_id: str | None = None,
         enable_llm_streaming: bool = False,
+        enable_node_tracing: bool = False,
     ) -> Any:
-        """Stream workflow execution for real-time updates.
+        """Stream workflow execution using astream_events() for real-time updates.
         
         Args:
             workflow: The LangGraph workflow to execute
             initial_state: Initial conversation state
             thread_id: Optional thread ID for conversation continuity
-            enable_llm_streaming: If True, intercept model calls for token-by-token streaming
+            enable_llm_streaming: If True, stream token-by-token LLM output
+            enable_node_tracing: If True, include node-level tracing events
         """
         if not thread_id:
             thread_id = generate_ulid()
@@ -614,65 +616,189 @@ class LangGraphWorkflowManager:
         config = {"configurable": {"thread_id": thread_id}}
 
         try:
-            if enable_llm_streaming:
-                # Use custom streaming logic that intercepts model calls
-                async for event in self._stream_with_llm_streaming(
-                    workflow, initial_state, config
-                ):
-                    yield event
-            else:
-                # Use standard LangGraph streaming (events per node completion)
-                async for event in workflow.astream(
-                    initial_state, config=config
-                ):
-                    yield event
+            # Use astream_events for rich event streaming
+            async for event in self._stream_with_astream_events(
+                workflow, initial_state, config, enable_llm_streaming, enable_node_tracing
+            ):
+                yield event
         except Exception as e:
             logger.error(
                 "Workflow streaming failed",
                 error=str(e),
                 thread_id=thread_id,
                 enable_llm_streaming=enable_llm_streaming,
+                enable_node_tracing=enable_node_tracing,
             )
             raise
 
-    async def _stream_with_llm_streaming(
-        self, workflow: Pregel, initial_state: ConversationState, config: dict
+    async def _stream_with_astream_events(
+        self, 
+        workflow: Pregel, 
+        initial_state: ConversationState, 
+        config: dict,
+        enable_llm_streaming: bool = False,
+        enable_node_tracing: bool = False,
     ) -> Any:
-        """Custom streaming that provides token-by-token LLM output.
+        """Stream workflow using astream_events() for rich event processing.
         
-        This method provides a foundation for implementing true token-by-token
-        streaming by intercepting model calls. Currently it falls back to 
-        regular streaming but can be enhanced to provide real streaming.
+        Args:
+            workflow: The LangGraph workflow to execute
+            initial_state: Initial conversation state
+            config: Configuration for the workflow
+            enable_llm_streaming: If True, stream token-by-token LLM output
+            enable_node_tracing: If True, include node-level tracing events
         """
-        # Current implementation: Enhanced event processing
-        # This provides the foundation for token-by-token streaming
+        # Configure event filtering based on requirements
+        include_types = []
+        include_names = []
         
-        async for event in workflow.astream(initial_state, config=config):
-            # Process each event to identify model calls
-            for node_name, node_output in event.items():
-                if (
-                    node_name == "call_model" 
-                    and isinstance(node_output, dict) 
-                    and "messages" in node_output
-                ):
-                    # This is where token-by-token streaming would be implemented
-                    # For now, we emit the complete response but the infrastructure is ready
+        if enable_llm_streaming:
+            include_types.append("chat_model")
+            # Focus on the final model call for token streaming
+            include_names.append("call_model")
+        
+        if enable_node_tracing:
+            # Include all workflow nodes for development tracing
+            include_types.extend(["chain", "tool", "runnable"])
+        
+        # If neither specific streaming nor tracing is enabled, 
+        # fall back to node completion events
+        if not include_types:
+            include_types = ["chain"]
+        
+        try:
+            async for event in workflow.astream_events(
+                initial_state, 
+                config=config, 
+                version="v2",
+                include_types=include_types,
+                include_names=include_names if include_names else None,
+            ):
+                # Convert astream_events to the expected workflow event format
+                converted_event = await self._convert_astream_event(
+                    event, enable_llm_streaming, enable_node_tracing
+                )
+                
+                if converted_event:
+                    yield converted_event
                     
-                    messages = node_output["messages"]
-                    if messages:
-                        message = messages[-1]
-                        if hasattr(message, "content") and message.content:
-                            # Simulate token-by-token by emitting the complete response
-                            # In a full implementation, this would be multiple events
-                            logger.debug(
-                                "Model response ready for token-by-token streaming",
-                                content_length=len(message.content)
-                            )
-                    
-                    yield event
-                else:
-                    # Emit non-model events as-is
-                    yield event
+        except Exception as e:
+            logger.error(
+                "astream_events streaming failed", 
+                error=str(e),
+                enable_llm_streaming=enable_llm_streaming,
+                enable_node_tracing=enable_node_tracing,
+            )
+            # Fallback to regular astream if astream_events fails
+            logger.info("Falling back to regular astream")
+            async for event in workflow.astream(initial_state, config=config):
+                yield event
+    
+    async def _convert_astream_event(
+        self, 
+        event: dict[str, Any], 
+        enable_llm_streaming: bool = False,
+        enable_node_tracing: bool = False,
+    ) -> dict[str, Any] | None:
+        """Convert astream_events format to expected workflow event format.
+        
+        Args:
+            event: Event from astream_events
+            enable_llm_streaming: Whether LLM streaming is enabled
+            enable_node_tracing: Whether node tracing is enabled
+            
+        Returns:
+            Converted event or None if event should be filtered
+        """
+        event_type = event.get("event", "")
+        event_name = event.get("name", "")
+        event_data = event.get("data", {})
+        
+        # Handle LLM streaming events
+        if enable_llm_streaming and event_type == "on_chat_model_stream":
+            # Extract token content from the streaming chunk
+            chunk = event_data.get("chunk")
+            if chunk and hasattr(chunk, "content"):
+                # Create a token streaming event that mimics the old format
+                # but includes token-level data
+                return {
+                    "_token_stream": {
+                        "content": chunk.content,
+                        "token": True,
+                        "model": event_name,
+                        "run_id": event.get("run_id"),
+                        "parent_ids": event.get("parent_ids", []),
+                    }
+                }
+        
+        # Handle LLM completion events  
+        if event_type == "on_chat_model_end":
+            # Extract the final message from the model call
+            output = event_data.get("output")
+            if output and hasattr(output, "content"):
+                # Create standard workflow event format for final model output
+                return {
+                    "call_model": {
+                        "messages": [output],
+                        "run_id": event.get("run_id"),
+                        "metadata": {
+                            "model": event_name,
+                            "parent_ids": event.get("parent_ids", []),
+                        }
+                    }
+                }
+        
+        # Handle node tracing events
+        if enable_node_tracing:
+            if event_type == "on_chain_start":
+                return {
+                    "_node_trace": {
+                        "type": "node_start",
+                        "node": event_name,
+                        "run_id": event.get("run_id"),
+                        "parent_ids": event.get("parent_ids", []),
+                        "input": event_data.get("input"),
+                    }
+                }
+            elif event_type == "on_chain_end":
+                return {
+                    "_node_trace": {
+                        "type": "node_end", 
+                        "node": event_name,
+                        "run_id": event.get("run_id"),
+                        "parent_ids": event.get("parent_ids", []),
+                        "output": event_data.get("output"),
+                    }
+                }
+            elif event_type == "on_tool_start":
+                return {
+                    "_node_trace": {
+                        "type": "tool_start",
+                        "tool": event_name,
+                        "run_id": event.get("run_id"),
+                        "parent_ids": event.get("parent_ids", []),
+                        "input": event_data.get("input"),
+                    }
+                }
+            elif event_type == "on_tool_end":
+                return {
+                    "_node_trace": {
+                        "type": "tool_end",
+                        "tool": event_name, 
+                        "run_id": event.get("run_id"),
+                        "parent_ids": event.get("parent_ids", []),
+                        "output": event_data.get("output"),
+                    }
+                }
+        
+        # Handle regular node completion events (fallback)
+        if event_type == "on_chain_end" and event_name and not enable_node_tracing:
+            output = event_data.get("output")
+            if output:
+                return {event_name: output}
+        
+        # Filter out events we don't need
+        return None
 
     async def get_conversation_history(
         self, workflow: Pregel, thread_id: str

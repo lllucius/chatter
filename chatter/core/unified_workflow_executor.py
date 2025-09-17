@@ -192,32 +192,46 @@ class UnifiedWorkflowExecutor:
                 streaming_message, conversation, correlation_id
             )
 
-            # Stream workflow execution
+            # Stream workflow execution using new astream_events approach
             content_buffer = ""
             async for event in workflow_manager.stream_workflow(
                 workflow, 
                 state, 
                 thread_id=conversation.id,
-                enable_llm_streaming=True  # Enable token-by-token LLM streaming
+                enable_llm_streaming=True,  # Enable real token-by-token streaming
+                enable_node_tracing=False,  # Disable node tracing for production
             ):
-                # Look for messages in any node's output
-                messages_found = None
-                for node_name, node_output in event.items():
-                    if isinstance(node_output, dict) and "messages" in node_output:
-                        messages_found = node_output["messages"]
-                        break
+                # Handle token streaming events
+                if "_token_stream" in event:
+                    token_data = event["_token_stream"]
+                    token_content = token_data.get("content", "")
+                    
+                    if token_content:
+                        content_buffer += token_content
+                        yield await self._send_streaming_token_chunk(
+                            token_content, streaming_message, conversation, correlation_id
+                        )
                 
-                if messages_found:
-                    message = messages_found[-1]
-                    if hasattr(message, "content") and message.content:
-                        # Extract new content since last chunk
-                        if len(message.content) > len(content_buffer):
-                            new_content = message.content[len(content_buffer):]
-                            content_buffer = message.content
+                # Handle traditional node completion events (for non-model nodes)
+                elif any(key not in ["_token_stream", "_node_trace"] for key in event.keys()):
+                    # Look for messages in any node's output (fallback for non-streaming)
+                    messages_found = None
+                    for node_name, node_output in event.items():
+                        if isinstance(node_output, dict) and "messages" in node_output:
+                            messages_found = node_output["messages"]
+                            break
+                    
+                    if messages_found:
+                        message = messages_found[-1]
+                        if hasattr(message, "content") and message.content:
+                            # Only send new content if we haven't already streamed it
+                            if len(message.content) > len(content_buffer):
+                                new_content = message.content[len(content_buffer):]
+                                content_buffer = message.content
 
-                            yield await self._send_streaming_token_chunk(
-                                new_content, streaming_message, conversation, correlation_id
-                            )
+                                yield await self._send_streaming_token_chunk(
+                                    new_content, streaming_message, conversation, correlation_id
+                                )
 
             # Finalize streaming message and send completion chunk
             yield await self._finalize_streaming_message(
@@ -237,6 +251,183 @@ class UnifiedWorkflowExecutor:
             )
             raise WorkflowExecutionError(
                 f"{workflow_type.title()} workflow streaming failed: {str(e)}"
+            ) from e
+        finally:
+            # Clean up resource tracking
+            if user_id:
+                self.limit_manager.end_workflow_tracking(workflow_id, user_id)
+
+    async def execute_streaming_with_tracing(
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
+        user_id: str | None = None,
+        limits: WorkflowLimits | None = None,
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute workflow with streaming and node-level tracing for development."""
+        workflow_type = chat_request.workflow_type or chat_request.workflow or "plain"
+        start_time = time.time()
+        workflow_id, limits = await self._setup_execution(
+            conversation, chat_request, correlation_id, user_id, limits, workflow_type
+        )
+
+        try:
+            performance_monitor.start_workflow(workflow_id, workflow_type)
+
+            # Get workflow configuration based on type
+            workflow_config = self._get_workflow_config(workflow_type, conversation, chat_request)
+            
+            # Create unified streaming workflow
+            workflow = await self.llm_service.create_langgraph_workflow(
+                provider_name=chat_request.provider,
+                workflow_type=workflow_type,
+                **workflow_config,
+                system_message=chat_request.system_prompt_override,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
+                enable_streaming=True,
+            )
+
+            # Prepare conversation context
+            user_id = user_id or conversation.user_id
+            if user_id is None:
+                raise WorkflowExecutionError(
+                    "No user_id provided and conversation has no associated user_id"
+                )
+
+            messages = await self._prepare_messages(
+                conversation, chat_request, user_id, workflow_config["memory_window"]
+            )
+            state = ConversationState(messages=messages)
+
+            # Create message for streaming and send start chunk
+            streaming_message = await self._create_streaming_message(
+                conversation, user_id, correlation_id
+            )
+            yield await self._send_streaming_start_chunk(
+                streaming_message, conversation, correlation_id
+            )
+
+            # Stream workflow execution with both LLM streaming and node tracing
+            content_buffer = ""
+            async for event in workflow_manager.stream_workflow(
+                workflow, 
+                state, 
+                thread_id=conversation.id,
+                enable_llm_streaming=True,  # Enable real token-by-token streaming
+                enable_node_tracing=True,   # Enable node tracing for development
+            ):
+                # Handle node tracing events
+                if "_node_trace" in event:
+                    trace_data = event["_node_trace"]
+                    trace_type = trace_data.get("type", "")
+                    
+                    if trace_type == "node_start":
+                        yield StreamingChatChunk(
+                            type="node_start",
+                            content=f"Starting node: {trace_data.get('node', 'unknown')}",
+                            message_id=streaming_message.id,
+                            conversation_id=conversation.id,
+                            correlation_id=correlation_id,
+                            metadata={
+                                "node_name": trace_data.get("node"),
+                                "run_id": trace_data.get("run_id"),
+                                "parent_ids": trace_data.get("parent_ids", []),
+                                "input": trace_data.get("input"),
+                            }
+                        )
+                    elif trace_type == "node_end":
+                        yield StreamingChatChunk(
+                            type="node_end", 
+                            content=f"Completed node: {trace_data.get('node', 'unknown')}",
+                            message_id=streaming_message.id,
+                            conversation_id=conversation.id,
+                            correlation_id=correlation_id,
+                            metadata={
+                                "node_name": trace_data.get("node"),
+                                "run_id": trace_data.get("run_id"),
+                                "parent_ids": trace_data.get("parent_ids", []),
+                                "output": trace_data.get("output"),
+                            }
+                        )
+                    elif trace_type == "tool_start":
+                        yield StreamingChatChunk(
+                            type="tool_call_start",
+                            content=f"Calling tool: {trace_data.get('tool', 'unknown')}",
+                            message_id=streaming_message.id,
+                            conversation_id=conversation.id,
+                            correlation_id=correlation_id,
+                            metadata={
+                                "tool_name": trace_data.get("tool"),
+                                "run_id": trace_data.get("run_id"),
+                                "parent_ids": trace_data.get("parent_ids", []),
+                                "input": trace_data.get("input"),
+                            }
+                        )
+                    elif trace_type == "tool_end":
+                        yield StreamingChatChunk(
+                            type="tool_call_end",
+                            content=f"Tool completed: {trace_data.get('tool', 'unknown')}",
+                            message_id=streaming_message.id,
+                            conversation_id=conversation.id,
+                            correlation_id=correlation_id,
+                            metadata={
+                                "tool_name": trace_data.get("tool"),
+                                "run_id": trace_data.get("run_id"),
+                                "parent_ids": trace_data.get("parent_ids", []),
+                                "output": trace_data.get("output"),
+                            }
+                        )
+                
+                # Handle token streaming events
+                elif "_token_stream" in event:
+                    token_data = event["_token_stream"]
+                    token_content = token_data.get("content", "")
+                    
+                    if token_content:
+                        content_buffer += token_content
+                        yield await self._send_streaming_token_chunk(
+                            token_content, streaming_message, conversation, correlation_id
+                        )
+                
+                # Handle traditional node completion events (fallback)
+                elif any(key not in ["_token_stream", "_node_trace"] for key in event.keys()):
+                    messages_found = None
+                    for node_name, node_output in event.items():
+                        if isinstance(node_output, dict) and "messages" in node_output:
+                            messages_found = node_output["messages"]
+                            break
+                    
+                    if messages_found:
+                        message = messages_found[-1]
+                        if hasattr(message, "content") and message.content:
+                            if len(message.content) > len(content_buffer):
+                                new_content = message.content[len(content_buffer):]
+                                content_buffer = message.content
+
+                                yield await self._send_streaming_token_chunk(
+                                    new_content, streaming_message, conversation, correlation_id
+                                )
+
+            # Finalize streaming message and send completion chunk
+            yield await self._finalize_streaming_message(
+                streaming_message, content_buffer, conversation, correlation_id
+            )
+
+            # Record success metrics
+            await self._record_metrics(
+                workflow_id, "stream_trace", start_time, True, workflow_type, correlation_id=correlation_id
+            )
+
+        except Exception as e:
+            # Record error metrics
+            await self._record_metrics(
+                workflow_id, "stream_trace", start_time, False, workflow_type,
+                error_type=type(e).__name__, correlation_id=correlation_id
+            )
+            raise WorkflowExecutionError(
+                f"{workflow_type.title()} workflow streaming with tracing failed: {str(e)}"
             ) from e
         finally:
             # Clean up resource tracking

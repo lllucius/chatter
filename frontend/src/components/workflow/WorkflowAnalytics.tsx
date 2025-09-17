@@ -159,32 +159,6 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
 
   // Use the analytics data (either from server or fallback)
 
-  const findPaths = (
-    currentNodeId: string,
-    currentPath: string[],
-    visited: Set<string>,
-    allPaths: string[][],
-    edges: Array<{ source: string; target: string }>,
-    nodes: Array<{ id: string }>
-  ) => {
-    const outgoingEdges = edges.filter((edge) => edge.source === currentNodeId);
-
-    if (outgoingEdges.length === 0) {
-      // End of path
-      allPaths.push([...currentPath]);
-      return;
-    }
-
-    outgoingEdges.forEach((edge) => {
-      if (!visited.has(edge.target)) {
-        const newVisited = new Set(visited);
-        newVisited.add(edge.target);
-        const newPath = [...currentPath, edge.target];
-        findPaths(edge.target, newPath, newVisited, allPaths, edges, nodes);
-      }
-    });
-  };
-
   const getComplexityColor = (
     score: number
   ): 'success' | 'warning' | 'error' => {

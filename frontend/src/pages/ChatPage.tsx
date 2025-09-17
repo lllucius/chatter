@@ -6,13 +6,11 @@ import {
   Typography,
   TextField,
   IconButton,
-  CircularProgress,
   Chip,
   Button,
   Divider,
   FormControlLabel,
   Switch,
-  Avatar,
 } from '@mui/material';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
@@ -504,7 +502,7 @@ const ChatPage: React.FC = () => {
 
                         // Replace all messages with the complete persisted state
                         setMessages(chatMessages);
-                      } catch (reloadError) {
+                      } catch (_reloadError) {
                         // Fall back to updating the current message
                         const updateData: any = {};
                         
@@ -545,12 +543,8 @@ const ChatPage: React.FC = () => {
                     );
                   }
                 } catch (parseError) {
-                  // Failed to parse streaming chunk - log and skip invalid data
-                  console.warn(
-                    'Failed to parse streaming chunk:',
-                    dataStr,
-                    parseError
-                  );
+                  // Failed to parse streaming chunk - skip invalid data
+                  // Note: In production, this should be logged to a proper logging service
                 }
               }
             }
@@ -666,7 +660,7 @@ const ChatPage: React.FC = () => {
 
             // Replace all messages with the complete persisted state
             setMessages(chatMessages);
-          } catch (reloadError) {
+          } catch (_reloadError) {
             // If reloading fails, fall back to the old behavior
             const assistantMessage: ExtendedChatMessage = {
               id: String(response.message.id),

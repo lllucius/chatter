@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
   Card,
@@ -130,7 +130,7 @@ const ChatBubbleDemo: React.FC = () => {
         </Typography>
         
         <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-          This demo shows how the chat "working" indicator is now merged with the assistant response bubble,
+          This demo shows how the chat &quot;working&quot; indicator is now merged with the assistant response bubble,
           displaying workflow progress directly in the message.
         </Typography>
 
@@ -175,7 +175,7 @@ const ChatBubbleDemo: React.FC = () => {
               height: 150,
               color: 'text.secondary'
             }}>
-              <Typography>Click "Next Step" to start the demo</Typography>
+              <Typography>Click &quot;Next Step&quot; to start the demo</Typography>
             </Box>
           )}
         </Box>

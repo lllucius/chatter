@@ -1006,7 +1006,7 @@ const AdministrationPage: React.FC = () => {
         <Box>
           <Alert severity="warning" sx={{ mb: 3 }}>
             <strong>Warning:</strong> Bulk operations can delete large amounts
-            of data permanently. Always test with "Dry Run" first.
+            of data permanently. Always test with &quot;Dry Run&quot; first.
           </Alert>
 
           <Box

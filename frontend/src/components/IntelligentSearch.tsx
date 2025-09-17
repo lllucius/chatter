@@ -93,7 +93,7 @@ const IntelligentSearch: React.FC = () => {
 
     setIsSearching(true);
     try {
-      const response = await getSDK().analytics.intelligentSearch({
+      const response = await getSDK().analytics.intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent({
         query: query.trim(),
         searchType: type,
         limit: 10,
@@ -117,7 +117,7 @@ const IntelligentSearch: React.FC = () => {
   const loadTrendingContent = useCallback(async () => {
     setIsLoadingTrending(true);
     try {
-      const response = await getSDK().analytics.getTrendingContent({
+      const response = await getSDK().analytics.getTrendingContentApiV1AnalyticsRealTimeSearchTrending({
         limit: 10,
       });
       setTrendingContent(response.trending_content || []);

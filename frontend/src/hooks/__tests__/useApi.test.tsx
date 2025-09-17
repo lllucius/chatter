@@ -121,7 +121,7 @@ describe('useApi hook', () => {
     let callCount = 0;
     const mockSDK = {
       analytics: {
-        getDashboardApiV1AnalyticsDashboardGet: () => {
+        getDashboardApiV1AnalyticsDashboard: () => {
           callCount++;
           return Promise.resolve({
             data: {
@@ -139,7 +139,7 @@ describe('useApi hook', () => {
     const MockDashboardPage = () => {
       // Exact pattern from DashboardPage.tsx line 122-125
       const dashboardApi = useApi(
-        () => mockSDK.analytics.getDashboardApiV1AnalyticsDashboardGet(),
+        () => mockSDK.analytics.getDashboardApiV1AnalyticsDashboard(),
         { immediate: true }
       );
 

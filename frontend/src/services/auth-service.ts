@@ -149,11 +149,9 @@ class AuthService {
     this.refreshInProgress = true;
 
     try {
-      // Use empty refresh token - the actual refresh token is in HttpOnly cookie
+      // The actual refresh token is in HttpOnly cookie
       // and will be sent automatically with credentials: 'include'
-      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh({
-        refreshToken: '', // Server will use the cookie
-      });
+      const response = await this.baseSDK.auth.refreshTokenApiV1AuthRefresh();
 
       if (response.access_token) {
         this.token = response.access_token; // Store in memory only

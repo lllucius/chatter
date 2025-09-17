@@ -11,12 +11,12 @@ vi.mock('../../services/auth-service', (): void => ({
   getSDK: vi.fn((): void => ({
     documents: {
       listDocumentsApiV1Documents: vi.fn(),
-      uploadDocumentApiV1DocumentsUploadPost: vi.fn(),
-      deleteDocumentApiV1DocumentsDocumentIdDelete: vi.fn(),
-      getDocumentApiV1DocumentsDocumentIdGet: vi.fn(),
-      searchDocumentsApiV1DocumentsSearchPost: vi.fn(),
-      getDocumentChunksApiV1DocumentsDocumentIdChunksGet: vi.fn(),
-      downloadDocumentApiV1DocumentsDocumentIdDownloadGet: vi.fn(),
+      uploadDocumentApiV1DocumentsUpload: vi.fn(),
+      deleteDocumentApiV1DocumentsDocumentId: vi.fn(),
+      getDocumentApiV1DocumentsDocumentId: vi.fn(),
+      searchDocumentsApiV1DocumentsSearch: vi.fn(),
+      getDocumentChunksApiV1DocumentsDocumentIdChunks: vi.fn(),
+      downloadDocumentApiV1DocumentsDocumentIdDownload: vi.fn(),
     },
   })),
   authService: {

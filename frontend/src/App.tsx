@@ -46,6 +46,7 @@ const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
 const ErrorTestPage = lazy(() => import('./pages/ErrorTestPage'));
 const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
+const ChatBubbleDemo = lazy(() => import('./components/ChatBubbleDemo'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -195,6 +196,20 @@ function App() {
                       >
                         <SuspenseWrapper loadingMessage="Loading error test page...">
                           <ErrorTestPage />
+                        </SuspenseWrapper>
+                      </SectionErrorBoundary>
+                    }
+                  />
+                  <Route
+                    path="/chat-bubble-demo-public"
+                    element={
+                      <SectionErrorBoundary
+                        level="page"
+                        name="ChatBubbleDemo"
+                        showHomeButton={true}
+                      >
+                        <SuspenseWrapper loadingMessage="Loading chat demo...">
+                          <ChatBubbleDemo />
                         </SuspenseWrapper>
                       </SectionErrorBoundary>
                     }
@@ -378,6 +393,14 @@ function App() {
                       element={
                         <SuspenseWrapper loadingMessage="Loading demo...">
                           <NotificationDemo />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="chat-bubble-demo"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading chat demo...">
+                          <ChatBubbleDemo />
                         </SuspenseWrapper>
                       }
                     />

@@ -42,6 +42,12 @@ export interface ChatMessage {
     model?: string;
     tokens?: number;
     processingTime?: number;
+    workflow?: {
+      stage?: string;
+      progress?: number;
+      isStreaming?: boolean;
+      status?: 'thinking' | 'processing' | 'streaming' | 'complete';
+    };
   };
 }
 
@@ -226,6 +232,26 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                   <Typography variant="subtitle2" fontWeight="bold">
                     {getRoleLabel()}
                   </Typography>
+                  {/* Workflow progress indicator for assistant messages */}
+                  {message.role === 'assistant' && message.metadata?.workflow && (
+                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+                      {message.metadata.workflow.isStreaming && (
+                        <CircularProgress size={16} sx={{ mr: 0.5 }} />
+                      )}
+                      {message.metadata.workflow.stage && (
+                        <Chip
+                          label={message.metadata.workflow.stage}
+                          size="small"
+                          variant="outlined"
+                          color={
+                            message.metadata.workflow.status === 'complete' ? 'success' :
+                            message.metadata.workflow.status === 'streaming' ? 'primary' :
+                            'default'
+                          }
+                        />
+                      )}
+                    </Box>
+                  )}
                   {message.edited && (
                     <Chip label="Edited" size="small" variant="outlined" />
                   )}

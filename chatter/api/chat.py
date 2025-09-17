@@ -78,11 +78,14 @@ async def chat(
         conversation, assistant_message = await chat_service.chat(
             current_user.id, chat_request
         )
-        
+
         # Ensure assistant message has content before validation
-        if not assistant_message.content or len(assistant_message.content.strip()) == 0:
+        if (
+            not assistant_message.content
+            or len(assistant_message.content.strip()) == 0
+        ):
             raise ChatServiceError("Assistant response has no content")
-        
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(assistant_message),
@@ -261,7 +264,10 @@ async def chat_with_template(
         )
 
         # Ensure assistant message has content before validation
-        if not assistant_message.content or len(assistant_message.content.strip()) == 0:
+        if (
+            not assistant_message.content
+            or len(assistant_message.content.strip()) == 0
+        ):
             raise ChatServiceError("Assistant response has no content")
 
         return ChatResponse(

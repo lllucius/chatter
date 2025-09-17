@@ -167,6 +167,8 @@ async def create_provider(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create provider",
         ) from e
+
+
 @router.put("/providers/{provider_id}", response_model=Provider)
 async def update_provider(
     provider_id: str,
@@ -204,6 +206,8 @@ async def update_provider(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         ) from e
+
+
 @router.delete(
     "/providers/{provider_id}", response_model=ProviderDeleteResponse
 )
@@ -238,6 +242,8 @@ async def delete_provider(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot delete provider due to existing dependencies",
         ) from e
+
+
 @router.post(
     "/providers/{provider_id}/set-default",
     response_model=ProviderDefaultResponse,
@@ -296,6 +302,8 @@ async def set_default_provider(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to set default provider",
         ) from e
+
+
 # Model endpoints
 @router.get("/models", response_model=ModelDefList)
 async def list_models(
@@ -410,6 +418,8 @@ async def create_model(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail="Failed to create model",
         ) from e
+
+
 @router.put("/models/{model_id}", response_model=ModelDefWithProvider)
 async def update_model(
     model_id: str,
@@ -454,6 +464,8 @@ async def update_model(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail=str(e),
         ) from e
+
+
 @router.delete("/models/{model_id}", response_model=ModelDeleteResponse)
 async def delete_model(
     model_id: str,
@@ -486,6 +498,8 @@ async def delete_model(
             status_code=status.HTTP_400_BAD_REQUEST,
             detail="Cannot delete model due to existing dependencies",
         ) from e
+
+
 @router.post(
     "/models/{model_id}/set-default",
     response_model=ModelDefaultResponse,
@@ -642,6 +656,8 @@ async def create_embedding_space(
             status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
             detail=f"Failed to create embedding space: {str(e)}",
         ) from e
+
+
 @router.put(
     "/embedding-spaces/{space_id}",
     response_model=EmbeddingSpaceWithModel,

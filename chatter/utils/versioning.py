@@ -284,7 +284,7 @@ async def version_middleware(
         clean_path, method, version
     ):
         raise HTTPException(
-            status_code=404, from e
+            status_code=404,
             detail=f"Endpoint not available in API version {version.value}",
         )
 

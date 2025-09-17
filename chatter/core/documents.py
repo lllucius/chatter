@@ -474,9 +474,6 @@ class DocumentService:
                 if isinstance(usage, dict)
                 else None
             )
-            model = (
-                usage.get("model") if isinstance(usage, dict) else None
-            )
 
             # Get accessible document IDs
             accessible_docs_result = await self.session.execute(

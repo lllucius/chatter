@@ -154,7 +154,7 @@ class TestLangGraphStreamingEnhancement:
             mock_manager.create_workflow.assert_called_once()
             call_args = mock_manager.create_workflow.call_args
             assert call_args[1]['mode'] == 'plain'
-            assert call_args[1]['enable_memory'] == True
+            assert call_args[1]['enable_memory']
             assert call_args[1]['memory_window'] == 10
 
     def test_workflow_manager_get_tools_returns_builtin_tools(self):

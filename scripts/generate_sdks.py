@@ -15,16 +15,16 @@ project_root = Path(__file__).parent.parent.resolve()
 if str(project_root) not in sys.path:
     sys.path.insert(0, str(project_root))
 
-from scripts.sdk import PythonSDKGenerator
-from scripts.utils.config import (
+from scripts.sdk import PythonSDKGenerator  # noqa: E402
+from scripts.utils.config import (  # noqa: E402
     get_default_python_config,
     get_default_typescript_config,
 )
 
 # Import standalone generators
 sys.path.insert(0, str(project_root))
-from generate_ts_apis import main as generate_apis_main
-from generate_ts_models import main as generate_models_main
+from generate_ts_apis import main as generate_apis_main  # noqa: E402
+from generate_ts_models import main as generate_models_main  # noqa: E402
 
 
 def generate_python_sdk(

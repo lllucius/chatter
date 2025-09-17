@@ -64,7 +64,7 @@ class TestTransactionRollbackFixes:
         seeder = DatabaseSeeder(session=mock_session)
 
         # Should handle the error and continue to create user
-        admin_user = await seeder._create_admin_user(skip_existing=True)
+        await seeder._create_admin_user(skip_existing=True)
 
         # Should have rolled back after failed query
         mock_session.rollback.assert_called()
@@ -87,7 +87,7 @@ class TestTransactionRollbackFixes:
         seeder._seed_minimal_data = AsyncMock()
 
         # Should handle count error and continue seeding
-        result = await seeder.seed_database(
+        await seeder.seed_database(
             SeedingMode.MINIMAL, force=False
         )
 
@@ -133,7 +133,7 @@ class TestTransactionRollbackFixes:
         ]
 
         # Should handle query error and continue
-        users = await seeder._create_development_users(
+        await seeder._create_development_users(
             skip_existing=True
         )
 
@@ -156,7 +156,7 @@ class TestTransactionRollbackFixes:
         )
 
         # Should handle query error and continue
-        users = await seeder._create_test_users(skip_existing=True)
+        await seeder._create_test_users(skip_existing=True)
 
         # Should have rolled back after failed query
         mock_session.rollback.assert_called()

@@ -214,7 +214,7 @@ def test_critical_imports_exist():
             # If we can't analyze the file, at least check it exists
             raise AssertionError(
                 f"Error checking critical imports in {module_name}: {e}"
-            )
+            ) from e
 
 
 def test_no_obvious_missing_imports():

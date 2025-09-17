@@ -128,7 +128,7 @@ async def test_summary_context_formatting():
         llm=mock_llm, mode="plain", enable_memory=True
     )
 
-    result = await manager.run_workflow(workflow, state, "test_thread")
+    _result = await manager.run_workflow(workflow, state, "test_thread")
 
     # Verify the LLM was called with properly formatted context
     call_args = mock_llm.ainvoke.call_args[0][

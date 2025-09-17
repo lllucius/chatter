@@ -119,11 +119,17 @@ const ChatPage: React.FC = () => {
     let profilesResponse: any = null;
     try {
       const sdk = getSDK();
-      const [profilesResp, promptsResponse, documentsResponse] =
+      const [profilesResp, promptsResponse, documentsResponse, conversationsResp] =
         await Promise.all([
           sdk.profiles.listProfilesApiV1Profiles({}),
           sdk.prompts.listPromptsApiV1Prompts({}),
           sdk.documents.listDocumentsApiV1Documents({}),
+          sdk.conversations.listConversationsApiV1Conversations({
+            limit: 1,
+            offset: 0,
+            sort_by: 'updated_at',
+            sort_order: 'desc'
+          }),
         ]);
       profilesResponse = profilesResp;
       setProfiles(profilesResponse.profiles);
@@ -132,6 +138,12 @@ const ChatPage: React.FC = () => {
 
       if (profilesResponse.profiles.length > 0) {
         setSelectedProfile(profilesResponse.profiles[0].id);
+      }
+
+      // Load the most recent conversation if it exists
+      if (conversationsResp.conversations.length > 0) {
+        const lastConversation = conversationsResp.conversations[0];
+        await onSelectConversation(lastConversation);
       }
     } catch (err: unknown) {
       handleError(err, {
@@ -248,6 +260,17 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     inputRef.current?.focus();
   }, []);
+
+  // Focus the input when messages change during an active conversation
+  useEffect(() => {
+    if (currentConversation && messages.length > 0 && !loading) {
+      // Use a small timeout to ensure the component has updated
+      const timeoutId = setTimeout(() => {
+        inputRef.current?.focus();
+      }, 100);
+      return () => clearTimeout(timeoutId);
+    }
+  }, [messages, currentConversation, loading]);
 
   // Inject configuration panel into the right drawer
   useEffect(() => {
@@ -455,37 +478,66 @@ const ChatPage: React.FC = () => {
                     chunk.type === 'complete' ||
                     chunk.type === 'end'
                   ) {
-                    // Stream ended - update final message with metadata if available
-                    const updateData: any = {};
-                    
-                    if (chunk.metadata) {
-                      updateData.metadata = {
-                        model: chunk.metadata.model_used,
-                        tokens: chunk.metadata.total_tokens,
-                        processingTime: chunk.metadata.response_time_ms,
-                        workflow: {
-                          stage: 'Complete',
-                          status: 'complete',
-                          isStreaming: false,
-                        },
-                      };
-                    } else {
-                      updateData.metadata = {
-                        workflow: {
-                          stage: 'Complete',
-                          status: 'complete',
-                          isStreaming: false,
-                        },
-                      };
-                    }
+                    // Stream ended - reload conversation to get complete persisted state
+                    if (chunk.conversation_id || currentConversation?.id) {
+                      try {
+                        const conversationId = chunk.conversation_id || currentConversation?.id;
+                        const updatedConversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
+                          conversationId,
+                          { includeMessages: true }
+                        );
 
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === currentMessageId
-                          ? { ...msg, ...updateData }
-                          : msg
-                      )
-                    );
+                        // Convert all messages to ExtendedChatMessage format
+                        const chatMessages: ExtendedChatMessage[] = (
+                          updatedConversation.messages || []
+                        ).map((msg) => ({
+                          id: msg.id,
+                          role: msg.role as 'user' | 'assistant' | 'system',
+                          content: msg.content,
+                          timestamp: new Date(msg.created_at),
+                          metadata: {
+                            model: msg.model_used || undefined,
+                            tokens: msg.total_tokens || undefined,
+                            processingTime: msg.response_time_ms || undefined,
+                          },
+                        }));
+
+                        // Replace all messages with the complete persisted state
+                        setMessages(chatMessages);
+                      } catch (reloadError) {
+                        // Fall back to updating the current message
+                        const updateData: any = {};
+                        
+                        if (chunk.metadata) {
+                          updateData.metadata = {
+                            model: chunk.metadata.model_used,
+                            tokens: chunk.metadata.total_tokens,
+                            processingTime: chunk.metadata.response_time_ms,
+                            workflow: {
+                              stage: 'Complete',
+                              status: 'complete',
+                              isStreaming: false,
+                            },
+                          };
+                        } else {
+                          updateData.metadata = {
+                            workflow: {
+                              stage: 'Complete',
+                              status: 'complete',
+                              isStreaming: false,
+                            },
+                          };
+                        }
+
+                        setMessages((prev) =>
+                          prev.map((msg) =>
+                            msg.id === currentMessageId
+                              ? { ...msg, ...updateData }
+                              : msg
+                          )
+                        );
+                      }
+                    }
                     return; // End the streaming loop
                   } else if (chunk.type === 'error') {
                     throw new Error(
@@ -588,30 +640,59 @@ const ChatPage: React.FC = () => {
           setCurrentConversation(response.conversation);
         }
 
-        // Replace placeholder with real message data from the API response
-        const assistantMessage: ExtendedChatMessage = {
-          id: String(response.message.id),
-          role: 'assistant',
-          content: response.message.content,
-          timestamp: new Date(response.message.created_at),
-          metadata: {
-            model: response.message.model_used || undefined,
-            tokens: response.message.total_tokens || undefined,
-            processingTime: response.message.response_time_ms || undefined,
-            workflow: {
-              stage: 'Complete',
-              status: 'complete',
-              isStreaming: false,
-            },
-          },
-        };
-        
-        // Replace the placeholder message with the real response
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === placeholderMessage.id ? assistantMessage : msg
-          )
-        );
+        // After successful API call, reload the conversation to get all persisted messages
+        // This ensures we have the correct IDs and complete state
+        if (response.conversation_id) {
+          try {
+            const updatedConversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
+              response.conversation_id,
+              { includeMessages: true }
+            );
+
+            // Convert all messages to ExtendedChatMessage format
+            const chatMessages: ExtendedChatMessage[] = (
+              updatedConversation.messages || []
+            ).map((msg) => ({
+              id: msg.id,
+              role: msg.role as 'user' | 'assistant' | 'system',
+              content: msg.content,
+              timestamp: new Date(msg.created_at),
+              metadata: {
+                model: msg.model_used || undefined,
+                tokens: msg.total_tokens || undefined,
+                processingTime: msg.response_time_ms || undefined,
+              },
+            }));
+
+            // Replace all messages with the complete persisted state
+            setMessages(chatMessages);
+          } catch (reloadError) {
+            // If reloading fails, fall back to the old behavior
+            const assistantMessage: ExtendedChatMessage = {
+              id: String(response.message.id),
+              role: 'assistant',
+              content: response.message.content,
+              timestamp: new Date(response.message.created_at),
+              metadata: {
+                model: response.message.model_used || undefined,
+                tokens: response.message.total_tokens || undefined,
+                processingTime: response.message.response_time_ms || undefined,
+                workflow: {
+                  stage: 'Complete',
+                  status: 'complete',
+                  isStreaming: false,
+                },
+              },
+            };
+            
+            // Replace the placeholder message with the real response
+            setMessages((prev) =>
+              prev.map((msg) =>
+                msg.id === placeholderMessage.id ? assistantMessage : msg
+              )
+            );
+          }
+        }
       }
     } catch (err: unknown) {
       handleError(err, {

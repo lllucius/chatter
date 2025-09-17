@@ -199,7 +199,9 @@ class MessageService:
 
                 # Update conversation's updated_at timestamp
                 conversation.updated_at = message.created_at
-                await self.session.flush()
+                
+                # Ensure the message and conversation changes are committed to the database
+                await self.session.commit()
 
                 logger.info(
                     "Added message to conversation",

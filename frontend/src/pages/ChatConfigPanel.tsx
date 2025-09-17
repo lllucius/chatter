@@ -30,7 +30,7 @@ interface Props {
   profiles: ProfileResponse[];
   prompts: PromptResponse[];
   documents: DocumentResponse[];
-  currentConversation: any;
+  currentConversation: Record<string, unknown> | null;
 
   selectedProfile: string;
   setSelectedProfile: (id: string) => void;
@@ -50,14 +50,14 @@ interface Props {
   enableRetrieval: boolean;
   setEnableRetrieval: (v: boolean) => void;
 
-  onSelectConversation: (conversation: any) => void;
+  onSelectConversation: (conversation: Record<string, unknown>) => void;
 }
 
 const ChatConfigPanel: React.FC<Props> = ({
   profiles,
   prompts,
   documents,
-  currentConversation,
+  currentConversation: _currentConversation,
   selectedProfile,
   setSelectedProfile,
   selectedPrompt,
@@ -70,7 +70,7 @@ const ChatConfigPanel: React.FC<Props> = ({
   setMaxTokens,
   enableRetrieval,
   setEnableRetrieval,
-  onSelectConversation,
+  onSelectConversation: _onSelectConversation,
 }) => {
   const { collapsed, setCollapsed } = useRightSidebar();
   const [expandedPanel, setExpandedPanel] = useState<string>(() => {

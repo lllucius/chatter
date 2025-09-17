@@ -1,944 +1,291 @@
-import React, { useState, useEffect, useCallback } from 'react';
+import React, { useState } from 'react';
 import {
   Box,
-  Card,
-  CardContent,
-  Typography,
-  Grid,
-  Tab,
   Tabs,
+  Tab,
   TabPanel,
   Button,
-  IconButton,
-  Chip,
-  Alert,
-  CircularProgress,
-  Tooltip,
   Dialog,
   DialogTitle,
   DialogContent,
   DialogActions,
   TextField,
-  FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
-  List,
-  ListItem,
-  ListItemText,
-  ListItemIcon,
-  ListItemSecondaryAction,
-  Paper,
-  Divider,
-  LinearProgress,
-  Accordion,
-  AccordionSummary,
-  AccordionDetails,
-  Switch,
-  FormControlLabel,
-  Stack,
-  Breadcrumbs,
-  Link,
+  Typography,
+  Alert,
 } from '../utils/mui';
 import {
-  AccountTree as WorkflowIcon,
-  PlayArrow as PlayIcon,
-  Stop as StopIcon,
-  Settings as SettingsIcon,
-  Add as AddIcon,
-  Edit as EditIcon,
-  Delete as DeleteIcon,
-  Refresh as RefreshIcon,
-  Analytics as AnalyticsIcon,
-  Timeline as TimelineIcon,
-  Speed as SpeedIcon,
-  Code as CodeIcon,
-  Build as BuildIcon,
-  GetApp as ExportIcon,
-  Publish as ImportIcon,
-  ExpandMore as ExpandMoreIcon,
-  CheckCircle as CheckCircleIcon,
-  Error as ErrorIcon,
-  Warning as WarningIcon,
-  Info as InfoIcon,
-  Launch as LaunchIcon,
-  Visibility as ViewIcon,
-  ContentCopy as CopyIcon,
-  Tune as TuneIcon,
-} from '@mui/icons-material';
-import { getSDK } from '../services/auth-service';
-import { toastService } from '../services/toast-service';
-import { handleError } from '../utils/error-handler';
-import {
-  WorkflowTemplateInfo,
-  AvailableToolsResponse,
-  ChatRequest,
-} from 'chatter-sdk';
-import WorkflowEditor from '../components/workflow/WorkflowEditor';
-import WorkflowMonitor from '../components/WorkflowMonitor';
+  AddIcon,
+  RefreshIcon,
+  WorkflowIcon,
+  BuildIcon,
+  SpeedIcon,
+} from '../utils/icons';
 import PageLayout from '../components/PageLayout';
+import WorkflowTemplatesTab from '../components/workflow-management/WorkflowTemplatesTab';
+import WorkflowExecutionsTab from '../components/workflow-management/WorkflowExecutionsTab';
+import WorkflowEditor from '../components/workflow/WorkflowEditor';
+import { useWorkflowData } from '../hooks/useWorkflowData';
+import { useFormGeneric } from '../hooks/useFormGeneric';
+import { toastService } from '../services/toast-service';
 
-interface WorkflowExecution {
-  id: string;
-  templateName?: string;
-  status: 'running' | 'completed' | 'failed' | 'cancelled';
-  startTime: Date;
-  endTime?: Date;
-  result?: any;
-  error?: string;
-  progress?: number;
+interface WorkflowFormData {
+  name: string;
+  description: string;
+  category: string;
 }
 
 const WorkflowManagementPage: React.FC = () => {
+  const {
+    loading,
+    templates,
+    availableTools,
+    executions,
+    selectedTemplate,
+    setSelectedTemplate,
+    loadTemplates,
+    loadExecutions,
+    createTemplate,
+    executeWorkflow,
+    deleteTemplate,
+  } = useWorkflowData();
+
+  // UI state
   const [tabValue, setTabValue] = useState(0);
-  const [loading, setLoading] = useState(false);
-  const [templates, setTemplates] = useState<
-    Record<string, WorkflowTemplateInfo>
-  >({});
-  const [availableTools, setAvailableTools] =
-    useState<AvailableToolsResponse | null>(null);
-  const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
-  const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
-  const [viewDetailsDialogOpen, setViewDetailsDialogOpen] = useState(false);
-  const [detailsTemplate, setDetailsTemplate] =
-    useState<WorkflowTemplateInfo | null>(null);
-  const [customWorkflow, setCustomWorkflow] = useState({
-    name: '',
-    description: '',
-    type: 'sequential' as 'sequential' | 'parallel' | 'conditional',
-    steps: [] as any[],
+  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+
+  // Form for template creation
+  const templateForm = useFormGeneric<WorkflowFormData>({
+    initialValues: {
+      name: '',
+      description: '',
+      category: 'general',
+    },
+    onSubmit: async (values) => {
+      try {
+        // This would create a template with the workflow data
+        const templateData = {
+          ...values,
+          workflow: {}, // Would come from workflow editor
+        };
+        await createTemplate(templateData);
+        toastService.success('Template created successfully');
+        setBuilderDialogOpen(false);
+      } catch (error) {
+        // Error handling is done in the hook
+      }
+    },
   });
 
-  const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
-    setTabValue(newValue);
-  };
-
-  const loadWorkflowTemplates = useCallback(async () => {
-    try {
-      setLoading(true);
-      const response =
-        await getSDK().chat.getWorkflowTemplatesApiV1ChatTemplates();
-      if (response.templates) {
-        setTemplates(response.templates);
-      }
-    } catch (error: unknown) {
-      handleError(error, {
-        source: 'WorkflowManagementPage.loadTemplates',
-        operation: 'load workflow templates',
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, []);
-
-  const loadAvailableTools = useCallback(async () => {
-    try {
-      const response =
-        await getSDK().chat.getAvailableToolsApiV1ChatToolsAvailable();
-      setAvailableTools(response.data);
-    } catch (error: unknown) {
-      // Don't show error toast for tools as it's not critical
-    }
-  }, []);
-
-  useEffect(() => {
-    loadWorkflowTemplates();
-    loadAvailableTools();
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []); // Intentionally empty deps to run only once on mount
-
-  const executeWorkflow = async (templateName: string, input: string) => {
-    const executionId = `exec_${Date.now()}`;
-    const execution: WorkflowExecution = {
-      id: executionId,
-      templateName,
-      status: 'running',
-      startTime: new Date(),
-      progress: 0,
-    };
-
-    setExecutions((prev) => [execution, ...prev]);
-
-    try {
-      const chatRequest: ChatRequest = {
-        message: input,
-        stream: false,
-        conversation_id: undefined,
-        workflow: 'full' as any,
-      };
-
-      const response =
-        await getSDK().chat.chatWithTemplateApiV1ChatTemplateTemplateName(
-          templateName,
-          { chatRequest }
-        );
-
-      // Update execution with result
-      setExecutions((prev) =>
-        prev.map((exec) =>
-          exec.id === executionId
-            ? {
-                ...exec,
-                status: 'completed',
-                endTime: new Date(),
-                result: response.data,
-                progress: 100,
-              }
-            : exec
-        )
-      );
-
-      toastService.success(`Workflow "${templateName}" executed successfully`);
-    } catch (error: unknown) {
-      setExecutions((prev) =>
-        prev.map((exec) =>
-          exec.id === executionId
-            ? {
-                ...exec,
-                status: 'failed',
-                endTime: new Date(),
-                error: error.message,
-                progress: 100,
-              }
-            : exec
-        )
-      );
-      handleError(error, {
-        source: 'WorkflowManagementPage.simulateWorkflowExecution',
-        operation: 'execute workflow template',
-        additionalData: { templateName, executionId },
-      });
-    }
-  };
-
-  const handleExecuteTemplate = (templateName: string) => {
-    setSelectedTemplate(templateName);
+  // Event handlers
+  const handleExecuteTemplate = (templateId: string) => {
+    setSelectedTemplate(templateId);
     setExecuteDialogOpen(true);
+    setExecutionInput('');
   };
 
-  const handleViewDetails = (templateName: string) => {
-    const template = templates[templateName];
-    if (template) {
-      setDetailsTemplate(template);
-      setViewDetailsDialogOpen(true);
+  const handleEditTemplate = (template: any) => {
+    setEditingTemplate(template);
+    templateForm.setValues({
+      name: template.name || '',
+      description: template.description || '',
+      category: template.category || 'general',
+    });
+    setBuilderDialogOpen(true);
+  };
+
+  const handleDeleteTemplate = async (templateId: string) => {
+    if (window.confirm('Are you sure you want to delete this template?')) {
+      await deleteTemplate(templateId);
+      toastService.success('Template deleted successfully');
     }
   };
 
-  const handleCopyTemplate = (templateName: string) => {
-    const template = templates[templateName];
-    if (template) {
-      // Copy template data to clipboard as JSON
-      const templateData = {
-        name: `${template.name} (Copy)`,
-        description: template.description,
-        workflow_type: template.workflow_type,
-        category: template.category,
-        required_tools: template.required_tools,
-        parameters: template.parameters,
-      };
+  const handleExecuteWorkflow = async () => {
+    if (!selectedTemplate) return;
 
-      navigator.clipboard
-        .writeText(JSON.stringify(templateData, null, 2))
-        .then(() => {
-          toastService.success(
-            `Template "${template.name}" copied to clipboard`
-          );
-        })
-        .catch(() => {
-          handleError(new Error('Clipboard operation failed'), {
-            source: 'WorkflowManagementPage.copyTemplate',
-            operation: 'copy template to clipboard',
-            additionalData: { templateName: template.name },
-          });
-        });
-    }
-  };
+    try {
+      let input;
+      try {
+        input = executionInput.trim() ? JSON.parse(executionInput) : {};
+      } catch {
+        toastService.error('Invalid JSON input');
+        return;
+      }
 
-  const handleExecuteConfirm = () => {
-    if (selectedTemplate && executionInput.trim()) {
-      executeWorkflow(selectedTemplate, executionInput);
+      await executeWorkflow(selectedTemplate, input);
+      toastService.success('Workflow execution started');
       setExecuteDialogOpen(false);
-      setExecutionInput('');
-      setSelectedTemplate(null);
+      setTabValue(2); // Switch to executions tab
+    } catch (error) {
+      // Error handling is done in the hook
     }
   };
 
-  const renderTemplatesTab = (): void => (
-    <Box>
-      {loading ? (
-        <Box sx={{ display: 'flex', justifyContent: 'center', p: 4 }}>
-          <CircularProgress />
-        </Box>
-      ) : (
-        <Grid container spacing={3}>
-          {Object.entries(templates).map(([name, template]): void => (
-            <Grid size={{ xs: 12, md: 6, lg: 4 }} key={name}>
-              <Card
-                sx={{
-                  height: '100%',
-                  display: 'flex',
-                  flexDirection: 'column',
-                }}
-              >
-                <CardContent sx={{ flexGrow: 1 }}>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                    <WorkflowIcon sx={{ mr: 1, color: 'primary.main' }} />
-                    <Typography variant="h6" component="h2">
-                      {template.name || name}
-                    </Typography>
-                  </Box>
-
-                  <Typography
-                    variant="body2"
-                    color="text.secondary"
-                    sx={{ mb: 2 }}
-                  >
-                    {template.description || 'No description available'}
-                  </Typography>
-
-                  <Box sx={{ mb: 2 }}>
-                    <Chip
-                      label={template.workflow_type || 'Unknown'}
-                      size="small"
-                      color="primary"
-                      sx={{ mr: 1 }}
-                    />
-                    {template.category && (
-                      <Chip
-                        label={template.category}
-                        size="small"
-                        variant="outlined"
-                      />
-                    )}
-                  </Box>
-
-                  {template.required_tools &&
-                    template.required_tools.length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          display="block"
-                        >
-                          Required Tools:
-                        </Typography>
-                        <Box sx={{ mt: 0.5 }}>
-                          {template.required_tools.map((tool, index): void => (
-                            <Chip
-                              key={index}
-                              label={tool}
-                              size="small"
-                              variant="outlined"
-                              sx={{ mr: 0.5, mb: 0.5 }}
-                            />
-                          ))}
-                        </Box>
-                      </Box>
-                    )}
-
-                  {template.parameters &&
-                    Object.keys(template.parameters).length > 0 && (
-                      <Box sx={{ mb: 2 }}>
-                        <Typography
-                          variant="caption"
-                          color="text.secondary"
-                          display="block"
-                        >
-                          Parameters: {Object.keys(template.parameters).length}
-                        </Typography>
-                      </Box>
-                    )}
-                </CardContent>
-
-                <CardContent sx={{ pt: 0 }}>
-                  <Box sx={{ display: 'flex', gap: 1 }}>
-                    <Button
-                      variant="contained"
-                      size="small"
-                      startIcon={<PlayIcon />}
-                      onClick={() => handleExecuteTemplate(name)}
-                      fullWidth
-                    >
-                      Execute
-                    </Button>
-                    <Tooltip title="View Details">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleViewDetails(name)}
-                      >
-                        <ViewIcon />
-                      </IconButton>
-                    </Tooltip>
-                    <Tooltip title="Copy Template">
-                      <IconButton
-                        size="small"
-                        onClick={() => handleCopyTemplate(name)}
-                      >
-                        <CopyIcon />
-                      </IconButton>
-                    </Tooltip>
-                  </Box>
-                </CardContent>
-              </Card>
-            </Grid>
-          ))}
-        </Grid>
-      )}
-
-      {Object.keys(templates).length === 0 && !loading && (
-        <Alert severity="info" sx={{ mt: 2 }}>
-          No workflow templates found. Templates allow you to create reusable
-          workflow configurations.
-        </Alert>
-      )}
-    </Box>
-  );
-
-  const renderBuilderTab = (): void => (
-    <Box>
-      <Grid container spacing={3}>
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <BuildIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Sequential Workflow
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Execute steps one after another, with each step receiving the
-                output of the previous step.
-              </Typography>
-              <Button variant="outlined" size="small">
-                Create Sequential
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <TimelineIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Parallel Workflow
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Execute multiple steps simultaneously, combining their results
-                at the end.
-              </Typography>
-              <Button variant="outlined" size="small">
-                Create Parallel
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, md: 4 }}>
-          <Card>
-            <CardContent>
-              <Typography variant="h6" gutterBottom>
-                <TuneIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
-                Conditional Workflow
-              </Typography>
-              <Typography variant="body2" color="text.secondary" paragraph>
-                Execute different steps based on conditions and decision points.
-              </Typography>
-              <Button variant="outlined" size="small">
-                Create Conditional
-              </Button>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Box sx={{ mt: 4 }}>
-        <Typography variant="h6" gutterBottom>
-          Available Tools
-        </Typography>
-        {availableTools ? (
-          <Grid container spacing={2}>
-            {availableTools.tools?.map((tool, index): void => (
-              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={index}>
-                <Card variant="outlined">
-                  <CardContent>
-                    <Typography variant="subtitle2" gutterBottom>
-                      {tool.name}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary">
-                      {tool.description || 'No description available'}
-                    </Typography>
-                    <Box sx={{ mt: 1 }}>
-                      <Chip
-                        label={tool.server || 'Unknown'}
-                        size="small"
-                        variant="outlined"
-                      />
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            ))}
-          </Grid>
-        ) : (
-          <Alert severity="info">Loading available tools...</Alert>
-        )}
-      </Box>
-    </Box>
-  );
-
-  const getStatusIcon = (status: WorkflowExecution['status']) => {
-    switch (status) {
-      case 'completed':
-        return <CheckCircleIcon color="success" />;
-      case 'failed':
-        return <ErrorIcon color="error" />;
-      case 'running':
-        return <CircularProgress size={20} />;
-      case 'cancelled':
-        return <WarningIcon color="warning" />;
-      default:
-        return <InfoIcon />;
-    }
+  const handleRefresh = () => {
+    loadTemplates();
+    loadExecutions();
   };
 
-  const getStatusColor = (status: WorkflowExecution['status']) => {
-    switch (status) {
-      case 'completed':
-        return 'success' as const;
-      case 'failed':
-        return 'error' as const;
-      case 'running':
-        return 'info' as const;
-      case 'cancelled':
-        return 'warning' as const;
-      default:
-        return 'default' as const;
-    }
-  };
-
-  const renderExecutionTab = (): void => (
-    <Box>
-      <WorkflowMonitor
-        executions={executions.map((exec) => ({
-          id: exec.id,
-          workflowId: exec.templateName || 'unknown',
-          workflowName: exec.templateName || 'Custom Workflow',
-          status:
-            exec.status === 'completed'
-              ? 'completed'
-              : exec.status === 'failed'
-                ? 'failed'
-                : exec.status === 'running'
-                  ? 'running'
-                  : 'queued',
-          startTime: exec.startTime,
-          endTime: exec.endTime,
-          progress: exec.progress || 0,
-          currentStep: 'Processing...',
-          totalSteps: 5,
-          completedSteps: Math.floor((exec.progress || 0) / 20),
-          metrics: {
-            tokensUsed: Math.floor(Math.random() * 1000) + 500,
-            apiCalls: Math.floor(Math.random() * 20) + 5,
-            memoryUsage: Math.floor(Math.random() * 100) + 50,
-            executionTime: exec.endTime
-              ? Math.floor(
-                  (exec.endTime.getTime() - exec.startTime.getTime()) / 1000
-                )
-              : Math.floor(
-                  (new Date().getTime() - exec.startTime.getTime()) / 1000
-                ),
-            cost: (Math.random() * 0.1).toFixed(4) as any,
-          },
-          logs: [
-            {
-              timestamp: exec.startTime,
-              level: 'info' as const,
-              message: 'Workflow execution started',
-            },
-            ...(exec.error
-              ? [
-                  {
-                    timestamp: new Date(),
-                    level: 'error' as const,
-                    message: exec.error,
-                  },
-                ]
-              : []),
-          ],
-          ...(exec.error && {
-            error: {
-              message: exec.error,
-              stepId: 'step-1',
-              timestamp: new Date(),
-            },
-          }),
-        }))}
-        onRefresh={() => {
-          /* Refresh executions */
-        }}
-        onStop={(executionId) => {
-          // Handle stop execution
-        }}
-        onRetry={(executionId) => {
-          // Handle retry execution
-        }}
-      />
-    </Box>
-  );
-
-  const renderAnalyticsTab = (): void => (
-    <Box>
-      <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="text.secondary" gutterBottom>
-                Total Executions
-              </Typography>
-              <Typography variant="h4">{executions.length}</Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="text.secondary" gutterBottom>
-                Success Rate
-              </Typography>
-              <Typography variant="h4">
-                {executions.length > 0
-                  ? Math.round(
-                      (executions.filter((e) => e.status === 'completed')
-                        .length /
-                        executions.length) *
-                        100
-                    )
-                  : 0}
-                %
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="text.secondary" gutterBottom>
-                Running
-              </Typography>
-              <Typography variant="h4">
-                {executions.filter((e) => e.status === 'running').length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-
-        <Grid size={{ xs: 12, sm: 6, md: 3 }}>
-          <Card>
-            <CardContent>
-              <Typography color="text.secondary" gutterBottom>
-                Failed
-              </Typography>
-              <Typography variant="h4">
-                {executions.filter((e) => e.status === 'failed').length}
-              </Typography>
-            </CardContent>
-          </Card>
-        </Grid>
-      </Grid>
-
-      <Alert severity="info" sx={{ mt: 2 }}>
-        Analytics features are coming soon. This will include detailed
-        performance metrics, cost analysis, and workflow optimization insights.
-      </Alert>
-    </Box>
-  );
-
+  // Toolbar
   const toolbar = (
     <>
-      {tabValue === 0 && (
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={loadWorkflowTemplates}
-          disabled={loading}
-          size="small"
-        >
-          Refresh
-        </Button>
-      )}
-      {tabValue === 1 && (
-        <Button
-          variant="contained"
-          startIcon={<AddIcon />}
-          onClick={() => setBuilderDialogOpen(true)}
-          size="small"
-        >
-          Create Workflow
-        </Button>
-      )}
-      {tabValue === 2 && (
-        <Button
-          variant="outlined"
-          startIcon={<RefreshIcon />}
-          onClick={() => {
-            /* Refresh executions */
-          }}
-          size="small"
-        >
-          Refresh
-        </Button>
-      )}
+      <Button
+        variant="outlined"
+        startIcon={<RefreshIcon />}
+        onClick={handleRefresh}
+        disabled={loading}
+      >
+        Refresh
+      </Button>
+      <Button
+        variant="contained"
+        startIcon={<AddIcon />}
+        onClick={() => {
+          setEditingTemplate(null);
+          templateForm.reset();
+          setBuilderDialogOpen(true);
+        }}
+      >
+        Create Template
+      </Button>
     </>
   );
 
   return (
     <PageLayout title="Workflow Management" toolbar={toolbar}>
-      <Box sx={{ mb: 3 }}>
-        <Tabs
-          value={tabValue}
-          onChange={handleTabChange}
-          aria-label="workflow management tabs"
-        >
-          <Tab label="Templates" icon={<WorkflowIcon />} iconPosition="start" />
-          <Tab label="Builder" icon={<BuildIcon />} iconPosition="start" />
-          <Tab label="Executions" icon={<SpeedIcon />} iconPosition="start" />
-          <Tab
-            label="Analytics"
-            icon={<AnalyticsIcon />}
-            iconPosition="start"
-          />
-        </Tabs>
-      </Box>
+      <Box sx={{ width: '100%' }}>
+        <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
+          <Tabs
+            value={tabValue}
+            onChange={(_, newValue) => setTabValue(newValue)}
+            variant="scrollable"
+            scrollButtons="auto"
+          >
+            <Tab label="Templates" icon={<WorkflowIcon />} iconPosition="start" />
+            <Tab label="Builder" icon={<BuildIcon />} iconPosition="start" />
+            <Tab label="Executions" icon={<SpeedIcon />} iconPosition="start" />
+          </Tabs>
+        </Box>
 
-      {/* Tab Content */}
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
         <TabPanel value={tabValue} index={0} idPrefix="workflow">
-          {renderTemplatesTab()}
+          <WorkflowTemplatesTab
+            templates={templates}
+            loading={loading}
+            onExecuteTemplate={handleExecuteTemplate}
+            onEditTemplate={handleEditTemplate}
+            onDeleteTemplate={handleDeleteTemplate}
+          />
         </TabPanel>
+
         <TabPanel value={tabValue} index={1} idPrefix="workflow">
-          {renderBuilderTab()}
+          <Alert severity="info" sx={{ mb: 2 }}>
+            Use the "Create Template" button to open the workflow builder in a dialog.
+          </Alert>
         </TabPanel>
+
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          {renderExecutionTab()}
-        </TabPanel>
-        <TabPanel value={tabValue} index={3} idPrefix="workflow">
-          {renderAnalyticsTab()}
+          <WorkflowExecutionsTab
+            executions={executions}
+            loading={loading}
+          />
         </TabPanel>
       </Box>
 
-      {/* Execute Template Dialog */}
+      {/* Execute Workflow Dialog */}
       <Dialog
         open={executeDialogOpen}
         onClose={() => setExecuteDialogOpen(false)}
-        maxWidth="md"
+        maxWidth="sm"
         fullWidth
       >
-        <DialogTitle>Execute Workflow Template: {selectedTemplate}</DialogTitle>
+        <DialogTitle>Execute Workflow</DialogTitle>
         <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Provide input data for the workflow execution (JSON format):
+          </Typography>
           <TextField
-            autoFocus
-            margin="dense"
-            label="Input Message"
-            multiline
-            rows={4}
             fullWidth
-            variant="outlined"
+            multiline
+            rows={6}
+            label="Input Data (JSON)"
             value={executionInput}
             onChange={(e) => setExecutionInput(e.target.value)}
-            placeholder="Enter your message or prompt for the workflow..."
+            placeholder='{\n  "message": "Hello, world!",\n  "options": {\n    "temperature": 0.7\n  }\n}'
+            sx={{ fontFamily: 'monospace' }}
           />
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setExecuteDialogOpen(false)}>Cancel</Button>
           <Button
-            onClick={handleExecuteConfirm}
+            onClick={handleExecuteWorkflow}
             variant="contained"
-            disabled={!executionInput.trim()}
+            disabled={loading}
           >
-            Execute
+            {loading ? 'Executing...' : 'Execute'}
           </Button>
         </DialogActions>
       </Dialog>
 
-      {/* Builder Dialog */}
+      {/* Workflow Builder Dialog */}
       <Dialog
         open={builderDialogOpen}
         onClose={() => setBuilderDialogOpen(false)}
-        maxWidth="xl"
+        maxWidth="lg"
         fullWidth
-        PaperProps={{
-          sx: { height: '90vh' },
-        }}
+        PaperProps={{ sx: { height: '90vh' } }}
       >
-        <DialogTitle>Visual Workflow Builder</DialogTitle>
-        <DialogContent
-          sx={{
-            p: 0,
-            display: 'flex',
-            flexDirection: 'column',
-            height: '100%',
-          }}
-        >
-          <WorkflowEditor
-            onSave={useCallback((workflow) => {
-              try {
-                // Save workflow to localStorage for persistence
-                const savedWorkflows = JSON.parse(
-                  localStorage.getItem('customWorkflows') || '[]'
-                );
-                const existingIndex = savedWorkflows.findIndex(
-                  (w: any) => w.metadata.name === workflow.metadata.name
-                );
-
-                if (existingIndex >= 0) {
-                  savedWorkflows[existingIndex] = workflow;
-                } else {
-                  savedWorkflows.push(workflow);
-                }
-
-                localStorage.setItem(
-                  'customWorkflows',
-                  JSON.stringify(savedWorkflows)
-                );
-
-                // Update local state to reflect the saved workflow
-                const newWorkflow = {
-                  name: workflow.metadata.name,
-                  description: workflow.metadata.description,
-                  type: 'sequential' as const, // Map from workflow structure
-                  steps: workflow.nodes
-                    .filter((node) => node.type !== 'start')
-                    .map((node) => ({
-                      id: node.id,
-                      type: node.type,
-                      config: node.data.config || {},
-                    })),
-                };
-
-                setCustomWorkflow(newWorkflow);
-                toastService.success('Workflow saved successfully');
-                setBuilderDialogOpen(false);
-              } catch (error) {
-                handleError(error, {
-                  source: 'WorkflowManagementPage.onSave',
-                  operation: 'save custom workflow',
-                  additionalData: { workflowName: newWorkflow.name },
-                });
-              }
-            }, [])}
-            onWorkflowChange={useCallback((workflow) => {
-              // Update the current workflow state as user makes changes
-              const newWorkflow = {
-                name: workflow.metadata.name,
-                description: workflow.metadata.description,
-                type: 'sequential' as const,
-                steps: workflow.nodes
-                  .filter((node) => node.type !== 'start')
-                  .map((node) => ({
-                    id: node.id,
-                    type: node.type,
-                    config: node.data.config || {},
-                  })),
-              };
-
-              // Only update if the workflow has actually changed
-              setCustomWorkflow((prev) => {
-                if (JSON.stringify(prev) !== JSON.stringify(newWorkflow)) {
-                  return newWorkflow;
-                }
-                return prev;
-              });
-            }, [])}
-          />
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setBuilderDialogOpen(false)}>Close</Button>
-        </DialogActions>
-      </Dialog>
-
-      {/* View Details Dialog */}
-      <Dialog
-        open={viewDetailsDialogOpen}
-        onClose={() => setViewDetailsDialogOpen(false)}
-        maxWidth="md"
-        fullWidth
-      >
-        <DialogTitle>Template Details: {detailsTemplate?.name}</DialogTitle>
+        <DialogTitle>
+          {editingTemplate ? 'Edit Workflow Template' : 'Create Workflow Template'}
+        </DialogTitle>
         <DialogContent>
-          {detailsTemplate && (
-            <Box>
-              <Typography variant="body1" paragraph>
-                <strong>Description:</strong>{' '}
-                {detailsTemplate.description || 'No description available'}
-              </Typography>
+          <Box sx={{ mb: 3 }}>
+            <TextField
+              fullWidth
+              label="Template Name"
+              value={templateForm.values.name}
+              onChange={(e) => templateForm.handleChange('name', e.target.value)}
+              error={Boolean(templateForm.errors.name)}
+              helperText={templateForm.errors.name}
+              sx={{ mb: 2 }}
+            />
+            
+            <TextField
+              fullWidth
+              label="Description"
+              multiline
+              rows={2}
+              value={templateForm.values.description}
+              onChange={(e) => templateForm.handleChange('description', e.target.value)}
+              sx={{ mb: 2 }}
+            />
 
-              <Typography variant="body1" paragraph>
-                <strong>Type:</strong>{' '}
-                {detailsTemplate.workflow_type || 'Unknown'}
-              </Typography>
+            <TextField
+              fullWidth
+              label="Category"
+              value={templateForm.values.category}
+              onChange={(e) => templateForm.handleChange('category', e.target.value)}
+            />
+          </Box>
 
-              {detailsTemplate.category && (
-                <Typography variant="body1" paragraph>
-                  <strong>Category:</strong> {detailsTemplate.category}
-                </Typography>
-              )}
-
-              {detailsTemplate.required_tools &&
-                detailsTemplate.required_tools.length > 0 && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                      <strong>Required Tools:</strong>
-                    </Typography>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-                      {detailsTemplate.required_tools.map(
-                        (tool, index): void => (
-                          <Chip
-                            key={index}
-                            label={tool}
-                            size="small"
-                            variant="outlined"
-                          />
-                        )
-                      )}
-                    </Box>
-                  </Box>
-                )}
-
-              {detailsTemplate.parameters &&
-                Object.keys(detailsTemplate.parameters).length > 0 && (
-                  <Box sx={{ mb: 2 }}>
-                    <Typography variant="body1" sx={{ mb: 1 }}>
-                      <strong>Parameters:</strong>
-                    </Typography>
-                    <Box sx={{ pl: 2 }}>
-                      {Object.entries(detailsTemplate.parameters).map(
-                        ([key, value]): void => (
-                          <Typography
-                            key={key}
-                            variant="body2"
-                            sx={{ mb: 0.5 }}
-                          >
-                            • <strong>{key}:</strong>{' '}
-                            {typeof value === 'object'
-                              ? JSON.stringify(value)
-                              : String(value)}
-                          </Typography>
-                        )
-                      )}
-                    </Box>
-                  </Box>
-                )}
-            </Box>
-          )}
+          <Box sx={{ height: '60vh', border: 1, borderColor: 'divider', borderRadius: 1 }}>
+            <WorkflowEditor
+              availableTools={availableTools?.tools || []}
+              initialWorkflow={editingTemplate?.workflow}
+            />
+          </Box>
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setViewDetailsDialogOpen(false)}>Close</Button>
+          <Button onClick={() => setBuilderDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={templateForm.handleSubmit}
+            variant="contained"
+            disabled={loading}
+          >
+            {loading ? 'Saving...' : editingTemplate ? 'Update' : 'Create'}
+          </Button>
         </DialogActions>
       </Dialog>
     </PageLayout>

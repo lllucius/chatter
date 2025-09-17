@@ -17,8 +17,8 @@ import {
   DialogContent,
   DialogActions,
   TextField,
-} from '@mui/material';
-import Grid from '@mui/material/Grid';
+  Grid,
+} from '../utils/mui';
 import {
   XAxis,
   YAxis,
@@ -213,8 +213,8 @@ const DashboardPage: React.FC = () => {
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
         }
         return null;
-      } catch (error) {
-        console.log('Chart data API not available yet');
+      } catch (_error) {
+        // Chart data API not available yet - silently fail
         return null;
       }
     },
@@ -368,7 +368,6 @@ const DashboardPage: React.FC = () => {
       if (response && typeof response === 'object') {
         // Create a downloadable file
         let blob;
-        let mimeType;
         const fileExtension = exportFormat;
 
         switch (exportFormat) {
@@ -376,7 +375,6 @@ const DashboardPage: React.FC = () => {
             blob = new Blob([JSON.stringify(response, null, 2)], {
               type: 'application/json',
             });
-            mimeType = 'application/json';
             break;
           case 'csv':
             // If response is already CSV string
@@ -388,21 +386,17 @@ const DashboardPage: React.FC = () => {
               ],
               { type: 'text/csv' }
             );
-            mimeType = 'text/csv';
             break;
           case 'xlsx':
             // This would need proper handling if the API returns binary data
             blob = new Blob([response], {
               type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             });
-            mimeType =
-              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             break;
           default:
             blob = new Blob([JSON.stringify(response, null, 2)], {
               type: 'application/json',
             });
-            mimeType = 'application/json';
         }
 
         // Create download link

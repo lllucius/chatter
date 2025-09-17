@@ -155,7 +155,7 @@ export const CrudDataTable = forwardRef<
     } finally {
       setLoading(false);
     }
-  }, [page, rowsPerPage, service, config.entityNamePlural]);
+  }, [page, rowsPerPage, service, config.entityNamePlural, config.entityName]);
 
   useEffect(() => {
     loadData();

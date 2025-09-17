@@ -33,7 +33,9 @@ describe('SectionErrorBoundary', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Suppress console.error during tests
-    vi.spyOn(console, 'error').mockImplementation(() => {});
+    vi.spyOn(console, 'error').mockImplementation(() => {
+      // Intentionally empty - suppressing console.error during tests
+    });
   });
 
   afterEach(() => {

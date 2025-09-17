@@ -36,6 +36,11 @@ export {
   PlayArrow as PlayIcon,
   Stop as StopIcon,
   Pause as PauseIcon,
+  Backup as BackupIcon,
+  Work as JobIcon,
+  Extension as PluginIcon,
+  People as UsersIcon,
+  DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
 
 // Navigation icons

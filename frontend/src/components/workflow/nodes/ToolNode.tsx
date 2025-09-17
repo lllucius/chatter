@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Build as ToolIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#ff9800' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 180, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 180,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: 'warning.light',
-          color: 'warning.contrastText'
+          color: 'warning.contrastText',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,29 +39,29 @@ const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => 
             Execute tools
           </Typography>
           {config.parallel && (
-            <Chip 
-              label="Parallel" 
-              size="small" 
-              color="warning" 
+            <Chip
+              label="Parallel"
+              size="small"
+              color="warning"
               variant="outlined"
               sx={{ mr: 0.5 }}
             />
           )}
           {config.tools && config.tools.length > 0 && (
-            <Chip 
-              label={`${config.tools.length} tools`} 
-              size="small" 
-              color="warning" 
+            <Chip
+              label={`${config.tools.length} tools`}
+              size="small"
+              color="warning"
               variant="outlined"
             />
           )}
         </CardContent>
       </Card>
-      
+
       {/* Output handle */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         style={{ background: '#ff9800' }}
       />
     </>

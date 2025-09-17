@@ -1,10 +1,18 @@
 /**
  * SSE Context Provider
- * 
+ *
  * Provides SSE event manager to React components via context
  */
 
-import React, { createContext, useContext, useEffect, useState, ReactNode, useCallback, useMemo } from 'react';
+import React, {
+  createContext,
+  useContext,
+  useEffect,
+  useState,
+  ReactNode,
+  useCallback,
+  useMemo,
+} from 'react';
 import { sseEventManager } from './sse-manager';
 import { AnySSEEvent, SSEEventListener } from './sse-types';
 import { authService } from '../services/auth-service';
@@ -15,8 +23,14 @@ interface SSEContextValue {
   connectionState: 'connecting' | 'open' | 'closed';
   connect: () => void;
   disconnect: () => void;
-  on: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => () => void;
-  off: (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => void;
+  on: (
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ) => () => void;
+  off: (
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ) => void;
   onCategory: (category: string, listener: SSEEventListener) => () => void;
   offCategory: (category: string, listener: SSEEventListener) => void;
   onHighPriority: (listener: SSEEventListener) => () => void;
@@ -31,9 +45,14 @@ interface SSEProviderProps {
   autoConnect?: boolean;
 }
 
-export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect = true }) => {
+export const SSEProvider: React.FC<SSEProviderProps> = ({
+  children,
+  autoConnect = true,
+}) => {
   const [isConnected, setIsConnected] = useState(false);
-  const [connectionState, setConnectionState] = useState<'connecting' | 'open' | 'closed'>('closed');
+  const [connectionState, setConnectionState] = useState<
+    'connecting' | 'open' | 'closed'
+  >('closed');
 
   // Monitor connection state
   useEffect(() => {
@@ -79,21 +98,33 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     sseEventManager.disconnect();
   }, []);
 
-  const on = useCallback((eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
-    return sseEventManager.on(eventType, listener);
-  }, []);
+  const on = useCallback(
+    (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
+      return sseEventManager.on(eventType, listener);
+    },
+    []
+  );
 
-  const off = useCallback((eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
-    sseEventManager.off(eventType, listener);
-  }, []);
+  const off = useCallback(
+    (eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener) => {
+      sseEventManager.off(eventType, listener);
+    },
+    []
+  );
 
-  const onCategory = useCallback((category: string, listener: SSEEventListener) => {
-    return sseEventManager.onCategory(category, listener);
-  }, []);
+  const onCategory = useCallback(
+    (category: string, listener: SSEEventListener) => {
+      return sseEventManager.onCategory(category, listener);
+    },
+    []
+  );
 
-  const offCategory = useCallback((category: string, listener: SSEEventListener) => {
-    sseEventManager.offCategory(category, listener);
-  }, []);
+  const offCategory = useCallback(
+    (category: string, listener: SSEEventListener) => {
+      sseEventManager.offCategory(category, listener);
+    },
+    []
+  );
 
   const onHighPriority = useCallback((listener: SSEEventListener) => {
     return sseEventManager.onHighPriority(listener);
@@ -107,38 +138,37 @@ export const SSEProvider: React.FC<SSEProviderProps> = ({ children, autoConnect 
     return sseEventManager.getConnectionStats();
   }, []);
 
-  const value: SSEContextValue = useMemo(() => ({
-    manager: sseEventManager,
-    isConnected,
-    connectionState,
-    connect,
-    disconnect,
-    on,
-    off,
-    onCategory,
-    offCategory,
-    onHighPriority,
-    requestNotificationPermission,
-    getConnectionStats,
-  }), [
-    isConnected, 
-    connectionState, 
-    connect, 
-    disconnect, 
-    on, 
-    off, 
-    onCategory, 
-    offCategory, 
-    onHighPriority, 
-    requestNotificationPermission,
-    getConnectionStats
-  ]);
-
-  return (
-    <SSEContext.Provider value={value}>
-      {children}
-    </SSEContext.Provider>
+  const value: SSEContextValue = useMemo(
+    () => ({
+      manager: sseEventManager,
+      isConnected,
+      connectionState,
+      connect,
+      disconnect,
+      on,
+      off,
+      onCategory,
+      offCategory,
+      onHighPriority,
+      requestNotificationPermission,
+      getConnectionStats,
+    }),
+    [
+      isConnected,
+      connectionState,
+      connect,
+      disconnect,
+      on,
+      off,
+      onCategory,
+      offCategory,
+      onHighPriority,
+      requestNotificationPermission,
+      getConnectionStats,
+    ]
   );
+
+  return <SSEContext.Provider value={value}>{children}</SSEContext.Provider>;
 };
 
 export const useSSE = (): SSEContextValue => {

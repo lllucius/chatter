@@ -22,7 +22,13 @@ export interface LangGraphWorkflowConfig {
 
 export interface LangGraphNode {
   id: string;
-  type: 'start' | 'manage_memory' | 'retrieve_context' | 'call_model' | 'execute_tools' | 'conditional';
+  type:
+    | 'start'
+    | 'manage_memory'
+    | 'retrieve_context'
+    | 'call_model'
+    | 'execute_tools'
+    | 'conditional';
   config: Record<string, unknown>;
 }
 
@@ -37,13 +43,15 @@ export class WorkflowTranslator {
   /**
    * Convert visual workflow definition to LangGraph configuration
    */
-  static toLangGraphConfig(workflow: WorkflowDefinition): LangGraphWorkflowConfig {
+  static toLangGraphConfig(
+    workflow: WorkflowDefinition
+  ): LangGraphWorkflowConfig {
     const nodes = this.translateNodes(workflow);
     const edges = this.translateEdges(workflow);
-    
+
     // Analyze workflow to determine mode
     const mode = this.determineWorkflowMode(workflow);
-    
+
     // Extract configuration from nodes
     const config: LangGraphWorkflowConfig = {
       mode,
@@ -54,7 +62,7 @@ export class WorkflowTranslator {
     };
 
     // Add retriever configuration if present
-    const retrieverNode = workflow.nodes.find(n => n.type === 'retrieval');
+    const retrieverNode = workflow.nodes.find((n) => n.type === 'retrieval');
     if (retrieverNode?.data.config) {
       config.retriever = {
         collection: retrieverNode.data.config.collection || 'default',
@@ -63,21 +71,23 @@ export class WorkflowTranslator {
     }
 
     // Add memory configuration if present
-    const memoryNode = workflow.nodes.find(n => n.type === 'memory');
+    const memoryNode = workflow.nodes.find((n) => n.type === 'memory');
     if (memoryNode?.data.config) {
       config.memory_window = memoryNode.data.config.window || 20;
     }
 
     // Extract system message from model nodes
-    const modelNodes = workflow.nodes.filter(n => n.type === 'model');
+    const modelNodes = workflow.nodes.filter((n) => n.type === 'model');
     if (modelNodes.length > 0 && modelNodes[0].data.config?.systemMessage) {
       config.system_message = modelNodes[0].data.config.systemMessage;
     }
 
     // Extract tools from tool nodes
-    const toolNodes = workflow.nodes.filter(n => n.type === 'tool');
+    const toolNodes = workflow.nodes.filter((n) => n.type === 'tool');
     if (toolNodes.length > 0) {
-      const allTools = toolNodes.flatMap(node => node.data.config?.tools || []);
+      const allTools = toolNodes.flatMap(
+        (node) => node.data.config?.tools || []
+      );
       config.tools = [...new Set(allTools)];
     }
 
@@ -88,9 +98,11 @@ export class WorkflowTranslator {
    * Convert workflow nodes to LangGraph node format
    */
   private static translateNodes(workflow: WorkflowDefinition): LangGraphNode[] {
-    return workflow.nodes.map(node => {
-      const langGraphType = this.mapNodeTypeToLangGraph(node.type as WorkflowNodeType);
-      
+    return workflow.nodes.map((node) => {
+      const langGraphType = this.mapNodeTypeToLangGraph(
+        node.type as WorkflowNodeType
+      );
+
       return {
         id: node.id,
         type: langGraphType,
@@ -103,7 +115,7 @@ export class WorkflowTranslator {
    * Convert workflow edges to LangGraph edge format
    */
   private static translateEdges(workflow: WorkflowDefinition): LangGraphEdge[] {
-    return workflow.edges.map(edge => ({
+    return workflow.edges.map((edge) => ({
       from: edge.source,
       to: edge.target,
       condition: edge.data?.condition,
@@ -114,7 +126,9 @@ export class WorkflowTranslator {
   /**
    * Map visual node types to LangGraph node types
    */
-  private static mapNodeTypeToLangGraph(nodeType: string): LangGraphNode['type'] {
+  private static mapNodeTypeToLangGraph(
+    nodeType: string
+  ): LangGraphNode['type'] {
     switch (nodeType) {
       case 'start':
         return 'start';
@@ -136,10 +150,12 @@ export class WorkflowTranslator {
   /**
    * Determine workflow mode based on nodes present
    */
-  private static determineWorkflowMode(workflow: WorkflowDefinition): LangGraphWorkflowConfig['mode'] {
-    const hasRetrieval = workflow.nodes.some(n => n.type === 'retrieval');
-    const hasTools = workflow.nodes.some(n => n.type === 'tool');
-    
+  private static determineWorkflowMode(
+    workflow: WorkflowDefinition
+  ): LangGraphWorkflowConfig['mode'] {
+    const hasRetrieval = workflow.nodes.some((n) => n.type === 'retrieval');
+    const hasTools = workflow.nodes.some((n) => n.type === 'tool');
+
     if (hasRetrieval && hasTools) {
       return 'full';
     } else if (hasTools) {
@@ -155,14 +171,16 @@ export class WorkflowTranslator {
    * Check if workflow has memory management
    */
   private static hasMemoryNode(workflow: WorkflowDefinition): boolean {
-    return workflow.nodes.some(n => n.type === 'memory');
+    return workflow.nodes.some((n) => n.type === 'memory');
   }
 
   /**
    * Find the entry point node
    */
-  private static findEntryPoint(workflow: WorkflowDefinition): string | undefined {
-    const startNode = workflow.nodes.find(n => n.type === 'start');
+  private static findEntryPoint(
+    workflow: WorkflowDefinition
+  ): string | undefined {
+    const startNode = workflow.nodes.find((n) => n.type === 'start');
     return startNode?.id;
   }
 
@@ -172,85 +190,92 @@ export class WorkflowTranslator {
   static generateExecutionOrder(workflow: WorkflowDefinition): string[] {
     const graph = new Map<string, string[]>();
     const inDegree = new Map<string, number>();
-    
+
     // Initialize graph
-    workflow.nodes.forEach(node => {
+    workflow.nodes.forEach((node) => {
       graph.set(node.id, []);
       inDegree.set(node.id, 0);
     });
-    
+
     // Build adjacency list and calculate in-degrees
-    workflow.edges.forEach(edge => {
+    workflow.edges.forEach((edge) => {
       const neighbors = graph.get(edge.source) || [];
       neighbors.push(edge.target);
       graph.set(edge.source, neighbors);
-      
+
       inDegree.set(edge.target, (inDegree.get(edge.target) || 0) + 1);
     });
-    
+
     // Topological sort
     const queue: string[] = [];
     const result: string[] = [];
-    
+
     // Start with nodes that have no incoming edges
     inDegree.forEach((degree, nodeId) => {
       if (degree === 0) {
         queue.push(nodeId);
       }
     });
-    
+
     while (queue.length > 0) {
       const current = queue.shift()!;
       result.push(current);
-      
+
       const neighbors = graph.get(current) || [];
-      neighbors.forEach(neighbor => {
+      neighbors.forEach((neighbor) => {
         const newDegree = (inDegree.get(neighbor) || 0) - 1;
         inDegree.set(neighbor, newDegree);
-        
+
         if (newDegree === 0) {
           queue.push(neighbor);
         }
       });
     }
-    
+
     return result;
   }
 
   /**
    * Validate that workflow can be converted to LangGraph
    */
-  static validateForLangGraph(workflow: WorkflowDefinition): { valid: boolean; errors: string[] } {
+  static validateForLangGraph(workflow: WorkflowDefinition): {
+    valid: boolean;
+    errors: string[];
+  } {
     const errors: string[] = [];
-    
+
     // Must have at least one start node
-    const startNodes = workflow.nodes.filter(n => n.type === 'start');
+    const startNodes = workflow.nodes.filter((n) => n.type === 'start');
     if (startNodes.length === 0) {
       errors.push('Workflow must have a start node');
     } else if (startNodes.length > 1) {
       errors.push('Workflow can only have one start node for LangGraph');
     }
-    
+
     // Must have at least one model node
-    const modelNodes = workflow.nodes.filter(n => n.type === 'model');
+    const modelNodes = workflow.nodes.filter((n) => n.type === 'model');
     if (modelNodes.length === 0) {
       errors.push('Workflow must have at least one model node');
     }
-    
+
     // Conditional nodes must have conditions
-    const conditionalNodes = workflow.nodes.filter(n => n.type === 'conditional');
-    conditionalNodes.forEach(node => {
+    const conditionalNodes = workflow.nodes.filter(
+      (n) => n.type === 'conditional'
+    );
+    conditionalNodes.forEach((node) => {
       if (!node.data.config?.condition) {
-        errors.push(`Conditional node "${node.data.label}" must have a condition defined`);
+        errors.push(
+          `Conditional node "${node.data.label}" must have a condition defined`
+        );
       }
     });
-    
+
     // Check for proper connectivity
     const executionOrder = this.generateExecutionOrder(workflow);
     if (executionOrder.length !== workflow.nodes.length) {
       errors.push('Workflow has cycles or disconnected components');
     }
-    
+
     return {
       valid: errors.length === 0,
       errors,

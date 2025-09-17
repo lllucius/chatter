@@ -51,7 +51,7 @@ import {
 } from '../utils/icons';
 import { TrendingFlat as TrendingFlatIcon } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import {
@@ -67,8 +67,6 @@ import {
 } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 import ABTestAnalytics from '../components/ABTestAnalytics';
-
-
 
 interface TestRecommendations {
   recommendations?: string[];
@@ -96,27 +94,35 @@ const ABTestingPage: React.FC = () => {
   const [selectedTest, setSelectedTest] = useState<ABTestResponse | null>(null);
   const [saving, setSaving] = useState(false);
   const [activeTab, setActiveTab] = useState(0);
-  
+
   // Additional data states
-  const [testMetrics, setTestMetrics] = useState<ABTestMetricsResponse | null>(null);
-  const [testResults, setTestResults] = useState<ABTestResultsResponse | null>(null);
-  const [testRecommendations, setTestRecommendations] = useState<TestRecommendations | null>(null);
-  const [testPerformance, setTestPerformance] = useState<TestPerformance | null>(null);
-  
+  const [testMetrics, setTestMetrics] = useState<ABTestMetricsResponse | null>(
+    null
+  );
+  const [testResults, setTestResults] = useState<ABTestResultsResponse | null>(
+    null
+  );
+  const [testRecommendations, setTestRecommendations] =
+    useState<TestRecommendations | null>(null);
+  const [testPerformance, setTestPerformance] =
+    useState<TestPerformance | null>(null);
+
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     test_type: TestType.prompt,
     variants: [
       { name: 'Control', allocation: 50 },
-      { name: 'Variant A', allocation: 50 }
+      { name: 'Variant A', allocation: 50 },
     ],
     min_sample_size: 1000,
     confidence_level: 0.95,
     duration_days: 14,
   });
 
-  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
   const [actionTest, setActionTest] = useState<ABTestResponse | null>(null);
 
   const testTypes = [
@@ -138,7 +144,7 @@ const ABTestingPage: React.FC = () => {
     } catch (err: unknown) {
       handleError(err, {
         source: 'ABTestingPage.loadTests',
-        operation: 'load AB tests'
+        operation: 'load AB tests',
       });
     } finally {
       setLoading(false);
@@ -147,18 +153,38 @@ const ABTestingPage: React.FC = () => {
 
   const loadTestDetails = async (test: ABTestResponse) => {
     try {
-      const [metricsResponse, resultsResponse, recommendationsResponse, performanceResponse] = 
-        await Promise.allSettled([
-          getSDK().abTesting.getAbTestMetricsApiV1AbTestsTestIdMetrics(test.id),
-          getSDK().abTesting.getAbTestResultsApiV1AbTestsTestIdResults(test.id),
-          getSDK().abTesting.getAbTestRecommendationsApiV1AbTestsTestIdRecommendations(test.id),
-          getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformance(test.id),
-        ]);
+      const [
+        metricsResponse,
+        resultsResponse,
+        recommendationsResponse,
+        performanceResponse,
+      ] = await Promise.allSettled([
+        getSDK().abTesting.getAbTestMetricsApiV1AbTestsTestIdMetrics(test.id),
+        getSDK().abTesting.getAbTestResultsApiV1AbTestsTestIdResults(test.id),
+        getSDK().abTesting.getAbTestRecommendationsApiV1AbTestsTestIdRecommendations(
+          test.id
+        ),
+        getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformance(
+          test.id
+        ),
+      ]);
 
-      setTestMetrics(metricsResponse.status === 'fulfilled' ? metricsResponse.value : null);
-      setTestResults(resultsResponse.status === 'fulfilled' ? resultsResponse.value : null);
-      setTestRecommendations(recommendationsResponse.status === 'fulfilled' ? recommendationsResponse.value as TestRecommendations : null);
-      setTestPerformance(performanceResponse.status === 'fulfilled' ? performanceResponse.value as unknown as TestPerformance : null);
+      setTestMetrics(
+        metricsResponse.status === 'fulfilled' ? metricsResponse.value : null
+      );
+      setTestResults(
+        resultsResponse.status === 'fulfilled' ? resultsResponse.value : null
+      );
+      setTestRecommendations(
+        recommendationsResponse.status === 'fulfilled'
+          ? (recommendationsResponse.value as TestRecommendations)
+          : null
+      );
+      setTestPerformance(
+        performanceResponse.status === 'fulfilled'
+          ? (performanceResponse.value as unknown as TestPerformance)
+          : null
+      );
     } catch {
       // Error loading test details - will show in UI appropriately
     }
@@ -171,7 +197,7 @@ const ABTestingPage: React.FC = () => {
         name: test.name,
         description: test.description || '',
         test_type: test.test_type,
-        variants: test.variants.map(v => ({
+        variants: test.variants.map((v) => ({
           name: v.name,
           allocation: (v.weight || 0) * 100, // Convert from decimal to percentage
         })),
@@ -187,7 +213,7 @@ const ABTestingPage: React.FC = () => {
         test_type: TestType.prompt,
         variants: [
           { name: 'Control', allocation: 50 },
-          { name: 'Variant A', allocation: 50 }
+          { name: 'Variant A', allocation: 50 },
         ],
         min_sample_size: 1000,
         confidence_level: 0.95,
@@ -227,9 +253,12 @@ const ABTestingPage: React.FC = () => {
         description: formData.description,
         test_type: formData.test_type,
         allocation_strategy: VariantAllocation.equal, // Default allocation strategy
-        variants: formData.variants.map(v => ({
+        variants: formData.variants.map((v) => ({
           name: v.name,
-          description: v.name === 'Control' ? 'Control variant for baseline comparison' : `${v.name} test variant`,
+          description:
+            v.name === 'Control'
+              ? 'Control variant for baseline comparison'
+              : `${v.name} test variant`,
           weight: v.allocation / 100, // Convert percentage to decimal
           configuration: {},
         })),
@@ -256,10 +285,10 @@ const ABTestingPage: React.FC = () => {
       handleError(err, {
         source: 'ABTestingPage.handleSaveTest',
         operation: editingTest ? 'update AB test' : 'create AB test',
-        additionalData: { 
+        additionalData: {
           testId: editingTest?.id,
-          testName: formData.name 
-        }
+          testName: formData.name,
+        },
       });
     } finally {
       setSaving(false);
@@ -279,26 +308,40 @@ const ABTestingPage: React.FC = () => {
       handleError(err, {
         source: 'ABTestingPage.handleDeleteTest',
         operation: 'delete AB test',
-        additionalData: { testId: test.id, testName: test.name }
+        additionalData: { testId: test.id, testName: test.name },
       });
     }
   };
 
-  const handleTestAction = async (test: ABTestResponse, action: 'start' | 'pause' | 'end' | 'complete') => {
+  const handleTestAction = async (
+    test: ABTestResponse,
+    action: 'start' | 'pause' | 'end' | 'complete'
+  ) => {
     try {
       let response;
       switch (action) {
         case 'start':
-          response = await getSDK().abTesting.startAbTestApiV1AbTestsTestIdStart(test.id);
+          response =
+            await getSDK().abTesting.startAbTestApiV1AbTestsTestIdStart(
+              test.id
+            );
           break;
         case 'pause':
-          response = await getSDK().abTesting.pauseAbTestApiV1AbTestsTestIdPause(test.id);
+          response =
+            await getSDK().abTesting.pauseAbTestApiV1AbTestsTestIdPause(
+              test.id
+            );
           break;
         case 'end':
-          response = await getSDK().abTesting.endAbTestApiV1AbTestsTestIdEnd(test.id);
+          response = await getSDK().abTesting.endAbTestApiV1AbTestsTestIdEnd(
+            test.id
+          );
           break;
         case 'complete':
-          response = await getSDK().abTesting.completeAbTestApiV1AbTestsTestIdComplete(test.id);
+          response =
+            await getSDK().abTesting.completeAbTestApiV1AbTestsTestIdComplete(
+              test.id
+            );
           break;
       }
       toastService.success(response.message);
@@ -308,16 +351,19 @@ const ABTestingPage: React.FC = () => {
       handleError(err, {
         source: 'ABTestingPage.handleTestAction',
         operation: `${action} AB test`,
-        additionalData: { 
-          testId: test.id, 
+        additionalData: {
+          testId: test.id,
           testName: test.name,
-          action 
-        }
+          action,
+        },
       });
     }
   };
 
-  const handleOpenActionMenu = (event: React.MouseEvent<HTMLElement>, test: ABTestResponse) => {
+  const handleOpenActionMenu = (
+    event: React.MouseEvent<HTMLElement>,
+    test: ABTestResponse
+  ) => {
     setActionAnchorEl(event.currentTarget);
     setActionTest(test);
   };
@@ -328,11 +374,20 @@ const ABTestingPage: React.FC = () => {
   };
 
   const addVariant = () => {
-    const totalAllocation = formData.variants.reduce((sum, v) => sum + v.allocation, 0);
+    const totalAllocation = formData.variants.reduce(
+      (sum, v) => sum + v.allocation,
+      0
+    );
     const newAllocation = Math.max(0, 100 - totalAllocation);
     setFormData({
       ...formData,
-      variants: [...formData.variants, { name: `Variant ${String.fromCharCode(65 + formData.variants.length - 1)}`, allocation: newAllocation }]
+      variants: [
+        ...formData.variants,
+        {
+          name: `Variant ${String.fromCharCode(65 + formData.variants.length - 1)}`,
+          allocation: newAllocation,
+        },
+      ],
     });
   };
 
@@ -343,35 +398,65 @@ const ABTestingPage: React.FC = () => {
     }
   };
 
-  const getStatusColor = (status: TestStatus): "default" | "primary" | "secondary" | "error" | "info" | "success" | "warning" => {
+  const getStatusColor = (
+    status: TestStatus
+  ):
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'error'
+    | 'info'
+    | 'success'
+    | 'warning' => {
     switch (status) {
-      case TestStatus.draft: return 'default';
-      case TestStatus.running: return 'primary';
-      case TestStatus.paused: return 'warning';
-      case TestStatus.completed: return 'success';
-      case TestStatus.cancelled: return 'error';
-      default: return 'default';
+      case TestStatus.draft:
+        return 'default';
+      case TestStatus.running:
+        return 'primary';
+      case TestStatus.paused:
+        return 'warning';
+      case TestStatus.completed:
+        return 'success';
+      case TestStatus.cancelled:
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
   const getStatusIcon = (status: TestStatus) => {
     switch (status) {
-      case TestStatus.running: return <TrendingUpIcon />;
-      case TestStatus.paused: return <PauseIcon />;
-      case TestStatus.completed: return <CompleteIcon />;
-      case TestStatus.cancelled: return <StopIcon />;
-      default: return <TrendingFlatIcon />;
+      case TestStatus.running:
+        return <TrendingUpIcon />;
+      case TestStatus.paused:
+        return <PauseIcon />;
+      case TestStatus.completed:
+        return <CompleteIcon />;
+      case TestStatus.cancelled:
+        return <StopIcon />;
+      default:
+        return <TrendingFlatIcon />;
     }
   };
 
-  const canStart = (test: ABTestResponse) => test.status === TestStatus.draft || test.status === TestStatus.paused;
+  const canStart = (test: ABTestResponse) =>
+    test.status === TestStatus.draft || test.status === TestStatus.paused;
   const canPause = (test: ABTestResponse) => test.status === TestStatus.running;
-  const canEnd = (test: ABTestResponse) => test.status === TestStatus.running || test.status === TestStatus.paused;
-  const canComplete = (test: ABTestResponse) => test.status === TestStatus.running || test.status === TestStatus.paused;
+  const canEnd = (test: ABTestResponse) =>
+    test.status === TestStatus.running || test.status === TestStatus.paused;
+  const canComplete = (test: ABTestResponse) =>
+    test.status === TestStatus.running || test.status === TestStatus.paused;
 
   const renderTestDialog = () => (
-    <Dialog open={dialogOpen} onClose={handleCloseDialog} maxWidth="md" fullWidth>
-      <DialogTitle>{editingTest ? 'Edit AB Test' : 'Create AB Test'}</DialogTitle>
+    <Dialog
+      open={dialogOpen}
+      onClose={handleCloseDialog}
+      maxWidth="md"
+      fullWidth
+    >
+      <DialogTitle>
+        {editingTest ? 'Edit AB Test' : 'Create AB Test'}
+      </DialogTitle>
       <DialogContent>
         <Box sx={{ pt: 1 }}>
           <Grid container spacing={3}>
@@ -381,7 +466,9 @@ const ABTestingPage: React.FC = () => {
                 fullWidth
                 label="Test Name"
                 value={formData.name}
-                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, name: e.target.value })
+                }
                 required
               />
             </Grid>
@@ -390,7 +477,12 @@ const ABTestingPage: React.FC = () => {
                 <InputLabel>Test Type</InputLabel>
                 <Select
                   value={formData.test_type}
-                  onChange={(e) => setFormData({ ...formData, test_type: e.target.value as TestType })}
+                  onChange={(e) =>
+                    setFormData({
+                      ...formData,
+                      test_type: e.target.value as TestType,
+                    })
+                  }
                   label="Test Type"
                 >
                   {testTypes.map((type) => (
@@ -410,10 +502,12 @@ const ABTestingPage: React.FC = () => {
                 rows={3}
                 label="Description"
                 value={formData.description}
-                onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+                onChange={(e) =>
+                  setFormData({ ...formData, description: e.target.value })
+                }
               />
             </Grid>
-            
+
             {/* Variants Section */}
             <Grid size={12}>
               <Typography variant="h6" gutterBottom sx={{ mt: 2, mb: 2 }}>
@@ -442,7 +536,10 @@ const ABTestingPage: React.FC = () => {
                         value={variant.allocation}
                         onChange={(e) => {
                           const newVariants = [...formData.variants];
-                          newVariants[index].allocation = Math.max(0, Math.min(100, parseInt(e.target.value) || 0));
+                          newVariants[index].allocation = Math.max(
+                            0,
+                            Math.min(100, parseInt(e.target.value) || 0)
+                          );
                           setFormData({ ...formData, variants: newVariants });
                         }}
                         inputProps={{ min: 0, max: 100 }}
@@ -450,7 +547,10 @@ const ABTestingPage: React.FC = () => {
                     </Grid>
                     <Grid size={{ xs: 4, sm: 1 }}>
                       {formData.variants.length > 2 && (
-                        <IconButton onClick={() => removeVariant(index)} color="error">
+                        <IconButton
+                          onClick={() => removeVariant(index)}
+                          color="error"
+                        >
                           <DeleteIcon />
                         </IconButton>
                       )}
@@ -458,10 +558,10 @@ const ABTestingPage: React.FC = () => {
                   </Grid>
                 ))}
               </Box>
-              <Button 
-                onClick={addVariant} 
-                startIcon={<AddIcon />} 
-                variant="outlined" 
+              <Button
+                onClick={addVariant}
+                startIcon={<AddIcon />}
+                variant="outlined"
                 sx={{ mt: 2 }}
               >
                 Add Variant
@@ -480,7 +580,12 @@ const ABTestingPage: React.FC = () => {
                 label="Minimum Sample Size"
                 type="number"
                 value={formData.min_sample_size}
-                onChange={(e) => setFormData({ ...formData, min_sample_size: parseInt(e.target.value) || 1000 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    min_sample_size: parseInt(e.target.value) || 1000,
+                  })
+                }
                 inputProps={{ min: 100 }}
               />
             </Grid>
@@ -490,7 +595,12 @@ const ABTestingPage: React.FC = () => {
                 label="Duration (Days)"
                 type="number"
                 value={formData.duration_days}
-                onChange={(e) => setFormData({ ...formData, duration_days: parseInt(e.target.value) || 14 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    duration_days: parseInt(e.target.value) || 14,
+                  })
+                }
                 inputProps={{ min: 1 }}
               />
             </Grid>
@@ -500,7 +610,12 @@ const ABTestingPage: React.FC = () => {
                 label="Confidence Level"
                 type="number"
                 value={formData.confidence_level}
-                onChange={(e) => setFormData({ ...formData, confidence_level: parseFloat(e.target.value) || 0.95 })}
+                onChange={(e) =>
+                  setFormData({
+                    ...formData,
+                    confidence_level: parseFloat(e.target.value) || 0.95,
+                  })
+                }
                 inputProps={{ min: 0.8, max: 0.99, step: 0.01 }}
               />
             </Grid>
@@ -509,30 +624,42 @@ const ABTestingPage: React.FC = () => {
       </DialogContent>
       <DialogActions>
         <Button onClick={handleCloseDialog}>Cancel</Button>
-        <Button 
-          onClick={handleSave} 
+        <Button
+          onClick={handleSave}
           variant="contained"
           disabled={saving || !formData.name.trim()}
         >
-          {saving ? <CircularProgress size={20} /> : editingTest ? 'Update Test' : 'Create Test'}
+          {saving ? (
+            <CircularProgress size={20} />
+          ) : editingTest ? (
+            'Update Test'
+          ) : (
+            'Create Test'
+          )}
         </Button>
       </DialogActions>
     </Dialog>
   );
 
   const renderDetailDialog = () => (
-    <Dialog 
-      open={detailDialogOpen} 
-      onClose={handleCloseDetailDialog} 
-      maxWidth="lg" 
+    <Dialog
+      open={detailDialogOpen}
+      onClose={handleCloseDetailDialog}
+      maxWidth="lg"
       fullWidth
       PaperProps={{ sx: { height: '90vh' } }}
     >
       <DialogTitle>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="h5">{selectedTest?.name}</Typography>
-          <Chip 
-            label={selectedTest?.status || 'Unknown'} 
+          <Chip
+            label={selectedTest?.status || 'Unknown'}
             color={getStatusColor(selectedTest?.status as TestStatus)}
             icon={getStatusIcon(selectedTest?.status as TestStatus)}
           />
@@ -540,7 +667,10 @@ const ABTestingPage: React.FC = () => {
       </DialogTitle>
       <DialogContent>
         <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
-          <Tabs value={activeTab} onChange={(_, newValue) => setActiveTab(newValue)}>
+          <Tabs
+            value={activeTab}
+            onChange={(_, newValue) => setActiveTab(newValue)}
+          >
             <Tab label="Overview" />
             <Tab label="Metrics" />
             <Tab label="Results" />
@@ -548,41 +678,76 @@ const ABTestingPage: React.FC = () => {
             <Tab label="Recommendations" />
           </Tabs>
         </Box>
-        
+
         <TabPanel value={activeTab} index={0} idPrefix="ab-testing">
           {selectedTest && (
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Test Details</Typography>
-                  <Typography><strong>Type:</strong> {selectedTest.test_type}</Typography>
-                  <Typography><strong>Status:</strong> {selectedTest.status}</Typography>
-                  <Typography><strong>Duration:</strong> {selectedTest.duration_days} days</Typography>
-                  <Typography><strong>Sample Size:</strong> {selectedTest.min_sample_size.toLocaleString()}</Typography>
-                  <Typography><strong>Confidence:</strong> {(selectedTest.confidence_level * 100).toFixed(1)}%</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    Test Details
+                  </Typography>
+                  <Typography>
+                    <strong>Type:</strong> {selectedTest.test_type}
+                  </Typography>
+                  <Typography>
+                    <strong>Status:</strong> {selectedTest.status}
+                  </Typography>
+                  <Typography>
+                    <strong>Duration:</strong> {selectedTest.duration_days} days
+                  </Typography>
+                  <Typography>
+                    <strong>Sample Size:</strong>{' '}
+                    {selectedTest.min_sample_size.toLocaleString()}
+                  </Typography>
+                  <Typography>
+                    <strong>Confidence:</strong>{' '}
+                    {(selectedTest.confidence_level * 100).toFixed(1)}%
+                  </Typography>
                   {selectedTest.created_at && (
-                    <Typography><strong>Created:</strong> {format(new Date(selectedTest.created_at), 'MMM dd, yyyy HH:mm')}</Typography>
+                    <Typography>
+                      <strong>Created:</strong>{' '}
+                      {format(
+                        new Date(selectedTest.created_at),
+                        'MMM dd, yyyy HH:mm'
+                      )}
+                    </Typography>
                   )}
                   {selectedTest.description && (
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle2">Description</Typography>
-                      <Typography variant="body2" color="text.secondary">{selectedTest.description}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        {selectedTest.description}
+                      </Typography>
                     </Box>
                   )}
                 </Paper>
               </Grid>
               <Grid item xs={12} md={6}>
                 <Paper sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Test Variants</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    Test Variants
+                  </Typography>
                   {selectedTest.variants.map((variant) => (
                     <Box key={variant.name} sx={{ mb: 2 }}>
-                      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                        <Typography variant="subtitle1">{variant.name}</Typography>
-                        <Chip label={`${((variant.weight || 0) * 100).toFixed(1)}%`} size="small" />
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          justifyContent: 'space-between',
+                          alignItems: 'center',
+                        }}
+                      >
+                        <Typography variant="subtitle1">
+                          {variant.name}
+                        </Typography>
+                        <Chip
+                          label={`${((variant.weight || 0) * 100).toFixed(1)}%`}
+                          size="small"
+                        />
                       </Box>
-                      <LinearProgress 
-                        variant="determinate" 
-                        value={(variant.weight || 0) * 100} 
+                      <LinearProgress
+                        variant="determinate"
+                        value={(variant.weight || 0) * 100}
                         sx={{ mt: 1, height: 6, borderRadius: 3 }}
                       />
                     </Box>
@@ -630,7 +795,9 @@ const ABTestingPage: React.FC = () => {
               performance={testPerformance}
             />
           ) : (
-            <Alert severity="info">No performance data available for this test.</Alert>
+            <Alert severity="info">
+              No performance data available for this test.
+            </Alert>
           )}
         </TabPanel>
 
@@ -638,37 +805,47 @@ const ABTestingPage: React.FC = () => {
           {testRecommendations ? (
             <Grid container spacing={3}>
               <Grid item xs={12}>
-                <Typography variant="h6" gutterBottom>AI Recommendations</Typography>
+                <Typography variant="h6" gutterBottom>
+                  AI Recommendations
+                </Typography>
                 <Paper sx={{ p: 2 }}>
-                  {testRecommendations.recommendations && testRecommendations.recommendations.length > 0 ? (
+                  {testRecommendations.recommendations &&
+                  testRecommendations.recommendations.length > 0 ? (
                     <List>
-                      {testRecommendations.recommendations.map((rec: string, index: number) => (
-                        <ListItem key={index}>
-                          <ListItemText primary={rec} />
-                        </ListItem>
-                      ))}
+                      {testRecommendations.recommendations.map(
+                        (rec: string, index: number) => (
+                          <ListItem key={index}>
+                            <ListItemText primary={rec} />
+                          </ListItem>
+                        )
+                      )}
                     </List>
                   ) : (
                     <Typography>No recommendations available.</Typography>
                   )}
-                  
-                  {testRecommendations.insights && testRecommendations.insights.length > 0 && (
-                    <Box sx={{ mt: 2 }}>
-                      <Typography variant="subtitle1">Insights</Typography>
-                      <List>
-                        {testRecommendations.insights.map((insight: string, index: number) => (
-                          <ListItem key={index}>
-                            <ListItemText primary={insight} />
-                          </ListItem>
-                        ))}
-                      </List>
-                    </Box>
-                  )}
+
+                  {testRecommendations.insights &&
+                    testRecommendations.insights.length > 0 && (
+                      <Box sx={{ mt: 2 }}>
+                        <Typography variant="subtitle1">Insights</Typography>
+                        <List>
+                          {testRecommendations.insights.map(
+                            (insight: string, index: number) => (
+                              <ListItem key={index}>
+                                <ListItemText primary={insight} />
+                              </ListItem>
+                            )
+                          )}
+                        </List>
+                      </Box>
+                    )}
                 </Paper>
               </Grid>
             </Grid>
           ) : (
-            <Alert severity="info">No recommendations available for this test.</Alert>
+            <Alert severity="info">
+              No recommendations available for this test.
+            </Alert>
           )}
         </TabPanel>
       </DialogContent>
@@ -686,35 +863,58 @@ const ABTestingPage: React.FC = () => {
     >
       {actionTest && canStart(actionTest) && (
         <MenuItem onClick={() => handleTestAction(actionTest, 'start')}>
-          <ListItemIcon><StartIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <StartIcon fontSize="small" />
+          </ListItemIcon>
           Start Test
         </MenuItem>
       )}
       {actionTest && canPause(actionTest) && (
         <MenuItem onClick={() => handleTestAction(actionTest, 'pause')}>
-          <ListItemIcon><PauseIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <PauseIcon fontSize="small" />
+          </ListItemIcon>
           Pause Test
         </MenuItem>
       )}
       {actionTest && canEnd(actionTest) && (
         <MenuItem onClick={() => handleTestAction(actionTest, 'end')}>
-          <ListItemIcon><StopIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <StopIcon fontSize="small" />
+          </ListItemIcon>
           End Test
         </MenuItem>
       )}
       {actionTest && canComplete(actionTest) && (
         <MenuItem onClick={() => handleTestAction(actionTest, 'complete')}>
-          <ListItemIcon><CompleteIcon fontSize="small" /></ListItemIcon>
+          <ListItemIcon>
+            <CompleteIcon fontSize="small" />
+          </ListItemIcon>
           Complete Test
         </MenuItem>
       )}
       <Divider />
-      <MenuItem onClick={() => { handleOpenDialog(actionTest); handleCloseActionMenu(); }}>
-        <ListItemIcon><EditIcon fontSize="small" /></ListItemIcon>
+      <MenuItem
+        onClick={() => {
+          handleOpenDialog(actionTest);
+          handleCloseActionMenu();
+        }}
+      >
+        <ListItemIcon>
+          <EditIcon fontSize="small" />
+        </ListItemIcon>
         Edit Test
       </MenuItem>
-      <MenuItem onClick={() => { actionTest && handleDelete(actionTest); handleCloseActionMenu(); }} sx={{ color: 'error.main' }}>
-        <ListItemIcon><DeleteIcon fontSize="small" /></ListItemIcon>
+      <MenuItem
+        onClick={() => {
+          actionTest && handleDelete(actionTest);
+          handleCloseActionMenu();
+        }}
+        sx={{ color: 'error.main' }}
+      >
+        <ListItemIcon>
+          <DeleteIcon fontSize="small" />
+        </ListItemIcon>
         Delete Test
       </MenuItem>
     </Menu>
@@ -733,7 +933,12 @@ const ABTestingPage: React.FC = () => {
       <Button onClick={loadTests} startIcon={<RefreshIcon />} size="small">
         Refresh
       </Button>
-      <Button variant="contained" onClick={() => handleOpenDialog()} startIcon={<AddIcon />} size="small">
+      <Button
+        variant="contained"
+        onClick={() => handleOpenDialog()}
+        startIcon={<AddIcon />}
+        size="small"
+      >
         Create Test
       </Button>
     </>
@@ -741,10 +946,10 @@ const ABTestingPage: React.FC = () => {
 
   return (
     <PageLayout title="A/B Testing" toolbar={toolbar}>
-
       {tests.length === 0 ? (
         <Alert severity="info">
-          No AB tests found. Create your first test to get started with experimentation.
+          No AB tests found. Create your first test to get started with
+          experimentation.
         </Alert>
       ) : (
         <Card>
@@ -762,55 +967,71 @@ const ABTestingPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {tests.slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage).map((test) => (
-                  <TableRow key={test.id} hover>
-                    <TableCell>
-                      <Box>
-                        <Typography 
-                          variant="subtitle2" 
-                          component="button"
-                          onClick={() => handleOpenDetailDialog(test)}
-                          sx={{ 
-                            cursor: 'pointer', 
-                            color: 'primary.main',
-                            textDecoration: 'none',
-                            border: 'none',
-                            background: 'none',
-                            '&:hover': { textDecoration: 'underline' }
-                          }}
-                        >
-                          {test.name}
-                        </Typography>
-                        {test.description && (
-                          <Typography variant="body2" color="text.secondary" noWrap>
-                            {test.description}
+                {tests
+                  .slice(page * rowsPerPage, page * rowsPerPage + rowsPerPage)
+                  .map((test) => (
+                    <TableRow key={test.id} hover>
+                      <TableCell>
+                        <Box>
+                          <Typography
+                            variant="subtitle2"
+                            component="button"
+                            onClick={() => handleOpenDetailDialog(test)}
+                            sx={{
+                              cursor: 'pointer',
+                              color: 'primary.main',
+                              textDecoration: 'none',
+                              border: 'none',
+                              background: 'none',
+                              '&:hover': { textDecoration: 'underline' },
+                            }}
+                          >
+                            {test.name}
                           </Typography>
-                        )}
-                      </Box>
-                    </TableCell>
-                    <TableCell>
-                      <Chip label={test.test_type} size="small" variant="outlined" />
-                    </TableCell>
-                    <TableCell>
-                      <Chip 
-                        label={test.status} 
-                        color={getStatusColor(test.status)} 
-                        size="small"
-                        icon={getStatusIcon(test.status)}
-                      />
-                    </TableCell>
-                    <TableCell>{test.variants.length}</TableCell>
-                    <TableCell>{test.min_sample_size.toLocaleString()}</TableCell>
-                    <TableCell>
-                      {test.created_at ? format(new Date(test.created_at), 'MMM dd, yyyy') : 'N/A'}
-                    </TableCell>
-                    <TableCell>
-                      <IconButton onClick={(e) => handleOpenActionMenu(e, test)}>
-                        <MoreVertIcon />
-                      </IconButton>
-                    </TableCell>
-                  </TableRow>
-                ))}
+                          {test.description && (
+                            <Typography
+                              variant="body2"
+                              color="text.secondary"
+                              noWrap
+                            >
+                              {test.description}
+                            </Typography>
+                          )}
+                        </Box>
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={test.test_type}
+                          size="small"
+                          variant="outlined"
+                        />
+                      </TableCell>
+                      <TableCell>
+                        <Chip
+                          label={test.status}
+                          color={getStatusColor(test.status)}
+                          size="small"
+                          icon={getStatusIcon(test.status)}
+                        />
+                      </TableCell>
+                      <TableCell>{test.variants.length}</TableCell>
+                      <TableCell>
+                        {test.min_sample_size.toLocaleString()}
+                      </TableCell>
+                      <TableCell>
+                        {test.created_at
+                          ? format(new Date(test.created_at), 'MMM dd, yyyy')
+                          : 'N/A'}
+                      </TableCell>
+                      <TableCell>
+                        <IconButton
+                          onClick={(e) => handleOpenActionMenu(e, test)}
+                        >
+                          <MoreVertIcon />
+                        </IconButton>
+                      </TableCell>
+                    </TableRow>
+                  ))}
               </TableBody>
             </Table>
           </TableContainer>

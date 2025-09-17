@@ -15,9 +15,13 @@ interface RightSidebarContextValue {
   setCollapsed: (collapsed: boolean) => void;
 }
 
-const RightSidebarContext = createContext<RightSidebarContextValue | undefined>(undefined);
+const RightSidebarContext = createContext<RightSidebarContextValue | undefined>(
+  undefined
+);
 
-export const RightSidebarProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const RightSidebarProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
   const [panelContent, setPanelContent] = useState<ReactNode | null>(null);
   const [title, setTitle] = useState<string>('Panel');
   const [open, setOpen] = useState<boolean>(false);
@@ -47,7 +51,9 @@ export const RightSidebarProvider: React.FC<{ children: ReactNode }> = ({ childr
 export const useRightSidebar = (): RightSidebarContextValue => {
   const ctx = useContext(RightSidebarContext);
   if (!ctx) {
-    throw new Error('useRightSidebar must be used within a RightSidebarProvider');
+    throw new Error(
+      'useRightSidebar must be used within a RightSidebarProvider'
+    );
   }
   return ctx;
 };

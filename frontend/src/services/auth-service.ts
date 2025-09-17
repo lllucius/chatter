@@ -14,7 +14,8 @@ class AuthService {
   private refreshInProgress: boolean = false; // Prevent multiple concurrent refresh attempts
 
   constructor() {
-    this.basePath = import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    this.basePath =
+      import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
@@ -30,12 +31,12 @@ class AuthService {
     if (this.initialized) {
       return;
     }
-    
+
     // Try to restore authentication state from refresh token cookie
     if (!this.token) {
       await this.refreshToken();
     }
-    
+
     this.initialized = true;
   }
 
@@ -53,21 +54,23 @@ class AuthService {
 
   public getSDK(): ChatterSDK {
     if (!this.initialized) {
-      throw new Error('SDK not initialized. Please wait for initialization to complete.');
+      throw new Error(
+        'SDK not initialized. Please wait for initialization to complete.'
+      );
     }
-    
+
     let sdk: ChatterSDK;
     if (this.token) {
       sdk = this.baseSDK.withAuth(this.token, 'bearer');
     } else {
       sdk = this.baseSDK;
     }
-    
+
     // Verify the SDK is properly constructed with all expected APIs
     if (!sdk || !sdk.conversations) {
       throw new Error('SDK not properly initialized. Please reload the page.');
     }
-    
+
     return sdk;
   }
 
@@ -89,14 +92,18 @@ class AuthService {
       }
     } catch (error: unknown) {
       // Use standardized error handling
-      handleError(error, {
-        source: 'AuthService.login',
-        operation: 'user authentication',
-        additionalData: { username }
-      }, {
-        showToast: false, // Let the calling component handle the UI
-        rethrow: true
-      });
+      handleError(
+        error,
+        {
+          source: 'AuthService.login',
+          operation: 'user authentication',
+          additionalData: { username },
+        },
+        {
+          showToast: false, // Let the calling component handle the UI
+          rethrow: true,
+        }
+      );
     }
   }
 
@@ -107,13 +114,17 @@ class AuthService {
       }
     } catch (error) {
       // Use standardized error handling for logout failures
-      handleError(error, {
-        source: 'AuthService.logout',
-        operation: 'user logout'
-      }, {
-        showToast: false, // Don't interrupt logout flow with error toast
-        logToConsole: true
-      });
+      handleError(
+        error,
+        {
+          source: 'AuthService.logout',
+          operation: 'user logout',
+        },
+        {
+          showToast: false, // Don't interrupt logout flow with error toast
+          logToConsole: true,
+        }
+      );
       // Continue with local logout even if API call fails
     } finally {
       this.clearToken();
@@ -146,21 +157,25 @@ class AuthService {
 
       if (response.access_token) {
         this.token = response.access_token; // Store in memory only
-        
+
         // New refresh token is automatically set in HttpOnly cookie by server
         return true;
       }
-      
+
       return false;
     } catch (error) {
       // Use standardized error handling for refresh failures
-      handleError(error, {
-        source: 'AuthService.refreshToken',
-        operation: 'token refresh'
-      }, {
-        showToast: false, // Don't show toast for automatic token refresh failures
-        logToConsole: true
-      });
+      handleError(
+        error,
+        {
+          source: 'AuthService.refreshToken',
+          operation: 'token refresh',
+        },
+        {
+          showToast: false, // Don't show toast for automatic token refresh failures
+          logToConsole: true,
+        }
+      );
       this.clearToken();
       return false;
     } finally {
@@ -182,11 +197,15 @@ class AuthService {
   /**
    * Get the current SDK configuration (for debugging/inspection)
    */
-  public getSDKInfo(): { basePath: string | undefined; hasToken: boolean; initialized: boolean } {
+  public getSDKInfo(): {
+    basePath: string | undefined;
+    hasToken: boolean;
+    initialized: boolean;
+  } {
     return {
       basePath: this.basePath,
       hasToken: !!this.token,
-      initialized: this.initialized
+      initialized: this.initialized,
     };
   }
 
@@ -194,20 +213,28 @@ class AuthService {
    * Execute an authenticated API request with automatic token refresh
    * This method will automatically refresh the token if the request fails with 401
    */
-  public async executeWithAuth<T>(apiCall: (sdk: ChatterSDK) => Promise<T>): Promise<T> {
+  public async executeWithAuth<T>(
+    apiCall: (sdk: ChatterSDK) => Promise<T>
+  ): Promise<T> {
     const sdk = this.getSDK();
-    
+
     try {
       return await apiCall(sdk);
     } catch (error: unknown) {
       // Check if it's an authentication error (401)
-      const isAuthError = (
-        (error && typeof error === 'object' && 'status' in error && error.status === 401) ||
-        (error && typeof error === 'object' && 'response' in error && 
-         error.response && typeof error.response === 'object' && 'status' in error.response && 
-         error.response.status === 401)
-      );
-      
+      const isAuthError =
+        (error &&
+          typeof error === 'object' &&
+          'status' in error &&
+          error.status === 401) ||
+        (error &&
+          typeof error === 'object' &&
+          'response' in error &&
+          error.response &&
+          typeof error.response === 'object' &&
+          'status' in error.response &&
+          error.response.status === 401);
+
       if (isAuthError) {
         const refreshSuccess = await this.refreshToken();
         if (refreshSuccess) {
@@ -217,15 +244,19 @@ class AuthService {
           throw new Error('Authentication failed - please login again');
         }
       }
-      
+
       // For non-auth errors, use standardized error handling
-      handleError(error, {
-        source: 'AuthService.executeWithAuth',
-        operation: 'authenticated API call'
-      }, {
-        showToast: false, // Let the calling component handle the UI
-        rethrow: true
-      });
+      handleError(
+        error,
+        {
+          source: 'AuthService.executeWithAuth',
+          operation: 'authenticated API call',
+        },
+        {
+          showToast: false, // Let the calling component handle the UI
+          rethrow: true,
+        }
+      );
     }
   }
 }

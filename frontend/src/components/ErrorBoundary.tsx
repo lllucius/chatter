@@ -25,17 +25,21 @@ class ErrorBoundary extends Component<Props, State> {
 
   public componentDidCatch(error: Error, errorInfo: ErrorInfo) {
     // Use standardized error handling to log and process the error
-    errorHandler.handleError(error, {
-      source: 'ErrorBoundary',
-      operation: 'React component rendering',
-      additionalData: {
-        componentStack: errorInfo.componentStack,
-        errorBoundary: true
+    errorHandler.handleError(
+      error,
+      {
+        source: 'ErrorBoundary',
+        operation: 'React component rendering',
+        additionalData: {
+          componentStack: errorInfo.componentStack,
+          errorBoundary: true,
+        },
+      },
+      {
+        showToast: false, // Don't show toast since we're showing UI
+        logToConsole: true,
       }
-    }, {
-      showToast: false, // Don't show toast since we're showing UI
-      logToConsole: true
-    });
+    );
 
     // Store error details for development mode display
     if (process.env.NODE_ENV === 'development') {
@@ -45,7 +49,11 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   private handleReset = () => {
-    this.setState({ hasError: false, error: undefined, errorDetails: undefined });
+    this.setState({
+      hasError: false,
+      error: undefined,
+      errorDetails: undefined,
+    });
   };
 
   private handleReload = () => {
@@ -68,7 +76,7 @@ class ErrorBoundary extends Component<Props, State> {
               {this.state.error?.message || 'An unexpected error occurred'}
             </Typography>
           </Alert>
-          
+
           <Box sx={{ display: 'flex', gap: 2, mt: 2 }}>
             <Button
               variant="contained"
@@ -77,24 +85,37 @@ class ErrorBoundary extends Component<Props, State> {
             >
               Try Again
             </Button>
-            <Button
-              variant="outlined"
-              onClick={this.handleReload}
-            >
+            <Button variant="outlined" onClick={this.handleReload}>
               Reload Page
             </Button>
           </Box>
 
-          {process.env.NODE_ENV === 'development' && this.state.errorDetails && (
-            <Box sx={{ mt: 3, p: 2, bgcolor: 'background.paper', borderRadius: 1 }}>
-              <Typography variant="subtitle2" gutterBottom>
-                Error Details (Development Mode):
-              </Typography>
-              <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', overflow: 'auto', whiteSpace: 'pre-wrap' }}>
-                {this.state.errorDetails}
-              </Typography>
-            </Box>
-          )}
+          {process.env.NODE_ENV === 'development' &&
+            this.state.errorDetails && (
+              <Box
+                sx={{
+                  mt: 3,
+                  p: 2,
+                  bgcolor: 'background.paper',
+                  borderRadius: 1,
+                }}
+              >
+                <Typography variant="subtitle2" gutterBottom>
+                  Error Details (Development Mode):
+                </Typography>
+                <Typography
+                  variant="body2"
+                  component="pre"
+                  sx={{
+                    fontSize: '0.75rem',
+                    overflow: 'auto',
+                    whiteSpace: 'pre-wrap',
+                  }}
+                >
+                  {this.state.errorDetails}
+                </Typography>
+              </Box>
+            )}
         </Container>
       );
     }

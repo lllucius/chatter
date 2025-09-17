@@ -51,21 +51,31 @@ class SimplifiedWorkflowValidationService:
         if "name" in definition:
             name = definition["name"]
             if not isinstance(name, str) or len(name.strip()) == 0:
-                errors.append("Workflow name must be a non-empty string")
+                errors.append(
+                    "Workflow name must be a non-empty string"
+                )
             elif len(name) > 255:
-                errors.append("Workflow name must be 255 characters or less")
+                errors.append(
+                    "Workflow name must be 255 characters or less"
+                )
 
         # Validate nodes
-        if "nodes" in definition and isinstance(definition["nodes"], list):
+        if "nodes" in definition and isinstance(
+            definition["nodes"], list
+        ):
             if len(definition["nodes"]) == 0:
                 warnings.append("Workflow has no nodes")
             else:
-                node_errors, node_warnings = self._validate_nodes(definition["nodes"])
+                node_errors, node_warnings = self._validate_nodes(
+                    definition["nodes"]
+                )
                 errors.extend(node_errors)
                 warnings.extend(node_warnings)
 
         # Validate edges
-        if "edges" in definition and isinstance(definition["edges"], list):
+        if "edges" in definition and isinstance(
+            definition["edges"], list
+        ):
             edge_errors, edge_warnings = self._validate_edges(
                 definition["edges"], definition.get("nodes", [])
             )
@@ -78,7 +88,9 @@ class SimplifiedWorkflowValidationService:
             warnings=warnings,
         )
 
-    def validate_workflow_template(self, template: WorkflowTemplate) -> ValidationResult:
+    def validate_workflow_template(
+        self, template: WorkflowTemplate
+    ) -> ValidationResult:
         """Validate a workflow template."""
         errors = []
         warnings = []
@@ -89,8 +101,12 @@ class SimplifiedWorkflowValidationService:
 
         if not template.workflow_type:
             errors.append("Workflow type is required")
-        elif template.workflow_type not in [t.value for t in WorkflowType]:
-            errors.append(f"Invalid workflow type: {template.workflow_type}")
+        elif template.workflow_type not in [
+            t.value for t in WorkflowType
+        ]:
+            errors.append(
+                f"Invalid workflow type: {template.workflow_type}"
+            )
 
         if not template.description:
             warnings.append("Template description is empty")
@@ -101,7 +117,9 @@ class SimplifiedWorkflowValidationService:
             warnings=warnings,
         )
 
-    def _validate_nodes(self, nodes: list[dict[str, Any]]) -> tuple[list[str], list[str]]:
+    def _validate_nodes(
+        self, nodes: list[dict[str, Any]]
+    ) -> tuple[list[str], list[str]]:
         """Validate workflow nodes."""
         errors = []
         warnings = []
@@ -112,8 +130,16 @@ class SimplifiedWorkflowValidationService:
         node_ids = set()
         node_types = set()
         valid_node_types = {
-            "start", "model", "tool", "memory", "retrieval",
-            "conditional", "loop", "variable", "errorHandler", "delay"
+            "start",
+            "model",
+            "tool",
+            "memory",
+            "retrieval",
+            "conditional",
+            "loop",
+            "variable",
+            "errorHandler",
+            "delay",
         }
 
         for i, node in enumerate(nodes):
@@ -126,7 +152,9 @@ class SimplifiedWorkflowValidationService:
                 node_ids.add(node["id"])
 
             if "type" not in node:
-                errors.append(f"Node {node.get('id', i)} missing required field: type")
+                errors.append(
+                    f"Node {node.get('id', i)} missing required field: type"
+                )
             elif node["type"] not in valid_node_types:
                 warnings.append(f"Unknown node type: {node['type']}")
             else:
@@ -134,7 +162,9 @@ class SimplifiedWorkflowValidationService:
 
         # Check for start node
         if "start" not in node_types:
-            warnings.append("Workflow should have at least one start node")
+            warnings.append(
+                "Workflow should have at least one start node"
+            )
 
         return errors, warnings
 
@@ -155,7 +185,9 @@ class SimplifiedWorkflowValidationService:
             required_fields = ["id", "source", "target"]
             for field in required_fields:
                 if field not in edge:
-                    errors.append(f"Edge {i} missing required field: {field}")
+                    errors.append(
+                        f"Edge {i} missing required field: {field}"
+                    )
 
             # Check if source and target nodes exist
             if "source" in edge and edge["source"] not in node_ids:
@@ -172,4 +204,6 @@ class SimplifiedWorkflowValidationService:
 
 
 # Create singleton instance
-simplified_workflow_validation_service = SimplifiedWorkflowValidationService()
+simplified_workflow_validation_service = (
+    SimplifiedWorkflowValidationService()
+)

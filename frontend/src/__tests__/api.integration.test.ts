@@ -10,7 +10,7 @@ describe('API Client Integration', () => {
   it('should handle authentication flow', () => {
     const mockLogin = vi.fn().mockResolvedValue({
       access_token: 'test_token',
-      token_type: 'bearer'
+      token_type: 'bearer',
     });
 
     expect(mockLogin).toBeDefined();
@@ -20,7 +20,7 @@ describe('API Client Integration', () => {
     const mockSendMessage = vi.fn().mockResolvedValue({
       id: '1',
       content: 'Hello',
-      role: 'user'
+      role: 'user',
     });
 
     expect(mockSendMessage).toBeDefined();
@@ -28,7 +28,7 @@ describe('API Client Integration', () => {
 
   it('should handle error responses', () => {
     const mockApiCall = vi.fn().mockRejectedValue(new Error('Network error'));
-    
+
     expect(mockApiCall).toBeDefined();
   });
 });

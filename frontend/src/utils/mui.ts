@@ -18,14 +18,7 @@ export {
 } from '@mui/material';
 
 // Typography and display
-export {
-  Typography,
-  Link,
-  Chip,
-  Badge,
-  Avatar,
-  Tooltip,
-} from '@mui/material';
+export { Typography, Link, Chip, Badge, Avatar, Tooltip } from '@mui/material';
 
 // Overlays
 export {
@@ -126,21 +119,11 @@ export {
 } from '@mui/material';
 
 // Theme and styling
-export type {
-  Theme,
-  SxProps,
-  Breakpoint,
-} from '@mui/material';
+export type { Theme, SxProps, Breakpoint } from '@mui/material';
 
-export {
-  useTheme,
-  styled,
-  alpha,
-} from '@mui/material/styles';
+export { useTheme, styled, alpha } from '@mui/material/styles';
 
-export {
-  useMediaQuery,
-} from '@mui/material';
+export { useMediaQuery } from '@mui/material';
 
 // TabPanel is defined in a separate file
 export { TabPanel } from './TabPanel';

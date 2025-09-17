@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Error as ErrorIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ErrorHandlerNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const ErrorHandlerNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#f44336' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 180, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 180,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: '#ef5350',
-          color: 'white'
+          color: 'white',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,47 +39,47 @@ const ErrorHandlerNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selecte
             Catch & handle errors
           </Typography>
           {config.retryCount && (
-            <Chip 
-              label={`Retry: ${config.retryCount}`} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={`Retry: ${config.retryCount}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5
+                mr: 0.5,
               }}
             />
           )}
           {config.fallbackAction && (
-            <Chip 
-              label={config.fallbackAction} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={config.fallbackAction}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
               }}
             />
           )}
         </CardContent>
       </Card>
-      
+
       {/* Multiple output handles */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="success"
         style={{ background: '#4caf50', top: '30%' }}
       />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="retry"
         style={{ background: '#ff9800', top: '50%' }}
       />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="fallback"
         style={{ background: '#f44336', top: '70%' }}
       />

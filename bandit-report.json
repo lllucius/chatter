@@ -1,17 +1,17 @@
 {
   "errors": [],
-  "generated_at": "2025-09-15T22:09:52Z",
+  "generated_at": "2025-09-17T06:02:40Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 24,
+      "CONFIDENCE.HIGH": 22,
       "CONFIDENCE.LOW": 1,
       "CONFIDENCE.MEDIUM": 15,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 39,
+      "SEVERITY.HIGH": 1,
+      "SEVERITY.LOW": 36,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 68997,
+      "loc": 70291,
       "nosec": 0,
       "skipped_tests": 3
     },
@@ -63,7 +63,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1130,
+      "loc": 1143,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -89,7 +89,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 952,
+      "loc": 1022,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -154,7 +154,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 61,
+      "loc": 63,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -167,7 +167,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 598,
+      "loc": 602,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -232,7 +232,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 252,
+      "loc": 287,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -284,7 +284,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 259,
+      "loc": 287,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -297,7 +297,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 193,
+      "loc": 203,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -323,7 +323,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 616,
+      "loc": 618,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -336,7 +336,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 136,
+      "loc": 115,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -349,7 +349,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 201,
+      "loc": 202,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -375,7 +375,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 86,
+      "loc": 93,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -401,7 +401,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 232,
+      "loc": 240,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -427,7 +427,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 359,
+      "loc": 370,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -466,7 +466,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 184,
+      "loc": 191,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -479,7 +479,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 677,
+      "loc": 686,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -492,7 +492,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 102,
+      "loc": 109,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -505,7 +505,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 213,
+      "loc": 223,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -518,7 +518,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 183,
+      "loc": 190,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -531,7 +531,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 665,
+      "loc": 681,
       "nosec": 0,
       "skipped_tests": 2
     },
@@ -570,7 +570,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3307,
+      "loc": 3769,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -648,7 +648,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 882,
+      "loc": 877,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -674,7 +674,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 558,
+      "loc": 679,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -752,7 +752,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 736,
+      "loc": 998,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -804,7 +804,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 680,
+      "loc": 690,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -843,7 +843,33 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 545,
+      "loc": 549,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "chatter/core/simplified_workflow_validation.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 163,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "chatter/core/streamlined_workflow_performance.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 117,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -869,7 +895,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 694,
+      "loc": 693,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "chatter/core/unified_workflow_executor.py": {
+      "CONFIDENCE.HIGH": 0,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 0,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 705,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -895,7 +934,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 84,
+      "loc": 86,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -973,7 +1012,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1051,
+      "loc": 191,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1013,19 +1052,6 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 478,
-      "nosec": 0,
-      "skipped_tests": 0
-    },
-    "chatter/core/workflow_validation.py": {
-      "CONFIDENCE.HIGH": 0,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 0,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 325,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1155,7 +1181,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 564,
+      "loc": 593,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1168,7 +1194,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 269,
+      "loc": 271,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1259,7 +1285,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 272,
+      "loc": 290,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1285,7 +1311,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 515,
+      "loc": 530,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1311,7 +1337,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 389,
+      "loc": 393,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1337,7 +1363,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 275,
+      "loc": 297,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1350,7 +1376,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 294,
+      "loc": 296,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1428,7 +1454,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 537,
+      "loc": 539,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1506,7 +1532,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1335,
+      "loc": 1373,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1519,7 +1545,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 263,
+      "loc": 364,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1532,7 +1558,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 542,
+      "loc": 583,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1558,7 +1584,7 @@
       "SEVERITY.LOW": 4,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 959,
+      "loc": 1053,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1571,7 +1597,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 483,
+      "loc": 587,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1584,20 +1610,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1071,
-      "nosec": 0,
-      "skipped_tests": 0
-    },
-    "chatter/services/dynamic_vector_store.py": {
-      "CONFIDENCE.HIGH": 1,
-      "CONFIDENCE.LOW": 0,
-      "CONFIDENCE.MEDIUM": 0,
-      "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 1,
-      "SEVERITY.MEDIUM": 0,
-      "SEVERITY.UNDEFINED": 0,
-      "loc": 527,
+      "loc": 1153,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1610,7 +1623,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 645,
+      "loc": 904,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1623,7 +1636,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 379,
+      "loc": 470,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1636,7 +1649,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1077,
+      "loc": 1114,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1649,7 +1662,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 913,
+      "loc": 975,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1662,7 +1675,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 637,
+      "loc": 639,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1675,7 +1688,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 559,
+      "loc": 606,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1688,7 +1701,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 429,
+      "loc": 526,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1701,7 +1714,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1167,
+      "loc": 1169,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1714,7 +1727,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 219,
+      "loc": 279,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1728,6 +1741,19 @@
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
       "loc": 185,
+      "nosec": 0,
+      "skipped_tests": 0
+    },
+    "chatter/services/simplified_workflow_analytics.py": {
+      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.LOW": 0,
+      "CONFIDENCE.MEDIUM": 0,
+      "CONFIDENCE.UNDEFINED": 0,
+      "SEVERITY.HIGH": 1,
+      "SEVERITY.LOW": 0,
+      "SEVERITY.MEDIUM": 0,
+      "SEVERITY.UNDEFINED": 0,
+      "loc": 179,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1753,7 +1779,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 736,
+      "loc": 752,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1792,20 +1818,20 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 558,
+      "loc": 570,
       "nosec": 0,
       "skipped_tests": 0
     },
     "chatter/services/workflow_execution.py": {
-      "CONFIDENCE.HIGH": 2,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
       "SEVERITY.HIGH": 0,
-      "SEVERITY.LOW": 2,
+      "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 708,
+      "loc": 260,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1818,7 +1844,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 613,
+      "loc": 512,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1844,7 +1870,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 680,
+      "loc": 685,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1870,7 +1896,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 686,
+      "loc": 720,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1935,7 +1961,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 131,
+      "loc": 141,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2000,7 +2026,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1314,
+      "loc": 1336,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2046,7 +2072,7 @@
   },
   "results": [
     {
-      "code": "796             if (\n797                 secret_key == \"your-secret-key-here\"\n798                 or len(secret_key) < 32\n",
+      "code": "812             if (\n813                 secret_key == \"your-secret-key-here\"\n814                 or len(secret_key) < 32\n",
       "col_offset": 30,
       "end_col_offset": 52,
       "filename": "chatter/config.py",
@@ -2057,16 +2083,16 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: 'your-secret-key-here'",
-      "line_number": 797,
+      "line_number": 813,
       "line_range": [
-        797
+        813
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "832                     total_errors += stats.errors\n833                 except Exception:\n834                     continue\n835 \n",
+      "code": "1152                     total_errors += stats.errors\n1153                 except Exception:\n1154                     continue\n1155 \n",
       "col_offset": 16,
       "end_col_offset": 28,
       "filename": "chatter/core/analytics.py",
@@ -2077,10 +2103,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Continue detected.",
-      "line_number": 833,
+      "line_number": 1153,
       "line_range": [
-        833,
-        834
+        1153,
+        1154
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b112_try_except_continue.html",
       "test_id": "B112",
@@ -2136,7 +2162,7 @@
       "test_name": "blacklist"
     },
     {
-      "code": "110                             )\n111                         except Exception:\n112                             pass  # Ignore cleanup errors\n113                         self._redis_context_manager = None\n",
+      "code": "109                             )\n110                         except Exception:\n111                             pass  # Ignore cleanup errors\n112                         self._redis_context_manager = None\n",
       "col_offset": 24,
       "end_col_offset": 32,
       "filename": "chatter/core/langgraph.py",
@@ -2147,17 +2173,17 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 111,
+      "line_number": 110,
       "line_range": [
-        111,
-        112
+        110,
+        111
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "156                 self._redis_context_manager.__exit__(None, None, None)\n157             except Exception:\n158                 pass  # Ignore cleanup errors in destructor\n159 \n",
+      "code": "155                 self._redis_context_manager.__exit__(None, None, None)\n156             except Exception:\n157                 pass  # Ignore cleanup errors in destructor\n158 \n",
       "col_offset": 12,
       "end_col_offset": 20,
       "filename": "chatter/core/langgraph.py",
@@ -2168,10 +2194,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 157,
+      "line_number": 156,
       "line_range": [
-        157,
-        158
+        156,
+        157
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
@@ -2486,7 +2512,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "44     ERROR_RATE = \"error_rate\"\n45     TOKEN_USAGE = \"token_usage\"\n46     CUSTOM = \"custom\"\n",
+      "code": "43     ERROR_RATE = \"error_rate\"\n44     TOKEN_USAGE = \"token_usage\"\n45     CUSTOM = \"custom\"\n",
       "col_offset": 18,
       "end_col_offset": 31,
       "filename": "chatter/schemas/ab_testing.py",
@@ -2497,9 +2523,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: 'token_usage'",
-      "line_number": 45,
+      "line_number": 44,
       "line_range": [
-        45
+        44
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
@@ -2526,9 +2552,9 @@
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "725             participants = max(10, int(total_participants * variant.weight / sum(v.weight for v in test.variants)))\n726             conversion_rate = 0.10 + (random.random() - 0.5) * 0.05  # Simulate data\n727             conversions = int(participants * conversion_rate)\n",
-      "col_offset": 38,
-      "end_col_offset": 53,
+      "code": "734             conversion_rate = (\n735                 0.10 + (random.random() - 0.5) * 0.05\n736             )  # Simulate data\n",
+      "col_offset": 24,
+      "end_col_offset": 39,
       "filename": "chatter/services/ab_testing.py",
       "issue_confidence": "HIGH",
       "issue_cwe": {
@@ -2537,9 +2563,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 726,
+      "line_number": 735,
       "line_range": [
-        726
+        735
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
@@ -2630,28 +2656,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "427                         matches.append((chunk, float(similarity)))\n428                 except Exception:\n429                     continue\n430 \n",
-      "col_offset": 16,
-      "end_col_offset": 28,
-      "filename": "chatter/services/dynamic_vector_store.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 703,
-        "link": "https://cwe.mitre.org/data/definitions/703.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Try, Except, Continue detected.",
-      "line_number": 428,
-      "line_range": [
-        428,
-        429
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b112_try_except_continue.html",
-      "test_id": "B112",
-      "test_name": "try_except_continue"
-    },
-    {
-      "code": "340                     boost += 0.05 * (7 - days_old) / 7\n341             except Exception:\n342                 pass\n343 \n",
+      "code": "402                     boost += 0.05 * (7 - days_old) / 7\n403             except Exception:\n404                 pass\n405 \n",
       "col_offset": 12,
       "end_col_offset": 20,
       "filename": "chatter/services/intelligent_search.py",
@@ -2662,10 +2667,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 341,
+      "line_number": 403,
       "line_range": [
-        341,
-        342
+        403,
+        404
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
@@ -2693,7 +2698,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "1105 \n1106         provider = random.choice(providers)\n1107 \n",
+      "code": "1167 \n1168         provider = random.choice(providers)\n1169 \n",
       "col_offset": 19,
       "end_col_offset": 43,
       "filename": "chatter/services/llm.py",
@@ -2704,9 +2709,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 1106,
+      "line_number": 1168,
       "line_range": [
-        1106
+        1168
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
@@ -2755,6 +2760,26 @@
       "test_name": "try_except_pass"
     },
     {
+      "code": "65             content = json.dumps(workflow_data, sort_keys=True)\n66             return f\"workflow_analytics:{hashlib.md5(content.encode()).hexdigest()}\"\n67         except Exception:\n",
+      "col_offset": 41,
+      "end_col_offset": 70,
+      "filename": "chatter/services/simplified_workflow_analytics.py",
+      "issue_confidence": "HIGH",
+      "issue_cwe": {
+        "id": 327,
+        "link": "https://cwe.mitre.org/data/definitions/327.html"
+      },
+      "issue_severity": "HIGH",
+      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
+      "line_number": 66,
+      "line_range": [
+        66
+      ],
+      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
+      "test_id": "B324",
+      "test_name": "hashlib"
+    },
+    {
       "code": "22     START = \"start\"\n23     TOKEN = \"token\"\n24     TOOL_CALL_START = \"tool_call_start\"\n",
       "col_offset": 12,
       "end_col_offset": 19,
@@ -2773,46 +2798,6 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
       "test_name": "hardcoded_password_string"
-    },
-    {
-      "code": "797             if delay_type == \"random\":\n798                 actual_delay = random.randint(duration, max_duration)\n799             elif delay_type == \"exponential\":\n",
-      "col_offset": 31,
-      "end_col_offset": 69,
-      "filename": "chatter/services/workflow_execution.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 798,
-      "line_range": [
-        798
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
-    },
-    {
-      "code": "803                 # Could be based on system load, etc.\n804                 actual_delay = random.randint(duration, max_duration)\n805 \n",
-      "col_offset": 31,
-      "end_col_offset": 69,
-      "filename": "chatter/services/workflow_execution.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 330,
-        "link": "https://cwe.mitre.org/data/definitions/330.html"
-      },
-      "issue_severity": "LOW",
-      "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 804,
-      "line_range": [
-        804
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
-      "test_id": "B311",
-      "test_name": "blacklist"
     },
     {
       "code": "26     LOGIN_FAILED = \"auth.login_failed\"\n27     TOKEN_REFRESH = \"auth.token_refresh\"\n28 \n",

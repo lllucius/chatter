@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Memory as MemoryIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#9c27b0' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 180, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 180,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: 'secondary.light',
-          color: 'secondary.contrastText'
+          color: 'secondary.contrastText',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,27 +39,27 @@ const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) =
             Manage context
           </Typography>
           {config.window && (
-            <Chip 
-              label={`Window: ${config.window}`} 
-              size="small" 
-              color="secondary" 
+            <Chip
+              label={`Window: ${config.window}`}
+              size="small"
+              color="secondary"
               variant="outlined"
               sx={{ mr: 0.5 }}
             />
           )}
-          <Chip 
-            label={config.enabled ? "Enabled" : "Disabled"} 
-            size="small" 
-            color={config.enabled ? "success" : "error"} 
+          <Chip
+            label={config.enabled ? 'Enabled' : 'Disabled'}
+            size="small"
+            color={config.enabled ? 'success' : 'error'}
             variant="outlined"
           />
         </CardContent>
       </Card>
-      
+
       {/* Output handle */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         style={{ background: '#9c27b0' }}
       />
     </>

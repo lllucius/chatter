@@ -27,7 +27,9 @@ export interface UseBaseFormReturn<TData> {
   resetForm: () => void;
   isSubmitting: boolean;
   setIsSubmitting: React.Dispatch<React.SetStateAction<boolean>>;
-  handleSubmit: (onSubmit: (data: TData) => Promise<void>) => () => Promise<void>;
+  handleSubmit: (
+    onSubmit: (data: TData) => Promise<void>
+  ) => () => Promise<void>;
   handleClose: (onClose: () => void) => () => void;
 }
 
@@ -62,7 +64,7 @@ export function useBaseForm<TData>(
   }, [open, mode, initialData, resetOnOpen, defaultData, transformInitialData]);
 
   const updateFormData = useCallback((updates: Partial<TData>) => {
-    setFormData(prev => ({ ...prev, ...updates }));
+    setFormData((prev) => ({ ...prev, ...updates }));
   }, []);
 
   const resetForm = useCallback(() => {
@@ -70,25 +72,31 @@ export function useBaseForm<TData>(
     setIsSubmitting(false);
   }, [defaultData]);
 
-  const handleSubmit = useCallback((onSubmit: (data: TData) => Promise<void>) => {
-    return async () => {
-      try {
-        setIsSubmitting(true);
-        await onSubmit(formData);
-      } finally {
-        setIsSubmitting(false);
-      }
-    };
-  }, [formData]);
+  const handleSubmit = useCallback(
+    (onSubmit: (data: TData) => Promise<void>) => {
+      return async () => {
+        try {
+          setIsSubmitting(true);
+          await onSubmit(formData);
+        } finally {
+          setIsSubmitting(false);
+        }
+      };
+    },
+    [formData]
+  );
 
-  const handleClose = useCallback((onClose: () => void) => {
-    return () => {
-      if (resetOnClose) {
-        resetForm();
-      }
-      onClose();
-    };
-  }, [resetOnClose, resetForm]);
+  const handleClose = useCallback(
+    (onClose: () => void) => {
+      return () => {
+        if (resetOnClose) {
+          resetForm();
+        }
+        onClose();
+      };
+    },
+    [resetOnClose, resetForm]
+  );
 
   return {
     formData,
@@ -117,8 +125,14 @@ export interface ValidationErrors {
   [key: string]: string;
 }
 
-export function validateField(value: unknown, rules: ValidationRule): string | null {
-  if (rules.required && (!value || (typeof value === 'string' && !value.trim()))) {
+export function validateField(
+  value: unknown,
+  rules: ValidationRule
+): string | null {
+  if (
+    rules.required &&
+    (!value || (typeof value === 'string' && !value.trim()))
+  ) {
     return 'This field is required';
   }
 
@@ -181,11 +195,11 @@ export function useFormValidation<T extends Record<string, unknown>>(
   }, []);
 
   const setFieldError = useCallback((field: string, error: string) => {
-    setErrors(prev => ({ ...prev, [field]: error }));
+    setErrors((prev) => ({ ...prev, [field]: error }));
   }, []);
 
   const clearFieldError = useCallback((field: string) => {
-    setErrors(prev => {
+    setErrors((prev) => {
       const newErrors = { ...prev };
       delete newErrors[field];
       return newErrors;

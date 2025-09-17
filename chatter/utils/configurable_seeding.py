@@ -740,8 +740,8 @@ class ConfigurableSeeder(DatabaseSeeder):
         self, skip_existing: bool = True
     ) -> int:
         """Create background jobs from configuration."""
-        from chatter.services.job_queue import job_queue
         from chatter.schemas.jobs import JobPriority
+        from chatter.services.job_queue import job_queue
 
         background_jobs_data = self._get_configured_data(
             "background_jobs"

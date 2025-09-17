@@ -1,7 +1,6 @@
 """LLM service for LangChain integration."""
 
 import asyncio
-import os
 from collections.abc import AsyncGenerator
 from typing import TYPE_CHECKING, Any
 
@@ -17,6 +16,7 @@ from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.config import get_settings
 from chatter.core.dependencies import (
     get_builtin_tools,
     get_mcp_service,
@@ -25,7 +25,6 @@ from chatter.core.dependencies import (
 )
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
-from chatter.config import get_settings
 from chatter.utils.logging import get_logger
 
 # Use TYPE_CHECKING to avoid circular imports at runtime

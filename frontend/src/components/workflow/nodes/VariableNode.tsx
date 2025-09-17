@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Storage as VariableIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#607d8b' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 180, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 180,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: '#78909c',
-          color: 'white'
+          color: 'white',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,35 +39,38 @@ const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected })
             Store & retrieve data
           </Typography>
           {config.operation && (
-            <Chip 
-              label={config.operation} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={config.operation}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5
+                mr: 0.5,
               }}
             />
           )}
           {config.variableName && (
-            <Chip 
-              label={config.variableName.slice(0, 8) + (config.variableName.length > 8 ? '...' : '')} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={
+                config.variableName.slice(0, 8) +
+                (config.variableName.length > 8 ? '...' : '')
+              }
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
               }}
             />
           )}
         </CardContent>
       </Card>
-      
+
       {/* Output handle */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         style={{ background: '#607d8b' }}
       />
     </>

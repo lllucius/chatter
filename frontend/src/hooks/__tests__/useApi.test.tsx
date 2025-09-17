@@ -10,7 +10,7 @@ const createMockApiCall = () => {
     callCount++;
     return Promise.resolve({ data: `result-${callCount}` });
   });
-  
+
   return { mockApiCall, getCallCount: () => callCount };
 };
 
@@ -21,8 +21,8 @@ describe('useApi hook', () => {
 
   it('should not make repeated calls when immediate is true', async () => {
     const { mockApiCall, getCallCount } = createMockApiCall();
-    
-    const { result, rerender } = renderHook(() => 
+
+    const { result, rerender } = renderHook(() =>
       useApi(mockApiCall, { immediate: true })
     );
 
@@ -41,7 +41,7 @@ describe('useApi hook', () => {
     rerender();
 
     // Wait a bit to ensure no additional calls are made
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // Should still only be 1 call despite multiple re-renders
     expect(getCallCount()).toBe(1);
@@ -50,13 +50,13 @@ describe('useApi hook', () => {
 
   it('should not make initial call when immediate is false', async () => {
     const { mockApiCall, getCallCount } = createMockApiCall();
-    
-    const { result } = renderHook(() => 
+
+    const { result } = renderHook(() =>
       useApi(mockApiCall, { immediate: false })
     );
 
     // Wait a bit
-    await new Promise(resolve => setTimeout(resolve, 100));
+    await new Promise((resolve) => setTimeout(resolve, 100));
 
     // No call should have been made
     expect(getCallCount()).toBe(0);
@@ -66,8 +66,8 @@ describe('useApi hook', () => {
 
   it('should make call when execute is called manually', async () => {
     const { mockApiCall, getCallCount } = createMockApiCall();
-    
-    const { result } = renderHook(() => 
+
+    const { result } = renderHook(() =>
       useApi(mockApiCall, { immediate: false })
     );
 
@@ -92,11 +92,14 @@ describe('useApi hook', () => {
     let callCount = 0;
     const TestComponent = () => {
       // This simulates the DashboardPage pattern with anonymous function
-      const api = useApi(() => {
-        callCount++;
-        return Promise.resolve({ data: `result-${callCount}` });
-      }, { immediate: true });
-      
+      const api = useApi(
+        () => {
+          callCount++;
+          return Promise.resolve({ data: `result-${callCount}` });
+        },
+        { immediate: true }
+      );
+
       return <div>{api.data?.data || 'loading'}</div>;
     };
 
@@ -106,7 +109,7 @@ describe('useApi hook', () => {
 
     // Wait for initial call and any potential loop
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     });
 
     // Should only make 1 call, not loop infinitely
@@ -126,11 +129,11 @@ describe('useApi hook', () => {
               usage_metrics: { total_tokens: callCount * 100 },
               document_analytics: { total_documents: callCount * 5 },
               system_health: { active_users_today: callCount * 2 },
-              performance_metrics: { avg_response_time_ms: 200 }
-            }
+              performance_metrics: { avg_response_time_ms: 200 },
+            },
           });
-        }
-      }
+        },
+      },
     };
 
     const MockDashboardPage = () => {
@@ -145,7 +148,8 @@ describe('useApi hook', () => {
           {dashboardApi.loading && <div>Loading...</div>}
           {dashboardApi.data && (
             <div>
-              Conversations: {dashboardApi.data.data.conversation_stats.total_conversations}
+              Conversations:{' '}
+              {dashboardApi.data.data.conversation_stats.total_conversations}
             </div>
           )}
         </div>
@@ -157,13 +161,16 @@ describe('useApi hook', () => {
     });
 
     // Wait for the component to settle
-    await waitFor(() => {
-      expect(callCount).toBe(1);
-    }, { timeout: 1000 });
+    await waitFor(
+      () => {
+        expect(callCount).toBe(1);
+      },
+      { timeout: 1000 }
+    );
 
     // Wait additional time to ensure no more calls are made
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 500));
+      await new Promise((resolve) => setTimeout(resolve, 500));
     });
 
     // Should still only be 1 call

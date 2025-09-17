@@ -50,9 +50,21 @@ interface ABTestAnalyticsProps {
     confidence?: number;
   };
   _performance?: {
-    response_times: Array<{ timestamp: string; variant: string; response_time: number }>;
-    error_rates: Array<{ timestamp: string; variant: string; error_rate: number }>;
-    throughput: Array<{ timestamp: string; variant: string; requests_per_second: number }>;
+    response_times: Array<{
+      timestamp: string;
+      variant: string;
+      response_time: number;
+    }>;
+    error_rates: Array<{
+      timestamp: string;
+      variant: string;
+      error_rate: number;
+    }>;
+    throughput: Array<{
+      timestamp: string;
+      variant: string;
+      requests_per_second: number;
+    }>;
   };
 }
 
@@ -67,7 +79,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {
     if (metrics) return metrics;
-    
+
     return {
       total_participants: 5420,
       conversion_rate: {
@@ -87,7 +99,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
   const sampleResults = React.useMemo(() => {
     if (results) return results;
-    
+
     return {
       winner: 'variant_a',
       improvement: 0.208,
@@ -129,19 +141,19 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
   const timeSeriesData = React.useMemo(() => {
     const days = 14;
     const data = [];
-    
+
     for (let i = 0; i < days; i++) {
       data.push({
         day: i + 1,
-        control: 0.10 + (Math.random() * 0.04) + (i * 0.001),
-        variant_a: 0.12 + (Math.random() * 0.05) + (i * 0.002),
-        variant_b: 0.115 + (Math.random() * 0.045) + (i * 0.0015),
+        control: 0.1 + Math.random() * 0.04 + i * 0.001,
+        variant_a: 0.12 + Math.random() * 0.05 + i * 0.002,
+        variant_b: 0.115 + Math.random() * 0.045 + i * 0.0015,
         control_participants: 120 + Math.floor(Math.random() * 20),
         variant_a_participants: 118 + Math.floor(Math.random() * 22),
         variant_b_participants: 122 + Math.floor(Math.random() * 18),
       });
     }
-    
+
     return data;
   }, []);
 
@@ -190,7 +202,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -201,10 +213,11 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Typography variant="h4">
                   {sampleMetrics.statistical_significance ? 'Yes' : 'No'}
                 </Typography>
-                {sampleMetrics.statistical_significance ? 
-                  <CheckCircle color="success" sx={{ ml: 1 }} /> : 
+                {sampleMetrics.statistical_significance ? (
+                  <CheckCircle color="success" sx={{ ml: 1 }} />
+                ) : (
                   <Warning color="warning" sx={{ ml: 1 }} />
-                }
+                )}
               </Box>
               <Typography variant="body2" color="text.secondary">
                 p-value: {sampleMetrics.p_value?.toFixed(4) || 'N/A'}
@@ -212,7 +225,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -223,12 +236,13 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 {sampleResults.winner?.replace('_', ' ').toUpperCase() || 'TBD'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                +{((sampleResults.improvement || 0) * 100).toFixed(1)}% improvement
+                +{((sampleResults.improvement || 0) * 100).toFixed(1)}%
+                improvement
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -236,11 +250,22 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Test Progress
               </Typography>
               <Typography variant="h5">
-                {Math.round(((sampleMetrics.duration_days || 14) - (sampleMetrics.remaining_days || 0)) / (sampleMetrics.duration_days || 14) * 100)}%
+                {Math.round(
+                  (((sampleMetrics.duration_days || 14) -
+                    (sampleMetrics.remaining_days || 0)) /
+                    (sampleMetrics.duration_days || 14)) *
+                    100
+                )}
+                %
               </Typography>
-              <LinearProgress 
-                variant="determinate" 
-                value={((sampleMetrics.duration_days || 14) - (sampleMetrics.remaining_days || 0)) / (sampleMetrics.duration_days || 14) * 100} 
+              <LinearProgress
+                variant="determinate"
+                value={
+                  (((sampleMetrics.duration_days || 14) -
+                    (sampleMetrics.remaining_days || 0)) /
+                    (sampleMetrics.duration_days || 14)) *
+                  100
+                }
                 sx={{ mt: 1 }}
               />
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -262,33 +287,46 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <ResponsiveContainer width="100%" height={300}>
                 <LineChart data={timeSeriesData}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="day" label={{ value: 'Days', position: 'insideBottom', offset: -5 }} />
-                  <YAxis label={{ value: 'Conversion Rate', angle: -90, position: 'insideLeft' }} />
-                  <Tooltip 
+                  <XAxis
+                    dataKey="day"
+                    label={{
+                      value: 'Days',
+                      position: 'insideBottom',
+                      offset: -5,
+                    }}
+                  />
+                  <YAxis
+                    label={{
+                      value: 'Conversion Rate',
+                      angle: -90,
+                      position: 'insideLeft',
+                    }}
+                  />
+                  <Tooltip
                     formatter={(value: unknown, name: string) => [
-                      `${(Number(value) * 100).toFixed(2)}%`, 
-                      name.replace('_', ' ').toUpperCase()
+                      `${(Number(value) * 100).toFixed(2)}%`,
+                      name.replace('_', ' ').toUpperCase(),
                     ]}
                   />
                   <Legend />
-                  <Line 
-                    type="monotone" 
-                    dataKey="control" 
-                    stroke={variantColors.control} 
+                  <Line
+                    type="monotone"
+                    dataKey="control"
+                    stroke={variantColors.control}
                     strokeWidth={2}
                     name="Control"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="variant_a" 
-                    stroke={variantColors.variant_a} 
+                  <Line
+                    type="monotone"
+                    dataKey="variant_a"
+                    stroke={variantColors.variant_a}
                     strokeWidth={2}
                     name="Variant A"
                   />
-                  <Line 
-                    type="monotone" 
-                    dataKey="variant_b" 
-                    stroke={variantColors.variant_b} 
+                  <Line
+                    type="monotone"
+                    dataKey="variant_b"
+                    stroke={variantColors.variant_b}
                     strokeWidth={2}
                     name="Variant B"
                   />
@@ -297,7 +335,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} lg={4}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
@@ -312,21 +350,32 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     </ListItemIcon>
                     <ListItemText
                       primary={
-                        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            justifyContent: 'space-between',
+                            alignItems: 'center',
+                          }}
+                        >
                           <Typography variant="subtitle2">
                             {variant.name.replace('_', ' ').toUpperCase()}
                           </Typography>
-                          <Chip 
+                          <Chip
                             label={`${(variant.conversion_rate * 100).toFixed(1)}%`}
                             size="small"
-                            color={variant.name === sampleResults.winner ? 'success' : 'default'}
+                            color={
+                              variant.name === sampleResults.winner
+                                ? 'success'
+                                : 'default'
+                            }
                           />
                         </Box>
                       }
                       secondary={
                         <Box>
                           <Typography variant="body2" color="text.secondary">
-                            {variant.conversions} / {variant.participants} conversions
+                            {variant.conversions} / {variant.participants}{' '}
+                            conversions
                           </Typography>
                           <Typography variant="body2" color="text.secondary">
                             ROI: {variant.roi.toFixed(2)}x
@@ -357,15 +406,17 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, participants }) => `${name.replace('_', ' ').toUpperCase()}: ${participants}`}
+                    label={({ name, participants }) =>
+                      `${name.replace('_', ' ').toUpperCase()}: ${participants}`
+                    }
                     outerRadius={80}
                     fill="#8884d8"
                     dataKey="participants"
                   >
                     {sampleResults.variants?.map((entry, index): void => (
-                      <Cell 
-                        key={`cell-${index}`} 
-                        fill={Object.values(variantColors)[index]} 
+                      <Cell
+                        key={`cell-${index}`}
+                        fill={Object.values(variantColors)[index]}
                       />
                     ))}
                   </Pie>
@@ -375,7 +426,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} md={6}>
           <Card>
             <CardContent>
@@ -385,14 +436,21 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <ResponsiveContainer width="100%" height={250}>
                 <BarChart data={sampleResults.variants}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis 
-                    dataKey="name" 
-                    tickFormatter={(value) => value.replace('_', ' ').toUpperCase()}
+                  <XAxis
+                    dataKey="name"
+                    tickFormatter={(value) =>
+                      value.replace('_', ' ').toUpperCase()
+                    }
                   />
                   <YAxis />
-                  <Tooltip 
-                    formatter={(value: unknown) => [`$${Number(value).toLocaleString()}`, 'Revenue']}
-                    labelFormatter={(label) => label.replace('_', ' ').toUpperCase()}
+                  <Tooltip
+                    formatter={(value: unknown) => [
+                      `$${Number(value).toLocaleString()}`,
+                      'Revenue',
+                    ]}
+                    labelFormatter={(label) =>
+                      label.replace('_', ' ').toUpperCase()
+                    }
                   />
                   <Bar dataKey="revenue" fill="#82ca9d" />
                 </BarChart>
@@ -403,49 +461,51 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
       </Grid>
 
       {/* Recommendations */}
-      {recommendations && (recommendations.recommendations.length > 0 || recommendations.insights.length > 0) && (
-        <Grid container spacing={3}>
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  AI Recommendations
-                </Typography>
-                <List>
-                  {recommendations.recommendations.map((rec, index): void => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        {getRecommendationIcon('winner')}
-                      </ListItemIcon>
-                      <ListItemText primary={rec} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
+      {recommendations &&
+        (recommendations.recommendations.length > 0 ||
+          recommendations.insights.length > 0) && (
+          <Grid container spacing={3}>
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    AI Recommendations
+                  </Typography>
+                  <List>
+                    {recommendations.recommendations.map((rec, index): void => (
+                      <ListItem key={index} sx={{ px: 0 }}>
+                        <ListItemIcon>
+                          {getRecommendationIcon('winner')}
+                        </ListItemIcon>
+                        <ListItemText primary={rec} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
+
+            <Grid item xs={12} md={6}>
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" gutterBottom>
+                    Key Insights
+                  </Typography>
+                  <List>
+                    {recommendations.insights.map((insight, index): void => (
+                      <ListItem key={index} sx={{ px: 0 }}>
+                        <ListItemIcon>
+                          {getRecommendationIcon('info')}
+                        </ListItemIcon>
+                        <ListItemText primary={insight} />
+                      </ListItem>
+                    ))}
+                  </List>
+                </CardContent>
+              </Card>
+            </Grid>
           </Grid>
-          
-          <Grid item xs={12} md={6}>
-            <Card>
-              <CardContent>
-                <Typography variant="h6" gutterBottom>
-                  Key Insights
-                </Typography>
-                <List>
-                  {recommendations.insights.map((insight, index): void => (
-                    <ListItem key={index} sx={{ px: 0 }}>
-                      <ListItemIcon>
-                        {getRecommendationIcon('info')}
-                      </ListItemIcon>
-                      <ListItemText primary={insight} />
-                    </ListItem>
-                  ))}
-                </List>
-              </CardContent>
-            </Card>
-          </Grid>
-        </Grid>
-      )}
+        )}
 
       {/* Statistical Details */}
       <Grid container spacing={3} sx={{ mt: 2 }}>
@@ -459,7 +519,8 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid item xs={6} sm={3}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {((sampleMetrics.confidence_level || 0) * 100).toFixed(0)}%
+                      {((sampleMetrics.confidence_level || 0) * 100).toFixed(0)}
+                      %
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Confidence Level

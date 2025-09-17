@@ -512,6 +512,7 @@ def create_app() -> FastAPI:
         return problem.to_response(request)
 
     # --- DELAYED IMPORTS: Routers registered here only ---
+    # Import new document API
     from chatter.api import (
         ab_testing,
         agents,
@@ -524,15 +525,13 @@ def create_app() -> FastAPI:
         health,
         jobs,
         model_registry,
+        new_documents,
         plugins,
         profiles,
         prompts,
         toolserver,
         workflows,
     )
-
-    # Import new document API
-    from chatter.api import new_documents
 
     app.include_router(health.router, tags=["Health"])
 

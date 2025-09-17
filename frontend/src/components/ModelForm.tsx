@@ -91,10 +91,16 @@ const ModelForm: React.FC<ModelFormProps> = ({
             <InputLabel>Provider</InputLabel>
             <Select
               value={formData.provider_id}
-              onChange={(e) => setFormData({ ...formData, provider_id: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, provider_id: e.target.value })
+              }
               disabled={mode === 'edit'}
               label="Provider"
-              helperText={mode === 'edit' ? "Provider cannot be changed after creation" : ""}
+              helperText={
+                mode === 'edit'
+                  ? 'Provider cannot be changed after creation'
+                  : ''
+              }
             >
               {providers.length === 0 ? (
                 <MenuItem disabled value="">
@@ -109,7 +115,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
               )}
             </Select>
           </FormControl>
-          
+
           <TextField
             fullWidth
             label="Name"
@@ -117,80 +123,105 @@ const ModelForm: React.FC<ModelFormProps> = ({
             value={formData.name}
             onChange={(e) => setFormData({ ...formData, name: e.target.value })}
             disabled={mode === 'edit'}
-            helperText={mode === 'edit' ? "Name cannot be changed after creation" : ""}
+            helperText={
+              mode === 'edit' ? 'Name cannot be changed after creation' : ''
+            }
           />
-          
+
           <FormControl fullWidth>
             <InputLabel>Model Type</InputLabel>
             <Select
               value={formData.model_type}
               onChange={(e) => {
-                const modelType = e.target.value as ModelDefCreate['model_type'];
+                const modelType = e.target
+                  .value as ModelDefCreate['model_type'];
                 setFormData((f): void => ({
                   ...f,
                   model_type: modelType,
-                  dimensions: modelType === 'embedding' ? (f.dimensions ?? 1536) : undefined,
+                  dimensions:
+                    modelType === 'embedding'
+                      ? (f.dimensions ?? 1536)
+                      : undefined,
                 }));
               }}
               disabled={mode === 'edit'}
               label="Model Type"
-              helperText={mode === 'edit' ? "Model type cannot be changed after creation" : ""}
+              helperText={
+                mode === 'edit'
+                  ? 'Model type cannot be changed after creation'
+                  : ''
+              }
             >
               <MenuItem value="embedding">Embedding</MenuItem>
               <MenuItem value="llm">LLM</MenuItem>
             </Select>
           </FormControl>
-          
+
           <TextField
             fullWidth
             label="Display Name"
             required
             value={formData.display_name}
-            onChange={(e) => setFormData({ ...formData, display_name: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, display_name: e.target.value })
+            }
           />
-          
+
           <TextField
             fullWidth
             label="Model Name (API)"
             required
             value={formData.model_name}
-            onChange={(e) => setFormData({ ...formData, model_name: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, model_name: e.target.value })
+            }
           />
-          
+
           {formData.model_type === 'embedding' && (
             <TextField
               fullWidth
               type="number"
               label="Dimensions"
               value={formData.dimensions ?? 1536}
-              onChange={(e) => setFormData({ ...formData, dimensions: parseInt(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  dimensions: parseInt(e.target.value) || 0,
+                })
+              }
             />
           )}
-          
+
           <TextField
             fullWidth
             label="Description"
             multiline
             rows={3}
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
           />
-          
+
           <FormControlLabel
             control={
               <Switch
                 checked={formData.supports_batch}
-                onChange={(e) => setFormData({ ...formData, supports_batch: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, supports_batch: e.target.checked })
+                }
               />
             }
             label="Supports Batch"
           />
-          
+
           <FormControlLabel
             control={
               <Switch
                 checked={formData.is_active}
-                onChange={(e) => setFormData({ ...formData, is_active: e.target.checked })}
+                onChange={(e) =>
+                  setFormData({ ...formData, is_active: e.target.checked })
+                }
               />
             }
             label="Active"
@@ -198,13 +229,25 @@ const ModelForm: React.FC<ModelFormProps> = ({
         </Box>
       </DialogContent>
       <DialogActions>
-        <Button onClick={onClose} disabled={saving}>Cancel</Button>
-        <Button 
-          variant="contained" 
+        <Button onClick={onClose} disabled={saving}>
+          Cancel
+        </Button>
+        <Button
+          variant="contained"
           onClick={handleSubmit}
-          disabled={!formData.name || !formData.displayName || !formData.modelName || providers.length === 0 || saving}
+          disabled={
+            !formData.name ||
+            !formData.displayName ||
+            !formData.modelName ||
+            providers.length === 0 ||
+            saving
+          }
         >
-          {saving ? 'Saving...' : (mode === 'edit' ? 'Update Model' : 'Create Model')}
+          {saving
+            ? 'Saving...'
+            : mode === 'edit'
+              ? 'Update Model'
+              : 'Create Model'}
         </Button>
       </DialogActions>
     </Dialog>

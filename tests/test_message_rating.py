@@ -1,16 +1,16 @@
 """Test for message rating functionality."""
 
-import pytest
 from unittest.mock import AsyncMock, Mock
+
+import pytest
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.core.exceptions import ValidationError
+from chatter.models.conversation import Message
 from chatter.schemas.chat import (
     MessageRatingUpdate,
-    MessageRatingResponse,
 )
-from chatter.models.conversation import Message, MessageRole
 from chatter.services.message import MessageService
-from chatter.core.exceptions import ValidationError, NotFoundError
 
 
 @pytest.mark.asyncio

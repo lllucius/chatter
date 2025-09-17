@@ -11,13 +11,13 @@ vi.mock('../../services/auth-service', (): void => ({
     prompts: {
       listPromptsApiV1Prompts: vi.fn().mockResolvedValue({
         prompts: [],
-        total_count: 0
-      })
-    }
+        total_count: 0,
+      }),
+    },
   })),
   authService: {
-    isAuthenticated: vi.fn(() => true)
-  }
+    isAuthenticated: vi.fn(() => true),
+  },
 }));
 
 // Mock the toast service
@@ -25,7 +25,7 @@ vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),
-  }
+  },
 }));
 
 const theme = createTheme();
@@ -43,19 +43,19 @@ const renderPromptsPage = () => {
 describe('PromptsPage', () => {
   test('renders Prompts page title', async () => {
     renderPromptsPage();
-    
+
     expect(await screen.findByText('Prompts')).toBeInTheDocument();
   });
 
   test('renders toolbar with Add Prompt button', async () => {
     renderPromptsPage();
-    
+
     expect(await screen.findByText('Add Prompt')).toBeInTheDocument();
   });
 
   test('renders toolbar with Refresh button', async () => {
     renderPromptsPage();
-    
+
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });
 });

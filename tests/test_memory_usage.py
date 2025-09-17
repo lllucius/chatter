@@ -3,13 +3,9 @@
 import io
 import tempfile
 from pathlib import Path
-from unittest.mock import AsyncMock, patch
 
 import pytest
 
-from chatter.api.documents import upload_document
-from chatter.core.documents import DocumentService
-from chatter.services.new_document_service import NewDocumentService
 from chatter.utils.memory_monitor import (
     MemoryMonitor,
     memory_monitor_context,

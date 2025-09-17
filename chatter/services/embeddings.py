@@ -3,7 +3,6 @@
 import hashlib
 import time
 from typing import Any
-import asyncio
 
 import numpy as np
 from langchain_core.embeddings import Embeddings
@@ -44,8 +43,8 @@ except ImportError:
 
 from chatter.config import get_settings, settings
 from chatter.core.model_registry import ModelRegistryService
-from chatter.models.registry import ModelType, ProviderType
 from chatter.models.document import DocumentChunk
+from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
 from chatter.utils.logging import get_logger
 
@@ -155,13 +154,20 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                         data = response.data
                         if data:
                             # Standard OpenAI response format with .data attribute
-                            logger.debug("OpenAI response has .data attribute")
+                            logger.debug(
+                                "OpenAI response has .data attribute"
+                            )
                             batch_embeddings = []
                             for r in data:
                                 if hasattr(r, "embedding"):
                                     batch_embeddings.append(r.embedding)
-                                elif isinstance(r, dict) and "embedding" in r:
-                                    batch_embeddings.append(r["embedding"])
+                                elif (
+                                    isinstance(r, dict)
+                                    and "embedding" in r
+                                ):
+                                    batch_embeddings.append(
+                                        r["embedding"]
+                                    )
                                 else:
                                     logger.error(
                                         "Invalid embedding object in .data response",
@@ -173,18 +179,28 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             embeddings.extend(batch_embeddings)
                         else:
                             # .data exists but is empty/falsy, try other paths
-                            raise AttributeError("Empty .data attribute")
+                            raise AttributeError(
+                                "Empty .data attribute"
+                            )
                     except AttributeError:
                         # No .data attribute or .data access failed, try dict access
-                        if isinstance(response, dict) and "data" in response:
+                        if (
+                            isinstance(response, dict)
+                            and "data" in response
+                        ):
                             # Dict format response
                             logger.debug(
                                 "OpenAI response is dict with 'data' key"
                             )
                             batch_embeddings = []
                             for r in response["data"]:
-                                if isinstance(r, dict) and "embedding" in r:
-                                    batch_embeddings.append(r["embedding"])
+                                if (
+                                    isinstance(r, dict)
+                                    and "embedding" in r
+                                ):
+                                    batch_embeddings.append(
+                                        r["embedding"]
+                                    )
                                 elif hasattr(r, "embedding"):
                                     batch_embeddings.append(r.embedding)
                                 else:
@@ -203,15 +219,24 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             embeddings.extend(batch_embeddings)
                         elif hasattr(response, "model_dump"):
                             # Pydantic model, convert to dict
-                            logger.debug("OpenAI response is Pydantic model")
+                            logger.debug(
+                                "OpenAI response is Pydantic model"
+                            )
                             response_dict = response.model_dump()
                             if "data" in response_dict:
                                 batch_embeddings = []
                                 for r in response_dict["data"]:
-                                    if isinstance(r, dict) and "embedding" in r:
-                                        batch_embeddings.append(r["embedding"])
+                                    if (
+                                        isinstance(r, dict)
+                                        and "embedding" in r
+                                    ):
+                                        batch_embeddings.append(
+                                            r["embedding"]
+                                        )
                                     elif hasattr(r, "embedding"):
-                                        batch_embeddings.append(r.embedding)
+                                        batch_embeddings.append(
+                                            r.embedding
+                                        )
                                     else:
                                         logger.error(
                                             "Invalid embedding object in model_dump response",
@@ -229,7 +254,9 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             else:
                                 logger.error(
                                     "Unexpected OpenAI response format after model_dump",
-                                    response_keys=list(response_dict.keys()),
+                                    response_keys=list(
+                                        response_dict.keys()
+                                    ),
                                 )
                                 raise ValueError(
                                     f"Unexpected OpenAI response format: {type(response)}"
@@ -242,7 +269,6 @@ class SafeOpenAIEmbeddings(OpenAIEmbeddings):
                             raise ValueError(
                                 f"Unhandled OpenAI response format: {type(response)}"
                             )
-
 
             except Exception as e:
                 logger.error(
@@ -354,7 +380,9 @@ class DimensionalReductionEmbeddings(Embeddings):
         base_embedding = self.base.embed_query(text)
         return self._reduce_vector(base_embedding)
 
-    async def aembed_documents(self, texts: list[str]) -> list[list[float]]:
+    async def aembed_documents(
+        self, texts: list[str]
+    ) -> list[list[float]]:
         """Async embed documents and apply dimensional reduction."""
         base_embeddings = await self.base.aembed_documents(texts)
         return [
@@ -895,48 +923,50 @@ class EmbeddingService:
         metadata: dict[str, Any] | None = None,
     ) -> bool:
         """Store embedding for a document chunk using hybrid vector storage.
-        
+
         This method consolidates functionality from DynamicVectorStoreService.
-        
+
         Args:
             chunk_id: Document chunk ID
             embedding: Embedding vector
             provider_name: Provider name (optional, uses default if not provided)
             metadata: Additional metadata
-            
+
         Returns:
             True if successful
         """
         try:
             # Get the chunk
             result = await self._session.execute(
-                select(DocumentChunk).where(DocumentChunk.id == chunk_id)
+                select(DocumentChunk).where(
+                    DocumentChunk.id == chunk_id
+                )
             )
             chunk = result.scalar_one_or_none()
-            
+
             if not chunk:
                 logger.error("Chunk not found", chunk_id=chunk_id)
                 return False
-            
+
             # Use hybrid vector storage approach from document_chunks table
             chunk.set_embedding_vector(
                 vector=embedding,
                 provider=provider_name,
                 model=metadata.get("model") if metadata else None,
             )
-            
+
             await self._session.commit()
             await self._session.refresh(chunk)
-            
+
             logger.debug(
                 "Stored embedding using hybrid vector system",
                 chunk_id=chunk_id,
                 provider=provider_name,
                 dimensions=len(embedding),
             )
-            
+
             return True
-            
+
         except Exception as e:
             await self._session.rollback()
             logger.error(
@@ -955,27 +985,27 @@ class EmbeddingService:
         document_ids: list[str] | None = None,
     ) -> list[tuple[DocumentChunk, float]]:
         """Perform similarity search using hybrid vector storage.
-        
+
         This method consolidates functionality from DynamicVectorStoreService.
-        
+
         Args:
             query_embedding: Query vector
             provider_name: Provider name for filtering (optional)
             limit: Maximum number of results
             score_threshold: Minimum similarity score
             document_ids: Filter by document IDs (optional)
-            
+
         Returns:
             List of (chunk, similarity_score) tuples
         """
         try:
             # Use the hybrid vector search helper from document chunks
             from chatter.models.document import HybridVectorSearchHelper
-            
+
             # Get session for the helper
             session = await self._get_session()
             helper = HybridVectorSearchHelper(session)
-            
+
             # Perform hybrid search
             results = await helper.hybrid_search(
                 query_vector=query_embedding,
@@ -983,22 +1013,23 @@ class EmbeddingService:
                 document_ids=document_ids,
                 provider_filter=provider_name,
             )
-            
+
             # Filter by score threshold
             filtered_results = [
-                (chunk, score) for chunk, score in results
+                (chunk, score)
+                for chunk, score in results
                 if score >= score_threshold
             ]
-            
+
             logger.debug(
                 "Similarity search completed",
                 results_count=len(filtered_results),
                 limit=limit,
                 score_threshold=score_threshold,
             )
-            
+
             return filtered_results
-            
+
         except Exception as e:
             logger.error(
                 "Similarity search failed",
@@ -1009,43 +1040,45 @@ class EmbeddingService:
 
     async def get_embedding_stats(self) -> dict[str, Any]:
         """Get statistics about stored embeddings.
-        
+
         Simplified version consolidating functionality from DynamicVectorStoreService.
-        
+
         Returns:
             Dictionary with embedding statistics
         """
         try:
             from sqlalchemy import func
-            
+
             stats: dict[str, Any] = {
                 "total_chunks": 0,
                 "embedded_chunks": 0,
                 "vector_store_type": "hybrid",
             }
-            
+
             # Total chunks
             total_result = await self._session.execute(
                 select(func.count(DocumentChunk.id))
             )
             stats["total_chunks"] = int(total_result.scalar() or 0)
-            
+
             # Chunks with embeddings (using hybrid vector fields)
             embedded_result = await self._session.execute(
                 select(func.count(DocumentChunk.id)).where(
                     DocumentChunk.raw_embedding.is_not(None)
                 )
             )
-            stats["embedded_chunks"] = int(embedded_result.scalar() or 0)
-            
+            stats["embedded_chunks"] = int(
+                embedded_result.scalar() or 0
+            )
+
             logger.debug(
                 "Generated embedding statistics",
                 total_chunks=stats["total_chunks"],
                 embedded_chunks=stats["embedded_chunks"],
             )
-            
+
             return stats
-            
+
         except Exception as e:
             logger.error("Failed to get embedding stats", error=str(e))
             return {

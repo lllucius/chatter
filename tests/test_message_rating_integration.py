@@ -1,12 +1,10 @@
 """Integration test for message rating feature."""
 
 import pytest
-from unittest.mock import AsyncMock, patch
 from httpx import AsyncClient
 
 from chatter.main import app
 from chatter.models.conversation import (
-    Conversation,
     Message,
     MessageRole,
 )
@@ -31,7 +29,7 @@ async def test_message_rating_end_to_end(
     conversation_response = await test_client.post(
         "/api/v1/chat/conversations",
         json=conversation_data,
-        headers={"Authorization": f"Bearer fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
     )
 
     assert conversation_response.status_code == 201
@@ -60,7 +58,7 @@ async def test_message_rating_end_to_end(
     rating_response = await test_client.patch(
         f"/api/v1/conversations/{conversation_id}/messages/{message_id}/rating",
         json=rating_data,
-        headers={"Authorization": f"Bearer fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
     )
 
     assert rating_response.status_code == 200
@@ -79,7 +77,7 @@ async def test_message_rating_end_to_end(
     second_rating_response = await test_client.patch(
         f"/api/v1/conversations/{conversation_id}/messages/{message_id}/rating",
         json=second_rating_data,
-        headers={"Authorization": f"Bearer fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
     )
 
     assert second_rating_response.status_code == 200
@@ -92,7 +90,7 @@ async def test_message_rating_end_to_end(
     # Test analytics integration
     analytics_response = await test_client.get(
         "/api/v1/analytics/conversations",
-        headers={"Authorization": f"Bearer fake-token"},
+        headers={"Authorization": "Bearer fake-token"},
     )
 
     assert analytics_response.status_code == 200
@@ -119,7 +117,7 @@ async def test_message_rating_validation_errors():
         response = await client.patch(
             "/api/v1/conversations/fake-id/messages/fake-msg-id/rating",
             json=invalid_rating_data,
-            headers={"Authorization": f"Bearer fake-token"},
+            headers={"Authorization": "Bearer fake-token"},
         )
 
         # Should return 422 validation error
@@ -136,7 +134,7 @@ async def test_message_rating_validation_errors():
         response = await client.patch(
             "/api/v1/conversations/fake-id/messages/fake-msg-id/rating",
             json=invalid_rating_data,
-            headers={"Authorization": f"Bearer fake-token"},
+            headers={"Authorization": "Bearer fake-token"},
         )
 
         assert response.status_code in [400, 401, 404, 422]

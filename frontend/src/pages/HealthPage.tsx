@@ -62,7 +62,7 @@ const HealthPage: React.FC = () => {
     } catch (err: unknown) {
       handleError(err, {
         source: 'HealthPage.loadHealthData',
-        operation: 'load system health data'
+        operation: 'load system health data',
       });
     } finally {
       setLoading(false);
@@ -147,8 +147,9 @@ const HealthPage: React.FC = () => {
         <Grid
           size={{
             xs: 12,
-            md: 8
-          }}>
+            md: 8,
+          }}
+        >
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -156,18 +157,12 @@ const HealthPage: React.FC = () => {
               </Typography>
               <List>
                 <ListItem>
-                  <ListItemIcon>
-                    {getStatusIcon('healthy')}
-                  </ListItemIcon>
+                  <ListItemIcon>{getStatusIcon('healthy')}</ListItemIcon>
                   <ListItemText
                     primary="API Server"
                     secondary={`Status: ${health?.status || 'Unknown'} | Version: ${health?.version || 'Unknown'}`}
                   />
-                  <Chip
-                    label="Healthy"
-                    color="success"
-                    size="small"
-                  />
+                  <Chip label="Healthy" color="success" size="small" />
                 </ListItem>
                 <Divider />
                 <ListItem>
@@ -178,11 +173,7 @@ const HealthPage: React.FC = () => {
                     primary="Database"
                     secondary="PostgreSQL connection active"
                   />
-                  <Chip
-                    label="Connected"
-                    color="success"
-                    size="small"
-                  />
+                  <Chip label="Connected" color="success" size="small" />
                 </ListItem>
                 <Divider />
                 <ListItem>
@@ -193,11 +184,7 @@ const HealthPage: React.FC = () => {
                     primary="Vector Store"
                     secondary="PGVector integration operational"
                   />
-                  <Chip
-                    label="Operational"
-                    color="success"
-                    size="small"
-                  />
+                  <Chip label="Operational" color="success" size="small" />
                 </ListItem>
                 <Divider />
                 <ListItem>
@@ -208,11 +195,7 @@ const HealthPage: React.FC = () => {
                     primary="Job Queue"
                     secondary="Background processing active"
                   />
-                  <Chip
-                    label="Active"
-                    color="info"
-                    size="small"
-                  />
+                  <Chip label="Active" color="info" size="small" />
                 </ListItem>
               </List>
             </CardContent>
@@ -221,8 +204,9 @@ const HealthPage: React.FC = () => {
         <Grid
           size={{
             xs: 12,
-            md: 4
-          }}>
+            md: 4,
+          }}
+        >
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -261,44 +245,87 @@ const HealthPage: React.FC = () => {
         <Grid
           size={{
             xs: 12,
-            md: 6
-          }}>
+            md: 6,
+          }}
+        >
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Resource Usage
               </Typography>
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="body2">CPU Usage</Typography>
-                  <Typography variant="body2">{systemMetrics.cpu_usage}%</Typography>
+                  <Typography variant="body2">
+                    {systemMetrics.cpu_usage}%
+                  </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={systemMetrics.cpu_usage}
-                  color={systemMetrics.cpu_usage > 80 ? 'error' : systemMetrics.cpu_usage > 60 ? 'warning' : 'success'}
+                  color={
+                    systemMetrics.cpu_usage > 80
+                      ? 'error'
+                      : systemMetrics.cpu_usage > 60
+                        ? 'warning'
+                        : 'success'
+                  }
                 />
               </Box>
               <Box sx={{ mb: 3 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="body2">Memory Usage</Typography>
-                  <Typography variant="body2">{systemMetrics.memory_usage}%</Typography>
+                  <Typography variant="body2">
+                    {systemMetrics.memory_usage}%
+                  </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={systemMetrics.memory_usage}
-                  color={systemMetrics.memory_usage > 80 ? 'error' : systemMetrics.memory_usage > 60 ? 'warning' : 'success'}
+                  color={
+                    systemMetrics.memory_usage > 80
+                      ? 'error'
+                      : systemMetrics.memory_usage > 60
+                        ? 'warning'
+                        : 'success'
+                  }
                 />
               </Box>
               <Box>
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    mb: 1,
+                  }}
+                >
                   <Typography variant="body2">Disk Usage</Typography>
-                  <Typography variant="body2">{systemMetrics.disk_usage}%</Typography>
+                  <Typography variant="body2">
+                    {systemMetrics.disk_usage}%
+                  </Typography>
                 </Box>
                 <LinearProgress
                   variant="determinate"
                   value={systemMetrics.disk_usage}
-                  color={systemMetrics.disk_usage > 80 ? 'error' : systemMetrics.disk_usage > 60 ? 'warning' : 'success'}
+                  color={
+                    systemMetrics.disk_usage > 80
+                      ? 'error'
+                      : systemMetrics.disk_usage > 60
+                        ? 'warning'
+                        : 'success'
+                  }
                 />
               </Box>
             </CardContent>
@@ -307,44 +334,35 @@ const HealthPage: React.FC = () => {
         <Grid
           size={{
             xs: 12,
-            md: 6
-          }}>
+            md: 6,
+          }}
+        >
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Performance Metrics
               </Typography>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2">API Response Time</Typography>
-                <Chip
-                  label="<100ms"
-                  color="success"
-                  size="small"
-                />
+                <Chip label="<100ms" color="success" size="small" />
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2">Database Query Time</Typography>
-                <Chip
-                  label="<50ms"
-                  color="success"
-                  size="small"
-                />
+                <Chip label="<50ms" color="success" size="small" />
               </Box>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}>
+              <Box
+                sx={{ display: 'flex', justifyContent: 'space-between', mb: 2 }}
+              >
                 <Typography variant="body2">Vector Search Time</Typography>
-                <Chip
-                  label="<200ms"
-                  color="success"
-                  size="small"
-                />
+                <Chip label="<200ms" color="success" size="small" />
               </Box>
               <Box sx={{ display: 'flex', justifyContent: 'space-between' }}>
                 <Typography variant="body2">Success Rate</Typography>
-                <Chip
-                  label="99.9%"
-                  color="success"
-                  size="small"
-                />
+                <Chip label="99.9%" color="success" size="small" />
               </Box>
             </CardContent>
           </Card>
@@ -373,13 +391,19 @@ const HealthPage: React.FC = () => {
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>
                         {getStatusIcon(server.status)}
-                        <Typography variant="body2" sx={{ ml: 1, fontWeight: 'medium' }}>
+                        <Typography
+                          variant="body2"
+                          sx={{ ml: 1, fontWeight: 'medium' }}
+                        >
                           {server.name}
                         </Typography>
                       </Box>
                     </TableCell>
                     <TableCell>
-                      <Typography variant="body2" sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}>
+                      <Typography
+                        variant="body2"
+                        sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
+                      >
                         {server.command || 'N/A'}
                       </Typography>
                     </TableCell>
@@ -393,7 +417,10 @@ const HealthPage: React.FC = () => {
                     <TableCell>
                       {server.last_health_check ? (
                         <Typography variant="body2">
-                          {format(new Date(server.last_health_check), 'MMM dd, yyyy HH:mm')}
+                          {format(
+                            new Date(server.last_health_check),
+                            'MMM dd, yyyy HH:mm'
+                          )}
                         </Typography>
                       ) : (
                         '-'
@@ -402,7 +429,10 @@ const HealthPage: React.FC = () => {
                     <TableCell>
                       {server.last_health_check ? (
                         <Typography variant="body2">
-                          {format(new Date(server.last_health_check), 'MMM dd, HH:mm')}
+                          {format(
+                            new Date(server.last_health_check),
+                            'MMM dd, HH:mm'
+                          )}
                         </Typography>
                       ) : (
                         '-'
@@ -413,7 +443,11 @@ const HealthPage: React.FC = () => {
                 {(toolServers || []).length === 0 && (
                   <TableRow>
                     <TableCell colSpan={5} align="center">
-                      <Typography variant="body2" color="text.secondary" sx={{ py: 3 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ py: 3 }}
+                      >
                         No tool servers configured
                       </Typography>
                     </TableCell>

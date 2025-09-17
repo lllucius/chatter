@@ -1,10 +1,11 @@
 """Memory monitoring utilities for document processing."""
 
 import gc
-import psutil
+from collections.abc import AsyncGenerator
 from contextlib import asynccontextmanager
 from typing import Any
-from collections.abc import AsyncGenerator
+
+import psutil
 
 from chatter.config import settings
 from chatter.utils.logging import get_logger

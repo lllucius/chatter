@@ -6,7 +6,7 @@ describe('ChatPage Streaming Logic', () => {
     // Mock the decoder and streaming logic from ChatPage
     const mockMessages: any[] = [];
     const messageId = 'test-message-id';
-    
+
     // Simulate the setMessages function
     const setMessages = (updateFn: (prev: any[]) => any[]) => {
       const updated = updateFn(mockMessages);
@@ -27,22 +27,22 @@ describe('ChatPage Streaming Logic', () => {
       'data: {"type":"token","content":"Hello"}',
       'data: {"type":"token","content":" world"}',
       'data: {"type":"complete","metadata":{"total_tokens":5}}',
-      'data: [DONE]'
+      'data: [DONE]',
     ];
 
     // Process each line (simplified version of the ChatPage logic)
     for (const line of sseLines) {
       if (line.startsWith('data: ')) {
         const dataStr = line.slice(6).trim();
-        
+
         if (dataStr === '[DONE]') {
           break;
         }
-        
+
         if (dataStr) {
           try {
             const chunk = JSON.parse(dataStr);
-            
+
             if (chunk.type === 'token' && chunk.content) {
               setMessages((prev) =>
                 prev.map((msg) =>
@@ -56,13 +56,13 @@ describe('ChatPage Streaming Logic', () => {
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === messageId
-                      ? { 
-                          ...msg, 
+                      ? {
+                          ...msg,
                           metadata: {
                             model: chunk.metadata.model_used,
                             tokens: chunk.metadata.total_tokens,
                             processingTime: chunk.metadata.response_time_ms,
-                          }
+                          },
                         }
                       : msg
                   )
@@ -85,7 +85,7 @@ describe('ChatPage Streaming Logic', () => {
   it('should handle streaming errors gracefully', () => {
     const mockMessages: any[] = [];
     const messageId = 'test-message-id';
-    
+
     const setMessages = (updateFn: (prev: any[]) => any[]) => {
       const updated = updateFn(mockMessages);
       mockMessages.splice(0, mockMessages.length, ...updated);
@@ -101,15 +101,15 @@ describe('ChatPage Streaming Logic', () => {
 
     // Simulate error chunk
     const errorLine = 'data: {"type":"error","content":"Streaming failed"}';
-    
+
     // This should throw an error in the real implementation
     const line = errorLine;
     if (line.startsWith('data: ')) {
       const dataStr = line.slice(6).trim();
-      
+
       if (dataStr) {
         const chunk = JSON.parse(dataStr);
-        
+
         if (chunk.type === 'error') {
           expect(() => {
             throw new Error(chunk.content || 'Streaming error');
@@ -121,14 +121,14 @@ describe('ChatPage Streaming Logic', () => {
 
   it('should handle malformed SSE data gracefully', () => {
     const mockMessages: any[] = [];
-    
+
     // Test with malformed JSON
     const malformedLine = 'data: {invalid json}';
-    
+
     let parseError = false;
     if (malformedLine.startsWith('data: ')) {
       const dataStr = malformedLine.slice(6).trim();
-      
+
       if (dataStr) {
         try {
           JSON.parse(dataStr);
@@ -138,7 +138,7 @@ describe('ChatPage Streaming Logic', () => {
         }
       }
     }
-    
+
     expect(parseError).toBe(true);
   });
 });

@@ -113,6 +113,10 @@ dev = [
     "black>=25.1.0",
     "isort>=6.0.1",
     
+    # Security analysis
+    "bandit[toml]>=1.7.10",
+    "safety>=3.2.8",
+    
     # Documentation
     "mkdocs>=1.6.1",
     "mkdocs-material>=9.6.18",
@@ -250,4 +254,29 @@ markers = [
     "security: marks tests as security tests",
     "slow: marks tests as slow (deselect with '-m \"not slow\"')",
     "unit: marks tests as unit tests",
+]
+
+[tool.bandit]
+exclude_dirs = ["tests", "venv", "env", ".venv", ".env"]
+skips = ["B101", "B601"]  # Skip assert_used and shell=True subprocess
+
+[tool.bandit.any_other_function_with_shell_equals_true]
+no_shell = [
+    "os.execl",
+    "os.execle", 
+    "os.execlp",
+    "os.execlpe",
+    "os.execv",
+    "os.execve",
+    "os.execvp",
+    "os.execvpe",
+    "os.spawnl",
+    "os.spawnle",
+    "os.spawnlp",
+    "os.spawnlpe",
+    "os.spawnv",
+    "os.spawnve",
+    "os.spawnvp",
+    "os.spawnvpe",
+    "os.startfile"
 ]

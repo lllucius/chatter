@@ -1,6 +1,6 @@
 /**
  * SSE Event Manager Service
- * 
+ *
  * Manages Server-Sent Events connection and provides EventEmitter pattern
  * for components to subscribe to specific events.
  */
@@ -57,7 +57,7 @@ export class SSEEventManager {
     this.stopHealthCheck();
 
     // Clear all reconnect timeouts
-    this.reconnectTimeouts.forEach(timeout => clearTimeout(timeout));
+    this.reconnectTimeouts.forEach((timeout) => clearTimeout(timeout));
     this.reconnectTimeouts.clear();
 
     // Clear event buffer to prevent memory leaks
@@ -65,13 +65,15 @@ export class SSEEventManager {
 
     // Note: With fetch-based approach, we don't have a direct way to cancel
     // The stream will be cancelled when the browser closes the connection
-    
   }
 
   /**
    * Subscribe to a specific event type
    */
-  public on(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): () => void {
+  public on(
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ): () => void {
     if (!this.listeners[eventType]) {
       this.listeners[eventType] = [];
     }
@@ -86,23 +88,34 @@ export class SSEEventManager {
   /**
    * Unsubscribe from a specific event type
    */
-  public off(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+  public off(
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ): void {
     if (this.listeners[eventType]) {
-      this.listeners[eventType] = this.listeners[eventType]!.filter(l => l !== listener);
+      this.listeners[eventType] = this.listeners[eventType]!.filter(
+        (l) => l !== listener
+      );
     }
   }
 
   /**
    * Compatibility method for addEventListener (similar to on())
    */
-  public addEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+  public addEventListener(
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ): void {
     this.on(eventType, listener);
   }
 
   /**
    * Compatibility method for removeEventListener (similar to off())
    */
-  public removeEventListener(eventType: AnySSEEvent['type'] | '*', listener: SSEEventListener): void {
+  public removeEventListener(
+    eventType: AnySSEEvent['type'] | '*',
+    listener: SSEEventListener
+  ): void {
     this.off(eventType, listener);
   }
 
@@ -132,20 +145,26 @@ export class SSEEventManager {
       return;
     }
 
-    console.log('SSE: Connecting to', `${authService.getURL()}/api/v1/events/stream`);
+    console.log(
+      'SSE: Connecting to',
+      `${authService.getURL()}/api/v1/events/stream`
+    );
 
     try {
       // Use SDK method with automatic authentication and retry
       this.connectWithSDKAuth();
-
     } catch (error) {
-      handleError(error, {
-        source: 'SSEEventManager.createConnection',
-        operation: 'SSE connection initialization'
-      }, {
-        showToast: false, // Don't show toast for connection failures
-        logToConsole: true
-      });
+      handleError(
+        error,
+        {
+          source: 'SSEEventManager.createConnection',
+          operation: 'SSE connection initialization',
+        },
+        {
+          showToast: false, // Don't show toast for connection failures
+          logToConsole: true,
+        }
+      );
       this.connectionStartTime = null;
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
@@ -169,7 +188,6 @@ export class SSEEventManager {
       this.isConnected = true;
       this.reconnectAttempts = 0;
       this.reconnectDelay = 1000;
-      
 
       // Emit connection established event
       this.emitEvent({
@@ -178,27 +196,30 @@ export class SSEEventManager {
         data: {
           user_id: '',
           connection_id: '',
-          established_at: new Date().toISOString()
+          established_at: new Date().toISOString(),
         },
         timestamp: new Date().toISOString(),
-        metadata: {}
+        metadata: {},
       } as AnySSEEvent);
 
       // Process the stream
       this.processStream(reader, decoder);
-
     } catch (error) {
       this.isConnected = false;
       this.connectionStartTime = null;
-      
-      handleError(error, {
-        source: 'SSEEventManager.connectWithSDKAuth',
-        operation: 'SSE stream connection'
-      }, {
-        showToast: false, // Don't show toast for connection failures
-        logToConsole: true
-      });
-      
+
+      handleError(
+        error,
+        {
+          source: 'SSEEventManager.connectWithSDKAuth',
+          operation: 'SSE stream connection',
+        },
+        {
+          showToast: false, // Don't show toast for connection failures
+          logToConsole: true,
+        }
+      );
+
       if (!this.isManuallyDisconnected) {
         this.scheduleReconnect();
       }
@@ -208,14 +229,16 @@ export class SSEEventManager {
   /**
    * Process the SSE stream manually
    */
-  private async processStream(reader: ReadableStreamDefaultReader<Uint8Array>, decoder: TextDecoder): Promise<void> {
+  private async processStream(
+    reader: ReadableStreamDefaultReader<Uint8Array>,
+    decoder: TextDecoder
+  ): Promise<void> {
     let buffer = '';
 
     try {
-       
       while (true) {
         const { done, value } = await reader.read();
-        
+
         if (done) {
           console.log('SSE: Stream ended');
           break;
@@ -230,13 +253,17 @@ export class SSEEventManager {
         }
       }
     } catch (error) {
-      handleError(error, {
-        source: 'SSEEventManager.processStream',
-        operation: 'SSE stream processing'
-      }, {
-        showToast: false, // Don't show toast for stream processing failures
-        logToConsole: true
-      });
+      handleError(
+        error,
+        {
+          source: 'SSEEventManager.processStream',
+          operation: 'SSE stream processing',
+        },
+        {
+          showToast: false, // Don't show toast for stream processing failures
+          logToConsole: true,
+        }
+      );
     } finally {
       this.isConnected = false;
       this.connectionStartTime = null;
@@ -253,19 +280,23 @@ export class SSEEventManager {
   private processSSELine(line: string): void {
     if (line.startsWith('data: ')) {
       const raw = line.slice(6); // Remove 'data: ' prefix
-      const data = raw.trim();   // Be robust to \r\n endings and whitespace
+      const data = raw.trim(); // Be robust to \r\n endings and whitespace
       try {
         const event = JSON.parse(data) as AnySSEEvent;
         this.emitEvent(event);
       } catch (error) {
-        handleError(error, {
-          source: 'SSEEventManager.processSSELine',
-          operation: 'SSE event parsing',
-          additionalData: { rawData: data }
-        }, {
-          showToast: false, // Don't show toast for parsing failures
-          logToConsole: true
-        });
+        handleError(
+          error,
+          {
+            source: 'SSEEventManager.processSSELine',
+            operation: 'SSE event parsing',
+            additionalData: { rawData: data },
+          },
+          {
+            showToast: false, // Don't show toast for parsing failures
+            logToConsole: true,
+          }
+        );
       }
     }
     // We can also handle other SSE fields like id:, event:, retry: if needed
@@ -275,15 +306,12 @@ export class SSEEventManager {
    * Emit an event to all registered listeners
    */
   private emitEvent(event: AnySSEEvent): void {
-    
-
     // Update event tracking
     this.eventCount++;
     this.lastEventTime = Date.now();
 
     // Basic event validation for security
     if (!this.isValidEvent(event)) {
-      
       return;
     }
 
@@ -292,42 +320,53 @@ export class SSEEventManager {
     // TODO: Process unified metadata when ready
 
     // Route high priority events to special handlers
-    if (unifiedMetadata?.priority === 'high' || unifiedMetadata?.priority === 'critical') {
+    if (
+      unifiedMetadata?.priority === 'high' ||
+      unifiedMetadata?.priority === 'critical'
+    ) {
       this.handleHighPriorityEvent(event, unifiedMetadata);
     }
 
     // Emit to specific event type listeners
     if (this.listeners[event.type]) {
-      this.listeners[event.type]!.forEach(listener => {
+      this.listeners[event.type]!.forEach((listener) => {
         try {
           listener(event);
         } catch (error) {
-          handleError(error, {
-            source: 'SSEEventManager.emitEvent',
-            operation: 'specific event listener execution',
-            additionalData: { eventType: event.type }
-          }, {
-            showToast: false, // Don't show toast for listener failures
-            logToConsole: true
-          });
+          handleError(
+            error,
+            {
+              source: 'SSEEventManager.emitEvent',
+              operation: 'specific event listener execution',
+              additionalData: { eventType: event.type },
+            },
+            {
+              showToast: false, // Don't show toast for listener failures
+              logToConsole: true,
+            }
+          );
         }
       });
     }
 
     // Emit to wildcard listeners
     if (this.listeners['*']) {
-      this.listeners['*'].forEach(listener => {
+      this.listeners['*'].forEach((listener) => {
         try {
           listener(event);
         } catch (error) {
-          handleError(error, {
-            source: 'SSEEventManager.emitEvent',
-            operation: 'wildcard event listener execution',
-            additionalData: { eventType: event.type }
-          }, {
-            showToast: false, // Don't show toast for listener failures
-            logToConsole: true
-          });
+          handleError(
+            error,
+            {
+              source: 'SSEEventManager.emitEvent',
+              operation: 'wildcard event listener execution',
+              additionalData: { eventType: event.type },
+            },
+            {
+              showToast: false, // Don't show toast for listener failures
+              logToConsole: true,
+            }
+          );
         }
       });
     }
@@ -348,14 +387,18 @@ export class SSEEventManager {
     }
 
     const obj = event as Record<string, unknown>;
-    
+
     // Required fields
     if (!obj.id || !obj.type || !obj.timestamp) {
       return false;
     }
 
     // Type validation
-    if (typeof obj.id !== 'string' || typeof obj.type !== 'string' || typeof obj.timestamp !== 'string') {
+    if (
+      typeof obj.id !== 'string' ||
+      typeof obj.type !== 'string' ||
+      typeof obj.timestamp !== 'string'
+    ) {
       return false;
     }
 
@@ -376,31 +419,38 @@ export class SSEEventManager {
    * Schedule a reconnection attempt
    */
   private scheduleReconnect(): void {
-    if (this.isManuallyDisconnected || this.reconnectAttempts >= this.maxReconnectAttempts) {
-      console.log(`SSE: Max reconnection attempts reached (${this.maxReconnectAttempts})`);
+    if (
+      this.isManuallyDisconnected ||
+      this.reconnectAttempts >= this.maxReconnectAttempts
+    ) {
+      console.log(
+        `SSE: Max reconnection attempts reached (${this.maxReconnectAttempts})`
+      );
       return;
     }
 
     this.reconnectAttempts++;
-    
+
     // Exponential backoff with jitter
     const jitter = Math.random() * 1000; // Add up to 1 second of random delay
     const delay = Math.min(
       this.reconnectDelay * Math.pow(1.5, this.reconnectAttempts - 1) + jitter,
       this.maxReconnectDelay
     );
-    
-    console.log(`SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`);
-    
+
+    console.log(
+      `SSE: Scheduling reconnection attempt ${this.reconnectAttempts}/${this.maxReconnectAttempts} in ${delay}ms`
+    );
+
     const timeout = setTimeout(() => {
       // Remove this timeout from tracking
       this.reconnectTimeouts.delete(timeout);
-      
+
       if (!this.isManuallyDisconnected) {
         this.createConnection();
       }
     }, delay);
-    
+
     // Track timeout for cleanup
     this.reconnectTimeouts.add(timeout);
   }
@@ -410,21 +460,20 @@ export class SSEEventManager {
    */
   private startHealthCheck(): void {
     this.stopHealthCheck(); // Ensure no duplicate intervals
-    
+
     this.healthCheckInterval = setInterval(() => {
       const now = Date.now();
-      
+
       // Check if we haven't received events in a while (but only if connected)
       if (this.isConnected && this.lastEventTime) {
         const timeSinceLastEvent = now - this.lastEventTime;
         const healthCheckTimeout = 60000; // 60 seconds
-        
+
         if (timeSinceLastEvent > healthCheckTimeout) {
-          
           // Could trigger a reconnection here if needed
         }
       }
-      
+
       // Log connection stats periodically
       if (this.connectionStartTime) {
         // Connection duration tracking for future use
@@ -452,8 +501,8 @@ export class SSEEventManager {
     reconnectAttempts: number;
     lastEventTime: number | null;
   } {
-    const connectionDuration = this.connectionStartTime 
-      ? Date.now() - this.connectionStartTime 
+    const connectionDuration = this.connectionStartTime
+      ? Date.now() - this.connectionStartTime
       : null;
 
     return {
@@ -487,7 +536,10 @@ export class SSEEventManager {
   /**
    * Handle high priority events with special treatment
    */
-  private handleHighPriorityEvent(event: AnySSEEvent, metadata: Record<string, unknown>): void {
+  private handleHighPriorityEvent(
+    event: AnySSEEvent,
+    metadata: Record<string, unknown>
+  ): void {
     // Log high priority events - handled by metadata tracking
 
     // Could trigger notifications, sounds, or other UI feedback
@@ -506,7 +558,7 @@ export class SSEEventManager {
       new Notification('Critical System Alert', {
         body: `${event.type}: ${event.data.message || 'Critical event occurred'}`,
         icon: '/favicon.ico',
-        tag: 'critical-alert'
+        tag: 'critical-alert',
       });
     }
   }
@@ -517,18 +569,22 @@ export class SSEEventManager {
   private emitToCategoryListeners(event: AnySSEEvent, category: string): void {
     const categoryKey = `category:${category}`;
     if (this.listeners[categoryKey]) {
-      this.listeners[categoryKey]!.forEach(listener => {
+      this.listeners[categoryKey]!.forEach((listener) => {
         try {
           listener(event);
         } catch (error) {
-          handleError(error, {
-            source: 'SSEEventManager.emitToCategoryListeners',
-            operation: 'category event listener execution',
-            additionalData: { category, eventType: event.type }
-          }, {
-            showToast: false, // Don't show toast for listener failures
-            logToConsole: true
-          });
+          handleError(
+            error,
+            {
+              source: 'SSEEventManager.emitToCategoryListeners',
+              operation: 'category event listener execution',
+              additionalData: { category, eventType: event.type },
+            },
+            {
+              showToast: false, // Don't show toast for listener failures
+              logToConsole: true,
+            }
+          );
         }
       });
     }
@@ -556,7 +612,9 @@ export class SSEEventManager {
   public offCategory(category: string, listener: SSEEventListener): void {
     const categoryKey = `category:${category}`;
     if (this.listeners[categoryKey]) {
-      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter(l => l !== listener);
+      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter(
+        (l) => l !== listener
+      );
     }
   }
 
@@ -577,7 +635,6 @@ export class SSEEventManager {
    */
   public async requestNotificationPermission(): Promise<boolean> {
     if (!('Notification' in window)) {
-      
       return false;
     }
 
@@ -602,18 +659,22 @@ export class SSEEventManager {
       const response = await authService.executeWithAuth(async (sdk) => {
         return await sdk.events.triggerTestEventApiV1EventsTestEvent();
       });
-      
+
       // Response processed successfully
       return true;
     } catch (error) {
-      handleError(error, {
-        source: 'SSEEventManager.triggerTestEvent',
-        operation: 'trigger test event'
-      }, {
-        showToast: true, // Show toast for test event failures since it's user-initiated
-        logToConsole: true,
-        fallbackMessage: 'Failed to trigger test event'
-      });
+      handleError(
+        error,
+        {
+          source: 'SSEEventManager.triggerTestEvent',
+          operation: 'trigger test event',
+        },
+        {
+          showToast: true, // Show toast for test event failures since it's user-initiated
+          logToConsole: true,
+          fallbackMessage: 'Failed to trigger test event',
+        }
+      );
       return false;
     }
   }
@@ -626,17 +687,21 @@ export class SSEEventManager {
       const response = await authService.executeWithAuth(async (sdk) => {
         return await sdk.events.getSseStatsApiV1EventsStats();
       });
-      
+
       return response;
     } catch (error) {
-      handleError(error, {
-        source: 'SSEEventManager.getSSEStats',
-        operation: 'get SSE statistics'
-      }, {
-        showToast: false, // Don't show toast for stats failures
-        logToConsole: true,
-        fallbackMessage: 'Failed to get SSE statistics'
-      });
+      handleError(
+        error,
+        {
+          source: 'SSEEventManager.getSSEStats',
+          operation: 'get SSE statistics',
+        },
+        {
+          showToast: false, // Don't show toast for stats failures
+          logToConsole: true,
+          fallbackMessage: 'Failed to get SSE statistics',
+        }
+      );
       return null;
     }
   }

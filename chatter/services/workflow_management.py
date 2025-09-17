@@ -611,7 +611,11 @@ class WorkflowManagementService:
         """Validate a workflow definition using simplified validation."""
         try:
             validation_result = simplified_workflow_validation_service.validate_workflow_definition(
-                {"nodes": nodes, "edges": edges, "name": "validation_check"}
+                {
+                    "nodes": nodes,
+                    "edges": edges,
+                    "name": "validation_check",
+                }
             )
 
             return {

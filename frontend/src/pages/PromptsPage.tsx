@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { 
+import {
   Dialog,
   DialogTitle,
   DialogContent,
@@ -7,31 +7,34 @@ import {
   Typography,
   Box,
   Chip,
-  Button
+  Button,
 } from '../utils/mui';
-import { 
-  CodeIcon,
-  RefreshIcon,
-  AddIcon
-} from '../utils/icons';
+import { CodeIcon, RefreshIcon, AddIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import { CrudPageHeader } from '../components/PageHeader';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
 import PromptForm from '../components/PromptForm';
-import { 
-  createCategoryChipRenderer, 
+import {
+  createCategoryChipRenderer,
   createTypeChipRenderer,
-  createDateRenderer
+  createDateRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { PromptResponse, PromptCreate, PromptUpdate } from 'chatter-sdk';
 
 const PromptsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
-  
+
   // State for view code dialog
   const [codeDialogOpen, setCodeDialogOpen] = useState(false);
-  const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(null);
+  const [selectedPrompt, setSelectedPrompt] = useState<PromptResponse | null>(
+    null
+  );
 
   // Handle view code action
   const handleViewCode = (prompt: PromptResponse) => {
@@ -66,9 +69,8 @@ const PromptsPage: React.FC = () => {
       id: 'variables',
       label: 'Variables',
       width: '150px',
-      render: (variables: any[]): void => (
-        variables?.length > 0 ? `${variables.length} variables` : 'None'
-      ),
+      render: (variables: any[]): void =>
+        variables?.length > 0 ? `${variables.length} variables` : 'None',
     },
     {
       id: 'updated_at',
@@ -146,12 +148,12 @@ const PromptsPage: React.FC = () => {
         FormComponent={PromptForm}
         getItemId={getItemId}
       />
-      
+
       {/* View Code Dialog */}
-      <Dialog 
-        open={codeDialogOpen} 
-        onClose={() => setCodeDialogOpen(false)} 
-        maxWidth="md" 
+      <Dialog
+        open={codeDialogOpen}
+        onClose={() => setCodeDialogOpen(false)}
+        maxWidth="md"
         fullWidth
       >
         <DialogTitle>
@@ -161,14 +163,14 @@ const PromptsPage: React.FC = () => {
                 {selectedPrompt.name}
               </Typography>
               <Box sx={{ mt: 1 }}>
-                <Chip 
-                  label={selectedPrompt.prompt_type} 
-                  size="small" 
+                <Chip
+                  label={selectedPrompt.prompt_type}
+                  size="small"
                   sx={{ mr: 1 }}
                 />
-                <Chip 
-                  label={selectedPrompt.category} 
-                  size="small" 
+                <Chip
+                  label={selectedPrompt.category}
+                  size="small"
                   color="secondary"
                 />
               </Box>
@@ -179,12 +181,19 @@ const PromptsPage: React.FC = () => {
           {selectedPrompt && (
             <Box>
               {selectedPrompt.description && (
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   {selectedPrompt.description}
                 </Typography>
               )}
-              
-              <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
+
+              <Typography
+                variant="subtitle2"
+                sx={{ mb: 1, fontWeight: 'bold' }}
+              >
                 Template Content:
               </Typography>
               <Box
@@ -198,59 +207,65 @@ const PromptsPage: React.FC = () => {
                   fontFamily: 'monospace',
                   fontSize: '0.875rem',
                   whiteSpace: 'pre-wrap',
-                  wordBreak: 'break-word'
+                  wordBreak: 'break-word',
                 }}
               >
                 {selectedPrompt.content}
               </Box>
-              
-              {selectedPrompt.variables && selectedPrompt.variables.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                    Template Variables:
-                  </Typography>
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                    {selectedPrompt.variables.map((variable, index): void => (
-                      <Chip
-                        key={index}
-                        label={`{${variable}}`}
-                        size="small"
-                        variant="outlined"
-                      />
-                    ))}
+
+              {selectedPrompt.variables &&
+                selectedPrompt.variables.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ mb: 1, fontWeight: 'bold' }}
+                    >
+                      Template Variables:
+                    </Typography>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {selectedPrompt.variables.map((variable, index): void => (
+                        <Chip
+                          key={index}
+                          label={`{${variable}}`}
+                          size="small"
+                          variant="outlined"
+                        />
+                      ))}
+                    </Box>
                   </Box>
-                </Box>
-              )}
-              
-              {selectedPrompt.examples && selectedPrompt.examples.length > 0 && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                    Examples:
-                  </Typography>
-                  <Box
-                    component="pre"
-                    sx={{
-                      backgroundColor: 'grey.50',
-                      padding: 1.5,
-                      borderRadius: 1,
-                      overflow: 'auto',
-                      maxHeight: '200px',
-                      fontFamily: 'monospace',
-                      fontSize: '0.8rem',
-                      whiteSpace: 'pre-wrap'
-                    }}
-                  >
-                    {JSON.stringify(selectedPrompt.examples, null, 2)}
+                )}
+
+              {selectedPrompt.examples &&
+                selectedPrompt.examples.length > 0 && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ mb: 1, fontWeight: 'bold' }}
+                    >
+                      Examples:
+                    </Typography>
+                    <Box
+                      component="pre"
+                      sx={{
+                        backgroundColor: 'grey.50',
+                        padding: 1.5,
+                        borderRadius: 1,
+                        overflow: 'auto',
+                        maxHeight: '200px',
+                        fontFamily: 'monospace',
+                        fontSize: '0.8rem',
+                        whiteSpace: 'pre-wrap',
+                      }}
+                    >
+                      {JSON.stringify(selectedPrompt.examples, null, 2)}
+                    </Box>
                   </Box>
-                </Box>
-              )}
+                )}
             </Box>
           )}
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setCodeDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setCodeDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </PageLayout>

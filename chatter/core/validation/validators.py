@@ -9,6 +9,7 @@ from urllib.parse import urlparse
 from ulid import ULID
 
 from chatter.config import settings
+
 from .context import ValidationContext
 from .exceptions import (
     BusinessValidationError,

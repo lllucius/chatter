@@ -39,8 +39,8 @@ from chatter.models.document import (
 from chatter.services.embeddings import EmbeddingError, EmbeddingService
 from chatter.utils.logging import get_logger
 from chatter.utils.memory_monitor import (
-    memory_monitor_context,
     check_memory_before_operation,
+    memory_monitor_context,
 )
 
 logger = get_logger(__name__)

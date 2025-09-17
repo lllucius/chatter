@@ -1,6 +1,6 @@
 /**
  * SSE Event Types and Interfaces
- * 
+ *
  * TypeScript definitions for Server-Sent Events from the Chatter platform
  */
 
@@ -22,7 +22,7 @@ export enum EventCategory {
   MONITORING = 'monitoring',
   STREAMING = 'streaming',
   ANALYTICS = 'analytics',
-  WORKFLOW = 'workflow'
+  WORKFLOW = 'workflow',
 }
 
 // Event priorities matching backend
@@ -30,7 +30,7 @@ export enum EventPriority {
   LOW = 'low',
   NORMAL = 'normal',
   HIGH = 'high',
-  CRITICAL = 'critical'
+  CRITICAL = 'critical',
 }
 
 // SSE Event Type constants for frontend usage
@@ -38,41 +38,41 @@ export enum SSEEventType {
   // Chat Events
   CHAT_MESSAGE_CHUNK = 'chat.message_chunk',
   CHAT_MESSAGE_COMPLETE = 'chat.message_complete',
-  
-  // Workflow Events  
+
+  // Workflow Events
   WORKFLOW_STATUS = 'workflow.status',
   WORKFLOW_STARTED = 'workflow.started',
   WORKFLOW_COMPLETED = 'workflow.completed',
   WORKFLOW_FAILED = 'workflow.failed',
-  
+
   // Document Events
   DOCUMENT_PROCESSING = 'document.processing_progress',
   DOCUMENT_UPLOADED = 'document.uploaded',
-  DOCUMENT_PROCESSING_STARTED = 'document.processing_started', 
+  DOCUMENT_PROCESSING_STARTED = 'document.processing_started',
   DOCUMENT_PROCESSING_COMPLETED = 'document.processing_completed',
   DOCUMENT_PROCESSING_FAILED = 'document.processing_failed',
-  
+
   // Job Events
   JOB_STARTED = 'job.started',
   JOB_COMPLETED = 'job.completed',
   JOB_FAILED = 'job.failed',
   JOB_PROGRESS = 'job.progress',
-  
+
   // Backup Events
   BACKUP_STARTED = 'backup.started',
   BACKUP_COMPLETED = 'backup.completed',
   BACKUP_FAILED = 'backup.failed',
   BACKUP_PROGRESS = 'backup.progress',
-  
+
   // Plugin Events
   PLUGIN_STARTED = 'plugin.started',
   PLUGIN_STOPPED = 'plugin.stopped',
   PLUGIN_ERROR = 'plugin.error',
-  
+
   // System Events
   SYSTEM_ALERT = 'system.alert',
   SYSTEM_STATUS = 'system.status',
-  CONNECTION_ESTABLISHED = 'connection.established'
+  CONNECTION_ESTABLISHED = 'connection.established',
 }
 
 // Enhanced event with unified system metadata
@@ -247,7 +247,7 @@ export interface ConnectionEstablishedEvent extends SSEEvent {
 }
 
 // Union type for all possible events
-export type AnySSEEvent = 
+export type AnySSEEvent =
   | BackupStartedEvent
   | BackupCompletedEvent
   | BackupFailedEvent
@@ -280,52 +280,52 @@ export type SSEEventListeners = {
 export const STATIC_EVENT_TYPES = [
   // Backup events
   'backup.started',
-  'backup.completed', 
+  'backup.completed',
   'backup.failed',
   'backup.progress',
-  
+
   // Job events
   'job.started',
   'job.completed',
-  'job.failed', 
+  'job.failed',
   'job.progress',
-  
+
   // Tool server events
   'tool_server.started',
   'tool_server.stopped',
   'tool_server.health_changed',
   'tool_server.error',
-  
+
   // Document events
   'document.uploaded',
   'document.processing_started',
   'document.processing_completed',
   'document.processing_failed',
   'document.processing_progress',
-  
+
   // Chat events
   'conversation.started',
   'conversation.ended',
   'message.received',
   'message.sent',
-  
+
   // User events
   'user.registered',
   'user.updated',
   'user.connected',
   'user.disconnected',
   'user.status_changed',
-  
+
   // Plugin events
   'plugin.installed',
   'plugin.activated',
   'plugin.deactivated',
   'plugin.error',
-  
+
   // Agent events
   'agent.created',
   'agent.updated',
-  
+
   // System events
   'system.alert',
   'system.status',
@@ -335,17 +335,12 @@ export const STATIC_EVENT_TYPES = [
 // Static filter options for common values
 export const STATIC_CATEGORIES = [
   'realtime',
-  'security', 
+  'security',
   'audit',
   'monitoring',
   'streaming',
   'analytics',
-  'workflow'
+  'workflow',
 ] as const;
 
-export const STATIC_PRIORITIES = [
-  'low',
-  'normal',
-  'high', 
-  'critical'
-] as const;
+export const STATIC_PRIORITIES = ['low', 'normal', 'high', 'critical'] as const;

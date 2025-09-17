@@ -11,7 +11,7 @@ export const formatFileSize = (bytes: number): string => {
   const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
   if (bytes === 0) return '0 Bytes';
   const i = Math.floor(Math.log(bytes) / Math.log(1024));
-  return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+  return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
 };
 
 /**
@@ -39,7 +39,16 @@ export const truncateText = (text: string, maxLength: number): string => {
  * @param status - Status string
  * @returns MUI color name
  */
-export const getStatusColor = (status: string): 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning' => {
+export const getStatusColor = (
+  status: string
+):
+  | 'default'
+  | 'primary'
+  | 'secondary'
+  | 'error'
+  | 'info'
+  | 'success'
+  | 'warning' => {
   switch (status.toLowerCase()) {
     case 'processed':
     case 'success':
@@ -104,5 +113,7 @@ export const debounce = <T extends (...args: unknown[]) => unknown>(
  * @returns Random string ID
  */
 export const generateId = (length: number = 8): string => {
-  return Math.random().toString(36).substring(2, 2 + length);
+  return Math.random()
+    .toString(36)
+    .substring(2, 2 + length);
 };

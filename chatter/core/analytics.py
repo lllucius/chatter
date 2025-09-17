@@ -16,9 +16,9 @@ except ImportError:
 from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.cache_factory import cache_factory, CacheType
-from chatter.core.cache_interface import CacheInterface
 from chatter.config import settings
+from chatter.core.cache_factory import CacheType, cache_factory
+from chatter.core.cache_interface import CacheInterface
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,
@@ -4095,10 +4095,11 @@ class UserBehaviorAnalyzer:
         """
         try:
             from datetime import timedelta
+
             from chatter.schemas.analytics import (
                 ChartDataPoint,
-                TimeSeriesDataPoint,
                 ChartReadyAnalytics,
+                TimeSeriesDataPoint,
             )
 
             # Get base analytics data
@@ -4260,8 +4261,8 @@ class UserBehaviorAnalyzer:
             # Return default chart data to prevent frontend errors
             from chatter.schemas.analytics import (
                 ChartDataPoint,
-                TimeSeriesDataPoint,
                 ChartReadyAnalytics,
+                TimeSeriesDataPoint,
             )
 
             # Minimal fallback data

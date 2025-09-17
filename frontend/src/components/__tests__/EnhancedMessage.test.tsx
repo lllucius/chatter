@@ -21,7 +21,7 @@ describe('EnhancedMessage', () => {
       };
 
       render(<EnhancedMessage message={validMessage} {...mockProps} />);
-      
+
       // The exact time displayed depends on timezone, but it should not be --:--
       const timeElement = screen.getByText(/\d{2}:\d{2}/);
       expect(timeElement).toBeInTheDocument();
@@ -30,13 +30,13 @@ describe('EnhancedMessage', () => {
     it('should display fallback time for invalid timestamps', () => {
       const invalidMessage: ChatMessage = {
         id: '2',
-        role: 'user', 
+        role: 'user',
         content: 'Test message with invalid timestamp',
         timestamp: new Date('invalid-date'),
       };
 
       render(<EnhancedMessage message={invalidMessage} {...mockProps} />);
-      
+
       // Should display fallback --:-- for invalid date
       expect(screen.getByText('--:--')).toBeInTheDocument();
     });
@@ -45,12 +45,12 @@ describe('EnhancedMessage', () => {
       const nullTimestampMessage: ChatMessage = {
         id: '3',
         role: 'user',
-        content: 'Test message with null timestamp', 
+        content: 'Test message with null timestamp',
         timestamp: null as unknown as Date, // Simulating null timestamp from API
       };
 
       render(<EnhancedMessage message={nullTimestampMessage} {...mockProps} />);
-      
+
       // Should display fallback --:-- for null timestamp
       expect(screen.getByText('--:--')).toBeInTheDocument();
     });
@@ -63,8 +63,10 @@ describe('EnhancedMessage', () => {
         timestamp: undefined as unknown as Date, // Simulating undefined timestamp from API
       };
 
-      render(<EnhancedMessage message={undefinedTimestampMessage} {...mockProps} />);
-      
+      render(
+        <EnhancedMessage message={undefinedTimestampMessage} {...mockProps} />
+      );
+
       // Should display fallback --:-- for undefined timestamp
       expect(screen.getByText('--:--')).toBeInTheDocument();
     });
@@ -104,10 +106,10 @@ describe('EnhancedMessage', () => {
 
       // Should show timestamp in top area
       expect(screen.getByText(/12:05/)).toBeInTheDocument();
-      
+
       // Should show rating section
       expect(screen.getByText('Rate this response:')).toBeInTheDocument();
-      
+
       // Should show tokens and processing time in the same area as rating
       expect(screen.getByText('25 tokens')).toBeInTheDocument();
       expect(screen.getByText('500ms')).toBeInTheDocument();
@@ -125,10 +127,10 @@ describe('EnhancedMessage', () => {
 
       // Should show timestamp in top area
       expect(screen.getByText(/12:10/)).toBeInTheDocument();
-      
+
       // Should show rating section
       expect(screen.getByText('Rate this response:')).toBeInTheDocument();
-      
+
       // Should not show tokens or processing time
       expect(screen.queryByText(/tokens/)).not.toBeInTheDocument();
       expect(screen.queryByText(/ms/)).not.toBeInTheDocument();
@@ -150,10 +152,10 @@ describe('EnhancedMessage', () => {
 
       // Should show timestamp in top area
       expect(screen.getByText(/12:15/)).toBeInTheDocument();
-      
+
       // Should show rating section
       expect(screen.getByText('Rate this response:')).toBeInTheDocument();
-      
+
       // Should show only tokens
       expect(screen.getByText('42 tokens')).toBeInTheDocument();
       expect(screen.queryByText(/\d+ms/)).not.toBeInTheDocument();

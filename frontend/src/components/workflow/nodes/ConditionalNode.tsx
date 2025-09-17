@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { CallSplit as ConditionalIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ConditionalNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const ConditionalNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#795548' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 200, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 200,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: '#8d6e63',
-          color: 'white'
+          color: 'white',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,29 +39,32 @@ const ConditionalNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected
             Decision point
           </Typography>
           {config.condition && (
-            <Chip 
-              label={config.condition.slice(0, 20) + (config.condition.length > 20 ? '...' : '')} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={
+                config.condition.slice(0, 20) +
+                (config.condition.length > 20 ? '...' : '')
+              }
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
               }}
             />
           )}
         </CardContent>
       </Card>
-      
+
       {/* Multiple output handles for different branches */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="true"
         style={{ background: '#4caf50', top: '40%' }}
       />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="false"
         style={{ background: '#f44336', top: '60%' }}
       />

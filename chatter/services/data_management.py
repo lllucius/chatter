@@ -659,12 +659,13 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> list[str]:
         """Get conversation IDs that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.conversation import (
             Conversation,
             ConversationStatus,
         )
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -705,9 +706,10 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> list[str]:
         """Get document IDs that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.document import Document, DocumentStatus
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -746,9 +748,10 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> list[str]:
         """Get prompt IDs that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.prompt import Prompt
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -781,12 +784,13 @@ class DataManager:
         sample_size: int = 10,
     ) -> list["Conversation"]:
         """Get sample conversations that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.conversation import (
             Conversation,
             ConversationStatus,
         )
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -828,9 +832,10 @@ class DataManager:
         sample_size: int = 10,
     ) -> list["Document"]:
         """Get sample documents that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.document import Document, DocumentStatus
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -868,9 +873,10 @@ class DataManager:
         sample_size: int = 10,
     ) -> list["Prompt"]:
         """Get sample prompts that match the filters."""
+        from sqlalchemy import and_, select
+
         from chatter.models.prompt import Prompt
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -899,12 +905,13 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> int:
         """Count conversations that match the filters."""
+        from sqlalchemy import and_, func, select
+
         from chatter.models.conversation import (
             Conversation,
             ConversationStatus,
         )
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, func, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -941,9 +948,10 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> int:
         """Count documents that match the filters."""
+        from sqlalchemy import and_, func, select
+
         from chatter.models.document import Document, DocumentStatus
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, func, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
@@ -978,9 +986,10 @@ class DataManager:
         self, filters: "BulkOperationFilters", user_id: str
     ) -> int:
         """Count prompts that match the filters."""
+        from sqlalchemy import and_, func, select
+
         from chatter.models.prompt import Prompt
         from chatter.utils.database import get_session_maker
-        from sqlalchemy import and_, func, select
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:

@@ -10,9 +10,9 @@ from rich.table import Table
 from chatter.commands import (
     console,
     get_client,
-    run_async,
     get_default_page_size,
     get_message_display_limit,
+    run_async,
 )
 
 # Chat Commands

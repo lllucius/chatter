@@ -1,11 +1,12 @@
 """Tests for embedding service API key handling."""
 
-import pytest
-from unittest.mock import Mock, patch, AsyncMock
 import os
+from unittest.mock import Mock, patch
 
-from chatter.services.embeddings import EmbeddingService
+import pytest
+
 from chatter.models.registry import ProviderType
+from chatter.services.embeddings import EmbeddingService
 
 
 class TestEmbeddingServiceApiKeyHandling:

@@ -4,14 +4,19 @@ import { Typography } from '../utils/mui';
 import { RefreshIcon, AddIcon } from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
 import ProfileForm from '../components/ProfileForm';
-import { 
-  createNameWithDescriptionRenderer, 
+import {
+  createNameWithDescriptionRenderer,
   createCategoryChipRenderer,
-  createMonospaceTextRenderer 
+  createMonospaceTextRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { ProfileResponse, ProfileCreate, ProfileUpdate } from 'chatter-sdk';
 
 const ProfilesPage: React.FC = () => {
@@ -28,7 +33,10 @@ const ProfilesPage: React.FC = () => {
       id: 'llmProvider',
       label: 'Provider',
       width: '120px',
-      render: createCategoryChipRenderer<ProfileResponse>('primary', 'outlined'),
+      render: createCategoryChipRenderer<ProfileResponse>(
+        'primary',
+        'outlined'
+      ),
     },
     {
       id: 'llmModel',
@@ -40,29 +48,29 @@ const ProfilesPage: React.FC = () => {
       id: 'temperature',
       label: 'Temperature',
       width: '120px',
-      render: createCategoryChipRenderer<ProfileResponse>('secondary', 'outlined'),
+      render: createCategoryChipRenderer<ProfileResponse>(
+        'secondary',
+        'outlined'
+      ),
     },
     {
       id: 'maxTokens',
       label: 'Max Tokens',
       width: '120px',
-      render: (value?: number): void => (
+      render: (value?: number): void =>
         value ? (
-          <Typography variant="body2">
-            {value.toLocaleString()}
-          </Typography>
+          <Typography variant="body2">{value.toLocaleString()}</Typography>
         ) : (
           <Typography variant="body2" color="text.secondary">
             Unlimited
           </Typography>
-        )
-      ),
+        ),
     },
     {
       id: 'createdAt',
       label: 'Created',
       width: '140px',
-      render: (value: Date) => value ? format(value, 'MMM dd, yyyy') : '',
+      render: (value: Date) => (value ? format(value, 'MMM dd, yyyy') : ''),
     },
   ];
 
@@ -97,10 +105,8 @@ const ProfilesPage: React.FC = () => {
     },
 
     update: async (id: string, data: ProfileUpdate) => {
-      const response = await getSDK().profiles.updateProfileApiV1ProfilesProfileId(
-        id,
-        data
-      );
+      const response =
+        await getSDK().profiles.updateProfileApiV1ProfilesProfileId(id, data);
       return response;
     },
 

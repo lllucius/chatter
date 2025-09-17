@@ -37,11 +37,11 @@ import {
   Visibility as ViewIcon,
 } from '@mui/icons-material';
 import { format, differenceInSeconds } from 'date-fns';
-import { 
-  XAxis, 
-  YAxis, 
-  CartesianGrid, 
-  Tooltip as RechartsTooltip, 
+import {
+  XAxis,
+  YAxis,
+  CartesianGrid,
+  Tooltip as RechartsTooltip,
   ResponsiveContainer,
   AreaChart,
   Area,
@@ -51,7 +51,13 @@ interface WorkflowExecution {
   id: string;
   workflowId: string;
   workflowName: string;
-  status: 'queued' | 'running' | 'completed' | 'failed' | 'paused' | 'cancelled';
+  status:
+    | 'queued'
+    | 'running'
+    | 'completed'
+    | 'failed'
+    | 'paused'
+    | 'cancelled';
   startTime: Date;
   endTime?: Date;
   progress: number;
@@ -95,9 +101,12 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
   autoRefresh = true,
   refreshInterval = 5000,
 }) => {
-  const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+  const [selectedExecution, setSelectedExecution] =
+    useState<WorkflowExecution | null>(null);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [performanceData, setPerformanceData] = useState<Array<{ timestamp: string; tokensPerSecond: number; latency: number }>>([]);
+  const [performanceData, setPerformanceData] = useState<
+    Array<{ timestamp: string; tokensPerSecond: number; latency: number }>
+  >([]);
 
   // Auto-refresh functionality
   useEffect(() => {
@@ -112,50 +121,69 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
 
   // Generate performance data for visualization
   useEffect(() => {
-    const runningExecutions = executions.filter(e => e.status === 'running');
+    const runningExecutions = executions.filter((e) => e.status === 'running');
     if (runningExecutions.length === 0) return;
 
-    const newData = runningExecutions.map(execution => ({
+    const newData = runningExecutions.map((execution) => ({
       time: new Date().toISOString(),
       executionId: execution.id,
-      tokensPerSecond: execution.metrics.tokensUsed / Math.max(execution.metrics.executionTime, 1),
+      tokensPerSecond:
+        execution.metrics.tokensUsed /
+        Math.max(execution.metrics.executionTime, 1),
       memoryUsage: execution.metrics.memoryUsage,
-      apiCallsPerMinute: (execution.metrics.apiCalls / Math.max(execution.metrics.executionTime / 60, 1)),
+      apiCallsPerMinute:
+        execution.metrics.apiCalls /
+        Math.max(execution.metrics.executionTime / 60, 1),
     }));
 
-    setPerformanceData(prev => [...prev.slice(-20), ...newData]);
+    setPerformanceData((prev) => [...prev.slice(-20), ...newData]);
   }, [executions]);
 
   const getStatusIcon = (status: WorkflowExecution['status']) => {
     switch (status) {
-      case 'running': return <RunningIcon color="primary" />;
-      case 'completed': return <CompletedIcon color="success" />;
-      case 'failed': return <ErrorIcon color="error" />;
-      case 'paused': return <PausedIcon color="warning" />;
-      case 'cancelled': return <StopIcon color="action" />;
-      case 'queued': return <CircularProgress size={20} />;
-      default: return <WarningIcon color="warning" />;
+      case 'running':
+        return <RunningIcon color="primary" />;
+      case 'completed':
+        return <CompletedIcon color="success" />;
+      case 'failed':
+        return <ErrorIcon color="error" />;
+      case 'paused':
+        return <PausedIcon color="warning" />;
+      case 'cancelled':
+        return <StopIcon color="action" />;
+      case 'queued':
+        return <CircularProgress size={20} />;
+      default:
+        return <WarningIcon color="warning" />;
     }
   };
 
   const getStatusColor = (status: WorkflowExecution['status']) => {
     switch (status) {
-      case 'running': return 'info' as const;
-      case 'completed': return 'success' as const;
-      case 'failed': return 'error' as const;
-      case 'paused': return 'warning' as const;
-      case 'cancelled': return 'default' as const;
-      case 'queued': return 'default' as const;
-      default: return 'default' as const;
+      case 'running':
+        return 'info' as const;
+      case 'completed':
+        return 'success' as const;
+      case 'failed':
+        return 'error' as const;
+      case 'paused':
+        return 'warning' as const;
+      case 'cancelled':
+        return 'default' as const;
+      case 'queued':
+        return 'default' as const;
+      default:
+        return 'default' as const;
     }
   };
 
   const formatDuration = (startTime: Date, endTime?: Date) => {
     const end = endTime || new Date();
     const duration = differenceInSeconds(end, startTime);
-    
+
     if (duration < 60) return `${duration}s`;
-    if (duration < 3600) return `${Math.floor(duration / 60)}m ${duration % 60}s`;
+    if (duration < 3600)
+      return `${Math.floor(duration / 60)}m ${duration % 60}s`;
     return `${Math.floor(duration / 3600)}h ${Math.floor((duration % 3600) / 60)}m`;
   };
 
@@ -164,7 +192,9 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
     setDetailDialogOpen(true);
   };
 
-  const runningExecutions = executions.filter(e => ['running', 'queued'].includes(e.status));
+  const runningExecutions = executions.filter((e) =>
+    ['running', 'queued'].includes(e.status)
+  );
 
   return (
     <Box>
@@ -182,7 +212,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -190,14 +220,18 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 Total Today
               </Typography>
               <Typography variant="h4">
-                {executions.filter(e => 
-                  format(e.startTime, 'yyyy-MM-dd') === format(new Date(), 'yyyy-MM-dd')
-                ).length}
+                {
+                  executions.filter(
+                    (e) =>
+                      format(e.startTime, 'yyyy-MM-dd') ===
+                      format(new Date(), 'yyyy-MM-dd')
+                  ).length
+                }
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -205,14 +239,20 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 Success Rate
               </Typography>
               <Typography variant="h4" color="success">
-                {executions.length > 0 
-                  ? Math.round((executions.filter(e => e.status === 'completed').length / executions.length) * 100)
-                  : 0}%
+                {executions.length > 0
+                  ? Math.round(
+                      (executions.filter((e) => e.status === 'completed')
+                        .length /
+                        executions.length) *
+                        100
+                    )
+                  : 0}
+                %
               </Typography>
             </CardContent>
           </Card>
         </Grid>
-        
+
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
@@ -220,13 +260,17 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                 Avg Duration
               </Typography>
               <Typography variant="h4">
-                {executions.filter(e => e.endTime).length > 0
-                  ? `${Math.round(executions
-                      .filter(e => e.endTime)
-                      .reduce((acc, e) => acc + differenceInSeconds(e.endTime!, e.startTime), 0) 
-                      / executions.filter(e => e.endTime).length)}s`
-                  : 'N/A'
-                }
+                {executions.filter((e) => e.endTime).length > 0
+                  ? `${Math.round(
+                      executions
+                        .filter((e) => e.endTime)
+                        .reduce(
+                          (acc, e) =>
+                            acc + differenceInSeconds(e.endTime!, e.startTime),
+                          0
+                        ) / executions.filter((e) => e.endTime).length
+                    )}s`
+                  : 'N/A'}
               </Typography>
             </CardContent>
           </Card>
@@ -238,10 +282,15 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
         <Grid item xs={12} lg={8}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 2 }}>
-                <Typography variant="h6">
-                  Active Workflow Executions
-                </Typography>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'center',
+                  mb: 2,
+                }}
+              >
+                <Typography variant="h6">Active Workflow Executions</Typography>
                 <Button
                   startIcon={<RefreshIcon />}
                   onClick={onRefresh}
@@ -251,7 +300,7 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   Refresh
                 </Button>
               </Box>
-              
+
               {runningExecutions.length === 0 ? (
                 <Alert severity="info">No active workflow executions.</Alert>
               ) : (
@@ -264,26 +313,39 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                         </ListItemIcon>
                         <ListItemText
                           primary={
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                            <Box
+                              sx={{
+                                display: 'flex',
+                                alignItems: 'center',
+                                gap: 1,
+                              }}
+                            >
                               <Typography variant="subtitle1">
                                 {execution.workflowName}
                               </Typography>
-                              <Chip 
-                                label={execution.status} 
-                                size="small" 
+                              <Chip
+                                label={execution.status}
+                                size="small"
                                 color={getStatusColor(execution.status)}
                               />
                             </Box>
                           }
                           secondary={
                             <Box>
-                              <Typography variant="body2" color="text.secondary">
-                                Started: {format(execution.startTime, 'HH:mm:ss')} • 
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Started:{' '}
+                                {format(execution.startTime, 'HH:mm:ss')} •
                                 Duration: {formatDuration(execution.startTime)}
                               </Typography>
-                              <Typography variant="body2" color="text.secondary">
-                                Step {execution.completedSteps} of {execution.totalSteps} • 
-                                {execution.currentStep}
+                              <Typography
+                                variant="body2"
+                                color="text.secondary"
+                              >
+                                Step {execution.completedSteps} of{' '}
+                                {execution.totalSteps} •{execution.currentStep}
                               </Typography>
                               <LinearProgress
                                 variant="determinate"
@@ -295,12 +357,17 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                         />
                         <Box sx={{ display: 'flex', gap: 1 }}>
                           <Tooltip title="View Details">
-                            <IconButton onClick={() => openExecutionDetails(execution)}>
+                            <IconButton
+                              onClick={() => openExecutionDetails(execution)}
+                            >
                               <ViewIcon />
                             </IconButton>
                           </Tooltip>
                           <Tooltip title="Stop Execution">
-                            <IconButton onClick={() => onStop(execution.id)} color="error">
+                            <IconButton
+                              onClick={() => onStop(execution.id)}
+                              color="error"
+                            >
                               <StopIcon />
                             </IconButton>
                           </Tooltip>
@@ -330,14 +397,19 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   </Box>
                   <Typography variant="h6">
                     {runningExecutions.length > 0
-                      ? Math.round(runningExecutions.reduce((acc, e) => 
-                          acc + (e.metrics.tokensUsed / Math.max(e.metrics.executionTime, 1)), 0
-                        ) / runningExecutions.length)
-                      : 0
-                    }
+                      ? Math.round(
+                          runningExecutions.reduce(
+                            (acc, e) =>
+                              acc +
+                              e.metrics.tokensUsed /
+                                Math.max(e.metrics.executionTime, 1),
+                            0
+                          ) / runningExecutions.length
+                        )
+                      : 0}
                   </Typography>
                 </Box>
-                
+
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <MemoryIcon color="warning" />
@@ -345,12 +417,17 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   </Box>
                   <Typography variant="h6">
                     {runningExecutions.length > 0
-                      ? Math.round(runningExecutions.reduce((acc, e) => acc + e.metrics.memoryUsage, 0) / runningExecutions.length)
-                      : 0
-                    } MB
+                      ? Math.round(
+                          runningExecutions.reduce(
+                            (acc, e) => acc + e.metrics.memoryUsage,
+                            0
+                          ) / runningExecutions.length
+                        )
+                      : 0}{' '}
+                    MB
                   </Typography>
                 </Box>
-                
+
                 <Box>
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                     <StorageIcon color="info" />
@@ -358,11 +435,16 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                   </Box>
                   <Typography variant="h6">
                     {runningExecutions.length > 0
-                      ? Math.round(runningExecutions.reduce((acc, e) => 
-                          acc + (e.metrics.apiCalls / Math.max(e.metrics.executionTime / 60, 1)), 0
-                        ) / runningExecutions.length)
-                      : 0
-                    }
+                      ? Math.round(
+                          runningExecutions.reduce(
+                            (acc, e) =>
+                              acc +
+                              e.metrics.apiCalls /
+                                Math.max(e.metrics.executionTime / 60, 1),
+                            0
+                          ) / runningExecutions.length
+                        )
+                      : 0}
                   </Typography>
                 </Box>
               </Box>
@@ -378,11 +460,19 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
               <ResponsiveContainer width="100%" height={200}>
                 <AreaChart data={performanceData.slice(-10)}>
                   <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis dataKey="time" tickFormatter={(time) => format(new Date(time), 'HH:mm')} />
+                  <XAxis
+                    dataKey="time"
+                    tickFormatter={(time) => format(new Date(time), 'HH:mm')}
+                  />
                   <YAxis />
                   <RechartsTooltip
-                    labelFormatter={(time) => format(new Date(time), 'HH:mm:ss')}
-                    formatter={(value: number, name: string) => [Math.round(value), name]}
+                    labelFormatter={(time) =>
+                      format(new Date(time), 'HH:mm:ss')
+                    }
+                    formatter={(value: number, name: string) => [
+                      Math.round(value),
+                      name,
+                    ]}
                   />
                   <Area
                     type="monotone"
@@ -400,8 +490,8 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
       </Grid>
 
       {/* Execution Details Dialog */}
-      <Dialog 
-        open={detailDialogOpen} 
+      <Dialog
+        open={detailDialogOpen}
         onClose={() => setDetailDialogOpen(false)}
         maxWidth="lg"
         fullWidth
@@ -419,24 +509,45 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Execution Status</Typography>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 2 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Execution Status
+                  </Typography>
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      alignItems: 'center',
+                      gap: 1,
+                      mb: 2,
+                    }}
+                  >
                     {getStatusIcon(selectedExecution.status)}
-                    <Chip 
-                      label={selectedExecution.status} 
+                    <Chip
+                      label={selectedExecution.status}
                       color={getStatusColor(selectedExecution.status)}
                     />
                   </Box>
                   <Typography variant="body2">
-                    Started: {format(selectedExecution.startTime, 'MMM dd, yyyy HH:mm:ss')}
+                    Started:{' '}
+                    {format(
+                      selectedExecution.startTime,
+                      'MMM dd, yyyy HH:mm:ss'
+                    )}
                   </Typography>
                   {selectedExecution.endTime && (
                     <Typography variant="body2">
-                      Ended: {format(selectedExecution.endTime, 'MMM dd, yyyy HH:mm:ss')}
+                      Ended:{' '}
+                      {format(
+                        selectedExecution.endTime,
+                        'MMM dd, yyyy HH:mm:ss'
+                      )}
                     </Typography>
                   )}
                   <Typography variant="body2">
-                    Duration: {formatDuration(selectedExecution.startTime, selectedExecution.endTime)}
+                    Duration:{' '}
+                    {formatDuration(
+                      selectedExecution.startTime,
+                      selectedExecution.endTime
+                    )}
                   </Typography>
                   <LinearProgress
                     variant="determinate"
@@ -444,60 +555,79 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
                     sx={{ mt: 2, height: 8, borderRadius: 4 }}
                   />
                   <Typography variant="caption" color="text.secondary">
-                    {selectedExecution.completedSteps} of {selectedExecution.totalSteps} steps completed
+                    {selectedExecution.completedSteps} of{' '}
+                    {selectedExecution.totalSteps} steps completed
                   </Typography>
                 </Paper>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Metrics</Typography>
-                  <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}>
+                  <Typography variant="h6" gutterBottom>
+                    Metrics
+                  </Typography>
+                  <Box
+                    sx={{ display: 'flex', flexDirection: 'column', gap: 1 }}
+                  >
                     <Typography variant="body2">
-                      Tokens Used: {selectedExecution.metrics.tokensUsed.toLocaleString()}
+                      Tokens Used:{' '}
+                      {selectedExecution.metrics.tokensUsed.toLocaleString()}
                     </Typography>
                     <Typography variant="body2">
-                      API Calls: {selectedExecution.metrics.apiCalls.toLocaleString()}
+                      API Calls:{' '}
+                      {selectedExecution.metrics.apiCalls.toLocaleString()}
                     </Typography>
                     <Typography variant="body2">
                       Memory Usage: {selectedExecution.metrics.memoryUsage} MB
                     </Typography>
                     <Typography variant="body2">
-                      Estimated Cost: ${selectedExecution.metrics.cost.toFixed(4)}
+                      Estimated Cost: $
+                      {selectedExecution.metrics.cost.toFixed(4)}
                     </Typography>
                   </Box>
                 </Paper>
               </Grid>
-              
+
               {selectedExecution.error && (
                 <Grid item xs={12}>
                   <Alert severity="error">
-                    <Typography variant="subtitle2">Error in step: {selectedExecution.error.stepId}</Typography>
-                    <Typography variant="body2">{selectedExecution.error.message}</Typography>
+                    <Typography variant="subtitle2">
+                      Error in step: {selectedExecution.error.stepId}
+                    </Typography>
+                    <Typography variant="body2">
+                      {selectedExecution.error.message}
+                    </Typography>
                     <Typography variant="caption">
                       {format(selectedExecution.error.timestamp, 'HH:mm:ss')}
                     </Typography>
                   </Alert>
                 </Grid>
               )}
-              
+
               <Grid item xs={12}>
                 <Paper variant="outlined" sx={{ p: 2 }}>
-                  <Typography variant="h6" gutterBottom>Execution Logs</Typography>
+                  <Typography variant="h6" gutterBottom>
+                    Execution Logs
+                  </Typography>
                   <Box sx={{ maxHeight: 300, overflow: 'auto' }}>
                     {selectedExecution.logs.map((log, index) => (
                       <Box key={index} sx={{ mb: 1 }}>
-                        <Typography 
-                          variant="body2" 
+                        <Typography
+                          variant="body2"
                           component="pre"
-                          sx={{ 
-                            color: log.level === 'error' ? 'error.main' : 
-                                  log.level === 'warn' ? 'warning.main' : 'text.primary',
+                          sx={{
+                            color:
+                              log.level === 'error'
+                                ? 'error.main'
+                                : log.level === 'warn'
+                                  ? 'warning.main'
+                                  : 'text.primary',
                             fontFamily: 'monospace',
                             fontSize: '0.875rem',
                           }}
                         >
-                          [{format(log.timestamp, 'HH:mm:ss')}] {log.level.toUpperCase()}: {log.message}
+                          [{format(log.timestamp, 'HH:mm:ss')}]{' '}
+                          {log.level.toUpperCase()}: {log.message}
                         </Typography>
                       </Box>
                     ))}
@@ -509,16 +639,14 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
         </DialogContent>
         <DialogActions>
           {selectedExecution?.status === 'failed' && (
-            <Button 
+            <Button
               onClick={() => selectedExecution && onRetry(selectedExecution.id)}
               color="primary"
             >
               Retry
             </Button>
           )}
-          <Button onClick={() => setDetailDialogOpen(false)}>
-            Close
-          </Button>
+          <Button onClick={() => setDetailDialogOpen(false)}>Close</Button>
         </DialogActions>
       </Dialog>
     </Box>

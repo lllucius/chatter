@@ -266,7 +266,7 @@ async def version_middleware(
     # Check if version is supported
     if not version_manager.is_version_supported(version):
         raise HTTPException(
-            status_code=400,
+            status_code=400, from e
             detail=f"API version {version.value} is not supported",
         )
 
@@ -284,7 +284,7 @@ async def version_middleware(
         clean_path, method, version
     ):
         raise HTTPException(
-            status_code=404,
+            status_code=404, from e
             detail=f"Endpoint not available in API version {version.value}",
         )
 

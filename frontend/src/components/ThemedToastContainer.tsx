@@ -33,8 +33,10 @@ const ThemedToastContainer: React.FC = () => {
     '--toastify-text-color-error': isDark ? '#ffffff' : '#d32f2f',
     '--toastify-spinner-color': '#616161',
     '--toastify-spinner-color-empty-area': '#e0e0e0',
-    '--toastify-color-progress-light': 'linear-gradient(to right, #4caf50, #81c784, #4caf50, #81c784)',
-    '--toastify-color-progress-dark': 'linear-gradient(to right, #56d364, #238636, #56d364, #238636)',
+    '--toastify-color-progress-light':
+      'linear-gradient(to right, #4caf50, #81c784, #4caf50, #81c784)',
+    '--toastify-color-progress-dark':
+      'linear-gradient(to right, #56d364, #238636, #56d364, #238636)',
     '--toastify-color-progress-info': isDark ? '#2196f3' : '#1976d2',
     '--toastify-color-progress-success': isDark ? '#4caf50' : '#2e7d32',
     '--toastify-color-progress-warning': isDark ? '#ff9800' : '#ed6c02',

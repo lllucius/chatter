@@ -17,9 +17,8 @@ from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.pregel import Pregel
 
-from chatter.models.base import generate_ulid
-
 from chatter.config import settings
+from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -321,22 +320,25 @@ class LangGraphWorkflowManager:
                         "content",
                         str(summary_response),
                     )
-                    
+
                     # Clean the summary to ensure it's just factual content
                     # Remove conversational elements that might confuse the main model
                     summary = raw_summary.strip()
-                    
+
                     # If the summary looks like a conversational response rather than a summary,
                     # replace it with a simple summary
-                    if any(phrase in summary.lower() for phrase in [
-                        "there is no conversation history",
-                        "conversation just started", 
-                        "what would you like",
-                        "i can help",
-                        "how can i assist"
-                    ]):
+                    if any(
+                        phrase in summary.lower()
+                        for phrase in [
+                            "there is no conversation history",
+                            "conversation just started",
+                            "what would you like",
+                            "i can help",
+                            "how can i assist",
+                        ]
+                    ):
                         summary = "Summary: Initial conversation with basic greetings and introductions."
-                    
+
                     # Ensure summary is prefixed appropriately for context use
                     if not summary.lower().startswith("summary:"):
                         summary = f"Summary: {summary}"
@@ -345,7 +347,7 @@ class LangGraphWorkflowManager:
                         "Created conversation summary",
                         summary_length=len(summary),
                         older_messages_count=len(older_messages),
-                        recent_messages_count=len(recent_messages)
+                        recent_messages_count=len(recent_messages),
                     )
 
                     return {
@@ -354,7 +356,7 @@ class LangGraphWorkflowManager:
                         "memory_context": {
                             "summarized_messages": len(older_messages),
                             "kept_messages": len(recent_messages),
-                            "summary_created": True
+                            "summary_created": True,
                         },
                     }
                 except Exception as e:
@@ -385,12 +387,16 @@ class LangGraphWorkflowManager:
                     if state.get("conversation_summary"):
                         summary = state["conversation_summary"]
                         # Ensure the summary is properly formatted for context use
-                        if summary and not summary.lower().startswith(("summary:", "context:", "previous conversation:")):
+                        if summary and not summary.lower().startswith(
+                            (
+                                "summary:",
+                                "context:",
+                                "previous conversation:",
+                            )
+                        ):
                             summary = f"Context from previous conversation: {summary}"
-                        
-                        prefixed.append(
-                            SystemMessage(content=summary)
-                        )
+
+                        prefixed.append(SystemMessage(content=summary))
 
                     if use_retriever and state.get("retrieval_context"):
                         context = state.get("retrieval_context") or ""
@@ -399,11 +405,19 @@ class LangGraphWorkflowManager:
                             "If the context doesn't contain relevant information, say so clearly."
                         )
                         focused_system_message = base + (
-                            f"\n\nContext:\n{context}" if context else ""
+                            f"\n\nContext:\n{context}"
+                            if context
+                            else ""
                         )
-                        prefixed.append(SystemMessage(content=focused_system_message))
+                        prefixed.append(
+                            SystemMessage(
+                                content=focused_system_message
+                            )
+                        )
                     elif system_message:
-                        prefixed.append(SystemMessage(content=system_message))
+                        prefixed.append(
+                            SystemMessage(content=system_message)
+                        )
 
                     # Only include the last user message for focused response
                     prefixed.append(last_human_message)
@@ -414,14 +428,14 @@ class LangGraphWorkflowManager:
             if state.get("conversation_summary"):
                 summary = state["conversation_summary"]
                 # Ensure the summary is properly formatted for context use
-                if summary and not summary.lower().startswith(("summary:", "context:", "previous conversation:")):
-                    summary = f"Context from previous conversation: {summary}"
-                
-                prefixed.append(
-                    SystemMessage(
-                        content=summary
+                if summary and not summary.lower().startswith(
+                    ("summary:", "context:", "previous conversation:")
+                ):
+                    summary = (
+                        f"Context from previous conversation: {summary}"
                     )
-                )
+
+                prefixed.append(SystemMessage(content=summary))
 
             rag_system_message = None
             if use_retriever:
@@ -701,7 +715,11 @@ class LangGraphWorkflowManager:
         try:
             # Use astream_events for rich event streaming
             async for event in self._stream_with_astream_events(
-                workflow, initial_state, config, enable_llm_streaming, enable_node_tracing
+                workflow,
+                initial_state,
+                config,
+                enable_llm_streaming,
+                enable_node_tracing,
             ):
                 yield event
         except Exception as e:
@@ -774,7 +792,9 @@ class LangGraphWorkflowManager:
             )
             # Fallback to regular astream if astream_events fails
             logger.info("Falling back to regular astream")
-            async for event in workflow.astream(initial_state, config=config):
+            async for event in workflow.astream(
+                initial_state, config=config
+            ):
                 yield event
 
     async def _convert_astream_event(
@@ -798,7 +818,10 @@ class LangGraphWorkflowManager:
         event_data = event.get("data", {})
 
         # Handle LLM streaming events
-        if enable_llm_streaming and event_type == "on_chat_model_stream":
+        if (
+            enable_llm_streaming
+            and event_type == "on_chat_model_stream"
+        ):
             # Extract token content from the streaming chunk
             chunk = event_data.get("chunk")
             if chunk and hasattr(chunk, "content"):
@@ -827,7 +850,7 @@ class LangGraphWorkflowManager:
                         "metadata": {
                             "model": event_name,
                             "parent_ids": event.get("parent_ids", []),
-                        }
+                        },
                     }
                 }
 
@@ -875,7 +898,11 @@ class LangGraphWorkflowManager:
                 }
 
         # Handle regular node completion events (fallback)
-        if event_type == "on_chain_end" and event_name and not enable_node_tracing:
+        if (
+            event_type == "on_chain_end"
+            and event_name
+            and not enable_node_tracing
+        ):
             output = event_data.get("output")
             if output:
                 return {event_name: output}
@@ -1188,12 +1215,16 @@ class LangGraphWorkflowManager:
             builtin_tools = get_builtin_tools()
             if builtin_tools:
                 tools.extend(builtin_tools)
-                logger.debug(f"Added {len(builtin_tools)} builtin tools")
+                logger.debug(
+                    f"Added {len(builtin_tools)} builtin tools"
+                )
 
             # Note: MCP tools are loaded asynchronously in the LLM service
             # when creating workflows, so we don't load them here to avoid
             # blocking synchronous calls
-            logger.debug(f"Configured tools for workspace: {workspace_id}, total: {len(tools)}")
+            logger.debug(
+                f"Configured tools for workspace: {workspace_id}, total: {len(tools)}"
+            )
 
             return tools
 

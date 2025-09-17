@@ -10,13 +10,13 @@ vi.mock('../../services/auth-service', (): void => ({
   getSDK: vi.fn((): void => ({
     agents: {
       listAgentsApiV1Agents: vi.fn().mockResolvedValue({
-        data: []
-      })
-    }
+        data: [],
+      }),
+    },
   })),
   authService: {
-    isAuthenticated: vi.fn(() => true)
-  }
+    isAuthenticated: vi.fn(() => true),
+  },
 }));
 
 // Mock the toast service
@@ -24,7 +24,7 @@ vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),
-  }
+  },
 }));
 
 const theme = createTheme();
@@ -42,40 +42,40 @@ const renderAgentsPage = () => {
 describe('AgentsPage', () => {
   test('renders AI Agents page title', async () => {
     renderAgentsPage();
-    
+
     expect(await screen.findByText('AI Agents')).toBeInTheDocument();
   });
 
   test('renders toolbar with Add Agent button', async () => {
     renderAgentsPage();
-    
+
     expect(await screen.findByText('Add Agent')).toBeInTheDocument();
   });
 
   test('renders toolbar with Refresh button', async () => {
     renderAgentsPage();
-    
+
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });
 
   test('passes correct pagination parameters to SDK', async () => {
     const mockListAgents = vi.fn().mockResolvedValue({
-      data: []
+      data: [],
     });
-    
+
     // Import the module to get the mock
     const { getSDK } = await import('../../services/auth-service');
     vi.mocked(getSDK).mockReturnValue({
       agents: {
-        listAgentsApiV1Agents: mockListAgents
-      }
+        listAgentsApiV1Agents: mockListAgents,
+      },
     } as any);
 
     renderAgentsPage();
-    
+
     // Wait for the component to call the API
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     // Verify the API was called with correct pagination structure
     expect(mockListAgents).toHaveBeenCalledWith({
       pagination: {

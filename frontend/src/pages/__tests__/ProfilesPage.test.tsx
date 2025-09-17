@@ -11,13 +11,13 @@ vi.mock('../../services/auth-service', (): void => ({
     profiles: {
       listProfilesApiV1Profiles: vi.fn().mockResolvedValue({
         profiles: [],
-        total_count: 0
-      })
-    }
+        total_count: 0,
+      }),
+    },
   })),
   authService: {
-    isAuthenticated: vi.fn(() => true)
-  }
+    isAuthenticated: vi.fn(() => true),
+  },
 }));
 
 // Mock the toast service
@@ -25,7 +25,7 @@ vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),
-  }
+  },
 }));
 
 const theme = createTheme();
@@ -43,19 +43,19 @@ const renderProfilesPage = () => {
 describe('ProfilesPage', () => {
   test('renders Profile Management page title', async () => {
     renderProfilesPage();
-    
+
     expect(await screen.findByText('Profile Management')).toBeInTheDocument();
   });
 
   test('renders toolbar with Add Profile button', async () => {
     renderProfilesPage();
-    
+
     expect(await screen.findByText('Add Profile')).toBeInTheDocument();
   });
 
   test('renders toolbar with Refresh button', async () => {
     renderProfilesPage();
-    
+
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });
 });

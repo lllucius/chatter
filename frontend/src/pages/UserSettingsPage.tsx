@@ -34,7 +34,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { useForm } from '../hooks/useForm';
@@ -89,17 +89,18 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const updatedProfile = await getSDK().auth.updateProfileApiV1AuthMe(values);
+        const updatedProfile =
+          await getSDK().auth.updateProfileApiV1AuthMe(values);
         setUserProfile({ ...userProfile!, ...updatedProfile });
         toastService.success('Profile updated successfully');
       } catch (error: unknown) {
         handleError(error, {
           source: 'UserSettingsPage.handleSaveProfile',
           operation: 'update user profile',
-          additionalData: { 
+          additionalData: {
             name: profileForm.values.name,
-            email: profileForm.values.email 
-          }
+            email: profileForm.values.email,
+          },
         });
         throw error;
       }
@@ -114,21 +115,21 @@ const UserSettingsPage: React.FC = () => {
     },
     validate: (values) => {
       const errors: Partial<Record<keyof PasswordFormValues, string>> = {};
-      
+
       if (!values.current_password) {
         errors.current_password = 'Current password is required';
       }
-      
+
       if (!values.new_password) {
         errors.new_password = 'New password is required';
       } else if (values.new_password.length < 6) {
         errors.new_password = 'Password must be at least 6 characters';
       }
-      
+
       if (values.new_password !== values.confirm_password) {
         errors.confirm_password = 'Passwords do not match';
       }
-      
+
       return errors;
     },
     onSubmit: async (values) => {
@@ -142,7 +143,7 @@ const UserSettingsPage: React.FC = () => {
       } catch (error: unknown) {
         handleError(error, {
           source: 'UserSettingsPage.handleChangePassword',
-          operation: 'change password'
+          operation: 'change password',
         });
         throw error;
       }
@@ -165,7 +166,7 @@ const UserSettingsPage: React.FC = () => {
         handleError(error, {
           source: 'UserSettingsPage.handleCreateApiKey',
           operation: 'create API key',
-          additionalData: { keyName: apiKeyForm.values.name }
+          additionalData: { keyName: apiKeyForm.values.name },
         });
         throw error;
       }
@@ -183,7 +184,7 @@ const UserSettingsPage: React.FC = () => {
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadUserProfile',
-        operation: 'load user profile'
+        operation: 'load user profile',
       });
     }
   };
@@ -196,7 +197,7 @@ const UserSettingsPage: React.FC = () => {
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadApiKeys',
-        operation: 'load API keys'
+        operation: 'load API keys',
       });
     } finally {
       setApiKeysLoading(false);
@@ -206,13 +207,13 @@ const UserSettingsPage: React.FC = () => {
   const handleRevokeApiKey = async (keyId: string) => {
     try {
       await getSDK().revokeApiKey(keyId);
-      setApiKeys(apiKeys.filter(key => key.id !== keyId));
+      setApiKeys(apiKeys.filter((key) => key.id !== keyId));
       toastService.success('API key revoked successfully');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleRevokeKey',
         operation: 'revoke API key',
-        additionalData: { keyId: key.id, keyName: key.name }
+        additionalData: { keyId: key.id, keyName: key.name },
       });
     }
   };
@@ -225,7 +226,7 @@ const UserSettingsPage: React.FC = () => {
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleDeactivateAccount',
-        operation: 'deactivate user account'
+        operation: 'deactivate user account',
       });
     } finally {
       setDeactivateDialogOpen(false);
@@ -235,10 +236,7 @@ const UserSettingsPage: React.FC = () => {
   useEffect(() => {
     const loadData = async () => {
       setLoading(true);
-      await Promise.all([
-        loadUserProfile(),
-        loadApiKeys(),
-      ]);
+      await Promise.all([loadUserProfile(), loadApiKeys()]);
       setLoading(false);
     };
 
@@ -251,7 +249,12 @@ const UserSettingsPage: React.FC = () => {
 
   if (loading) {
     return (
-      <Box display="flex" justifyContent="center" alignItems="center" minHeight="400px">
+      <Box
+        display="flex"
+        justifyContent="center"
+        alignItems="center"
+        minHeight="400px"
+      >
         <CircularProgress />
       </Box>
     );
@@ -260,7 +263,11 @@ const UserSettingsPage: React.FC = () => {
   return (
     <PageLayout title="User Settings">
       <Card>
-        <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider' }}>
+        <Tabs
+          value={tabValue}
+          onChange={handleTabChange}
+          sx={{ borderBottom: 1, borderColor: 'divider' }}
+        >
           <Tab label="Profile" />
           <Tab label="Security" />
           <Tab label="API Keys" />
@@ -306,7 +313,10 @@ const UserSettingsPage: React.FC = () => {
               </Grid>
               <Grid item xs={12}>
                 <Typography variant="body2" color="text.secondary">
-                  Account created: {userProfile?.created_at ? format(new Date(userProfile.created_at), 'PPpp') : 'Unknown'}
+                  Account created:{' '}
+                  {userProfile?.created_at
+                    ? format(new Date(userProfile.created_at), 'PPpp')
+                    : 'Unknown'}
                 </Typography>
               </Grid>
             </Grid>
@@ -379,10 +389,13 @@ const UserSettingsPage: React.FC = () => {
         {/* API Keys Tab */}
         {tabValue === 2 && (
           <CardContent>
-            <Box display="flex" justifyContent="space-between" alignItems="center" sx={{ mb: 3 }}>
-              <Typography variant="h6">
-                API Keys
-              </Typography>
+            <Box
+              display="flex"
+              justifyContent="space-between"
+              alignItems="center"
+              sx={{ mb: 3 }}
+            >
+              <Typography variant="h6">API Keys</Typography>
               <Button
                 variant="contained"
                 startIcon={<AddIcon />}
@@ -420,13 +433,19 @@ const UserSettingsPage: React.FC = () => {
                         <TableRow key={key.id}>
                           <TableCell>{key.name}</TableCell>
                           <TableCell>
-                            {key.created_at ? format(new Date(key.created_at), 'PP') : 'Unknown'}
+                            {key.created_at
+                              ? format(new Date(key.created_at), 'PP')
+                              : 'Unknown'}
                           </TableCell>
                           <TableCell>
                             {key.expires_at ? (
                               <Chip
                                 label={format(new Date(key.expires_at), 'PP')}
-                                color={new Date(key.expires_at) < new Date() ? 'error' : 'default'}
+                                color={
+                                  new Date(key.expires_at) < new Date()
+                                    ? 'error'
+                                    : 'default'
+                                }
                                 size="small"
                               />
                             ) : (
@@ -434,7 +453,9 @@ const UserSettingsPage: React.FC = () => {
                             )}
                           </TableCell>
                           <TableCell>
-                            {key.last_used ? format(new Date(key.last_used), 'PP') : 'Never'}
+                            {key.last_used
+                              ? format(new Date(key.last_used), 'PP')
+                              : 'Never'}
                           </TableCell>
                           <TableCell>
                             <IconButton
@@ -464,15 +485,16 @@ const UserSettingsPage: React.FC = () => {
 
             <Alert severity="warning" sx={{ mb: 3 }}>
               <Typography variant="body2">
-                <strong>Warning:</strong> Account deactivation is permanent and cannot be undone.
-                All your data will be removed and you will lose access to the system.
+                <strong>Warning:</strong> Account deactivation is permanent and
+                cannot be undone. All your data will be removed and you will
+                lose access to the system.
               </Typography>
             </Alert>
 
             <Box>
               <Typography variant="body1" sx={{ mb: 2 }}>
-                If you no longer need your account, you can deactivate it permanently.
-                This action will:
+                If you no longer need your account, you can deactivate it
+                permanently. This action will:
               </Typography>
               <ul>
                 <li>Remove all your personal data</li>
@@ -480,7 +502,7 @@ const UserSettingsPage: React.FC = () => {
                 <li>Delete all conversations and documents</li>
                 <li>Log you out of all sessions</li>
               </ul>
-              
+
               <Button
                 variant="contained"
                 color="error"
@@ -496,7 +518,12 @@ const UserSettingsPage: React.FC = () => {
       </Card>
 
       {/* Create API Key Dialog */}
-      <Dialog open={apiKeyDialogOpen} onClose={() => setApiKeyDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={apiKeyDialogOpen}
+        onClose={() => setApiKeyDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Create API Key</DialogTitle>
         <DialogContent>
           <Box sx={{ pt: 1 }}>
@@ -516,7 +543,10 @@ const UserSettingsPage: React.FC = () => {
               value={apiKeyForm.values.expires_in_days}
               onChange={apiKeyForm.handleChange('expires_in_days')}
               error={Boolean(apiKeyForm.errors.expires_in_days)}
-              helperText={apiKeyForm.errors.expires_in_days || 'Set to 0 for no expiration'}
+              helperText={
+                apiKeyForm.errors.expires_in_days ||
+                'Set to 0 for no expiration'
+              }
             />
           </Box>
         </DialogContent>
@@ -533,15 +563,19 @@ const UserSettingsPage: React.FC = () => {
       </Dialog>
 
       {/* Deactivate Account Dialog */}
-      <Dialog open={deactivateDialogOpen} onClose={() => setDeactivateDialogOpen(false)}>
+      <Dialog
+        open={deactivateDialogOpen}
+        onClose={() => setDeactivateDialogOpen(false)}
+      >
         <DialogTitle>Confirm Account Deactivation</DialogTitle>
         <DialogContent>
           <Alert severity="error" sx={{ mb: 2 }}>
             This action cannot be undone!
           </Alert>
           <Typography>
-            Are you absolutely sure you want to deactivate your account? This will permanently
-            delete all your data and you will lose access to the system.
+            Are you absolutely sure you want to deactivate your account? This
+            will permanently delete all your data and you will lose access to
+            the system.
           </Typography>
         </DialogContent>
         <DialogActions>

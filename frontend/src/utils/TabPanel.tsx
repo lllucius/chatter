@@ -14,13 +14,13 @@ export interface TabPanelProps {
   sx?: SxProps<Theme>;
 }
 
-export const TabPanel: React.FC<TabPanelProps> = ({ 
-  children, 
-  value, 
-  index, 
+export const TabPanel: React.FC<TabPanelProps> = ({
+  children,
+  value,
+  index,
   idPrefix = 'simple',
   sx,
-  ...other 
+  ...other
 }) => {
   return (
     <div
@@ -30,11 +30,7 @@ export const TabPanel: React.FC<TabPanelProps> = ({
       aria-labelledby={`${idPrefix}-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ py: 3, ...sx }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ py: 3, ...sx }}>{children}</Box>}
     </div>
   );
 };

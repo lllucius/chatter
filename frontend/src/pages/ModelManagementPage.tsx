@@ -1,15 +1,29 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { Box, Tabs, Tab, TabPanel, Typography, Chip, Button } from '../utils/mui';
+import {
+  Box,
+  Tabs,
+  Tab,
+  TabPanel,
+  Typography,
+  Chip,
+  Button,
+} from '../utils/mui';
 import { Star as DefaultIcon, RefreshIcon, AddIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudAction,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
-import { 
+import {
   createTypeChipRenderer,
-  createMonospaceTextRenderer
+  createMonospaceTextRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import {
@@ -22,7 +36,6 @@ import {
   DefaultProvider,
 } from 'chatter-sdk';
 
-
 const ModelManagementPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [providers, setProviders] = useState<Provider[]>([]);
@@ -32,9 +45,10 @@ const ModelManagementPage: React.FC = () => {
   // Load providers for model form
   const loadProviders = async () => {
     try {
-      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
-        activeOnly: true, // Only load active providers for model creation
-      });
+      const response =
+        await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
+          activeOnly: true, // Only load active providers for model creation
+        });
       setProviders(response.providers || []);
     } catch (error) {
       console.error('Failed to load providers:', error);
@@ -172,7 +186,7 @@ const ModelManagementPage: React.FC = () => {
             handleError(error, {
               source: 'ModelManagementPage.setDefaultProvider',
               operation: 'set default provider',
-              additionalData: { providerId: provider.id }
+              additionalData: { providerId: provider.id },
             });
           }
         }
@@ -192,36 +206,45 @@ const ModelManagementPage: React.FC = () => {
     pageSize: 10,
   };
 
-  const providerService: CrudService<Provider, ProviderCreate, ProviderUpdate> = {
-    list: async (page: number, pageSize: number) => {
-      const response = await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
-        activeOnly: false,
-        page: page + 1,
-        perPage: pageSize,
-      });
-      return {
-        items: response.providers || [],
-        total: response.total || 0,
-      };
-    },
+  const providerService: CrudService<Provider, ProviderCreate, ProviderUpdate> =
+    {
+      list: async (page: number, pageSize: number) => {
+        const response =
+          await getSDK().modelRegistry.listProvidersApiV1ModelsProviders({
+            activeOnly: false,
+            page: page + 1,
+            perPage: pageSize,
+          });
+        return {
+          items: response.providers || [],
+          total: response.total || 0,
+        };
+      },
 
-    create: async (data: ProviderCreate) => {
-      const response = await getSDK().modelRegistry.createProviderApiV1ModelsProviders(data);
-      await loadProviders(); // Refresh providers for model form
-      return response;
-    },
+      create: async (data: ProviderCreate) => {
+        const response =
+          await getSDK().modelRegistry.createProviderApiV1ModelsProviders(data);
+        await loadProviders(); // Refresh providers for model form
+        return response;
+      },
 
-    update: async (id: string, data: ProviderUpdate) => {
-      const response = await getSDK().modelRegistry.updateProviderApiV1ModelsProvidersProviderId(id, data);
-      await loadProviders(); // Refresh providers for model form
-      return response;
-    },
+      update: async (id: string, data: ProviderUpdate) => {
+        const response =
+          await getSDK().modelRegistry.updateProviderApiV1ModelsProvidersProviderId(
+            id,
+            data
+          );
+        await loadProviders(); // Refresh providers for model form
+        return response;
+      },
 
-    delete: async (id: string) => {
-      await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderId(id);
-      await loadProviders(); // Refresh providers for model form
-    },
-  };
+      delete: async (id: string) => {
+        await getSDK().modelRegistry.deleteProviderApiV1ModelsProvidersProviderId(
+          id
+        );
+        await loadProviders(); // Refresh providers for model form
+      },
+    };
 
   // Model columns and config
   const modelColumns: CrudColumn<ModelDefWithProvider>[] = [
@@ -248,15 +271,16 @@ const ModelManagementPage: React.FC = () => {
       id: 'provider',
       label: 'Provider',
       render: (value: any): void => (
-        <Typography variant="body2">
-          {value?.displayName || '—'}
-        </Typography>
+        <Typography variant="body2">{value?.displayName || '—'}</Typography>
       ),
     },
     {
       id: 'model_type',
       label: 'Type',
-      render: createTypeChipRenderer<ModelDefWithProvider>('secondary', 'outlined'),
+      render: createTypeChipRenderer<ModelDefWithProvider>(
+        'secondary',
+        'outlined'
+      ),
     },
     {
       id: 'is_active',
@@ -292,13 +316,15 @@ const ModelManagementPage: React.FC = () => {
       onClick: async (model) => {
         if (!model.isDefault) {
           try {
-            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(model.id);
+            await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(
+              model.id
+            );
             toastService.success('Default model updated');
           } catch (error) {
             handleError(error, {
               source: 'ModelManagementPage.setDefaultModel',
               operation: 'set default model',
-              additionalData: { modelId: model.id }
+              additionalData: { modelId: model.id },
             });
           }
         }
@@ -318,13 +344,19 @@ const ModelManagementPage: React.FC = () => {
     pageSize: 10,
   };
 
-  const modelService: CrudService<ModelDefWithProvider, ModelDefCreate, ModelDefUpdate> = {
+  const modelService: CrudService<
+    ModelDefWithProvider,
+    ModelDefCreate,
+    ModelDefUpdate
+  > = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().modelRegistry.listModelsApiV1ModelsModels({
-        activeOnly: false,
-        page: page + 1,
-        perPage: pageSize,
-      });
+      const response = await getSDK().modelRegistry.listModelsApiV1ModelsModels(
+        {
+          activeOnly: false,
+          page: page + 1,
+          perPage: pageSize,
+        }
+      );
       return {
         items: response.models || [],
         total: response.total || 0,
@@ -332,12 +364,17 @@ const ModelManagementPage: React.FC = () => {
     },
 
     create: async (data: ModelDefCreate) => {
-      const response = await getSDK().modelRegistry.createModelApiV1ModelsModels(data);
+      const response =
+        await getSDK().modelRegistry.createModelApiV1ModelsModels(data);
       return response;
     },
 
     update: async (id: string, data: ModelDefUpdate) => {
-      const response = await getSDK().modelRegistry.updateModelApiV1ModelsModelsModelId(id, data);
+      const response =
+        await getSDK().modelRegistry.updateModelApiV1ModelsModelsModelId(
+          id,
+          data
+        );
       return response;
     },
 

@@ -20,48 +20,60 @@ import {
   SmartToy as BotIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { ConversationResponse, MessageResponse } from 'chatter-sdk';
 import CustomScrollbar from '../components/CustomScrollbar';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
 import { createDateRenderer } from '../components/CrudRenderers';
-
-
 
 const ConversationsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
-  
+
   // View conversation dialog state
-  const [selectedConversation, setSelectedConversation] = useState<ConversationResponse | null>(null);
-  const [conversationMessages, setConversationMessages] = useState<MessageResponse[]>([]);
+  const [selectedConversation, setSelectedConversation] =
+    useState<ConversationResponse | null>(null);
+  const [conversationMessages, setConversationMessages] = useState<
+    MessageResponse[]
+  >([]);
   const [viewDialogOpen, setViewDialogOpen] = useState(false);
   const [loadingMessages, setLoadingMessages] = useState(false);
 
   // Handle view conversation action
-  const handleViewConversation = useCallback(async (conversation: ConversationResponse) => {
-    setSelectedConversation(conversation);
-    setViewDialogOpen(true);
-    setLoadingMessages(true);
+  const handleViewConversation = useCallback(
+    async (conversation: ConversationResponse) => {
+      setSelectedConversation(conversation);
+      setViewDialogOpen(true);
+      setLoadingMessages(true);
 
-    try {
-      const sdk = getSDK();
-      const response =
-        await sdk.conversations.getConversationApiV1ConversationsConversationId(
-          conversation.id,
-          { includeMessages: true }
-        );
-      const messages = response.messages || [];
-      setConversationMessages(messages);
-    } catch {
-      setConversationMessages([]);
-    } finally {
-      setLoadingMessages(false);
-    }
-  }, []);
+      try {
+        const sdk = getSDK();
+        const response =
+          await sdk.conversations.getConversationApiV1ConversationsConversationId(
+            conversation.id,
+            { includeMessages: true }
+          );
+        const messages = response.messages || [];
+        setConversationMessages(messages);
+      } catch {
+        setConversationMessages([]);
+      } finally {
+        setLoadingMessages(false);
+      }
+    },
+    []
+  );
 
   // Conversation title renderer
-  const renderConversationTitle = (title: string | null, conversation: ConversationResponse): void => (
+  const renderConversationTitle = (
+    title: string | null,
+    conversation: ConversationResponse
+  ): void => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
         <MessageIcon fontSize="small" />
@@ -79,12 +91,7 @@ const ConversationsPage: React.FC = () => {
 
   // Status renderer - for now all are active
   const renderStatus = (): void => (
-    <Chip
-      label="Active"
-      size="small"
-      color="success"
-      variant="outlined"
-    />
+    <Chip label="Active" size="small" color="success" variant="outlined" />
   );
 
   // Message count renderer
@@ -141,7 +148,7 @@ const ConversationsPage: React.FC = () => {
       },
     ],
     enableCreate: false, // Conversations are created from chat interface
-    enableEdit: false,   // Conversations don't have direct edit functionality
+    enableEdit: false, // Conversations don't have direct edit functionality
     enableDelete: true,
     enableRefresh: true,
     pageSize: 10,
@@ -151,10 +158,11 @@ const ConversationsPage: React.FC = () => {
   const service: CrudService<ConversationResponse, never, never> = {
     list: async (page: number, pageSize: number) => {
       const sdk = getSDK();
-      const response = await sdk.conversations.listConversationsApiV1Conversations({
-        limit: pageSize,
-        offset: page * pageSize,
-      });
+      const response =
+        await sdk.conversations.listConversationsApiV1Conversations({
+          limit: pageSize,
+          offset: page * pageSize,
+        });
       return {
         items: response.conversations || [],
         total: response.total || 0,
@@ -163,7 +171,9 @@ const ConversationsPage: React.FC = () => {
 
     delete: async (id: string) => {
       const sdk = getSDK();
-      await sdk.conversations.deleteConversationApiV1ConversationsConversationId(id);
+      await sdk.conversations.deleteConversationApiV1ConversationsConversationId(
+        id
+      );
     },
   };
 
@@ -260,15 +270,23 @@ const ConversationsPage: React.FC = () => {
                         sx={{
                           p: 2,
                           maxWidth: '70%',
-                          bgcolor: message.role === 'user'
-                            ? 'primary.light'
-                            : (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100',
-                          color: message.role === 'user'
-                            ? 'primary.contrastText'
-                            : 'text.primary',
+                          bgcolor:
+                            message.role === 'user'
+                              ? 'primary.light'
+                              : (theme) =>
+                                  theme.palette.mode === 'dark'
+                                    ? 'grey.800'
+                                    : 'grey.100',
+                          color:
+                            message.role === 'user'
+                              ? 'primary.contrastText'
+                              : 'text.primary',
                         }}
                       >
-                        <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap' }}>
+                        <Typography
+                          variant="body1"
+                          sx={{ whiteSpace: 'pre-wrap' }}
+                        >
                           {message.content}
                         </Typography>
                         <Typography
@@ -293,7 +311,11 @@ const ConversationsPage: React.FC = () => {
                     </Box>
                   ))}
                   {conversationMessages.length === 0 && (
-                    <Typography variant="body2" color="text.secondary" sx={{ textAlign: 'center', py: 3 }}>
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ textAlign: 'center', py: 3 }}
+                    >
                       No messages in this conversation
                     </Typography>
                   )}

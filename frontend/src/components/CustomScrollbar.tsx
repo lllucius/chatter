@@ -9,14 +9,19 @@ interface CustomScrollbarProps {
   className?: string;
 }
 
-const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, className, ...props }) => {
+const CustomScrollbar: React.FC<CustomScrollbarProps> = ({
+  children,
+  style,
+  className,
+  ...props
+}) => {
   const theme = useTheme();
 
   useEffect(() => {
     // Create custom CSS for theming SimpleBar
     const styleId = 'simplebar-theme';
     let styleElement = document.getElementById(styleId) as HTMLStyleElement;
-    
+
     if (!styleElement) {
       styleElement = document.createElement('style');
       styleElement.id = styleId;
@@ -24,9 +29,13 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({ children, style, clas
     }
 
     const isDark = theme.palette.mode === 'dark';
-    const trackBg = isDark ? 'rgba(255, 255, 255, 0.25)' : 'rgba(0, 0, 0, 0.15)';
+    const trackBg = isDark
+      ? 'rgba(255, 255, 255, 0.25)'
+      : 'rgba(0, 0, 0, 0.15)';
     const thumbBg = isDark ? 'rgba(255, 255, 255, 0.8)' : 'rgba(0, 0, 0, 0.6)';
-    const thumbHoverBg = isDark ? 'rgba(255, 255, 255, 0.9)' : 'rgba(0, 0, 0, 0.8)';
+    const thumbHoverBg = isDark
+      ? 'rgba(255, 255, 255, 0.9)'
+      : 'rgba(0, 0, 0, 0.8)';
 
     styleElement.textContent = `
       .simplebar-track.simplebar-vertical {

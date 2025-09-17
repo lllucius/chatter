@@ -6,9 +6,9 @@ interface LoadingFallbackProps {
   size?: number;
 }
 
-export const LoadingFallback: React.FC<LoadingFallbackProps> = ({ 
-  message = "Loading...", 
-  size = 40 
+export const LoadingFallback: React.FC<LoadingFallbackProps> = ({
+  message = 'Loading...',
+  size = 40,
 }): void => (
   <Box
     sx={{
@@ -36,13 +36,9 @@ interface SuspenseWrapperProps {
 export const SuspenseWrapper: React.FC<SuspenseWrapperProps> = ({
   children,
   fallback,
-  loadingMessage = "Loading...",
+  loadingMessage = 'Loading...',
 }): void => (
-  <Suspense
-    fallback={
-      fallback || <LoadingFallback message={loadingMessage} />
-    }
-  >
+  <Suspense fallback={fallback || <LoadingFallback message={loadingMessage} />}>
     {children}
   </Suspense>
 );

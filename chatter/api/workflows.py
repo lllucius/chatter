@@ -21,7 +21,9 @@ from chatter.schemas.workflows import (
     WorkflowTemplateUpdate,
     WorkflowValidationResponse,
 )
-from chatter.services.simplified_workflow_analytics import WorkflowAnalyticsService
+from chatter.services.simplified_workflow_analytics import (
+    WorkflowAnalyticsService,
+)
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.services.workflow_management import (
     WorkflowManagementService,

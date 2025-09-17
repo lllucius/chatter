@@ -40,19 +40,23 @@ class SectionErrorBoundary extends Component<Props, State> {
     const { level = 'component', name = 'Unknown', onError } = this.props;
 
     // Use standardized error handling to log and process the error
-    errorHandler.handleError(error, {
-      source: `SectionErrorBoundary.${name}`,
-      operation: `${level} error boundary`,
-      additionalData: {
-        componentStack: errorInfo.componentStack,
-        errorBoundary: true,
-        level,
-        name
+    errorHandler.handleError(
+      error,
+      {
+        source: `SectionErrorBoundary.${name}`,
+        operation: `${level} error boundary`,
+        additionalData: {
+          componentStack: errorInfo.componentStack,
+          errorBoundary: true,
+          level,
+          name,
+        },
+      },
+      {
+        showToast: level === 'component', // Only show toast for component-level errors
+        logToConsole: true,
       }
-    }, {
-      showToast: level === 'component', // Only show toast for component-level errors
-      logToConsole: true
-    });
+    );
 
     // Store error details for development mode display
     if (process.env.NODE_ENV === 'development') {
@@ -88,11 +92,11 @@ class SectionErrorBoundary extends Component<Props, State> {
     if (this.autoRecoverTimeout) {
       clearTimeout(this.autoRecoverTimeout);
     }
-    this.setState({ 
-      hasError: false, 
-      error: undefined, 
+    this.setState({
+      hasError: false,
+      error: undefined,
       errorDetails: undefined,
-      autoRecovering: false 
+      autoRecovering: false,
     });
   };
 
@@ -106,23 +110,26 @@ class SectionErrorBoundary extends Component<Props, State> {
 
   private renderPageError() {
     return (
-      <Box sx={{ 
-        display: 'flex', 
-        flexDirection: 'column', 
-        alignItems: 'center', 
-        justifyContent: 'center', 
-        minHeight: '50vh',
-        p: 3 
-      }}>
+      <Box
+        sx={{
+          display: 'flex',
+          flexDirection: 'column',
+          alignItems: 'center',
+          justifyContent: 'center',
+          minHeight: '50vh',
+          p: 3,
+        }}
+      >
         <Alert severity="error" sx={{ mb: 3, maxWidth: 600 }}>
           <Typography variant="h6" gutterBottom>
             Page Error
           </Typography>
           <Typography variant="body2" color="text.secondary">
-            {this.state.error?.message || 'This page encountered an error and cannot be displayed'}
+            {this.state.error?.message ||
+              'This page encountered an error and cannot be displayed'}
           </Typography>
         </Alert>
-        
+
         <Box sx={{ display: 'flex', gap: 2, flexWrap: 'wrap' }}>
           <Button
             variant="contained"
@@ -140,10 +147,7 @@ class SectionErrorBoundary extends Component<Props, State> {
               Go Home
             </Button>
           )}
-          <Button
-            variant="outlined"
-            onClick={this.handleReload}
-          >
+          <Button variant="outlined" onClick={this.handleReload}>
             Reload Page
           </Button>
         </Box>
@@ -159,12 +163,16 @@ class SectionErrorBoundary extends Component<Props, State> {
             <Typography variant="subtitle2" gutterBottom>
               Error Details (Development Mode):
             </Typography>
-            <Typography variant="body2" component="pre" sx={{ 
-              fontSize: '0.75rem', 
-              overflow: 'auto', 
-              whiteSpace: 'pre-wrap',
-              maxHeight: 300
-            }}>
+            <Typography
+              variant="body2"
+              component="pre"
+              sx={{
+                fontSize: '0.75rem',
+                overflow: 'auto',
+                whiteSpace: 'pre-wrap',
+                maxHeight: 300,
+              }}
+            >
               {this.state.errorDetails}
             </Typography>
           </Paper>
@@ -175,14 +183,16 @@ class SectionErrorBoundary extends Component<Props, State> {
 
   private renderSectionError() {
     return (
-      <Paper sx={{ p: 2, m: 1, bgcolor: 'error.main', color: 'error.contrastText' }}>
+      <Paper
+        sx={{ p: 2, m: 1, bgcolor: 'error.main', color: 'error.contrastText' }}
+      >
         <Typography variant="subtitle1" gutterBottom>
           Section Error
         </Typography>
         <Typography variant="body2" sx={{ mb: 2 }}>
           {this.state.error?.message || 'This section encountered an error'}
         </Typography>
-        
+
         <Box sx={{ display: 'flex', gap: 1 }}>
           <Button
             size="small"
@@ -210,11 +220,7 @@ class SectionErrorBoundary extends Component<Props, State> {
         <Typography variant="body2">
           {this.state.error?.message || 'Component error'}
         </Typography>
-        <Button 
-          size="small" 
-          onClick={this.handleReset}
-          sx={{ mt: 1 }}
-        >
+        <Button size="small" onClick={this.handleReset} sx={{ mt: 1 }}>
           Retry
         </Button>
       </Alert>

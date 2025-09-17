@@ -66,14 +66,23 @@ interface TrendingContent {
 
 const IntelligentSearch: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchType, setSearchType] = useState<'documents' | 'conversations' | 'prompts'>('documents');
+  const [searchType, setSearchType] = useState<
+    'documents' | 'conversations' | 'prompts'
+  >('documents');
   const [searchResults, setSearchResults] = useState<SearchResult[]>([]);
-  const [recommendations, setRecommendations] = useState<SearchRecommendation[]>([]);
+  const [recommendations, setRecommendations] = useState<
+    SearchRecommendation[]
+  >([]);
   const [trendingContent, setTrendingContent] = useState<TrendingContent[]>([]);
   const [isSearching, setIsSearching] = useState(false);
   const [isLoadingTrending, setIsLoadingTrending] = useState(false);
-  const [expandedRecommendations, setExpandedRecommendations] = useState<Set<number>>(new Set());
-  const [userContext, setUserContext] = useState<Record<string, unknown> | null>(null);
+  const [expandedRecommendations, setExpandedRecommendations] = useState<
+    Set<number>
+  >(new Set());
+  const [userContext, setUserContext] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
 
   const performSearch = useCallback(async (query: string, type: string) => {
     if (!query.trim()) {
@@ -88,7 +97,7 @@ const IntelligentSearch: React.FC = () => {
         query: query.trim(),
         searchType: type,
         limit: 10,
-        includeRecommendations: true
+        includeRecommendations: true,
       });
 
       setSearchResults(response.results || []);
@@ -96,7 +105,6 @@ const IntelligentSearch: React.FC = () => {
       setUserContext(response.user_context);
 
       // Track search analytics (future implementation)
-
     } catch (error) {
       handleError(error);
       setSearchResults([]);
@@ -109,7 +117,9 @@ const IntelligentSearch: React.FC = () => {
   const loadTrendingContent = useCallback(async () => {
     setIsLoadingTrending(true);
     try {
-      const response = await getSDK().analytics.getTrendingContent({ limit: 10 });
+      const response = await getSDK().analytics.getTrendingContent({
+        limit: 10,
+      });
       setTrendingContent(response.trending_content || []);
     } catch (error) {
       handleError(error);
@@ -135,7 +145,9 @@ const IntelligentSearch: React.FC = () => {
     loadTrendingContent();
   }, [loadTrendingContent]);
 
-  const handleSearchTypeChange = (type: 'documents' | 'conversations' | 'prompts') => {
+  const handleSearchTypeChange = (
+    type: 'documents' | 'conversations' | 'prompts'
+  ) => {
     setSearchType(type);
     if (searchQuery.trim()) {
       performSearch(searchQuery, type);
@@ -148,7 +160,7 @@ const IntelligentSearch: React.FC = () => {
   };
 
   const toggleRecommendationExpansion = (index: number) => {
-    setExpandedRecommendations(prev => {
+    setExpandedRecommendations((prev) => {
       const newSet = new Set(prev);
       if (newSet.has(index)) {
         newSet.delete(index);
@@ -201,7 +213,11 @@ const IntelligentSearch: React.FC = () => {
             InputProps={{
               startAdornment: (
                 <InputAdornment position="start">
-                  {isSearching ? <CircularProgress size={20} /> : <SearchIcon />}
+                  {isSearching ? (
+                    <CircularProgress size={20} />
+                  ) : (
+                    <SearchIcon />
+                  )}
                 </InputAdornment>
               ),
             }}
@@ -218,7 +234,9 @@ const IntelligentSearch: React.FC = () => {
               Documents
             </Button>
             <Button
-              variant={searchType === 'conversations' ? 'contained' : 'outlined'}
+              variant={
+                searchType === 'conversations' ? 'contained' : 'outlined'
+              }
               onClick={() => handleSearchTypeChange('conversations')}
               startIcon={<ConversationIcon />}
             >
@@ -240,14 +258,16 @@ const IntelligentSearch: React.FC = () => {
                 Personalized based on your preferences:
               </Typography>
               <Box display="flex" gap={1} mt={1} flexWrap="wrap">
-                {Object.entries(userContext.preferred_content_types || {}).map(([type, preference]) => (
-                  <Chip
-                    key={type}
-                    label={`${type}: ${Math.round((preference as number) * 100)}%`}
-                    size="small"
-                    variant="outlined"
-                  />
-                ))}
+                {Object.entries(userContext.preferred_content_types || {}).map(
+                  ([type, preference]) => (
+                    <Chip
+                      key={type}
+                      label={`${type}: ${Math.round((preference as number) * 100)}%`}
+                      size="small"
+                      variant="outlined"
+                    />
+                  )
+                )}
               </Box>
             </Box>
           )}
@@ -274,37 +294,66 @@ const IntelligentSearch: React.FC = () => {
                           primary={
                             <Box display="flex" alignItems="center" gap={1}>
                               <Typography variant="subtitle1">
-                                {result.metadata?.title || result.metadata?.name || `${result.type} ${result.id}`}
+                                {result.metadata?.title ||
+                                  result.metadata?.name ||
+                                  `${result.type} ${result.id}`}
                               </Typography>
-                              <Tooltip title={`Relevance: ${formatScore(result.score)}% | Personalized: ${formatScore(result.personalized_score)}%`}>
+                              <Tooltip
+                                title={`Relevance: ${formatScore(result.score)}% | Personalized: ${formatScore(result.personalized_score)}%`}
+                              >
                                 <Chip
                                   label={`${formatScore(result.personalized_score)}%`}
                                   size="small"
-                                  color={result.personalization_boost > 0 ? 'primary' : 'default'}
-                                  icon={result.personalization_boost > 0 ? <StarIcon /> : undefined}
+                                  color={
+                                    result.personalization_boost > 0
+                                      ? 'primary'
+                                      : 'default'
+                                  }
+                                  icon={
+                                    result.personalization_boost > 0 ? (
+                                      <StarIcon />
+                                    ) : undefined
+                                  }
                                 />
                               </Tooltip>
                             </Box>
                           }
                           secondary={
                             <Box>
-                              <Typography variant="body2" color="textSecondary" paragraph>
+                              <Typography
+                                variant="body2"
+                                color="textSecondary"
+                                paragraph
+                              >
                                 {result.content.substring(0, 200)}
                                 {result.content.length > 200 ? '...' : ''}
                               </Typography>
-                              {result.personalization_factors && result.personalization_factors.length > 0 && (
-                                <Box>
-                                  <Typography variant="caption" color="primary">
-                                    Personalized for you:
-                                  </Typography>
-                                  <Box mt={0.5}>
-                                    {getPersonalizationChips(result)}
+                              {result.personalization_factors &&
+                                result.personalization_factors.length > 0 && (
+                                  <Box>
+                                    <Typography
+                                      variant="caption"
+                                      color="primary"
+                                    >
+                                      Personalized for you:
+                                    </Typography>
+                                    <Box mt={0.5}>
+                                      {getPersonalizationChips(result)}
+                                    </Box>
                                   </Box>
-                                </Box>
-                              )}
+                                )}
                               {result.metadata?.created_at && (
-                                <Typography variant="caption" color="textSecondary" display="block" mt={1}>
-                                  Created: {format(new Date(result.metadata.created_at), 'MMM d, yyyy')}
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                  display="block"
+                                  mt={1}
+                                >
+                                  Created:{' '}
+                                  {format(
+                                    new Date(result.metadata.created_at),
+                                    'MMM d, yyyy'
+                                  )}
                                 </Typography>
                               )}
                             </Box>
@@ -340,10 +389,18 @@ const IntelligentSearch: React.FC = () => {
                         {rec.title}
                       </Typography>
                       <IconButton size="small">
-                        {expandedRecommendations.has(index) ? <CollapseIcon /> : <ExpandIcon />}
+                        {expandedRecommendations.has(index) ? (
+                          <CollapseIcon />
+                        ) : (
+                          <ExpandIcon />
+                        )}
                       </IconButton>
                     </Box>
-                    <Typography variant="body2" color="textSecondary" gutterBottom>
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      gutterBottom
+                    >
                       {rec.description}
                     </Typography>
                     <Collapse in={expandedRecommendations.has(index)}>
@@ -368,7 +425,9 @@ const IntelligentSearch: React.FC = () => {
                         </Box>
                       )}
                     </Collapse>
-                    {index < recommendations.length - 1 && <Divider sx={{ mt: 2 }} />}
+                    {index < recommendations.length - 1 && (
+                      <Divider sx={{ mt: 2 }} />
+                    )}
                   </Box>
                 ))}
               </CardContent>
@@ -377,7 +436,8 @@ const IntelligentSearch: React.FC = () => {
 
           {searchQuery && searchResults.length === 0 && !isSearching && (
             <Alert severity="info">
-              No results found for &ldquo;{searchQuery}&rdquo;. Try different keywords or check the recommendations below.
+              No results found for &ldquo;{searchQuery}&rdquo;. Try different
+              keywords or check the recommendations below.
             </Alert>
           )}
         </Box>
@@ -386,14 +446,19 @@ const IntelligentSearch: React.FC = () => {
         <Box flex={1}>
           <Card>
             <CardContent>
-              <Box display="flex" alignItems="center" justifyContent="between" mb={2}>
+              <Box
+                display="flex"
+                alignItems="center"
+                justifyContent="between"
+                mb={2}
+              >
                 <Typography variant="h6">
                   <TrendingIcon sx={{ verticalAlign: 'middle', mr: 1 }} />
                   Trending for You
                 </Typography>
                 {isLoadingTrending && <CircularProgress size={20} />}
               </Box>
-              
+
               {trendingContent.length > 0 ? (
                 <List dense>
                   {trendingContent.map((item, index) => (
@@ -412,7 +477,10 @@ const IntelligentSearch: React.FC = () => {
                           primary={item.title}
                           secondary={
                             <Box>
-                              <Typography variant="caption" color="textSecondary">
+                              <Typography
+                                variant="caption"
+                                color="textSecondary"
+                              >
                                 {item.content.substring(0, 50)}...
                               </Typography>
                               <Chip
@@ -435,7 +503,7 @@ const IntelligentSearch: React.FC = () => {
                   No trending content available yet.
                 </Typography>
               )}
-              
+
               <Button
                 fullWidth
                 variant="outlined"

@@ -187,6 +187,7 @@ const ChatPage: React.FC = () => {
     handleEditMessage,
     handleDeleteMessage,
     handleRateMessage,
+    handleStreamingResponse,
   ]);
 
   const handleSelectConversation = useCallback(async (conversation: ConversationResponse) => {
@@ -204,7 +205,7 @@ const ChatPage: React.FC = () => {
   }, [setCurrentConversation, loadMessagesForConversation]);
 
   // Handle streaming response from chat API
-  const handleStreamingResponse = useCallback(async (chatRequest: any, isRegeneration: boolean) => {
+  const handleStreamingResponse = useCallback(async (chatRequest: Record<string, unknown>, isRegeneration: boolean) => {
     try {
       // Get the streaming response
       const stream = await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
@@ -215,7 +216,6 @@ const ChatPage: React.FC = () => {
       
       let streamedContent = '';
       let assistantMessageId = `assistant-${Date.now()}`;
-      let conversationId: string | undefined;
       
       // Create initial assistant message with empty content
       const initialAssistantMessage: ChatMessage = {
@@ -255,6 +255,7 @@ const ChatPage: React.FC = () => {
       let totalTokens: number | undefined;
       let model: string | undefined;
       let processingTime: number | undefined;
+      let conversationId: string | undefined;
 
       // Process the stream
       while (true) {
@@ -347,11 +348,11 @@ const ChatPage: React.FC = () => {
                   
                 default:
                   // Handle other event types if needed
-                  console.log('Unknown streaming event type:', eventData.type);
+                  // console.log('Unknown streaming event type:', eventData.type);
                   break;
               }
             } catch (parseError) {
-              console.warn('Failed to parse streaming data:', raw, parseError);
+              // console.warn('Failed to parse streaming data:', raw, parseError);
             }
           }
         }
@@ -572,6 +573,7 @@ const ChatPage: React.FC = () => {
     handleDeleteMessage,
     handleRateMessage,
     focusInput,
+    handleStreamingResponse,
   ]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {

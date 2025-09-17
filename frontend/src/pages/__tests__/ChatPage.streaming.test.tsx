@@ -5,11 +5,10 @@ import ChatPage from '../ChatPage';
 
 // Mock dependencies
 vi.mock('../../services/auth-service', () => {
-  const mockStreamingMethod = vi.fn();
   return {
     getSDK: vi.fn(() => ({
       chat: {
-        streamingChatApiV1ChatStreaming: mockStreamingMethod,
+        streamingChatApiV1ChatStreaming: vi.fn(),
         chatChat: vi.fn(),
       },
       profiles: {
@@ -71,10 +70,10 @@ describe('ChatPage Streaming Functionality', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-
-    // Get the mock SDK streaming method
-    const authService = require('../../services/auth-service');
-    mockStreamingMethod = authService.getSDK().chat.streamingChatApiV1ChatStreaming;
+    
+    // Get the streaming method mock from the auth service
+    const { getSDK } = require('../../services/auth-service');
+    mockStreamingMethod = getSDK().chat.streamingChatApiV1ChatStreaming;
   });
 
   it('should render the chat page', async () => {

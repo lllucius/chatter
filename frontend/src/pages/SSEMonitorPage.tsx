@@ -298,19 +298,21 @@ const SSEMonitorPage: React.FC = () => {
     URL.revokeObjectURL(url);
   }, [filteredMessages]);
 
-  // Auto-restore monitoring state on mount if it was previously active
+  // Auto-restore monitoring state when SSE manager becomes available
   useEffect(() => {
-    if (isMonitoring && manager && !isConnected) {
-      // If monitoring was active but we're not connected, try to reconnect
-      console.log('Restoring SSE monitoring state and connecting...');
-      manager.connect();
-      manager.addEventListener('*', handleSSEEvent);
-    } else if (isMonitoring && manager && isConnected) {
-      // If monitoring was active and we're connected, just add the listener
-      console.log('Restoring SSE monitoring state...');
-      manager.addEventListener('*', handleSSEEvent);
+    if (isMonitoring && manager) {
+      if (!isConnected) {
+        // If monitoring was active but we're not connected, try to reconnect
+        console.log('Restoring SSE monitoring state and connecting...');
+        manager.connect();
+        manager.addEventListener('*', handleSSEEvent);
+      } else {
+        // If monitoring was active and we're connected, just add the listener
+        console.log('Restoring SSE monitoring state...');
+        manager.addEventListener('*', handleSSEEvent);
+      }
     }
-  }, []); // Only run on mount
+  }, [manager, isConnected, isMonitoring, handleSSEEvent]);
 
   // Auto-scroll to bottom when new messages arrive
   useEffect(() => {

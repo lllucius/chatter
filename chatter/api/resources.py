@@ -103,6 +103,8 @@ class ConversationResourceHandler:
             [
                 MessageResponse.model_validate(m)
                 for m in conversation.messages
+                if (m.content and len(m.content.strip()) > 0 and 
+                    not (m.extra_metadata and m.extra_metadata.get("is_placeholder", False)))  # Filter out empty/placeholder messages
             ]
             if include_messages
             else []
@@ -167,7 +169,12 @@ class MessageResourceHandler:
         messages = await self.chat_service.get_conversation_messages(
             conversation_id, current_user.id, limit, offset
         )
-        return [MessageResponse.model_validate(msg) for msg in messages]
+        return [
+            MessageResponse.model_validate(msg) 
+            for msg in messages 
+            if (msg.content and len(msg.content.strip()) > 0 and 
+                not (msg.extra_metadata and msg.extra_metadata.get("is_placeholder", False)))  # Filter out empty/placeholder messages
+        ]
 
     async def delete_message(
         self,

@@ -1,311 +1,33 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import React, { useState, useCallback } from 'react';
 import {
   Box,
   Card,
   CardContent,
   Typography,
-  TextField,
-  IconButton,
-  Chip,
   Button,
-  Divider,
-  FormControlLabel,
-  Switch,
-} from '@mui/material';
-import CustomScrollbar from '../components/CustomScrollbar';
+} from '../utils/mui';
+import {
+  BotIcon,
+  HistoryIcon,
+  DownloadIcon,
+  RefreshIcon,
+} from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import {
-  Send as SendIcon,
-  SmartToy as BotIcon,
-  Refresh as RefreshIcon,
-  History as HistoryIcon,
-  Download as DownloadIcon,
-  Clear as ClearIcon,
-} from '@mui/icons-material';
-import { getSDK } from '../services/auth-service';
-import { toastService } from '../services/toast-service';
-import { handleError } from '../utils/error-handler';
-import {
-  ProfileResponse,
-  PromptResponse,
-  DocumentResponse,
-  ConversationResponse,
-  ConversationCreate,
-  ChatRequest,
-} from 'chatter-sdk';
-import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
 import ConversationHistory from '../components/ConversationHistory';
 import ChatExport from '../components/ChatExport';
-import EnhancedMessage, { ChatMessage } from '../components/EnhancedMessage';
-
-// Use ChatMessage directly as it already has the required fields
-type ExtendedChatMessage = ChatMessage;
+import ChatMessageList from '../components/chat/ChatMessageList';
+import ChatInput from '../components/chat/ChatInput';
+import { useChatData, useChatMessages } from '../hooks/useChatData';
+import { getSDK } from '../services/auth-service';
+import { toastService } from '../services/toast-service';
+import { handleError } from '../utils/error-handler';
+import { ChatMessage } from '../components/EnhancedMessage';
 
 const ChatPage: React.FC = () => {
-  const [message, setMessage] = useState('');
-  const [messages, setMessages] = useState<ExtendedChatMessage[]>([]);
-  const [profiles, setProfiles] = useState<ProfileResponse[]>([]);
-  const [prompts, setPrompts] = useState<PromptResponse[]>([]);
-  const [documents, setDocuments] = useState<DocumentResponse[]>([]);
-  const [selectedProfile, setSelectedProfile] = useState<string>('');
-  const [selectedPrompt, setSelectedPrompt] = useState<string>('');
-  const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [currentConversation, setCurrentConversation] =
-    useState<ConversationResponse | null>(null);
-  const [loading, setLoading] = useState(false);
-  const messagesEndRef = useRef<HTMLDivElement>(null);
-
-  // New state for advanced features
-  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
-  const [exportDialogOpen, setExportDialogOpen] = useState(false);
-
-  // Input focus ref (works for textarea in multiline mode)
-  const inputRef = useRef<HTMLInputElement | HTMLTextAreaElement>(null);
-
-  // Chat configuration state with localStorage persistence
-  const [streamingEnabled, setStreamingEnabled] = useState(() => {
-    const saved = localStorage.getItem('chatter_streamingEnabled');
-    return saved ? JSON.parse(saved) : false;
-  });
-  const [temperature, setTemperature] = useState(() => {
-    const saved = localStorage.getItem('chatter_temperature');
-    return saved ? parseFloat(saved) : 0.7;
-  });
-  const [maxTokens, setMaxTokens] = useState(() => {
-    const saved = localStorage.getItem('chatter_maxTokens');
-    return saved ? parseInt(saved) : 2048;
-  });
-  const [enableRetrieval, setEnableRetrieval] = useState(() => {
-    const saved = localStorage.getItem('chatter_enableRetrieval');
-    return saved ? JSON.parse(saved) : true;
-  });
-
-  // Save config to localStorage when values change
-  useEffect(() => {
-    localStorage.setItem(
-      'chatter_streamingEnabled',
-      JSON.stringify(streamingEnabled)
-    );
-  }, [streamingEnabled]);
-
-  useEffect(() => {
-    localStorage.setItem('chatter_temperature', temperature.toString());
-  }, [temperature]);
-
-  useEffect(() => {
-    localStorage.setItem('chatter_maxTokens', maxTokens.toString());
-  }, [maxTokens]);
-
-  useEffect(() => {
-    localStorage.setItem(
-      'chatter_enableRetrieval',
-      JSON.stringify(enableRetrieval)
-    );
-  }, [enableRetrieval]);
-
-  // Right drawer context
-  const { setPanelContent, clearPanelContent, setTitle, open, setOpen } =
-    useRightSidebar();
-
-  // Save right drawer state when it changes
-  useEffect(() => {
-    localStorage.setItem('chatter_rightDrawerOpen', JSON.stringify(open));
-  }, [open]);
-
-  const loadData = async () => {
-    let profilesResponse: ProfileResponse[] | null = null;
-    try {
-      const sdk = getSDK();
-      const [profilesResp, promptsResponse, documentsResponse, conversationsResp] =
-        await Promise.all([
-          sdk.profiles.listProfilesApiV1Profiles({}),
-          sdk.prompts.listPromptsApiV1Prompts({}),
-          sdk.documents.listDocumentsApiV1Documents({}),
-          sdk.conversations.listConversationsApiV1Conversations({
-            limit: 1,
-            offset: 0,
-            sort_by: 'updated_at',
-            sort_order: 'desc'
-          }),
-        ]);
-      profilesResponse = profilesResp;
-      setProfiles(profilesResponse.profiles);
-      setPrompts(promptsResponse.prompts);
-      setDocuments(documentsResponse.documents);
-
-      if (profilesResponse.profiles.length > 0) {
-        setSelectedProfile(profilesResponse.profiles[0].id);
-      }
-
-      // Load the most recent conversation if it exists
-      if (conversationsResp.conversations.length > 0) {
-        const lastConversation = conversationsResp.conversations[0];
-        await onSelectConversation(lastConversation);
-      }
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.loadInitialData',
-        operation: 'load profiles, prompts and documents',
-        additionalData: { hasProfiles: profilesResponse?.profiles?.length },
-      });
-    }
-  };
-
-  // Return the created conversation so callers can use its id immediately
-  const startNewConversation =
-    useCallback(async (): Promise<ConversationResponse | null> => {
-      const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
-      try {
-        await loadData();
-
-        const systemPrompt = selectedPromptData?.content || undefined;
-
-        const createRequest: ConversationCreate = {
-          title: `Chat ${new Date().toLocaleString()}`,
-          profile_id: selectedProfile || undefined,
-          enable_retrieval: enableRetrieval,
-          system_prompt: systemPrompt,
-        };
-        const response =
-          await getSDK().conversations.createConversationApiV1Conversations(
-            createRequest
-          );
-        setCurrentConversation(response);
-        setMessages([]);
-
-        if (selectedPrompt && selectedPromptData) {
-          setMessages([
-            {
-              id: 'system',
-              role: 'system',
-              content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
-              timestamp: new Date(),
-            },
-          ]);
-        }
-        return response;
-      } catch (err: unknown) {
-        handleError(err, {
-          source: 'ChatPage.startNewConversation',
-          operation: 'create new conversation',
-          additionalData: {
-            selectedProfile,
-            selectedPrompt,
-            enableRetrieval,
-            promptName: selectedPromptData?.name,
-          },
-        });
-        return null;
-      }
-    }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
-
-  const onSelectConversation = useCallback(
-    async (conversation: ConversationResponse) => {
-      try {
-        // Set current conversation
-        setCurrentConversation(conversation);
-
-        // Load messages for this conversation
-        const response =
-          await getSDK().conversations.getConversationApiV1ConversationsConversationId(
-            conversation.id,
-            { includeMessages: true }
-          );
-
-        // Convert messages to ExtendedChatMessage format
-        const chatMessages: ExtendedChatMessage[] = (
-          response.messages || []
-        ).map((msg) => ({
-          id: msg.id,
-          role: msg.role as 'user' | 'assistant' | 'system',
-          content: msg.content,
-          timestamp: new Date(msg.created_at),
-          metadata: {
-            model: msg.model_used || undefined,
-            tokens: msg.total_tokens || undefined,
-            processingTime: msg.response_time_ms || undefined,
-          },
-        }));
-
-        setMessages(chatMessages);
-
-        // Scroll to bottom after messages are set
-        setTimeout(() => scrollToBottom(), 100);
-      } catch (err: unknown) {
-        handleError(err, {
-          source: 'ChatPage.onSelectConversation',
-          operation: 'load conversation messages',
-          additionalData: {
-            conversationId: conversation.id,
-            messageCount: conversation.message_count,
-          },
-        });
-      }
-    },
-    []
-  );
-
-  useEffect(() => {
-    loadData();
-  }, []);
-
-  useEffect(() => {
-    scrollToBottom();
-  }, [messages]);
-
-  // Focus the input on mount
-  useEffect(() => {
-    inputRef.current?.focus();
-  }, []);
-
-  // Focus the input when messages change during an active conversation
-  useEffect(() => {
-    if (currentConversation && messages.length > 0 && !loading) {
-      // Use a small timeout to ensure the component has updated
-      const timeoutId = setTimeout(() => {
-        inputRef.current?.focus();
-      }, 100);
-      return () => clearTimeout(timeoutId);
-    }
-  }, [messages, currentConversation, loading]);
-
-  // Inject configuration panel into the right drawer
-  useEffect(() => {
-    setTitle('Configuration');
-
-    // Restore right drawer state
-    const savedDrawerState = localStorage.getItem('chatter_rightDrawerOpen');
-    const shouldOpen = savedDrawerState ? JSON.parse(savedDrawerState) : true;
-    setOpen(shouldOpen);
-    setPanelContent(
-      <ChatConfigPanel
-        profiles={profiles}
-        prompts={prompts}
-        documents={documents}
-        currentConversation={currentConversation}
-        selectedProfile={selectedProfile}
-        setSelectedProfile={setSelectedProfile}
-        selectedPrompt={selectedPrompt}
-        setSelectedPrompt={setSelectedPrompt}
-        selectedDocuments={selectedDocuments}
-        setSelectedDocuments={setSelectedDocuments}
-        temperature={temperature}
-        setTemperature={setTemperature}
-        maxTokens={maxTokens}
-        setMaxTokens={setMaxTokens}
-        enableRetrieval={enableRetrieval}
-        setEnableRetrieval={setEnableRetrieval}
-        onSelectConversation={onSelectConversation}
-      />
-    );
-
-    return () => {
-      clearPanelContent();
-    };
-    // ESLint disabled: setPanelContent, clearPanelContent, setTitle, setOpen are stable setter functions
-    /* eslint-disable-next-line react-hooks/exhaustive-deps */
-  }, [
+  
+  // Use custom hooks for data and message management
+  const {
     profiles,
     prompts,
     documents,
@@ -313,411 +35,201 @@ const ChatPage: React.FC = () => {
     selectedProfile,
     selectedPrompt,
     selectedDocuments,
+    streamingEnabled,
     temperature,
     maxTokens,
     enableRetrieval,
-    onSelectConversation,
-  ]);
+    setSelectedProfile,
+    setSelectedPrompt,
+    setSelectedDocuments,
+    setCurrentConversation,
+    setStreamingEnabled,
+    setTemperature,
+    setMaxTokens,
+    setEnableRetrieval,
+    loadData,
+  } = useChatData();
 
-  const scrollToBottom = () => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  };
+  const {
+    message,
+    messages,
+    loading,
+    messagesEndRef,
+    inputRef,
+    setMessage,
+    setMessages,
+    setLoading,
+    loadMessagesForConversation,
+    clearMessages,
+    focusInput,
+  } = useChatMessages();
 
-  const handleStreamingResponse = async (
-    chatRequest: ChatRequest,
-    assistantMessageId?: string
-  ) => {
+  // Dialog state
+  const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
+  const [exportDialogOpen, setExportDialogOpen] = useState(false);
+
+  // Message handlers
+  const handleEditMessage = useCallback((messageId: string, newContent: string) => {
+    setMessages(prev => prev.map(msg => 
+      msg.id === messageId 
+        ? { ...msg, content: newContent }
+        : msg
+    ));
+  }, [setMessages]);
+
+  const handleRegenerateMessage = useCallback(async (messageId: string) => {
     try {
-      let currentMessageId = assistantMessageId || `stream-${Date.now()}`;
-
-      // If no assistantMessageId provided, create a placeholder message with workflow indicator
-      if (!assistantMessageId) {
-        const assistantMessage: ExtendedChatMessage = {
-          id: currentMessageId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-          metadata: {
-            workflow: {
-              stage: streamingEnabled ? 'Streaming' : 'Thinking',
-              status: streamingEnabled ? 'streaming' : 'thinking',
-              isStreaming: true,
-            },
-          },
-        };
-        setMessages((prev) => [...prev, assistantMessage]);
-      }
-
-      // Use SDK streaming method instead of direct fetch
-      const sdk = getSDK();
-      const stream =
-        await sdk.chat.streamingChatApiV1ChatStreaming(chatRequest);
-
-      if (!stream) {
-        throw new Error('No response stream received');
-      }
-
-      const reader = stream.getReader();
-      const decoder = new TextDecoder();
-      let buffer = '';
-
-      try {
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) break;
-
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep incomplete line in buffer
-
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const dataStr = line.slice(6).trim(); // Remove 'data: ' prefix
-
-              if (dataStr === '[DONE]') {
-                return; // End of stream
-              }
-
-              if (dataStr) {
-                try {
-                  const chunk = JSON.parse(dataStr);
-
-                  // Handle start chunk first to get the real message ID
-                  if (chunk.type === 'start') {
-                    // Update conversation if provided
-                    if (chunk.conversation_id && !currentConversation) {
-                      setCurrentConversation(
-                        (prev) =>
-                          prev ||
-                          ({
-                            id: chunk.conversation_id,
-                          } as ConversationResponse)
-                      );
-                    }
-
-                    // Update to real message ID from backend if provided
-                    if (
-                      chunk.message_id &&
-                      chunk.message_id !== currentMessageId
-                    ) {
-                      const oldMessageId = currentMessageId;
-                      currentMessageId = chunk.message_id;
-
-                      setMessages((prev) =>
-                        prev.map((msg) =>
-                          msg.id === oldMessageId
-                            ? { ...msg, id: currentMessageId }
-                            : msg
-                        )
-                      );
-                    }
-
-                    // Update workflow stage if provided
-                    if (chunk.workflow_stage) {
-                      setMessages((prev) =>
-                        prev.map((msg) =>
-                          msg.id === currentMessageId
-                            ? {
-                                ...msg,
-                                metadata: {
-                                  ...msg.metadata,
-                                  workflow: {
-                                    ...msg.metadata?.workflow,
-                                    stage: chunk.workflow_stage,
-                                    status: 'processing',
-                                  },
-                                },
-                              }
-                            : msg
-                        )
-                      );
-                    }
-                  } else if (chunk.type === 'token' && chunk.content) {
-                    // Append token content to the message and update workflow status
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === currentMessageId
-                          ? { 
-                              ...msg, 
-                              content: msg.content + chunk.content,
-                              metadata: {
-                                ...msg.metadata,
-                                workflow: {
-                                  ...msg.metadata?.workflow,
-                                  status: 'streaming',
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                  } else if (chunk.type === 'workflow_progress') {
-                    // Handle workflow progress updates
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === currentMessageId
-                          ? {
-                              ...msg,
-                              metadata: {
-                                ...msg.metadata,
-                                workflow: {
-                                  ...msg.metadata?.workflow,
-                                  stage: chunk.stage || msg.metadata?.workflow?.stage,
-                                  progress: chunk.progress,
-                                  status: chunk.status || 'processing',
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                  } else if (
-                    chunk.type === 'complete' ||
-                    chunk.type === 'end'
-                  ) {
-                    // Stream ended - reload conversation to get complete persisted state
-                    if (chunk.conversation_id || currentConversation?.id) {
-                      try {
-                        const conversationId = chunk.conversation_id || currentConversation?.id;
-                        const updatedConversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
-                          conversationId,
-                          { includeMessages: true }
-                        );
-
-                        // Convert all messages to ExtendedChatMessage format
-                        const chatMessages: ExtendedChatMessage[] = (
-                          updatedConversation.messages || []
-                        ).map((msg) => ({
-                          id: msg.id,
-                          role: msg.role as 'user' | 'assistant' | 'system',
-                          content: msg.content,
-                          timestamp: new Date(msg.created_at),
-                          metadata: {
-                            model: msg.model_used || undefined,
-                            tokens: msg.total_tokens || undefined,
-                            processingTime: msg.response_time_ms || undefined,
-                          },
-                        }));
-
-                        // Replace all messages with the complete persisted state
-                        setMessages(chatMessages);
-                      } catch (_reloadError) {
-                        // Fall back to updating the current message
-                        const updateData: Partial<ExtendedChatMessage> = {};
-                        
-                        if (chunk.metadata) {
-                          updateData.metadata = {
-                            model: chunk.metadata.model_used,
-                            tokens: chunk.metadata.total_tokens,
-                            processingTime: chunk.metadata.response_time_ms,
-                            workflow: {
-                              stage: 'Complete',
-                              status: 'complete',
-                              isStreaming: false,
-                            },
-                          };
-                        } else {
-                          updateData.metadata = {
-                            workflow: {
-                              stage: 'Complete',
-                              status: 'complete',
-                              isStreaming: false,
-                            },
-                          };
-                        }
-
-                        setMessages((prev) =>
-                          prev.map((msg) =>
-                            msg.id === currentMessageId
-                              ? { ...msg, ...updateData }
-                              : msg
-                          )
-                        );
-                      }
-                    }
-                    return; // End the streaming loop
-                  } else if (chunk.type === 'error') {
-                    throw new Error(
-                      chunk.content || chunk.error || 'Streaming error'
-                    );
-                  }
-                } catch (parseError) {
-                  // Failed to parse streaming chunk - skip invalid data
-                  // Note: In production, this should be logged to a proper logging service
-                }
-              }
-            }
-          }
+      setLoading(true);
+      // Find the message and regenerate from the previous user message
+      const messageIndex = messages.findIndex(msg => msg.id === messageId);
+      if (messageIndex > 0) {
+        const userMessage = messages[messageIndex - 1];
+        if (userMessage.role === 'user') {
+          await sendMessage(userMessage.content, true);
         }
-      } finally {
-        reader.releaseLock();
       }
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.handleStreamingResponse',
-        operation: 'process streaming chat response',
-        additionalData: {
-          conversationId: currentConversation?.id,
-          messageLength: message.length,
-        },
+    } catch (error) {
+      handleError(error, {
+        source: 'ChatPage.handleRegenerateMessage',
+        operation: 'regenerate message',
       });
-    }
-  };
-
-  const sendMessage = async () => {
-    if (!message.trim() || loading) return;
-
-    const text = message.trim();
-    setMessage('');
-    setLoading(true);
-
-    try {
-      // Ensure we have a conversation id we can include immediately
-      let conversationId = currentConversation?.id;
-      if (!conversationId) {
-        const conv = await startNewConversation();
-        conversationId = conv?.id;
-      }
-
-      const userMessage: ExtendedChatMessage = {
-        id: Date.now().toString(),
-        role: 'user',
-        content: text,
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, userMessage]);
-
-      // Build the chat request with config panel values
-      const sendRequest: ChatRequest = {
-        message: text,
-        conversation_id: conversationId,
-        profile_id:
-          selectedProfile && selectedProfile !== currentConversation?.profile_id
-            ? selectedProfile
-            : undefined,
-        temperature,
-        max_tokens: maxTokens,
-        enable_retrieval: enableRetrieval,
-        document_ids:
-          selectedDocuments.length > 0 ? selectedDocuments : undefined,
-        prompt_id: selectedPrompt || undefined,
-        system_prompt_override: selectedPrompt
-          ? prompts.find((p) => p.id === selectedPrompt)?.content
-          : undefined,
-      };
-
-      if (streamingEnabled) {
-        await handleStreamingResponse(sendRequest);
-      } else {
-        // Create a placeholder message with workflow indicator for non-streaming
-        const placeholderMessage: ExtendedChatMessage = {
-          id: `placeholder-${Date.now()}`,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-          metadata: {
-            workflow: {
-              stage: 'Thinking',
-              status: 'thinking',
-              isStreaming: false,
-            },
-          },
-        };
-        setMessages((prev) => [...prev, placeholderMessage]);
-
-        // Use regular API
-        const response = await getSDK().chat.chatChat(sendRequest);
-
-        // Update conversation with the response data
-        if (response.conversation) {
-          setCurrentConversation(response.conversation);
-        }
-
-        // After successful API call, reload the conversation to get all persisted messages
-        // This ensures we have the correct IDs and complete state
-        if (response.conversation_id) {
-          try {
-            const updatedConversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
-              response.conversation_id,
-              { includeMessages: true }
-            );
-
-            // Convert all messages to ExtendedChatMessage format
-            const chatMessages: ExtendedChatMessage[] = (
-              updatedConversation.messages || []
-            ).map((msg) => ({
-              id: msg.id,
-              role: msg.role as 'user' | 'assistant' | 'system',
-              content: msg.content,
-              timestamp: new Date(msg.created_at),
-              metadata: {
-                model: msg.model_used || undefined,
-                tokens: msg.total_tokens || undefined,
-                processingTime: msg.response_time_ms || undefined,
-              },
-            }));
-
-            // Replace all messages with the complete persisted state
-            setMessages(chatMessages);
-          } catch (_reloadError) {
-            // If reloading fails, fall back to the old behavior
-            const assistantMessage: ExtendedChatMessage = {
-              id: String(response.message.id),
-              role: 'assistant',
-              content: response.message.content,
-              timestamp: new Date(response.message.created_at),
-              metadata: {
-                model: response.message.model_used || undefined,
-                tokens: response.message.total_tokens || undefined,
-                processingTime: response.message.response_time_ms || undefined,
-                workflow: {
-                  stage: 'Complete',
-                  status: 'complete',
-                  isStreaming: false,
-                },
-              },
-            };
-            
-            // Replace the placeholder message with the real response
-            setMessages((prev) =>
-              prev.map((msg) =>
-                msg.id === placeholderMessage.id ? assistantMessage : msg
-              )
-            );
-          }
-        }
-      }
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.sendMessage',
-        operation: 'send chat message',
-        additionalData: {
-          conversationId: currentConversation?.id,
-          messageLength: message.length,
-          streamingEnabled,
-          selectedProfile,
-          temperature,
-          maxTokens,
-        },
-      });
-
-      const errorMessage: ChatMessage = {
-        id: Date.now().toString(),
-        role: 'assistant',
-        content:
-          'Sorry, I encountered an error processing your message. Please try again.',
-        timestamp: new Date(),
-      };
-      setMessages((prev) => [...prev, errorMessage]);
     } finally {
       setLoading(false);
-      inputRef.current?.focus();
     }
-  };
+  }, [messages, setLoading]);
 
-  // Fix typing to match TextField's onKeyDown (root div)
-  const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
+  const handleDeleteMessage = useCallback((messageId: string) => {
+    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+  }, [setMessages]);
+
+  const handleRateMessage = useCallback((messageId: string, rating: 'good' | 'bad') => {
+    // Implementation for message rating
+    toastService.info(`Message rated as ${rating}`);
+  }, []);
+
+  const handleSelectConversation = useCallback(async (conversationId: string) => {
+    try {
+      const conversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(conversationId);
+      setCurrentConversation(conversation);
+      await loadMessagesForConversation(conversationId);
+      setHistoryDialogOpen(false);
+    } catch (error) {
+      handleError(error, {
+        source: 'ChatPage.handleSelectConversation',
+        operation: 'select conversation',
+      });
+    }
+  }, [setCurrentConversation, loadMessagesForConversation]);
+
+  const sendMessage = useCallback(async (messageText?: string, isRegeneration = false) => {
+    const textToSend = messageText || message.trim();
+    if (!textToSend || loading) return;
+
+    try {
+      setLoading(true);
+      
+      if (!isRegeneration) {
+        setMessage('');
+      }
+
+      // Create user message
+      const userMessage: ChatMessage = {
+        id: `user-${Date.now()}`,
+        role: 'user',
+        content: textToSend,
+        timestamp: new Date(),
+        onEdit: handleEditMessage,
+        onRegenerate: handleRegenerateMessage,
+        onDelete: handleDeleteMessage,
+        onRate: handleRateMessage,
+      };
+
+      if (!isRegeneration) {
+        setMessages(prev => [...prev, userMessage]);
+      }
+
+      // Prepare chat request
+      const chatRequest = {
+        message: textToSend,
+        profile_id: selectedProfile || undefined,
+        prompt_id: selectedPrompt || undefined,
+        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        temperature,
+        max_tokens: maxTokens,
+        stream: streamingEnabled,
+        enable_retrieval: enableRetrieval,
+      };
+
+      // Send message to API
+      const response = await getSDK().chat.chatApiV1Chat(chatRequest);
+
+      // Create assistant message
+      const assistantMessage: ChatMessage = {
+        id: `assistant-${Date.now()}`,
+        role: 'assistant',
+        content: response.message.content,
+        timestamp: new Date(),
+        metadata: {
+          model: response.message.model_used || undefined,
+          tokens: response.message.total_tokens || undefined,
+          processingTime: response.message.response_time_ms || undefined,
+          workflow: {
+            stage: 'Complete',
+            currentStep: 0,
+            totalSteps: 1,
+            stepDescriptions: ['Message processed'],
+          },
+        },
+        onEdit: handleEditMessage,
+        onRegenerate: handleRegenerateMessage,
+        onDelete: handleDeleteMessage,
+        onRate: handleRateMessage,
+      };
+
+      if (isRegeneration) {
+        // Replace the last assistant message
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
+          if (lastAssistantIndex !== -1) {
+            newMessages[lastAssistantIndex] = assistantMessage;
+          }
+          return newMessages;
+        });
+      } else {
+        setMessages(prev => [...prev, assistantMessage]);
+      }
+
+      focusInput();
+    } catch (error) {
+      handleError(error, {
+        source: 'ChatPage.sendMessage',
+        operation: 'send message',
+      });
+    } finally {
+      setLoading(false);
+    }
+  }, [
+    message,
+    loading,
+    selectedProfile,
+    selectedPrompt,
+    selectedDocuments,
+    temperature,
+    maxTokens,
+    streamingEnabled,
+    enableRetrieval,
+    setMessage,
+    setMessages,
+    setLoading,
+    handleEditMessage,
+    handleRegenerateMessage,
+    handleDeleteMessage,
+    handleRateMessage,
+    focusInput,
+  ]);
+
+  const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {
     if (
       e.key === 'Enter' &&
       !e.shiftKey &&
@@ -726,282 +238,86 @@ const ChatPage: React.FC = () => {
       e.preventDefault();
       sendMessage();
     }
-  };
+  }, [sendMessage]);
 
-  // Enhanced message handlers
-  const handleEditMessage = useCallback(
-    (messageId: string, newContent: string) => {
-      setMessages((prev) =>
-        prev.map((msg) =>
-          msg.id === messageId
-            ? {
-                ...msg,
-                content: newContent,
-                edited: true,
-                editedAt: new Date(),
-              }
-            : msg
-        )
-      );
-    },
-    []
-  );
+  const handleClearMessages = useCallback(() => {
+    clearMessages();
+    setCurrentConversation(null);
+  }, [clearMessages, setCurrentConversation]);
 
-  const handleRegenerateMessage = useCallback(
-    async (messageId: string) => {
-      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
-      if (messageIndex === -1) return;
-
-      // Find the last user message before this assistant message
-      let userMessageContent = '';
-      for (let i = messageIndex - 1; i >= 0; i--) {
-        if (messages[i].role === 'user') {
-          userMessageContent = messages[i].content;
-          break;
-        }
-      }
-
-      if (!userMessageContent) return;
-
-      // Remove the message to be regenerated and all messages after it
-      setMessages((prev) => prev.slice(0, messageIndex));
-
-      // Regenerate the response
-      try {
-        setLoading(true);
-        const sendRequest: ChatRequest = {
-          message: userMessageContent,
-          conversation_id: currentConversation?.id,
-          profile_id: selectedProfile,
-          temperature,
-          max_tokens: maxTokens,
-          enable_retrieval: enableRetrieval,
-          document_ids:
-            selectedDocuments.length > 0 ? selectedDocuments : undefined,
-          prompt_id: selectedPrompt || undefined,
-          system_prompt_override: selectedPrompt
-            ? prompts.find((p) => p.id === selectedPrompt)?.content
-            : undefined,
-        };
-
-        if (streamingEnabled) {
-          const assistantMessageId = Date.now().toString();
-          const assistantMessage: ExtendedChatMessage = {
-            id: assistantMessageId,
-            role: 'assistant',
-            content: '',
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-          await handleStreamingResponse(sendRequest, assistantMessageId);
-        } else {
-          const response = await getSDK().chat.chatChat(sendRequest);
-          const assistantMessage: ExtendedChatMessage = {
-            id: Date.now().toString(),
-            role: 'assistant',
-            content: response.message.content,
-            timestamp: new Date(),
-          };
-          setMessages((prev) => [...prev, assistantMessage]);
-        }
-      } catch (err: unknown) {
-        handleError(err, {
-          source: 'ChatPage.regenerateLastMessage',
-          operation: 'regenerate assistant message',
-          additionalData: {
-            conversationId: currentConversation?.id,
-            messageId: messageId,
-            selectedProfile,
-            temperature,
-            maxTokens,
-          },
-        });
-      } finally {
-        setLoading(false);
-      }
-    },
-    [
-      messages,
-      currentConversation,
-      selectedProfile,
-      streamingEnabled,
-      temperature,
-      maxTokens,
-      enableRetrieval,
-      selectedDocuments,
-      selectedPrompt,
-      prompts,
-    ]
-  );
-
-  const handleDeleteMessage = useCallback((messageId: string) => {
-    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
-  }, []);
-
-  const handleRateMessage = useCallback(
-    async (messageId: string, rating: number) => {
-      if (!currentConversation?.id) {
-        toastService.error('No conversation selected for rating');
-        return;
-      }
-
-      try {
-        // Optimistically update the UI
-        setMessages((prev) =>
-          prev.map((msg) => (msg.id === messageId ? { ...msg, rating } : msg))
-        );
-
-        // Call the backend API to persist the rating using SDK
-        const sdk = getSDK();
-        const result =
-          await sdk.conversations.updateMessageRatingApiV1ConversationsConversationIdMessagesMessageIdRating(
-            currentConversation.id,
-            messageId,
-            { rating }
-          );
-
-        // Update the message with the actual server response (average rating)
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, rating: result.rating } : msg
-          )
-        );
-
-        toastService.success('Message rated successfully');
-      } catch (error) {
-        // Revert the optimistic update on error
-        const previousRating = messages.find(
-          (msg) => msg.id === messageId
-        )?.rating;
-        setMessages((prev) =>
-          prev.map((msg) =>
-            msg.id === messageId ? { ...msg, rating: previousRating } : msg
-          )
-        );
-
-        handleError(error, {
-          source: 'ChatPage.handleRateMessage',
-          operation: 'rate message',
-          additionalData: {
-            conversationId: currentConversation?.id,
-            messageId,
-          },
-        });
-      }
-    },
-    [currentConversation?.id, messages]
-  );
-
-  const handleSelectConversation = useCallback(
-    (conversation: ConversationResponse) => {
-      setCurrentConversation(conversation);
-      // In a real implementation, you would load the conversation messages here
-      // For now, we'll just clear the current messages
-      setMessages([]);
-    },
-    []
-  );
-
-  const handleClearConversation = useCallback(() => {
-    if (window.confirm('Are you sure you want to clear this conversation?')) {
-      setMessages([]);
-      setCurrentConversation(null);
-    }
-  }, []);
-
-  // Create the toolbar content
+  // Toolbar content
   const toolbar = (
     <>
-      <FormControlLabel
-        control={
-          <Switch
-            checked={streamingEnabled}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
-              setStreamingEnabled(e.target.checked)
-            }
-          />
-        }
-        label={streamingEnabled ? 'Streaming' : 'Standard'}
-      />
-      <Divider orientation="vertical" flexItem />
       <Button
         variant="outlined"
-        size="small"
-        onClick={startNewConversation}
         startIcon={<RefreshIcon />}
+        onClick={loadData}
+        size="small"
       >
-        New Chat
+        Refresh
       </Button>
       <Button
         variant="outlined"
-        size="small"
-        onClick={() => setHistoryDialogOpen(true)}
         startIcon={<HistoryIcon />}
+        onClick={() => setHistoryDialogOpen(true)}
+        size="small"
       >
         History
       </Button>
       <Button
         variant="outlined"
-        size="small"
-        onClick={() => setExportDialogOpen(true)}
         startIcon={<DownloadIcon />}
+        onClick={() => setExportDialogOpen(true)}
         disabled={messages.length === 0}
+        size="small"
       >
         Export
       </Button>
-      <Button
-        variant="outlined"
-        size="small"
-        onClick={handleClearConversation}
-        startIcon={<ClearIcon />}
-        disabled={messages.length === 0}
-        color="warning"
-      >
-        Clear
-      </Button>
-      {currentConversation && (
-        <Chip
-          label={`${currentConversation.title} (${messages.length} messages)`}
-          size="small"
-          variant="outlined"
-        />
-      )}
     </>
   );
 
-  // Create the fixed bottom input area
+  // Chat input component
   const messageInput = (
-    <Box sx={{ p: 1.5 }}>
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-        <TextField
-          fullWidth
-          multiline
-          maxRows={4}
-          placeholder="Type your message here... (Shift+Enter for new line)"
-          value={message}
-          onChange={(e) => setMessage(e.target.value)}
-          onKeyDown={handleKeyDown}
-          disabled={loading}
-          variant="outlined"
-          size="small"
-          inputRef={inputRef}
-          autoFocus
-          autoComplete="off"
-        />
-        <IconButton
-          color="primary"
-          onClick={sendMessage}
-          disabled={!message.trim() || loading}
-          sx={{ p: 1.5 }}
-        >
-          <SendIcon />
-        </IconButton>
-      </Box>
-    </Box>
+    <ChatInput
+      message={message}
+      setMessage={setMessage}
+      loading={loading}
+      streamingEnabled={streamingEnabled}
+      setStreamingEnabled={setStreamingEnabled}
+      onSendMessage={() => sendMessage()}
+      onClearMessages={handleClearMessages}
+      onKeyDown={handleKeyDown}
+      inputRef={inputRef}
+    />
   );
 
   return (
-    <PageLayout title="Chat" toolbar={toolbar} fixedBottom={messageInput}>
+    <PageLayout 
+      title="Chat" 
+      toolbar={toolbar} 
+      fixedBottom={messageInput}
+      rightSidebar={
+        <ChatConfigPanel
+          profiles={profiles}
+          prompts={prompts}
+          documents={documents}
+          currentConversation={currentConversation}
+          selectedProfile={selectedProfile}
+          setSelectedProfile={setSelectedProfile}
+          selectedPrompt={selectedPrompt}
+          setSelectedPrompt={setSelectedPrompt}
+          selectedDocuments={selectedDocuments}
+          setSelectedDocuments={setSelectedDocuments}
+          temperature={temperature}
+          setTemperature={setTemperature}
+          maxTokens={maxTokens}
+          setMaxTokens={setMaxTokens}
+          enableRetrieval={enableRetrieval}
+          setEnableRetrieval={setEnableRetrieval}
+          onSelectConversation={handleSelectConversation}
+        />
+      }
+    >
       {/* Messages Area */}
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <CardContent
@@ -1014,57 +330,34 @@ const ChatPage: React.FC = () => {
             flexDirection: 'column',
           }}
         >
-          <Box
-            sx={{
-              flex: 1,
-              minHeight: 0,
-              p: 2,
-              display: 'flex',
-              flexDirection: 'column',
-            }}
-          >
-            <CustomScrollbar style={{ flex: 1 }}>
-              <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                {messages.length === 0 ? (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      flexDirection: 'column',
-                      alignItems: 'center',
-                      justifyContent: 'center',
-                      height: '100%',
-                      color: 'text.secondary',
-                    }}
-                  >
-                    <BotIcon sx={{ fontSize: 64, mb: 2 }} />
-                    <Typography variant="h6" gutterBottom>
-                      Welcome to Chatter!
-                    </Typography>
-                    <Typography variant="body2" textAlign="center">
-                      Configure your settings in the right panel and start
-                      chatting. Use the streaming toggle for real-time
-                      responses.
-                    </Typography>
-                  </Box>
-                ) : (
-                  messages.map((msg) => (
-                    <EnhancedMessage
-                      key={msg.id}
-                      message={msg}
-                      onEdit={handleEditMessage}
-                      onRegenerate={handleRegenerateMessage}
-                      onDelete={handleDeleteMessage}
-                      onRate={handleRateMessage}
-                      canEdit={msg.role === 'user'}
-                      canRegenerate={msg.role === 'assistant'}
-                      canDelete={true}
-                    />
-                  ))
-                )}
-                <div ref={messagesEndRef} />
-              </Box>
-            </CustomScrollbar>
-          </Box>
+          {messages.length === 0 ? (
+            <Box
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: 'center',
+                justifyContent: 'center',
+                height: '100%',
+                color: 'text.secondary',
+                p: 4,
+              }}
+            >
+              <BotIcon sx={{ fontSize: 64, mb: 2 }} />
+              <Typography variant="h6" gutterBottom>
+                Welcome to Chatter!
+              </Typography>
+              <Typography variant="body2" textAlign="center">
+                Configure your settings in the right panel and start chatting. 
+                Use the streaming toggle for real-time responses.
+              </Typography>
+            </Box>
+          ) : (
+            <ChatMessageList
+              messages={messages}
+              messagesEndRef={messagesEndRef}
+              loading={loading}
+            />
+          )}
         </CardContent>
       </Card>
 

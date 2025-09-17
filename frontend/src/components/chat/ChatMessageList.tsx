@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import { Box } from '../../utils/mui';
 import CustomScrollbar from '../CustomScrollbar';
 import EnhancedMessage, { ChatMessage } from '../EnhancedMessage';
@@ -9,7 +9,7 @@ interface ChatMessageListProps {
   loading: boolean;
 }
 
-const ChatMessageList: React.FC<ChatMessageListProps> = ({
+const ChatMessageList: React.FC<ChatMessageListProps> = memo(({
   messages,
   messagesEndRef,
   loading,
@@ -81,6 +81,8 @@ const ChatMessageList: React.FC<ChatMessageListProps> = ({
       </CustomScrollbar>
     </Box>
   );
-};
+});
+
+ChatMessageList.displayName = 'ChatMessageList';
 
 export default ChatMessageList;

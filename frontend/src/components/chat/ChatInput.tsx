@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { memo } from 'react';
 import {
   Box,
   Card,
@@ -23,7 +23,7 @@ interface ChatInputProps {
   inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement>;
 }
 
-const ChatInput: React.FC<ChatInputProps> = ({
+const ChatInput: React.FC<ChatInputProps> = memo(({
   message,
   setMessage,
   loading,
@@ -93,6 +93,8 @@ const ChatInput: React.FC<ChatInputProps> = ({
       </CardContent>
     </Card>
   );
-};
+});
+
+ChatInput.displayName = 'ChatInput';
 
 export default ChatInput;

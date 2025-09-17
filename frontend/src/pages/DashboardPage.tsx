@@ -50,7 +50,7 @@ import {
   Computer,
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { useApi } from '../hooks/useApi';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
@@ -66,56 +66,55 @@ interface MetricCardProps {
 }
 
 // Memoized MetricCard component
-const MetricCard = memo<MetricCardProps>(({
-  title,
-  value,
-  change,
-  changeType = 'neutral',
-  icon,
-  color,
-}) => {
-  const getChangeColor = () => {
-    switch (changeType) {
-      case 'positive':
-        return 'success.main';
-      case 'negative':
-        return 'error.main';
-      default:
-        return 'text.secondary';
-    }
-  };
+const MetricCard = memo<MetricCardProps>(
+  ({ title, value, change, changeType = 'neutral', icon, color }) => {
+    const getChangeColor = () => {
+      switch (changeType) {
+        case 'positive':
+          return 'success.main';
+        case 'negative':
+          return 'error.main';
+        default:
+          return 'text.secondary';
+      }
+    };
 
-  return (
-    <Card sx={{ height: '100%' }}>
-      <CardContent>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-          <Box
-            sx={{
-              p: 1,
-              borderRadius: 1,
-              backgroundColor: `${color}.light`,
-              color: `${color}.main`,
-              mr: 2,
-            }}
-          >
-            {icon}
+    return (
+      <Card sx={{ height: '100%' }}>
+        <CardContent>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <Box
+              sx={{
+                p: 1,
+                borderRadius: 1,
+                backgroundColor: `${color}.light`,
+                color: `${color}.main`,
+                mr: 2,
+              }}
+            >
+              {icon}
+            </Box>
+            <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
+              {title}
+            </Typography>
           </Box>
-          <Typography variant="h6" component="div" sx={{ flexGrow: 1 }}>
-            {title}
+          <Typography
+            variant="h4"
+            component="div"
+            sx={{ mb: 1, fontWeight: 'bold' }}
+          >
+            {value}
           </Typography>
-        </Box>
-        <Typography variant="h4" component="div" sx={{ mb: 1, fontWeight: 'bold' }}>
-          {value}
-        </Typography>
-        {change && (
-          <Typography variant="body2" sx={{ color: getChangeColor() }}>
-            {change}
-          </Typography>
-        )}
-      </CardContent>
-    </Card>
-  );
-});
+          {change && (
+            <Typography variant="body2" sx={{ color: getChangeColor() }}>
+              {change}
+            </Typography>
+          )}
+        </CardContent>
+      </Card>
+    );
+  }
+);
 
 MetricCard.displayName = 'MetricCard';
 
@@ -138,9 +137,11 @@ function safeToFixed(n: number | undefined | null, digits: number): string {
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
-  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx'>('json');
+  const [exportFormat, setExportFormat] = useState<'json' | 'csv' | 'xlsx'>(
+    'json'
+  );
   const [fileName, setFileName] = useState('analytics_export');
-  
+
   // Use custom API hooks for various analytics data
   const dashboardApi = useApi(
     () => getSDK().analytics.getDashboardApiV1AnalyticsDashboard(),
@@ -243,31 +244,92 @@ const DashboardPage: React.FC = () => {
     // Fallback to real data if chart API isn't available
     const conversationStats = data?.conversation_stats || {};
     const usageMetrics = usageData || data?.usage_metrics || {};
-    const realPerformanceData = performanceData || data?.performance_metrics || {};
+    const realPerformanceData =
+      performanceData || data?.performance_metrics || {};
 
     // Provide fallback data when APIs fail
     const conversationChartData = [
-      { name: 'Mon', conversations: Math.max((conversationStats.total_conversations ?? 0) * 0.8, 5) },
-      { name: 'Tue', conversations: Math.max((conversationStats.total_conversations ?? 0) * 1.2, 8) },
-      { name: 'Wed', conversations: Math.max((conversationStats.total_conversations ?? 0) * 0.9, 6) },
-      { name: 'Thu', conversations: Math.max((conversationStats.total_conversations ?? 0) * 1.1, 7) },
-      { name: 'Fri', conversations: Math.max((conversationStats.total_conversations ?? 0) * 1.3, 9) },
-      { name: 'Sat', conversations: Math.max((conversationStats.total_conversations ?? 0) * 0.7, 4) },
-      { name: 'Sun', conversations: Math.max(conversationStats.total_conversations ?? 0, 5) },
+      {
+        name: 'Mon',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 0.8,
+          5
+        ),
+      },
+      {
+        name: 'Tue',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 1.2,
+          8
+        ),
+      },
+      {
+        name: 'Wed',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 0.9,
+          6
+        ),
+      },
+      {
+        name: 'Thu',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 1.1,
+          7
+        ),
+      },
+      {
+        name: 'Fri',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 1.3,
+          9
+        ),
+      },
+      {
+        name: 'Sat',
+        conversations: Math.max(
+          (conversationStats.total_conversations ?? 0) * 0.7,
+          4
+        ),
+      },
+      {
+        name: 'Sun',
+        conversations: Math.max(conversationStats.total_conversations ?? 0, 5),
+      },
     ];
 
     const tokenUsageData = [
-      { name: 'Week 1', tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.6, 1000) },
-      { name: 'Week 2', tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.8, 1500) },
-      { name: 'Week 3', tokens: Math.max((usageMetrics.total_tokens ?? 0) * 1.1, 2000) },
-      { name: 'Week 4', tokens: Math.max(usageMetrics.total_tokens ?? 0, 2500) },
+      {
+        name: 'Week 1',
+        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.6, 1000),
+      },
+      {
+        name: 'Week 2',
+        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.8, 1500),
+      },
+      {
+        name: 'Week 3',
+        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 1.1, 2000),
+      },
+      {
+        name: 'Week 4',
+        tokens: Math.max(usageMetrics.total_tokens ?? 0, 2500),
+      },
     ];
 
     // Enhanced performance data from performance API
     const performanceChartData = [
-      { name: 'API Latency', value: Math.max(realPerformanceData.avg_response_time_ms ?? 250, 100) },
-      { name: 'P95 Latency', value: Math.max(realPerformanceData.p95_response_time_ms ?? 500, 200) },
-      { name: 'P99 Latency', value: Math.max(realPerformanceData.p99_response_time_ms ?? 800, 400) },
+      {
+        name: 'API Latency',
+        value: Math.max(realPerformanceData.avg_response_time_ms ?? 250, 100),
+      },
+      {
+        name: 'P95 Latency',
+        value: Math.max(realPerformanceData.p95_response_time_ms ?? 500, 200),
+      },
+      {
+        name: 'P99 Latency',
+        value: Math.max(realPerformanceData.p99_response_time_ms ?? 800, 400),
+      },
     ];
 
     const systemHealthData = [
@@ -295,39 +357,54 @@ const DashboardPage: React.FC = () => {
   // Helper function for exporting analytics with file name
   const handleExportAnalytics = async () => {
     try {
-      const response = await getSDK().analytics.exportAnalyticsApiV1AnalyticsExport({
-        metrics: ['conversations', 'usage', 'performance'],
-        format: exportFormat,
-        period: '30d'
-      });
-      
+      const response =
+        await getSDK().analytics.exportAnalyticsApiV1AnalyticsExport({
+          metrics: ['conversations', 'usage', 'performance'],
+          format: exportFormat,
+          period: '30d',
+        });
+
       // If the API returns file data (like CSV or XLSX), trigger download
       if (response && typeof response === 'object') {
         // Create a downloadable file
         let blob;
         let mimeType;
         const fileExtension = exportFormat;
-        
+
         switch (exportFormat) {
           case 'json':
-            blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+            blob = new Blob([JSON.stringify(response, null, 2)], {
+              type: 'application/json',
+            });
             mimeType = 'application/json';
             break;
           case 'csv':
             // If response is already CSV string
-            blob = new Blob([typeof response === 'string' ? response : JSON.stringify(response)], { type: 'text/csv' });
+            blob = new Blob(
+              [
+                typeof response === 'string'
+                  ? response
+                  : JSON.stringify(response),
+              ],
+              { type: 'text/csv' }
+            );
             mimeType = 'text/csv';
             break;
           case 'xlsx':
             // This would need proper handling if the API returns binary data
-            blob = new Blob([response], { type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet' });
-            mimeType = 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
+            blob = new Blob([response], {
+              type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            });
+            mimeType =
+              'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet';
             break;
           default:
-            blob = new Blob([JSON.stringify(response, null, 2)], { type: 'application/json' });
+            blob = new Blob([JSON.stringify(response, null, 2)], {
+              type: 'application/json',
+            });
             mimeType = 'application/json';
         }
-        
+
         // Create download link
         const url = window.URL.createObjectURL(blob);
         const link = document.createElement('a');
@@ -338,13 +415,13 @@ const DashboardPage: React.FC = () => {
         document.body.removeChild(link);
         window.URL.revokeObjectURL(url);
       }
-      
+
       setExportDialogOpen(false);
       toastService.success(`Analytics exported as ${fileName}.${exportFormat}`);
     } catch (error) {
       handleError(new Error('Analytics export failed'), {
         source: 'DashboardPage.handleExportAnalytics',
-        operation: 'export analytics data'
+        operation: 'export analytics data',
       });
     }
   };
@@ -373,7 +450,11 @@ const DashboardPage: React.FC = () => {
         <Alert severity="error" sx={{ mt: 2 }}>
           {dashboardApi.error}
           <Box sx={{ mt: 1 }}>
-            <Button variant="outlined" onClick={dashboardApi.execute} size="small">
+            <Button
+              variant="outlined"
+              onClick={dashboardApi.execute}
+              size="small"
+            >
               Retry
             </Button>
           </Box>
@@ -394,7 +475,7 @@ const DashboardPage: React.FC = () => {
     const sizes = ['Bytes', 'KB', 'MB', 'GB', 'TB'];
     if (!bytes || bytes === 0) return '0 Bytes';
     const i = Math.floor(Math.log(bytes) / Math.log(1024));
-    return Math.round(bytes / Math.pow(1024, i) * 100) / 100 + ' ' + sizes[i];
+    return Math.round((bytes / Math.pow(1024, i)) * 100) / 100 + ' ' + sizes[i];
   };
 
   const toolbar = (
@@ -460,8 +541,9 @@ const DashboardPage: React.FC = () => {
               size={{
                 xs: 12,
                 sm: 6,
-                md: 3
-              }}>
+                md: 3,
+              }}
+            >
               <MetricCard
                 title="Total Conversations"
                 value={safeLocaleString(conversationStats.total_conversations)}
@@ -475,8 +557,9 @@ const DashboardPage: React.FC = () => {
               size={{
                 xs: 12,
                 sm: 6,
-                md: 3
-              }}>
+                md: 3,
+              }}
+            >
               <MetricCard
                 title="Total Messages"
                 value={safeLocaleString(conversationStats.total_messages)}
@@ -490,8 +573,9 @@ const DashboardPage: React.FC = () => {
               size={{
                 xs: 12,
                 sm: 6,
-                md: 3
-              }}>
+                md: 3,
+              }}
+            >
               <MetricCard
                 title="Token Usage"
                 value={safeLocaleString(usageMetrics.total_tokens)}
@@ -505,8 +589,9 @@ const DashboardPage: React.FC = () => {
               size={{
                 xs: 12,
                 sm: 6,
-                md: 3
-              }}>
+                md: 3,
+              }}
+            >
               <MetricCard
                 title="Documents"
                 value={safeLocaleString(documentAnalytics.total_documents)}
@@ -522,8 +607,9 @@ const DashboardPage: React.FC = () => {
             <Grid
               size={{
                 xs: 12,
-                md: 8
-              }}>
+                md: 8,
+              }}
+            >
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
@@ -535,7 +621,12 @@ const DashboardPage: React.FC = () => {
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Area type="monotone" dataKey="conversations" stroke="#8884d8" fill="#8884d8" />
+                      <Area
+                        type="monotone"
+                        dataKey="conversations"
+                        stroke="#8884d8"
+                        fill="#8884d8"
+                      />
                     </AreaChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -544,8 +635,9 @@ const DashboardPage: React.FC = () => {
             <Grid
               size={{
                 xs: 12,
-                md: 4
-              }}>
+                md: 4,
+              }}
+            >
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom sx={{ mb: 3 }}>
@@ -557,7 +649,12 @@ const DashboardPage: React.FC = () => {
                       <XAxis dataKey="name" />
                       <YAxis />
                       <Tooltip />
-                      <Line type="monotone" dataKey="tokens" stroke="#82ca9d" strokeWidth={3} />
+                      <Line
+                        type="monotone"
+                        dataKey="tokens"
+                        stroke="#82ca9d"
+                        strokeWidth={3}
+                      />
                     </LineChart>
                   </ResponsiveContainer>
                 </CardContent>
@@ -581,7 +678,9 @@ const DashboardPage: React.FC = () => {
                       <CartesianGrid strokeDasharray="3 3" />
                       <XAxis dataKey="name" />
                       <YAxis />
-                      <Tooltip formatter={(value) => [`${value}ms`, 'Latency']} />
+                      <Tooltip
+                        formatter={(value) => [`${value}ms`, 'Latency']}
+                      />
                       <Bar dataKey="value" fill="#8884d8" />
                     </BarChart>
                   </ResponsiveContainer>
@@ -599,21 +698,33 @@ const DashboardPage: React.FC = () => {
                 </Typography>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
-                    Average: {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
+                    Average:{' '}
+                    {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
-                    value={Math.min((performanceMetrics.avg_response_time_ms ?? 0) / 10, 100)}
+                    value={Math.min(
+                      (performanceMetrics.avg_response_time_ms ?? 0) / 10,
+                      100
+                    )}
                     sx={{ mb: 1 }}
                   />
                 </Box>
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
-                    P95: {safeToFixed(performanceMetrics.p95_response_time_ms ?? 0, 1)}ms
+                    P95:{' '}
+                    {safeToFixed(
+                      performanceMetrics.p95_response_time_ms ?? 0,
+                      1
+                    )}
+                    ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
-                    value={Math.min((performanceMetrics.p95_response_time_ms ?? 0) / 20, 100)}
+                    value={Math.min(
+                      (performanceMetrics.p95_response_time_ms ?? 0) / 20,
+                      100
+                    )}
                     color="warning"
                   />
                 </Box>
@@ -698,16 +809,28 @@ const DashboardPage: React.FC = () => {
                 {documentData ? (
                   <Grid container spacing={2}>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Total Documents</Typography>
-                      <Typography variant="h5">{safeLocaleString(documentAnalytics.total_documents)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Documents
+                      </Typography>
+                      <Typography variant="h5">
+                        {safeLocaleString(documentAnalytics.total_documents)}
+                      </Typography>
                     </Grid>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Total Chunks</Typography>
-                      <Typography variant="h5">{safeLocaleString(documentAnalytics.total_chunks)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Chunks
+                      </Typography>
+                      <Typography variant="h5">
+                        {safeLocaleString(documentAnalytics.total_chunks)}
+                      </Typography>
                     </Grid>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Storage Size</Typography>
-                      <Typography variant="h5">{formatBytes(documentAnalytics.total_size_bytes ?? 0)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Storage Size
+                      </Typography>
+                      <Typography variant="h5">
+                        {formatBytes(documentAnalytics.total_size_bytes ?? 0)}
+                      </Typography>
                     </Grid>
                   </Grid>
                 ) : (
@@ -730,20 +853,38 @@ const DashboardPage: React.FC = () => {
                 {toolServerData ? (
                   <Grid container spacing={2}>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Active Servers</Typography>
-                      <Typography variant="h5">{safeLocaleString(toolServerData.active_servers ?? 0)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Active Servers
+                      </Typography>
+                      <Typography variant="h5">
+                        {safeLocaleString(toolServerData.active_servers ?? 0)}
+                      </Typography>
                     </Grid>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Total Requests</Typography>
-                      <Typography variant="h5">{safeLocaleString(toolServerData.total_requests ?? 0)}</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Total Requests
+                      </Typography>
+                      <Typography variant="h5">
+                        {safeLocaleString(toolServerData.total_requests ?? 0)}
+                      </Typography>
                     </Grid>
                     <Grid size={4}>
-                      <Typography variant="body2" color="text.secondary">Avg Response Time</Typography>
-                      <Typography variant="h5">{safeToFixed(toolServerData.avg_response_time_ms ?? 0, 1)}ms</Typography>
+                      <Typography variant="body2" color="text.secondary">
+                        Avg Response Time
+                      </Typography>
+                      <Typography variant="h5">
+                        {safeToFixed(
+                          toolServerData.avg_response_time_ms ?? 0,
+                          1
+                        )}
+                        ms
+                      </Typography>
                     </Grid>
                   </Grid>
                 ) : (
-                  <Alert severity="info">Tool server analytics loading...</Alert>
+                  <Alert severity="info">
+                    Tool server analytics loading...
+                  </Alert>
                 )}
               </CardContent>
             </Card>
@@ -778,7 +919,11 @@ const DashboardPage: React.FC = () => {
             />
             <Chip
               label={`Avg Response: ${safeToFixed(performanceMetrics.avg_response_time_ms ?? 0, 0)}ms`}
-              color={(performanceMetrics.avg_response_time_ms ?? 0) < 1000 ? "success" : "warning"}
+              color={
+                (performanceMetrics.avg_response_time_ms ?? 0) < 1000
+                  ? 'success'
+                  : 'warning'
+              }
               variant="outlined"
               icon={<Speed />}
             />
@@ -787,7 +932,12 @@ const DashboardPage: React.FC = () => {
       </Card>
 
       {/* Export Dialog */}
-      <Dialog open={exportDialogOpen} onClose={() => setExportDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={exportDialogOpen}
+        onClose={() => setExportDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Export Analytics</DialogTitle>
         <DialogContent>
           <TextField
@@ -802,17 +952,18 @@ const DashboardPage: React.FC = () => {
           />
         </DialogContent>
         <DialogActions>
-          <Button onClick={() => setExportDialogOpen(false)}>
-            Cancel
-          </Button>
-          <Button onClick={handleExportAnalytics} variant="contained" disabled={!fileName.trim()}>
+          <Button onClick={() => setExportDialogOpen(false)}>Cancel</Button>
+          <Button
+            onClick={handleExportAnalytics}
+            variant="contained"
+            disabled={!fileName.trim()}
+          >
             Export {exportFormat.toUpperCase()}
           </Button>
         </DialogActions>
       </Dialog>
     </PageLayout>
   );
-
 };
 
 export default memo(DashboardPage);

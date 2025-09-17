@@ -4,25 +4,28 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Loop as LoopIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => {
+const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+  data,
+  selected,
+}) => {
   const config = data.config || {};
-  
+
   return (
     <>
       {/* Input handle */}
-      <Handle 
-        type="target" 
-        position={Position.Left} 
+      <Handle
+        type="target"
+        position={Position.Left}
         style={{ background: '#9c27b0' }}
       />
-      
-      <Card 
-        sx={{ 
-          minWidth: 180, 
-          border: selected ? 2 : 1, 
+
+      <Card
+        sx={{
+          minWidth: 180,
+          border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
           bgcolor: '#ba68c8',
-          color: 'white'
+          color: 'white',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
@@ -36,41 +39,41 @@ const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({ data, selected }) => 
             Repeat execution
           </Typography>
           {config.maxIterations && (
-            <Chip 
-              label={`Max: ${config.maxIterations}`} 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label={`Max: ${config.maxIterations}`}
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
                 border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5
+                mr: 0.5,
               }}
             />
           )}
           {config.condition && (
-            <Chip 
-              label="Conditional" 
-              size="small" 
-              sx={{ 
-                bgcolor: 'rgba(255,255,255,0.2)', 
+            <Chip
+              label="Conditional"
+              size="small"
+              sx={{
+                bgcolor: 'rgba(255,255,255,0.2)',
                 color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)'
+                border: '1px solid rgba(255,255,255,0.3)',
               }}
             />
           )}
         </CardContent>
       </Card>
-      
+
       {/* Output handles */}
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="continue"
         style={{ background: '#9c27b0', top: '40%' }}
       />
-      <Handle 
-        type="source" 
-        position={Position.Right} 
+      <Handle
+        type="source"
+        position={Position.Right}
         id="exit"
         style={{ background: '#e91e63', top: '60%' }}
       />

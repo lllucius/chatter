@@ -50,7 +50,10 @@ class ErrorHandler {
   /**
    * Extract a meaningful error message from various error types
    */
-  private extractErrorMessage(error: unknown, fallback: string = 'An unexpected error occurred'): string {
+  private extractErrorMessage(
+    error: unknown,
+    fallback: string = 'An unexpected error occurred'
+  ): string {
     // Handle string errors
     if (typeof error === 'string') {
       return error;
@@ -64,28 +67,28 @@ class ErrorHandler {
     // Handle API error responses with problem details
     if (error && typeof error === 'object') {
       const errorResponse = error as ErrorResponse;
-      
+
       // Try to extract problem detail information
       const problemDetail = errorResponse?.response?.data as ProblemDetail;
-      
+
       if (problemDetail && typeof problemDetail === 'object') {
         // Check for specific error cases and provide better messaging
         const detail = problemDetail.detail || '';
-        
+
         // Handle duplicate document error specifically
         if (detail.includes('Document with identical content already exists')) {
           return 'This file has already been uploaded. Documents are identified by their content, so uploading the same file again is not allowed. If you need to update the document, please delete the existing one first or upload a modified version.';
         }
-        
+
         // Priority order: title + detail, detail only, title only
         if (problemDetail.title && problemDetail.detail) {
           return `${problemDetail.title}: ${problemDetail.detail}`;
         }
-        
+
         if (problemDetail.detail) {
           return problemDetail.detail;
         }
-        
+
         if (problemDetail.title) {
           return problemDetail.title;
         }
@@ -105,7 +108,7 @@ class ErrorHandler {
    */
   private extractErrorDetails(error: unknown, context: ErrorContext): string {
     const details: string[] = [];
-    
+
     // Add context information
     details.push(`Source: ${context.source}`);
     if (context.operation) {
@@ -133,7 +136,9 @@ class ErrorHandler {
 
     // Add additional context data
     if (context.additionalData) {
-      details.push(`Additional Data: ${JSON.stringify(context.additionalData, null, 2)}`);
+      details.push(
+        `Additional Data: ${JSON.stringify(context.additionalData, null, 2)}`
+      );
     }
 
     return details.join('\n');
@@ -142,7 +147,10 @@ class ErrorHandler {
   /**
    * Generate a production-friendly error message with minimal context
    */
-  private generateProductionMessage(userMessage: string, context: ErrorContext): string {
+  private generateProductionMessage(
+    userMessage: string,
+    context: ErrorContext
+  ): string {
     // In production, show user-friendly message with minimal context for debugging
     return `${userMessage} (Error in ${context.source})`;
   }
@@ -159,7 +167,7 @@ class ErrorHandler {
       showToast = true,
       logToConsole = this.isDevelopment(),
       rethrow = false,
-      fallbackMessage = 'An unexpected error occurred'
+      fallbackMessage = 'An unexpected error occurred',
     } = options;
 
     const userMessage = this.extractErrorMessage(error, fallbackMessage);
@@ -188,7 +196,10 @@ class ErrorHandler {
         toastService.error(devMessage, { autoClose: false });
       } else {
         // In production, show user-friendly message
-        const prodMessage = this.generateProductionMessage(userMessage, context);
+        const prodMessage = this.generateProductionMessage(
+          userMessage,
+          context
+        );
         toastService.error(prodMessage);
       }
     }
@@ -208,7 +219,10 @@ class ErrorHandler {
     context: ErrorContext,
     options: ErrorHandlerOptions = {}
   ): { success: false; error: string; details?: string } {
-    const userMessage = this.extractErrorMessage(error, options.fallbackMessage);
+    const userMessage = this.extractErrorMessage(
+      error,
+      options.fallbackMessage
+    );
     const isDev = this.isDevelopment();
 
     // Handle the error (logging, toasts, etc.)
@@ -218,7 +232,7 @@ class ErrorHandler {
     return {
       success: false,
       error: userMessage,
-      ...(isDev && { details: this.extractErrorDetails(error, context) })
+      ...(isDev && { details: this.extractErrorDetails(error, context) }),
     };
   }
 

@@ -32,7 +32,11 @@ describe('useAsyncError', () => {
         result.current.handleAsyncError(testError, context, options);
       });
 
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, options);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        options
+      );
     });
 
     it('should work without options parameter', () => {
@@ -47,7 +51,11 @@ describe('useAsyncError', () => {
         result.current.handleAsyncError(testError, context);
       });
 
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, undefined);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        undefined
+      );
     });
   });
 
@@ -79,7 +87,11 @@ describe('useAsyncError', () => {
       const wrappedFn = result.current.wrapAsyncFunction(mockFn, context);
 
       await expect(wrappedFn()).rejects.toThrow('Test error');
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, undefined);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        undefined
+      );
     });
 
     it('should pass options to error handler', async () => {
@@ -95,10 +107,18 @@ describe('useAsyncError', () => {
         logToConsole: true,
       };
 
-      const wrappedFn = result.current.wrapAsyncFunction(mockFn, context, options);
+      const wrappedFn = result.current.wrapAsyncFunction(
+        mockFn,
+        context,
+        options
+      );
 
       await expect(wrappedFn()).rejects.toThrow('Test error');
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, options);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        options
+      );
     });
   });
 
@@ -138,7 +158,11 @@ describe('useAsyncError', () => {
         success: false,
         error: 'Test error',
       });
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, undefined);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        undefined
+      );
     });
 
     it('should handle non-Error rejections', async () => {
@@ -156,7 +180,11 @@ describe('useAsyncError', () => {
         success: false,
         error: 'An error occurred',
       });
-      expect(errorHandler.handleError).toHaveBeenCalledWith('String error', context, undefined);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        'String error',
+        context,
+        undefined
+      );
     });
   });
 
@@ -197,7 +225,11 @@ describe('useAsyncError', () => {
         success: false,
         error: 'Execution failed',
       });
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, undefined);
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        undefined
+      );
     });
   });
 });
@@ -253,7 +285,11 @@ describe('useAsyncOperation', () => {
         error: 'Operation failed',
       });
       expect(onError).toHaveBeenCalledWith('Operation failed');
-      expect(errorHandler.handleError).toHaveBeenCalledWith(testError, context, expect.any(Object));
+      expect(errorHandler.handleError).toHaveBeenCalledWith(
+        testError,
+        context,
+        expect.any(Object)
+      );
     });
 
     it('should work without callback options', async () => {
@@ -303,7 +339,7 @@ describe('useAsyncOperation', () => {
   describe('handleAsyncError', () => {
     it('should be available from useAsyncOperation', () => {
       const { result } = renderHook(() => useAsyncOperation());
-      
+
       expect(result.current.handleAsyncError).toBeDefined();
       expect(typeof result.current.handleAsyncError).toBe('function');
     });
@@ -312,7 +348,7 @@ describe('useAsyncOperation', () => {
   describe('executeAsync', () => {
     it('should be available from useAsyncOperation', () => {
       const { result } = renderHook(() => useAsyncOperation());
-      
+
       expect(result.current.executeAsync).toBeDefined();
       expect(typeof result.current.executeAsync).toBe('function');
     });

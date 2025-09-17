@@ -21,7 +21,10 @@ class GlobalErrorHandler {
     window.addEventListener('error', this.handleJavaScriptError);
 
     // Handle unhandled promise rejections
-    window.addEventListener('unhandledrejection', this.handleUnhandledRejection);
+    window.addEventListener(
+      'unhandledrejection',
+      this.handleUnhandledRejection
+    );
 
     // Handle resource loading errors (images, scripts, etc.)
     window.addEventListener('error', this.handleResourceError, true);
@@ -39,7 +42,10 @@ class GlobalErrorHandler {
     }
 
     window.removeEventListener('error', this.handleJavaScriptError);
-    window.removeEventListener('unhandledrejection', this.handleUnhandledRejection);
+    window.removeEventListener(
+      'unhandledrejection',
+      this.handleUnhandledRejection
+    );
     window.removeEventListener('error', this.handleResourceError, true);
 
     this.initialized = false;
@@ -56,27 +62,34 @@ class GlobalErrorHandler {
       // Only log in development mode for debugging purposes
       if (process.env.NODE_ENV === 'development') {
         // eslint-disable-next-line no-console
-        console.debug('[Global Error Handler] ResizeObserver loop error (benign):', message);
+        console.debug(
+          '[Global Error Handler] ResizeObserver loop error (benign):',
+          message
+        );
       }
       return;
     }
 
-    errorHandler.handleError(error || new Error(message), {
-      source: 'GlobalErrorHandler.handleJavaScriptError',
-      operation: 'Uncaught JavaScript error',
-      additionalData: {
-        filename,
-        lineno,
-        colno,
-        message,
-        url: window.location.href,
-        userAgent: navigator.userAgent
+    errorHandler.handleError(
+      error || new Error(message),
+      {
+        source: 'GlobalErrorHandler.handleJavaScriptError',
+        operation: 'Uncaught JavaScript error',
+        additionalData: {
+          filename,
+          lineno,
+          colno,
+          message,
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+        },
+      },
+      {
+        showToast: true,
+        logToConsole: true,
+        fallbackMessage: 'An unexpected error occurred',
       }
-    }, {
-      showToast: true,
-      logToConsole: true,
-      fallbackMessage: 'An unexpected error occurred'
-    });
+    );
   };
 
   /**
@@ -85,18 +98,23 @@ class GlobalErrorHandler {
   private handleUnhandledRejection = (event: PromiseRejectionEvent): void => {
     const { reason } = event;
 
-    errorHandler.handleError(reason, {
-      source: 'GlobalErrorHandler.handleUnhandledRejection',
-      operation: 'Unhandled promise rejection',
-      additionalData: {
-        url: window.location.href,
-        userAgent: navigator.userAgent
+    errorHandler.handleError(
+      reason,
+      {
+        source: 'GlobalErrorHandler.handleUnhandledRejection',
+        operation: 'Unhandled promise rejection',
+        additionalData: {
+          url: window.location.href,
+          userAgent: navigator.userAgent,
+        },
+      },
+      {
+        showToast: true,
+        logToConsole: true,
+        fallbackMessage:
+          'An unexpected error occurred while processing a request',
       }
-    }, {
-      showToast: true,
-      logToConsole: true,
-      fallbackMessage: 'An unexpected error occurred while processing a request'
-    });
+    );
 
     // Prevent the default browser console error
     event.preventDefault();
@@ -107,14 +125,18 @@ class GlobalErrorHandler {
    */
   private handleResourceError = (event: Event): void => {
     const target = event.target as HTMLElement | null;
-    
+
     // Only handle resource loading errors, not JavaScript errors
     // Check if target is an element and not the window
-    if (target && target !== (window as unknown as EventTarget) && target !== event.currentTarget) {
+    if (
+      target &&
+      target !== (window as unknown as EventTarget) &&
+      target !== event.currentTarget
+    ) {
       const resourceType = target.tagName?.toLowerCase() || 'unknown';
-      const resourceSrc = 
-        (target as HTMLImageElement | HTMLScriptElement).src || 
-        (target as HTMLLinkElement).href || 
+      const resourceSrc =
+        (target as HTMLImageElement | HTMLScriptElement).src ||
+        (target as HTMLLinkElement).href ||
         'unknown';
 
       errorHandler.handleError(
@@ -125,13 +147,13 @@ class GlobalErrorHandler {
           additionalData: {
             resourceType,
             resourceSrc,
-            url: window.location.href
-          }
+            url: window.location.href,
+          },
         },
         {
           showToast: false, // Don't show toast for resource errors by default
           logToConsole: true,
-          fallbackMessage: `Failed to load ${resourceType}`
+          fallbackMessage: `Failed to load ${resourceType}`,
         }
       );
     }
@@ -148,17 +170,18 @@ class GlobalErrorHandler {
    * Check if an error is a benign ResizeObserver error that should be filtered out
    */
   private isResizeObserverError(message: string, error?: Error): boolean {
-    const resizeObserverPattern = /ResizeObserver loop completed with undelivered notifications/i;
-    
+    const resizeObserverPattern =
+      /ResizeObserver loop completed with undelivered notifications/i;
+
     // Check both the message and error object for ResizeObserver patterns
     if (message && resizeObserverPattern.test(message)) {
       return true;
     }
-    
+
     if (error && error.message && resizeObserverPattern.test(error.message)) {
       return true;
     }
-    
+
     return false;
   }
 }

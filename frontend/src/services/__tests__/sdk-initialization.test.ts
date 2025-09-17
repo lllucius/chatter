@@ -36,15 +36,17 @@ describe('SDK Initialization Fix', () => {
   it('should throw error when getSDK is called before initialization', () => {
     expect(() => {
       getSDK();
-    }).toThrow('SDK not initialized. Please wait for initialization to complete.');
+    }).toThrow(
+      'SDK not initialized. Please wait for initialization to complete.'
+    );
   });
 
   it('should return SDK after initialization', async () => {
     // Mock the refresh token to avoid network calls
     vi.spyOn(authService as any, 'refreshToken').mockResolvedValue(false);
-    
+
     await authService.initialize();
-    
+
     const sdk = getSDK();
     expect(sdk).toBeDefined();
     expect(sdk.conversations).toBeDefined();
@@ -53,9 +55,9 @@ describe('SDK Initialization Fix', () => {
   it('should verify SDK has conversations property', async () => {
     // Mock the refresh token to avoid network calls
     vi.spyOn(authService as any, 'refreshToken').mockResolvedValue(false);
-    
+
     await authService.initialize();
-    
+
     const sdk = getSDK();
     expect(sdk.conversations).toBeDefined();
     expect(sdk.conversations.listConversationsApiV1Conversations).toBeDefined();
@@ -63,12 +65,12 @@ describe('SDK Initialization Fix', () => {
 
   it('should check initialization status correctly', async () => {
     expect(isSDKInitialized()).toBe(false);
-    
+
     // Mock the refresh token to avoid network calls
     vi.spyOn(authService as any, 'refreshToken').mockResolvedValue(false);
-    
+
     await authService.initialize();
-    
+
     expect(isSDKInitialized()).toBe(true);
   });
 });

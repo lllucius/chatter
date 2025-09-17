@@ -27,7 +27,14 @@ import {
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
-import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse, ConversationCreate, ChatRequest } from 'chatter-sdk';
+import {
+  ProfileResponse,
+  PromptResponse,
+  DocumentResponse,
+  ConversationResponse,
+  ConversationCreate,
+  ChatRequest,
+} from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import ChatConfigPanel from './ChatConfigPanel';
 import ConversationHistory from '../components/ConversationHistory';
@@ -46,10 +53,11 @@ const ChatPage: React.FC = () => {
   const [selectedProfile, setSelectedProfile] = useState<string>('');
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
-  const [currentConversation, setCurrentConversation] = useState<ConversationResponse | null>(null);
+  const [currentConversation, setCurrentConversation] =
+    useState<ConversationResponse | null>(null);
   const [loading, setLoading] = useState(false);
   const messagesEndRef = useRef<HTMLDivElement>(null);
-  
+
   // New state for advanced features
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -77,24 +85,31 @@ const ChatPage: React.FC = () => {
 
   // Save config to localStorage when values change
   useEffect(() => {
-    localStorage.setItem('chatter_streamingEnabled', JSON.stringify(streamingEnabled));
+    localStorage.setItem(
+      'chatter_streamingEnabled',
+      JSON.stringify(streamingEnabled)
+    );
   }, [streamingEnabled]);
-  
+
   useEffect(() => {
     localStorage.setItem('chatter_temperature', temperature.toString());
   }, [temperature]);
-  
+
   useEffect(() => {
     localStorage.setItem('chatter_maxTokens', maxTokens.toString());
   }, [maxTokens]);
-  
+
   useEffect(() => {
-    localStorage.setItem('chatter_enableRetrieval', JSON.stringify(enableRetrieval));
+    localStorage.setItem(
+      'chatter_enableRetrieval',
+      JSON.stringify(enableRetrieval)
+    );
   }, [enableRetrieval]);
 
   // Right drawer context
-  const { setPanelContent, clearPanelContent, setTitle, open, setOpen } = useRightSidebar();
-  
+  const { setPanelContent, clearPanelContent, setTitle, open, setOpen } =
+    useRightSidebar();
+
   // Save right drawer state when it changes
   useEffect(() => {
     localStorage.setItem('chatter_rightDrawerOpen', JSON.stringify(open));
@@ -104,11 +119,12 @@ const ChatPage: React.FC = () => {
     let profilesResponse: any = null;
     try {
       const sdk = getSDK();
-      const [profilesResp, promptsResponse, documentsResponse] = await Promise.all([
-        sdk.profiles.listProfilesApiV1Profiles({}),
-        sdk.prompts.listPromptsApiV1Prompts({}),
-        sdk.documents.listDocumentsApiV1Documents({}),
-      ]);
+      const [profilesResp, promptsResponse, documentsResponse] =
+        await Promise.all([
+          sdk.profiles.listProfilesApiV1Profiles({}),
+          sdk.prompts.listPromptsApiV1Prompts({}),
+          sdk.documents.listDocumentsApiV1Documents({}),
+        ]);
       profilesResponse = profilesResp;
       setProfiles(profilesResponse.profiles);
       setPrompts(promptsResponse.prompts);
@@ -121,94 +137,104 @@ const ChatPage: React.FC = () => {
       handleError(err, {
         source: 'ChatPage.loadInitialData',
         operation: 'load profiles, prompts and documents',
-        additionalData: { hasProfiles: profilesResponse?.profiles?.length }
+        additionalData: { hasProfiles: profilesResponse?.profiles?.length },
       });
     }
   };
 
   // Return the created conversation so callers can use its id immediately
-  const startNewConversation = useCallback(async (): Promise<ConversationResponse | null> => {
-    const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
-    try {
-      await loadData();
-      
-      const systemPrompt = selectedPromptData?.content || undefined;
-      
-      const createRequest: ConversationCreate = {
-        title: `Chat ${new Date().toLocaleString()}`,
-        profile_id: selectedProfile || undefined,
-        enable_retrieval: enableRetrieval,
-        system_prompt: systemPrompt,
-      };
-      const response = await getSDK().conversations.createConversationApiV1Conversations(createRequest);
-      setCurrentConversation(response);
-      setMessages([]);
+  const startNewConversation =
+    useCallback(async (): Promise<ConversationResponse | null> => {
+      const selectedPromptData = prompts.find((p) => p.id === selectedPrompt);
+      try {
+        await loadData();
 
-      if (selectedPrompt && selectedPromptData) {
-        setMessages([
-          {
-            id: 'system',
-            role: 'system',
-            content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
-            timestamp: new Date(),
+        const systemPrompt = selectedPromptData?.content || undefined;
+
+        const createRequest: ConversationCreate = {
+          title: `Chat ${new Date().toLocaleString()}`,
+          profile_id: selectedProfile || undefined,
+          enable_retrieval: enableRetrieval,
+          system_prompt: systemPrompt,
+        };
+        const response =
+          await getSDK().conversations.createConversationApiV1Conversations(
+            createRequest
+          );
+        setCurrentConversation(response);
+        setMessages([]);
+
+        if (selectedPrompt && selectedPromptData) {
+          setMessages([
+            {
+              id: 'system',
+              role: 'system',
+              content: `Using prompt: "${selectedPromptData.name}" - ${selectedPromptData.content}`,
+              timestamp: new Date(),
+            },
+          ]);
+        }
+        return response;
+      } catch (err: unknown) {
+        handleError(err, {
+          source: 'ChatPage.startNewConversation',
+          operation: 'create new conversation',
+          additionalData: {
+            selectedProfile,
+            selectedPrompt,
+            enableRetrieval,
+            promptName: selectedPromptData?.name,
           },
-        ]);
+        });
+        return null;
       }
-      return response;
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.startNewConversation',
-        operation: 'create new conversation',
-        additionalData: { 
-          selectedProfile, 
-          selectedPrompt, 
-          enableRetrieval,
-          promptName: selectedPromptData?.name 
-        }
-      });
-      return null;
-    }
-  }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
+    }, [selectedProfile, selectedPrompt, prompts, enableRetrieval]);
 
-  const onSelectConversation = useCallback(async (conversation: ConversationResponse) => {
-    try {
-      // Set current conversation
-      setCurrentConversation(conversation);
-      
-      // Load messages for this conversation
-      const response = await getSDK().conversations.getConversationApiV1ConversationsConversationId(
-        conversation.id,
-        { includeMessages: true }
-      );
-      
-      // Convert messages to ExtendedChatMessage format
-      const chatMessages: ExtendedChatMessage[] = (response.messages || []).map(msg => ({
-        id: msg.id,
-        role: msg.role as 'user' | 'assistant' | 'system',
-        content: msg.content,
-        timestamp: new Date(msg.created_at),
-        metadata: {
-          model: msg.model_used || undefined,
-          tokens: msg.total_tokens || undefined,
-          processingTime: msg.response_time_ms || undefined,
-        },
-      }));
-      
-      setMessages(chatMessages);
-      
-      // Scroll to bottom after messages are set
-      setTimeout(() => scrollToBottom(), 100);
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.onSelectConversation',
-        operation: 'load conversation messages',
-        additionalData: { 
-          conversationId: conversation.id,
-          messageCount: conversation.message_count 
-        }
-      });
-    }
-  }, []);
+  const onSelectConversation = useCallback(
+    async (conversation: ConversationResponse) => {
+      try {
+        // Set current conversation
+        setCurrentConversation(conversation);
+
+        // Load messages for this conversation
+        const response =
+          await getSDK().conversations.getConversationApiV1ConversationsConversationId(
+            conversation.id,
+            { includeMessages: true }
+          );
+
+        // Convert messages to ExtendedChatMessage format
+        const chatMessages: ExtendedChatMessage[] = (
+          response.messages || []
+        ).map((msg) => ({
+          id: msg.id,
+          role: msg.role as 'user' | 'assistant' | 'system',
+          content: msg.content,
+          timestamp: new Date(msg.created_at),
+          metadata: {
+            model: msg.model_used || undefined,
+            tokens: msg.total_tokens || undefined,
+            processingTime: msg.response_time_ms || undefined,
+          },
+        }));
+
+        setMessages(chatMessages);
+
+        // Scroll to bottom after messages are set
+        setTimeout(() => scrollToBottom(), 100);
+      } catch (err: unknown) {
+        handleError(err, {
+          source: 'ChatPage.onSelectConversation',
+          operation: 'load conversation messages',
+          additionalData: {
+            conversationId: conversation.id,
+            messageCount: conversation.message_count,
+          },
+        });
+      }
+    },
+    []
+  );
 
   useEffect(() => {
     loadData();
@@ -226,7 +252,7 @@ const ChatPage: React.FC = () => {
   // Inject configuration panel into the right drawer
   useEffect(() => {
     setTitle('Configuration');
-    
+
     // Restore right drawer state
     const savedDrawerState = localStorage.getItem('chatter_rightDrawerOpen');
     const shouldOpen = savedDrawerState ? JSON.parse(savedDrawerState) : true;
@@ -276,10 +302,13 @@ const ChatPage: React.FC = () => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   };
 
-  const handleStreamingResponse = async (chatRequest: ChatRequest, assistantMessageId?: string) => {
+  const handleStreamingResponse = async (
+    chatRequest: ChatRequest,
+    assistantMessageId?: string
+  ) => {
     try {
       let currentMessageId = assistantMessageId || `stream-${Date.now()}`;
-      
+
       // If no assistantMessageId provided, create a placeholder message
       if (!assistantMessageId) {
         const assistantMessage: ExtendedChatMessage = {
@@ -293,7 +322,8 @@ const ChatPage: React.FC = () => {
 
       // Use SDK streaming method instead of direct fetch
       const sdk = getSDK();
-      const stream = await sdk.chat.streamingChatApiV1ChatStreaming(chatRequest);
+      const stream =
+        await sdk.chat.streamingChatApiV1ChatStreaming(chatRequest);
 
       if (!stream) {
         throw new Error('No response stream received');
@@ -306,7 +336,7 @@ const ChatPage: React.FC = () => {
       try {
         while (true) {
           const { done, value } = await reader.read();
-          
+
           if (done) break;
 
           buffer += decoder.decode(value, { stream: true });
@@ -316,27 +346,36 @@ const ChatPage: React.FC = () => {
           for (const line of lines) {
             if (line.startsWith('data: ')) {
               const dataStr = line.slice(6).trim(); // Remove 'data: ' prefix
-              
+
               if (dataStr === '[DONE]') {
                 return; // End of stream
               }
-              
+
               if (dataStr) {
                 try {
                   const chunk = JSON.parse(dataStr);
-                  
+
                   // Handle start chunk first to get the real message ID
                   if (chunk.type === 'start') {
                     // Update conversation if provided
                     if (chunk.conversation_id && !currentConversation) {
-                      setCurrentConversation(prev => prev || { id: chunk.conversation_id } as ConversationResponse);
+                      setCurrentConversation(
+                        (prev) =>
+                          prev ||
+                          ({
+                            id: chunk.conversation_id,
+                          } as ConversationResponse)
+                      );
                     }
-                    
+
                     // Update to real message ID from backend if provided
-                    if (chunk.message_id && chunk.message_id !== currentMessageId) {
+                    if (
+                      chunk.message_id &&
+                      chunk.message_id !== currentMessageId
+                    ) {
                       const oldMessageId = currentMessageId;
                       currentMessageId = chunk.message_id;
-                      
+
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === oldMessageId
@@ -354,19 +393,23 @@ const ChatPage: React.FC = () => {
                           : msg
                       )
                     );
-                  } else if (chunk.type === 'complete' || chunk.type === 'end') {
+                  } else if (
+                    chunk.type === 'complete' ||
+                    chunk.type === 'end'
+                  ) {
                     // Stream ended - update final message with metadata if available
                     if (chunk.metadata) {
                       setMessages((prev) =>
                         prev.map((msg) =>
                           msg.id === currentMessageId
-                            ? { 
-                                ...msg, 
+                            ? {
+                                ...msg,
                                 metadata: {
                                   model: chunk.metadata.model_used,
                                   tokens: chunk.metadata.total_tokens,
-                                  processingTime: chunk.metadata.response_time_ms,
-                                }
+                                  processingTime:
+                                    chunk.metadata.response_time_ms,
+                                },
                               }
                             : msg
                         )
@@ -374,11 +417,17 @@ const ChatPage: React.FC = () => {
                     }
                     return; // End the streaming loop
                   } else if (chunk.type === 'error') {
-                    throw new Error(chunk.content || chunk.error || 'Streaming error');
+                    throw new Error(
+                      chunk.content || chunk.error || 'Streaming error'
+                    );
                   }
                 } catch (parseError) {
                   // Failed to parse streaming chunk - log and skip invalid data
-                  console.warn('Failed to parse streaming chunk:', dataStr, parseError);
+                  console.warn(
+                    'Failed to parse streaming chunk:',
+                    dataStr,
+                    parseError
+                  );
                 }
               }
             }
@@ -387,15 +436,14 @@ const ChatPage: React.FC = () => {
       } finally {
         reader.releaseLock();
       }
-
     } catch (err: unknown) {
       handleError(err, {
         source: 'ChatPage.handleStreamingResponse',
         operation: 'process streaming chat response',
-        additionalData: { 
+        additionalData: {
           conversationId: currentConversation?.id,
-          messageLength: message.length 
-        }
+          messageLength: message.length,
+        },
       });
     }
   };
@@ -427,13 +475,19 @@ const ChatPage: React.FC = () => {
       const sendRequest: ChatRequest = {
         message: text,
         conversation_id: conversationId,
-        profile_id: selectedProfile && selectedProfile !== currentConversation?.profile_id ? selectedProfile : undefined,
+        profile_id:
+          selectedProfile && selectedProfile !== currentConversation?.profile_id
+            ? selectedProfile
+            : undefined,
         temperature,
         max_tokens: maxTokens,
         enable_retrieval: enableRetrieval,
-        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+        document_ids:
+          selectedDocuments.length > 0 ? selectedDocuments : undefined,
         prompt_id: selectedPrompt || undefined,
-        system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
+        system_prompt_override: selectedPrompt
+          ? prompts.find((p) => p.id === selectedPrompt)?.content
+          : undefined,
       };
 
       if (streamingEnabled) {
@@ -467,20 +521,21 @@ const ChatPage: React.FC = () => {
       handleError(err, {
         source: 'ChatPage.sendMessage',
         operation: 'send chat message',
-        additionalData: { 
+        additionalData: {
           conversationId: currentConversation?.id,
           messageLength: message.length,
           streamingEnabled,
           selectedProfile,
           temperature,
-          maxTokens 
-        }
+          maxTokens,
+        },
       });
 
       const errorMessage: ChatMessage = {
         id: Date.now().toString(),
         role: 'assistant',
-        content: 'Sorry, I encountered an error processing your message. Please try again.',
+        content:
+          'Sorry, I encountered an error processing your message. Please try again.',
         timestamp: new Date(),
       };
       setMessages((prev) => [...prev, errorMessage]);
@@ -492,151 +547,189 @@ const ChatPage: React.FC = () => {
 
   // Fix typing to match TextField's onKeyDown (root div)
   const handleKeyDown = (e: React.KeyboardEvent<HTMLDivElement>) => {
-    if (e.key === 'Enter' && !e.shiftKey && !(e.nativeEvent as any).isComposing) {
+    if (
+      e.key === 'Enter' &&
+      !e.shiftKey &&
+      !(e.nativeEvent as any).isComposing
+    ) {
       e.preventDefault();
       sendMessage();
     }
   };
 
   // Enhanced message handlers
-  const handleEditMessage = useCallback((messageId: string, newContent: string) => {
-    setMessages(prev => prev.map(msg => 
-      msg.id === messageId 
-        ? { ...msg, content: newContent, edited: true, editedAt: new Date() }
-        : msg
-    ));
-  }, []);
+  const handleEditMessage = useCallback(
+    (messageId: string, newContent: string) => {
+      setMessages((prev) =>
+        prev.map((msg) =>
+          msg.id === messageId
+            ? {
+                ...msg,
+                content: newContent,
+                edited: true,
+                editedAt: new Date(),
+              }
+            : msg
+        )
+      );
+    },
+    []
+  );
 
-  const handleRegenerateMessage = useCallback(async (messageId: string) => {
-    const messageIndex = messages.findIndex(msg => msg.id === messageId);
-    if (messageIndex === -1) return;
+  const handleRegenerateMessage = useCallback(
+    async (messageId: string) => {
+      const messageIndex = messages.findIndex((msg) => msg.id === messageId);
+      if (messageIndex === -1) return;
 
-    // Find the last user message before this assistant message
-    let userMessageContent = '';
-    for (let i = messageIndex - 1; i >= 0; i--) {
-      if (messages[i].role === 'user') {
-        userMessageContent = messages[i].content;
-        break;
-      }
-    }
-
-    if (!userMessageContent) return;
-
-    // Remove the message to be regenerated and all messages after it
-    setMessages(prev => prev.slice(0, messageIndex));
-
-    // Regenerate the response
-    try {
-      setLoading(true);
-      const sendRequest: ChatRequest = {
-        message: userMessageContent,
-        conversation_id: currentConversation?.id,
-        profile_id: selectedProfile,
-        temperature,
-        max_tokens: maxTokens,
-        enable_retrieval: enableRetrieval,
-        document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-        prompt_id: selectedPrompt || undefined,
-        system_prompt_override: selectedPrompt ? prompts.find(p => p.id === selectedPrompt)?.content : undefined,
-      };
-
-      if (streamingEnabled) {
-        const assistantMessageId = Date.now().toString();
-        const assistantMessage: ExtendedChatMessage = {
-          id: assistantMessageId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-        await handleStreamingResponse(sendRequest, assistantMessageId);
-      } else {
-        const response = await getSDK().chat.chatChat(sendRequest);
-        const assistantMessage: ExtendedChatMessage = {
-          id: Date.now().toString(),
-          role: 'assistant',
-          content: response.message.content,
-          timestamp: new Date(),
-        };
-        setMessages(prev => [...prev, assistantMessage]);
-      }
-    } catch (err: unknown) {
-      handleError(err, {
-        source: 'ChatPage.regenerateLastMessage',
-        operation: 'regenerate assistant message',
-        additionalData: { 
-          conversationId: currentConversation?.id,
-          messageId: messageId,
-          selectedProfile,
-          temperature,
-          maxTokens 
+      // Find the last user message before this assistant message
+      let userMessageContent = '';
+      for (let i = messageIndex - 1; i >= 0; i--) {
+        if (messages[i].role === 'user') {
+          userMessageContent = messages[i].content;
+          break;
         }
-      });
-    } finally {
-      setLoading(false);
-    }
-  }, [messages, currentConversation, selectedProfile, streamingEnabled, temperature, maxTokens, enableRetrieval, selectedDocuments, selectedPrompt, prompts]);
+      }
+
+      if (!userMessageContent) return;
+
+      // Remove the message to be regenerated and all messages after it
+      setMessages((prev) => prev.slice(0, messageIndex));
+
+      // Regenerate the response
+      try {
+        setLoading(true);
+        const sendRequest: ChatRequest = {
+          message: userMessageContent,
+          conversation_id: currentConversation?.id,
+          profile_id: selectedProfile,
+          temperature,
+          max_tokens: maxTokens,
+          enable_retrieval: enableRetrieval,
+          document_ids:
+            selectedDocuments.length > 0 ? selectedDocuments : undefined,
+          prompt_id: selectedPrompt || undefined,
+          system_prompt_override: selectedPrompt
+            ? prompts.find((p) => p.id === selectedPrompt)?.content
+            : undefined,
+        };
+
+        if (streamingEnabled) {
+          const assistantMessageId = Date.now().toString();
+          const assistantMessage: ExtendedChatMessage = {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: '',
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+          await handleStreamingResponse(sendRequest, assistantMessageId);
+        } else {
+          const response = await getSDK().chat.chatChat(sendRequest);
+          const assistantMessage: ExtendedChatMessage = {
+            id: Date.now().toString(),
+            role: 'assistant',
+            content: response.message.content,
+            timestamp: new Date(),
+          };
+          setMessages((prev) => [...prev, assistantMessage]);
+        }
+      } catch (err: unknown) {
+        handleError(err, {
+          source: 'ChatPage.regenerateLastMessage',
+          operation: 'regenerate assistant message',
+          additionalData: {
+            conversationId: currentConversation?.id,
+            messageId: messageId,
+            selectedProfile,
+            temperature,
+            maxTokens,
+          },
+        });
+      } finally {
+        setLoading(false);
+      }
+    },
+    [
+      messages,
+      currentConversation,
+      selectedProfile,
+      streamingEnabled,
+      temperature,
+      maxTokens,
+      enableRetrieval,
+      selectedDocuments,
+      selectedPrompt,
+      prompts,
+    ]
+  );
 
   const handleDeleteMessage = useCallback((messageId: string) => {
-    setMessages(prev => prev.filter(msg => msg.id !== messageId));
+    setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
   }, []);
 
-  const handleRateMessage = useCallback(async (messageId: string, rating: number) => {
-    if (!currentConversation?.id) {
-      toastService.error('No conversation selected for rating');
-      return;
-    }
+  const handleRateMessage = useCallback(
+    async (messageId: string, rating: number) => {
+      if (!currentConversation?.id) {
+        toastService.error('No conversation selected for rating');
+        return;
+      }
 
-    try {
-      // Optimistically update the UI
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, rating }
-          : msg
-      ));
+      try {
+        // Optimistically update the UI
+        setMessages((prev) =>
+          prev.map((msg) => (msg.id === messageId ? { ...msg, rating } : msg))
+        );
 
-      // Call the backend API to persist the rating using SDK
-      const sdk = getSDK();
-      const result = await sdk.conversations.updateMessageRatingApiV1ConversationsConversationIdMessagesMessageIdRating(
-        currentConversation.id,
-        messageId,
-        { rating }
-      );
-      
-      // Update the message with the actual server response (average rating)
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, rating: result.rating }
-          : msg
-      ));
+        // Call the backend API to persist the rating using SDK
+        const sdk = getSDK();
+        const result =
+          await sdk.conversations.updateMessageRatingApiV1ConversationsConversationIdMessagesMessageIdRating(
+            currentConversation.id,
+            messageId,
+            { rating }
+          );
 
-      toastService.success('Message rated successfully');
-    } catch (error) {
-      // Revert the optimistic update on error
-      const previousRating = messages.find(msg => msg.id === messageId)?.rating;
-      setMessages(prev => prev.map(msg => 
-        msg.id === messageId 
-          ? { ...msg, rating: previousRating }
-          : msg
-      ));
-      
-      handleError(error, {
-        source: 'ChatPage.handleRateMessage',
-        operation: 'rate message',
-        additionalData: { 
-          conversationId: currentConversation?.id,
-          messageId 
-        }
-      });
-    }
-  }, [currentConversation?.id, messages]);
+        // Update the message with the actual server response (average rating)
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, rating: result.rating } : msg
+          )
+        );
 
-  const handleSelectConversation = useCallback((conversation: ConversationResponse) => {
-    setCurrentConversation(conversation);
-    // In a real implementation, you would load the conversation messages here
-    // For now, we'll just clear the current messages
-    setMessages([]);
-  }, []);
+        toastService.success('Message rated successfully');
+      } catch (error) {
+        // Revert the optimistic update on error
+        const previousRating = messages.find(
+          (msg) => msg.id === messageId
+        )?.rating;
+        setMessages((prev) =>
+          prev.map((msg) =>
+            msg.id === messageId ? { ...msg, rating: previousRating } : msg
+          )
+        );
+
+        handleError(error, {
+          source: 'ChatPage.handleRateMessage',
+          operation: 'rate message',
+          additionalData: {
+            conversationId: currentConversation?.id,
+            messageId,
+          },
+        });
+      }
+    },
+    [currentConversation?.id, messages]
+  );
+
+  const handleSelectConversation = useCallback(
+    (conversation: ConversationResponse) => {
+      setCurrentConversation(conversation);
+      // In a real implementation, you would load the conversation messages here
+      // For now, we'll just clear the current messages
+      setMessages([]);
+    },
+    []
+  );
 
   const handleClearConversation = useCallback(() => {
     if (window.confirm('Are you sure you want to clear this conversation?')) {
@@ -652,36 +745,43 @@ const ChatPage: React.FC = () => {
         control={
           <Switch
             checked={streamingEnabled}
-            onChange={(e: React.ChangeEvent<HTMLInputElement>) => setStreamingEnabled(e.target.checked)}
+            onChange={(e: React.ChangeEvent<HTMLInputElement>) =>
+              setStreamingEnabled(e.target.checked)
+            }
           />
         }
         label={streamingEnabled ? 'Streaming' : 'Standard'}
       />
       <Divider orientation="vertical" flexItem />
-      <Button variant="outlined" size="small" onClick={startNewConversation} startIcon={<RefreshIcon />}>
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={startNewConversation}
+        startIcon={<RefreshIcon />}
+      >
         New Chat
       </Button>
-      <Button 
-        variant="outlined" 
-        size="small" 
-        onClick={() => setHistoryDialogOpen(true)} 
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => setHistoryDialogOpen(true)}
         startIcon={<HistoryIcon />}
       >
         History
       </Button>
-      <Button 
-        variant="outlined" 
-        size="small" 
-        onClick={() => setExportDialogOpen(true)} 
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={() => setExportDialogOpen(true)}
         startIcon={<DownloadIcon />}
         disabled={messages.length === 0}
       >
         Export
       </Button>
-      <Button 
-        variant="outlined" 
-        size="small" 
-        onClick={handleClearConversation} 
+      <Button
+        variant="outlined"
+        size="small"
+        onClick={handleClearConversation}
         startIcon={<ClearIcon />}
         disabled={messages.length === 0}
         color="warning"
@@ -717,7 +817,12 @@ const ChatPage: React.FC = () => {
           autoFocus
           autoComplete="off"
         />
-        <IconButton color="primary" onClick={sendMessage} disabled={!message.trim() || loading} sx={{ p: 1.5 }}>
+        <IconButton
+          color="primary"
+          onClick={sendMessage}
+          disabled={!message.trim() || loading}
+          sx={{ p: 1.5 }}
+        >
           <SendIcon />
         </IconButton>
       </Box>
@@ -725,11 +830,7 @@ const ChatPage: React.FC = () => {
   );
 
   return (
-    <PageLayout 
-      title="Chat" 
-      toolbar={toolbar}
-      fixedBottom={messageInput}
-    >
+    <PageLayout title="Chat" toolbar={toolbar} fixedBottom={messageInput}>
       {/* Messages Area */}
       <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
         <CardContent
@@ -754,54 +855,55 @@ const ChatPage: React.FC = () => {
             <CustomScrollbar style={{ flex: 1 }}>
               <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                 {messages.length === 0 ? (
-              <Box
-                sx={{
-                  display: 'flex',
-                  flexDirection: 'column',
-                  alignItems: 'center',
-                  justifyContent: 'center',
-                  height: '100%',
-                  color: 'text.secondary',
-                }}
-              >
-                <BotIcon sx={{ fontSize: 64, mb: 2 }} />
-                <Typography variant="h6" gutterBottom>
-                  Welcome to Chatter!
-                </Typography>
-                <Typography variant="body2" textAlign="center">
-                  Configure your settings in the right panel and start chatting.
-                  Use the streaming toggle for real-time responses.
-                </Typography>
-              </Box>
-            ) : (
-              messages.map((msg) => (
-                <EnhancedMessage
-                  key={msg.id}
-                  message={msg}
-                  onEdit={handleEditMessage}
-                  onRegenerate={handleRegenerateMessage}
-                  onDelete={handleDeleteMessage}
-                  onRate={handleRateMessage}
-                  canEdit={msg.role === 'user'}
-                  canRegenerate={msg.role === 'assistant'}
-                  canDelete={true}
-                />
-              ))
-            )}
-            {loading && (
-              <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-                <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>
-                  <BotIcon />
-                </Avatar>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <CircularProgress size={20} sx={{ mr: 1 }} />
-                  <Typography variant="body2" color="text.secondary">
-                    {streamingEnabled ? 'Streaming...' : 'Thinking...'}
-                  </Typography>
-                </Box>
-              </Box>
-            )}
-            <div ref={messagesEndRef} />
+                  <Box
+                    sx={{
+                      display: 'flex',
+                      flexDirection: 'column',
+                      alignItems: 'center',
+                      justifyContent: 'center',
+                      height: '100%',
+                      color: 'text.secondary',
+                    }}
+                  >
+                    <BotIcon sx={{ fontSize: 64, mb: 2 }} />
+                    <Typography variant="h6" gutterBottom>
+                      Welcome to Chatter!
+                    </Typography>
+                    <Typography variant="body2" textAlign="center">
+                      Configure your settings in the right panel and start
+                      chatting. Use the streaming toggle for real-time
+                      responses.
+                    </Typography>
+                  </Box>
+                ) : (
+                  messages.map((msg) => (
+                    <EnhancedMessage
+                      key={msg.id}
+                      message={msg}
+                      onEdit={handleEditMessage}
+                      onRegenerate={handleRegenerateMessage}
+                      onDelete={handleDeleteMessage}
+                      onRate={handleRateMessage}
+                      canEdit={msg.role === 'user'}
+                      canRegenerate={msg.role === 'assistant'}
+                      canDelete={true}
+                    />
+                  ))
+                )}
+                {loading && (
+                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+                    <Avatar sx={{ bgcolor: 'secondary.main', mr: 1 }}>
+                      <BotIcon />
+                    </Avatar>
+                    <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                      <CircularProgress size={20} sx={{ mr: 1 }} />
+                      <Typography variant="body2" color="text.secondary">
+                        {streamingEnabled ? 'Streaming...' : 'Thinking...'}
+                      </Typography>
+                    </Box>
+                  </Box>
+                )}
+                <div ref={messagesEndRef} />
               </Box>
             </CustomScrollbar>
           </Box>
@@ -819,7 +921,9 @@ const ChatPage: React.FC = () => {
         open={exportDialogOpen}
         onClose={() => setExportDialogOpen(false)}
         messages={messages}
-        conversationTitle={currentConversation?.title || 'Untitled Conversation'}
+        conversationTitle={
+          currentConversation?.title || 'Untitled Conversation'
+        }
       />
     </PageLayout>
   );

@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { Navigate } from 'react-router-dom';
 import { Box, CircularProgress, Typography } from '@mui/material';
-import { authService } from "../services/auth-service";
+import { authService } from '../services/auth-service';
 
 interface ProtectedRouteProps {
   children: React.ReactNode;
@@ -34,14 +34,14 @@ const ProtectedRoute: React.FC<ProtectedRouteProps> = ({ children }) => {
 
   if (isLoading) {
     return (
-      <Box 
-        sx={{ 
-          display: 'flex', 
-          justifyContent: 'center', 
-          alignItems: 'center', 
+      <Box
+        sx={{
+          display: 'flex',
+          justifyContent: 'center',
+          alignItems: 'center',
           height: '100vh',
           flexDirection: 'column',
-          gap: 2
+          gap: 2,
         }}
       >
         <CircularProgress />

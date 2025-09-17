@@ -7,7 +7,10 @@ without the complexity of the original system.
 import time
 from typing import Any
 
-from chatter.core.cache_factory import get_persistent_cache, get_general_cache
+from chatter.core.cache_factory import (
+    get_general_cache,
+    get_persistent_cache,
+)
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -23,7 +26,9 @@ class StreamlinedPerformanceMonitor:
         self.error_counts: dict[str, int] = {}
         self.start_times: dict[str, float] = {}
 
-    def start_workflow(self, workflow_id: str, workflow_type: str) -> None:
+    def start_workflow(
+        self, workflow_id: str, workflow_type: str
+    ) -> None:
         """Start timing a workflow execution."""
         self.start_times[workflow_id] = time.time()
         self.workflow_types[workflow_type] = (
@@ -96,31 +101,45 @@ class SimpleWorkflowOptimizer:
         optimized_config = config.copy()
 
         # Simple memory window optimization
-        if "avg_memory_used" in usage_stats and "memory_window" in config:
+        if (
+            "avg_memory_used" in usage_stats
+            and "memory_window" in config
+        ):
             avg_used = usage_stats["avg_memory_used"]
             current_window = config["memory_window"]
-            
+
             if avg_used < current_window * 0.5:
-                optimized_config["memory_window"] = max(10, int(avg_used * 1.2))
+                optimized_config["memory_window"] = max(
+                    10, int(avg_used * 1.2)
+                )
 
         # Simple tool calls optimization
-        if "avg_tool_calls" in usage_stats and "max_tool_calls" in config:
+        if (
+            "avg_tool_calls" in usage_stats
+            and "max_tool_calls" in config
+        ):
             avg_calls = usage_stats["avg_tool_calls"]
             current_max = config["max_tool_calls"]
-            
+
             if avg_calls < current_max * 0.5:
-                optimized_config["max_tool_calls"] = max(3, int(avg_calls * 1.5))
+                optimized_config["max_tool_calls"] = max(
+                    3, int(avg_calls * 1.5)
+                )
 
         return optimized_config
 
     @staticmethod
-    def get_optimization_recommendations(stats: dict[str, Any]) -> list[str]:
+    def get_optimization_recommendations(
+        stats: dict[str, Any],
+    ) -> list[str]:
         """Get simple optimization recommendations."""
         recommendations = []
 
         if stats.get("avg_execution_time_ms", 0) > 5000:
             recommendations.append("Consider enabling workflow caching")
-            recommendations.append("Reduce memory window if not fully utilized")
+            recommendations.append(
+                "Reduce memory window if not fully utilized"
+            )
 
         error_rate = len(stats.get("error_counts", {}))
         if error_rate > 0:

@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Email, VpnKey, CheckCircle } from '@mui/icons-material';
 import { useForm } from '../hooks/useForm';
-import { getSDK, authService } from "../services/auth-service";
+import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 
@@ -31,7 +31,9 @@ interface ConfirmResetFormValues {
 }
 
 const PasswordResetPage: React.FC = () => {
-  const [step, setStep] = useState<'request' | 'confirm' | 'complete'>('request');
+  const [step, setStep] = useState<'request' | 'confirm' | 'complete'>(
+    'request'
+  );
   const [email, setEmail] = useState('');
 
   const requestForm = useForm<RequestResetFormValues>({
@@ -57,7 +59,7 @@ const PasswordResetPage: React.FC = () => {
         handleError(error, {
           source: 'PasswordResetPage.handleSendInstructions',
           operation: 'send password reset instructions',
-          additionalData: { email: formData.email }
+          additionalData: { email: formData.email },
         });
         throw error;
       }
@@ -97,7 +99,7 @@ const PasswordResetPage: React.FC = () => {
         handleError(error, {
           source: 'PasswordResetPage.handleResetPassword',
           operation: 'reset password',
-          additionalData: { token: formData.token }
+          additionalData: { token: formData.token },
         });
         throw error;
       }
@@ -116,9 +118,12 @@ const PasswordResetPage: React.FC = () => {
               Password Reset
             </Typography>
             <Typography variant="body1" color="text.secondary">
-              {step === 'request' && 'Enter your email to receive reset instructions'}
-              {step === 'confirm' && 'Enter the reset token and your new password'}
-              {step === 'complete' && 'Your password has been successfully reset'}
+              {step === 'request' &&
+                'Enter your email to receive reset instructions'}
+              {step === 'confirm' &&
+                'Enter the reset token and your new password'}
+              {step === 'complete' &&
+                'Your password has been successfully reset'}
             </Typography>
           </Box>
 
@@ -143,7 +148,9 @@ const PasswordResetPage: React.FC = () => {
                     label="Email Address"
                     type="email"
                     value={requestForm.values.email}
-                    onChange={(e) => requestForm.setValue('email', e.target.value)}
+                    onChange={(e) =>
+                      requestForm.setValue('email', e.target.value)
+                    }
                     error={!!requestForm.errors.email}
                     helperText={requestForm.errors.email}
                     sx={{ mb: 3 }}
@@ -154,9 +161,17 @@ const PasswordResetPage: React.FC = () => {
                     fullWidth
                     variant="contained"
                     disabled={requestForm.isSubmitting}
-                    startIcon={requestForm.isSubmitting ? <CircularProgress size={20} /> : <Email />}
+                    startIcon={
+                      requestForm.isSubmitting ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <Email />
+                      )
+                    }
                   >
-                    {requestForm.isSubmitting ? 'Sending...' : 'Send Reset Instructions'}
+                    {requestForm.isSubmitting
+                      ? 'Sending...'
+                      : 'Send Reset Instructions'}
                   </Button>
                 </form>
               </CardContent>
@@ -171,16 +186,22 @@ const PasswordResetPage: React.FC = () => {
                   <Typography variant="h6">Reset Your Password</Typography>
                 </Box>
                 <Alert severity="info" sx={{ mb: 3 }}>
-                  Check your email ({email}) for the reset token and enter it below.
+                  Check your email ({email}) for the reset token and enter it
+                  below.
                 </Alert>
                 <form onSubmit={confirmForm.handleSubmit}>
                   <TextField
                     fullWidth
                     label="Reset Token"
                     value={confirmForm.values.token}
-                    onChange={(e) => confirmForm.setValue('token', e.target.value)}
+                    onChange={(e) =>
+                      confirmForm.setValue('token', e.target.value)
+                    }
                     error={!!confirmForm.errors.token}
-                    helperText={confirmForm.errors.token || 'Enter the token from your email'}
+                    helperText={
+                      confirmForm.errors.token ||
+                      'Enter the token from your email'
+                    }
                     sx={{ mb: 3 }}
                     autoFocus
                   />
@@ -189,7 +210,9 @@ const PasswordResetPage: React.FC = () => {
                     label="New Password"
                     type="password"
                     value={confirmForm.values.newPassword}
-                    onChange={(e) => confirmForm.setValue('newPassword', e.target.value)}
+                    onChange={(e) =>
+                      confirmForm.setValue('newPassword', e.target.value)
+                    }
                     error={!!confirmForm.errors.newPassword}
                     helperText={confirmForm.errors.newPassword}
                     sx={{ mb: 3 }}
@@ -199,7 +222,9 @@ const PasswordResetPage: React.FC = () => {
                     label="Confirm New Password"
                     type="password"
                     value={confirmForm.values.confirmPassword}
-                    onChange={(e) => confirmForm.setValue('confirmPassword', e.target.value)}
+                    onChange={(e) =>
+                      confirmForm.setValue('confirmPassword', e.target.value)
+                    }
                     error={!!confirmForm.errors.confirmPassword}
                     helperText={confirmForm.errors.confirmPassword}
                     sx={{ mb: 3 }}
@@ -209,9 +234,17 @@ const PasswordResetPage: React.FC = () => {
                     fullWidth
                     variant="contained"
                     disabled={confirmForm.isSubmitting}
-                    startIcon={confirmForm.isSubmitting ? <CircularProgress size={20} /> : <VpnKey />}
+                    startIcon={
+                      confirmForm.isSubmitting ? (
+                        <CircularProgress size={20} />
+                      ) : (
+                        <VpnKey />
+                      )
+                    }
                   >
-                    {confirmForm.isSubmitting ? 'Resetting...' : 'Reset Password'}
+                    {confirmForm.isSubmitting
+                      ? 'Resetting...'
+                      : 'Reset Password'}
                   </Button>
                 </form>
                 <Button
@@ -229,16 +262,23 @@ const PasswordResetPage: React.FC = () => {
           {step === 'complete' && (
             <Card>
               <CardContent sx={{ textAlign: 'center' }}>
-                <CheckCircle sx={{ fontSize: 64, color: 'success.main', mb: 2 }} />
+                <CheckCircle
+                  sx={{ fontSize: 64, color: 'success.main', mb: 2 }}
+                />
                 <Typography variant="h6" gutterBottom>
                   Password Reset Complete
                 </Typography>
-                <Typography variant="body1" color="text.secondary" sx={{ mb: 3 }}>
-                  Your password has been successfully reset. You can now log in with your new password.
+                <Typography
+                  variant="body1"
+                  color="text.secondary"
+                  sx={{ mb: 3 }}
+                >
+                  Your password has been successfully reset. You can now log in
+                  with your new password.
                 </Typography>
                 <Button
                   variant="contained"
-                  onClick={() => window.location.href = '/login'}
+                  onClick={() => (window.location.href = '/login')}
                   fullWidth
                 >
                   Go to Login

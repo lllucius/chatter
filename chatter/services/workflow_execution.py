@@ -11,17 +11,19 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.unified_template_manager import (
-    get_template_manager_with_session,
-)
-from chatter.core.unified_workflow_executor import UnifiedWorkflowExecutor
-from chatter.core.workflow_limits import (
-    WorkflowLimits,
-    workflow_limit_manager,
-)
 from chatter.core.streamlined_workflow_performance import (
     performance_monitor,
     workflow_cache,
+)
+from chatter.core.unified_template_manager import (
+    get_template_manager_with_session,
+)
+from chatter.core.unified_workflow_executor import (
+    UnifiedWorkflowExecutor,
+)
+from chatter.core.workflow_limits import (
+    WorkflowLimits,
+    workflow_limit_manager,
 )
 from chatter.models.conversation import Conversation, Message
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
@@ -44,7 +46,9 @@ class WorkflowExecutionService:
         """Initialize simplified workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = get_template_manager_with_session(session)
+        self.template_manager = get_template_manager_with_session(
+            session
+        )
         self.limit_manager = workflow_limit_manager
         self.executor = UnifiedWorkflowExecutor(
             llm_service, message_service, self.template_manager
@@ -138,14 +142,20 @@ class WorkflowExecutionService:
         Returns:
             Dictionary with validation results
         """
-        workflow_type = chat_request.workflow_type or chat_request.workflow or "plain"
+        workflow_type = (
+            chat_request.workflow_type
+            or chat_request.workflow
+            or "plain"
+        )
 
         # Check if workflow type is supported
         supported_types = self.executor.get_supported_types()
         if workflow_type not in supported_types:
             return {
                 "valid": False,
-                "errors": [f"Unsupported workflow type: {workflow_type}"],
+                "errors": [
+                    f"Unsupported workflow type: {workflow_type}"
+                ],
                 "supported_types": supported_types,
             }
 
@@ -169,7 +179,9 @@ class WorkflowExecutionService:
         supported_types = self.executor.get_supported_types()
 
         if workflow_type not in supported_types:
-            return {"error": f"Unsupported workflow type: {workflow_type}"}
+            return {
+                "error": f"Unsupported workflow type: {workflow_type}"
+            }
 
         # Basic capabilities mapping
         capabilities = {
@@ -233,6 +245,7 @@ class WorkflowExecutionService:
             Dictionary with execution results
         """
         from datetime import datetime
+
         from chatter.models.base import generate_ulid
 
         execution_id = generate_ulid()
@@ -240,14 +253,19 @@ class WorkflowExecutionService:
 
         try:
             # Simple validation
-            if not hasattr(workflow_definition, 'nodes') or not workflow_definition.nodes:
+            if (
+                not hasattr(workflow_definition, 'nodes')
+                or not workflow_definition.nodes
+            ):
                 raise ValueError("Workflow definition must have nodes")
 
             # For now, return a simple success response
             # In the future, this could be extended to support specific node types
             # that are actually needed by the application
             completed_at = datetime.utcnow()
-            total_time = int((completed_at - started_at).total_seconds() * 1000)
+            total_time = int(
+                (completed_at - started_at).total_seconds() * 1000
+            )
 
             return {
                 "execution_id": execution_id,
@@ -274,7 +292,9 @@ class WorkflowExecutionService:
         except Exception as e:
             logger.error(f"Workflow definition execution failed: {e}")
             completed_at = datetime.utcnow()
-            total_time = int((completed_at - started_at).total_seconds() * 1000)
+            total_time = int(
+                (completed_at - started_at).total_seconds() * 1000
+            )
 
             return {
                 "execution_id": execution_id,

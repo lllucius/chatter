@@ -1,5 +1,9 @@
 import { describe, it, expect, vi, beforeEach, afterEach } from 'vitest';
-import { globalErrorHandler, initializeGlobalErrorHandling, cleanupGlobalErrorHandling } from '../global-error-handler';
+import {
+  globalErrorHandler,
+  initializeGlobalErrorHandling,
+  cleanupGlobalErrorHandling,
+} from '../global-error-handler';
 import { errorHandler } from '../error-handler';
 
 // Mock the error handler
@@ -12,19 +16,21 @@ vi.mock('../error-handler', () => ({
 // Mock PromiseRejectionEvent for test environment
 if (typeof PromiseRejectionEvent === 'undefined') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  (global as any).PromiseRejectionEvent = class PromiseRejectionEvent extends Event {
+  (global as any).PromiseRejectionEvent = class PromiseRejectionEvent extends (
+    Event
+  ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     promise: Promise<any>;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     reason: any;
-    
+
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     constructor(type: string, options: { promise: Promise<any>; reason: any }) {
       super(type);
       this.promise = options.promise;
       this.reason = options.reason;
     }
-    
+
     preventDefault() {
       // Mock preventDefault
     }
@@ -45,16 +51,16 @@ describe('GlobalErrorHandler', () => {
   describe('Initialization', () => {
     it('should initialize global error handlers', () => {
       expect(globalErrorHandler.isInitialized()).toBe(false);
-      
+
       initializeGlobalErrorHandling();
-      
+
       expect(globalErrorHandler.isInitialized()).toBe(true);
     });
 
     it('should not initialize twice', () => {
       initializeGlobalErrorHandling();
       expect(globalErrorHandler.isInitialized()).toBe(true);
-      
+
       // Second call should not change anything
       initializeGlobalErrorHandling();
       expect(globalErrorHandler.isInitialized()).toBe(true);
@@ -63,7 +69,7 @@ describe('GlobalErrorHandler', () => {
     it('should cleanup global error handlers', () => {
       initializeGlobalErrorHandling();
       expect(globalErrorHandler.isInitialized()).toBe(true);
-      
+
       cleanupGlobalErrorHandling();
       expect(globalErrorHandler.isInitialized()).toBe(false);
     });
@@ -109,14 +115,17 @@ describe('GlobalErrorHandler', () => {
       initializeGlobalErrorHandling();
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
-      
+      const consoleDebugSpy = vi
+        .spyOn(console, 'debug')
+        .mockImplementation(() => {});
+
       // Clear any previous calls
       vi.clearAllMocks();
-      
+
       // Test with ResizeObserver error in message
       const resizeObserverEvent = new ErrorEvent('error', {
-        message: 'ResizeObserver loop completed with undelivered notifications.',
+        message:
+          'ResizeObserver loop completed with undelivered notifications.',
         filename: 'test.js',
         lineno: 0,
         colno: 0,
@@ -139,10 +148,13 @@ describe('GlobalErrorHandler', () => {
       // Clear any previous calls
       vi.clearAllMocks();
 
-      const resizeObserverError = new Error('ResizeObserver loop completed with undelivered notifications.');
+      const resizeObserverError = new Error(
+        'ResizeObserver loop completed with undelivered notifications.'
+      );
       const errorEvent = new ErrorEvent('error', {
         error: resizeObserverError,
-        message: 'ResizeObserver loop completed with undelivered notifications.',
+        message:
+          'ResizeObserver loop completed with undelivered notifications.',
         filename: 'test.js',
         lineno: 0,
         colno: 0,
@@ -165,13 +177,16 @@ describe('GlobalErrorHandler', () => {
       initializeGlobalErrorHandling();
 
       // eslint-disable-next-line @typescript-eslint/no-empty-function
-      const consoleDebugSpy = vi.spyOn(console, 'debug').mockImplementation(() => {});
-      
+      const consoleDebugSpy = vi
+        .spyOn(console, 'debug')
+        .mockImplementation(() => {});
+
       // Clear any previous calls
       vi.clearAllMocks();
-      
+
       const resizeObserverEvent = new ErrorEvent('error', {
-        message: 'ResizeObserver loop completed with undelivered notifications.',
+        message:
+          'ResizeObserver loop completed with undelivered notifications.',
         filename: 'test.js',
         lineno: 0,
         colno: 0,
@@ -239,7 +254,8 @@ describe('GlobalErrorHandler', () => {
         expect.objectContaining({
           showToast: true,
           logToConsole: true,
-          fallbackMessage: 'An unexpected error occurred while processing a request',
+          fallbackMessage:
+            'An unexpected error occurred while processing a request',
         })
       );
 
@@ -368,15 +384,35 @@ describe('GlobalErrorHandler', () => {
 
       initializeGlobalErrorHandling();
 
-      expect(addEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(addEventListenerSpy).toHaveBeenCalledWith('unhandledrejection', expect.any(Function));
-      expect(addEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function), true);
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function)
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'unhandledrejection',
+        expect.any(Function)
+      );
+      expect(addEventListenerSpy).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function),
+        true
+      );
 
       cleanupGlobalErrorHandling();
 
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('unhandledrejection', expect.any(Function));
-      expect(removeEventListenerSpy).toHaveBeenCalledWith('error', expect.any(Function), true);
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'unhandledrejection',
+        expect.any(Function)
+      );
+      expect(removeEventListenerSpy).toHaveBeenCalledWith(
+        'error',
+        expect.any(Function),
+        true
+      );
 
       addEventListenerSpy.mockRestore();
       removeEventListenerSpy.mockRestore();

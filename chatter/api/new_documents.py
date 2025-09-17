@@ -28,8 +28,8 @@ from chatter.schemas.document import (
     SearchResultResponse,
 )
 from chatter.services.new_document_service import (
-    NewDocumentService,
     DocumentServiceError,
+    NewDocumentService,
 )
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger

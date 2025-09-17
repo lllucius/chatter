@@ -1,15 +1,14 @@
 """A/B testing schemas."""
 
 from datetime import datetime
+
+# Enums defined locally to avoid circular imports
+from enum import Enum
 from typing import Any
 
 from pydantic import BaseModel, Field
 
 from chatter.schemas.common import ListRequestBase
-
-
-# Enums defined locally to avoid circular imports
-from enum import Enum
 
 
 class TestStatus(str, Enum):

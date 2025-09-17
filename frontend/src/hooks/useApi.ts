@@ -23,16 +23,16 @@ export function useApi<T>(
   options: UseApiOptions<T> = {}
 ): UseApiReturn<T> {
   const { immediate = false, onSuccess, onError } = options;
-  
+
   const [data, setData] = useState<T | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
-  
+
   // Use refs to store the current values to avoid dependency issues
   const apiCallRef = useRef(apiCall);
   const onSuccessRef = useRef(onSuccess);
   const onErrorRef = useRef(onError);
-  
+
   // Update refs when values change
   apiCallRef.current = apiCall;
   onSuccessRef.current = onSuccess;
@@ -46,19 +46,24 @@ export function useApi<T>(
       setData(result);
       onSuccessRef.current?.(result);
     } catch (err: unknown) {
-      const errorMessage = err instanceof Error ? err.message : 'An error occurred';
+      const errorMessage =
+        err instanceof Error ? err.message : 'An error occurred';
       setError(errorMessage);
       onErrorRef.current?.(err);
-      
+
       // Use standardized error handling
-      handleError(err, {
-        source: 'useApi.execute',
-        operation: 'API call execution'
-      }, {
-        showToast: true,
-        logToConsole: true,
-        fallbackMessage: 'API call failed'
-      });
+      handleError(
+        err,
+        {
+          source: 'useApi.execute',
+          operation: 'API call execution',
+        },
+        {
+          showToast: true,
+          logToConsole: true,
+          fallbackMessage: 'API call failed',
+        }
+      );
     } finally {
       setLoading(false);
     }
@@ -97,30 +102,39 @@ export function useApiList<T>(
   options: UseApiOptions<T[]> = {}
 ) {
   const api = useApi(fetchApiCall, options);
-  
-  const addItem = useCallback((item: T) => {
-    if (api.data) {
-      api.data.push(item);
-    }
-  }, [api.data]);
 
-  const removeItem = useCallback((predicate: (item: T) => boolean) => {
-    if (api.data) {
-      const index = api.data.findIndex(predicate);
-      if (index !== -1) {
-        api.data.splice(index, 1);
+  const addItem = useCallback(
+    (item: T) => {
+      if (api.data) {
+        api.data.push(item);
       }
-    }
-  }, [api.data]);
+    },
+    [api.data]
+  );
 
-  const updateItem = useCallback((predicate: (item: T) => boolean, updater: (item: T) => T) => {
-    if (api.data) {
-      const index = api.data.findIndex(predicate);
-      if (index !== -1) {
-        api.data[index] = updater(api.data[index]);
+  const removeItem = useCallback(
+    (predicate: (item: T) => boolean) => {
+      if (api.data) {
+        const index = api.data.findIndex(predicate);
+        if (index !== -1) {
+          api.data.splice(index, 1);
+        }
       }
-    }
-  }, [api.data]);
+    },
+    [api.data]
+  );
+
+  const updateItem = useCallback(
+    (predicate: (item: T) => boolean, updater: (item: T) => T) => {
+      if (api.data) {
+        const index = api.data.findIndex(predicate);
+        if (index !== -1) {
+          api.data[index] = updater(api.data[index]);
+        }
+      }
+    },
+    [api.data]
+  );
 
   return {
     ...api,

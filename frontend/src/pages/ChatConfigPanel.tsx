@@ -149,16 +149,17 @@ const ChatConfigPanel: React.FC<Props> = ({
             <DocumentIcon />
           </IconButton>
         </Tooltip>
-
       </Box>
     );
   }
 
   return (
     <Box>
-
       {/* Profile */}
-      <Accordion expanded={expandedPanel === 'profile'} onChange={handlePanelChange('profile')}>
+      <Accordion
+        expanded={expandedPanel === 'profile'}
+        onChange={handlePanelChange('profile')}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <ProfileIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Profile Settings</Typography>
@@ -225,7 +226,10 @@ const ChatConfigPanel: React.FC<Props> = ({
       </Accordion>
 
       {/* Prompts */}
-      <Accordion expanded={expandedPanel === 'prompts'} onChange={handlePanelChange('prompts')}>
+      <Accordion
+        expanded={expandedPanel === 'prompts'}
+        onChange={handlePanelChange('prompts')}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <PromptIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Prompt Templates</Typography>
@@ -263,7 +267,10 @@ const ChatConfigPanel: React.FC<Props> = ({
           {selectedPrompt && (
             <Box>
               <Typography variant="body2" color="text.secondary">
-                {prompts.find((p) => p.id === selectedPrompt)?.content?.substring(0, 100)}...
+                {prompts
+                  .find((p) => p.id === selectedPrompt)
+                  ?.content?.substring(0, 100)}
+                ...
               </Typography>
             </Box>
           )}
@@ -271,7 +278,10 @@ const ChatConfigPanel: React.FC<Props> = ({
       </Accordion>
 
       {/* Knowledge */}
-      <Accordion expanded={expandedPanel === 'knowledge'} onChange={handlePanelChange('knowledge')}>
+      <Accordion
+        expanded={expandedPanel === 'knowledge'}
+        onChange={handlePanelChange('knowledge')}
+      >
         <AccordionSummary expandIcon={<ExpandMoreIcon />}>
           <DocumentIcon sx={{ mr: 1 }} />
           <Typography sx={{ flexGrow: 1 }}>Knowledge Base</Typography>
@@ -292,7 +302,12 @@ const ChatConfigPanel: React.FC<Props> = ({
         </AccordionSummary>
         <AccordionDetails>
           <FormControlLabel
-            control={<Switch checked={enableRetrieval} onChange={(e) => setEnableRetrieval(e.target.checked)} />}
+            control={
+              <Switch
+                checked={enableRetrieval}
+                onChange={(e) => setEnableRetrieval(e.target.checked)}
+              />
+            }
             label="Enable Document Retrieval"
             sx={{ mb: 2 }}
           />
@@ -308,7 +323,14 @@ const ChatConfigPanel: React.FC<Props> = ({
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                   {(selected as string[]).map((value) => {
                     const doc = documents.find((d) => d.id === value);
-                    return <Chip key={value} label={doc?.title || value} size="small" variant="outlined" />;
+                    return (
+                      <Chip
+                        key={value}
+                        label={doc?.title || value}
+                        size="small"
+                        variant="outlined"
+                      />
+                    );
                   })}
                 </Box>
               )}
@@ -326,8 +348,6 @@ const ChatConfigPanel: React.FC<Props> = ({
           </Typography>
         </AccordionDetails>
       </Accordion>
-
-
     </Box>
   );
 };

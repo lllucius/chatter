@@ -31,16 +31,28 @@ const PromptForm: React.FC<PromptFormProps> = ({
     description: '',
     content: '',
     category: 'general',
-    prompt_type: 'template' as 'template' | 'system' | 'few_shot' | 'chain_of_thought',
+    prompt_type: 'template' as
+      | 'template'
+      | 'system'
+      | 'few_shot'
+      | 'chain_of_thought',
     variables: [] as string[],
   });
 
   const [variableInput, setVariableInput] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const categories = ['general', 'chat', 'analysis', 'creative', 'technical', 'business'];
-  const promptTypes: Array<'template' | 'system' | 'few_shot' | 'chain_of_thought'> = 
-    ['template', 'system', 'few_shot', 'chain_of_thought'];
+  const categories = [
+    'general',
+    'chat',
+    'analysis',
+    'creative',
+    'technical',
+    'business',
+  ];
+  const promptTypes: Array<
+    'template' | 'system' | 'few_shot' | 'chain_of_thought'
+  > = ['template', 'system', 'few_shot', 'chain_of_thought'];
 
   useEffect(() => {
     if (open) {
@@ -50,7 +62,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           description: initialData.description || '',
           content: initialData.content || '',
           category: initialData.category || 'general',
-          prompt_type: (initialData.prompt_type || 'template'),
+          prompt_type: initialData.prompt_type || 'template',
           variables: initialData.variables || [],
         });
       } else {
@@ -77,7 +89,10 @@ const PromptForm: React.FC<PromptFormProps> = ({
   };
 
   const handleAddVariable = () => {
-    if (variableInput.trim() && !formData.variables.includes(variableInput.trim())) {
+    if (
+      variableInput.trim() &&
+      !formData.variables.includes(variableInput.trim())
+    ) {
       setFormData({
         ...formData,
         variables: [...formData.variables, variableInput.trim()],
@@ -89,7 +104,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
   const handleRemoveVariable = (variable: string) => {
     setFormData({
       ...formData,
-      variables: formData.variables.filter(v => v !== variable),
+      variables: formData.variables.filter((v) => v !== variable),
     });
   };
 
@@ -118,7 +133,9 @@ const PromptForm: React.FC<PromptFormProps> = ({
           <TextField
             label="Description"
             value={formData.description}
-            onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, description: e.target.value })
+            }
             fullWidth
             multiline
             rows={2}
@@ -128,7 +145,9 @@ const PromptForm: React.FC<PromptFormProps> = ({
             <InputLabel>Category</InputLabel>
             <Select
               value={formData.category}
-              onChange={(e) => setFormData({ ...formData, category: e.target.value })}
+              onChange={(e) =>
+                setFormData({ ...formData, category: e.target.value })
+              }
               label="Category"
             >
               {categories.map((category): void => (
@@ -143,12 +162,19 @@ const PromptForm: React.FC<PromptFormProps> = ({
             <InputLabel>Type</InputLabel>
             <Select
               value={formData.prompt_type}
-              onChange={(e) => setFormData({ ...formData, prompt_type: e.target.value as PromptCreate['prompt_type'] })}
+              onChange={(e) =>
+                setFormData({
+                  ...formData,
+                  prompt_type: e.target.value as PromptCreate['prompt_type'],
+                })
+              }
               label="Type"
             >
               {promptTypes.map((type): void => (
                 <MenuItem key={type} value={type}>
-                  {type.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase())}
+                  {type
+                    .replace('_', ' ')
+                    .replace(/\b\w/g, (l) => l.toUpperCase())}
                 </MenuItem>
               ))}
             </Select>
@@ -157,7 +183,9 @@ const PromptForm: React.FC<PromptFormProps> = ({
           <TextField
             label="Content"
             value={formData.content}
-            onChange={(e) => setFormData({ ...formData, content: e.target.value })}
+            onChange={(e) =>
+              setFormData({ ...formData, content: e.target.value })
+            }
             fullWidth
             multiline
             rows={6}
@@ -200,12 +228,12 @@ const PromptForm: React.FC<PromptFormProps> = ({
         <Button onClick={onClose} disabled={saving}>
           Cancel
         </Button>
-        <Button 
-          onClick={handleSubmit} 
-          variant="contained" 
+        <Button
+          onClick={handleSubmit}
+          variant="contained"
           disabled={saving || !formData.name.trim() || !formData.content.trim()}
         >
-          {saving ? 'Saving...' : (mode === 'create' ? 'Create' : 'Update')}
+          {saving ? 'Saving...' : mode === 'create' ? 'Create' : 'Update'}
         </Button>
       </DialogActions>
     </Dialog>

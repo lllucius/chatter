@@ -10,22 +10,22 @@ interface PageLayoutProps {
   maxWidth?: string | number;
 }
 
-const PageLayout: React.FC<PageLayoutProps> = ({ 
-  title, 
-  toolbar, 
-  children, 
+const PageLayout: React.FC<PageLayoutProps> = ({
+  title,
+  toolbar,
+  children,
   fixedBottom,
-  maxWidth = 'none'
+  maxWidth = 'none',
 }) => {
   return (
-    <Box 
-      sx={{ 
-        height: '100%', 
-        display: 'flex', 
+    <Box
+      sx={{
+        height: '100%',
+        display: 'flex',
         flexDirection: 'column',
         maxWidth,
         margin: '0 auto',
-        width: '100%'
+        width: '100%',
       }}
     >
       {/* Fixed Title Bar */}
@@ -39,18 +39,18 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           zIndex: 1,
         }}
       >
-        <Toolbar 
-          sx={{ 
+        <Toolbar
+          sx={{
             justifyContent: 'space-between',
             minHeight: { xs: 56, sm: 64 },
-            px: { xs: 2, sm: 3 }
+            px: { xs: 2, sm: 3 },
           }}
         >
-          <Typography 
-            variant="h6" 
-            component="h1" 
+          <Typography
+            variant="h6"
+            component="h1"
             noWrap
-            sx={{ 
+            sx={{
               fontWeight: 'bold',
             }}
           >
@@ -65,19 +65,17 @@ const PageLayout: React.FC<PageLayoutProps> = ({
       </Box>
 
       {/* Scrollable Content Area */}
-      <Box 
-        sx={{ 
-          flex: 1, 
-          minHeight: 0, 
-          display: 'flex', 
+      <Box
+        sx={{
+          flex: 1,
+          minHeight: 0,
+          display: 'flex',
           flexDirection: 'column',
-          position: 'relative'
+          position: 'relative',
         }}
       >
         <CustomScrollbar style={{ flex: 1 }}>
-          <Box sx={{ p: { xs: 2, sm: 3 } }}>
-            {children}
-          </Box>
+          <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>
         </CustomScrollbar>
       </Box>
 

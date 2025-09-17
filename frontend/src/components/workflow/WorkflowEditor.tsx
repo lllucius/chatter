@@ -15,15 +15,15 @@ import {
   ConnectionMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
-import { 
-  Box, 
-  Toolbar, 
-  Button, 
-  ButtonGroup, 
-  Typography, 
-  Menu, 
-  MenuItem, 
-  Alert, 
+import {
+  Box,
+  Toolbar,
+  Button,
+  ButtonGroup,
+  Typography,
+  Menu,
+  MenuItem,
+  Alert,
   Snackbar,
   Paper,
   Fade,
@@ -72,7 +72,7 @@ import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 
 // Define node types for the workflow
-export type WorkflowNodeType = 
+export type WorkflowNodeType =
   | 'start'
   | 'model'
   | 'tool'
@@ -151,16 +151,28 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   );
 
   const [nodeIdCounter, setNodeIdCounter] = useState(1);
-  const [exampleMenuAnchor, setExampleMenuAnchor] = useState<null | HTMLElement>(null);
-  const [validationResult, setValidationResult] = useState<{ isValid: boolean; errors: string[] } | null>(null);
+  const [exampleMenuAnchor, setExampleMenuAnchor] =
+    useState<null | HTMLElement>(null);
+  const [validationResult, setValidationResult] = useState<{
+    isValid: boolean;
+    errors: string[];
+  } | null>(null);
   const [showValidation, setShowValidation] = useState(false);
-  const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
+  const [selectedNode, setSelectedNode] =
+    useState<Node<WorkflowNodeData> | null>(null);
   const [showPropertiesPanel, setShowPropertiesPanel] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
-  const [clipboard, setClipboard] = useState<{ nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] } | null>(null);
-  const [history, setHistory] = useState<{ nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] }[]>([]);
+  const [clipboard, setClipboard] = useState<{
+    nodes: Node<WorkflowNodeData>[];
+    edges: Edge<WorkflowEdgeData>[];
+  } | null>(null);
+  const [history, setHistory] = useState<
+    { nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] }[]
+  >([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [sidePanelTab, setSidePanelTab] = useState<'properties' | 'analytics'>('properties');
+  const [sidePanelTab, setSidePanelTab] = useState<'properties' | 'analytics'>(
+    'properties'
+  );
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   // Save current state to history
@@ -173,50 +185,59 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, [nodes, edges, history, historyIndex]);
 
   // Handle node selection
-  const onNodeClick = useCallback((_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
-    setSelectedNode(node);
-    setShowPropertiesPanel(true);
-  }, []);
+  const onNodeClick = useCallback(
+    (_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
+      setSelectedNode(node);
+      setShowPropertiesPanel(true);
+    },
+    []
+  );
 
   // Handle node updates from properties panel
-  const handleNodeUpdate = useCallback((nodeId: string, updates: Partial<WorkflowNodeData>) => {
-    saveToHistory();
-    setNodes((nds) =>
-      nds.map((node) =>
-        node.id === nodeId
-          ? { ...node, data: { ...node.data, ...updates } }
-          : node
-      )
-    );
-  }, [setNodes, saveToHistory]);
+  const handleNodeUpdate = useCallback(
+    (nodeId: string, updates: Partial<WorkflowNodeData>) => {
+      saveToHistory();
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...updates } }
+            : node
+        )
+      );
+    },
+    [setNodes, saveToHistory]
+  );
 
   // Smart positioning function
-  const getSmartPosition = useCallback((_nodeType: WorkflowNodeType): { x: number; y: number } => {
-    const existingNodes = nodes;
-    let x = 100;
-    let y = 100;
+  const getSmartPosition = useCallback(
+    (_nodeType: WorkflowNodeType): { x: number; y: number } => {
+      const existingNodes = nodes;
+      let x = 100;
+      let y = 100;
 
-    // Try to place new nodes in a logical flow
-    if (existingNodes.length === 0) {
-      return { x: 100, y: 200 };
-    }
+      // Try to place new nodes in a logical flow
+      if (existingNodes.length === 0) {
+        return { x: 100, y: 200 };
+      }
 
-    // Find rightmost node and place new node to its right
-    const rightmostNode = existingNodes.reduce((rightmost, node) => 
-      node.position.x > rightmost.position.x ? node : rightmost
-    );
+      // Find rightmost node and place new node to its right
+      const rightmostNode = existingNodes.reduce((rightmost, node) =>
+        node.position.x > rightmost.position.x ? node : rightmost
+      );
 
-    x = rightmostNode.position.x + NODE_SPACING;
-    y = rightmostNode.position.y;
+      x = rightmostNode.position.x + NODE_SPACING;
+      y = rightmostNode.position.y;
 
-    // Snap to grid if enabled
-    if (snapToGrid) {
-      x = Math.round(x / GRID_SIZE) * GRID_SIZE;
-      y = Math.round(y / GRID_SIZE) * GRID_SIZE;
-    }
+      // Snap to grid if enabled
+      if (snapToGrid) {
+        x = Math.round(x / GRID_SIZE) * GRID_SIZE;
+        y = Math.round(y / GRID_SIZE) * GRID_SIZE;
+      }
 
-    return { x, y };
-  }, [nodes, snapToGrid]);
+      return { x, y };
+    },
+    [nodes, snapToGrid]
+  );
   // Handle new connections
   const onConnect = useCallback(
     (params: Connection) => {
@@ -247,7 +268,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
           config: getDefaultNodeConfig(nodeType),
         },
       };
-      
+
       setNodes((nds) => [...nds, newNode]);
       setNodeIdCounter((counter) => counter + 1);
     },
@@ -255,12 +276,19 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   );
 
   // Get default configuration for node type
-  const getDefaultNodeConfig = (nodeType: WorkflowNodeType): Record<string, unknown> => {
+  const getDefaultNodeConfig = (
+    nodeType: WorkflowNodeType
+  ): Record<string, unknown> => {
     switch (nodeType) {
       case 'start':
         return { isEntryPoint: true };
       case 'model':
-        return { systemMessage: '', temperature: 0.7, maxTokens: 1000, model: 'gpt-4' };
+        return {
+          systemMessage: '',
+          temperature: 0.7,
+          maxTokens: 1000,
+          model: 'gpt-4',
+        };
       case 'tool':
         return { tools: [], parallel: false };
       case 'memory':
@@ -272,7 +300,12 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       case 'loop':
         return { maxIterations: 10, condition: '', breakCondition: '' };
       case 'variable':
-        return { operation: 'set', variableName: '', value: '', scope: 'workflow' };
+        return {
+          operation: 'set',
+          variableName: '',
+          value: '',
+          scope: 'workflow',
+        };
       case 'errorHandler':
         return { retryCount: 3, fallbackAction: 'continue', logErrors: true };
       case 'delay':
@@ -283,17 +316,21 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   };
 
   // Create current workflow definition
-  const currentWorkflow = useMemo((): WorkflowDefinition => ({
-    nodes,
-    edges,
-    metadata: {
-      name: initialWorkflow?.metadata?.name || 'Untitled Workflow',
-      description: initialWorkflow?.metadata?.description || '',
-      version: '1.0.0',
-      createdAt: initialWorkflow?.metadata?.createdAt || new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-    },
-  }), [nodes, edges, initialWorkflow]);
+  const currentWorkflow = useMemo(
+    (): WorkflowDefinition => ({
+      nodes,
+      edges,
+      metadata: {
+        name: initialWorkflow?.metadata?.name || 'Untitled Workflow',
+        description: initialWorkflow?.metadata?.description || '',
+        version: '1.0.0',
+        createdAt:
+          initialWorkflow?.metadata?.createdAt || new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    }),
+    [nodes, edges, initialWorkflow]
+  );
 
   // Keyboard shortcuts
   React.useEffect(() => {
@@ -355,8 +392,9 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   // Copy functionality
   const handleCopy = useCallback(() => {
     if (selectedNode) {
-      const selectedEdges = edges.filter(edge => 
-        edge.source === selectedNode.id || edge.target === selectedNode.id
+      const selectedEdges = edges.filter(
+        (edge) =>
+          edge.source === selectedNode.id || edge.target === selectedNode.id
       );
       setClipboard({ nodes: [selectedNode], edges: selectedEdges });
     }
@@ -367,9 +405,9 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     if (clipboard) {
       saveToHistory();
       const nodeIdMap = new Map<string, string>();
-      
+
       // Create new nodes with new IDs
-      const newNodes = clipboard.nodes.map(node => {
+      const newNodes = clipboard.nodes.map((node) => {
         const newId = `${node.type}-${nodeIdCounter + nodes.length}`;
         nodeIdMap.set(node.id, newId);
         return {
@@ -384,28 +422,41 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
       // Create new edges with updated IDs
       const newEdges = clipboard.edges
-        .filter(edge => nodeIdMap.has(edge.source) && nodeIdMap.has(edge.target))
-        .map(edge => ({
+        .filter(
+          (edge) => nodeIdMap.has(edge.source) && nodeIdMap.has(edge.target)
+        )
+        .map((edge) => ({
           ...edge,
           id: `e${edges.length + newNodes.length}`,
           source: nodeIdMap.get(edge.source)!,
           target: nodeIdMap.get(edge.target)!,
         }));
 
-      setNodes(nds => [...nds, ...newNodes]);
-      setEdges(eds => [...eds, ...newEdges]);
-      setNodeIdCounter(counter => counter + newNodes.length);
+      setNodes((nds) => [...nds, ...newNodes]);
+      setEdges((eds) => [...eds, ...newEdges]);
+      setNodeIdCounter((counter) => counter + newNodes.length);
     }
-  }, [clipboard, nodes, edges, nodeIdCounter, setNodes, setEdges, saveToHistory]);
+  }, [
+    clipboard,
+    nodes,
+    edges,
+    nodeIdCounter,
+    setNodes,
+    setEdges,
+    saveToHistory,
+  ]);
 
   // Delete selected node
   const handleDeleteSelected = useCallback(() => {
     if (selectedNode) {
       saveToHistory();
-      setNodes(nds => nds.filter(node => node.id !== selectedNode.id));
-      setEdges(eds => eds.filter(edge => 
-        edge.source !== selectedNode.id && edge.target !== selectedNode.id
-      ));
+      setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id));
+      setEdges((eds) =>
+        eds.filter(
+          (edge) =>
+            edge.source !== selectedNode.id && edge.target !== selectedNode.id
+        )
+      );
       setSelectedNode(null);
       setShowPropertiesPanel(false);
     }
@@ -434,23 +485,29 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   }, [setNodes, setEdges, saveToHistory]);
 
   // Load example workflow
-  const handleLoadExample = useCallback((exampleKey: string) => {
-    const example = exampleWorkflows[exampleKey];
-    if (example) {
-      saveToHistory();
-      setNodes(example.nodes);
-      setEdges(example.edges);
-    }
-    setExampleMenuAnchor(null);
-  }, [setNodes, setEdges, saveToHistory]);
+  const handleLoadExample = useCallback(
+    (exampleKey: string) => {
+      const example = exampleWorkflows[exampleKey];
+      if (example) {
+        saveToHistory();
+        setNodes(example.nodes);
+        setEdges(example.edges);
+      }
+      setExampleMenuAnchor(null);
+    },
+    [setNodes, setEdges, saveToHistory]
+  );
 
   // Load template workflow
-  const handleLoadTemplate = useCallback((workflow: WorkflowDefinition) => {
-    saveToHistory();
-    setNodes(workflow.nodes);
-    setEdges(workflow.edges);
-    setSelectedNode(null);
-  }, [setNodes, setEdges, saveToHistory]);
+  const handleLoadTemplate = useCallback(
+    (workflow: WorkflowDefinition) => {
+      saveToHistory();
+      setNodes(workflow.nodes);
+      setEdges(workflow.edges);
+      setSelectedNode(null);
+    },
+    [setNodes, setEdges, saveToHistory]
+  );
 
   // Validate workflow
   const handleValidate = useCallback(() => {
@@ -462,13 +519,27 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   return (
     <Box sx={{ height: '600px', width: '100%', display: 'flex' }}>
       {/* Main Editor Area */}
-      <Box sx={{ flex: 1, border: '1px solid #e0e0e0', borderRadius: 1, display: 'flex', flexDirection: 'column' }}>
+      <Box
+        sx={{
+          flex: 1,
+          border: '1px solid #e0e0e0',
+          borderRadius: 1,
+          display: 'flex',
+          flexDirection: 'column',
+        }}
+      >
         {/* Toolbar */}
-        <Toolbar sx={{ bgcolor: 'background.paper', borderBottom: '1px solid #e0e0e0', minHeight: '48px !important' }}>
+        <Toolbar
+          sx={{
+            bgcolor: 'background.paper',
+            borderBottom: '1px solid #e0e0e0',
+            minHeight: '48px !important',
+          }}
+        >
           <Typography variant="h6" sx={{ flexGrow: 1 }}>
             Workflow Editor
           </Typography>
-          
+
           {!readOnly && (
             <>
               {/* Node Type Buttons */}
@@ -555,7 +626,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
               {/* Edit Controls */}
               <ButtonGroup size="small" sx={{ mr: 2 }}>
-                <Button 
+                <Button
                   onClick={handleUndo}
                   disabled={historyIndex <= 0}
                   variant="outlined"
@@ -564,7 +635,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                 >
                   Undo
                 </Button>
-                <Button 
+                <Button
                   onClick={handleRedo}
                   disabled={historyIndex >= history.length - 1}
                   variant="outlined"
@@ -573,7 +644,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                 >
                   Redo
                 </Button>
-                <Button 
+                <Button
                   onClick={handleCopy}
                   disabled={!selectedNode}
                   variant="outlined"
@@ -582,7 +653,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                 >
                   Copy
                 </Button>
-                <Button 
+                <Button
                   onClick={handlePaste}
                   disabled={!clipboard}
                   variant="outlined"
@@ -595,27 +666,31 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
               {/* Utility Controls */}
               <ButtonGroup size="small" sx={{ mr: 2 }}>
-                <Button 
+                <Button
                   onClick={() => setSnapToGrid(!snapToGrid)}
-                  variant={snapToGrid ? "contained" : "outlined"}
+                  variant={snapToGrid ? 'contained' : 'outlined'}
                   startIcon={<GridIcon />}
                   title="Toggle Grid Snap"
                 >
                   Grid
                 </Button>
-                <Button 
+                <Button
                   onClick={() => setShowPropertiesPanel(!showPropertiesPanel)}
-                  variant={showPropertiesPanel ? "contained" : "outlined"}
+                  variant={showPropertiesPanel ? 'contained' : 'outlined'}
                   startIcon={<PropertiesIcon />}
                   title="Toggle Properties Panel"
                 >
                   Properties
                 </Button>
-                <Button 
+                <Button
                   onClick={handleValidate}
                   variant="outlined"
-                  startIcon={validationResult?.isValid ? <ValidIcon /> : <ErrorIcon />}
-                  color={validationResult?.isValid === false ? 'error' : 'primary'}
+                  startIcon={
+                    validationResult?.isValid ? <ValidIcon /> : <ErrorIcon />
+                  }
+                  color={
+                    validationResult?.isValid === false ? 'error' : 'primary'
+                  }
                 >
                   Validate
                 </Button>
@@ -623,14 +698,14 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
               {/* Workflow Controls */}
               <ButtonGroup size="small">
-                <Button 
+                <Button
                   onClick={() => setShowTemplateManager(true)}
                   variant="outlined"
                   startIcon={<TemplateIcon />}
                 >
                   Templates
                 </Button>
-                <Button 
+                <Button
                   onClick={(e) => setExampleMenuAnchor(e.currentTarget)}
                   variant="outlined"
                   startIcon={<ExampleIcon />}
@@ -676,16 +751,29 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       {/* Side Panel with Tabs */}
       {showPropertiesPanel && (
         <Fade in={showPropertiesPanel} timeout={300}>
-          <Paper elevation={3} sx={{ borderRadius: 0, display: 'flex', flexDirection: 'column' }}>
-            <Tabs 
-              value={sidePanelTab} 
+          <Paper
+            elevation={3}
+            sx={{ borderRadius: 0, display: 'flex', flexDirection: 'column' }}
+          >
+            <Tabs
+              value={sidePanelTab}
               onChange={(_, newValue) => setSidePanelTab(newValue)}
               variant="fullWidth"
             >
-              <Tab label="Properties" value="properties" icon={<PropertiesIcon />} iconPosition="start" />
-              <Tab label="Analytics" value="analytics" icon={<AnalyticsIcon />} iconPosition="start" />
+              <Tab
+                label="Properties"
+                value="properties"
+                icon={<PropertiesIcon />}
+                iconPosition="start"
+              />
+              <Tab
+                label="Analytics"
+                value="analytics"
+                icon={<AnalyticsIcon />}
+                iconPosition="start"
+              />
             </Tabs>
-            
+
             <Box sx={{ flex: 1, overflow: 'hidden' }}>
               {sidePanelTab === 'properties' && (
                 <PropertiesPanel
@@ -720,19 +808,18 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       </Menu>
 
       {/* Validation feedback */}
-      <Snackbar 
-        open={showValidation} 
-        autoHideDuration={6000} 
+      <Snackbar
+        open={showValidation}
+        autoHideDuration={6000}
         onClose={() => setShowValidation(false)}
       >
-        <Alert 
-          onClose={() => setShowValidation(false)} 
+        <Alert
+          onClose={() => setShowValidation(false)}
           severity={validationResult?.isValid ? 'success' : 'error'}
         >
-          {validationResult?.isValid 
-            ? 'Workflow is valid!' 
-            : `Validation errors: ${validationResult?.errors.join(', ')}`
-          }
+          {validationResult?.isValid
+            ? 'Workflow is valid!'
+            : `Validation errors: ${validationResult?.errors.join(', ')}`}
         </Alert>
       </Snackbar>
 

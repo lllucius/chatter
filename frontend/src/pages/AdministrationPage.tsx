@@ -1,4 +1,3 @@
- 
 import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
@@ -46,7 +45,15 @@ import {
   DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
 import { getSDK } from '../services/auth-service';
-import { BackupResponse, PluginResponse, JobResponse, JobCreateRequest, JobStatus, JobPriority, JobStatsResponse } from 'chatter-sdk';
+import {
+  BackupResponse,
+  PluginResponse,
+  JobResponse,
+  JobCreateRequest,
+  JobStatus,
+  JobPriority,
+  JobStatsResponse,
+} from 'chatter-sdk';
 import { useSSE } from '../services/sse-context';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
@@ -55,26 +62,37 @@ import PageLayout from '../components/PageLayout';
 
 const AdministrationPage: React.FC = () => {
   const { isConnected, on } = useSSE();
-  
-  const [activeTab, setActiveTab] = useState<'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'>('backups');
+
+  const [activeTab, setActiveTab] = useState<
+    'backups' | 'jobs' | 'plugins' | 'users' | 'bulk'
+  >('backups');
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [dialogType, setDialogType] = useState<'user' | 'backup' | 'plugin' | 'job'>('user');
+  const [dialogType, setDialogType] = useState<
+    'user' | 'backup' | 'plugin' | 'job'
+  >('user');
   const [loading, setLoading] = useState(false);
-  
+
   // More options menu state
-  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(null);
-  const [actionUser, setActionUser] = useState<Record<string, unknown> | null>(null);
-  
+  const [actionAnchorEl, setActionAnchorEl] = useState<HTMLElement | null>(
+    null
+  );
+  const [actionUser, setActionUser] = useState<Record<string, unknown> | null>(
+    null
+  );
+
   // User settings dialog state
   const [userSettingsOpen, setUserSettingsOpen] = useState(false);
-  const [editingUser, setEditingUser] = useState<Record<string, unknown> | null>(null);
-  
+  const [editingUser, setEditingUser] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
+
   const [backups, setBackups] = useState<BackupResponse[]>([]);
   const [plugins, setPlugins] = useState<PluginResponse[]>([]);
   const [jobs, setJobs] = useState<JobResponse[]>([]);
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
-  
+
   // Mock user data - in real app this would come from API
   const [users] = useState([
     {
@@ -84,7 +102,7 @@ const AdministrationPage: React.FC = () => {
       lastLogin: '2 hours ago',
       status: 'Active',
       name: 'Admin User',
-      isActive: true
+      isActive: true,
     },
     {
       id: 'user@example.com',
@@ -93,20 +111,24 @@ const AdministrationPage: React.FC = () => {
       lastLogin: '1 day ago',
       status: 'Active',
       name: 'Regular User',
-      isActive: true
-    }
+      isActive: true,
+    },
   ]);
 
-  const [notifications, setNotifications] = useState<Array<{
-    id: string;
-    title: string;
-    message: string;
-    type: 'success' | 'error' | 'info' | 'warning';
-    timestamp: Date;
-    jobId?: string;
-  }>>([]);
-  const [lastJobStates, setLastJobStates] = useState<Map<string, JobStatus>>(new Map());
-  
+  const [notifications, setNotifications] = useState<
+    Array<{
+      id: string;
+      title: string;
+      message: string;
+      type: 'success' | 'error' | 'info' | 'warning';
+      timestamp: Date;
+      jobId?: string;
+    }>
+  >([]);
+  const [lastJobStates, setLastJobStates] = useState<Map<string, JobStatus>>(
+    new Map()
+  );
+
   const [formData, setFormData] = useState({
     userId: '',
     email: '',
@@ -138,48 +160,59 @@ const AdministrationPage: React.FC = () => {
     dryRun: true,
   });
 
-  const addNotification = useCallback((notification: Omit<typeof notifications[0], 'id' | 'timestamp'>) => {
-    const newNotification = {
-      ...notification,
-      id: Math.random().toString(36).substr(2, 9),
-      timestamp: new Date(),
-    };
-    setNotifications(prev => [newNotification, ...prev.slice(0, 9)]);
-  }, []);
+  const addNotification = useCallback(
+    (notification: Omit<(typeof notifications)[0], 'id' | 'timestamp'>) => {
+      const newNotification = {
+        ...notification,
+        id: Math.random().toString(36).substr(2, 9),
+        timestamp: new Date(),
+      };
+      setNotifications((prev) => [newNotification, ...prev.slice(0, 9)]);
+    },
+    []
+  );
 
   const removeNotification = (id: string) => {
-    setNotifications(prev => prev.filter(n => n.id !== id));
+    setNotifications((prev) => prev.filter((n) => n.id !== id));
   };
 
   const loadJobs = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await getSDK().jobs.listJobsApiV1Jobs({}, {
-        limit: 100, // Load a reasonable amount for admin monitoring
-        offset: 0,
-      });
+      const response = await getSDK().jobs.listJobsApiV1Jobs(
+        {},
+        {
+          limit: 100, // Load a reasonable amount for admin monitoring
+          offset: 0,
+        }
+      );
       const newJobs = response.jobs || [];
-      newJobs.forEach(job => {
+      newJobs.forEach((job) => {
         const previousState = lastJobStates.get(job.id);
         if (previousState && previousState !== job.status) {
           addNotification({
             title: 'Job Status Update',
             message: `Job "${job.name || job.id.substring(0, 8)}" changed from ${previousState} to ${job.status}`,
-            type: job.status === 'completed' ? 'success' : 
-                  job.status === 'failed' ? 'error' : 
-                  job.status === 'cancelled' ? 'warning' : 'info',
-            jobId: job.id
+            type:
+              job.status === 'completed'
+                ? 'success'
+                : job.status === 'failed'
+                  ? 'error'
+                  : job.status === 'cancelled'
+                    ? 'warning'
+                    : 'info',
+            jobId: job.id,
           });
         }
       });
       const newStates = new Map<string, JobStatus>();
-      newJobs.forEach(job => newStates.set(job.id, job.status));
+      newJobs.forEach((job) => newStates.set(job.id, job.status));
       setLastJobStates(newStates);
       setJobs(newJobs);
     } catch (error: unknown) {
       handleError(error, {
         source: 'AdministrationPage.loadJobs',
-        operation: 'load job data'
+        operation: 'load job data',
       });
     } finally {
       setDataLoading(false);
@@ -193,7 +226,7 @@ const AdministrationPage: React.FC = () => {
     } catch (error: unknown) {
       handleError(error, {
         source: 'AdministrationPage.loadJobStats',
-        operation: 'load job statistics'
+        operation: 'load job statistics',
       });
     }
   }, []);
@@ -201,13 +234,14 @@ const AdministrationPage: React.FC = () => {
   const loadBackups = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await getSDK().dataManagement.listBackupsApiV1DataBackups({});
+      const response =
+        await getSDK().dataManagement.listBackupsApiV1DataBackups({});
       const items = response.backups || [];
       setBackups(items);
     } catch (error: unknown) {
       handleError(error, {
         source: 'AdministrationPage.loadBackups',
-        operation: 'load backup data'
+        operation: 'load backup data',
       });
     } finally {
       setDataLoading(false);
@@ -221,7 +255,7 @@ const AdministrationPage: React.FC = () => {
     } catch (error: unknown) {
       handleError(error, {
         source: 'AdministrationPage.loadPlugins',
-        operation: 'load plugin data'
+        operation: 'load plugin data',
       });
     }
   }, []);
@@ -242,7 +276,7 @@ const AdministrationPage: React.FC = () => {
         title: 'Job Started',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" has started`,
         type: 'info',
-        jobId: (event as any).data.job_id
+        jobId: (event as any).data.job_id,
       });
       loadJobs();
       loadJobStats();
@@ -253,7 +287,7 @@ const AdministrationPage: React.FC = () => {
         title: 'Job Completed',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" completed successfully`,
         type: 'success',
-        jobId: (event as any).data.job_id
+        jobId: (event as any).data.job_id,
       });
       loadJobs();
       loadJobStats();
@@ -264,7 +298,7 @@ const AdministrationPage: React.FC = () => {
         title: 'Job Failed',
         message: `Job "${(event as any).data.job_name || (event as any).data.job_id}" failed: ${(event as any).data.error}`,
         type: 'error',
-        jobId: (event as any).data.job_id
+        jobId: (event as any).data.job_id,
       });
       loadJobs();
       loadJobStats();
@@ -274,7 +308,7 @@ const AdministrationPage: React.FC = () => {
       addNotification({
         title: 'Backup Started',
         message: `Backup "${(event as any).data.backup_id}" has started`,
-        type: 'info'
+        type: 'info',
       });
       loadBackups();
     });
@@ -283,7 +317,7 @@ const AdministrationPage: React.FC = () => {
       addNotification({
         title: 'Backup Completed',
         message: `Backup "${(event as any).data.backup_id}" completed successfully`,
-        type: 'success'
+        type: 'success',
       });
       loadBackups();
     });
@@ -292,7 +326,7 @@ const AdministrationPage: React.FC = () => {
       addNotification({
         title: 'Backup Failed',
         message: `Backup "${(event as any).data.backup_id}" failed: ${(event as any).data.error}`,
-        type: 'error'
+        type: 'error',
       });
       loadBackups();
     });
@@ -322,21 +356,20 @@ const AdministrationPage: React.FC = () => {
       handleError(error, {
         source: 'AdministrationPage.handleJobAction',
         operation: `${action} job`,
-        additionalData: { jobId, action }
+        additionalData: { jobId, action },
       });
     } finally {
       setLoading(false);
     }
   };
 
-
   // Bulk operations functions
   const performBulkOperation = async () => {
     try {
       setLoading(true);
-      
+
       const filters: any = {};
-      
+
       // Build filters based on form data
       if (bulkOperationData.filters.olderThan) {
         filters.created_before = bulkOperationData.filters.olderThan;
@@ -349,19 +382,21 @@ const AdministrationPage: React.FC = () => {
       }
 
       let result;
-      
+
       // Use the new server-side bulk filtering API
       const entityTypeMap = {
-        'conversations': 'conversations',
-        'documents': 'documents', 
-        'prompts': 'prompts'
+        conversations: 'conversations',
+        documents: 'documents',
+        prompts: 'prompts',
       };
-      
+
       const entityType = entityTypeMap[bulkOperationData.operationType];
       if (!entityType) {
-        throw new Error(`Unsupported operation type: ${bulkOperationData.operationType}`);
+        throw new Error(
+          `Unsupported operation type: ${bulkOperationData.operationType}`
+        );
       }
-      
+
       // Build filters for the new API
       const apiFilters = {
         entity_type: entityType,
@@ -370,36 +405,40 @@ const AdministrationPage: React.FC = () => {
         user_id: bulkOperationData.filters.userId,
         status: bulkOperationData.filters.status,
         limit: 10000, // Increased limit since filtering happens server-side
-        dry_run: bulkOperationData.dryRun
+        dry_run: bulkOperationData.dryRun,
       };
-      
+
       if (bulkOperationData.dryRun) {
         // Use preview endpoint for dry run
-        const previewResponse = await getSDK().dataManagement.previewBulkDeleteApiV1DataBulkPreview({
-          filters: apiFilters
-        });
-        
+        const previewResponse =
+          await getSDK().dataManagement.previewBulkDeleteApiV1DataBulkPreview({
+            filters: apiFilters,
+          });
+
         result = {
           data: {
             total_requested: previewResponse.data.total_matching,
             successful_deletions: 0,
             failed_deletions: 0,
             errors: [],
-            preview_data: previewResponse.data
-          }
+            preview_data: previewResponse.data,
+          },
         };
       } else {
         // Use server-side filtered bulk delete
-        result = await getSDK().dataManagement.bulkDeleteWithFiltersApiV1DataBulkDeleteFiltered({
-          filters: apiFilters
-        });
+        result =
+          await getSDK().dataManagement.bulkDeleteWithFiltersApiV1DataBulkDeleteFiltered(
+            {
+              filters: apiFilters,
+            }
+          );
       }
 
       const operation = bulkOperationData.dryRun ? 'Preview' : 'Deleted';
-      const affectedCount = bulkOperationData.dryRun 
+      const affectedCount = bulkOperationData.dryRun
         ? result?.data.total_requested || 0
         : result?.data.successful_deletions || 0;
-      
+
       toastService[bulkOperationData.dryRun ? 'info' : 'success'](
         `${operation}: ${affectedCount} ${bulkOperationData.operationType}`
       );
@@ -407,18 +446,17 @@ const AdministrationPage: React.FC = () => {
       addNotification({
         title: 'Bulk Operation Complete',
         message: `${operation} ${affectedCount} ${bulkOperationData.operationType}`,
-        type: bulkOperationData.dryRun ? 'info' : 'success'
+        type: bulkOperationData.dryRun ? 'info' : 'success',
       });
-
     } catch (error: unknown) {
       handleError(error, {
         source: 'AdministrationPage.handleBulkAction',
         operation: 'bulk operation',
-        additionalData: { 
+        additionalData: {
           operationType: bulkOperationData.operationType,
           dryRun: bulkOperationData.dryRun,
-          filters: bulkOperationData.filters 
-        }
+          filters: bulkOperationData.filters,
+        },
       });
     } finally {
       setLoading(false);
@@ -451,7 +489,7 @@ const AdministrationPage: React.FC = () => {
       handleError(error, {
         source: 'AdministrationPage.handleUserSettingsSave',
         operation: 'update user settings',
-        additionalData: { userId: editingUser?.id }
+        additionalData: { userId: editingUser?.id },
       });
     }
   };
@@ -464,7 +502,7 @@ const AdministrationPage: React.FC = () => {
       handleError(error, {
         source: 'AdministrationPage.handleDownloadBackup',
         operation: 'download backup',
-        additionalData: { backupId: backup?.id }
+        additionalData: { backupId: backup?.id },
       });
     } finally {
       setLoading(false);
@@ -477,7 +515,9 @@ const AdministrationPage: React.FC = () => {
         await getSDK().plugins.enablePluginApiV1PluginsPluginIdEnable(pluginId);
         toastService.success('Plugin enabled successfully');
       } else {
-        await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisable(pluginId);
+        await getSDK().plugins.disablePluginApiV1PluginsPluginIdDisable(
+          pluginId
+        );
         toastService.success('Plugin disabled successfully');
       }
       loadPlugins();
@@ -485,7 +525,7 @@ const AdministrationPage: React.FC = () => {
       handleError(error, {
         source: 'AdministrationPage.handleTogglePlugin',
         operation: 'toggle plugin status',
-        additionalData: { pluginId: plugin.id, pluginName: plugin.name }
+        additionalData: { pluginId: plugin.id, pluginName: plugin.name },
       });
     }
   };
@@ -515,7 +555,7 @@ const AdministrationPage: React.FC = () => {
   };
 
   const handleFormChange = (field: string, value: any) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   const handleSubmit = async () => {
@@ -557,14 +597,16 @@ const AdministrationPage: React.FC = () => {
               kwargs: formData.jobKwargs ? JSON.parse(formData.jobKwargs) : {},
               priority: formData.jobPriority as JobPriority,
               max_retries: formData.maxRetries,
-              schedule_at: formData.scheduleAt ? new Date(formData.scheduleAt).toISOString() : undefined,
+              schedule_at: formData.scheduleAt
+                ? new Date(formData.scheduleAt).toISOString()
+                : undefined,
             };
             await getSDK().jobs.createJobApiV1Jobs(jobCreateRequest);
             toastService.success('Job created successfully!');
             addNotification({
               title: 'Job Created',
               message: `Job "${formData.jobName}" has been created and ${formData.scheduleAt ? 'scheduled' : 'queued for execution'}`,
-              type: 'success'
+              type: 'success',
             });
             loadJobs();
             loadJobStats();
@@ -597,13 +639,19 @@ const AdministrationPage: React.FC = () => {
       handleError(error, {
         source: 'AdministrationPage.handleCreateItem',
         operation: 'create item',
-        additionalData: { 
+        additionalData: {
           type,
-          formData: Object.keys(formData).reduce((acc, key) => ({
-            ...acc, 
-            [key]: typeof formData[key] === 'string' ? formData[key].substring(0, 50) : formData[key]
-          }), {})
-        }
+          formData: Object.keys(formData).reduce(
+            (acc, key) => ({
+              ...acc,
+              [key]:
+                typeof formData[key] === 'string'
+                  ? formData[key].substring(0, 50)
+                  : formData[key],
+            }),
+            {}
+          ),
+        },
       });
     } finally {
       setLoading(false);
@@ -616,10 +664,14 @@ const AdministrationPage: React.FC = () => {
         setLoading(true);
         switch (type) {
           case 'user':
-            toastService.warning('User deletion functionality requires implementation of admin user management API');
+            toastService.warning(
+              'User deletion functionality requires implementation of admin user management API'
+            );
             break;
           case 'backup':
-            toastService.warning('Backup deletion is not yet supported by the API');
+            toastService.warning(
+              'Backup deletion is not yet supported by the API'
+            );
             break;
           case 'plugin':
             await getSDK().plugins.uninstallPluginApiV1PluginsPluginId(id);
@@ -637,7 +689,7 @@ const AdministrationPage: React.FC = () => {
         handleError(error, {
           source: 'AdministrationPage.handleDeleteItem',
           operation: `delete ${type}`,
-          additionalData: { type, itemId: item?.id }
+          additionalData: { type, itemId: item?.id },
         });
       } finally {
         setLoading(false);
@@ -661,7 +713,7 @@ const AdministrationPage: React.FC = () => {
       >
         Refresh
       </Button>
-      
+
       {/* Backup tab controls */}
       {activeTab === 'backups' && (
         <>
@@ -673,16 +725,12 @@ const AdministrationPage: React.FC = () => {
           >
             Create Backup
           </Button>
-          <Button
-            variant="outlined"
-            startIcon={<UploadIcon />}
-            size="small"
-          >
+          <Button variant="outlined" startIcon={<UploadIcon />} size="small">
             Restore Backup
           </Button>
         </>
       )}
-      
+
       {/* Jobs tab controls */}
       {activeTab === 'jobs' && (
         <Button
@@ -694,7 +742,7 @@ const AdministrationPage: React.FC = () => {
           Create Job
         </Button>
       )}
-      
+
       {/* Plugins tab controls */}
       {activeTab === 'plugins' && (
         <Button
@@ -706,7 +754,7 @@ const AdministrationPage: React.FC = () => {
           Install Plugin
         </Button>
       )}
-      
+
       {/* Users tab controls */}
       {activeTab === 'users' && (
         <Button
@@ -723,11 +771,13 @@ const AdministrationPage: React.FC = () => {
 
   return (
     <PageLayout title="Administration" toolbar={toolbar}>
-
       {/* Notifications Panel */}
       {notifications.length > 0 && (
         <Box sx={{ mb: 3 }}>
-          <Typography variant="h6" sx={{ mb: 2, display: 'flex', alignItems: 'center' }}>
+          <Typography
+            variant="h6"
+            sx={{ mb: 2, display: 'flex', alignItems: 'center' }}
+          >
             <NotificationsIcon sx={{ mr: 1 }} />
             Recent Notifications ({notifications.length})
           </Typography>
@@ -735,21 +785,30 @@ const AdministrationPage: React.FC = () => {
             <CustomScrollbar>
               <List>
                 {notifications.map((notification): void => (
-                  <ListItem key={notification.id} sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}>
+                  <ListItem
+                    key={notification.id}
+                    sx={{ bgcolor: 'background.paper', mb: 1, borderRadius: 1 }}
+                  >
                     <ListItemText
                       primary={notification.title}
                       secondary={`${notification.message} • ${new Date(notification.timestamp).toLocaleString()}`}
                     />
-                    <Chip 
-                      label={notification.type} 
-                      color={notification.type === 'success' ? 'success' : 
-                             notification.type === 'error' ? 'error' : 
-                             notification.type === 'warning' ? 'warning' : 'info'} 
-                      size="small" 
+                    <Chip
+                      label={notification.type}
+                      color={
+                        notification.type === 'success'
+                          ? 'success'
+                          : notification.type === 'error'
+                            ? 'error'
+                            : notification.type === 'warning'
+                              ? 'warning'
+                              : 'info'
+                      }
+                      size="small"
                       sx={{ mr: 1 }}
                     />
-                    <IconButton 
-                      size="small" 
+                    <IconButton
+                      size="small"
                       onClick={() => removeNotification(notification.id)}
                       title="Dismiss"
                     >
@@ -770,11 +829,36 @@ const AdministrationPage: React.FC = () => {
         scrollButtons="auto"
         sx={{ mb: 2 }}
       >
-        <Tab value="backups" icon={<BackupIcon />} iconPosition="start" label="Backups" />
-        <Tab value="jobs" icon={<JobIcon />} iconPosition="start" label="Background Jobs" />
-        <Tab value="plugins" icon={<PluginIcon />} iconPosition="start" label="Plugins" />
-        <Tab value="users" icon={<UsersIcon />} iconPosition="start" label="User Management" />
-        <Tab value="bulk" icon={<BulkDeleteIcon />} iconPosition="start" label="Bulk Operations" />
+        <Tab
+          value="backups"
+          icon={<BackupIcon />}
+          iconPosition="start"
+          label="Backups"
+        />
+        <Tab
+          value="jobs"
+          icon={<JobIcon />}
+          iconPosition="start"
+          label="Background Jobs"
+        />
+        <Tab
+          value="plugins"
+          icon={<PluginIcon />}
+          iconPosition="start"
+          label="Plugins"
+        />
+        <Tab
+          value="users"
+          icon={<UsersIcon />}
+          iconPosition="start"
+          label="User Management"
+        />
+        <Tab
+          value="bulk"
+          icon={<BulkDeleteIcon />}
+          iconPosition="start"
+          label="Bulk Operations"
+        />
       </Tabs>
 
       {/* Backups Tab */}
@@ -798,8 +882,8 @@ const AdministrationPage: React.FC = () => {
               </ListItem>
             ) : backups.length === 0 ? (
               <ListItem>
-                <ListItemText 
-                  primary="No backups found" 
+                <ListItemText
+                  primary="No backups found"
                   secondary="Create your first backup to get started"
                 />
               </ListItem>
@@ -807,18 +891,23 @@ const AdministrationPage: React.FC = () => {
               backups.map((backup): void => (
                 <ListItem key={backup.id}>
                   <ListItemText
-                    primary={backup.name || `Backup ${backup.id?.substring(0, 8)}`}
+                    primary={
+                      backup.name || `Backup ${backup.id?.substring(0, 8)}`
+                    }
                     secondary={`Type: ${backup.backup_type} | Status: ${backup.status} | Created: ${backup.created_at ? new Date(backup.created_at).toLocaleString() : 'Unknown'}`}
                   />
                   <ListItemSecondaryAction>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       onClick={() => handleBackupDownload(backup.id)}
                       disabled={backup.status !== 'completed'}
                     >
                       <DownloadIcon />
                     </IconButton>
-                    <IconButton edge="end" onClick={() => handleDeleteAction('backup', backup.id)}>
+                    <IconButton
+                      edge="end"
+                      onClick={() => handleDeleteAction('backup', backup.id)}
+                    >
                       <DeleteIcon />
                     </IconButton>
                   </ListItemSecondaryAction>
@@ -838,7 +927,8 @@ const AdministrationPage: React.FC = () => {
                 {jobStats && (
                   <Box sx={{ textAlign: 'right' }}>
                     <Typography variant="body2" color="text.secondary">
-                      Total: {jobStats.total_jobs} | Pending: {jobStats.pending_jobs} | Running: {jobStats.running_jobs}
+                      Total: {jobStats.total_jobs} | Pending:{' '}
+                      {jobStats.pending_jobs} | Running: {jobStats.running_jobs}
                     </Typography>
                   </Box>
                 )}
@@ -853,8 +943,8 @@ const AdministrationPage: React.FC = () => {
               </ListItem>
             ) : jobs.length === 0 ? (
               <ListItem>
-                <ListItemText 
-                  primary="No jobs found" 
+                <ListItemText
+                  primary="No jobs found"
                   secondary="Create your first job to get started"
                 />
               </ListItem>
@@ -862,21 +952,32 @@ const AdministrationPage: React.FC = () => {
               jobs.map((job) => {
                 const getStatusColor = (status: JobStatus) => {
                   switch (status) {
-                    case 'running': return 'success';
-                    case 'pending': return 'warning';
-                    case 'completed': return 'info';
-                    case 'failed': return 'error';
-                    case 'cancelled': return 'default';
-                    default: return 'default';
+                    case 'running':
+                      return 'success';
+                    case 'pending':
+                      return 'warning';
+                    case 'completed':
+                      return 'info';
+                    case 'failed':
+                      return 'error';
+                    case 'cancelled':
+                      return 'default';
+                    default:
+                      return 'default';
                   }
                 };
 
                 const getSecondaryText = () => {
                   const parts: string[] = [];
-                  if (job.function_name) parts.push(`Function: ${job.function_name}`);
+                  if (job.function_name)
+                    parts.push(`Function: ${job.function_name}`);
                   if (job.priority) parts.push(`Priority: ${job.priority}`);
-                  if (job.progress !== undefined) parts.push(`Progress: ${job.progress}%`);
-                  if (job.created_at) parts.push(`Created: ${new Date(job.created_at).toLocaleString()}`);
+                  if (job.progress !== undefined)
+                    parts.push(`Progress: ${job.progress}%`);
+                  if (job.created_at)
+                    parts.push(
+                      `Created: ${new Date(job.created_at).toLocaleString()}`
+                    );
                   return parts.join(' | ');
                 };
 
@@ -886,16 +987,17 @@ const AdministrationPage: React.FC = () => {
                       primary={job.name || `Job ${job.id.substring(0, 8)}`}
                       secondary={getSecondaryText()}
                     />
-                    <Chip 
-                      label={job.status} 
-                      color={getStatusColor(job.status)} 
-                      size="small" 
+                    <Chip
+                      label={job.status}
+                      color={getStatusColor(job.status)}
+                      size="small"
                       sx={{ mr: 1 }}
                     />
                     <ListItemSecondaryAction>
-                      {(job.status === 'pending' || job.status === 'running') && (
-                        <IconButton 
-                          edge="end" 
+                      {(job.status === 'pending' ||
+                        job.status === 'running') && (
+                        <IconButton
+                          edge="end"
                           onClick={() => handleJobAction('cancel', job.id)}
                           title="Cancel Job"
                         >
@@ -917,8 +1019,8 @@ const AdministrationPage: React.FC = () => {
           <List>
             {plugins.length === 0 ? (
               <ListItem>
-                <ListItemText 
-                  primary="No plugins installed" 
+                <ListItemText
+                  primary="No plugins installed"
                   secondary="Install plugins to extend functionality"
                 />
               </ListItem>
@@ -931,9 +1033,11 @@ const AdministrationPage: React.FC = () => {
                     secondary={`Version ${plugin.version || 'Unknown'} | ${plugin.enabled ? 'Enabled' : 'Disabled'} | ${plugin.description || 'No description'}`}
                   />
                   <ListItemSecondaryAction>
-                    <Switch 
+                    <Switch
                       checked={plugin.enabled || false}
-                      onChange={(e) => handlePluginToggle(plugin.id, e.target.checked)}
+                      onChange={(e) =>
+                        handlePluginToggle(plugin.id, e.target.checked)
+                      }
                     />
                     <IconButton edge="end">
                       <SettingsIcon />
@@ -957,7 +1061,10 @@ const AdministrationPage: React.FC = () => {
                   secondary={`Role: ${user.role} | Last login: ${user.lastLogin} | Status: ${user.status}`}
                 />
                 <ListItemSecondaryAction>
-                  <IconButton edge="end" onClick={(e) => openUserActionsMenu(e, user)}>
+                  <IconButton
+                    edge="end"
+                    onClick={(e) => openUserActionsMenu(e, user)}
+                  >
                     <MoreVertIcon />
                   </IconButton>
                 </ListItemSecondaryAction>
@@ -971,14 +1078,17 @@ const AdministrationPage: React.FC = () => {
       {activeTab === 'bulk' && (
         <Box>
           <Alert severity="warning" sx={{ mb: 3 }}>
-            <strong>Warning:</strong> Bulk operations can delete large amounts of data permanently. Always test with "Dry Run" first.
+            <strong>Warning:</strong> Bulk operations can delete large amounts
+            of data permanently. Always test with "Dry Run" first.
           </Alert>
-          
-          <Box sx={{ mb: 3, p: 3, border: '1px solid #e0e0e0', borderRadius: 1 }}>
+
+          <Box
+            sx={{ mb: 3, p: 3, border: '1px solid #e0e0e0', borderRadius: 1 }}
+          >
             <Typography variant="h6" gutterBottom>
               Bulk Delete Configuration
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12} md={6}>
                 <FormControl fullWidth sx={{ mb: 2 }}>
@@ -986,12 +1096,16 @@ const AdministrationPage: React.FC = () => {
                   <Select
                     value={bulkOperationData.operationType}
                     label="Operation Type"
-                    onChange={(e) => setBulkOperationData(prev => ({
-                      ...prev,
-                      operationType: e.target.value as any
-                    }))}
+                    onChange={(e) =>
+                      setBulkOperationData((prev) => ({
+                        ...prev,
+                        operationType: e.target.value as any,
+                      }))
+                    }
                   >
-                    <MenuItem value="conversations">Delete Conversations</MenuItem>
+                    <MenuItem value="conversations">
+                      Delete Conversations
+                    </MenuItem>
                     <MenuItem value="documents">Delete Documents</MenuItem>
                     <MenuItem value="prompts">Delete Prompts</MenuItem>
                   </Select>
@@ -1002,10 +1116,12 @@ const AdministrationPage: React.FC = () => {
                   label="Created Before (YYYY-MM-DD)"
                   type="date"
                   value={bulkOperationData.filters.olderThan}
-                  onChange={(e) => setBulkOperationData(prev => ({
-                    ...prev,
-                    filters: { ...prev.filters, olderThan: e.target.value }
-                  }))}
+                  onChange={(e) =>
+                    setBulkOperationData((prev) => ({
+                      ...prev,
+                      filters: { ...prev.filters, olderThan: e.target.value },
+                    }))
+                  }
                   sx={{ mb: 2 }}
                   InputLabelProps={{ shrink: true }}
                 />
@@ -1014,10 +1130,12 @@ const AdministrationPage: React.FC = () => {
                   fullWidth
                   label="User ID (optional)"
                   value={bulkOperationData.filters.userId}
-                  onChange={(e) => setBulkOperationData(prev => ({
-                    ...prev,
-                    filters: { ...prev.filters, userId: e.target.value }
-                  }))}
+                  onChange={(e) =>
+                    setBulkOperationData((prev) => ({
+                      ...prev,
+                      filters: { ...prev.filters, userId: e.target.value },
+                    }))
+                  }
                   sx={{ mb: 2 }}
                 />
 
@@ -1025,10 +1143,12 @@ const AdministrationPage: React.FC = () => {
                   control={
                     <Switch
                       checked={bulkOperationData.dryRun}
-                      onChange={(e) => setBulkOperationData(prev => ({
-                        ...prev,
-                        dryRun: e.target.checked
-                      }))}
+                      onChange={(e) =>
+                        setBulkOperationData((prev) => ({
+                          ...prev,
+                          dryRun: e.target.checked,
+                        }))
+                      }
                       color="warning"
                     />
                   }
@@ -1045,7 +1165,10 @@ const AdministrationPage: React.FC = () => {
                     <strong>Type:</strong> {bulkOperationData.operationType}
                   </Typography>
                   <Typography variant="body2" gutterBottom>
-                    <strong>Mode:</strong> {bulkOperationData.dryRun ? 'Preview (Safe)' : 'Delete (Permanent)'}
+                    <strong>Mode:</strong>{' '}
+                    {bulkOperationData.dryRun
+                      ? 'Preview (Safe)'
+                      : 'Delete (Permanent)'}
                   </Typography>
                   <Typography variant="body2" gutterBottom>
                     <strong>Filters:</strong>
@@ -1061,11 +1184,16 @@ const AdministrationPage: React.FC = () => {
                         User ID: {bulkOperationData.filters.userId}
                       </Typography>
                     )}
-                    {!bulkOperationData.filters.olderThan && !bulkOperationData.filters.userId && (
-                      <Typography component="li" variant="body2" color="text.secondary">
-                        No filters applied (affects all data)
-                      </Typography>
-                    )}
+                    {!bulkOperationData.filters.olderThan &&
+                      !bulkOperationData.filters.userId && (
+                        <Typography
+                          component="li"
+                          variant="body2"
+                          color="text.secondary"
+                        >
+                          No filters applied (affects all data)
+                        </Typography>
+                      )}
                   </Box>
                 </Box>
               </Grid>
@@ -1074,21 +1202,29 @@ const AdministrationPage: React.FC = () => {
             <Box sx={{ mt: 3, display: 'flex', gap: 2 }}>
               <Button
                 variant="contained"
-                color={bulkOperationData.dryRun ? "info" : "error"}
+                color={bulkOperationData.dryRun ? 'info' : 'error'}
                 onClick={performBulkOperation}
                 disabled={loading}
-                startIcon={loading ? <CircularProgress size={20} /> : <BulkDeleteIcon />}
+                startIcon={
+                  loading ? <CircularProgress size={20} /> : <BulkDeleteIcon />
+                }
               >
-                {loading ? 'Processing...' : bulkOperationData.dryRun ? 'Preview Changes' : 'Execute Delete'}
+                {loading
+                  ? 'Processing...'
+                  : bulkOperationData.dryRun
+                    ? 'Preview Changes'
+                    : 'Execute Delete'}
               </Button>
-              
+
               <Button
                 variant="outlined"
-                onClick={() => setBulkOperationData(prev => ({
-                  ...prev,
-                  filters: { olderThan: '', userId: '', status: '' },
-                  dryRun: true
-                }))}
+                onClick={() =>
+                  setBulkOperationData((prev) => ({
+                    ...prev,
+                    filters: { olderThan: '', userId: '', status: '' },
+                    dryRun: true,
+                  }))
+                }
               >
                 Reset Filters
               </Button>
@@ -1097,7 +1233,12 @@ const AdministrationPage: React.FC = () => {
         </Box>
       )}
 
-      <Dialog open={dialogOpen} onClose={() => setDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={dialogOpen}
+        onClose={() => setDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>
           {dialogType === 'user' && 'Add New User'}
           {dialogType === 'backup' && 'Create Backup'}
@@ -1159,27 +1300,36 @@ const AdministrationPage: React.FC = () => {
               />
               <FormControlLabel
                 control={
-                  <Switch 
+                  <Switch
                     checked={formData.includeUserData}
-                    onChange={(e) => handleFormChange('includeUserData', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange('includeUserData', e.target.checked)
+                    }
                   />
                 }
                 label="Include user data"
               />
               <FormControlLabel
                 control={
-                  <Switch 
+                  <Switch
                     checked={formData.includeDocuments}
-                    onChange={(e) => handleFormChange('includeDocuments', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange('includeDocuments', e.target.checked)
+                    }
                   />
                 }
                 label="Include documents"
               />
               <FormControlLabel
                 control={
-                  <Switch 
+                  <Switch
                     checked={formData.includeConfigurations}
-                    onChange={(e) => handleFormChange('includeConfigurations', e.target.checked)}
+                    onChange={(e) =>
+                      handleFormChange(
+                        'includeConfigurations',
+                        e.target.checked
+                      )
+                    }
                   />
                 }
                 label="Include configurations"
@@ -1225,7 +1375,9 @@ const AdministrationPage: React.FC = () => {
                 required
                 helperText="Available functions: document_processing, conversation_summarization, vector_store_maintenance, data_export, data_backup"
                 value={formData.jobFunction}
-                onChange={(e) => handleFormChange('jobFunction', e.target.value)}
+                onChange={(e) =>
+                  handleFormChange('jobFunction', e.target.value)
+                }
               />
               <TextField
                 fullWidth
@@ -1233,7 +1385,9 @@ const AdministrationPage: React.FC = () => {
                 label="Priority"
                 margin="normal"
                 value={formData.jobPriority}
-                onChange={(e) => handleFormChange('jobPriority', e.target.value)}
+                onChange={(e) =>
+                  handleFormChange('jobPriority', e.target.value)
+                }
                 SelectProps={{ native: true }}
               >
                 <option value="low">Low</option>
@@ -1279,7 +1433,9 @@ const AdministrationPage: React.FC = () => {
                 margin="normal"
                 type="number"
                 value={formData.maxRetries}
-                onChange={(e) => handleFormChange('maxRetries', parseInt(e.target.value) || 0)}
+                onChange={(e) =>
+                  handleFormChange('maxRetries', parseInt(e.target.value) || 0)
+                }
                 inputProps={{ min: 0, max: 10 }}
               />
             </Box>
@@ -1290,7 +1446,11 @@ const AdministrationPage: React.FC = () => {
             Cancel
           </Button>
           <Button variant="contained" onClick={handleSubmit} disabled={loading}>
-            {loading ? 'Processing...' : (dialogType === 'backup' ? 'Create' : 'Add')}
+            {loading
+              ? 'Processing...'
+              : dialogType === 'backup'
+                ? 'Create'
+                : 'Add'}
           </Button>
         </DialogActions>
       </Dialog>
@@ -1307,10 +1467,12 @@ const AdministrationPage: React.FC = () => {
           </ListItemIcon>
           Settings
         </MenuItem>
-        <MenuItem onClick={() => {
-          if (actionUser) handleDeleteAction('user', actionUser.id);
-          closeActionsMenu();
-        }}>
+        <MenuItem
+          onClick={() => {
+            if (actionUser) handleDeleteAction('user', actionUser.id);
+            closeActionsMenu();
+          }}
+        >
           <ListItemIcon>
             <DeleteIcon fontSize="small" />
           </ListItemIcon>
@@ -1319,7 +1481,12 @@ const AdministrationPage: React.FC = () => {
       </Menu>
 
       {/* User Settings Dialog */}
-      <Dialog open={userSettingsOpen} onClose={() => setUserSettingsOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={userSettingsOpen}
+        onClose={() => setUserSettingsOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>User Settings - {editingUser?.email}</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
@@ -1327,7 +1494,9 @@ const AdministrationPage: React.FC = () => {
               fullWidth
               label="Name"
               value={editingUser?.name || ''}
-              onChange={(e) => setEditingUser({...editingUser, name: e.target.value})}
+              onChange={(e) =>
+                setEditingUser({ ...editingUser, name: e.target.value })
+              }
               sx={{ mb: 2 }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -1335,7 +1504,9 @@ const AdministrationPage: React.FC = () => {
               <Select
                 value={editingUser?.role || 'User'}
                 label="Role"
-                onChange={(e) => setEditingUser({...editingUser, role: e.target.value})}
+                onChange={(e) =>
+                  setEditingUser({ ...editingUser, role: e.target.value })
+                }
               >
                 <MenuItem value="User">User</MenuItem>
                 <MenuItem value="Administrator">Administrator</MenuItem>
@@ -1346,7 +1517,12 @@ const AdministrationPage: React.FC = () => {
               control={
                 <Switch
                   checked={editingUser?.isActive || false}
-                  onChange={(e) => setEditingUser({...editingUser, isActive: e.target.checked})}
+                  onChange={(e) =>
+                    setEditingUser({
+                      ...editingUser,
+                      isActive: e.target.checked,
+                    })
+                  }
                 />
               }
               label="Active"
@@ -1355,7 +1531,9 @@ const AdministrationPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setUserSettingsOpen(false)}>Cancel</Button>
-          <Button variant="contained" onClick={handleUserSettingsSave}>Save</Button>
+          <Button variant="contained" onClick={handleUserSettingsSave}>
+            Save
+          </Button>
         </DialogActions>
       </Dialog>
     </PageLayout>

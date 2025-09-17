@@ -25,33 +25,24 @@ const defaultDocumentData = {
   title: '',
 };
 
-const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateData>> = ({
-  open,
-  mode,
-  initialData,
-  onClose,
-  onSubmit,
-}) => {
+const DocumentForm: React.FC<
+  CrudFormProps<DocumentCreateData, DocumentUpdateData>
+> = ({ open, mode, initialData, onClose, onSubmit }) => {
   const [file, setFile] = useState<File | null>(null);
   const [uploadError, setUploadError] = useState<string | null>(null);
-  
-  const {
-    formData,
-    updateFormData,
-    isSubmitting,
-    handleSubmit,
-    handleClose,
-  } = useBaseForm(
-    {
-      defaultData: defaultDocumentData,
-      transformInitialData: (data: DocumentUpdateData): void => ({
-        title: data.title || '',
-      }),
-    },
-    open,
-    mode,
-    initialData
-  );
+
+  const { formData, updateFormData, isSubmitting, handleSubmit, handleClose } =
+    useBaseForm(
+      {
+        defaultData: defaultDocumentData,
+        transformInitialData: (data: DocumentUpdateData): void => ({
+          title: data.title || '',
+        }),
+      },
+      open,
+      mode,
+      initialData
+    );
 
   const handleFormSubmit = handleSubmit(async (data) => {
     try {
@@ -71,15 +62,25 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
       // Check if this is a duplicate document error
       let errorMessage = '';
       if (error && typeof error === 'object') {
-        const errorObj = error as { response?: { data?: { detail?: string } }; message?: string };
-        errorMessage = errorObj.response?.data?.detail || errorObj.message || '';
+        const errorObj = error as {
+          response?: { data?: { detail?: string } };
+          message?: string;
+        };
+        errorMessage =
+          errorObj.response?.data?.detail || errorObj.message || '';
       } else if (typeof error === 'string') {
         errorMessage = error;
       }
-      
-      if (errorMessage.includes('Document with identical content already exists') || 
-          errorMessage.includes('This file has already been uploaded')) {
-        setUploadError('This file has already been uploaded. Documents are identified by their content, so the same file cannot be uploaded twice. Please check your existing documents or upload a different file.');
+
+      if (
+        errorMessage.includes(
+          'Document with identical content already exists'
+        ) ||
+        errorMessage.includes('This file has already been uploaded')
+      ) {
+        setUploadError(
+          'This file has already been uploaded. Documents are identified by their content, so the same file cannot be uploaded twice. Please check your existing documents or upload a different file.'
+        );
       } else {
         // Let the error propagate to the global handler for other types of errors
         throw error;
@@ -114,7 +115,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
       onClose={handleCustomClose}
       onSubmit={handleFormSubmit}
       isSubmitting={isSubmitting}
-      disableSubmit={(mode === 'create' && !file)}
+      disableSubmit={mode === 'create' && !file}
       submitText={mode === 'create' ? 'Upload' : 'Update'}
     >
       <TextField
@@ -124,18 +125,18 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
         onChange={(e) => updateFormData({ title: e.target.value })}
         sx={{ mb: 3 }}
       />
-      
+
       {mode === 'create' && (
         <>
           <input
             type="file"
             accept=".pdf,.txt,.doc,.docx,.md,.csv,.json"
             onChange={handleFileSelect}
-            style={{ 
-              width: '100%', 
-              padding: '10px', 
-              border: '2px dashed #ccc', 
-              borderRadius: '4px' 
+            style={{
+              width: '100%',
+              padding: '10px',
+              border: '2px dashed #ccc',
+              borderRadius: '4px',
             }}
           />
           {file && (
@@ -145,7 +146,7 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
               </Typography>
             </Box>
           )}
-          
+
           {uploadError && (
             <Alert severity="warning" sx={{ mt: 2 }}>
               <AlertTitle>Duplicate File</AlertTitle>
@@ -154,12 +155,14 @@ const DocumentForm: React.FC<CrudFormProps<DocumentCreateData, DocumentUpdateDat
           )}
         </>
       )}
-      
+
       {isSubmitting && (
         <Box sx={{ mt: 2 }}>
           <LinearProgress />
           <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
-            {mode === 'create' ? 'Uploading and processing document...' : 'Updating document...'}
+            {mode === 'create'
+              ? 'Uploading and processing document...'
+              : 'Updating document...'}
           </Typography>
         </Box>
       )}

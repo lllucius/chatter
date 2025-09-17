@@ -18,7 +18,6 @@ from typing import Any
 from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.model_registry import ModelRegistryService
 from chatter.models.document import (
     Document,
     DocumentChunk,
@@ -26,7 +25,6 @@ from chatter.models.document import (
     DocumentType,
     HybridVectorSearchHelper,
 )
-from chatter.models.registry import ModelType
 from chatter.services.embeddings import EmbeddingService
 from chatter.utils.logging import get_logger
 
@@ -385,8 +383,6 @@ class DocumentChunker:
             raise EmbeddingPipelineError(
                 f"Failed to create chunks: {e}"
             ) from e
-
-
 
 
 class SimpleVectorStore:

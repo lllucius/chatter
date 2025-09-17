@@ -1,5 +1,5 @@
 import React, { useRef, useState } from 'react';
-import { 
+import {
   Button,
   Dialog,
   DialogTitle,
@@ -10,25 +10,33 @@ import {
   Box,
   Chip,
   CircularProgress,
-  Alert
+  Alert,
 } from '../utils/mui';
-import { 
-  AgentIcon,
-  SendIcon
-} from '../utils/icons';
+import { AgentIcon, SendIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import { CrudPageHeader } from '../components/PageHeader';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudDataTableRef } from '../components/CrudDataTable';
-import { 
-  createNameWithDescriptionRenderer, 
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
+import {
+  createNameWithDescriptionRenderer,
   createBooleanSwitchRenderer,
-  createDateRenderer 
+  createDateRenderer,
 } from '../components/CrudRenderers';
 import AgentForm from '../components/AgentForm';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { useAsyncError } from '../hooks/useAsyncError';
-import { AgentResponse, AgentCreateRequest, AgentUpdateRequest, AgentInteractRequest, AgentInteractResponse } from 'chatter-sdk';
+import {
+  AgentResponse,
+  AgentCreateRequest,
+  AgentUpdateRequest,
+  AgentInteractRequest,
+  AgentInteractResponse,
+} from 'chatter-sdk';
 
 const AgentsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
@@ -36,9 +44,12 @@ const AgentsPage: React.FC = () => {
 
   // State for test agent dialog
   const [testDialogOpen, setTestDialogOpen] = useState(false);
-  const [selectedAgent, setSelectedAgent] = useState<AgentResponse | null>(null);
+  const [selectedAgent, setSelectedAgent] = useState<AgentResponse | null>(
+    null
+  );
   const [testMessage, setTestMessage] = useState('');
-  const [testResponse, setTestResponse] = useState<AgentInteractResponse | null>(null);
+  const [testResponse, setTestResponse] =
+    useState<AgentInteractResponse | null>(null);
   const [testing, setTesting] = useState(false);
   const [testError, setTestError] = useState<string | null>(null);
 
@@ -62,40 +73,46 @@ const AgentsPage: React.FC = () => {
     try {
       // Generate a test conversation ID
       const conversationId = `test-${Date.now()}`;
-      
+
       const request: AgentInteractRequest = {
         message: testMessage.trim(),
         conversation_id: conversationId,
         context: {
           test: true,
-          source: 'agent_test_page'
-        }
+          source: 'agent_test_page',
+        },
       };
 
-      const response = await getSDK().agents.interactWithAgentApiV1AgentsAgentIdInteract(
-        selectedAgent.id,
-        request
-      );
-      
+      const response =
+        await getSDK().agents.interactWithAgentApiV1AgentsAgentIdInteract(
+          selectedAgent.id,
+          request
+        );
+
       setTestResponse(response.data);
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Failed to test agent';
+      const errorMessage =
+        error instanceof Error ? error.message : 'Failed to test agent';
       setTestError(errorMessage);
-      
+
       // Use standardized error handling
-      handleAsyncError(error, {
-        source: 'AgentsPage.handleSendTestMessage',
-        operation: 'Test agent interaction',
-        additionalData: {
-          agentId: selectedAgent.id,
-          agentName: selectedAgent.name,
-          messageLength: testMessage.length
+      handleAsyncError(
+        error,
+        {
+          source: 'AgentsPage.handleSendTestMessage',
+          operation: 'Test agent interaction',
+          additionalData: {
+            agentId: selectedAgent.id,
+            agentName: selectedAgent.name,
+            messageLength: testMessage.length,
+          },
+        },
+        {
+          showToast: false, // We're showing the error in the dialog
+          logToConsole: true,
+          fallbackMessage: 'Failed to test agent interaction',
         }
-      }, {
-        showToast: false, // We're showing the error in the dialog
-        logToConsole: true,
-        fallbackMessage: 'Failed to test agent interaction'
-      });
+      );
     } finally {
       setTesting(false);
     }
@@ -149,7 +166,11 @@ const AgentsPage: React.FC = () => {
   };
 
   // Define service methods
-  const service: CrudService<AgentResponse, AgentCreateRequest, AgentUpdateRequest> = {
+  const service: CrudService<
+    AgentResponse,
+    AgentCreateRequest,
+    AgentUpdateRequest
+  > = {
     list: async (page: number, pageSize: number) => {
       const response = await getSDK().agents.listAgentsApiV1Agents({
         pagination: {
@@ -197,12 +218,12 @@ const AgentsPage: React.FC = () => {
         getItemId={getItemId}
         FormComponent={AgentForm}
       />
-      
+
       {/* Test Agent Dialog */}
-      <Dialog 
-        open={testDialogOpen} 
-        onClose={() => setTestDialogOpen(false)} 
-        maxWidth="md" 
+      <Dialog
+        open={testDialogOpen}
+        onClose={() => setTestDialogOpen(false)}
+        maxWidth="md"
         fullWidth
       >
         <SectionErrorBoundary level="section" name="AgentTestDialog">
@@ -213,19 +234,21 @@ const AgentsPage: React.FC = () => {
                   Test Agent: {selectedAgent.name}
                 </Typography>
                 <Box sx={{ mt: 1 }}>
-                  <Chip 
-                    label={selectedAgent.type} 
-                    size="small" 
+                  <Chip
+                    label={selectedAgent.type}
+                    size="small"
                     sx={{ mr: 1 }}
                   />
-                  <Chip 
-                    label={selectedAgent.status} 
-                    size="small" 
-                    color={selectedAgent.status === 'active' ? 'success' : 'default'}
+                  <Chip
+                    label={selectedAgent.status}
+                    size="small"
+                    color={
+                      selectedAgent.status === 'active' ? 'success' : 'default'
+                    }
                   />
-                  <Chip 
-                    label={selectedAgent.primary_llm} 
-                    size="small" 
+                  <Chip
+                    label={selectedAgent.primary_llm}
+                    size="small"
                     color="info"
                     sx={{ ml: 1 }}
                   />
@@ -233,89 +256,100 @@ const AgentsPage: React.FC = () => {
               </Box>
             )}
           </DialogTitle>
-        <DialogContent>
-          {selectedAgent && (
-            <Box>
-              <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                {selectedAgent.description}
-              </Typography>
-              
-              <TextField
-                fullWidth
-                multiline
-                rows={3}
-                label="Test Message"
-                placeholder="Enter a message to test the agent..."
-                value={testMessage}
-                onChange={(e) => setTestMessage(e.target.value)}
-                sx={{ mb: 2 }}
-                disabled={testing}
-              />
-              
-              <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                <Button
-                  variant="contained"
-                  startIcon={testing ? <CircularProgress size={16} /> : <SendIcon />}
-                  onClick={handleSendTestMessage}
-                  disabled={!testMessage.trim() || testing}
+          <DialogContent>
+            {selectedAgent && (
+              <Box>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
                 >
-                  {testing ? 'Testing...' : 'Send Test Message'}
-                </Button>
-              </Box>
-              
-              {testError && (
-                <Alert severity="error" sx={{ mb: 2 }}>
-                  {testError}
-                </Alert>
-              )}
-              
-              {testResponse && (
-                <Box sx={{ mt: 2 }}>
-                  <Typography variant="subtitle2" sx={{ mb: 1, fontWeight: 'bold' }}>
-                    Agent Response:
-                  </Typography>
-                  <Box
-                    sx={{
-                      backgroundColor: 'grey.100',
-                      padding: 2,
-                      borderRadius: 1,
-                      mb: 2
-                    }}
+                  {selectedAgent.description}
+                </Typography>
+
+                <TextField
+                  fullWidth
+                  multiline
+                  rows={3}
+                  label="Test Message"
+                  placeholder="Enter a message to test the agent..."
+                  value={testMessage}
+                  onChange={(e) => setTestMessage(e.target.value)}
+                  sx={{ mb: 2 }}
+                  disabled={testing}
+                />
+
+                <Box
+                  sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}
+                >
+                  <Button
+                    variant="contained"
+                    startIcon={
+                      testing ? <CircularProgress size={16} /> : <SendIcon />
+                    }
+                    onClick={handleSendTestMessage}
+                    disabled={!testMessage.trim() || testing}
                   >
-                    <Typography variant="body2">
-                      {testResponse.response}
-                    </Typography>
-                  </Box>
-                  
-                  <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                    <Chip 
-                      label={`Confidence: ${(testResponse.confidence_score * 100).toFixed(1)}%`}
-                      size="small"
-                      color="info"
-                    />
-                    <Chip 
-                      label={`Response time: ${testResponse.response_time.toFixed(2)}s`}
-                      size="small"
-                      color="secondary"
-                    />
-                    {testResponse.tools_used.length > 0 && (
-                      <Chip 
-                        label={`Tools: ${testResponse.tools_used.join(', ')}`}
-                        size="small"
-                        color="primary"
-                      />
-                    )}
-                  </Box>
+                    {testing ? 'Testing...' : 'Send Test Message'}
+                  </Button>
                 </Box>
-              )}
-            </Box>
-          )}
-        </DialogContent>
-        <DialogActions>
-          <Button onClick={() => setTestDialogOpen(false)}>
-            Close
-          </Button>
-        </DialogActions>
+
+                {testError && (
+                  <Alert severity="error" sx={{ mb: 2 }}>
+                    {testError}
+                  </Alert>
+                )}
+
+                {testResponse && (
+                  <Box sx={{ mt: 2 }}>
+                    <Typography
+                      variant="subtitle2"
+                      sx={{ mb: 1, fontWeight: 'bold' }}
+                    >
+                      Agent Response:
+                    </Typography>
+                    <Box
+                      sx={{
+                        backgroundColor: 'grey.100',
+                        padding: 2,
+                        borderRadius: 1,
+                        mb: 2,
+                      }}
+                    >
+                      <Typography variant="body2">
+                        {testResponse.response}
+                      </Typography>
+                    </Box>
+
+                    <Box
+                      sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}
+                    >
+                      <Chip
+                        label={`Confidence: ${(testResponse.confidence_score * 100).toFixed(1)}%`}
+                        size="small"
+                        color="info"
+                      />
+                      <Chip
+                        label={`Response time: ${testResponse.response_time.toFixed(2)}s`}
+                        size="small"
+                        color="secondary"
+                      />
+                      {testResponse.tools_used.length > 0 && (
+                        <Chip
+                          label={`Tools: ${testResponse.tools_used.join(', ')}`}
+                          size="small"
+                          color="primary"
+                        />
+                      )}
+                    </Box>
+                  </Box>
+                )}
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={() => setTestDialogOpen(false)}>Close</Button>
+          </DialogActions>
         </SectionErrorBoundary>
       </Dialog>
     </PageLayout>

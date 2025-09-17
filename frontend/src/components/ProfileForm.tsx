@@ -34,7 +34,8 @@ interface ProvidersData {
   default_provider: string;
 }
 
-interface ProfileFormProps extends CrudFormProps<ProfileCreate, ProfileUpdate> {}
+interface ProfileFormProps
+  extends CrudFormProps<ProfileCreate, ProfileUpdate> {}
 
 const defaultProfileData = {
   name: '',
@@ -56,41 +57,39 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
   onSubmit,
 }) => {
   const [loadingProviders, setLoadingProviders] = useState(false);
-  const [providersData, setProvidersData] = useState<ProvidersData | null>(null);
+  const [providersData, setProvidersData] = useState<ProvidersData | null>(
+    null
+  );
   const [providersError, setProvidersError] = useState<string | null>(null);
 
-  const {
-    formData,
-    updateFormData,
-    isSubmitting,
-    handleSubmit,
-    handleClose,
-  } = useBaseForm(
-    {
-      defaultData: defaultProfileData,
-      transformInitialData: (data: ProfileResponse) => ({
-        name: data.name || '',
-        description: data.description || '',
-        llmModel: data.llm_model || '',
-        llmProvider: data.llm_provider || '',
-        temperature: data.temperature ?? 0.7,
-        max_tokens: data.max_tokens ?? 1000,
-        top_p: data.top_p ?? 1.0,
-        frequency_penalty: data.frequency_penalty ?? 0.0,
-        presence_penalty: data.presence_penalty ?? 0.0,
-      }),
-    },
-    open,
-    mode,
-    initialData
-  );
+  const { formData, updateFormData, isSubmitting, handleSubmit, handleClose } =
+    useBaseForm(
+      {
+        defaultData: defaultProfileData,
+        transformInitialData: (data: ProfileResponse) => ({
+          name: data.name || '',
+          description: data.description || '',
+          llmModel: data.llm_model || '',
+          llmProvider: data.llm_provider || '',
+          temperature: data.temperature ?? 0.7,
+          max_tokens: data.max_tokens ?? 1000,
+          top_p: data.top_p ?? 1.0,
+          frequency_penalty: data.frequency_penalty ?? 0.0,
+          presence_penalty: data.presence_penalty ?? 0.0,
+        }),
+      },
+      open,
+      mode,
+      initialData
+    );
 
   // Fetch providers data from API
   const fetchProviders = async () => {
     setLoadingProviders(true);
     setProvidersError(null);
     try {
-      const response = await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
+      const response =
+        await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
       setProvidersData(response as ProvidersData);
     } catch {
       // Failed to fetch providers - handled by setting error state
@@ -127,13 +126,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     return Object.keys(providersData.providers);
   };
 
-  const getAvailableModels = (): Array<{name: string, display_name: string}> => {
+  const getAvailableModels = (): Array<{
+    name: string;
+    display_name: string;
+  }> => {
     if (!providersData || !formData.llmProvider) return [];
     const provider = providersData.providers[formData.llmProvider];
     if (!provider) return [];
-    return provider.models.map(model => ({
+    return provider.models.map((model) => ({
       name: model.model_name,
-      display_name: model.display_name || model.name
+      display_name: model.display_name || model.name,
     }));
   };
 
@@ -152,7 +154,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
           {providersError}
         </Alert>
       )}
-      
+
       <Grid container spacing={3}>
         <Grid size={{ xs: 12, sm: 6 }}>
           <TextField
@@ -169,16 +171,16 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             <Select
               value={formData.llmProvider}
               label="Provider"
-              onChange={(e) => updateFormData({
-                llmProvider: e.target.value,
-                llmModel: '' // Reset model when provider changes
-              })}
+              onChange={(e) =>
+                updateFormData({
+                  llmProvider: e.target.value,
+                  llmModel: '', // Reset model when provider changes
+                })
+              }
               disabled={loadingProviders}
             >
               {loadingProviders ? (
-                <MenuItem disabled>
-                  Loading providers...
-                </MenuItem>
+                <MenuItem disabled>Loading providers...</MenuItem>
               ) : (
                 getAvailableProviders().map((provider) => {
                   const providerData = providersData?.providers[provider];
@@ -213,83 +215,97 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
             >
               {getAvailableModels().map((model) => (
                 <MenuItem key={model.name} value={model.name}>
-                      {model.display_name}
-                    </MenuItem>
-                  ))}
-                </Select>
-              </FormControl>
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <TextField
-                fullWidth
-                label="Max Tokens"
-                type="number"
-                value={formData.max_tokens}
-                onChange={(e) => updateFormData({ max_tokens: parseInt(e.target.value) || 0 })}
-                inputProps={{ min: 1, max: 32000 }}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography gutterBottom>Temperature: {formData.temperature}</Typography>
-              <Slider
-                value={formData.temperature}
-                onChange={(_, value) => updateFormData({ temperature: value as number })}
-                min={0}
-                max={2}
-                step={0.1}
-                marks={[
-                  { value: 0, label: '0 (Deterministic)' },
-                  { value: 1, label: '1 (Balanced)' },
-                  { value: 2, label: '2 (Creative)' },
-                ]}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography gutterBottom>Top P: {formData.top_p}</Typography>
-              <Slider
-                value={formData.top_p}
-                onChange={(_, value) => updateFormData({ top_p: value as number })}
-                min={0}
-                max={1}
-                step={0.1}
-                marks={[
-                  { value: 0, label: '0' },
-                  { value: 0.5, label: '0.5' },
-                  { value: 1, label: '1' },
-                ]}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography gutterBottom>Frequency Penalty: {formData.frequency_penalty}</Typography>
-              <Slider
-                value={formData.frequency_penalty}
-                onChange={(_, value) => updateFormData({ frequency_penalty: value as number })}
-                min={-2}
-                max={2}
-                step={0.1}
-                marks={[
-                  { value: -2, label: '-2' },
-                  { value: 0, label: '0' },
-                  { value: 2, label: '2' },
-                ]}
-              />
-            </Grid>
-            <Grid size={{ xs: 12, sm: 6 }}>
-              <Typography gutterBottom>Presence Penalty: {formData.presence_penalty}</Typography>
-              <Slider
-                value={formData.presence_penalty}
-                onChange={(_, value) => updateFormData({ presence_penalty: value as number })}
-                min={-2}
-                max={2}
-                step={0.1}
-                marks={[
-                  { value: -2, label: '-2' },
-                  { value: 0, label: '0' },
-                  { value: 2, label: '2' },
-                ]}
-              />
-            </Grid>
-          </Grid>
+                  {model.display_name}
+                </MenuItem>
+              ))}
+            </Select>
+          </FormControl>
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <TextField
+            fullWidth
+            label="Max Tokens"
+            type="number"
+            value={formData.max_tokens}
+            onChange={(e) =>
+              updateFormData({ max_tokens: parseInt(e.target.value) || 0 })
+            }
+            inputProps={{ min: 1, max: 32000 }}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Typography gutterBottom>
+            Temperature: {formData.temperature}
+          </Typography>
+          <Slider
+            value={formData.temperature}
+            onChange={(_, value) =>
+              updateFormData({ temperature: value as number })
+            }
+            min={0}
+            max={2}
+            step={0.1}
+            marks={[
+              { value: 0, label: '0 (Deterministic)' },
+              { value: 1, label: '1 (Balanced)' },
+              { value: 2, label: '2 (Creative)' },
+            ]}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Typography gutterBottom>Top P: {formData.top_p}</Typography>
+          <Slider
+            value={formData.top_p}
+            onChange={(_, value) => updateFormData({ top_p: value as number })}
+            min={0}
+            max={1}
+            step={0.1}
+            marks={[
+              { value: 0, label: '0' },
+              { value: 0.5, label: '0.5' },
+              { value: 1, label: '1' },
+            ]}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Typography gutterBottom>
+            Frequency Penalty: {formData.frequency_penalty}
+          </Typography>
+          <Slider
+            value={formData.frequency_penalty}
+            onChange={(_, value) =>
+              updateFormData({ frequency_penalty: value as number })
+            }
+            min={-2}
+            max={2}
+            step={0.1}
+            marks={[
+              { value: -2, label: '-2' },
+              { value: 0, label: '0' },
+              { value: 2, label: '2' },
+            ]}
+          />
+        </Grid>
+        <Grid size={{ xs: 12, sm: 6 }}>
+          <Typography gutterBottom>
+            Presence Penalty: {formData.presence_penalty}
+          </Typography>
+          <Slider
+            value={formData.presence_penalty}
+            onChange={(_, value) =>
+              updateFormData({ presence_penalty: value as number })
+            }
+            min={-2}
+            max={2}
+            step={0.1}
+            marks={[
+              { value: -2, label: '-2' },
+              { value: 0, label: '0' },
+              { value: 2, label: '2' },
+            ]}
+          />
+        </Grid>
+      </Grid>
     </FormDialog>
   );
 };

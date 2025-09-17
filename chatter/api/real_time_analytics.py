@@ -1,10 +1,9 @@
 """Enhanced real-time analytics API endpoints for Phase 4 features."""
 
-from fastapi import APIRouter, Depends, HTTPException, BackgroundTasks
+from fastapi import APIRouter, BackgroundTasks, Depends, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_admin_user, get_current_user
-from chatter.utils.database import get_session_generator
 from chatter.models.user import User
 from chatter.schemas.analytics import SystemAnalyticsResponse
 from chatter.services.intelligent_search import (
@@ -13,6 +12,7 @@ from chatter.services.intelligent_search import (
 from chatter.services.real_time_analytics import (
     get_real_time_analytics_service,
 )
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.unified_rate_limiter import (
     RateLimitExceeded,

@@ -6,13 +6,13 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from chatter.core.analytics import AnalyticsService
 from chatter.core.cache_factory import get_general_cache
 from chatter.models.base import generate_ulid
 from chatter.schemas.analytics import (
     IntegratedDashboardStats,
 )
 from chatter.schemas.events import Event, EventType
-from chatter.core.analytics import AnalyticsService
 from chatter.services.sse_events import sse_service
 from chatter.utils.logging import get_logger
 

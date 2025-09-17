@@ -41,7 +41,9 @@ class SimplifiedWorkflowAnalyticsService:
             analysis = self._perform_basic_analysis(nodes, edges)
 
             # Cache the result for future use
-            await self.cache.set(cache_key, analysis, ttl=3600)  # 1 hour TTL
+            await self.cache.set(
+                cache_key, analysis, ttl=3600
+            )  # 1 hour TTL
 
             return analysis
 
@@ -64,7 +66,9 @@ class SimplifiedWorkflowAnalyticsService:
             return f"workflow_analytics:{hashlib.md5(content.encode()).hexdigest()}"
         except Exception:
             # Fallback to simple hash
-            return f"workflow_analytics:fallback_{len(nodes)}_{len(edges)}"
+            return (
+                f"workflow_analytics:fallback_{len(nodes)}_{len(edges)}"
+            )
 
     def _perform_basic_analysis(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
@@ -72,10 +76,10 @@ class SimplifiedWorkflowAnalyticsService:
         """Perform basic workflow analysis."""
         # Basic complexity metrics
         complexity = self._calculate_basic_complexity(nodes, edges)
-        
+
         # Simple suggestions
         suggestions = self._get_basic_suggestions(nodes, edges)
-        
+
         # Basic bottleneck detection
         bottlenecks = self._detect_basic_bottlenecks(nodes, edges)
 
@@ -93,7 +97,7 @@ class SimplifiedWorkflowAnalyticsService:
         """Calculate basic complexity metrics."""
         node_count = len(nodes)
         edge_count = len(edges)
-        
+
         # Count different node types
         node_types = {}
         for node in nodes:
@@ -115,7 +119,9 @@ class SimplifiedWorkflowAnalyticsService:
             "node_types": node_types,
             "complexity_score": complexity_score,
             "complexity_level": complexity_level,
-            "cyclomatic_complexity": edge_count - node_count + 2,  # Basic formula
+            "cyclomatic_complexity": edge_count
+            - node_count
+            + 2,  # Basic formula
         }
 
     def _get_basic_suggestions(
@@ -126,37 +132,49 @@ class SimplifiedWorkflowAnalyticsService:
 
         # Too many nodes
         if len(nodes) > 20:
-            suggestions.append({
-                "type": "complexity",
-                "severity": "medium",
-                "message": "Consider breaking down large workflows into smaller components",
-                "category": "structure"
-            })
+            suggestions.append(
+                {
+                    "type": "complexity",
+                    "severity": "medium",
+                    "message": "Consider breaking down large workflows into smaller components",
+                    "category": "structure",
+                }
+            )
 
         # No start node
-        start_nodes = [n for n in nodes if n.get("data", {}).get("nodeType") == "start"]
+        start_nodes = [
+            n
+            for n in nodes
+            if n.get("data", {}).get("nodeType") == "start"
+        ]
         if not start_nodes:
-            suggestions.append({
-                "type": "validation",
-                "severity": "high", 
-                "message": "Workflow should have at least one start node",
-                "category": "structure"
-            })
+            suggestions.append(
+                {
+                    "type": "validation",
+                    "severity": "high",
+                    "message": "Workflow should have at least one start node",
+                    "category": "structure",
+                }
+            )
 
         # Disconnected nodes
         connected_nodes = set()
         for edge in edges:
             connected_nodes.add(edge.get("source"))
             connected_nodes.add(edge.get("target"))
-        
-        disconnected = [n for n in nodes if n.get("id") not in connected_nodes]
+
+        disconnected = [
+            n for n in nodes if n.get("id") not in connected_nodes
+        ]
         if disconnected and len(disconnected) > 1:
-            suggestions.append({
-                "type": "optimization",
-                "severity": "low",
-                "message": f"Found {len(disconnected)} disconnected nodes",
-                "category": "structure"
-            })
+            suggestions.append(
+                {
+                    "type": "optimization",
+                    "severity": "low",
+                    "message": f"Found {len(disconnected)} disconnected nodes",
+                    "category": "structure",
+                }
+            )
 
         return suggestions
 
@@ -171,17 +189,21 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             target = edge.get("target")
             if target:
-                incoming_counts[target] = incoming_counts.get(target, 0) + 1
+                incoming_counts[target] = (
+                    incoming_counts.get(target, 0) + 1
+                )
 
         for node_id, count in incoming_counts.items():
             if count > 3:  # More than 3 incoming connections
-                bottlenecks.append({
-                    "node_id": node_id,
-                    "type": "convergence",
-                    "severity": "medium",
-                    "description": f"Node has {count} incoming connections",
-                    "suggestion": "Consider simplifying node connections"
-                })
+                bottlenecks.append(
+                    {
+                        "node_id": node_id,
+                        "type": "convergence",
+                        "severity": "medium",
+                        "description": f"Node has {count} incoming connections",
+                        "suggestion": "Consider simplifying node connections",
+                    }
+                )
 
         return bottlenecks
 
@@ -206,4 +228,5 @@ class SimplifiedWorkflowAnalyticsService:
 # For backwards compatibility with existing code
 class WorkflowAnalyticsService(SimplifiedWorkflowAnalyticsService):
     """Alias for backwards compatibility."""
+
     pass

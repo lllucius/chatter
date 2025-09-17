@@ -31,12 +31,15 @@ const LoginPage: React.FC = () => {
         await authService.login(values.username, values.password);
         navigate('/dashboard');
       } catch (err: unknown) {
-        const errorMessage = err instanceof Error ? err.message : 'Login failed';
-        
+        const errorMessage =
+          err instanceof Error ? err.message : 'Login failed';
+
         // Check if error is related to username (user not found, invalid username format, etc.)
-        if (errorMessage.toLowerCase().includes('user') || 
-            errorMessage.toLowerCase().includes('username') ||
-            errorMessage.toLowerCase().includes('not found')) {
+        if (
+          errorMessage.toLowerCase().includes('user') ||
+          errorMessage.toLowerCase().includes('username') ||
+          errorMessage.toLowerCase().includes('not found')
+        ) {
           form.setFieldError('username', errorMessage);
         } else {
           form.setFieldError('password', errorMessage);
@@ -46,15 +49,15 @@ const LoginPage: React.FC = () => {
     },
     validate: (values) => {
       const errors: Partial<Record<keyof LoginFormValues, string>> = {};
-      
+
       if (!values.username.trim()) {
         errors.username = 'Username is required';
       }
-      
+
       if (!values.password.trim()) {
         errors.password = 'Password is required';
       }
-      
+
       return errors;
     },
   });
@@ -77,15 +80,29 @@ const LoginPage: React.FC = () => {
         }}
       >
         <Paper elevation={3} sx={{ padding: 4, width: '100%' }}>
-          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-            <Typography component="h1" variant="h4" sx={{ mb: 3, fontWeight: 'bold', color: 'primary.main' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              flexDirection: 'column',
+              alignItems: 'center',
+            }}
+          >
+            <Typography
+              component="h1"
+              variant="h4"
+              sx={{ mb: 3, fontWeight: 'bold', color: 'primary.main' }}
+            >
               Chatter
             </Typography>
             <Typography component="h2" variant="h5" sx={{ mb: 3 }}>
               Sign In
             </Typography>
-            
-            <Box component="form" onSubmit={form.handleSubmit} sx={{ width: '100%' }}>
+
+            <Box
+              component="form"
+              onSubmit={form.handleSubmit}
+              sx={{ width: '100%' }}
+            >
               <TextField
                 margin="normal"
                 required

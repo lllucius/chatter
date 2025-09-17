@@ -1,14 +1,14 @@
 """Test for embedding response format handling fix."""
 
-import pytest
-from unittest.mock import Mock, AsyncMock
-import os
+from unittest.mock import AsyncMock, Mock
 
-from chatter.services.embeddings import (
-    SafeOpenAIEmbeddings,
-    EmbeddingService,
-)
+import pytest
+
 from chatter.models.registry import ProviderType
+from chatter.services.embeddings import (
+    EmbeddingService,
+    SafeOpenAIEmbeddings,
+)
 
 
 class TestEmbeddingResponseFormatFix:

@@ -29,7 +29,13 @@ export interface BaseDialogProps {
   cancelText?: string;
   disableSubmit?: boolean;
   hideActions?: boolean;
-  submitButtonColor?: 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+  submitButtonColor?:
+    | 'primary'
+    | 'secondary'
+    | 'error'
+    | 'info'
+    | 'success'
+    | 'warning';
   submitButtonVariant?: 'text' | 'outlined' | 'contained';
 }
 
@@ -74,14 +80,10 @@ export const BaseDialog: React.FC<BaseDialogProps> = ({
       fullScreen={fullScreen}
       aria-labelledby="dialog-title"
     >
-      <DialogTitle id="dialog-title">
-        {title}
-      </DialogTitle>
-      
+      <DialogTitle id="dialog-title">{title}</DialogTitle>
+
       <DialogContent dividers>
-        <Box sx={{ py: 1 }}>
-          {children}
-        </Box>
+        <Box sx={{ py: 1 }}>{children}</Box>
       </DialogContent>
 
       {!hideActions && (
@@ -93,7 +95,7 @@ export const BaseDialog: React.FC<BaseDialogProps> = ({
           >
             {cancelText}
           </Button>
-          
+
           {onSubmit && (
             <Button
               onClick={handleSubmit}
@@ -131,7 +133,8 @@ export const FormDialog: React.FC<FormDialogProps> = ({
   submitText,
   ...props
 }) => {
-  const defaultTitle = mode === 'edit' ? `Edit ${entityName}` : `Add ${entityName}`;
+  const defaultTitle =
+    mode === 'edit' ? `Edit ${entityName}` : `Add ${entityName}`;
   const defaultSubmitText = mode === 'edit' ? 'Update' : 'Create';
 
   return (

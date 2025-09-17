@@ -1,6 +1,6 @@
 /**
  * SSE Monitor Demo
- * 
+ *
  * This file demonstrates how the SSE Monitor component would work with real SSE events.
  * It shows the expected behavior and data flow when the backend is available.
  */
@@ -14,15 +14,15 @@ const sampleSSEEvents = [
       message_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7V',
       content: 'Hello, how can I help you today?',
       chunk_index: 0,
-      is_final: false
+      is_final: false,
     },
     timestamp: '2024-01-15T10:30:45.123Z',
     user_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7W',
     metadata: {
       priority: 'normal',
       category: 'streaming',
-      correlation_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7X'
-    }
+      correlation_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7X',
+    },
   },
   {
     id: '01JQKY0D8Z6M1N2P3Q4R5S6T7Y',
@@ -30,15 +30,15 @@ const sampleSSEEvents = [
     data: {
       workflow_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7Z',
       workflow_name: 'Document Processing Pipeline',
-      started_at: '2024-01-15T10:30:50.456Z'
+      started_at: '2024-01-15T10:30:50.456Z',
     },
     timestamp: '2024-01-15T10:30:50.456Z',
     user_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7W',
     metadata: {
       priority: 'high',
       category: 'workflow',
-      source_system: 'workflow-engine'
-    }
+      source_system: 'workflow-engine',
+    },
   },
   {
     id: '01JQKY0D8Z6M1N2P3Q4R5S6T80',
@@ -49,15 +49,15 @@ const sampleSSEEvents = [
       details: {
         memory_usage: '85%',
         threshold: '80%',
-        recommendation: 'Consider scaling up resources'
-      }
+        recommendation: 'Consider scaling up resources',
+      },
     },
     timestamp: '2024-01-15T10:31:15.789Z',
     metadata: {
       priority: 'critical',
       category: 'monitoring',
-      source_system: 'monitoring-service'
-    }
+      source_system: 'monitoring-service',
+    },
   },
   {
     id: '01JQKY0D8Z6M1N2P3Q4R5S6T81',
@@ -67,23 +67,23 @@ const sampleSSEEvents = [
       result: {
         chunks_created: 15,
         text_length: 5420,
-        processing_time: 2.34
+        processing_time: 2.34,
       },
-      completed_at: '2024-01-15T10:31:30.012Z'
+      completed_at: '2024-01-15T10:31:30.012Z',
     },
     timestamp: '2024-01-15T10:31:30.012Z',
     user_id: '01JQKY0D8Z6M1N2P3Q4R5S6T7W',
     metadata: {
       priority: 'normal',
       category: 'realtime',
-      source_system: 'document-processor'
-    }
-  }
+      source_system: 'document-processor',
+    },
+  },
 ];
 
 /**
  * How the SSE Monitor would work:
- * 
+ *
  * 1. User navigates to /sse-monitor
  * 2. Component renders with all controls
  * 3. User clicks "Start Monitoring"
@@ -97,7 +97,7 @@ const sampleSSEEvents = [
  * 7. User can filter by event type
  * 8. Console logging captures events for debugging
  * 9. Export functionality saves filtered events to JSON
- * 
+ *
  * Event Processing Flow:
  * - SSE stream -> SSEEventManager -> Event Listener -> Monitor Display
  * - Each event shows with appropriate color coding
@@ -107,13 +107,13 @@ const sampleSSEEvents = [
 
 /**
  * Console output when logging is enabled:
- * 
+ *
  * 🔴 SSE Event: chat.message_chunk
  *   📅 Timestamp: 10:30:45.123
  *   📋 Event: {id: "01JQKY...", type: "chat.message_chunk", ...}
  *   🔗 Event ID: 01JQKY0D8Z6M1N2P3Q4R5S6T7U
  *   👤 User ID: 01JQKY0D8Z6M1N2P3Q4R5S6T7W
- * 
+ *
  * 🔴 SSE Event: workflow.started
  *   📅 Timestamp: 10:30:50.456
  *   📋 Event: {id: "01JQKY...", type: "workflow.started", ...}

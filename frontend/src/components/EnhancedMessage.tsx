@@ -123,7 +123,10 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
   }, [message.content]);
 
   const handleDelete = () => {
-    if (onDelete && window.confirm('Are you sure you want to delete this message?')) {
+    if (
+      onDelete &&
+      window.confirm('Are you sure you want to delete this message?')
+    ) {
       onDelete(message.id);
     }
     handleMenuClose();
@@ -133,7 +136,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
     const ratingValue = newRating || 0;
     setRatingLoading(true);
     setRating(ratingValue);
-    
+
     try {
       if (onRate) {
         await onRate(message.id, ratingValue);
@@ -187,17 +190,21 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
       <Card
         sx={{
           mb: 1,
-          bgcolor: message.role === 'user' 
-            ? 'primary.50' 
-            : message.role === 'assistant' 
-              ? (theme) => theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'
-              : 'background.paper',
+          bgcolor:
+            message.role === 'user'
+              ? 'primary.50'
+              : message.role === 'assistant'
+                ? (theme) =>
+                    theme.palette.mode === 'dark' ? 'grey.800' : 'grey.100'
+                : 'background.paper',
           border: '1px solid',
-          borderColor: message.role === 'user' 
-            ? 'primary.200' 
-            : message.role === 'assistant' 
-              ? (theme) => theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300'
-              : 'grey.200',
+          borderColor:
+            message.role === 'user'
+              ? 'primary.200'
+              : message.role === 'assistant'
+                ? (theme) =>
+                    theme.palette.mode === 'dark' ? 'grey.600' : 'grey.300'
+                : 'grey.200',
         }}
       >
         <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
@@ -205,9 +212,16 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
             <Avatar sx={{ bgcolor: getAvatarColor(), width: 36, height: 36 }}>
               {getAvatarIcon()}
             </Avatar>
-            
+
             <Box sx={{ flex: 1, minWidth: 0 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', mb: 0.5 }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  alignItems: 'center',
+                  justifyContent: 'space-between',
+                  mb: 0.5,
+                }}
+              >
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="subtitle2" fontWeight="bold">
                     {getRoleLabel()}
@@ -216,10 +230,14 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                     <Chip label="Edited" size="small" variant="outlined" />
                   )}
                   {message.metadata?.model && (
-                    <Chip label={message.metadata.model} size="small" variant="outlined" />
+                    <Chip
+                      label={message.metadata.model}
+                      size="small"
+                      variant="outlined"
+                    />
                   )}
                 </Box>
-                
+
                 <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                   <Typography variant="caption" color="text.secondary">
                     {formatTimestamp(message.timestamp, 'HH:mm')}
@@ -229,13 +247,22 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                   </IconButton>
                 </Box>
               </Box>
-              
-              <Typography variant="body1" sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}>
+
+              <Typography
+                variant="body1"
+                sx={{ whiteSpace: 'pre-wrap', mb: 0.5 }}
+              >
                 {message.content}
               </Typography>
-              
+
               {message.role === 'assistant' && onRate && (
-                <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    alignItems: 'center',
+                    justifyContent: 'space-between',
+                  }}
+                >
                   <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
                     <Typography variant="caption" color="text.secondary">
                       Rate this response:
@@ -246,24 +273,26 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                       size="small"
                       disabled={ratingLoading}
                     />
-                    {ratingLoading && (
-                      <CircularProgress size={16} />
-                    )}
+                    {ratingLoading && <CircularProgress size={16} />}
                   </Box>
-                  {message.metadata && (message.metadata.tokens || message.metadata.processingTime) && (
-                    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                      {message.metadata.tokens && (
-                        <Typography variant="caption" color="text.secondary">
-                          {message.metadata.tokens} tokens
-                        </Typography>
-                      )}
-                      {message.metadata.processingTime && (
-                        <Typography variant="caption" color="text.secondary">
-                          {message.metadata.processingTime}ms
-                        </Typography>
-                      )}
-                    </Box>
-                  )}
+                  {message.metadata &&
+                    (message.metadata.tokens ||
+                      message.metadata.processingTime) && (
+                      <Box
+                        sx={{ display: 'flex', alignItems: 'center', gap: 1 }}
+                      >
+                        {message.metadata.tokens && (
+                          <Typography variant="caption" color="text.secondary">
+                            {message.metadata.tokens} tokens
+                          </Typography>
+                        )}
+                        {message.metadata.processingTime && (
+                          <Typography variant="caption" color="text.secondary">
+                            {message.metadata.processingTime}ms
+                          </Typography>
+                        )}
+                      </Box>
+                    )}
                 </Box>
               )}
             </Box>
@@ -283,7 +312,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
           </ListItemIcon>
           Copy
         </MenuItem>
-        
+
         {canEdit && message.role === 'user' && (
           <MenuItem onClick={handleEditClick}>
             <ListItemIcon>
@@ -292,7 +321,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
             Edit
           </MenuItem>
         )}
-        
+
         {canRegenerate && message.role === 'assistant' && (
           <MenuItem onClick={handleRegenerate}>
             <ListItemIcon>
@@ -301,7 +330,7 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
             Regenerate
           </MenuItem>
         )}
-        
+
         {canDelete && (
           <MenuItem onClick={handleDelete}>
             <ListItemIcon>
@@ -313,7 +342,12 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
       </Menu>
 
       {/* Edit Dialog */}
-      <Dialog open={editDialogOpen} onClose={handleEditCancel} maxWidth="md" fullWidth>
+      <Dialog
+        open={editDialogOpen}
+        onClose={handleEditCancel}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Edit Message</DialogTitle>
         <DialogContent>
           <TextField
@@ -331,7 +365,9 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
           <Button
             onClick={handleEditSave}
             variant="contained"
-            disabled={!editContent.trim() || editContent.trim() === message.content}
+            disabled={
+              !editContent.trim() || editContent.trim() === message.content
+            }
           >
             Save
           </Button>

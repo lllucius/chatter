@@ -1,9 +1,10 @@
 """Test transaction rollback fixes for seeding."""
 
+from unittest.mock import AsyncMock
+
 import pytest
-from unittest.mock import AsyncMock, Mock
-from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.exc import ProgrammingError, SQLAlchemyError
+from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.utils.seeding import DatabaseSeeder, SeedingMode
 

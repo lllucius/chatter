@@ -5,9 +5,9 @@ import CustomScrollbar from '../CustomScrollbar';
 
 const theme = createTheme();
 
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }): void => (
-  <ThemeProvider theme={theme}>{children}</ThemeProvider>
-);
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({
+  children,
+}): void => <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 
 describe('CustomScrollbar', () => {
   it('renders without crashing', () => {
@@ -18,7 +18,7 @@ describe('CustomScrollbar', () => {
         </CustomScrollbar>
       </TestWrapper>
     );
-    
+
     expect(container.firstChild).toBeInTheDocument();
   });
 
@@ -31,7 +31,7 @@ describe('CustomScrollbar', () => {
         </CustomScrollbar>
       </TestWrapper>
     );
-    
+
     expect(getByText(testContent)).toBeInTheDocument();
   });
 
@@ -44,9 +44,11 @@ describe('CustomScrollbar', () => {
         </CustomScrollbar>
       </TestWrapper>
     );
-    
+
     // SimpleBar creates its own wrapper, so we need to check the correct element
-    const scrollbarContainer = container.querySelector('[data-simplebar]') as HTMLElement;
+    const scrollbarContainer = container.querySelector(
+      '[data-simplebar]'
+    ) as HTMLElement;
     expect(scrollbarContainer).toBeInTheDocument();
   });
 
@@ -59,7 +61,7 @@ describe('CustomScrollbar', () => {
         </CustomScrollbar>
       </TestWrapper>
     );
-    
+
     const scrollbarContainer = container.firstChild as HTMLElement;
     expect(scrollbarContainer).toHaveClass(customClass);
   });

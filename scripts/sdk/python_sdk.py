@@ -102,13 +102,13 @@ class PythonSDKGenerator:
                 return False
 
             print("✅ Python SDK generation completed")
-            
+
             # Post-process generated models to fix datetime serialization
             if self._fix_datetime_serialization():
                 print("✅ Applied datetime serialization fix")
             else:
                 print("⚠️  Failed to apply datetime serialization fix")
-            
+
             return True
 
         except Exception as e:
@@ -211,77 +211,89 @@ class PythonSDKGenerator:
 
     def _fix_datetime_serialization(self) -> bool:
         """Fix datetime serialization in generated models.
-        
+
         This method automatically adds mode='json' to model_dump() calls
         in models that have datetime fields to ensure proper JSON serialization.
-        
+
         Returns:
             True if fix was applied successfully, False otherwise
         """
         try:
-            models_dir = self.config.output_dir / self.config.package_name / "models"
+            models_dir = (
+                self.config.output_dir
+                / self.config.package_name
+                / "models"
+            )
             if not models_dir.exists():
                 print("❌ Models directory not found for datetime fix")
                 return False
-            
+
             fixed_files = 0
             total_files = 0
-            
+
             # Process all model files
             for model_file in models_dir.glob("*.py"):
                 if model_file.name == "__init__.py":
                     continue
-                    
+
                 total_files += 1
                 if self._fix_datetime_in_file(model_file):
                     fixed_files += 1
-            
-            print(f"📝 Processed {total_files} model files, applied datetime fix to {fixed_files} files")
+
+            print(
+                f"📝 Processed {total_files} model files, applied datetime fix to {fixed_files} files"
+            )
             return True
-            
+
         except Exception as e:
             print(f"❌ Failed to fix datetime serialization: {e}")
             return False
-    
+
     def _fix_datetime_in_file(self, file_path: Path) -> bool:
         """Fix datetime serialization in a specific model file.
-        
+
         Args:
             file_path: Path to the model file to fix
-            
+
         Returns:
             True if the file was modified, False otherwise
         """
         try:
-            with open(file_path, 'r') as f:
+            with open(file_path) as f:
                 content = f.read()
-            
+
             original_content = content
-            
+
             # Check if this file has datetime fields and to_dict methods
-            has_datetime = 'datetime' in content and 'from datetime import datetime' in content
+            has_datetime = (
+                'datetime' in content
+                and 'from datetime import datetime' in content
+            )
             has_to_dict = 'def to_dict(self)' in content
             has_model_dump = 'self.model_dump(' in content
-            
+
             if not (has_datetime and has_to_dict and has_model_dump):
                 return False
-            
+
             # Fix model_dump calls that don't have mode='json'
-            
+
             # Pattern to match model_dump calls without mode='json'
             pattern = r'(\s+_dict = self\.model_dump\(\s*)(.*?)(exclude_none=True,?)(\s*\))'
-            
+
             def replacement(match):
                 full_call = match.group(0)
                 start = match.group(1)
                 middle = match.group(2)
                 exclude_none = match.group(3)
                 end = match.group(4)
-                
+
                 # Check if mode='json' is already present
-                if "mode='json'" in full_call or 'mode="json"' in full_call:
+                if (
+                    "mode='json'" in full_call
+                    or 'mode="json"' in full_call
+                ):
                     return full_call  # No change needed
-                
+
                 # Extract the base indentation from the start
                 base_indent = ''
                 for char in start:
@@ -289,27 +301,31 @@ class PythonSDKGenerator:
                         base_indent += char
                     else:
                         break
-                
+
                 # Add mode='json' parameter with proper indentation
                 if exclude_none.strip():
                     # Add mode='json' on a new line with proper indentation
                     mode_line = f"\n{base_indent}    mode='json',"
-                    new_call = start + middle + exclude_none + mode_line + end
+                    new_call = (
+                        start + middle + exclude_none + mode_line + end
+                    )
                 else:
                     new_call = start + middle + "mode='json'," + end
-                
+
                 return new_call
-            
-            content = re.sub(pattern, replacement, content, flags=re.DOTALL)
-            
+
+            content = re.sub(
+                pattern, replacement, content, flags=re.DOTALL
+            )
+
             # Only write if content changed
             if content != original_content:
                 with open(file_path, 'w') as f:
                     f.write(content)
                 return True
-                
+
             return False
-            
+
         except Exception as e:
             print(f"❌ Failed to fix datetime in {file_path}: {e}")
             return False

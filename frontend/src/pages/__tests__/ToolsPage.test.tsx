@@ -11,12 +11,12 @@ vi.mock('../../services/auth-service', (): void => ({
   getSDK: vi.fn((): void => ({
     toolServers: {
       listToolServersApiV1ToolserversServers: vi.fn().mockResolvedValue([]),
-      listAllToolsApiV1ToolserversToolsAll: vi.fn().mockResolvedValue([])
-    }
+      listAllToolsApiV1ToolserversToolsAll: vi.fn().mockResolvedValue([]),
+    },
   })),
   authService: {
-    isAuthenticated: vi.fn(() => true)
-  }
+    isAuthenticated: vi.fn(() => true),
+  },
 }));
 
 // Mock the toast service
@@ -24,7 +24,7 @@ vi.mock('../../services/toast-service', (): void => ({
   toastService: {
     error: vi.fn(),
     success: vi.fn(),
-  }
+  },
 }));
 
 const theme = createTheme();
@@ -42,50 +42,52 @@ const renderToolsPage = () => {
 describe('ToolsPage', () => {
   test('renders Tool Server Management page title', async () => {
     renderToolsPage();
-    
-    expect(await screen.findByText('Tool Server Management')).toBeInTheDocument();
+
+    expect(
+      await screen.findByText('Tool Server Management')
+    ).toBeInTheDocument();
   });
 
   test('renders toolbar with Refresh button', async () => {
     renderToolsPage();
-    
+
     expect(await screen.findByText('Refresh')).toBeInTheDocument();
   });
 
   test('renders Add Remote Server button on Remote Servers tab', async () => {
     renderToolsPage();
-    
+
     expect(await screen.findByText('Add Remote Server')).toBeInTheDocument();
   });
 
   test('renders Add Tool button on Available Tools tab', async () => {
     renderToolsPage();
-    
+
     // Click on Available Tools tab
     const toolsTab = await screen.findByText('Available Tools');
     fireEvent.click(toolsTab);
-    
+
     // Check that Add Tool button appears
     expect(await screen.findByText('Add Tool')).toBeInTheDocument();
-    
+
     // Check that Add Remote Server button is not visible
     expect(screen.queryByText('Add Remote Server')).not.toBeInTheDocument();
   });
 
   test('shows correct button on tab switch back to Remote Servers', async () => {
     renderToolsPage();
-    
+
     // Click on Available Tools tab first
     const toolsTab = await screen.findByText('Available Tools');
     fireEvent.click(toolsTab);
-    
+
     // Then click back on Remote Servers tab
     const serversTab = await screen.findByText('Remote Servers');
     fireEvent.click(serversTab);
-    
+
     // Check that Add Remote Server button appears again
     expect(await screen.findByText('Add Remote Server')).toBeInTheDocument();
-    
+
     // Check that Add Tool button is not visible
     expect(screen.queryByText('Add Tool')).not.toBeInTheDocument();
   });

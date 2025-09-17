@@ -199,7 +199,7 @@ class MessageService:
 
                 # Update conversation's updated_at timestamp
                 conversation.updated_at = message.created_at
-                
+
                 # Ensure the message and conversation changes are committed to the database
                 await self.session.commit()
 
@@ -724,7 +724,9 @@ class MessageService:
                 message = result.scalar_one_or_none()
 
                 if not message:
-                    raise NotFoundError(f"Message {message_id} not found")
+                    raise NotFoundError(
+                        f"Message {message_id} not found"
+                    )
 
                 # Update the content
                 message.content = content

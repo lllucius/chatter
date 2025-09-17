@@ -17,13 +17,11 @@ import {
   Checkbox,
   Alert,
 } from '@mui/material';
-import {
-  Download as DownloadIcon,
-} from '@mui/icons-material';
+import { Download as DownloadIcon } from '@mui/icons-material';
 import { format, isValid } from 'date-fns';
 import { ChatMessage } from './EnhancedMessage';
 
-// Helper function to safely format timestamps  
+// Helper function to safely format timestamps
 const formatTimestamp = (timestamp: Date, formatString: string): string => {
   if (!timestamp || !isValid(timestamp)) {
     return 'Invalid Date';
@@ -64,13 +62,15 @@ const ChatExport: React.FC<ChatExportProps> = ({
       title: conversationTitle,
       exportedAt: new Date().toISOString(),
       messageCount: filteredMessages.length,
-      messages: filteredMessages.map(msg => ({
+      messages: filteredMessages.map((msg) => ({
         id: msg.id,
         role: msg.role,
         content: msg.content,
         timestamp: msg.timestamp.toISOString(),
         ...(includeMetadata && msg.metadata ? { metadata: msg.metadata } : {}),
-        ...(msg.edited ? { edited: true, editedAt: msg.editedAt?.toISOString() } : {}),
+        ...(msg.edited
+          ? { edited: true, editedAt: msg.editedAt?.toISOString() }
+          : {}),
         ...(msg.rating ? { rating: msg.rating } : {}),
       })),
     };
@@ -79,7 +79,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
 
   const formatAsMarkdown = () => {
     let content = `# ${conversationTitle}\n\n`;
-    
+
     if (includeMetadata) {
       content += `**Exported:** ${format(new Date(), 'PPpp')}\n`;
       content += `**Messages:** ${filteredMessages.length}\n\n`;
@@ -87,34 +87,42 @@ const ChatExport: React.FC<ChatExportProps> = ({
     }
 
     filteredMessages.forEach((msg) => {
-      const roleEmoji = msg.role === 'user' ? '👤' : msg.role === 'assistant' ? '🤖' : '⚙️';
-      const roleName = msg.role === 'user' ? 'User' : msg.role === 'assistant' ? 'Assistant' : 'System';
-      
+      const roleEmoji =
+        msg.role === 'user' ? '👤' : msg.role === 'assistant' ? '🤖' : '⚙️';
+      const roleName =
+        msg.role === 'user'
+          ? 'User'
+          : msg.role === 'assistant'
+            ? 'Assistant'
+            : 'System';
+
       content += `## ${roleEmoji} ${roleName}`;
-      
+
       if (includeTimestamps) {
         content += ` (${formatTimestamp(msg.timestamp, 'PPpp')})`;
       }
-      
+
       if (msg.edited) {
         content += ' ✏️ *Edited*';
       }
-      
+
       content += '\n\n';
       content += msg.content + '\n\n';
-      
+
       if (includeMetadata && msg.metadata) {
         content += '**Metadata:**\n';
         if (msg.metadata.model) content += `- Model: ${msg.metadata.model}\n`;
-        if (msg.metadata.tokens) content += `- Tokens: ${msg.metadata.tokens}\n`;
-        if (msg.metadata.processingTime) content += `- Processing Time: ${msg.metadata.processingTime}ms\n`;
+        if (msg.metadata.tokens)
+          content += `- Tokens: ${msg.metadata.tokens}\n`;
+        if (msg.metadata.processingTime)
+          content += `- Processing Time: ${msg.metadata.processingTime}ms\n`;
         content += '\n';
       }
-      
+
       if (msg.rating) {
         content += `**Rating:** ${'⭐'.repeat(msg.rating)} (${msg.rating}/5)\n\n`;
       }
-      
+
       content += '---\n\n';
     });
 
@@ -123,7 +131,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
 
   const formatAsText = () => {
     let content = `${conversationTitle}\n${'='.repeat(conversationTitle.length)}\n\n`;
-    
+
     if (includeMetadata) {
       content += `Exported: ${format(new Date(), 'PPpp')}\n`;
       content += `Messages: ${filteredMessages.length}\n\n`;
@@ -132,29 +140,31 @@ const ChatExport: React.FC<ChatExportProps> = ({
     filteredMessages.forEach((msg, index) => {
       const roleName = msg.role.toUpperCase();
       content += `[${index + 1}] ${roleName}`;
-      
+
       if (includeTimestamps) {
         content += ` (${formatTimestamp(msg.timestamp, 'PPpp')})`;
       }
-      
+
       if (msg.edited) {
         content += ' [EDITED]';
       }
-      
+
       content += ':\n';
       content += msg.content + '\n';
-      
+
       if (includeMetadata && msg.metadata) {
         content += '\nMetadata:\n';
         if (msg.metadata.model) content += `  Model: ${msg.metadata.model}\n`;
-        if (msg.metadata.tokens) content += `  Tokens: ${msg.metadata.tokens}\n`;
-        if (msg.metadata.processingTime) content += `  Processing Time: ${msg.metadata.processingTime}ms\n`;
+        if (msg.metadata.tokens)
+          content += `  Tokens: ${msg.metadata.tokens}\n`;
+        if (msg.metadata.processingTime)
+          content += `  Processing Time: ${msg.metadata.processingTime}ms\n`;
       }
-      
+
       if (msg.rating) {
         content += `Rating: ${msg.rating}/5\n`;
       }
-      
+
       content += '\n' + '-'.repeat(50) + '\n\n';
     });
 
@@ -185,10 +195,14 @@ const ChatExport: React.FC<ChatExportProps> = ({
       <body>
         <div class="header">
           <h1>${conversationTitle}</h1>
-          ${includeMetadata ? `
+          ${
+            includeMetadata
+              ? `
             <p>Exported: ${format(new Date(), 'PPpp')}</p>
             <p>Messages: ${filteredMessages.length}</p>
-          ` : ''}
+          `
+              : ''
+          }
         </div>
     `;
 
@@ -201,13 +215,17 @@ const ChatExport: React.FC<ChatExportProps> = ({
             ${msg.edited ? ' <span style="color: orange;">✏️ Edited</span>' : ''}
           </div>
           <div class="content">${msg.content.replace(/\n/g, '<br>')}</div>
-          ${includeMetadata && msg.metadata ? `
+          ${
+            includeMetadata && msg.metadata
+              ? `
             <div class="metadata">
               ${msg.metadata.model ? `Model: ${msg.metadata.model} | ` : ''}
               ${msg.metadata.tokens ? `Tokens: ${msg.metadata.tokens} | ` : ''}
               ${msg.metadata.processingTime ? `Processing: ${msg.metadata.processingTime}ms` : ''}
             </div>
-          ` : ''}
+          `
+              : ''
+          }
           ${msg.rating ? `<div class="metadata">Rating: ${'⭐'.repeat(msg.rating)} (${msg.rating}/5)</div>` : ''}
         </div>
       `;
@@ -217,14 +235,14 @@ const ChatExport: React.FC<ChatExportProps> = ({
     return html;
   };
 
-  const filteredMessages = messages.filter(msg => 
-    includeSystemMessages || msg.role !== 'system'
+  const filteredMessages = messages.filter(
+    (msg) => includeSystemMessages || msg.role !== 'system'
   );
 
   const handleExport = async () => {
     try {
       setExporting(true);
-      
+
       let content: string;
       let mimeType: string;
       let extension: string;
@@ -263,7 +281,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
       a.click();
       document.body.removeChild(a);
       URL.revokeObjectURL(url);
-      
+
       onClose();
     } catch {
       // Export failed - user will notice no file was downloaded
@@ -280,7 +298,7 @@ const ChatExport: React.FC<ChatExportProps> = ({
           Export Conversation
         </Box>
       </DialogTitle>
-      
+
       <DialogContent>
         <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
           <TextField
@@ -357,11 +375,12 @@ const ChatExport: React.FC<ChatExportProps> = ({
           </Box>
 
           <Alert severity="info">
-            Exporting {filteredMessages.length} message{filteredMessages.length !== 1 ? 's' : ''}
+            Exporting {filteredMessages.length} message
+            {filteredMessages.length !== 1 ? 's' : ''}
           </Alert>
         </Box>
       </DialogContent>
-      
+
       <DialogActions>
         <Button onClick={onClose} disabled={exporting}>
           Cancel

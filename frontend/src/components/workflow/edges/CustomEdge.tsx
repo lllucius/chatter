@@ -39,12 +39,12 @@ const CustomEdge: React.FC<EdgeProps> = ({
         markerEnd={markerEnd}
         style={{
           ...style,
-          stroke: selected ? '#2196f3' : (isConditional ? '#ff9800' : '#666'),
+          stroke: selected ? '#2196f3' : isConditional ? '#ff9800' : '#666',
           strokeWidth: selected ? 3 : 2,
           strokeDasharray: isConditional ? '5,5' : undefined,
         }}
       />
-      
+
       {isConditional && (
         <EdgeLabelRenderer>
           <div

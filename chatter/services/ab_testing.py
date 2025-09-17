@@ -699,9 +699,10 @@ class ABTestManager:
         self, test_id: str
     ) -> dict[str, Any] | None:
         """Calculate comprehensive analytics for an A/B test."""
-        from chatter.core.cache_factory import get_general_cache
         import math
         import random
+
+        from chatter.core.cache_factory import get_general_cache
 
         test = self.tests.get(test_id)
         if not test:

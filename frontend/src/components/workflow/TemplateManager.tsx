@@ -41,7 +41,9 @@ interface TemplateManagerProps {
   onClose: () => void;
   onSelectTemplate: (workflow: WorkflowDefinition) => void;
   currentWorkflow?: WorkflowDefinition;
-  onSaveAsTemplate?: (template: Omit<WorkflowTemplate, 'id' | 'createdAt'>) => void;
+  onSaveAsTemplate?: (
+    template: Omit<WorkflowTemplate, 'id' | 'createdAt'>
+  ) => void;
 }
 
 // Default templates
@@ -97,7 +99,8 @@ const defaultTemplates: WorkflowTemplate[] = [
   {
     id: 'rag-pipeline',
     name: 'RAG Pipeline',
-    description: 'Retrieval-Augmented Generation with memory and error handling',
+    description:
+      'Retrieval-Augmented Generation with memory and error handling',
     category: 'advanced',
     tags: ['rag', 'retrieval', 'memory', 'error-handling'],
     createdAt: new Date().toISOString(),
@@ -107,39 +110,89 @@ const defaultTemplates: WorkflowTemplate[] = [
           id: 'start-1',
           type: 'start',
           position: { x: 100, y: 300 },
-          data: { label: 'Start', nodeType: 'start', config: { isEntryPoint: true } },
+          data: {
+            label: 'Start',
+            nodeType: 'start',
+            config: { isEntryPoint: true },
+          },
         },
         {
           id: 'memory-1',
           type: 'memory',
           position: { x: 280, y: 300 },
-          data: { label: 'Memory', nodeType: 'memory', config: { enabled: true, window: 20 } },
+          data: {
+            label: 'Memory',
+            nodeType: 'memory',
+            config: { enabled: true, window: 20 },
+          },
         },
         {
           id: 'retrieval-1',
           type: 'retrieval',
           position: { x: 460, y: 300 },
-          data: { label: 'Retrieval', nodeType: 'retrieval', config: { collection: 'docs', topK: 5 } },
+          data: {
+            label: 'Retrieval',
+            nodeType: 'retrieval',
+            config: { collection: 'docs', topK: 5 },
+          },
         },
         {
           id: 'model-1',
           type: 'model',
           position: { x: 640, y: 300 },
-          data: { label: 'RAG Model', nodeType: 'model', config: { temperature: 0.3, maxTokens: 1500 } },
+          data: {
+            label: 'RAG Model',
+            nodeType: 'model',
+            config: { temperature: 0.3, maxTokens: 1500 },
+          },
         },
         {
           id: 'error-1',
           type: 'errorHandler',
           position: { x: 460, y: 450 },
-          data: { label: 'Error Handler', nodeType: 'errorHandler', config: { retryCount: 2, fallbackAction: 'continue' } },
+          data: {
+            label: 'Error Handler',
+            nodeType: 'errorHandler',
+            config: { retryCount: 2, fallbackAction: 'continue' },
+          },
         },
       ],
       edges: [
-        { id: 'e1', source: 'start-1', target: 'memory-1', type: 'custom', animated: true },
-        { id: 'e2', source: 'memory-1', target: 'retrieval-1', type: 'custom', animated: true },
-        { id: 'e3', source: 'retrieval-1', target: 'model-1', type: 'custom', animated: true },
-        { id: 'e4', source: 'retrieval-1', target: 'error-1', type: 'custom', animated: true },
-        { id: 'e5', source: 'error-1', target: 'model-1', type: 'custom', animated: true },
+        {
+          id: 'e1',
+          source: 'start-1',
+          target: 'memory-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e2',
+          source: 'memory-1',
+          target: 'retrieval-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e3',
+          source: 'retrieval-1',
+          target: 'model-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e4',
+          source: 'retrieval-1',
+          target: 'error-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e5',
+          source: 'error-1',
+          target: 'model-1',
+          type: 'custom',
+          animated: true,
+        },
       ],
       metadata: {
         name: 'RAG Pipeline',
@@ -163,46 +216,108 @@ const defaultTemplates: WorkflowTemplate[] = [
           id: 'start-1',
           type: 'start',
           position: { x: 100, y: 200 },
-          data: { label: 'Start', nodeType: 'start', config: { isEntryPoint: true } },
+          data: {
+            label: 'Start',
+            nodeType: 'start',
+            config: { isEntryPoint: true },
+          },
         },
         {
           id: 'variable-1',
           type: 'variable',
           position: { x: 280, y: 200 },
-          data: { label: 'Initialize Counter', nodeType: 'variable', config: { operation: 'set', variableName: 'counter', value: '0' } },
+          data: {
+            label: 'Initialize Counter',
+            nodeType: 'variable',
+            config: { operation: 'set', variableName: 'counter', value: '0' },
+          },
         },
         {
           id: 'loop-1',
           type: 'loop',
           position: { x: 460, y: 200 },
-          data: { label: 'Process Loop', nodeType: 'loop', config: { maxIterations: 10, condition: 'counter < 10' } },
+          data: {
+            label: 'Process Loop',
+            nodeType: 'loop',
+            config: { maxIterations: 10, condition: 'counter < 10' },
+          },
         },
         {
           id: 'model-1',
           type: 'model',
           position: { x: 640, y: 120 },
-          data: { label: 'Process Item', nodeType: 'model', config: { temperature: 0.5, maxTokens: 800 } },
+          data: {
+            label: 'Process Item',
+            nodeType: 'model',
+            config: { temperature: 0.5, maxTokens: 800 },
+          },
         },
         {
           id: 'variable-2',
           type: 'variable',
           position: { x: 640, y: 280 },
-          data: { label: 'Increment Counter', nodeType: 'variable', config: { operation: 'increment', variableName: 'counter' } },
+          data: {
+            label: 'Increment Counter',
+            nodeType: 'variable',
+            config: { operation: 'increment', variableName: 'counter' },
+          },
         },
         {
           id: 'conditional-1',
           type: 'conditional',
           position: { x: 820, y: 200 },
-          data: { label: 'Check Complete', nodeType: 'conditional', config: { condition: 'counter >= 10' } },
+          data: {
+            label: 'Check Complete',
+            nodeType: 'conditional',
+            config: { condition: 'counter >= 10' },
+          },
         },
       ],
       edges: [
-        { id: 'e1', source: 'start-1', target: 'variable-1', type: 'custom', animated: true },
-        { id: 'e2', source: 'variable-1', target: 'loop-1', type: 'custom', animated: true },
-        { id: 'e3', source: 'loop-1', target: 'model-1', type: 'custom', animated: true, sourceHandle: 'continue' },
-        { id: 'e4', source: 'model-1', target: 'variable-2', type: 'custom', animated: true },
-        { id: 'e5', source: 'variable-2', target: 'conditional-1', type: 'custom', animated: true },
-        { id: 'e6', source: 'conditional-1', target: 'loop-1', type: 'custom', animated: true, targetHandle: 'false' },
+        {
+          id: 'e1',
+          source: 'start-1',
+          target: 'variable-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e2',
+          source: 'variable-1',
+          target: 'loop-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e3',
+          source: 'loop-1',
+          target: 'model-1',
+          type: 'custom',
+          animated: true,
+          sourceHandle: 'continue',
+        },
+        {
+          id: 'e4',
+          source: 'model-1',
+          target: 'variable-2',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e5',
+          source: 'variable-2',
+          target: 'conditional-1',
+          type: 'custom',
+          animated: true,
+        },
+        {
+          id: 'e6',
+          source: 'conditional-1',
+          target: 'loop-1',
+          type: 'custom',
+          animated: true,
+          targetHandle: 'false',
+        },
       ],
       metadata: {
         name: 'Loop Processor',
@@ -222,12 +337,16 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   currentWorkflow,
   onSaveAsTemplate,
 }) => {
-  const [templates, setTemplates] = useState<WorkflowTemplate[]>(defaultTemplates);
+  const [templates, setTemplates] =
+    useState<WorkflowTemplate[]>(defaultTemplates);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
   const [templateTags, setTemplateTags] = useState('');
-  const [menuAnchor, setMenuAnchor] = useState<{ element: HTMLElement; templateId: string } | null>(null);
+  const [menuAnchor, setMenuAnchor] = useState<{
+    element: HTMLElement;
+    templateId: string;
+  } | null>(null);
 
   const handleSaveTemplate = () => {
     if (!currentWorkflow || !templateName.trim()) return;
@@ -237,7 +356,10 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
       name: templateName,
       description: templateDescription,
       category: 'custom',
-      tags: templateTags.split(',').map(tag => tag.trim()).filter(Boolean),
+      tags: templateTags
+        .split(',')
+        .map((tag) => tag.trim())
+        .filter(Boolean),
       workflow: {
         ...currentWorkflow,
         metadata: {
@@ -249,8 +371,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
       createdAt: new Date().toISOString(),
     };
 
-    setTemplates(prev => [...prev, newTemplate]);
-    
+    setTemplates((prev) => [...prev, newTemplate]);
+
     if (onSaveAsTemplate) {
       onSaveAsTemplate(newTemplate);
     }
@@ -263,15 +385,20 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   };
 
   const handleDeleteTemplate = (templateId: string) => {
-    setTemplates(prev => prev.filter(t => t.id !== templateId));
+    setTemplates((prev) => prev.filter((t) => t.id !== templateId));
     setMenuAnchor(null);
   };
 
-  const getCategoryColor = (category: WorkflowTemplate['category']): 'default' | 'primary' | 'secondary' => {
+  const getCategoryColor = (
+    category: WorkflowTemplate['category']
+  ): 'default' | 'primary' | 'secondary' => {
     switch (category) {
-      case 'basic': return 'default';
-      case 'advanced': return 'primary';
-      case 'custom': return 'secondary';
+      case 'basic':
+        return 'default';
+      case 'advanced':
+        return 'primary';
+      case 'custom':
+        return 'secondary';
     }
   };
 
@@ -279,7 +406,13 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
     <>
       <Dialog open={open} onClose={onClose} maxWidth="md" fullWidth>
         <DialogTitle>
-          <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+            }}
+          >
             <Box sx={{ display: 'flex', alignItems: 'center' }}>
               <TemplateIcon sx={{ mr: 1 }} />
               Workflow Templates
@@ -296,31 +429,47 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
             )}
           </Box>
         </DialogTitle>
-        
+
         <DialogContent>
           <Grid container spacing={2}>
             {templates.map((template): void => (
               <Grid item xs={12} sm={6} md={4} key={template.id}>
                 <Card>
                   <CardContent>
-                    <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', mb: 1 }}>
+                    <Box
+                      sx={{
+                        display: 'flex',
+                        justifyContent: 'space-between',
+                        alignItems: 'flex-start',
+                        mb: 1,
+                      }}
+                    >
                       <Typography variant="h6" component="h3">
                         {template.name}
                       </Typography>
                       <IconButton
                         size="small"
-                        onClick={(e) => setMenuAnchor({ element: e.currentTarget, templateId: template.id })}
+                        onClick={(e) =>
+                          setMenuAnchor({
+                            element: e.currentTarget,
+                            templateId: template.id,
+                          })
+                        }
                       >
                         <MoreIcon />
                       </IconButton>
                     </Box>
-                    
-                    <Typography variant="body2" color="textSecondary" sx={{ mb: 2, minHeight: 40 }}>
+
+                    <Typography
+                      variant="body2"
+                      color="textSecondary"
+                      sx={{ mb: 2, minHeight: 40 }}
+                    >
                       {template.description}
                     </Typography>
-                    
+
                     <Box sx={{ mb: 2 }}>
-                      <Chip 
+                      <Chip
                         label={template.category}
                         color={getCategoryColor(template.category)}
                         size="small"
@@ -336,12 +485,13 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                         />
                       ))}
                     </Box>
-                    
+
                     <Typography variant="caption" color="textSecondary">
-                      {template.workflow.nodes.length} nodes, {template.workflow.edges.length} connections
+                      {template.workflow.nodes.length} nodes,{' '}
+                      {template.workflow.edges.length} connections
                     </Typography>
                   </CardContent>
-                  
+
                   <CardActions>
                     <Button
                       size="small"
@@ -358,7 +508,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
             ))}
           </Grid>
         </DialogContent>
-        
+
         <DialogActions>
           <Button onClick={onClose}>Close</Button>
         </DialogActions>
@@ -376,7 +526,10 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
               handleDeleteTemplate(menuAnchor.templateId);
             }
           }}
-          disabled={templates.find(t => t.id === menuAnchor?.templateId)?.category !== 'custom'}
+          disabled={
+            templates.find((t) => t.id === menuAnchor?.templateId)?.category !==
+            'custom'
+          }
         >
           <DeleteIcon sx={{ mr: 1 }} />
           Delete Template
@@ -384,7 +537,12 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
       </Menu>
 
       {/* Save Template Dialog */}
-      <Dialog open={saveDialogOpen} onClose={() => setSaveDialogOpen(false)} maxWidth="sm" fullWidth>
+      <Dialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
         <DialogTitle>Save as Template</DialogTitle>
         <DialogContent>
           <TextField

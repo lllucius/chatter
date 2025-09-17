@@ -8,52 +8,66 @@ import ChatConfigPanel from '../pages/ChatConfigPanel';
 vi.mock('../services/auth-service', (): void => ({
   getSDK: vi.fn((): void => ({
     chat: {
-      getWorkflowTemplatesApiV1ChatTemplatesGet: vi.fn().mockResolvedValue({ templates: {} }),
-      getAvailableToolsApiV1ChatToolsAvailableGet: vi.fn().mockResolvedValue({ data: { tools: [] } }),
-      listConversationsApiV1ChatConversationsGet: vi.fn().mockResolvedValue({ conversations: [] })
-    }
+      getWorkflowTemplatesApiV1ChatTemplatesGet: vi
+        .fn()
+        .mockResolvedValue({ templates: {} }),
+      getAvailableToolsApiV1ChatToolsAvailableGet: vi
+        .fn()
+        .mockResolvedValue({ data: { tools: [] } }),
+      listConversationsApiV1ChatConversationsGet: vi
+        .fn()
+        .mockResolvedValue({ conversations: [] }),
+    },
   })),
   authService: {
-    isAuthenticated: vi.fn(() => true)
-  }
+    isAuthenticated: vi.fn(() => true),
+  },
 }));
 
 // Mock toast service
 vi.mock('../services/toast-service', (): void => ({
   toastService: {
     success: vi.fn(),
-    error: vi.fn()
-  }
+    error: vi.fn(),
+  },
 }));
 
 // Mock PageLayout
 vi.mock('../components/PageLayout', (): void => ({
-  default: ({ children, title }: { children: React.ReactNode, title: string }): void => (
-    <div data-testid="page-layout" title={title}>{children}</div>
-  )
+  default: ({
+    children,
+    title,
+  }: {
+    children: React.ReactNode;
+    title: string;
+  }): void => (
+    <div data-testid="page-layout" title={title}>
+      {children}
+    </div>
+  ),
 }));
 
 // Mock WorkflowEditor
 vi.mock('../components/workflow/WorkflowEditor', (): void => ({
   default: (): void => (
     <div data-testid="workflow-editor">WorkflowEditor Mock</div>
-  )
+  ),
 }));
 
 // Mock RightSidebarContext
 vi.mock('../components/RightSidebarContext', (): void => ({
-  useRightSidebar: (): void => ({ collapsed: false, setCollapsed: vi.fn() })
+  useRightSidebar: (): void => ({ collapsed: false, setCollapsed: vi.fn() }),
 }));
 
 describe('Fixed Components - No Infinite Loops', () => {
   test('WorkflowManagementPage renders without infinite loop', async () => {
     const { unmount } = render(<WorkflowManagementPage />);
-    
+
     // Wait a bit to ensure no infinite loops occur
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     expect(screen.getByTestId('page-layout')).toBeInTheDocument();
-    
+
     // Component should not crash or cause infinite re-renders
     unmount();
   });
@@ -76,16 +90,16 @@ describe('Fixed Components - No Infinite Loops', () => {
       setMaxTokens: vi.fn(),
       enableRetrieval: false,
       setEnableRetrieval: vi.fn(),
-      onSelectConversation: vi.fn()
+      onSelectConversation: vi.fn(),
     };
 
     const { unmount } = render(<ChatConfigPanel {...mockProps} />);
-    
+
     // Wait a bit to ensure no infinite loops occur
-    await new Promise(resolve => setTimeout(resolve, 100));
-    
+    await new Promise((resolve) => setTimeout(resolve, 100));
+
     expect(screen.getByText('Conversations')).toBeInTheDocument();
-    
+
     // Component should not crash or cause infinite re-renders
     unmount();
   });

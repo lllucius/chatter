@@ -1,11 +1,11 @@
 """Database optimization service for analytics query performance."""
 
 import time
-from datetime import datetime, UTC, timedelta
-from typing import Any
 from dataclasses import dataclass
+from datetime import UTC, datetime, timedelta
+from typing import Any
 
-from sqlalchemy import select, func
+from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.models.conversation import Conversation, Message

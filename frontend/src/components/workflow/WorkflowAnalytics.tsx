@@ -18,7 +18,11 @@ import {
   Warning as WarningIcon,
   CheckCircle as CheckIcon,
 } from '@mui/icons-material';
-import { WorkflowDefinition, WorkflowNodeType, WorkflowNode } from './WorkflowEditor';
+import {
+  WorkflowDefinition,
+  WorkflowNodeType,
+  WorkflowNode,
+} from './WorkflowEditor';
 import { getSDK } from '../../services/auth-service';
 
 interface WorkflowAnalyticsProps {
@@ -35,7 +39,9 @@ interface WorkflowMetrics {
 }
 
 const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
-  const [analytics, setAnalytics] = React.useState<WorkflowMetrics | null>(null);
+  const [analytics, setAnalytics] = React.useState<WorkflowMetrics | null>(
+    null
+  );
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
@@ -50,13 +56,14 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
 
       setLoading(true);
       setError(null);
-      
+
       try {
         // Use the new server-side analytics API
-        const response = await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
-          workflow.id
-        );
-        
+        const response =
+          await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
+            workflow.id
+          );
+
         // Transform server response to client format
         const serverAnalytics = response.data;
         const clientMetrics: WorkflowMetrics = {
@@ -64,10 +71,14 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           nodeTypeDistribution: calculateNodeTypeDistribution(workflow.nodes),
           complexityScore: serverAnalytics.complexity.score,
           executionPaths: [], // Server returns count, not paths
-          potentialBottlenecks: serverAnalytics.bottlenecks.map(b => b.reason),
-          recommendations: serverAnalytics.optimization_suggestions.map(s => s.description),
+          potentialBottlenecks: serverAnalytics.bottlenecks.map(
+            (b) => b.reason
+          ),
+          recommendations: serverAnalytics.optimization_suggestions.map(
+            (s) => s.description
+          ),
         };
-        
+
         setAnalytics(clientMetrics);
       } catch {
         // Failed to fetch workflow analytics - using fallback
@@ -82,31 +93,40 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     fetchAnalytics();
   }, [workflow.id, workflow.nodes, workflow.edges, calculateSimpleMetrics]);
 
-  const calculateNodeTypeDistribution = (nodes: WorkflowNode[]): Record<WorkflowNodeType, number> => {
-    return nodes.reduce((acc, node) => {
-      const nodeType = node.data.nodeType;
-      acc[nodeType] = (acc[nodeType] || 0) + 1;
-      return acc;
-    }, {} as Record<WorkflowNodeType, number>);
+  const calculateNodeTypeDistribution = (
+    nodes: WorkflowNode[]
+  ): Record<WorkflowNodeType, number> => {
+    return nodes.reduce(
+      (acc, node) => {
+        const nodeType = node.data.nodeType;
+        acc[nodeType] = (acc[nodeType] || 0) + 1;
+        return acc;
+      },
+      {} as Record<WorkflowNodeType, number>
+    );
   };
 
   const calculateSimpleMetrics = (): WorkflowMetrics => {
     const { nodes, edges } = workflow;
-    
+
     // Simple fallback calculation for workflows without server-side analytics
     const nodeTypeDistribution = calculateNodeTypeDistribution(nodes);
-    
+
     let complexityScore = nodes.length + edges.length;
-    
+
     const potentialBottlenecks: string[] = [];
     const recommendations: string[] = [];
-    
+
     if (nodeTypeDistribution.errorHandler === 0 && nodes.length > 5) {
-      recommendations.push('Consider adding error handling nodes for better reliability');
+      recommendations.push(
+        'Consider adding error handling nodes for better reliability'
+      );
     }
-    
+
     if (complexityScore > 20) {
-      recommendations.push('Workflow complexity is moderate - consider optimizing');
+      recommendations.push(
+        'Workflow complexity is moderate - consider optimizing'
+      );
     }
 
     return {
@@ -147,15 +167,15 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     edges: Array<{ source: string; target: string }>,
     nodes: Array<{ id: string }>
   ) => {
-    const outgoingEdges = edges.filter(edge => edge.source === currentNodeId);
-    
+    const outgoingEdges = edges.filter((edge) => edge.source === currentNodeId);
+
     if (outgoingEdges.length === 0) {
       // End of path
       allPaths.push([...currentPath]);
       return;
     }
-    
-    outgoingEdges.forEach(edge => {
+
+    outgoingEdges.forEach((edge) => {
       if (!visited.has(edge.target)) {
         const newVisited = new Set(visited);
         newVisited.add(edge.target);
@@ -165,7 +185,9 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     });
   };
 
-  const getComplexityColor = (score: number): 'success' | 'warning' | 'error' => {
+  const getComplexityColor = (
+    score: number
+  ): 'success' | 'warning' | 'error' => {
     if (score < 20) return 'success';
     if (score < 50) return 'warning';
     return 'error';
@@ -223,17 +245,22 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 2 }}>
           <Chip label={`${analytics.totalNodes} Nodes`} color="primary" />
-          <Chip label={`${workflow.edges.length} Connections`} color="primary" />
-          <Chip 
-            label={`${getComplexityLabel(analytics.complexityScore)} Complexity`} 
+          <Chip
+            label={`${workflow.edges.length} Connections`}
+            color="primary"
+          />
+          <Chip
+            label={`${getComplexityLabel(analytics.complexityScore)} Complexity`}
             color={getComplexityColor(analytics.complexityScore)}
           />
         </Box>
-        
-        <Typography variant="body2" sx={{ mb: 1 }}>Complexity Score</Typography>
-        <LinearProgress 
-          variant="determinate" 
-          value={Math.min(analytics.complexityScore, 100)} 
+
+        <Typography variant="body2" sx={{ mb: 1 }}>
+          Complexity Score
+        </Typography>
+        <LinearProgress
+          variant="determinate"
+          value={Math.min(analytics.complexityScore, 100)}
           color={getComplexityColor(analytics.complexityScore)}
           sx={{ mb: 1 }}
         />
@@ -250,14 +277,16 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           Node Distribution
         </Typography>
         <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
-          {Object.entries(analytics.nodeTypeDistribution).map(([type, count]) => (
-            <Chip
-              key={type}
-              label={`${type}: ${count}`}
-              size="small"
-              variant="outlined"
-            />
-          ))}
+          {Object.entries(analytics.nodeTypeDistribution).map(
+            ([type, count]) => (
+              <Chip
+                key={type}
+                label={`${type}: ${count}`}
+                size="small"
+                variant="outlined"
+              />
+            )
+          )}
         </Box>
       </Box>
 
@@ -295,7 +324,9 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         <>
           <Box sx={{ mb: 3 }}>
             <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-              <WarningIcon sx={{ mr: 1, fontSize: 20, color: 'warning.main' }} />
+              <WarningIcon
+                sx={{ mr: 1, fontSize: 20, color: 'warning.main' }}
+              />
               <Typography variant="subtitle1" fontWeight="bold">
                 Potential Bottlenecks
               </Typography>
@@ -306,7 +337,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
                   <ListItemIcon>
                     <WarningIcon fontSize="small" color="warning" />
                   </ListItemIcon>
-                  <ListItemText 
+                  <ListItemText
                     primary={bottleneck}
                     primaryTypographyProps={{ variant: 'body2' }}
                   />
@@ -332,7 +363,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
               <ListItemIcon>
                 <CheckIcon fontSize="small" color="success" />
               </ListItemIcon>
-              <ListItemText 
+              <ListItemText
                 primary={recommendation}
                 primaryTypographyProps={{ variant: 'body2' }}
               />

@@ -60,13 +60,15 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 }) => {
   const navigate = useNavigate();
   const [selectedTab, setSelectedTab] = useState(0);
-  
+
   // Use backend API for integrated dashboard stats (with fallback)
   const statsApi = useApi(
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated) {
+        if (
+          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated
+        ) {
           return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated();
         }
         return null;
@@ -77,12 +79,12 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     },
     { immediate: true }
   );
-  
+
   // Use backend API for chart data (with fallback)
   const chartDataApi = useApi(
     async () => {
       try {
-        // Try the new endpoint, fall back if not available  
+        // Try the new endpoint, fall back if not available
         if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData) {
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
         }
@@ -100,7 +102,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     if (statsApi.data?.data) {
       return statsApi.data.data;
     }
-    
+
     // Fallback data if API not available
     return {
       workflows: {
@@ -126,7 +128,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       system: {
         tokensUsed: 1250000,
         apiCalls: 8520,
-        cost: 125.50,
+        cost: 125.5,
         uptime: 99.8,
       },
     };
@@ -136,20 +138,22 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
   const timeSeriesData = React.useMemo(() => {
     if (chartDataApi.data?.data?.hourly_performance_data) {
       // Transform backend data to frontend format
-      return chartDataApi.data.data.hourly_performance_data.slice(0, 7).map((item, index) => ({
-        date: format(subDays(new Date(), 6 - index), 'MMM dd'),
-        workflows: item.workflows || 40,
-        agents: item.agents || 180,
-        abTests: item.tests || 8,
-        tokens: 800000 + (item.workflows || 0) * 10000,
-        cost: 80 + (item.workflows || 0) * 2,
-      }));
+      return chartDataApi.data.data.hourly_performance_data
+        .slice(0, 7)
+        .map((item, index) => ({
+          date: format(subDays(new Date(), 6 - index), 'MMM dd'),
+          workflows: item.workflows || 40,
+          agents: item.agents || 180,
+          abTests: item.tests || 8,
+          tokens: 800000 + (item.workflows || 0) * 10000,
+          cost: 80 + (item.workflows || 0) * 2,
+        }));
     }
-    
+
     // Fallback to generating data if API not available
     const days = 7;
     const data = [];
-    
+
     for (let i = days - 1; i >= 0; i--) {
       const date = subDays(new Date(), i);
       data.push({
@@ -161,7 +165,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         cost: 80 + Math.random() * 40,
       });
     }
-    
+
     return data;
   }, [chartDataApi.data]);
 
@@ -170,7 +174,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     if (chartDataApi.data?.data?.integration_data) {
       return chartDataApi.data.data.integration_data;
     }
-    
+
     // Fallback data
     return [
       { name: 'Workflow → Agent', value: 35, color: '#8884d8' },
@@ -184,7 +188,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     if (chartDataApi.data?.data?.hourly_performance_data) {
       return chartDataApi.data.data.hourly_performance_data;
     }
-    
+
     // Fallback to generating data
     return Array.from({ length: 24 }, (_, i): void => ({
       hour: `${i}:00`,
@@ -202,16 +206,23 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     }
   };
 
-
-
   return (
     <Box>
       {/* Summary Statistics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/workflows')}>
+          <Card
+            sx={{ cursor: 'pointer' }}
+            onClick={() => handleNavigate('/workflows')}
+          >
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}
+              >
                 <div>
                   <Typography color="text.secondary" gutterBottom>
                     Active Workflows
@@ -238,9 +249,18 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/agents')}>
+          <Card
+            sx={{ cursor: 'pointer' }}
+            onClick={() => handleNavigate('/agents')}
+          >
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}
+              >
                 <div>
                   <Typography color="text.secondary" gutterBottom>
                     Active Agents
@@ -267,9 +287,18 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         </Grid>
 
         <Grid item xs={12} sm={6} md={3}>
-          <Card sx={{ cursor: 'pointer' }} onClick={() => handleNavigate('/ab-testing')}>
+          <Card
+            sx={{ cursor: 'pointer' }}
+            onClick={() => handleNavigate('/ab-testing')}
+          >
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}
+              >
                 <div>
                   <Typography color="text.secondary" gutterBottom>
                     A/B Tests
@@ -285,9 +314,13 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               </Box>
               <Box sx={{ mt: 2 }}>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <TrendingUpIcon color="success" sx={{ fontSize: 16, mr: 0.5 }} />
+                  <TrendingUpIcon
+                    color="success"
+                    sx={{ fontSize: 16, mr: 0.5 }}
+                  />
                   <Typography variant="body2" color="success.main">
-                    +{(stats.abTesting.totalImprovement * 100).toFixed(1)}% avg improvement
+                    +{(stats.abTesting.totalImprovement * 100).toFixed(1)}% avg
+                    improvement
                   </Typography>
                 </Box>
               </Box>
@@ -298,7 +331,13 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         <Grid item xs={12} sm={6} md={3}>
           <Card>
             <CardContent>
-              <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+              <Box
+                sx={{
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  alignItems: 'flex-start',
+                }}
+              >
                 <div>
                   <Typography color="text.secondary" gutterBottom>
                     Today&apos;s Cost
@@ -313,13 +352,14 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 <SpeedIcon color="error" sx={{ fontSize: 40 }} />
               </Box>
               <Box sx={{ mt: 2 }}>
-                <LinearProgress 
-                  variant="determinate" 
-                  value={(stats.system.cost / 200) * 100} 
+                <LinearProgress
+                  variant="determinate"
+                  value={(stats.system.cost / 200) * 100}
                   sx={{ height: 6, borderRadius: 3 }}
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {((stats.system.cost / 200) * 100).toFixed(1)}% of daily budget
+                  {((stats.system.cost / 200) * 100).toFixed(1)}% of daily
+                  budget
                 </Typography>
               </Box>
             </CardContent>
@@ -331,10 +371,25 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       <Card sx={{ mb: 4 }}>
         <CardContent>
           <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
-            <Tabs value={selectedTab} onChange={(_, newValue) => setSelectedTab(newValue)}>
-              <Tab label="Activity Overview" icon={<TimelineIcon />} iconPosition="start" />
-              <Tab label="Integration Flow" icon={<AssessmentIcon />} iconPosition="start" />
-              <Tab label="Performance" icon={<SpeedIcon />} iconPosition="start" />
+            <Tabs
+              value={selectedTab}
+              onChange={(_, newValue) => setSelectedTab(newValue)}
+            >
+              <Tab
+                label="Activity Overview"
+                icon={<TimelineIcon />}
+                iconPosition="start"
+              />
+              <Tab
+                label="Integration Flow"
+                icon={<AssessmentIcon />}
+                iconPosition="start"
+              />
+              <Tab
+                label="Performance"
+                icon={<SpeedIcon />}
+                iconPosition="start"
+              />
             </Tabs>
           </Box>
 
@@ -378,7 +433,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   </AreaChart>
                 </ResponsiveContainer>
               </Grid>
-              
+
               <Grid item xs={12} lg={4}>
                 <Typography variant="h6" gutterBottom>
                   Recent Activity
@@ -445,7 +500,9 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                      label={({ name, percent }) =>
+                        `${name}: ${(percent * 100).toFixed(0)}%`
+                      }
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
@@ -458,7 +515,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   </PieChart>
                 </ResponsiveContainer>
               </Grid>
-              
+
               <Grid item xs={12} md={6}>
                 <Typography variant="h6" gutterBottom>
                   Integration Benefits
@@ -468,29 +525,44 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     Workflow → Agent Integration
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    35% of workflows automatically trigger agent responses, improving response time by 40%
+                    35% of workflows automatically trigger agent responses,
+                    improving response time by 40%
                   </Typography>
-                  <LinearProgress variant="determinate" value={75} sx={{ mt: 1 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={75}
+                    sx={{ mt: 1 }}
+                  />
                 </Paper>
-                
+
                 <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
                   <Typography variant="subtitle1" gutterBottom>
                     Agent → A/B Testing Integration
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    25% of agent interactions participate in A/B tests, driving 18% improvement in satisfaction
+                    25% of agent interactions participate in A/B tests, driving
+                    18% improvement in satisfaction
                   </Typography>
-                  <LinearProgress variant="determinate" value={60} sx={{ mt: 1 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={60}
+                    sx={{ mt: 1 }}
+                  />
                 </Paper>
-                
+
                 <Paper variant="outlined" sx={{ p: 2 }}>
                   <Typography variant="subtitle1" gutterBottom>
                     A/B Test → Workflow Integration
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    15% of test results automatically update workflow configurations
+                    15% of test results automatically update workflow
+                    configurations
                   </Typography>
-                  <LinearProgress variant="determinate" value={85} sx={{ mt: 1 }} />
+                  <LinearProgress
+                    variant="determinate"
+                    value={85}
+                    sx={{ mt: 1 }}
+                  />
                 </Paper>
               </Grid>
             </Grid>
@@ -507,12 +579,20 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 <YAxis />
                 <RechartsTooltip />
                 <Legend />
-                <Bar dataKey="workflows" fill="#8884d8" name="Workflow Executions" />
-                <Bar dataKey="agents" fill="#82ca9d" name="Agent Interactions" />
+                <Bar
+                  dataKey="workflows"
+                  fill="#8884d8"
+                  name="Workflow Executions"
+                />
+                <Bar
+                  dataKey="agents"
+                  fill="#82ca9d"
+                  name="Agent Interactions"
+                />
                 <Bar dataKey="tests" fill="#ffc658" name="Test Events" />
               </BarChart>
             </ResponsiveContainer>
-            
+
             <Grid container spacing={2} sx={{ mt: 2 }}>
               <Grid item xs={6} sm={3}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
@@ -611,19 +691,28 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   <ListItemIcon>
                     <SuccessIcon color="success" />
                   </ListItemIcon>
-                  <ListItemText primary="API Services" secondary="All systems operational" />
+                  <ListItemText
+                    primary="API Services"
+                    secondary="All systems operational"
+                  />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
                     <SuccessIcon color="success" />
                   </ListItemIcon>
-                  <ListItemText primary="Database" secondary="Response time: 45ms" />
+                  <ListItemText
+                    primary="Database"
+                    secondary="Response time: 45ms"
+                  />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
                     <WarningIcon color="warning" />
                   </ListItemIcon>
-                  <ListItemText primary="Queue Processing" secondary="Some delays expected" />
+                  <ListItemText
+                    primary="Queue Processing"
+                    secondary="Some delays expected"
+                  />
                 </ListItem>
               </List>
             </CardContent>
@@ -641,27 +730,27 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   <ListItemIcon>
                     <TrendingUpIcon color="success" />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary="18% improvement" 
-                    secondary="Agent response quality this week" 
+                  <ListItemText
+                    primary="18% improvement"
+                    secondary="Agent response quality this week"
                   />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
                     <SpeedIcon color="info" />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary="25% faster execution" 
-                    secondary="Workflow processing optimization" 
+                  <ListItemText
+                    primary="25% faster execution"
+                    secondary="Workflow processing optimization"
                   />
                 </ListItem>
                 <ListItem>
                   <ListItemIcon>
                     <AnalyticsIcon color="warning" />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary="5 successful tests" 
-                    secondary="Completed A/B experiments this month" 
+                  <ListItemText
+                    primary="5 successful tests"
+                    secondary="Completed A/B experiments this month"
                   />
                 </ListItem>
               </List>

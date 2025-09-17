@@ -38,7 +38,7 @@ class MockSSEManager {
   // Method to simulate receiving events for testing
   simulateEvent(event: AnySSEEvent): void {
     const listeners = this.listeners.get('*') || [];
-    listeners.forEach(listener => listener(event));
+    listeners.forEach((listener) => listener(event));
   }
 }
 
@@ -62,13 +62,20 @@ const SSEMonitorDemo: React.FC = () => {
   const [eventCount, setEventCount] = useState(0);
 
   const generateTestEvent = () => {
-    const eventTypes = ['job.started', 'job.completed', 'document.uploaded', 'system.alert', 'backup.progress'];
+    const eventTypes = [
+      'job.started',
+      'job.completed',
+      'document.uploaded',
+      'system.alert',
+      'backup.progress',
+    ];
     const categories = ['workflow', 'security', 'monitoring', 'analytics'];
     const priorities = ['low', 'normal', 'high', 'critical'];
     const userIds = ['user-123', 'user-456', 'admin-789'];
     const sourceSystems = ['api-service', 'worker-service', 'backup-service'];
 
-    const randomChoice = <T,>(arr: T[]): T => arr[Math.floor(Math.random() * arr.length)];
+    const randomChoice = <T,>(arr: T[]): T =>
+      arr[Math.floor(Math.random() * arr.length)];
 
     const event: AnySSEEvent = {
       id: `event-${Date.now()}-${eventCount}`,
@@ -85,11 +92,11 @@ const SSEMonitorDemo: React.FC = () => {
         priority: randomChoice(priorities),
         source_system: randomChoice(sourceSystems),
         correlation_id: `corr-${Math.random().toString(36).substring(7)}`,
-      }
+      },
     } as AnySSEEvent;
 
     mockSSEManager.simulateEvent(event);
-    setEventCount(prev => prev + 1);
+    setEventCount((prev) => prev + 1);
   };
 
   return (
@@ -98,19 +105,16 @@ const SSEMonitorDemo: React.FC = () => {
         SSE Monitor Demo
       </Typography>
       <Typography variant="body1" sx={{ mb: 3 }}>
-        This demo shows the enhanced SSE Monitor with multiple filter types and settings persistence.
+        This demo shows the enhanced SSE Monitor with multiple filter types and
+        settings persistence.
       </Typography>
 
       <Box sx={{ mb: 3 }}>
-        <Button 
-          variant="contained" 
-          onClick={generateTestEvent}
-          sx={{ mr: 2 }}
-        >
+        <Button variant="contained" onClick={generateTestEvent} sx={{ mr: 2 }}>
           Generate Test Event ({eventCount} sent)
         </Button>
-        <Button 
-          variant="outlined" 
+        <Button
+          variant="outlined"
           onClick={() => {
             for (let i = 0; i < 5; i++) {
               setTimeout(() => generateTestEvent(), i * 200);

@@ -13,11 +13,11 @@ describe('Streaming SDK Method', () => {
   it('should be able to create a streaming request', async () => {
     const chatRequest: ChatRequest = {
       message: 'Test message',
-      conversation_id: 'test-id'
+      conversation_id: 'test-id',
     };
 
     const sdk = new ChatterSDK({
-      basePath: 'http://localhost:8000'
+      basePath: 'http://localhost:8000',
     });
 
     // This will fail without a real server, but we can at least verify the method signature

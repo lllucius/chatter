@@ -8,10 +8,10 @@ from rich.table import Table
 from chatter.commands import (
     console,
     get_client,
-    run_async,
-    get_default_page_size,
     get_default_max_tokens,
+    get_default_page_size,
     get_default_test_count,
+    run_async,
 )
 
 # Model Registry Commands

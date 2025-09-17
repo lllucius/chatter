@@ -17,10 +17,14 @@ vi.mock('../../services/auth-service', () => ({
       listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
     },
     documents: {
-      listDocumentsApiV1Documents: vi.fn(() => Promise.resolve({ documents: [] })),
+      listDocumentsApiV1Documents: vi.fn(() =>
+        Promise.resolve({ documents: [] })
+      ),
     },
     conversations: {
-      createConversationApiV1Conversations: vi.fn(() => Promise.resolve({ id: 'test-conv-id' })),
+      createConversationApiV1Conversations: vi.fn(() =>
+        Promise.resolve({ id: 'test-conv-id' })
+      ),
     },
   })),
 }));
@@ -53,9 +57,7 @@ vi.mock('@mui/material', async () => {
 
 // Create a wrapper component for context providers
 const TestWrapper = ({ children }: { children: React.ReactNode }) => (
-  <BrowserRouter>
-    {children}
-  </BrowserRouter>
+  <BrowserRouter>{children}</BrowserRouter>
 );
 
 describe('ChatPage Streaming Functionality', () => {
@@ -63,7 +65,7 @@ describe('ChatPage Streaming Functionality', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    
+
     // Get the mock SDK
     const { getSDK } = require('../../services/auth-service');
     const mockSDK = getSDK();
@@ -87,9 +89,9 @@ describe('ChatPage Streaming Functionality', () => {
     const mockChunks = [
       'data: {"type":"start","conversation_id":"test-conv"}\n\n',
       'data: {"type":"token","content":"Hello"}\n\n',
-      'data: {"type":"token","content":" there"}\n\n', 
+      'data: {"type":"token","content":" there"}\n\n',
       'data: {"type":"complete","metadata":{"total_tokens":5}}\n\n',
-      'data: [DONE]\n\n'
+      'data: [DONE]\n\n',
     ];
 
     let chunkIndex = 0;
@@ -105,7 +107,7 @@ describe('ChatPage Streaming Functionality', () => {
           }
         }
         pushChunk();
-      }
+      },
     });
 
     mockStreamingMethod.mockResolvedValue(mockStream);
@@ -127,7 +129,9 @@ describe('ChatPage Streaming Functionality', () => {
 
     // Type a message
     const messageInput = screen.getByPlaceholderText(/Type your message here/);
-    fireEvent.change(messageInput, { target: { value: 'Test streaming message' } });
+    fireEvent.change(messageInput, {
+      target: { value: 'Test streaming message' },
+    });
 
     // Send the message
     const sendButton = screen.getByRole('button', { name: /send/i });
@@ -144,14 +148,20 @@ describe('ChatPage Streaming Functionality', () => {
     });
 
     // Verify that the message appears in the chat
-    await waitFor(() => {
-      expect(screen.getByText('Test streaming message')).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Test streaming message')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
 
     // Wait for the streaming response to be processed
-    await waitFor(() => {
-      expect(screen.getByText('Hello there')).toBeInTheDocument();
-    }, { timeout: 5000 });
+    await waitFor(
+      () => {
+        expect(screen.getByText('Hello there')).toBeInTheDocument();
+      },
+      { timeout: 5000 }
+    );
   });
 
   it('should handle streaming errors gracefully', async () => {
@@ -181,8 +191,13 @@ describe('ChatPage Streaming Functionality', () => {
     fireEvent.click(sendButton);
 
     // Verify error is handled (should show error message)
-    await waitFor(() => {
-      expect(screen.getByText(/Sorry, I encountered an error/)).toBeInTheDocument();
-    }, { timeout: 3000 });
+    await waitFor(
+      () => {
+        expect(
+          screen.getByText(/Sorry, I encountered an error/)
+        ).toBeInTheDocument();
+      },
+      { timeout: 3000 }
+    );
   });
 });

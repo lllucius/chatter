@@ -69,7 +69,10 @@ describe('SSEMonitorPage', () => {
     const startButton = screen.getByText('Start Monitoring');
     fireEvent.click(startButton);
 
-    expect(mockSSEManager.addEventListener).toHaveBeenCalledWith('*', expect.any(Function));
+    expect(mockSSEManager.addEventListener).toHaveBeenCalledWith(
+      '*',
+      expect.any(Function)
+    );
     expect(screen.getByText('Stop Monitoring')).toBeInTheDocument();
   });
 
@@ -88,7 +91,10 @@ describe('SSEMonitorPage', () => {
     const stopButton = screen.getByText('Stop Monitoring');
     fireEvent.click(stopButton);
 
-    expect(mockSSEManager.removeEventListener).toHaveBeenCalledWith('*', expect.any(Function));
+    expect(mockSSEManager.removeEventListener).toHaveBeenCalledWith(
+      '*',
+      expect.any(Function)
+    );
     expect(screen.getByText('Start Monitoring')).toBeInTheDocument();
   });
 
@@ -128,7 +134,9 @@ describe('SSEMonitorPage', () => {
       </TestWrapper>
     );
 
-    const consoleSwitch = screen.getByRole('checkbox', { name: /console logging/i });
+    const consoleSwitch = screen.getByRole('checkbox', {
+      name: /console logging/i,
+    });
     expect(consoleSwitch).not.toBeChecked();
 
     fireEvent.click(consoleSwitch);
@@ -155,7 +163,11 @@ describe('SSEMonitorPage', () => {
       </TestWrapper>
     );
 
-    expect(screen.getByText(/Click "Start Monitoring" to begin capturing SSE messages/)).toBeInTheDocument();
+    expect(
+      screen.getByText(
+        /Click "Start Monitoring" to begin capturing SSE messages/
+      )
+    ).toBeInTheDocument();
   });
 
   it('should show filter controls correctly', () => {
@@ -166,7 +178,9 @@ describe('SSEMonitorPage', () => {
     );
 
     // Check that filter button is present by looking for the button with FilterList icon
-    expect(screen.getByRole('button', { name: /filters/i })).toBeInTheDocument();
+    expect(
+      screen.getByRole('button', { name: /filters/i })
+    ).toBeInTheDocument();
   });
 
   it('should toggle raw data view', () => {
@@ -176,7 +190,9 @@ describe('SSEMonitorPage', () => {
       </TestWrapper>
     );
 
-    const toggleButton = screen.getByRole('button', { name: /toggle raw data view/i });
+    const toggleButton = screen.getByRole('button', {
+      name: /toggle raw data view/i,
+    });
     fireEvent.click(toggleButton);
 
     // Should not throw any errors - visual change only
@@ -243,7 +259,7 @@ describe('SSEMonitorPage', () => {
     // Advanced filters should now be visible
     expect(screen.getByText('Filter Options')).toBeInTheDocument();
     expect(screen.getByText('Event Types')).toBeInTheDocument();
-    
+
     // Click again to collapse
     fireEvent.click(filtersButton);
   });
@@ -273,8 +289,8 @@ describe('SSEMonitorPage', () => {
         categories: ['testing'],
         priorities: ['high'],
         userIds: ['user123'],
-        sourceSystems: ['test-system']
-      }
+        sourceSystems: ['test-system'],
+      },
     });
 
     render(
@@ -284,10 +300,14 @@ describe('SSEMonitorPage', () => {
     );
 
     // Check that settings were loaded
-    expect(mockLocalStorage.getItem).toHaveBeenCalledWith('sse-monitor-settings');
-    
+    expect(mockLocalStorage.getItem).toHaveBeenCalledWith(
+      'sse-monitor-settings'
+    );
+
     // Check console logging switch is checked
-    const consoleSwitch = screen.getByRole('checkbox', { name: /console logging/i });
+    const consoleSwitch = screen.getByRole('checkbox', {
+      name: /console logging/i,
+    });
     expect(consoleSwitch).toBeChecked();
 
     // Check max messages field has correct value
@@ -304,10 +324,12 @@ describe('SSEMonitorPage', () => {
 
     // Check for Active Filters section specifically
     expect(screen.getByText('Active Filters')).toBeInTheDocument();
-    
+
     // Find the Active Filters count - should be 0 with default state
     const activeFiltersText = screen.getByText('Active Filters');
-    const statsCard = activeFiltersText.closest('[class*="MuiCardContent-root"]');
+    const statsCard = activeFiltersText.closest(
+      '[class*="MuiCardContent-root"]'
+    );
     expect(statsCard).toBeInTheDocument();
   });
 

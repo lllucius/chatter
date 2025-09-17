@@ -28,22 +28,27 @@ describe('EnhancedMessage Metadata Display Fix', () => {
         timestamp: new Date('2024-01-01T12:05:00Z'),
         metadata: {
           model: 'gpt-4-turbo',
-          tokens: 125,      // This should now display as "125 tokens"
-          processingTime: 2340,  // This should now display as "2340ms"
+          tokens: 125, // This should now display as "125 tokens"
+          processingTime: 2340, // This should now display as "2340ms"
         },
       };
 
-      render(<EnhancedMessage message={assistantMessageWithMetadata} {...mockProps} />);
+      render(
+        <EnhancedMessage
+          message={assistantMessageWithMetadata}
+          {...mockProps}
+        />
+      );
 
       // Verify the rating section appears (which means it's an assistant message)
       expect(screen.getByText('Rate this response:')).toBeInTheDocument();
-      
+
       // Verify that tokens and processing time are displayed
       // These are the exact elements that were not displaying before the fix
       expect(screen.getByText('125 tokens')).toBeInTheDocument();
       expect(screen.getByText('2340ms')).toBeInTheDocument();
-      
-      // Verify the model is also displayed 
+
+      // Verify the model is also displayed
       expect(screen.getByText('gpt-4-turbo')).toBeInTheDocument();
     });
 
@@ -59,7 +64,7 @@ describe('EnhancedMessage Metadata Display Fix', () => {
 
       // AFTER the fix: Same message now has proper metadata mapping
       const messageAfterFix: ChatMessage = {
-        id: 'msg-after-fix', 
+        id: 'msg-after-fix',
         role: 'assistant',
         content: 'This message now shows tokens/time after the fix.',
         timestamp: new Date('2024-01-01T10:00:00Z'),
@@ -71,7 +76,9 @@ describe('EnhancedMessage Metadata Display Fix', () => {
       };
 
       // Test before fix scenario
-      const { unmount } = render(<EnhancedMessage message={messageBeforeFix} {...mockProps} />);
+      const { unmount } = render(
+        <EnhancedMessage message={messageBeforeFix} {...mockProps} />
+      );
       expect(screen.queryByText(/\d+ tokens/)).not.toBeInTheDocument();
       expect(screen.queryByText(/\d+ms/)).not.toBeInTheDocument();
       unmount();

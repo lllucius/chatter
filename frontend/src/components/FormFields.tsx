@@ -82,9 +82,12 @@ export const FormTextField: React.FC<TextFieldProps> = ({
       type={type}
       value={value || ''}
       onChange={(e) => {
-        const newValue = type === 'number' ? 
-          (e.target.value ? parseFloat(e.target.value) : '') : 
-          e.target.value;
+        const newValue =
+          type === 'number'
+            ? e.target.value
+              ? parseFloat(e.target.value)
+              : ''
+            : e.target.value;
         onChange(newValue);
       }}
       error={!!error}
@@ -114,7 +117,12 @@ export const FormSelectField: React.FC<SelectFieldProps> = ({
   emptyLabel = 'Select...',
 }) => {
   return (
-    <FormControl fullWidth={fullWidth} error={!!error} disabled={disabled} required={required}>
+    <FormControl
+      fullWidth={fullWidth}
+      error={!!error}
+      disabled={disabled}
+      required={required}
+    >
       <InputLabel>{label}</InputLabel>
       <Select
         value={value || ''}
@@ -162,7 +170,7 @@ export const FormSliderField: React.FC<SliderFieldProps> = ({
   formatLabel,
 }) => {
   const displayText = formatLabel ? formatLabel(value) : value;
-  
+
   return (
     <Box>
       <Typography gutterBottom>
@@ -211,9 +219,9 @@ export const FormSwitchField: React.FC<SwitchFieldProps> = ({
         label={label}
       />
       {(error || helperText) && (
-        <Typography 
-          variant="caption" 
-          color={error ? "error" : "text.secondary"} 
+        <Typography
+          variant="caption"
+          color={error ? 'error' : 'text.secondary'}
           sx={{ display: 'block', mt: 0.5, ml: 1.75 }}
         >
           {error || helperText}
@@ -259,10 +267,10 @@ export const CommonFieldPresets = {
       { value: 1, label: '1 (Balanced)' },
       { value: 2, label: '2 (Creative)' },
     ],
-    formatLabel: (value: number) => `${value} (${
-      value < 0.3 ? 'Deterministic' :
-      value < 1.3 ? 'Balanced' : 'Creative'
-    })`,
+    formatLabel: (value: number) =>
+      `${value} (${
+        value < 0.3 ? 'Deterministic' : value < 1.3 ? 'Balanced' : 'Creative'
+      })`,
   },
   maxTokens: {
     label: 'Max Tokens',

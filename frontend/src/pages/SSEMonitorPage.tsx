@@ -39,7 +39,13 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { useSSE } from '../services/sse-context';
-import { AnySSEEvent, SSEEventType, STATIC_EVENT_TYPES, STATIC_CATEGORIES, STATIC_PRIORITIES } from '../services/sse-types';
+import {
+  AnySSEEvent,
+  SSEEventType,
+  STATIC_EVENT_TYPES,
+  STATIC_CATEGORIES,
+  STATIC_PRIORITIES,
+} from '../services/sse-types';
 
 interface SSEMessageEntry {
   id: string;
@@ -83,13 +89,13 @@ const defaultSettings: SSEMonitorSettings = {
 const SSEMonitorPage: React.FC = () => {
   const { manager, isConnected } = useSSE();
   const [messages, setMessages] = useState<SSEMessageEntry[]>([]);
-  
+
   // Load monitoring state from localStorage with persistence
   const [isMonitoring, setIsMonitoring] = useState(() => {
     const savedMonitoring = localStorage.getItem('sse-monitor-active');
     return savedMonitoring === 'true';
   });
-  
+
   // Load all settings from localStorage with defaults
   const [settings, setSettings] = useState<SSEMonitorSettings>(() => {
     const saved = localStorage.getItem('sse-monitor-settings');
@@ -119,14 +125,14 @@ const SSEMonitorPage: React.FC = () => {
 
   // Helper function to update settings
   const updateSettings = useCallback((updates: Partial<SSEMonitorSettings>) => {
-    setSettings(prev => ({ ...prev, ...updates }));
+    setSettings((prev) => ({ ...prev, ...updates }));
   }, []);
 
   // Helper function to update filters
   const updateFilters = useCallback((updates: Partial<SSEMonitorFilters>) => {
-    setSettings(prev => ({
+    setSettings((prev) => ({
       ...prev,
-      filters: { ...prev.filters, ...updates }
+      filters: { ...prev.filters, ...updates },
     }));
   }, []);
 
@@ -138,13 +144,13 @@ const SSEMonitorPage: React.FC = () => {
     const userIds = new Set<string>();
     const sourceSystems = new Set<string>();
 
-    messages.forEach(msg => {
+    messages.forEach((msg) => {
       eventTypes.add(msg.event.type); // Add any additional types from actual messages
-      
+
       if (msg.event.user_id) {
         userIds.add(msg.event.user_id);
       }
-      
+
       if (msg.event.metadata) {
         if (msg.event.metadata.category) {
           categories.add(String(msg.event.metadata.category));
@@ -169,14 +175,17 @@ const SSEMonitorPage: React.FC = () => {
 
   // Filter messages based on all active filters
   const filteredMessages = React.useMemo(() => {
-    return messages.filter(msg => {
+    return messages.filter((msg) => {
       const { filters } = settings;
-      
+
       // Filter by event types (if any selected)
-      if (filters.eventTypes.length > 0 && !filters.eventTypes.includes(msg.event.type)) {
+      if (
+        filters.eventTypes.length > 0 &&
+        !filters.eventTypes.includes(msg.event.type)
+      ) {
         return false;
       }
-      
+
       // Filter by categories (if any selected)
       if (filters.categories.length > 0) {
         const category = msg.event.metadata?.category;
@@ -184,7 +193,7 @@ const SSEMonitorPage: React.FC = () => {
           return false;
         }
       }
-      
+
       // Filter by priorities (if any selected)
       if (filters.priorities.length > 0) {
         const priority = msg.event.metadata?.priority;
@@ -192,61 +201,73 @@ const SSEMonitorPage: React.FC = () => {
           return false;
         }
       }
-      
+
       // Filter by user IDs (if any selected)
       if (filters.userIds.length > 0) {
-        if (!msg.event.user_id || !filters.userIds.includes(msg.event.user_id)) {
+        if (
+          !msg.event.user_id ||
+          !filters.userIds.includes(msg.event.user_id)
+        ) {
           return false;
         }
       }
-      
+
       // Filter by source systems (if any selected)
       if (filters.sourceSystems.length > 0) {
         const sourceSystem = msg.event.metadata?.source_system;
-        if (!sourceSystem || !filters.sourceSystems.includes(String(sourceSystem))) {
+        if (
+          !sourceSystem ||
+          !filters.sourceSystems.includes(String(sourceSystem))
+        ) {
           return false;
         }
       }
-      
+
       return true;
     });
   }, [messages, settings.filters]);
 
   // SSE event handler
-  const handleSSEEvent = useCallback((event: AnySSEEvent) => {
-    const messageEntry: SSEMessageEntry = {
-      id: `${Date.now()}-${messageCountRef.current++}`,
-      timestamp: new Date(),
-      event,
-      rawData: JSON.stringify(event, null, 2),
-    };
+  const handleSSEEvent = useCallback(
+    (event: AnySSEEvent) => {
+      const messageEntry: SSEMessageEntry = {
+        id: `${Date.now()}-${messageCountRef.current++}`,
+        timestamp: new Date(),
+        event,
+        rawData: JSON.stringify(event, null, 2),
+      };
 
-    setMessages(prev => {
-      const newMessages = [messageEntry, ...prev];
-      // Keep only the most recent messages based on maxMessages setting
-      return newMessages.slice(0, settings.maxMessages);
-    });
+      setMessages((prev) => {
+        const newMessages = [messageEntry, ...prev];
+        // Keep only the most recent messages based on maxMessages setting
+        return newMessages.slice(0, settings.maxMessages);
+      });
 
-    // Console logging if enabled
-    if (settings.consoleLogging) {
-      console.group(`🔴 SSE Event: ${event.type}`);
-      console.log('📅 Timestamp:', format(messageEntry.timestamp, 'HH:mm:ss.SSS'));
-      console.log('📋 Event:', event);
-      console.log('🔗 Event ID:', event.id);
-      console.log('👤 User ID:', event.user_id || 'N/A');
-      console.groupEnd();
-    }
-  }, [settings.consoleLogging, settings.maxMessages]);
+      // Console logging if enabled
+      if (settings.consoleLogging) {
+        console.group(`🔴 SSE Event: ${event.type}`);
+        console.log(
+          '📅 Timestamp:',
+          format(messageEntry.timestamp, 'HH:mm:ss.SSS')
+        );
+        console.log('📋 Event:', event);
+        console.log('🔗 Event ID:', event.id);
+        console.log('👤 User ID:', event.user_id || 'N/A');
+        console.groupEnd();
+      }
+    },
+    [settings.consoleLogging, settings.maxMessages]
+  );
 
   // Start monitoring
   const startMonitoring = useCallback(() => {
     if (!manager) return;
-    
+
     console.log('Starting SSE monitoring...');
     setIsMonitoring(true);
     // Listen to all events using wildcard
     manager.addEventListener('*', handleSSEEvent);
-    
+
     // Connect if not already connected
     if (!isConnected) {
       manager.connect();
@@ -256,7 +277,7 @@ const SSEMonitorPage: React.FC = () => {
   // Stop monitoring
   const stopMonitoring = useCallback(() => {
     if (!manager) return;
-    
+
     console.log('Stopping SSE monitoring...');
     setIsMonitoring(false);
     manager.removeEventListener('*', handleSSEEvent);
@@ -277,11 +298,13 @@ const SSEMonitorPage: React.FC = () => {
   // Helper function to count active filters
   const getActiveFilterCount = useCallback(() => {
     const { filters } = settings;
-    return filters.eventTypes.length + 
-           filters.categories.length + 
-           filters.priorities.length + 
-           filters.userIds.length + 
-           filters.sourceSystems.length;
+    return (
+      filters.eventTypes.length +
+      filters.categories.length +
+      filters.priorities.length +
+      filters.userIds.length +
+      filters.sourceSystems.length
+    );
   }, [settings.filters]);
 
   // Export messages to JSON
@@ -331,13 +354,24 @@ const SSEMonitorPage: React.FC = () => {
     };
   }, [manager, handleSSEEvent]);
 
-  const getEventTypeColor = (type: string): 'default' | 'primary' | 'secondary' | 'error' | 'warning' | 'info' | 'success' => {
+  const getEventTypeColor = (
+    type: string
+  ):
+    | 'default'
+    | 'primary'
+    | 'secondary'
+    | 'error'
+    | 'warning'
+    | 'info'
+    | 'success' => {
     if (type.includes('error') || type.includes('failed')) return 'error';
     if (type.includes('warning') || type.includes('alert')) return 'warning';
-    if (type.includes('success') || type.includes('completed')) return 'success';
+    if (type.includes('success') || type.includes('completed'))
+      return 'success';
     if (type.includes('progress') || type.includes('processing')) return 'info';
     if (type.includes('chat') || type.includes('message')) return 'primary';
-    if (type.includes('system') || type.includes('connection')) return 'secondary';
+    if (type.includes('system') || type.includes('connection'))
+      return 'secondary';
     return 'default';
   };
 
@@ -347,7 +381,8 @@ const SSEMonitorPage: React.FC = () => {
         SSE Monitor
       </Typography>
       <Typography variant="body2" color="text.secondary" sx={{ mb: 3 }}>
-        Real-time debugging tool for Server-Sent Events. Monitor incoming messages, filter by type, and export for analysis.
+        Real-time debugging tool for Server-Sent Events. Monitor incoming
+        messages, filter by type, and export for analysis.
       </Typography>
 
       {/* Control Panel */}
@@ -356,8 +391,8 @@ const SSEMonitorPage: React.FC = () => {
           <Grid container spacing={2} alignItems="center">
             <Grid>
               <Button
-                variant={isMonitoring ? "outlined" : "contained"}
-                color={isMonitoring ? "secondary" : "primary"}
+                variant={isMonitoring ? 'outlined' : 'contained'}
+                color={isMonitoring ? 'secondary' : 'primary'}
                 startIcon={isMonitoring ? <StopIcon /> : <PlayIcon />}
                 onClick={isMonitoring ? stopMonitoring : startMonitoring}
                 disabled={!manager}
@@ -365,7 +400,7 @@ const SSEMonitorPage: React.FC = () => {
                 {isMonitoring ? 'Stop Monitoring' : 'Start Monitoring'}
               </Button>
             </Grid>
-            
+
             <Grid>
               <Chip
                 label={isConnected ? 'Connected' : 'Disconnected'}
@@ -379,7 +414,14 @@ const SSEMonitorPage: React.FC = () => {
                 type="number"
                 label="Max Messages"
                 value={settings.maxMessages}
-                onChange={(e) => updateSettings({ maxMessages: Math.max(1, Math.min(1000, parseInt(e.target.value) || 100)) })}
+                onChange={(e) =>
+                  updateSettings({
+                    maxMessages: Math.max(
+                      1,
+                      Math.min(1000, parseInt(e.target.value) || 100)
+                    ),
+                  })
+                }
                 size="small"
                 sx={{ width: 120 }}
                 inputProps={{ min: 1, max: 1000 }}
@@ -391,7 +433,9 @@ const SSEMonitorPage: React.FC = () => {
                 control={
                   <Switch
                     checked={settings.consoleLogging}
-                    onChange={(e) => updateSettings({ consoleLogging: e.target.checked })}
+                    onChange={(e) =>
+                      updateSettings({ consoleLogging: e.target.checked })
+                    }
                   />
                 }
                 label="Console Logging"
@@ -400,8 +444,16 @@ const SSEMonitorPage: React.FC = () => {
 
             <Grid>
               <Tooltip title="Toggle Raw Data View">
-                <IconButton onClick={() => updateSettings({ showRawData: !settings.showRawData })}>
-                  {settings.showRawData ? <VisibilityOffIcon /> : <VisibilityIcon />}
+                <IconButton
+                  onClick={() =>
+                    updateSettings({ showRawData: !settings.showRawData })
+                  }
+                >
+                  {settings.showRawData ? (
+                    <VisibilityOffIcon />
+                  ) : (
+                    <VisibilityIcon />
+                  )}
                 </IconButton>
               </Tooltip>
             </Grid>
@@ -417,7 +469,10 @@ const SSEMonitorPage: React.FC = () => {
             <Grid>
               <Tooltip title="Export Messages">
                 <span>
-                  <IconButton onClick={exportMessages} disabled={filteredMessages.length === 0}>
+                  <IconButton
+                    onClick={exportMessages}
+                    disabled={filteredMessages.length === 0}
+                  >
                     <DownloadIcon />
                   </IconButton>
                 </span>
@@ -439,11 +494,22 @@ const SSEMonitorPage: React.FC = () => {
               <Button
                 variant="outlined"
                 startIcon={<FilterIcon />}
-                onClick={() => updateSettings({ showAdvancedFilters: !settings.showAdvancedFilters })}
-                endIcon={settings.showAdvancedFilters ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                color={getActiveFilterCount() > 0 ? "primary" : "inherit"}
+                onClick={() =>
+                  updateSettings({
+                    showAdvancedFilters: !settings.showAdvancedFilters,
+                  })
+                }
+                endIcon={
+                  settings.showAdvancedFilters ? (
+                    <ExpandLessIcon />
+                  ) : (
+                    <ExpandMoreIcon />
+                  )
+                }
+                color={getActiveFilterCount() > 0 ? 'primary' : 'inherit'}
               >
-                Filters {getActiveFilterCount() > 0 && `(${getActiveFilterCount()})`}
+                Filters{' '}
+                {getActiveFilterCount() > 0 && `(${getActiveFilterCount()})`}
               </Button>
             </Grid>
 
@@ -476,7 +542,9 @@ const SSEMonitorPage: React.FC = () => {
                     multiple
                     options={filterOptions.eventTypes}
                     value={settings.filters.eventTypes}
-                    onChange={(_, value) => updateFilters({ eventTypes: value })}
+                    onChange={(_, value) =>
+                      updateFilters({ eventTypes: value })
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -506,7 +574,9 @@ const SSEMonitorPage: React.FC = () => {
                     multiple
                     options={filterOptions.categories}
                     value={settings.filters.categories}
-                    onChange={(_, value) => updateFilters({ categories: value })}
+                    onChange={(_, value) =>
+                      updateFilters({ categories: value })
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -537,7 +607,9 @@ const SSEMonitorPage: React.FC = () => {
                     multiple
                     options={filterOptions.priorities}
                     value={settings.filters.priorities}
-                    onChange={(_, value) => updateFilters({ priorities: value })}
+                    onChange={(_, value) =>
+                      updateFilters({ priorities: value })
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -599,7 +671,9 @@ const SSEMonitorPage: React.FC = () => {
                     multiple
                     options={filterOptions.sourceSystems}
                     value={settings.filters.sourceSystems}
-                    onChange={(_, value) => updateFilters({ sourceSystems: value })}
+                    onChange={(_, value) =>
+                      updateFilters({ sourceSystems: value })
+                    }
                     renderInput={(params) => (
                       <TextField
                         {...params}
@@ -635,23 +709,37 @@ const SSEMonitorPage: React.FC = () => {
           <Grid container spacing={3}>
             <Grid size={2.4}>
               <Typography variant="h6">{messages.length}</Typography>
-              <Typography variant="body2" color="text.secondary">Total Messages</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Total Messages
+              </Typography>
             </Grid>
             <Grid size={2.4}>
               <Typography variant="h6">{filteredMessages.length}</Typography>
-              <Typography variant="body2" color="text.secondary">Filtered Messages</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Filtered Messages
+              </Typography>
             </Grid>
             <Grid size={2.4}>
-              <Typography variant="h6">{filterOptions.eventTypes.length}</Typography>
-              <Typography variant="body2" color="text.secondary">Event Types</Typography>
+              <Typography variant="h6">
+                {filterOptions.eventTypes.length}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Event Types
+              </Typography>
             </Grid>
             <Grid size={2.4}>
               <Typography variant="h6">{getActiveFilterCount()}</Typography>
-              <Typography variant="body2" color="text.secondary">Active Filters</Typography>
+              <Typography variant="body2" color="text.secondary">
+                Active Filters
+              </Typography>
             </Grid>
             <Grid size={2.4}>
-              <Typography variant="h6">{isMonitoring ? 'Active' : 'Inactive'}</Typography>
-              <Typography variant="body2" color="text.secondary">Monitor Status</Typography>
+              <Typography variant="h6">
+                {isMonitoring ? 'Active' : 'Inactive'}
+              </Typography>
+              <Typography variant="body2" color="text.secondary">
+                Monitor Status
+              </Typography>
             </Grid>
           </Grid>
         </CardContent>
@@ -661,18 +749,21 @@ const SSEMonitorPage: React.FC = () => {
       <Card>
         <CardContent>
           <Typography variant="h6" gutterBottom>
-            Messages {filteredMessages.length > 0 && `(${filteredMessages.length})`}
+            Messages{' '}
+            {filteredMessages.length > 0 && `(${filteredMessages.length})`}
           </Typography>
-          
+
           {!isMonitoring && messages.length === 0 && (
             <Alert severity="info" sx={{ my: 2 }}>
-              Click "Start Monitoring" to begin capturing SSE messages. Make sure you're connected to the SSE stream.
+              Click "Start Monitoring" to begin capturing SSE messages. Make
+              sure you're connected to the SSE stream.
             </Alert>
           )}
 
           {filteredMessages.length === 0 && messages.length > 0 && (
             <Alert severity="warning" sx={{ my: 2 }}>
-              No messages match the selected filters. Try clearing some filters or selecting different criteria.
+              No messages match the selected filters. Try clearing some filters
+              or selecting different criteria.
             </Alert>
           )}
 
@@ -683,7 +774,14 @@ const SSEMonitorPage: React.FC = () => {
                   <ListItem alignItems="flex-start">
                     <ListItemText
                       primary={
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1 }}>
+                        <Box
+                          sx={{
+                            display: 'flex',
+                            alignItems: 'center',
+                            gap: 1,
+                            mb: 1,
+                          }}
+                        >
                           <Chip
                             label={message.event.type}
                             color={getEventTypeColor(message.event.type)}
@@ -706,16 +804,24 @@ const SSEMonitorPage: React.FC = () => {
                         <Box>
                           {/* Event Data Summary */}
                           <Box sx={{ mb: 1 }}>
-                            {typeof message.event.data === 'object' 
+                            {typeof message.event.data === 'object'
                               ? `Data: ${Object.keys(message.event.data || {}).join(', ')}`
-                              : `Data: ${String(message.event.data).substring(0, 100)}...`
-                            }
+                              : `Data: ${String(message.event.data).substring(0, 100)}...`}
                           </Box>
-                          
+
                           {/* Raw Data (if enabled) */}
                           {settings.showRawData && (
-                            <Paper sx={{ p: 2, mt: 1, backgroundColor: 'grey.50' }}>
-                              <Typography variant="body2" component="pre" sx={{ fontSize: '0.75rem', whiteSpace: 'pre-wrap' }}>
+                            <Paper
+                              sx={{ p: 2, mt: 1, backgroundColor: 'grey.50' }}
+                            >
+                              <Typography
+                                variant="body2"
+                                component="pre"
+                                sx={{
+                                  fontSize: '0.75rem',
+                                  whiteSpace: 'pre-wrap',
+                                }}
+                              >
                                 {message.rawData}
                               </Typography>
                             </Paper>

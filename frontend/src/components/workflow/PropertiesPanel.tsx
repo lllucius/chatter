@@ -67,10 +67,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   if (!selectedNode) {
     return (
-      <Paper 
-        sx={{ 
-          width: 350, 
-          height: '100%', 
+      <Paper
+        sx={{
+          width: 350,
+          height: '100%',
           p: 2,
           display: 'flex',
           alignItems: 'center',
@@ -95,14 +95,20 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               multiline
               rows={3}
               value={config.systemMessage || ''}
-              onChange={(e) => setConfig({ ...config, systemMessage: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, systemMessage: e.target.value })
+              }
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>Temperature: {config.temperature || 0.7}</Typography>
+              <Typography gutterBottom>
+                Temperature: {config.temperature || 0.7}
+              </Typography>
               <Slider
                 value={config.temperature || 0.7}
-                onChange={(_, value) => setConfig({ ...config, temperature: value })}
+                onChange={(_, value) =>
+                  setConfig({ ...config, temperature: value })
+                }
                 min={0}
                 max={2}
                 step={0.1}
@@ -118,7 +124,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Max Tokens"
               type="number"
               value={config.maxTokens || 1000}
-              onChange={(e) => setConfig({ ...config, maxTokens: parseInt(e.target.value) || 1000 })}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  maxTokens: parseInt(e.target.value) || 1000,
+                })
+              }
               sx={{ mb: 2 }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -126,7 +137,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <Select
                 value={config.model || 'gpt-4'}
                 label="Model"
-                onChange={(e) => setConfig({ ...config, model: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, model: e.target.value })
+                }
               >
                 <MenuItem value="gpt-4">GPT-4</MenuItem>
                 <MenuItem value="gpt-4-turbo">GPT-4 Turbo</MenuItem>
@@ -145,7 +158,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               control={
                 <Switch
                   checked={config.parallel || false}
-                  onChange={(e) => setConfig({ ...config, parallel: e.target.checked })}
+                  onChange={(e) =>
+                    setConfig({ ...config, parallel: e.target.checked })
+                  }
                 />
               }
               label="Execute in Parallel"
@@ -156,17 +171,19 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 Selected Tools:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                {(config.tools || []).map((tool: string, index: number): void => (
-                  <Chip
-                    key={index}
-                    label={tool}
-                    onDelete={() => {
-                      const newTools = [...(config.tools || [])];
-                      newTools.splice(index, 1);
-                      setConfig({ ...config, tools: newTools });
-                    }}
-                  />
-                ))}
+                {(config.tools || []).map(
+                  (tool: string, index: number): void => (
+                    <Chip
+                      key={index}
+                      label={tool}
+                      onDelete={() => {
+                        const newTools = [...(config.tools || [])];
+                        newTools.splice(index, 1);
+                        setConfig({ ...config, tools: newTools });
+                      }}
+                    />
+                  )
+                )}
               </Box>
               <FormControl fullWidth>
                 <InputLabel>Add Tool</InputLabel>
@@ -176,9 +193,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   onChange={(e) => {
                     const tool = e.target.value as string;
                     if (tool && !config.tools?.includes(tool)) {
-                      setConfig({ 
-                        ...config, 
-                        tools: [...(config.tools || []), tool] 
+                      setConfig({
+                        ...config,
+                        tools: [...(config.tools || []), tool],
                       });
                     }
                   }}
@@ -201,7 +218,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               control={
                 <Switch
                   checked={config.enabled !== false}
-                  onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
+                  onChange={(e) =>
+                    setConfig({ ...config, enabled: e.target.checked })
+                  }
                 />
               }
               label="Enable Memory"
@@ -212,7 +231,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Memory Window Size"
               type="number"
               value={config.window || 20}
-              onChange={(e) => setConfig({ ...config, window: parseInt(e.target.value) || 20 })}
+              onChange={(e) =>
+                setConfig({ ...config, window: parseInt(e.target.value) || 20 })
+              }
               helperText="Number of messages to remember"
               sx={{ mb: 2 }}
             />
@@ -221,7 +242,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <Select
                 value={config.memoryType || 'conversation'}
                 label="Memory Type"
-                onChange={(e) => setConfig({ ...config, memoryType: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, memoryType: e.target.value })
+                }
               >
                 <MenuItem value="conversation">Conversation Buffer</MenuItem>
                 <MenuItem value="summary">Summary Buffer</MenuItem>
@@ -239,7 +262,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               fullWidth
               label="Collection Name"
               value={config.collection || ''}
-              onChange={(e) => setConfig({ ...config, collection: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, collection: e.target.value })
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -247,14 +272,20 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Top K Results"
               type="number"
               value={config.topK || 5}
-              onChange={(e) => setConfig({ ...config, topK: parseInt(e.target.value) || 5 })}
+              onChange={(e) =>
+                setConfig({ ...config, topK: parseInt(e.target.value) || 5 })
+              }
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>Similarity Threshold: {config.threshold || 0.7}</Typography>
+              <Typography gutterBottom>
+                Similarity Threshold: {config.threshold || 0.7}
+              </Typography>
               <Slider
                 value={config.threshold || 0.7}
-                onChange={(_, value) => setConfig({ ...config, threshold: value })}
+                onChange={(_, value) =>
+                  setConfig({ ...config, threshold: value })
+                }
                 min={0}
                 max={1}
                 step={0.05}
@@ -277,13 +308,16 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               multiline
               rows={2}
               value={config.condition || ''}
-              onChange={(e) => setConfig({ ...config, condition: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, condition: e.target.value })
+              }
               helperText="JavaScript-like expression (e.g., response.includes('yes'))"
               sx={{ mb: 2 }}
             />
             <Alert severity="info" sx={{ mb: 2 }}>
               <Typography variant="caption">
-                Use variables like: `response`, `user_input`, `context`, `tools_used`
+                Use variables like: `response`, `user_input`, `context`,
+                `tools_used`
               </Typography>
             </Alert>
           </>
@@ -297,7 +331,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Max Iterations"
               type="number"
               value={config.maxIterations || 10}
-              onChange={(e) => setConfig({ ...config, maxIterations: parseInt(e.target.value) || 10 })}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  maxIterations: parseInt(e.target.value) || 10,
+                })
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -306,7 +345,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               multiline
               rows={2}
               value={config.condition || ''}
-              onChange={(e) => setConfig({ ...config, condition: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, condition: e.target.value })
+              }
               helperText="Continue while this condition is true"
               sx={{ mb: 2 }}
             />
@@ -316,7 +357,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               multiline
               rows={2}
               value={config.breakCondition || ''}
-              onChange={(e) => setConfig({ ...config, breakCondition: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, breakCondition: e.target.value })
+              }
               helperText="Break loop when this condition is true"
               sx={{ mb: 2 }}
             />
@@ -331,7 +374,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <Select
                 value={config.operation || 'set'}
                 label="Operation"
-                onChange={(e) => setConfig({ ...config, operation: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, operation: e.target.value })
+                }
               >
                 <MenuItem value="set">Set Variable</MenuItem>
                 <MenuItem value="get">Get Variable</MenuItem>
@@ -344,7 +389,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               fullWidth
               label="Variable Name"
               value={config.variableName || ''}
-              onChange={(e) => setConfig({ ...config, variableName: e.target.value })}
+              onChange={(e) =>
+                setConfig({ ...config, variableName: e.target.value })
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -362,7 +409,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <Select
                 value={config.scope || 'workflow'}
                 label="Scope"
-                onChange={(e) => setConfig({ ...config, scope: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, scope: e.target.value })
+                }
               >
                 <MenuItem value="workflow">Workflow</MenuItem>
                 <MenuItem value="session">Session</MenuItem>
@@ -380,7 +429,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Retry Count"
               type="number"
               value={config.retryCount || 3}
-              onChange={(e) => setConfig({ ...config, retryCount: parseInt(e.target.value) || 3 })}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  retryCount: parseInt(e.target.value) || 3,
+                })
+              }
               sx={{ mb: 2 }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -388,7 +442,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               <Select
                 value={config.fallbackAction || 'continue'}
                 label="Fallback Action"
-                onChange={(e) => setConfig({ ...config, fallbackAction: e.target.value })}
+                onChange={(e) =>
+                  setConfig({ ...config, fallbackAction: e.target.value })
+                }
               >
                 <MenuItem value="continue">Continue Workflow</MenuItem>
                 <MenuItem value="stop">Stop Workflow</MenuItem>
@@ -400,7 +456,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               control={
                 <Switch
                   checked={config.logErrors !== false}
-                  onChange={(e) => setConfig({ ...config, logErrors: e.target.checked })}
+                  onChange={(e) =>
+                    setConfig({ ...config, logErrors: e.target.checked })
+                  }
                 />
               }
               label="Log Errors"
@@ -417,7 +475,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Duration"
               type="number"
               value={config.duration || 1}
-              onChange={(e) => setConfig({ ...config, duration: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  duration: parseInt(e.target.value) || 1,
+                })
+              }
               sx={{ mb: 2 }}
             />
             <FormControl fullWidth sx={{ mb: 2 }}>
@@ -460,39 +523,50 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
 
   const getNodeTypeDescription = (nodeType: WorkflowNodeType): string => {
     switch (nodeType) {
-      case 'start': return 'Entry point for the workflow execution';
-      case 'model': return 'Large Language Model interaction with configurable parameters';
-      case 'tool': return 'Execute external tools and functions';
-      case 'memory': return 'Manage conversation context and history';
-      case 'retrieval': return 'Search and retrieve relevant documents';
-      case 'conditional': return 'Branch execution based on conditions';
-      case 'loop': return 'Repeat execution with conditions and limits';
-      case 'variable': return 'Store, retrieve, and manipulate workflow variables';
-      case 'errorHandler': return 'Handle errors and implement retry logic';
-      case 'delay': return 'Add time delays to workflow execution';
-      default: return 'Workflow node';
+      case 'start':
+        return 'Entry point for the workflow execution';
+      case 'model':
+        return 'Large Language Model interaction with configurable parameters';
+      case 'tool':
+        return 'Execute external tools and functions';
+      case 'memory':
+        return 'Manage conversation context and history';
+      case 'retrieval':
+        return 'Search and retrieve relevant documents';
+      case 'conditional':
+        return 'Branch execution based on conditions';
+      case 'loop':
+        return 'Repeat execution with conditions and limits';
+      case 'variable':
+        return 'Store, retrieve, and manipulate workflow variables';
+      case 'errorHandler':
+        return 'Handle errors and implement retry logic';
+      case 'delay':
+        return 'Add time delays to workflow execution';
+      default:
+        return 'Workflow node';
     }
   };
 
   return (
-    <Paper 
-      sx={{ 
-        width: 350, 
-        height: '100%', 
+    <Paper
+      sx={{
+        width: 350,
+        height: '100%',
         display: 'flex',
         flexDirection: 'column',
         bgcolor: 'background.paper',
       }}
     >
       {/* Header */}
-      <Box 
-        sx={{ 
-          p: 2, 
-          borderBottom: 1, 
+      <Box
+        sx={{
+          p: 2,
+          borderBottom: 1,
           borderColor: 'divider',
           display: 'flex',
           alignItems: 'center',
-          justifyContent: 'space-between'
+          justifyContent: 'space-between',
         }}
       >
         <Typography variant="h6" component="h2">
@@ -544,7 +618,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               control={
                 <Switch
                   checked={config.enabled !== false}
-                  onChange={(e) => setConfig({ ...config, enabled: e.target.checked })}
+                  onChange={(e) =>
+                    setConfig({ ...config, enabled: e.target.checked })
+                  }
                 />
               }
               label="Enable Node"
@@ -555,7 +631,12 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Timeout (seconds)"
               type="number"
               value={config.timeout || 30}
-              onChange={(e) => setConfig({ ...config, timeout: parseInt(e.target.value) || 30 })}
+              onChange={(e) =>
+                setConfig({
+                  ...config,
+                  timeout: parseInt(e.target.value) || 30,
+                })
+              }
               sx={{ mb: 2 }}
             />
             <TextField
@@ -563,7 +644,9 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               label="Retry Attempts"
               type="number"
               value={config.retries || 1}
-              onChange={(e) => setConfig({ ...config, retries: parseInt(e.target.value) || 1 })}
+              onChange={(e) =>
+                setConfig({ ...config, retries: parseInt(e.target.value) || 1 })
+              }
               sx={{ mb: 2 }}
             />
           </AccordionDetails>

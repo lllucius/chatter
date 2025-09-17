@@ -1,4 +1,11 @@
-import React, { useState, useEffect, ReactNode, useCallback, useImperativeHandle, forwardRef } from 'react';
+import React, {
+  useState,
+  useEffect,
+  ReactNode,
+  useCallback,
+  useImperativeHandle,
+  forwardRef,
+} from 'react';
 import {
   Box,
   Card,
@@ -57,7 +64,10 @@ export interface CrudConfig<T> {
 }
 
 export interface CrudService<T, TCreate, TUpdate> {
-  list: (page: number, pageSize: number) => Promise<{ items: T[]; total: number }>;
+  list: (
+    page: number,
+    pageSize: number
+  ) => Promise<{ items: T[]; total: number }>;
   create?: (data: TCreate) => Promise<T>;
   update?: (id: string, data: TUpdate) => Promise<T>;
   delete?: (id: string) => Promise<void>;
@@ -86,27 +96,34 @@ interface CrudDataTableProps<T, TCreate, TUpdate> {
   onExternalDialogClose?: () => void;
 }
 
-export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unknown, unknown, unknown>>(function CrudDataTable<T, TCreate, TUpdate>({
-  config,
-  service,
-  FormComponent,
-  getItemId,
-  externalDialogOpen,
-  onExternalDialogClose,
-}: CrudDataTableProps<T, TCreate, TUpdate>, ref: React.ForwardedRef<CrudDataTableRef>) {
+export const CrudDataTable = forwardRef<
+  CrudDataTableRef,
+  CrudDataTableProps<unknown, unknown, unknown>
+>(function CrudDataTable<T, TCreate, TUpdate>(
+  {
+    config,
+    service,
+    FormComponent,
+    getItemId,
+    externalDialogOpen,
+    onExternalDialogClose,
+  }: CrudDataTableProps<T, TCreate, TUpdate>,
+  ref: React.ForwardedRef<CrudDataTableRef>
+) {
   // State management
   const [items, setItems] = useState<T[]>([]);
   const [loading, setLoading] = useState(true);
   const [page, setPage] = useState(0);
   const [rowsPerPage, setRowsPerPage] = useState(config.pageSize || 10);
   const [total, setTotal] = useState(0);
-  
+
   // Dialog state - use individual internal state for these
   const [internalDialogOpen, setInternalDialogOpen] = useState(false);
   const [dialogMode, setDialogMode] = useState<'create' | 'edit'>('create');
 
   // Use external dialog state if provided, otherwise use internal state
-  const isDialogOpen = externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
+  const isDialogOpen =
+    externalDialogOpen !== undefined ? externalDialogOpen : internalDialogOpen;
   const handleDialogClose = () => {
     if (onExternalDialogClose) {
       onExternalDialogClose();
@@ -115,9 +132,11 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
     }
   };
   const [selectedItem, setSelectedItem] = useState<T | null>(null);
-  
+
   // Action menu state
-  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
+  const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(
+    null
+  );
   const [actionMenuItem, setActionMenuItem] = useState<T | null>(null);
 
   // Load data
@@ -131,7 +150,7 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       handleError(error, {
         source: 'CrudDataTable.loadData',
         operation: `load ${config.entityNamePlural.toLowerCase()}`,
-        additionalData: { entityType: config.entityName }
+        additionalData: { entityType: config.entityName },
       });
     } finally {
       setLoading(false);
@@ -168,8 +187,12 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
 
   const handleDelete = async (item: T) => {
     if (!service.delete) return;
-    
-    if (window.confirm(`Are you sure you want to delete this ${config.entityName.toLowerCase()}?`)) {
+
+    if (
+      window.confirm(
+        `Are you sure you want to delete this ${config.entityName.toLowerCase()}?`
+      )
+    ) {
       try {
         await service.delete(getItemId(item));
         toastService.success(`${config.entityName} deleted successfully`);
@@ -178,10 +201,10 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         handleError(error, {
           source: 'CrudDataTable.handleDelete',
           operation: `delete ${config.entityName.toLowerCase()}`,
-          additionalData: { 
+          additionalData: {
             entityType: config.entityName,
-            itemId: item?.id 
-          }
+            itemId: item?.id,
+          },
         });
       }
     }
@@ -202,17 +225,20 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
       handleError(error, {
         source: 'CrudDataTable.handleSave',
         operation: `${dialogMode} ${config.entityName.toLowerCase()}`,
-        additionalData: { 
+        additionalData: {
           entityType: config.entityName,
           dialogMode,
-          itemId: selectedItem?.id 
-        }
+          itemId: selectedItem?.id,
+        },
       });
     }
   };
 
   // Action menu handlers
-  const handleActionMenuOpen = (event: React.MouseEvent<HTMLElement>, item: T) => {
+  const handleActionMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    item: T
+  ) => {
     setActionMenuAnchor(event.currentTarget);
     setActionMenuItem(item);
   };
@@ -234,7 +260,9 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
     setPage(newPage);
   };
 
-  const handleChangeRowsPerPage = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleChangeRowsPerPage = (
+    event: React.ChangeEvent<HTMLInputElement>
+  ) => {
     setRowsPerPage(parseInt(event.target.value, 10));
     setPage(0);
   };
@@ -252,7 +280,9 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
                     {column.label}
                   </TableCell>
                 ))}
-                {(config.enableEdit || config.enableDelete || config.actions) && (
+                {(config.enableEdit ||
+                  config.enableDelete ||
+                  config.actions) && (
                   <TableCell width="120px">Actions</TableCell>
                 )}
               </TableRow>
@@ -284,12 +314,18 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
                     {config.columns.map((column): void => (
                       <TableCell key={String(column.id)}>
                         {column.render
-                          ? column.render((item as Record<string, unknown>)[column.id], item)
-                          : String((item as Record<string, unknown>)[column.id] || '')
-                        }
+                          ? column.render(
+                              (item as Record<string, unknown>)[column.id],
+                              item
+                            )
+                          : String(
+                              (item as Record<string, unknown>)[column.id] || ''
+                            )}
                       </TableCell>
                     ))}
-                    {(config.enableEdit || config.enableDelete || config.actions) && (
+                    {(config.enableEdit ||
+                      config.enableDelete ||
+                      config.actions) && (
                       <TableCell>
                         <Tooltip title="Actions">
                           <IconButton
@@ -327,30 +363,38 @@ export const CrudDataTable = forwardRef<CrudDataTableRef, CrudDataTableProps<unk
         onClose={handleActionMenuClose}
       >
         {config.enableEdit && service.update && FormComponent && (
-          <MenuItem onClick={() => {
-            if (actionMenuItem) {
-              handleEdit(actionMenuItem);
-            }
-            handleActionMenuClose();
-          }}>
-            <ListItemIcon><EditIcon /></ListItemIcon>
+          <MenuItem
+            onClick={() => {
+              if (actionMenuItem) {
+                handleEdit(actionMenuItem);
+              }
+              handleActionMenuClose();
+            }}
+          >
+            <ListItemIcon>
+              <EditIcon />
+            </ListItemIcon>
             Edit {config.entityName}
           </MenuItem>
         )}
         {config.enableDelete && service.delete && (
-          <MenuItem onClick={() => {
-            if (actionMenuItem) {
-              handleDelete(actionMenuItem);
-            }
-            handleActionMenuClose();
-          }}>
-            <ListItemIcon><DeleteIcon /></ListItemIcon>
+          <MenuItem
+            onClick={() => {
+              if (actionMenuItem) {
+                handleDelete(actionMenuItem);
+              }
+              handleActionMenuClose();
+            }}
+          >
+            <ListItemIcon>
+              <DeleteIcon />
+            </ListItemIcon>
             Delete {config.entityName}
           </MenuItem>
         )}
-        {(config.enableEdit || config.enableDelete) && config.actions && config.actions.length > 0 && (
-          <Divider />
-        )}
+        {(config.enableEdit || config.enableDelete) &&
+          config.actions &&
+          config.actions.length > 0 && <Divider />}
         {config.actions?.map((action, index): void => (
           <MenuItem key={index} onClick={() => handleActionClick(action)}>
             <ListItemIcon>{action.icon}</ListItemIcon>

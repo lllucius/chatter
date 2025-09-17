@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-09-17T05:43:42Z",
+  "generated_at": "2025-09-17T06:02:40Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 22,
@@ -11,7 +11,7 @@
       "SEVERITY.LOW": 36,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 69921,
+      "loc": 70291,
       "nosec": 0,
       "skipped_tests": 3
     },
@@ -323,7 +323,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 616,
+      "loc": 618,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -674,7 +674,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 681,
+      "loc": 679,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -752,7 +752,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 966,
+      "loc": 998,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -856,7 +856,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 129,
+      "loc": 163,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -869,7 +869,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 98,
+      "loc": 117,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -908,7 +908,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 518,
+      "loc": 705,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1012,7 +1012,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 173,
+      "loc": 191,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1623,7 +1623,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 870,
+      "loc": 904,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1662,7 +1662,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 976,
+      "loc": 975,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1688,7 +1688,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 604,
+      "loc": 606,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1753,7 +1753,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 157,
+      "loc": 179,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1831,7 +1831,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 241,
+      "loc": 260,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1844,7 +1844,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 508,
+      "loc": 512,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2162,7 +2162,7 @@
       "test_name": "blacklist"
     },
     {
-      "code": "110                             )\n111                         except Exception:\n112                             pass  # Ignore cleanup errors\n113                         self._redis_context_manager = None\n",
+      "code": "109                             )\n110                         except Exception:\n111                             pass  # Ignore cleanup errors\n112                         self._redis_context_manager = None\n",
       "col_offset": 24,
       "end_col_offset": 32,
       "filename": "chatter/core/langgraph.py",
@@ -2173,17 +2173,17 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 111,
+      "line_number": 110,
       "line_range": [
-        111,
-        112
+        110,
+        111
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "156                 self._redis_context_manager.__exit__(None, None, None)\n157             except Exception:\n158                 pass  # Ignore cleanup errors in destructor\n159 \n",
+      "code": "155                 self._redis_context_manager.__exit__(None, None, None)\n156             except Exception:\n157                 pass  # Ignore cleanup errors in destructor\n158 \n",
       "col_offset": 12,
       "end_col_offset": 20,
       "filename": "chatter/core/langgraph.py",
@@ -2194,10 +2194,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 157,
+      "line_number": 156,
       "line_range": [
-        157,
-        158
+        156,
+        157
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
@@ -2512,7 +2512,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "44     ERROR_RATE = \"error_rate\"\n45     TOKEN_USAGE = \"token_usage\"\n46     CUSTOM = \"custom\"\n",
+      "code": "43     ERROR_RATE = \"error_rate\"\n44     TOKEN_USAGE = \"token_usage\"\n45     CUSTOM = \"custom\"\n",
       "col_offset": 18,
       "end_col_offset": 31,
       "filename": "chatter/schemas/ab_testing.py",
@@ -2523,9 +2523,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Possible hardcoded password: 'token_usage'",
-      "line_number": 45,
+      "line_number": 44,
       "line_range": [
-        45
+        44
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b105_hardcoded_password_string.html",
       "test_id": "B105",
@@ -2552,7 +2552,7 @@
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "733             conversion_rate = (\n734                 0.10 + (random.random() - 0.5) * 0.05\n735             )  # Simulate data\n",
+      "code": "734             conversion_rate = (\n735                 0.10 + (random.random() - 0.5) * 0.05\n736             )  # Simulate data\n",
       "col_offset": 24,
       "end_col_offset": 39,
       "filename": "chatter/services/ab_testing.py",
@@ -2563,9 +2563,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 734,
+      "line_number": 735,
       "line_range": [
-        734
+        735
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
@@ -2698,7 +2698,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "1168 \n1169         provider = random.choice(providers)\n1170 \n",
+      "code": "1167 \n1168         provider = random.choice(providers)\n1169 \n",
       "col_offset": 19,
       "end_col_offset": 43,
       "filename": "chatter/services/llm.py",
@@ -2709,9 +2709,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 1169,
+      "line_number": 1168,
       "line_range": [
-        1169
+        1168
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",
@@ -2760,7 +2760,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "63             content = json.dumps(workflow_data, sort_keys=True)\n64             return f\"workflow_analytics:{hashlib.md5(content.encode()).hexdigest()}\"\n65         except Exception:\n",
+      "code": "65             content = json.dumps(workflow_data, sort_keys=True)\n66             return f\"workflow_analytics:{hashlib.md5(content.encode()).hexdigest()}\"\n67         except Exception:\n",
       "col_offset": 41,
       "end_col_offset": 70,
       "filename": "chatter/services/simplified_workflow_analytics.py",
@@ -2771,9 +2771,9 @@
       },
       "issue_severity": "HIGH",
       "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 64,
+      "line_number": 66,
       "line_range": [
-        64
+        66
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
       "test_id": "B324",

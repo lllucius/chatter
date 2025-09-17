@@ -22,7 +22,7 @@ const useForm = (initialValues: Record<string, unknown>) => {
 describe('useForm hook', () => {
   it('should initialize correctly', () => {
     const { result } = renderHook(() => useForm({ username: 'test' }));
-    
+
     expect(result.current.values).toEqual({ username: 'test' });
     expect(result.current.errors).toEqual({});
     expect(result.current.touched).toEqual({});
@@ -30,7 +30,7 @@ describe('useForm hook', () => {
 
   it('should provide form methods', () => {
     const { result } = renderHook(() => useForm({ username: '' }));
-    
+
     expect(typeof result.current.setFieldValue).toBe('function');
     expect(typeof result.current.handleSubmit).toBe('function');
     expect(typeof result.current.resetForm).toBe('function');
@@ -38,8 +38,10 @@ describe('useForm hook', () => {
 
   it('should handle validation options', () => {
     const validate = vi.fn();
-    const { result } = renderHook(() => useForm({ username: '' }, { validate }));
-    
+    const { result } = renderHook(() =>
+      useForm({ username: '' }, { validate })
+    );
+
     expect(result.current.isValid).toBe(true);
   });
 });

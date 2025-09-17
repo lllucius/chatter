@@ -14,16 +14,15 @@ import {
   Paper,
   LinearProgress,
 } from '../utils/mui';
-import {
-  SearchIcon,
-  ViewIcon,
-  DownloadIcon,
-  AddIcon,
-} from '../utils/icons';
+import { SearchIcon, ViewIcon, DownloadIcon, AddIcon } from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import { CrudPageHeader } from '../components/PageHeader';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+} from '../components/CrudDataTable';
 import DocumentForm from '../components/DocumentForm';
 import CustomScrollbar from '../components/CustomScrollbar';
 import {
@@ -31,16 +30,14 @@ import {
   createCategoryChipRenderer,
   createDateRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import { formatFileSize } from '../utils/common';
-import {
-  DocumentProcessingFailedEvent
-} from '../services/sse-types';
+import { DocumentProcessingFailedEvent } from '../services/sse-types';
 
 interface DocumentCreateData {
   file: File;
@@ -54,7 +51,7 @@ interface DocumentUpdateData {
 const DocumentsPage: React.FC = () => {
   const { darkMode } = useContext(ThemeContext);
   const { on } = useSSE();
-  
+
   // Search dialog state
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
@@ -71,29 +68,41 @@ const DocumentsPage: React.FC = () => {
   useEffect(() => {
     // Attach listeners for real-time updates
     const unsubscribeDocumentUploaded = on('document.uploaded', () => {
-      setRefreshKey(prev => prev + 1);
+      setRefreshKey((prev) => prev + 1);
     });
 
-    const unsubscribeProcessingStarted = on('document.processing_started', () => {
-      setRefreshKey(prev => prev + 1);
-    });
+    const unsubscribeProcessingStarted = on(
+      'document.processing_started',
+      () => {
+        setRefreshKey((prev) => prev + 1);
+      }
+    );
 
-    const unsubscribeProcessingCompleted = on('document.processing_completed', () => {
-      setRefreshKey(prev => prev + 1);
-    });
+    const unsubscribeProcessingCompleted = on(
+      'document.processing_completed',
+      () => {
+        setRefreshKey((prev) => prev + 1);
+      }
+    );
 
-    const unsubscribeProcessingFailed = on('document.processing_failed', (event) => {
-      const docEvent = event as DocumentProcessingFailedEvent;
-      handleError(new Error(`Document processing failed: ${docEvent.data.error}`), {
-        source: 'DocumentsPage.onDocumentProcessingFailed',
-        operation: 'process document',
-        additionalData: { 
-          documentId: docEvent.data.document_id,
-          error: docEvent.data.error 
-        }
-      });
-      setRefreshKey(prev => prev + 1);
-    });
+    const unsubscribeProcessingFailed = on(
+      'document.processing_failed',
+      (event) => {
+        const docEvent = event as DocumentProcessingFailedEvent;
+        handleError(
+          new Error(`Document processing failed: ${docEvent.data.error}`),
+          {
+            source: 'DocumentsPage.onDocumentProcessingFailed',
+            operation: 'process document',
+            additionalData: {
+              documentId: docEvent.data.document_id,
+              error: docEvent.data.error,
+            },
+          }
+        );
+        setRefreshKey((prev) => prev + 1);
+      }
+    );
 
     return () => {
       unsubscribeDocumentUploaded();
@@ -106,23 +115,22 @@ const DocumentsPage: React.FC = () => {
   // Custom file size renderer
   const createFileSizeRenderer = (): CrudColumn<DocumentResponse>['render'] => {
     return (value: number): void => (
-      <Typography variant="body2">
-        {formatFileSize(value)}
-      </Typography>
+      <Typography variant="body2">{formatFileSize(value)}</Typography>
     );
   };
 
   // Custom chunk count renderer
-  const createChunkCountRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: number | undefined) => {
-      if (!value) return '—';
-      return (
-        <Typography variant="body2" color="info.main">
-          {value} chunks
-        </Typography>
-      );
+  const createChunkCountRenderer =
+    (): CrudColumn<DocumentResponse>['render'] => {
+      return (value: number | undefined) => {
+        if (!value) return '—';
+        return (
+          <Typography variant="body2" color="info.main">
+            {value} chunks
+          </Typography>
+        );
+      };
     };
-  };
 
   // Custom title renderer with filename fallback
   const createTitleRenderer = (): CrudColumn<DocumentResponse>['render'] => {
@@ -152,7 +160,10 @@ const DocumentsPage: React.FC = () => {
       id: 'mime_type',
       label: 'Type',
       width: '120px',
-      render: createCategoryChipRenderer<DocumentResponse>('secondary', 'outlined'),
+      render: createCategoryChipRenderer<DocumentResponse>(
+        'secondary',
+        'outlined'
+      ),
     },
     {
       id: 'file_size',
@@ -187,16 +198,21 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
-          document.id,
-          {
-            limit: 3,
-            offset: 0
-          }
-        );
-        if (chunksResponse.data && chunksResponse.data.chunks && chunksResponse.data.chunks.length > 0) {
+        const chunksResponse =
+          await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
+            document.id,
+            {
+              limit: 3,
+              offset: 0,
+            }
+          );
+        if (
+          chunksResponse.data &&
+          chunksResponse.data.chunks &&
+          chunksResponse.data.chunks.length > 0
+        ) {
           contentPreview = chunksResponse.data.chunks
-            .map(chunk => chunk.content)
+            .map((chunk) => chunk.content)
             .join('\n\n')
             .substring(0, 1000);
           if (contentPreview.length >= 1000) {
@@ -212,7 +228,11 @@ const DocumentsPage: React.FC = () => {
       const textColor = darkMode ? '#ffffff' : '#000000';
       const borderColor = darkMode ? '#333333' : '#dddddd';
 
-      const newWindow = window.open('', '_blank', 'width=800,height=600,scrollbars=yes');
+      const newWindow = window.open(
+        '',
+        '_blank',
+        'width=800,height=600,scrollbars=yes'
+      );
       if (newWindow) {
         newWindow.document.write(`
           <html>
@@ -290,7 +310,10 @@ const DocumentsPage: React.FC = () => {
       handleError(err, {
         source: 'DocumentsPage.handleViewDocument',
         operation: 'view document details',
-        additionalData: { documentId: document.id, documentName: document.filename }
+        additionalData: {
+          documentId: document.id,
+          documentName: document.filename,
+        },
       });
     }
   };
@@ -298,12 +321,15 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(
-        document.id
-      );
+      const response =
+        await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(
+          document.id
+        );
 
       // Create a blob URL and trigger download
-      const blob = new Blob([response.data], { type: 'application/octet-stream' });
+      const blob = new Blob([response.data], {
+        type: 'application/octet-stream',
+      });
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;
@@ -316,7 +342,10 @@ const DocumentsPage: React.FC = () => {
       handleError(err, {
         source: 'DocumentsPage.handleDownloadDocument',
         operation: 'download document',
-        additionalData: { documentId: document.id, documentName: document.filename }
+        additionalData: {
+          documentId: document.id,
+          documentName: document.filename,
+        },
       });
     }
   };
@@ -331,13 +360,16 @@ const DocumentsPage: React.FC = () => {
         query: searchQuery,
         limit: 10,
       };
-      const response = await getSDK().documents.searchDocumentsApiV1DocumentsSearch(searchRequest);
+      const response =
+        await getSDK().documents.searchDocumentsApiV1DocumentsSearch(
+          searchRequest
+        );
       setSearchResults(response.results);
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleSearch',
         operation: 'search documents',
-        additionalData: { query: searchQuery }
+        additionalData: { query: searchQuery },
       });
     } finally {
       setSearching(false);
@@ -369,14 +401,18 @@ const DocumentsPage: React.FC = () => {
   };
 
   // Define service methods
-  const service: CrudService<DocumentResponse, DocumentCreateData, DocumentUpdateData> = {
+  const service: CrudService<
+    DocumentResponse,
+    DocumentCreateData,
+    DocumentUpdateData
+  > = {
     list: async (page: number, pageSize: number) => {
       const response = await getSDK().documents.listDocumentsApiV1Documents({
         limit: pageSize,
         offset: page * pageSize,
       });
       const documents = response.documents || [];
-      
+
       return {
         items: documents,
         total: response.total_count || documents.length,
@@ -389,7 +425,8 @@ const DocumentsPage: React.FC = () => {
       if (data.title) {
         formData.append('title', data.title);
       }
-      const response = await getSDK().documents.uploadDocumentApiV1DocumentsUpload(formData);
+      const response =
+        await getSDK().documents.uploadDocumentApiV1DocumentsUpload(formData);
       return response.data;
     },
 
@@ -435,7 +472,12 @@ const DocumentsPage: React.FC = () => {
       />
 
       {/* Semantic Search Dialog */}
-      <Dialog open={searchDialogOpen} onClose={() => setSearchDialogOpen(false)} maxWidth="md" fullWidth>
+      <Dialog
+        open={searchDialogOpen}
+        onClose={() => setSearchDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
         <DialogTitle>Semantic Document Search</DialogTitle>
         <DialogContent>
           <Box sx={{ mt: 2 }}>
@@ -474,7 +516,13 @@ const DocumentsPage: React.FC = () => {
                     <ListItem key={index} divider>
                       <ListItemText
                         primary={
-                          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              alignItems: 'center',
+                              mb: 1,
+                            }}
+                          >
                             <Typography variant="subtitle2" sx={{ mr: 1 }}>
                               Score: {(result.score || 0).toFixed(3)}
                             </Typography>
@@ -484,8 +532,13 @@ const DocumentsPage: React.FC = () => {
                           </Box>
                         }
                         secondary={
-                          <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap' }}>
-                            {result.content || result.text || 'No content available'}
+                          <Typography
+                            variant="body2"
+                            sx={{ whiteSpace: 'pre-wrap' }}
+                          >
+                            {result.content ||
+                              result.text ||
+                              'No content available'}
                           </Typography>
                         }
                       />

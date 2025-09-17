@@ -48,11 +48,16 @@ interface AlertData {
 const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [dashboardData, setDashboardData] = useState<Record<string, unknown> | null>(null);
+  const [dashboardData, setDashboardData] = useState<Record<
+    string,
+    unknown
+  > | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
-  const [connectionStatus, setConnectionStatus] = useState<'disconnected' | 'connecting' | 'connected'>('disconnected');
+  const [connectionStatus, setConnectionStatus] = useState<
+    'disconnected' | 'connecting' | 'connected'
+  >('disconnected');
   const [lastUpdate, setLastUpdate] = useState<Date | null>(null);
-  
+
   const eventSourceRef = useRef<EventSource | null>(null);
   const reconnectTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const reconnectAttempts = useRef(0);
@@ -64,17 +69,19 @@ const RealTimeDashboard: React.FC = () => {
     }
 
     setConnectionStatus('connecting');
-    
+
     try {
       const sdk = getSDK();
       const token = sdk.configuration?.accessToken;
-      
+
       if (!token) {
         throw new Error('No authentication token available');
       }
 
       // Create EventSource connection to SSE endpoint
-      const eventSource = new EventSource(`/api/v1/events/stream?token=${token}`);
+      const eventSource = new EventSource(
+        `/api/v1/events/stream?token=${token}`
+      );
       eventSourceRef.current = eventSource;
 
       eventSource.onopen = () => {
@@ -95,12 +102,12 @@ const RealTimeDashboard: React.FC = () => {
       eventSource.onerror = () => {
         // SSE connection error
         setConnectionStatus('disconnected');
-        
+
         // Attempt to reconnect with exponential backoff
         if (reconnectAttempts.current < maxReconnectAttempts) {
           const delay = Math.pow(2, reconnectAttempts.current) * 1000; // 1s, 2s, 4s, 8s, 16s
           reconnectAttempts.current++;
-          
+
           reconnectTimeoutRef.current = setTimeout(() => {
             // Attempting to reconnect
             connectToSSE();
@@ -108,10 +115,11 @@ const RealTimeDashboard: React.FC = () => {
         } else {
           // Max reconnection attempts reached
           setRealTimeEnabled(false);
-          toastService.error('Real-time connection failed. Please refresh the page.');
+          toastService.error(
+            'Real-time connection failed. Please refresh the page.'
+          );
         }
       };
-
     } catch {
       // Error establishing SSE connection
       setConnectionStatus('disconnected');
@@ -121,7 +129,7 @@ const RealTimeDashboard: React.FC = () => {
 
   const handleRealTimeEvent = useCallback((event: RealTimeEvent) => {
     setLastUpdate(new Date());
-    
+
     switch (event.type) {
       case 'analytics':
         if (event.data.dashboard_stats) {
@@ -131,33 +139,35 @@ const RealTimeDashboard: React.FC = () => {
           setChartData(event.data.chart_data);
         }
         break;
-        
+
       case 'notification':
         if (event.data.alert) {
           const alert: AlertData = event.data.alert;
-          setAlerts(prev => [alert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
-          
+          setAlerts((prev) => [alert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
+
           // Show toast notification for critical alerts
           if (alert.severity === 'error' || alert.severity === 'warning') {
             toastService[alert.severity](alert.message);
           }
         }
         break;
-        
+
       case 'workflow':
         // Handle workflow updates
         // Workflow update received
         break;
-        
+
       case 'system':
         // Handle system health updates
         if (event.data.severity === 'critical') {
-          toastService.error(`System Alert: ${event.data.health.status || 'Critical issue detected'}`);
+          toastService.error(
+            `System Alert: ${event.data.health.status || 'Critical issue detected'}`
+          );
         }
         break;
-        
+
       default:
-        // Unknown event type - ignore
+      // Unknown event type - ignore
     }
   }, []);
 
@@ -167,17 +177,17 @@ const RealTimeDashboard: React.FC = () => {
       setIsConnecting(true);
       try {
         await getSDK().analytics.stopRealTimeDashboard();
-        
+
         if (eventSourceRef.current) {
           eventSourceRef.current.close();
           eventSourceRef.current = null;
         }
-        
+
         if (reconnectTimeoutRef.current) {
           clearTimeout(reconnectTimeoutRef.current);
           reconnectTimeoutRef.current = null;
         }
-        
+
         setConnectionStatus('disconnected');
         setRealTimeEnabled(false);
         toastService.success('Real-time updates stopped');
@@ -192,12 +202,12 @@ const RealTimeDashboard: React.FC = () => {
       try {
         await getSDK().analytics.startRealTimeDashboard();
         setRealTimeEnabled(true);
-        
+
         // Connect to SSE stream
         setTimeout(() => {
           connectToSSE();
         }, 1000); // Give server time to start the background task
-        
+
         toastService.success('Real-time updates started');
       } catch (error) {
         handleError(error);
@@ -213,9 +223,9 @@ const RealTimeDashboard: React.FC = () => {
       // Fetch latest data manually
       const [dashboardResponse, chartResponse] = await Promise.all([
         getSDK().analytics.getIntegratedDashboardStats(),
-        getSDK().analytics.getChartReadyData()
+        getSDK().analytics.getChartReadyData(),
       ]);
-      
+
       setDashboardData(dashboardResponse);
       setChartData(chartResponse);
       setLastUpdate(new Date());
@@ -239,32 +249,48 @@ const RealTimeDashboard: React.FC = () => {
 
   const getConnectionStatusColor = () => {
     switch (connectionStatus) {
-      case 'connected': return 'success';
-      case 'connecting': return 'warning';
-      case 'disconnected': return 'error';
-      default: return 'default';
+      case 'connected':
+        return 'success';
+      case 'connecting':
+        return 'warning';
+      case 'disconnected':
+        return 'error';
+      default:
+        return 'default';
     }
   };
 
   const getAlertIcon = (severity: string) => {
     switch (severity) {
-      case 'error': return <ErrorIcon color="error" />;
-      case 'warning': return <WarningIcon color="warning" />;
-      case 'success': return <SuccessIcon color="success" />;
-      default: return <TrendingIcon color="primary" />;
+      case 'error':
+        return <ErrorIcon color="error" />;
+      case 'warning':
+        return <WarningIcon color="warning" />;
+      case 'success':
+        return <SuccessIcon color="success" />;
+      default:
+        return <TrendingIcon color="primary" />;
     }
   };
 
   return (
     <Card>
       <CardContent>
-        <Box display="flex" justifyContent="space-between" alignItems="center" mb={2}>
+        <Box
+          display="flex"
+          justifyContent="space-between"
+          alignItems="center"
+          mb={2}
+        >
           <Typography variant="h6" component="h2">
             Real-Time Dashboard
           </Typography>
           <Box display="flex" alignItems="center" gap={1}>
-            <Chip 
-              label={connectionStatus.charAt(0).toUpperCase() + connectionStatus.slice(1)}
+            <Chip
+              label={
+                connectionStatus.charAt(0).toUpperCase() +
+                connectionStatus.slice(1)
+              }
               color={getConnectionStatusColor()}
               size="small"
             />
@@ -296,7 +322,12 @@ const RealTimeDashboard: React.FC = () => {
         />
 
         {lastUpdate && (
-          <Typography variant="caption" color="textSecondary" display="block" mt={1}>
+          <Typography
+            variant="caption"
+            color="textSecondary"
+            display="block"
+            mt={1}
+          >
             Last updated: {format(lastUpdate, 'HH:mm:ss')}
           </Typography>
         )}
@@ -313,20 +344,20 @@ const RealTimeDashboard: React.FC = () => {
               Current Metrics
             </Typography>
             <Box display="flex" gap={2} flexWrap="wrap">
-              <Chip 
-                icon={<TrendingIcon />} 
-                label={`Active Users: ${dashboardData.active_users || 0}`} 
-                variant="outlined" 
+              <Chip
+                icon={<TrendingIcon />}
+                label={`Active Users: ${dashboardData.active_users || 0}`}
+                variant="outlined"
               />
-              <Chip 
-                icon={<PerformanceIcon />} 
-                label={`Conversations: ${dashboardData.total_conversations || 0}`} 
-                variant="outlined" 
+              <Chip
+                icon={<PerformanceIcon />}
+                label={`Conversations: ${dashboardData.total_conversations || 0}`}
+                variant="outlined"
               />
-              <Chip 
-                icon={<TrendingIcon />} 
-                label={`Documents: ${dashboardData.total_documents || 0}`} 
-                variant="outlined" 
+              <Chip
+                icon={<TrendingIcon />}
+                label={`Documents: ${dashboardData.total_documents || 0}`}
+                variant="outlined"
               />
             </Box>
           </Box>
@@ -341,9 +372,7 @@ const RealTimeDashboard: React.FC = () => {
               {alerts.slice(0, 5).map((alert, index) => (
                 <React.Fragment key={index}>
                   <ListItem>
-                    <ListItemIcon>
-                      {getAlertIcon(alert.severity)}
-                    </ListItemIcon>
+                    <ListItemIcon>{getAlertIcon(alert.severity)}</ListItemIcon>
                     <ListItemText
                       primary={alert.title}
                       secondary={
@@ -369,7 +398,8 @@ const RealTimeDashboard: React.FC = () => {
 
         {!realTimeEnabled && (
           <Alert severity="info" sx={{ mt: 2 }}>
-            Enable real-time updates to see live dashboard metrics and notifications.
+            Enable real-time updates to see live dashboard metrics and
+            notifications.
           </Alert>
         )}
       </CardContent>

@@ -1002,8 +1002,9 @@ async def document_processing_job(
     document_id: str, file_path: str
 ) -> dict[str, Any]:
     """Document processing job handler for background processing."""
-    from chatter.utils.database import get_session_maker
     from pathlib import Path
+
+    from chatter.utils.database import get_session_maker
 
     logger.info(
         f"Starting background processing for document {document_id}"
@@ -1119,8 +1120,9 @@ async def database_maintenance_job() -> dict[str, Any]:
     try:
         async_session = get_session_maker()
         async with async_session() as session:
+            from datetime import UTC, datetime
+
             from sqlalchemy import text
-            from datetime import datetime, UTC
 
             # Perform database maintenance tasks
             start_time = datetime.now(UTC)
@@ -1205,8 +1207,10 @@ async def document_archiving_job() -> dict[str, Any]:
     try:
         async_session = get_session_maker()
         async with async_session() as session:
-            from datetime import datetime, UTC, timedelta
+            from datetime import UTC, datetime, timedelta
+
             from sqlalchemy import select
+
             from chatter.models.document import Document, DocumentStatus
 
             start_time = datetime.now(UTC)
@@ -1298,8 +1302,10 @@ async def conversation_cleanup_job() -> dict[str, Any]:
     try:
         async_session = get_session_maker()
         async with async_session() as session:
-            from datetime import datetime, UTC, timedelta
-            from sqlalchemy import select, delete
+            from datetime import UTC, datetime, timedelta
+
+            from sqlalchemy import delete, select
+
             from chatter.models.conversation import (
                 Conversation,
                 ConversationStatus,

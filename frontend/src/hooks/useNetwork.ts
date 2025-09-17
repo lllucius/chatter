@@ -26,7 +26,7 @@ export function useNetwork(options: UseNetworkOptions = {}) {
     onOffline,
     pingInterval = 30000, // 30 seconds
     pingUrl = '/api/health', // Default health check endpoint
-    showToasts = true
+    showToasts = true,
   } = options;
 
   const [status, setStatus] = useState<NetworkStatus>({
@@ -43,22 +43,26 @@ export function useNetwork(options: UseNetworkOptions = {}) {
       const response = await fetch(pingUrl, {
         method: 'HEAD',
         cache: 'no-cache',
-        signal: AbortSignal.timeout(5000) // 5 second timeout
+        signal: AbortSignal.timeout(5000), // 5 second timeout
       });
       return response.ok;
     } catch (error) {
       // Log connectivity check failure but don't show toast for routine checks
-      errorHandler.handleError(error, {
-        source: 'useNetwork.checkConnectivity',
-        operation: 'Network connectivity check',
-        additionalData: {
-          pingUrl,
-          navigatorOnLine: navigator.onLine
+      errorHandler.handleError(
+        error,
+        {
+          source: 'useNetwork.checkConnectivity',
+          operation: 'Network connectivity check',
+          additionalData: {
+            pingUrl,
+            navigatorOnLine: navigator.onLine,
+          },
+        },
+        {
+          showToast: false,
+          logToConsole: false, // Don't log routine connectivity checks
         }
-      }, {
-        showToast: false,
-        logToConsole: false // Don't log routine connectivity checks
-      });
+      );
       return false;
     }
   }, [pingUrl]);
@@ -68,11 +72,11 @@ export function useNetwork(options: UseNetworkOptions = {}) {
    */
   const handleOnline = useCallback(() => {
     const now = new Date();
-    setStatus(prev => ({
+    setStatus((prev) => ({
       ...prev,
       isOnline: true,
       isConnected: true,
-      lastConnectedAt: now
+      lastConnectedAt: now,
     }));
 
     if (showToasts) {
@@ -84,28 +88,31 @@ export function useNetwork(options: UseNetworkOptions = {}) {
 
   const handleOffline = useCallback(() => {
     const now = new Date();
-    setStatus(prev => ({
+    setStatus((prev) => ({
       ...prev,
       isOnline: false,
       isConnected: false,
-      lastDisconnectedAt: now
+      lastDisconnectedAt: now,
     }));
 
     if (showToasts) {
-      toastService.warning('Connection lost. Some features may not work properly.', {
-        autoClose: false
-      });
+      toastService.warning(
+        'Connection lost. Some features may not work properly.',
+        {
+          autoClose: false,
+        }
+      );
     }
 
     errorHandler.handleError(
       new Error('Network connection lost'),
       {
         source: 'useNetwork.handleOffline',
-        operation: 'Network status monitoring'
+        operation: 'Network status monitoring',
       },
       {
         showToast: false, // Already showing toast above
-        logToConsole: true
+        logToConsole: true,
       }
     );
 
@@ -121,27 +128,31 @@ export function useNetwork(options: UseNetworkOptions = {}) {
 
     if (isConnected !== wasConnected) {
       const now = new Date();
-      setStatus(prev => ({
+      setStatus((prev) => ({
         ...prev,
         isConnected,
-        ...(isConnected 
+        ...(isConnected
           ? { lastConnectedAt: now }
-          : { lastDisconnectedAt: now }
-        )
+          : { lastDisconnectedAt: now }),
       }));
 
       if (isConnected && !wasConnected) {
         // Regained connectivity
         if (showToasts) {
-          toastService.success('Server connection restored', { autoClose: 3000 });
+          toastService.success('Server connection restored', {
+            autoClose: 3000,
+          });
         }
         onOnline?.();
       } else if (!isConnected && wasConnected) {
         // Lost connectivity
         if (showToasts) {
-          toastService.warning('Cannot reach server. Please check your connection.', {
-            autoClose: false
-          });
+          toastService.warning(
+            'Cannot reach server. Please check your connection.',
+            {
+              autoClose: false,
+            }
+          );
         }
         onOffline?.();
       }
@@ -179,35 +190,42 @@ export function useNetwork(options: UseNetworkOptions = {}) {
   /**
    * Handle network-related errors with appropriate user feedback
    */
-  const handleNetworkError = useCallback((error: unknown, context: string) => {
-    const isNetworkError = 
-      error instanceof TypeError && error.message.includes('fetch') ||
-      error instanceof Error && (
-        error.message.includes('network') ||
-        error.message.includes('timeout') ||
-        error.message.includes('offline')
-      );
+  const handleNetworkError = useCallback(
+    (error: unknown, context: string) => {
+      const isNetworkError =
+        (error instanceof TypeError && error.message.includes('fetch')) ||
+        (error instanceof Error &&
+          (error.message.includes('network') ||
+            error.message.includes('timeout') ||
+            error.message.includes('offline')));
 
-    if (isNetworkError) {
-      errorHandler.handleError(error, {
-        source: 'useNetwork.handleNetworkError',
-        operation: context,
-        additionalData: {
-          isOnline: status.isOnline,
-          isConnected: status.isConnected,
-          lastConnectedAt: status.lastConnectedAt,
-          lastDisconnectedAt: status.lastDisconnectedAt
-        }
-      }, {
-        showToast: true,
-        logToConsole: true,
-        fallbackMessage: 'Network error occurred. Please check your connection and try again.'
-      });
-    } else {
-      // Re-throw non-network errors
-      throw error;
-    }
-  }, [status]);
+      if (isNetworkError) {
+        errorHandler.handleError(
+          error,
+          {
+            source: 'useNetwork.handleNetworkError',
+            operation: context,
+            additionalData: {
+              isOnline: status.isOnline,
+              isConnected: status.isConnected,
+              lastConnectedAt: status.lastConnectedAt,
+              lastDisconnectedAt: status.lastDisconnectedAt,
+            },
+          },
+          {
+            showToast: true,
+            logToConsole: true,
+            fallbackMessage:
+              'Network error occurred. Please check your connection and try again.',
+          }
+        );
+      } else {
+        // Re-throw non-network errors
+        throw error;
+      }
+    },
+    [status]
+  );
 
   return {
     status,
@@ -222,37 +240,40 @@ export function useNetwork(options: UseNetworkOptions = {}) {
 /**
  * Higher-order function to wrap API calls with network error handling
  */
-export function withNetworkErrorHandling<T extends (...args: unknown[]) => Promise<unknown>>(
-  fn: T,
-  context: string
-): T {
+export function withNetworkErrorHandling<
+  T extends (...args: unknown[]) => Promise<unknown>,
+>(fn: T, context: string): T {
   return (async (...args: Parameters<T>) => {
     try {
       return await fn(...args);
     } catch (error) {
       // Check if it's a network-related error
-      const isNetworkError = 
-        error instanceof TypeError && error.message.includes('fetch') ||
-        error instanceof Error && (
-          error.message.includes('network') ||
-          error.message.includes('timeout') ||
-          error.message.includes('ERR_NETWORK') ||
-          error.message.includes('ERR_INTERNET_DISCONNECTED')
-        );
+      const isNetworkError =
+        (error instanceof TypeError && error.message.includes('fetch')) ||
+        (error instanceof Error &&
+          (error.message.includes('network') ||
+            error.message.includes('timeout') ||
+            error.message.includes('ERR_NETWORK') ||
+            error.message.includes('ERR_INTERNET_DISCONNECTED')));
 
       if (isNetworkError) {
-        errorHandler.handleError(error, {
-          source: 'withNetworkErrorHandling',
-          operation: context,
-          additionalData: {
-            isOnline: navigator.onLine,
-            userAgent: navigator.userAgent
+        errorHandler.handleError(
+          error,
+          {
+            source: 'withNetworkErrorHandling',
+            operation: context,
+            additionalData: {
+              isOnline: navigator.onLine,
+              userAgent: navigator.userAgent,
+            },
+          },
+          {
+            showToast: true,
+            logToConsole: true,
+            fallbackMessage:
+              'Network error occurred. Please check your connection and try again.',
           }
-        }, {
-          showToast: true,
-          logToConsole: true,
-          fallbackMessage: 'Network error occurred. Please check your connection and try again.'
-        });
+        );
       }
 
       // Re-throw the error so it can be handled by the calling code

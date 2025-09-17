@@ -1,21 +1,21 @@
 import React, { useState } from 'react';
-import { 
-  Box, 
-  Typography, 
-  Button, 
-  Card, 
-  CardContent, 
+import {
+  Box,
+  Typography,
+  Button,
+  Card,
+  CardContent,
   Grid,
   Tab,
   Tabs,
   Paper,
-  Alert
+  Alert,
 } from '@mui/material';
-import { 
-  Refresh as RefreshIcon, 
-  Search as SearchIcon, 
+import {
+  Refresh as RefreshIcon,
+  Search as SearchIcon,
   TrendingUp as TrendingUpIcon,
-  Analytics as AnalyticsIcon 
+  Analytics as AnalyticsIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import IntegratedDashboard from '../components/IntegratedDashboard';
@@ -41,11 +41,7 @@ function TabPanel(props: TabPanelProps) {
       aria-labelledby={`dashboard-tab-${index}`}
       {...other}
     >
-      {value === index && (
-        <Box sx={{ p: 3 }}>
-          {children}
-        </Box>
-      )}
+      {value === index && <Box sx={{ p: 3 }}>{children}</Box>}
     </div>
   );
 }
@@ -89,8 +85,9 @@ const EnhancedDashboardPage: React.FC = () => {
       <Box sx={{ width: '100%' }}>
         {/* Dashboard Introduction */}
         <Alert severity="info" sx={{ mb: 3 }}>
-          🚀 <strong>Phase 4 Features:</strong> Experience real-time analytics, intelligent search with personalization, 
-          and live dashboard updates powered by our new backend infrastructure.
+          🚀 <strong>Phase 4 Features:</strong> Experience real-time analytics,
+          intelligent search with personalization, and live dashboard updates
+          powered by our new backend infrastructure.
         </Alert>
 
         {/* Tab Navigation */}
@@ -101,18 +98,18 @@ const EnhancedDashboardPage: React.FC = () => {
             aria-label="dashboard tabs"
             variant="fullWidth"
           >
-            <Tab 
-              label="Analytics Dashboard" 
+            <Tab
+              label="Analytics Dashboard"
               icon={<AnalyticsIcon />}
               iconPosition="start"
             />
-            <Tab 
-              label="Real-Time Monitoring" 
+            <Tab
+              label="Real-Time Monitoring"
               icon={<TrendingUpIcon />}
               iconPosition="start"
             />
-            <Tab 
-              label="Intelligent Search" 
+            <Tab
+              label="Intelligent Search"
               icon={<SearchIcon />}
               iconPosition="start"
             />
@@ -126,10 +123,11 @@ const EnhancedDashboardPage: React.FC = () => {
               Analytics Dashboard
             </Typography>
             <Typography variant="body1" color="textSecondary" paragraph>
-              Comprehensive analytics powered by server-side processing with real-time chart data 
-              and integrated statistics derived from actual usage metrics.
+              Comprehensive analytics powered by server-side processing with
+              real-time chart data and integrated statistics derived from actual
+              usage metrics.
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <IntegratedDashboard />
@@ -144,10 +142,10 @@ const EnhancedDashboardPage: React.FC = () => {
               Real-Time System Monitoring
             </Typography>
             <Typography variant="body1" color="textSecondary" paragraph>
-              Live dashboard updates with intelligent notifications, performance alerts, 
-              and system health monitoring via Server-Sent Events (SSE).
+              Live dashboard updates with intelligent notifications, performance
+              alerts, and system health monitoring via Server-Sent Events (SSE).
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <RealTimeDashboard />
@@ -162,10 +160,11 @@ const EnhancedDashboardPage: React.FC = () => {
               Intelligent Search & Discovery
             </Typography>
             <Typography variant="body1" color="textSecondary" paragraph>
-              Semantic search with personalized results, smart recommendations, 
-              and trending content discovery powered by vector similarity and user behavior analytics.
+              Semantic search with personalized results, smart recommendations,
+              and trending content discovery powered by vector similarity and
+              user behavior analytics.
             </Typography>
-            
+
             <Grid container spacing={3}>
               <Grid item xs={12}>
                 <IntelligentSearch />
@@ -188,15 +187,17 @@ const EnhancedDashboardPage: React.FC = () => {
                       Real-time Analytics
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      • Live dashboard streaming via SSE<br/>
-                      • Intelligent performance alerts<br/>
-                      • User behavior tracking<br/>
-                      • System health monitoring
+                      • Live dashboard streaming via SSE
+                      <br />
+                      • Intelligent performance alerts
+                      <br />
+                      • User behavior tracking
+                      <br />• System health monitoring
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               <Grid item xs={12} md={4}>
                 <Card variant="outlined">
                   <CardContent>
@@ -204,15 +205,17 @@ const EnhancedDashboardPage: React.FC = () => {
                       Intelligent Search
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      • Semantic vector search<br/>
-                      • Personalized recommendations<br/>
-                      • User preference learning<br/>
-                      • Trending content discovery
+                      • Semantic vector search
+                      <br />
+                      • Personalized recommendations
+                      <br />
+                      • User preference learning
+                      <br />• Trending content discovery
                     </Typography>
                   </CardContent>
                 </Card>
               </Grid>
-              
+
               <Grid item xs={12} md={4}>
                 <Card variant="outlined">
                   <CardContent>
@@ -220,10 +223,12 @@ const EnhancedDashboardPage: React.FC = () => {
                       Advanced User Experience
                     </Typography>
                     <Typography variant="body2" color="textSecondary">
-                      • Live notifications<br/>
-                      • Collaborative features<br/>
-                      • Performance optimization<br/>
-                      • Predictive analytics
+                      • Live notifications
+                      <br />
+                      • Collaborative features
+                      <br />
+                      • Performance optimization
+                      <br />• Predictive analytics
                     </Typography>
                   </CardContent>
                 </Card>

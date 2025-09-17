@@ -25,13 +25,13 @@ class ValidatedULID(str):
                 raise BadRequestProblem(
                     detail="Invalid ULID format: must be a string"
                 )
-            
+
             # Temporary allowance for stream-prefixed IDs during streaming
             if v.startswith("stream-"):
                 # For now, allow stream IDs to pass through
                 # TODO: Remove this once streaming properly provides ULIDs
                 return v
-                
+
             try:
                 ULID.from_str(v)
                 return v

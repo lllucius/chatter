@@ -10,13 +10,13 @@ import {
   Paper,
   Divider,
   Switch,
-  FormControlLabel
+  FormControlLabel,
 } from '@mui/material';
 import {
   Error as ErrorIcon,
   NetworkCheck as NetworkIcon,
   BugReport as BugIcon,
-  Refresh as RefreshIcon
+  Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import SectionErrorBoundary from '../components/SectionErrorBoundary';
@@ -25,10 +25,10 @@ import { useNetwork } from '../hooks/useNetwork';
 import { errorHandler } from '../utils/error-handler';
 
 // Test component that throws errors on demand
-const ErrorTestComponent: React.FC<{ shouldThrow: boolean; errorType: string }> = ({ 
-  shouldThrow, 
-  errorType 
-}) => {
+const ErrorTestComponent: React.FC<{
+  shouldThrow: boolean;
+  errorType: string;
+}> = ({ shouldThrow, errorType }) => {
   if (shouldThrow) {
     switch (errorType) {
       case 'javascript':
@@ -57,15 +57,18 @@ const AsyncErrorTestComponent: React.FC = () => {
     const result = await executeAsync(
       () => {
         return new Promise((_, reject) => {
-          setTimeout(() => reject(new Error('Simulated async operation failure')), 1000);
+          setTimeout(
+            () => reject(new Error('Simulated async operation failure')),
+            1000
+          );
         });
       },
       {
         source: 'ErrorTestPage.AsyncErrorTestComponent',
-        operation: 'Test async error handling'
+        operation: 'Test async error handling',
       }
     );
-    
+
     setResult(result.success ? 'Success!' : `Error: ${result.error}`);
   };
 
@@ -76,7 +79,7 @@ const AsyncErrorTestComponent: React.FC = () => {
     } catch (error) {
       handleAsyncError(error, {
         source: 'ErrorTestPage.AsyncErrorTestComponent',
-        operation: 'Test network error handling'
+        operation: 'Test network error handling',
       });
       setResult('Network error handled');
     }
@@ -105,7 +108,10 @@ const AsyncErrorTestComponent: React.FC = () => {
         </Button>
       </Box>
       {result && (
-        <Alert severity={result.includes('Error') ? 'error' : 'info'} sx={{ mt: 1 }}>
+        <Alert
+          severity={result.includes('Error') ? 'error' : 'info'}
+          sx={{ mt: 1 }}
+        >
           {result}
         </Alert>
       )}
@@ -117,7 +123,7 @@ const AsyncErrorTestComponent: React.FC = () => {
 const NetworkStatusComponent: React.FC = () => {
   const { status, refreshConnectivity } = useNetwork({
     showToasts: true,
-    pingInterval: 10000 // Check every 10 seconds
+    pingInterval: 10000, // Check every 10 seconds
   });
 
   return (
@@ -129,7 +135,11 @@ const NetworkStatusComponent: React.FC = () => {
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 2, mb: 2 }}>
         <Typography>Online: {status.isOnline ? '✅' : '❌'}</Typography>
         <Typography>Connected: {status.isConnected ? '✅' : '❌'}</Typography>
-        <Button size="small" onClick={refreshConnectivity} startIcon={<RefreshIcon />}>
+        <Button
+          size="small"
+          onClick={refreshConnectivity}
+          startIcon={<RefreshIcon />}
+        >
           Check Connection
         </Button>
       </Box>
@@ -165,11 +175,11 @@ const ErrorTestPage: React.FC = () => {
       new Error('Direct error handler test'),
       {
         source: 'ErrorTestPage.triggerDirectError',
-        operation: 'Manual error trigger'
+        operation: 'Manual error trigger',
       },
       {
         showToast: true,
-        logToConsole: true
+        logToConsole: true,
       }
     );
   };
@@ -181,10 +191,11 @@ const ErrorTestPage: React.FC = () => {
           <BugIcon sx={{ mr: 1, verticalAlign: 'middle' }} />
           Error Handling Test Page
         </Typography>
-        
+
         <Typography variant="body1" sx={{ mb: 3 }}>
-          This page demonstrates all the error handling capabilities implemented in the frontend.
-          Try the different error scenarios to see how they are caught and handled.
+          This page demonstrates all the error handling capabilities implemented
+          in the frontend. Try the different error scenarios to see how they are
+          caught and handled.
         </Typography>
 
         <Grid container spacing={3}>
@@ -195,20 +206,25 @@ const ErrorTestPage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   Global Error Handlers
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
-                  Test global JavaScript error and unhandled promise rejection handlers
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
+                  Test global JavaScript error and unhandled promise rejection
+                  handlers
                 </Typography>
                 <Box sx={{ display: 'flex', gap: 1, flexDirection: 'column' }}>
-                  <Button 
-                    variant="contained" 
-                    color="error" 
+                  <Button
+                    variant="contained"
+                    color="error"
                     onClick={triggerGlobalJSError}
                   >
                     Trigger Global JS Error
                   </Button>
-                  <Button 
-                    variant="outlined" 
-                    color="error" 
+                  <Button
+                    variant="outlined"
+                    color="error"
                     onClick={triggerDirectError}
                   >
                     Trigger Direct Error
@@ -225,15 +241,19 @@ const ErrorTestPage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   Error Boundaries
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   Test error boundaries at different levels
                 </Typography>
-                
+
                 <Box sx={{ mb: 2 }}>
                   <FormControlLabel
                     control={
-                      <Switch 
-                        checked={throwJSError} 
+                      <Switch
+                        checked={throwJSError}
                         onChange={(e) => setThrowJSError(e.target.checked)}
                       />
                     }
@@ -241,15 +261,15 @@ const ErrorTestPage: React.FC = () => {
                   />
                 </Box>
 
-                <SectionErrorBoundary 
-                  level="component" 
+                <SectionErrorBoundary
+                  level="component"
                   name="ErrorTestComponent"
                   autoRecover={true}
                   autoRecoverDelay={3000}
                 >
-                  <ErrorTestComponent 
-                    shouldThrow={throwJSError} 
-                    errorType="javascript" 
+                  <ErrorTestComponent
+                    shouldThrow={throwJSError}
+                    errorType="javascript"
                   />
                 </SectionErrorBoundary>
               </CardContent>
@@ -277,14 +297,18 @@ const ErrorTestPage: React.FC = () => {
                 <Typography variant="h6" gutterBottom>
                   Section-Level Error Boundary
                 </Typography>
-                <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+                <Typography
+                  variant="body2"
+                  color="text.secondary"
+                  sx={{ mb: 2 }}
+                >
                   This section is wrapped in a section-level error boundary
                 </Typography>
-                
+
                 <FormControlLabel
                   control={
-                    <Switch 
-                      checked={throwAsyncError} 
+                    <Switch
+                      checked={throwAsyncError}
                       onChange={(e) => setThrowAsyncError(e.target.checked)}
                     />
                   }
@@ -293,9 +317,9 @@ const ErrorTestPage: React.FC = () => {
 
                 <SectionErrorBoundary level="section" name="AsyncErrorSection">
                   <Box sx={{ mt: 2 }}>
-                    <ErrorTestComponent 
-                      shouldThrow={throwAsyncError} 
-                      errorType="async" 
+                    <ErrorTestComponent
+                      shouldThrow={throwAsyncError}
+                      errorType="async"
                     />
                   </Box>
                 </SectionErrorBoundary>

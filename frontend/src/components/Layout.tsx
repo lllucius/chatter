@@ -77,17 +77,21 @@ const navSections: NavSection[] = [
     items: [
       { label: 'Dashboard', path: '/dashboard', icon: <DashboardIcon /> },
       { label: 'Chat', path: '/chat', icon: <ChatIcon /> },
-    ]
+    ],
   },
   {
-    title: 'Content Management', 
+    title: 'Content Management',
     defaultExpanded: true,
     items: [
-      { label: 'Conversations', path: '/conversations', icon: <AnalyticsIcon /> },
+      {
+        label: 'Conversations',
+        path: '/conversations',
+        icon: <AnalyticsIcon />,
+      },
       { label: 'Documents', path: '/documents', icon: <DocumentIcon /> },
       { label: 'Profiles', path: '/profiles', icon: <ProfileIcon /> },
       { label: 'Prompts', path: '/prompts', icon: <PromptIcon /> },
-    ]
+    ],
   },
   {
     title: 'AI & Models',
@@ -98,7 +102,7 @@ const navSections: NavSection[] = [
       { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
       { label: 'Workflows', path: '/workflows', icon: <WorkflowIcon /> },
       { label: 'A/B Testing', path: '/ab-testing', icon: <ABTestIcon /> },
-    ]
+    ],
   },
   {
     title: 'System',
@@ -107,19 +111,22 @@ const navSections: NavSection[] = [
       { label: 'Administration', path: '/administration', icon: <AdminIcon /> },
       { label: 'Health', path: '/health', icon: <HealthIcon /> },
       { label: 'SSE Monitor', path: '/sse-monitor', icon: <MonitorIcon /> },
-    ]
-  }
+    ],
+  },
 ];
 
 const LayoutFrame: React.FC = () => {
   const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
-  const [notificationAnchorEl, setNotificationAnchorEl] = useState<null | HTMLElement>(null);
-  const [expandedSections, setExpandedSections] = useState<{[key: string]: boolean}>(() => {
+  const [notificationAnchorEl, setNotificationAnchorEl] =
+    useState<null | HTMLElement>(null);
+  const [expandedSections, setExpandedSections] = useState<{
+    [key: string]: boolean;
+  }>(() => {
     // Initialize expanded state based on defaultExpanded property
-    const initial: {[key: string]: boolean} = {};
-    navSections.forEach(section => {
+    const initial: { [key: string]: boolean } = {};
+    navSections.forEach((section) => {
       initial[section.title] = section.defaultExpanded ?? false;
     });
     return initial;
@@ -142,11 +149,15 @@ const LayoutFrame: React.FC = () => {
     clearPanelContent,
   } = useRightSidebar();
 
-  const currentDrawerWidth = sidebarCollapsed ? collapsedDrawerWidth : drawerWidth;
+  const currentDrawerWidth = sidebarCollapsed
+    ? collapsedDrawerWidth
+    : drawerWidth;
   // Right drawer should only be visible if there's content to show
   const isRightVisible = !!panelContent;
   const effectiveRightWidth = isRightVisible
-    ? (rightCollapsed ? rightCollapsedDrawerWidth : rightDrawerWidth)
+    ? rightCollapsed
+      ? rightCollapsedDrawerWidth
+      : rightDrawerWidth
     : 0;
 
   useEffect(() => {
@@ -161,7 +172,7 @@ const LayoutFrame: React.FC = () => {
       keyCode: 27,
       which: 27,
       bubbles: true,
-      cancelable: true
+      cancelable: true,
     });
     document.dispatchEvent(escapeEvent);
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -176,9 +187,9 @@ const LayoutFrame: React.FC = () => {
   };
 
   const handleSectionToggle = (sectionTitle: string) => {
-    setExpandedSections(prev => ({
+    setExpandedSections((prev) => ({
       ...prev,
-      [sectionTitle]: !prev[sectionTitle]
+      [sectionTitle]: !prev[sectionTitle],
     }));
   };
 
@@ -215,7 +226,11 @@ const LayoutFrame: React.FC = () => {
   };
 
   const renderNavigation = (isMobile: boolean = false): void => (
-    <CustomScrollbar style={{ height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)' }}>
+    <CustomScrollbar
+      style={{
+        height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)',
+      }}
+    >
       <List sx={{ pt: 0 }}>
         {navSections.map((section): void => (
           <React.Fragment key={section.title}>
@@ -239,19 +254,26 @@ const LayoutFrame: React.FC = () => {
                   cursor: 'pointer',
                   '&:hover': {
                     bgcolor: 'action.hover',
-                  }
+                  },
                 }}
                 onClick={() => handleSectionToggle(section.title)}
               >
                 {section.title}
-                {section.items.length > 0 && (
-                  expandedSections[section.title] ? <ExpandLess fontSize="small" /> : <ExpandMore fontSize="small" />
-                )}
+                {section.items.length > 0 &&
+                  (expandedSections[section.title] ? (
+                    <ExpandLess fontSize="small" />
+                  ) : (
+                    <ExpandMore fontSize="small" />
+                  ))}
               </ListSubheader>
             )}
-            
+
             {/* Section Items */}
-            <Collapse in={sidebarCollapsed || expandedSections[section.title]} timeout="auto" unmountOnExit>
+            <Collapse
+              in={sidebarCollapsed || expandedSections[section.title]}
+              timeout="auto"
+              unmountOnExit
+            >
               {section.items.map((item): void => (
                 <ListItem key={item.path} disablePadding>
                   <ListItemButton
@@ -278,7 +300,10 @@ const LayoutFrame: React.FC = () => {
                         justifyContent: 'center',
                       }}
                     >
-                      <Tooltip title={sidebarCollapsed ? item.label : ''} placement="right">
+                      <Tooltip
+                        title={sidebarCollapsed ? item.label : ''}
+                        placement="right"
+                      >
                         {item.icon}
                       </Tooltip>
                     </ListItemIcon>
@@ -287,11 +312,12 @@ const LayoutFrame: React.FC = () => {
                 </ListItem>
               ))}
             </Collapse>
-            
+
             {/* Add divider between sections, except for the last one */}
-            {!sidebarCollapsed && navSections.indexOf(section) < navSections.length - 1 && (
-              <Divider sx={{ my: 1, mx: 2 }} />
-            )}
+            {!sidebarCollapsed &&
+              navSections.indexOf(section) < navSections.length - 1 && (
+                <Divider sx={{ my: 1, mx: 2 }} />
+              )}
           </React.Fragment>
         ))}
       </List>
@@ -302,7 +328,12 @@ const LayoutFrame: React.FC = () => {
     <div>
       <Toolbar sx={{ justifyContent: 'space-between' }}>
         {!sidebarCollapsed && (
-          <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+          <Typography
+            variant="h6"
+            noWrap
+            component="div"
+            sx={{ fontWeight: 'bold', flexGrow: 1 }}
+          >
             Chatter
           </Typography>
         )}
@@ -326,7 +357,10 @@ const LayoutFrame: React.FC = () => {
               </IconButton>
             </>
           )}
-          <IconButton onClick={handleSidebarToggle} sx={{ display: { xs: 'none', sm: 'block' } }}>
+          <IconButton
+            onClick={handleSidebarToggle}
+            sx={{ display: { xs: 'none', sm: 'block' } }}
+          >
             {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </IconButton>
         </Box>
@@ -367,9 +401,18 @@ const LayoutFrame: React.FC = () => {
 
   const rightDrawerContent = (
     <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
-      <Toolbar sx={{ justifyContent: 'space-between', borderBottom: '1px solid', borderColor: 'divider' }}>
+      <Toolbar
+        sx={{
+          justifyContent: 'space-between',
+          borderBottom: '1px solid',
+          borderColor: 'divider',
+        }}
+      >
         {!rightCollapsed && (
-          <Typography variant="h6" sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}>
+          <Typography
+            variant="h6"
+            sx={{ fontWeight: 'bold', display: 'flex', alignItems: 'center' }}
+          >
             <SettingsIcon sx={{ mr: 1 }} />
             {title || 'Panel'}
           </Typography>
@@ -384,9 +427,7 @@ const LayoutFrame: React.FC = () => {
         </IconButton>
       </Toolbar>
       <CustomScrollbar style={{ flexGrow: 1 }}>
-        <Box sx={{ p: rightCollapsed ? 1 : 2 }}>
-          {panelContent}
-        </Box>
+        <Box sx={{ p: rightCollapsed ? 1 : 2 }}>{panelContent}</Box>
       </CustomScrollbar>
     </div>
   );
@@ -394,7 +435,10 @@ const LayoutFrame: React.FC = () => {
   return (
     <Box sx={{ display: 'flex', height: '100dvh', overflow: 'hidden' }}>
       {/* LEFT NAV */}
-      <Box component="nav" sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}
+      >
         {/* Mobile Left Drawer - mount only on mobile */}
         {isMobile && (
           <Drawer
@@ -409,21 +453,35 @@ const LayoutFrame: React.FC = () => {
             }}
             sx={{
               display: { xs: 'block', sm: 'none' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: drawerWidth },
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: drawerWidth,
+              },
             }}
           >
             <Box>
               <Toolbar sx={{ justifyContent: 'space-between' }}>
-                <Typography variant="h6" noWrap component="div" sx={{ fontWeight: 'bold', flexGrow: 1 }}>
+                <Typography
+                  variant="h6"
+                  noWrap
+                  component="div"
+                  sx={{ fontWeight: 'bold', flexGrow: 1 }}
+                >
                   Chatter
                 </Typography>
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Tooltip title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}>
+                  <Tooltip
+                    title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
+                  >
                     <IconButton onClick={toggleDarkMode} size="small">
                       {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
                     </IconButton>
                   </Tooltip>
-                  <IconButton size="small" aria-label="account of current user" onClick={handleProfileMenuOpen}>
+                  <IconButton
+                    size="small"
+                    aria-label="account of current user"
+                    onClick={handleProfileMenuOpen}
+                  >
                     <Avatar sx={{ width: 24, height: 24 }}>U</Avatar>
                   </IconButton>
                   <IconButton onClick={handleDrawerToggle}>
@@ -489,7 +547,9 @@ const LayoutFrame: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: { sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)` },
+          width: {
+            sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)`,
+          },
           minWidth: 0,
           minHeight: 0,
           display: 'flex',
@@ -506,7 +566,10 @@ const LayoutFrame: React.FC = () => {
       </Box>
 
       {/* RIGHT NAV */}
-      <Box component="nav" sx={{ width: { sm: effectiveRightWidth }, flexShrink: { sm: 0 } }}>
+      <Box
+        component="nav"
+        sx={{ width: { sm: effectiveRightWidth }, flexShrink: { sm: 0 } }}
+      >
         {/* Mobile Right Drawer - mount/open only on mobile */}
         {isMobile && isRightVisible && (
           <Drawer
@@ -522,7 +585,10 @@ const LayoutFrame: React.FC = () => {
             }}
             sx={{
               display: { xs: 'block', sm: 'none' },
-              '& .MuiDrawer-paper': { boxSizing: 'border-box', width: rightDrawerWidth },
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: rightDrawerWidth,
+              },
             }}
           >
             {rightDrawerContent}

@@ -44,7 +44,9 @@ export interface Notification {
 
 interface NotificationContextType {
   notifications: Notification[];
-  showNotification: (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => void;
+  showNotification: (
+    notification: Omit<Notification, 'id' | 'timestamp' | 'read'>
+  ) => void;
   markAsRead: (id: string) => void;
   markAllAsRead: () => void;
   clearNotification: (id: string) => void;
@@ -75,7 +77,9 @@ const NotificationContext = createContext<NotificationContextType>({
 export const useNotifications = () => {
   const context = useContext(NotificationContext);
   if (!context) {
-    throw new Error('useNotifications must be used within a NotificationProvider');
+    throw new Error(
+      'useNotifications must be used within a NotificationProvider'
+    );
   }
   return context;
 };
@@ -87,67 +91,86 @@ interface NotificationProviderProps {
 // Helper functions for icons
 const getIcon = (type: Notification['type']) => {
   switch (type) {
-    case 'success': return <SuccessIcon />;
-    case 'error': return <ErrorIcon />;
-    case 'warning': return <WarningIcon />;
-    case 'info': return <InfoIcon />;
-    default: return <InfoIcon />;
+    case 'success':
+      return <SuccessIcon />;
+    case 'error':
+      return <ErrorIcon />;
+    case 'warning':
+      return <WarningIcon />;
+    case 'info':
+      return <InfoIcon />;
+    default:
+      return <InfoIcon />;
   }
 };
 
 const getCategoryIcon = (category: Notification['category']) => {
   switch (category) {
-    case 'workflow': return <WorkflowIcon fontSize="small" />;
-    case 'agent': return <AgentIcon fontSize="small" />;
-    case 'test': return <TestIcon fontSize="small" />;
-    case 'performance': return <PerformanceIcon fontSize="small" />;
-    default: return <InfoIcon fontSize="small" />;
+    case 'workflow':
+      return <WorkflowIcon fontSize="small" />;
+    case 'agent':
+      return <AgentIcon fontSize="small" />;
+    case 'test':
+      return <TestIcon fontSize="small" />;
+    case 'performance':
+      return <PerformanceIcon fontSize="small" />;
+    default:
+      return <InfoIcon fontSize="small" />;
   }
 };
 
-export const NotificationProvider: React.FC<NotificationProviderProps> = ({ children }) => {
+export const NotificationProvider: React.FC<NotificationProviderProps> = ({
+  children,
+}) => {
   const [notifications, setNotifications] = useState<Notification[]>([]);
-  const [currentSnackbar, setCurrentSnackbar] = useState<Notification | null>(null);
+  const [currentSnackbar, setCurrentSnackbar] = useState<Notification | null>(
+    null
+  );
 
-  const showNotification = useCallback((notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
-    const newNotification: Notification = {
-      ...notification,
-      id: Math.random().toString(36).substring(7),
-      timestamp: new Date(),
-      read: false,
-    };
+  const showNotification = useCallback(
+    (notification: Omit<Notification, 'id' | 'timestamp' | 'read'>) => {
+      const newNotification: Notification = {
+        ...notification,
+        id: Math.random().toString(36).substring(7),
+        timestamp: new Date(),
+        read: false,
+      };
 
-    setNotifications(prev => [newNotification, ...prev]);
+      setNotifications((prev) => [newNotification, ...prev]);
 
-    // Show snackbar for non-persistent notifications
-    if (!notification.persistent) {
-      setCurrentSnackbar(newNotification);
-    }
-  }, []);
+      // Show snackbar for non-persistent notifications
+      if (!notification.persistent) {
+        setCurrentSnackbar(newNotification);
+      }
+    },
+    []
+  );
 
   const markAsRead = useCallback((id: string) => {
-    setNotifications(prev =>
-      prev.map(notification =>
+    setNotifications((prev) =>
+      prev.map((notification) =>
         notification.id === id ? { ...notification, read: true } : notification
       )
     );
   }, []);
 
   const markAllAsRead = useCallback(() => {
-    setNotifications(prev =>
-      prev.map(notification => ({ ...notification, read: true }))
+    setNotifications((prev) =>
+      prev.map((notification) => ({ ...notification, read: true }))
     );
   }, []);
 
   const clearNotification = useCallback((id: string) => {
-    setNotifications(prev => prev.filter(notification => notification.id !== id));
+    setNotifications((prev) =>
+      prev.filter((notification) => notification.id !== id)
+    );
   }, []);
 
   const clearAll = useCallback(() => {
     setNotifications([]);
   }, []);
 
-  const unreadCount = notifications.filter(n => !n.read).length;
+  const unreadCount = notifications.filter((n) => !n.read).length;
 
   const handleCloseSnackbar = () => {
     setCurrentSnackbar(null);
@@ -166,7 +189,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({ chil
       }}
     >
       {children}
-      
+
       {/* Snackbar for real-time notifications */}
       <Snackbar
         open={!!currentSnackbar}
@@ -210,13 +233,19 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
   open,
   onClose,
 }) => {
-  const { notifications, markAsRead, clearNotification, markAllAsRead, clearAll } = useNotifications();
+  const {
+    notifications,
+    markAsRead,
+    clearNotification,
+    markAllAsRead,
+    clearAll,
+  } = useNotifications();
 
   const handleNotificationClick = (notification: Notification) => {
     if (!notification.read) {
       markAsRead(notification.id);
     }
-    
+
     // Execute any actions
     if (notification.actions && notification.actions.length > 0) {
       notification.actions[0].action();
@@ -244,7 +273,13 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
       }}
     >
       <Box sx={{ p: 2, pb: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            justifyContent: 'space-between',
+            alignItems: 'center',
+          }}
+        >
           <Typography variant="h6">Notifications</Typography>
           <Box sx={{ display: 'flex', gap: 1 }}>
             <Typography
@@ -265,7 +300,7 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
         </Box>
       </Box>
       <Divider />
-      
+
       {notifications.length === 0 ? (
         <MenuItem disabled>
           <Typography variant="body2" color="text.secondary">
@@ -301,7 +336,13 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
             </ListItemIcon>
             <ListItemText
               primary={
-                <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+                <Box
+                  sx={{
+                    display: 'flex',
+                    justifyContent: 'space-between',
+                    alignItems: 'flex-start',
+                  }}
+                >
                   <Typography variant="subtitle2" noWrap>
                     {notification.title}
                   </Typography>
@@ -341,7 +382,7 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
           </MenuItem>
         ))
       )}
-      
+
       {notifications.length > 10 && (
         <MenuItem disabled>
           <Typography variant="caption" color="text.secondary">
@@ -357,7 +398,9 @@ interface NotificationIconProps {
   onClick: (event: React.MouseEvent<HTMLElement>) => void;
 }
 
-export const NotificationIcon: React.FC<NotificationIconProps> = ({ onClick }) => {
+export const NotificationIcon: React.FC<NotificationIconProps> = ({
+  onClick,
+}) => {
   const { unreadCount } = useNotifications();
 
   return (
@@ -373,33 +416,42 @@ export const NotificationIcon: React.FC<NotificationIconProps> = ({ onClick }) =
 export const useWorkflowNotifications = () => {
   const { showNotification } = useNotifications();
 
-  const notifyWorkflowStarted = useCallback((workflowName: string) => {
-    showNotification({
-      type: 'info',
-      category: 'workflow',
-      title: 'Workflow Started',
-      message: `${workflowName} execution has begun`,
-    });
-  }, [showNotification]);
+  const notifyWorkflowStarted = useCallback(
+    (workflowName: string) => {
+      showNotification({
+        type: 'info',
+        category: 'workflow',
+        title: 'Workflow Started',
+        message: `${workflowName} execution has begun`,
+      });
+    },
+    [showNotification]
+  );
 
-  const notifyWorkflowCompleted = useCallback((workflowName: string, duration: string) => {
-    showNotification({
-      type: 'success',
-      category: 'workflow',
-      title: 'Workflow Completed',
-      message: `${workflowName} finished successfully in ${duration}`,
-    });
-  }, [showNotification]);
+  const notifyWorkflowCompleted = useCallback(
+    (workflowName: string, duration: string) => {
+      showNotification({
+        type: 'success',
+        category: 'workflow',
+        title: 'Workflow Completed',
+        message: `${workflowName} finished successfully in ${duration}`,
+      });
+    },
+    [showNotification]
+  );
 
-  const notifyWorkflowFailed = useCallback((workflowName: string, error: string) => {
-    showNotification({
-      type: 'error',
-      category: 'workflow',
-      title: 'Workflow Failed',
-      message: `${workflowName}: ${error}`,
-      persistent: true,
-    });
-  }, [showNotification]);
+  const notifyWorkflowFailed = useCallback(
+    (workflowName: string, error: string) => {
+      showNotification({
+        type: 'error',
+        category: 'workflow',
+        title: 'Workflow Failed',
+        message: `${workflowName}: ${error}`,
+        persistent: true,
+      });
+    },
+    [showNotification]
+  );
 
   return {
     notifyWorkflowStarted,
@@ -412,23 +464,29 @@ export const useWorkflowNotifications = () => {
 export const useAgentNotifications = () => {
   const { showNotification } = useNotifications();
 
-  const notifyAgentActivated = useCallback((agentName: string) => {
-    showNotification({
-      type: 'success',
-      category: 'agent',
-      title: 'Agent Activated',
-      message: `${agentName} is now active and ready`,
-    });
-  }, [showNotification]);
+  const notifyAgentActivated = useCallback(
+    (agentName: string) => {
+      showNotification({
+        type: 'success',
+        category: 'agent',
+        title: 'Agent Activated',
+        message: `${agentName} is now active and ready`,
+      });
+    },
+    [showNotification]
+  );
 
-  const notifyAgentError = useCallback((agentName: string, error: string) => {
-    showNotification({
-      type: 'error',
-      category: 'agent',
-      title: 'Agent Error',
-      message: `${agentName}: ${error}`,
-    });
-  }, [showNotification]);
+  const notifyAgentError = useCallback(
+    (agentName: string, error: string) => {
+      showNotification({
+        type: 'error',
+        category: 'agent',
+        title: 'Agent Error',
+        message: `${agentName}: ${error}`,
+      });
+    },
+    [showNotification]
+  );
 
   return {
     notifyAgentActivated,
@@ -440,24 +498,30 @@ export const useAgentNotifications = () => {
 export const useTestNotifications = () => {
   const { showNotification } = useNotifications();
 
-  const notifyTestSignificant = useCallback((testName: string, winner: string) => {
-    showNotification({
-      type: 'success',
-      category: 'test',
-      title: 'Test Reached Significance',
-      message: `${testName}: ${winner} is the winner`,
-      persistent: true,
-    });
-  }, [showNotification]);
+  const notifyTestSignificant = useCallback(
+    (testName: string, winner: string) => {
+      showNotification({
+        type: 'success',
+        category: 'test',
+        title: 'Test Reached Significance',
+        message: `${testName}: ${winner} is the winner`,
+        persistent: true,
+      });
+    },
+    [showNotification]
+  );
 
-  const notifyTestStarted = useCallback((testName: string) => {
-    showNotification({
-      type: 'info',
-      category: 'test',
-      title: 'A/B Test Started',
-      message: `${testName} is now collecting data`,
-    });
-  }, [showNotification]);
+  const notifyTestStarted = useCallback(
+    (testName: string) => {
+      showNotification({
+        type: 'info',
+        category: 'test',
+        title: 'A/B Test Started',
+        message: `${testName} is now collecting data`,
+      });
+    },
+    [showNotification]
+  );
 
   return {
     notifyTestSignificant,

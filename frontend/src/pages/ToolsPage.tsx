@@ -1,29 +1,33 @@
 import React, { useState, useRef } from 'react';
 import { Box, Tabs, Tab, TabPanel, Chip, Button } from '../utils/mui';
-import { 
-  RefreshIcon, 
+import {
+  RefreshIcon,
   AddIcon,
   ModelsIcon as ServersIcon,
   ToolsIcon,
   ToggleIcon,
 } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import CrudDataTable, { CrudConfig, CrudService, CrudColumn, CrudAction, CrudDataTableRef } from '../components/CrudDataTable';
+import CrudDataTable, {
+  CrudConfig,
+  CrudService,
+  CrudColumn,
+  CrudAction,
+  CrudDataTableRef,
+} from '../components/CrudDataTable';
 import RemoteServerForm from '../components/RemoteServerForm';
-import { 
-  createNameWithDescriptionRenderer, 
+import {
+  createNameWithDescriptionRenderer,
   createTypeChipRenderer,
   createStatusChipRenderer,
   createCountRenderer,
   createConditionalChipRenderer,
   createUsageStatsRenderer,
-  createPerformanceRenderer 
+  createPerformanceRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from "../services/auth-service";
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
-
-
 
 // Define interfaces based on the original ToolsPage
 interface RemoteServer {
@@ -148,10 +152,14 @@ const ToolsPage: React.FC = () => {
       onClick: async (server) => {
         try {
           if (server.status === 'enabled') {
-            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisable(server.id);
+            await getSDK().toolServers.disableToolServerApiV1ToolserversServersServerIdDisable(
+              server.id
+            );
             toastService.success('Server disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable(server.id);
+            await getSDK().toolServers.enableToolServerApiV1ToolserversServersServerIdEnable(
+              server.id
+            );
             toastService.success('Server enabled successfully');
           }
           // Refresh the data after toggle
@@ -160,7 +168,7 @@ const ToolsPage: React.FC = () => {
           handleError(new Error('Server status toggle failed'), {
             source: 'ToolsPage.handleServerToggle',
             operation: 'toggle server status',
-            additionalData: { serverId: server.id, serverName: server.name }
+            additionalData: { serverId: server.id, serverName: server.name },
           });
         }
       },
@@ -170,7 +178,9 @@ const ToolsPage: React.FC = () => {
       label: 'Refresh Tools',
       onClick: async (server) => {
         try {
-          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools(server.id);
+          await getSDK().toolServers.refreshServerToolsApiV1ToolserversServersServerIdRefreshTools(
+            server.id
+          );
           toastService.success('Server tools refreshed successfully');
           // Refresh the data after refreshing tools
           serverCrudRef.current?.handleRefresh();
@@ -178,7 +188,7 @@ const ToolsPage: React.FC = () => {
           handleError(new Error('Server refresh failed'), {
             source: 'ToolsPage.handleServerRefresh',
             operation: 'refresh server tools',
-            additionalData: { serverId: server.id, serverName: server.name }
+            additionalData: { serverId: server.id, serverName: server.name },
           });
         }
       },
@@ -197,9 +207,14 @@ const ToolsPage: React.FC = () => {
     pageSize: 10,
   };
 
-  const serverService: CrudService<RemoteServer, RemoteServerCreate, RemoteServerUpdate> = {
+  const serverService: CrudService<
+    RemoteServer,
+    RemoteServerCreate,
+    RemoteServerUpdate
+  > = {
     list: async () => {
-      const response = await getSDK().toolServers.listToolServersApiV1ToolserversServers({});
+      const response =
+        await getSDK().toolServers.listToolServersApiV1ToolserversServers({});
       return {
         items: response || [],
         total: response?.length || 0,
@@ -207,20 +222,26 @@ const ToolsPage: React.FC = () => {
     },
 
     create: async (data: RemoteServerCreate) => {
-      const response = await getSDK().toolServers.createToolServerApiV1ToolserversServers(data);
+      const response =
+        await getSDK().toolServers.createToolServerApiV1ToolserversServers(
+          data
+        );
       return response;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
-      const response = await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId(
-        id,
-        data
-      );
+      const response =
+        await getSDK().toolServers.updateToolServerApiV1ToolserversServersServerId(
+          id,
+          data
+        );
       return response;
     },
 
     delete: async (id: string) => {
-      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerId(id);
+      await getSDK().toolServers.deleteToolServerApiV1ToolserversServersServerId(
+        id
+      );
     },
   };
 
@@ -266,10 +287,14 @@ const ToolsPage: React.FC = () => {
       onClick: async (tool) => {
         try {
           if (tool.status === 'enabled') {
-            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisable(tool.id);
+            await getSDK().toolServers.disableToolApiV1ToolserversToolsToolIdDisable(
+              tool.id
+            );
             toastService.success('Tool disabled successfully');
           } else {
-            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable(tool.id);
+            await getSDK().toolServers.enableToolApiV1ToolserversToolsToolIdEnable(
+              tool.id
+            );
             toastService.success('Tool enabled successfully');
           }
           // Refresh the data after toggle
@@ -278,7 +303,7 @@ const ToolsPage: React.FC = () => {
           handleError(new Error('Tool status toggle failed'), {
             source: 'ToolsPage.handleToolToggle',
             operation: 'toggle tool status',
-            additionalData: { toolId: tool.id, toolName: tool.name }
+            additionalData: { toolId: tool.id, toolName: tool.name },
           });
         }
       },
@@ -299,7 +324,8 @@ const ToolsPage: React.FC = () => {
 
   const toolService: CrudService<Tool, any, any> = {
     list: async () => {
-      const response = await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
+      const response =
+        await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
       return {
         items: response || [],
         total: response?.length || 0,
@@ -353,14 +379,14 @@ const ToolsPage: React.FC = () => {
     <PageLayout title="Tool Server Management" toolbar={toolbar}>
       <Box sx={{ borderBottom: 1, borderColor: 'divider' }}>
         <Tabs value={activeTab} onChange={handleTabChange}>
-          <Tab 
-            label="Remote Servers" 
-            icon={<ServersIcon />} 
+          <Tab
+            label="Remote Servers"
+            icon={<ServersIcon />}
             iconPosition="start"
           />
-          <Tab 
-            label="Available Tools" 
-            icon={<ToolsIcon />} 
+          <Tab
+            label="Available Tools"
+            icon={<ToolsIcon />}
             iconPosition="start"
           />
         </Tabs>

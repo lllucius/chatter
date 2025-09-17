@@ -27,7 +27,14 @@ export interface PageHeaderProps {
   stats?: Array<{
     label: string;
     value: string | number;
-    color?: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
+    color?:
+      | 'default'
+      | 'primary'
+      | 'secondary'
+      | 'error'
+      | 'info'
+      | 'success'
+      | 'warning';
   }>;
   loading?: boolean;
 }
@@ -45,7 +52,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 }) => {
   // Build default actions
   const defaultActions: PageHeaderAction[] = [];
-  
+
   if (onRefresh) {
     defaultActions.push({
       label: refreshLabel,
@@ -55,7 +62,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
       disabled: loading,
     });
   }
-  
+
   if (onAdd) {
     defaultActions.push({
       label: addLabel,
@@ -81,16 +88,21 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
     >
       {/* Title and subtitle section */}
       <Box sx={{ flex: 1, minWidth: 0 }}>
-        <Typography variant="h4" component="h1" gutterBottom sx={{ fontWeight: 'bold' }}>
+        <Typography
+          variant="h4"
+          component="h1"
+          gutterBottom
+          sx={{ fontWeight: 'bold' }}
+        >
           {title}
         </Typography>
-        
+
         {subtitle && (
           <Typography variant="body1" color="text.secondary" sx={{ mb: 2 }}>
             {subtitle}
           </Typography>
         )}
-        
+
         {/* Stats chips */}
         {stats.length > 0 && (
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
@@ -109,7 +121,14 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
 
       {/* Actions section */}
       {allActions.length > 0 && (
-        <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap', alignItems: 'center' }}>
+        <Box
+          sx={{
+            display: 'flex',
+            gap: 1,
+            flexWrap: 'wrap',
+            alignItems: 'center',
+          }}
+        >
           {allActions.map((action, index): void => (
             <Button
               key={index}
@@ -151,10 +170,11 @@ export const CrudPageHeader: React.FC<CrudPageHeaderProps> = ({
   additionalActions = [],
 }) => {
   const plural = entityNamePlural || `${entityName}s`;
-  
-  const stats = totalCount !== undefined ? [
-    { label: 'Total', value: totalCount, color: 'primary' as const }
-  ] : [];
+
+  const stats =
+    totalCount !== undefined
+      ? [{ label: 'Total', value: totalCount, color: 'primary' as const }]
+      : [];
 
   return (
     <PageHeader

@@ -390,6 +390,7 @@ async def auth_headers(client) -> dict[str, str]:
     """
     import random
     import string
+
     from chatter.models.base import generate_ulid
 
     # Generate a more username-friendly unique identifier

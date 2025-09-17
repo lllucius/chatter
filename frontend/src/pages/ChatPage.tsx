@@ -118,9 +118,9 @@ const ChatPage: React.FC = () => {
           // Send message to API
           let response;
           if (streamingEnabled) {
-            // TODO: Streaming functionality is not yet implemented
-            // For now, fall back to non-streaming to prevent errors
-            response = await getSDK().chat.chatChat(chatRequest);
+            // Use streaming endpoint 
+            await handleStreamingResponse(chatRequest, true);
+            return; // Streaming handling is complete
           } else {
             // Use non-streaming endpoint  
             response = await getSDK().chat.chatChat(chatRequest);
@@ -187,6 +187,7 @@ const ChatPage: React.FC = () => {
     handleEditMessage,
     handleDeleteMessage,
     handleRateMessage,
+    handleStreamingResponse,
   ]);
 
   const handleSelectConversation = useCallback(async (conversation: ConversationResponse) => {
@@ -202,6 +203,214 @@ const ChatPage: React.FC = () => {
       });
     }
   }, [setCurrentConversation, loadMessagesForConversation]);
+
+  // Handle streaming response from chat API
+  const handleStreamingResponse = useCallback(async (chatRequest: Record<string, unknown>, isRegeneration: boolean) => {
+    try {
+      // Get the streaming response
+      const stream = await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
+      
+      // Create a text decoder to handle the stream
+      const decoder = new TextDecoder();
+      const reader = stream.getReader();
+      
+      let streamedContent = '';
+      let assistantMessageId = `assistant-${Date.now()}`;
+      
+      // Create initial assistant message with empty content
+      const initialAssistantMessage: ChatMessage = {
+        id: assistantMessageId,
+        role: 'assistant',
+        content: '',
+        timestamp: new Date(),
+        metadata: {
+          workflow: {
+            stage: 'Streaming',
+            currentStep: 0,
+            totalSteps: 1,
+            stepDescriptions: ['Receiving response...'],
+          },
+        },
+        onEdit: handleEditMessage,
+        onRegenerate: handleRegenerateMessage,
+        onDelete: handleDeleteMessage,
+        onRate: handleRateMessage,
+      };
+
+      // Add the initial message to the chat
+      if (isRegeneration) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
+          if (lastAssistantIndex !== -1) {
+            newMessages[lastAssistantIndex] = initialAssistantMessage;
+          }
+          return newMessages;
+        });
+      } else {
+        setMessages(prev => [...prev, initialAssistantMessage]);
+      }
+
+      let buffer = '';
+      let totalTokens: number | undefined;
+      let model: string | undefined;
+      let processingTime: number | undefined;
+      let conversationId: string | undefined;
+
+      // Process the stream
+      while (true) {
+        const { done, value } = await reader.read();
+        
+        if (done) {
+          break;
+        }
+
+        // Decode the chunk and add to buffer
+        buffer += decoder.decode(value, { stream: true });
+        const lines = buffer.split('\n');
+        buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
+
+        // Process each complete line
+        for (const line of lines) {
+          if (line.startsWith('data: ')) {
+            const raw = line.slice(6).trim();
+            
+            // Handle special cases
+            if (raw === '[DONE]') {
+              // End of stream
+              continue;
+            }
+
+            try {
+              const eventData = JSON.parse(raw);
+              
+              switch (eventData.type) {
+                case 'start':
+                  conversationId = eventData.conversation_id;
+                  break;
+                  
+                case 'token':
+                  // Add the token to our streamed content
+                  streamedContent += eventData.content || '';
+                  
+                  // Update the message with the new content
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessageId 
+                      ? {
+                          ...msg,
+                          content: streamedContent,
+                          metadata: {
+                            ...msg.metadata,
+                            workflow: {
+                              stage: 'Streaming',
+                              currentStep: 0,
+                              totalSteps: 1,
+                              stepDescriptions: ['Receiving response...'],
+                            },
+                          },
+                        }
+                      : msg
+                  ));
+                  break;
+                  
+                case 'complete':
+                  // Extract final metadata
+                  if (eventData.metadata) {
+                    totalTokens = eventData.metadata.total_tokens;
+                    model = eventData.metadata.model_used;
+                    processingTime = eventData.metadata.response_time_ms;
+                  }
+                  
+                  // Update the message with final metadata
+                  setMessages(prev => prev.map(msg => 
+                    msg.id === assistantMessageId 
+                      ? {
+                          ...msg,
+                          content: streamedContent,
+                          metadata: {
+                            model,
+                            tokens: totalTokens,
+                            processingTime,
+                            workflow: {
+                              stage: 'Complete',
+                              currentStep: 1,
+                              totalSteps: 1,
+                              stepDescriptions: ['Response completed'],
+                            },
+                          },
+                        }
+                      : msg
+                  ));
+                  break;
+                  
+                case 'error':
+                  throw new Error(eventData.message || 'Streaming error occurred');
+                  
+                default:
+                  // Handle other event types if needed
+                  // console.log('Unknown streaming event type:', eventData.type);
+                  break;
+              }
+            } catch (parseError) {
+              // console.warn('Failed to parse streaming data:', raw, parseError);
+            }
+          }
+        }
+      }
+
+      // Clean up
+      reader.releaseLock();
+      
+      // Focus input after streaming is complete
+      focusInput();
+      
+    } catch (error) {
+      // Handle streaming errors by showing an error message
+      const errorMessage: ChatMessage = {
+        id: `assistant-error-${Date.now()}`,
+        role: 'assistant',
+        content: 'Sorry, I encountered an error while processing your request. Please try again.',
+        timestamp: new Date(),
+        metadata: {
+          workflow: {
+            stage: 'Error',
+            currentStep: 0,
+            totalSteps: 1,
+            stepDescriptions: ['Error occurred during streaming'],
+          },
+        },
+        onEdit: handleEditMessage,
+        onRegenerate: handleRegenerateMessage,
+        onDelete: handleDeleteMessage,
+        onRate: handleRateMessage,
+      };
+
+      if (isRegeneration) {
+        setMessages(prev => {
+          const newMessages = [...prev];
+          const lastAssistantIndex = newMessages.findLastIndex(msg => msg.role === 'assistant');
+          if (lastAssistantIndex !== -1) {
+            newMessages[lastAssistantIndex] = errorMessage;
+          }
+          return newMessages;
+        });
+      } else {
+        setMessages(prev => [...prev, errorMessage]);
+      }
+      
+      handleError(error, {
+        source: 'ChatPage.handleStreamingResponse',
+        operation: 'stream chat response',
+      });
+    }
+  }, [
+    setMessages,
+    handleEditMessage,
+    handleRegenerateMessage,
+    handleDeleteMessage,
+    handleRateMessage,
+    focusInput,
+  ]);
 
   // Set up right sidebar content
   useEffect(() => {
@@ -287,9 +496,9 @@ const ChatPage: React.FC = () => {
       // Send message to API
       let response;
       if (streamingEnabled) {
-        // TODO: Streaming functionality is not yet implemented
-        // For now, fall back to non-streaming to prevent errors
-        response = await getSDK().chat.chatChat(chatRequest);
+        // Use streaming endpoint
+        await handleStreamingResponse(chatRequest, isRegeneration);
+        return; // Streaming handling is complete
       } else {
         // Use non-streaming endpoint  
         response = await getSDK().chat.chatChat(chatRequest);
@@ -364,6 +573,7 @@ const ChatPage: React.FC = () => {
     handleDeleteMessage,
     handleRateMessage,
     focusInput,
+    handleStreamingResponse,
   ]);
 
   const handleKeyDown = useCallback((e: React.KeyboardEvent<HTMLDivElement>) => {

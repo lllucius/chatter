@@ -4,30 +4,36 @@ import { BrowserRouter } from 'react-router-dom';
 import ChatPage from '../ChatPage';
 
 // Mock dependencies
-vi.mock('../../services/auth-service', () => ({
-  getSDK: vi.fn(() => ({
-    chat: {
-      streamingChatApiV1ChatStreaming: vi.fn(),
-      chatChat: vi.fn(),
+vi.mock('../../services/auth-service', () => {
+  const mockStreamingMethod = vi.fn();
+  return {
+    getSDK: vi.fn(() => ({
+      chat: {
+        streamingChatApiV1ChatStreaming: mockStreamingMethod,
+        chatChat: vi.fn(),
+      },
+      profiles: {
+        listProfilesApiV1Profiles: vi.fn(() => Promise.resolve({ profiles: [] })),
+      },
+      prompts: {
+        listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
+      },
+      documents: {
+        listDocumentsApiV1Documents: vi.fn(() =>
+          Promise.resolve({ documents: [] })
+        ),
+      },
+      conversations: {
+        createConversationApiV1Conversations: vi.fn(() =>
+          Promise.resolve({ id: 'test-conv-id' })
+        ),
+      },
+    })),
+    authService: {
+      isAuthenticated: vi.fn(() => true),
     },
-    profiles: {
-      listProfilesApiV1Profiles: vi.fn(() => Promise.resolve({ profiles: [] })),
-    },
-    prompts: {
-      listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
-    },
-    documents: {
-      listDocumentsApiV1Documents: vi.fn(() =>
-        Promise.resolve({ documents: [] })
-      ),
-    },
-    conversations: {
-      createConversationApiV1Conversations: vi.fn(() =>
-        Promise.resolve({ id: 'test-conv-id' })
-      ),
-    },
-  })),
-}));
+  };
+});
 
 vi.mock('../../services/toast-service', () => ({
   toastService: {
@@ -66,10 +72,9 @@ describe('ChatPage Streaming Functionality', () => {
   beforeEach(() => {
     vi.clearAllMocks();
 
-    // Get the mock SDK
-    const { getSDK } = require('../../services/auth-service');
-    const mockSDK = getSDK();
-    mockStreamingMethod = mockSDK.chat.streamingChatApiV1ChatStreaming;
+    // Get the mock SDK streaming method
+    const authService = require('../../services/auth-service');
+    mockStreamingMethod = authService.getSDK().chat.streamingChatApiV1ChatStreaming;
   });
 
   it('should render the chat page', async () => {

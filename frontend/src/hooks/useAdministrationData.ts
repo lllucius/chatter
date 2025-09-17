@@ -5,8 +5,11 @@ import { useNotifications } from '../components/NotificationSystem';
 import { handleError } from '../utils/error-handler';
 import {
   BackupResponse,
+  BackupListResponse,
   PluginResponse,
+  PluginListResponse,
   JobResponse,
+  JobListResponse,
   JobStatsResponse,
 } from 'chatter-sdk';
 
@@ -85,7 +88,7 @@ export const useAdministrationData = () => {
     try {
       const response =
         await getSDK().dataManagement.listBackupsApiV1DataBackups();
-      setBackups(response || []);
+      setBackups(response?.backups || []);
     } catch (error) {
       handleError(error, {
         source: 'useAdministrationData.loadBackups',
@@ -97,7 +100,7 @@ export const useAdministrationData = () => {
   const loadPlugins = useCallback(async () => {
     try {
       const response = await getSDK().plugins.listPluginsApiV1Plugins();
-      setPlugins(response || []);
+      setPlugins(response?.plugins || []);
     } catch (error) {
       handleError(error, {
         source: 'useAdministrationData.loadPlugins',

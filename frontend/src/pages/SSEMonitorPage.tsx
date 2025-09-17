@@ -18,13 +18,13 @@ import {
   IconButton,
   Tooltip,
   Alert,
-  Grid,
   FormControl,
   InputLabel,
   Select,
   OutlinedInput,
   Autocomplete,
   Collapse,
+  Grid,
 } from '@mui/material';
 import {
   PlayArrow as PlayIcon,
@@ -352,7 +352,7 @@ const SSEMonitorPage: React.FC = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={2} alignItems="center">
-            <Grid item>
+            <Grid>
               <Button
                 variant={isMonitoring ? "outlined" : "contained"}
                 color={isMonitoring ? "secondary" : "primary"}
@@ -364,7 +364,7 @@ const SSEMonitorPage: React.FC = () => {
               </Button>
             </Grid>
             
-            <Grid item>
+            <Grid>
               <Chip
                 label={isConnected ? 'Connected' : 'Disconnected'}
                 color={isConnected ? 'success' : 'error'}
@@ -372,7 +372,7 @@ const SSEMonitorPage: React.FC = () => {
               />
             </Grid>
 
-            <Grid item>
+            <Grid>
               <TextField
                 type="number"
                 label="Max Messages"
@@ -384,7 +384,7 @@ const SSEMonitorPage: React.FC = () => {
               />
             </Grid>
 
-            <Grid item>
+            <Grid>
               <FormControlLabel
                 control={
                   <Switch
@@ -396,7 +396,7 @@ const SSEMonitorPage: React.FC = () => {
               />
             </Grid>
 
-            <Grid item>
+            <Grid>
               <Tooltip title="Toggle Raw Data View">
                 <IconButton onClick={() => updateSettings({ showRawData: !settings.showRawData })}>
                   {settings.showRawData ? <VisibilityOffIcon /> : <VisibilityIcon />}
@@ -404,7 +404,7 @@ const SSEMonitorPage: React.FC = () => {
               </Tooltip>
             </Grid>
 
-            <Grid item>
+            <Grid>
               <Tooltip title="Clear Messages">
                 <IconButton onClick={clearMessages}>
                   <ClearIcon />
@@ -412,15 +412,17 @@ const SSEMonitorPage: React.FC = () => {
               </Tooltip>
             </Grid>
 
-            <Grid item>
+            <Grid>
               <Tooltip title="Export Messages">
-                <IconButton onClick={exportMessages} disabled={filteredMessages.length === 0}>
-                  <DownloadIcon />
-                </IconButton>
+                <span>
+                  <IconButton onClick={exportMessages} disabled={filteredMessages.length === 0}>
+                    <DownloadIcon />
+                  </IconButton>
+                </span>
               </Tooltip>
             </Grid>
 
-            <Grid item>
+            <Grid>
               <Button
                 variant="outlined"
                 size="small"
@@ -431,7 +433,7 @@ const SSEMonitorPage: React.FC = () => {
               </Button>
             </Grid>
 
-            <Grid item>
+            <Grid>
               <Button
                 variant="outlined"
                 startIcon={<FilterIcon />}
@@ -444,7 +446,7 @@ const SSEMonitorPage: React.FC = () => {
             </Grid>
 
             {getActiveFilterCount() > 0 && (
-              <Grid item>
+              <Grid>
                 <Tooltip title="Clear All Filters">
                   <Button
                     variant="text"
@@ -467,7 +469,7 @@ const SSEMonitorPage: React.FC = () => {
               </Typography>
               <Grid container spacing={3}>
                 {/* Event Types Filter */}
-                <Grid item xs={12} md={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     multiple
                     options={filterOptions.eventTypes}
@@ -479,6 +481,7 @@ const SSEMonitorPage: React.FC = () => {
                         label="Event Types"
                         placeholder="Select event types..."
                         size="small"
+                        fullWidth
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -496,7 +499,7 @@ const SSEMonitorPage: React.FC = () => {
                 </Grid>
 
                 {/* Categories Filter */}
-                <Grid item xs={12} md={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     multiple
                     options={filterOptions.categories}
@@ -508,6 +511,7 @@ const SSEMonitorPage: React.FC = () => {
                         label="Categories"
                         placeholder="Select categories..."
                         size="small"
+                        fullWidth
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -526,7 +530,7 @@ const SSEMonitorPage: React.FC = () => {
                 </Grid>
 
                 {/* Priorities Filter */}
-                <Grid item xs={12} md={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     multiple
                     options={filterOptions.priorities}
@@ -538,6 +542,7 @@ const SSEMonitorPage: React.FC = () => {
                         label="Priorities"
                         placeholder="Select priorities..."
                         size="small"
+                        fullWidth
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -556,7 +561,7 @@ const SSEMonitorPage: React.FC = () => {
                 </Grid>
 
                 {/* User IDs Filter */}
-                <Grid item xs={12} md={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     multiple
                     options={filterOptions.userIds}
@@ -568,6 +573,7 @@ const SSEMonitorPage: React.FC = () => {
                         label="User IDs"
                         placeholder="Select user IDs..."
                         size="small"
+                        fullWidth
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -586,7 +592,7 @@ const SSEMonitorPage: React.FC = () => {
                 </Grid>
 
                 {/* Source Systems Filter */}
-                <Grid item xs={12} md={6} lg={4}>
+                <Grid size={{ xs: 12, sm: 6, md: 4 }}>
                   <Autocomplete
                     multiple
                     options={filterOptions.sourceSystems}
@@ -598,6 +604,7 @@ const SSEMonitorPage: React.FC = () => {
                         label="Source Systems"
                         placeholder="Select source systems..."
                         size="small"
+                        fullWidth
                       />
                     )}
                     renderTags={(value, getTagProps) =>
@@ -624,23 +631,23 @@ const SSEMonitorPage: React.FC = () => {
       <Card sx={{ mb: 3 }}>
         <CardContent>
           <Grid container spacing={3}>
-            <Grid item xs={2.4}>
+            <Grid size={2.4}>
               <Typography variant="h6">{messages.length}</Typography>
               <Typography variant="body2" color="text.secondary">Total Messages</Typography>
             </Grid>
-            <Grid item xs={2.4}>
+            <Grid size={2.4}>
               <Typography variant="h6">{filteredMessages.length}</Typography>
               <Typography variant="body2" color="text.secondary">Filtered Messages</Typography>
             </Grid>
-            <Grid item xs={2.4}>
+            <Grid size={2.4}>
               <Typography variant="h6">{filterOptions.eventTypes.length}</Typography>
               <Typography variant="body2" color="text.secondary">Event Types</Typography>
             </Grid>
-            <Grid item xs={2.4}>
+            <Grid size={2.4}>
               <Typography variant="h6">{getActiveFilterCount()}</Typography>
               <Typography variant="body2" color="text.secondary">Active Filters</Typography>
             </Grid>
-            <Grid item xs={2.4}>
+            <Grid size={2.4}>
               <Typography variant="h6">{isMonitoring ? 'Active' : 'Inactive'}</Typography>
               <Typography variant="body2" color="text.secondary">Monitor Status</Typography>
             </Grid>
@@ -696,12 +703,12 @@ const SSEMonitorPage: React.FC = () => {
                       secondary={
                         <Box>
                           {/* Event Data Summary */}
-                          <Typography variant="body2" sx={{ mb: 1 }}>
+                          <Box sx={{ mb: 1 }}>
                             {typeof message.event.data === 'object' 
                               ? `Data: ${Object.keys(message.event.data || {}).join(', ')}`
                               : `Data: ${String(message.event.data).substring(0, 100)}...`
                             }
-                          </Typography>
+                          </Box>
                           
                           {/* Raw Data (if enabled) */}
                           {settings.showRawData && (

@@ -94,3 +94,6 @@ export const useForm = <T extends Record<string, unknown>>(options: UseFormOptio
     setValues,
   };
 };
+
+// Export alias for backward compatibility
+export const useFormGeneric = useForm;

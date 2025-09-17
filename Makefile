@@ -117,6 +117,10 @@ quick-check: ## Quick syntax and basic checks
 	cd frontend && npm run type-check
 	@echo "$(GREEN)✅ Quick checks completed!$(NC)"
 
+health-check: ## Fast health check - essential quality and security checks
+	@echo "$(CYAN)Running health check...$(NC)"
+	bash scripts/health_check.sh
+
 # Development workflow helpers
 dev-setup: install install-hooks ## Complete development setup
 	@echo "$(GREEN)🚀 Development environment ready!$(NC)"

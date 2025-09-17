@@ -733,11 +733,11 @@ class UnifiedWorkflowExecutor:
             conversation_id=conversation.id,
             user_id=user_id,
             role=MessageRole.ASSISTANT,
-            content="",  # Empty content initially
+            content="...",  # Minimal placeholder content to pass validation
             metadata=(
-                {"correlation_id": correlation_id}
+                {"correlation_id": correlation_id, "is_placeholder": True}
                 if correlation_id
-                else None
+                else {"is_placeholder": True}
             ),
         )
 

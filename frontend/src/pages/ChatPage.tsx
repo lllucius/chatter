@@ -23,6 +23,7 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
+import type { ConversationResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
@@ -188,11 +189,11 @@ const ChatPage: React.FC = () => {
     handleRateMessage,
   ]);
 
-  const handleSelectConversation = useCallback(async (conversationId: string) => {
+  const handleSelectConversation = useCallback(async (conversation: ConversationResponse) => {
     try {
-      const conversation = await getSDK().conversations.getConversationApiV1ConversationsConversationId(conversationId);
-      setCurrentConversation(conversation);
-      await loadMessagesForConversation(conversationId);
+      const conversationWithMessages = await getSDK().conversations.getConversationApiV1ConversationsConversationId(conversation.id);
+      setCurrentConversation(conversationWithMessages);
+      await loadMessagesForConversation(conversation.id);
       setHistoryDialogOpen(false);
     } catch (error) {
       handleError(error, {

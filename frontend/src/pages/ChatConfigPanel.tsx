@@ -23,14 +23,14 @@ import {
   Description as DocumentIcon,
   RestartAlt as ResetIcon,
 } from '@mui/icons-material';
-import { ProfileResponse, PromptResponse, DocumentResponse } from 'chatter-sdk';
+import { ProfileResponse, PromptResponse, DocumentResponse, ConversationResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 interface Props {
   profiles: ProfileResponse[];
   prompts: PromptResponse[];
   documents: DocumentResponse[];
-  currentConversation: Record<string, unknown> | null;
+  currentConversation: ConversationResponse | null;
 
   selectedProfile: string;
   setSelectedProfile: (id: string) => void;
@@ -50,7 +50,7 @@ interface Props {
   enableRetrieval: boolean;
   setEnableRetrieval: (v: boolean) => void;
 
-  onSelectConversation: (conversation: Record<string, unknown>) => void;
+  onSelectConversation: (conversation: ConversationResponse) => void;
 }
 
 const ChatConfigPanel: React.FC<Props> = ({

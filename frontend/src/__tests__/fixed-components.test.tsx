@@ -48,15 +48,15 @@ vi.mock('../components/PageLayout', () => ({
 }));
 
 // Mock WorkflowEditor
-vi.mock('../components/workflow/WorkflowEditor', (): void => ({
-  default: (): void => (
+vi.mock('../components/workflow/WorkflowEditor', () => ({
+  default: () => (
     <div data-testid="workflow-editor">WorkflowEditor Mock</div>
   ),
 }));
 
 // Mock RightSidebarContext
-vi.mock('../components/RightSidebarContext', (): void => ({
-  useRightSidebar: (): void => ({ collapsed: false, setCollapsed: vi.fn() }),
+vi.mock('../components/RightSidebarContext', () => ({
+  useRightSidebar: () => ({ collapsed: false, setCollapsed: vi.fn() }),
 }));
 
 describe('Fixed Components - No Infinite Loops', () => {

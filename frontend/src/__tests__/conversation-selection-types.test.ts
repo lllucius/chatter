@@ -1,5 +1,6 @@
 import { describe, it, expect, vi } from 'vitest';
 import type { ConversationResponse } from 'chatter-sdk';
+import { ConversationStatus } from 'chatter-sdk';
 
 describe('Conversation Selection Type Safety', () => {
   it('should handle ConversationResponse objects correctly instead of causing [object Object] bug', () => {
@@ -21,7 +22,7 @@ describe('Conversation Selection Type Safety', () => {
       title: 'Test Conversation',
       description: 'A test conversation',
       user_id: 'user-123',
-      status: 'active',
+      status: ConversationStatus.active,
       enable_retrieval: false,
       message_count: 5,
       total_tokens: 100,
@@ -53,7 +54,7 @@ describe('Conversation Selection Type Safety', () => {
       title: 'My Conversation',
       description: null,
       user_id: 'user-ulid',
-      status: 'active',
+      status: ConversationStatus.active,
       enable_retrieval: true,
       message_count: 10,
       total_tokens: 500,
@@ -91,7 +92,7 @@ describe('Conversation Selection Type Safety', () => {
       title: 'Interface Test',
       description: null,
       user_id: 'test-user',
-      status: 'active',
+      status: ConversationStatus.active,
       enable_retrieval: false,
       message_count: 1,
       total_tokens: 50,

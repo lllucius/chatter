@@ -60,7 +60,10 @@ const EnhancedDashboardPage: React.FC = () => {
       // Trigger a manual refresh of dashboard data
       toastService.success('Dashboard refreshed');
     } catch (error) {
-      handleError(error);
+      handleError(error, {
+        source: 'EnhancedDashboardPage.handleRefresh',
+        operation: 'refresh dashboard',
+      });
     } finally {
       setIsRefreshing(false);
     }

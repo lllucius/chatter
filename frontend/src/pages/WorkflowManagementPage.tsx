@@ -28,7 +28,7 @@ import { useWorkflowData } from '../hooks/useWorkflowData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
 
-interface WorkflowFormData {
+interface WorkflowFormData extends Record<string, unknown> {
   name: string;
   description: string;
   category: string;
@@ -176,7 +176,7 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={0} idPrefix="workflow">
           <WorkflowTemplatesTab
-            templates={templates}
+            templates={templates as any}
             loading={loading}
             onExecuteTemplate={handleExecuteTemplate}
             onEditTemplate={handleEditTemplate}
@@ -192,7 +192,7 @@ const WorkflowManagementPage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          <WorkflowExecutionsTab executions={executions} loading={loading} />
+          <WorkflowExecutionsTab executions={executions as any} loading={loading} />
         </TabPanel>
       </Box>
 
@@ -289,7 +289,6 @@ const WorkflowManagementPage: React.FC = () => {
             }}
           >
             <WorkflowEditor
-              availableTools={availableTools?.tools || []}
               initialWorkflow={editingTemplate?.workflow}
             />
           </Box>

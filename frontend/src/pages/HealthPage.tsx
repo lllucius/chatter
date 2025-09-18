@@ -57,8 +57,8 @@ const HealthPage: React.FC = () => {
         getSDK().health.healthCheckEndpointHealthz(),
         getSDK().toolServers.listToolServersApiV1ToolserversServers({}),
       ]);
-      setHealth(healthResponse.data);
-      setToolServers(toolServerResponse.data);
+      setHealth(healthResponse);
+      setToolServers(toolServerResponse);
     } catch (err: unknown) {
       handleError(err, {
         source: 'HealthPage.loadHealthData',
@@ -404,7 +404,7 @@ const HealthPage: React.FC = () => {
                         variant="body2"
                         sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                       >
-                        {server.command || 'N/A'}
+                        {(server as any).command || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>

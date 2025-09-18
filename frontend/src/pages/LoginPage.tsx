@@ -13,7 +13,7 @@ import {
 import { authService } from '../services/auth-service';
 import { useForm } from '../hooks/useForm';
 
-interface LoginFormValues {
+interface LoginFormValues extends Record<string, unknown> {
   username: string;
   password: string;
 }

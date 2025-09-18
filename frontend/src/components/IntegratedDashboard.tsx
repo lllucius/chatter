@@ -67,9 +67,9 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       try {
         // Try the new endpoint, fall back if not available
         if (
-          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated
+          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated
         ) {
-          return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated();
+          return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated();
         }
         return null;
       } catch {
@@ -85,8 +85,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData) {
-          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
+        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData) {
+          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
       } catch {

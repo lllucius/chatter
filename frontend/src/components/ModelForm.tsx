@@ -14,7 +14,7 @@ import {
   FormControlLabel,
   Box,
 } from '@mui/material';
-import { ModelDefCreate, ModelDefUpdate, Provider } from 'chatter-sdk';
+import { ModelDefCreate, ModelDefUpdate, Provider, ModelType } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface ModelFormProps extends CrudFormProps<ModelDefCreate, ModelDefUpdate> {
@@ -32,7 +32,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
   const [formData, setFormData] = useState<ModelDefCreate>({
     provider_id: '',
     name: '',
-    model_type: 'embedding',
+    model_type: ModelType.embedding,
     display_name: '',
     description: '',
     model_name: '',
@@ -47,21 +47,21 @@ const ModelForm: React.FC<ModelFormProps> = ({
     if (open) {
       if (mode === 'edit' && initialData) {
         setFormData({
-          provider_id: initialData.providerId || '',
-          name: initialData.name || '',
-          model_type: initialData.modelType || 'embedding',
-          display_name: initialData.displayName || '',
+          provider_id: '',
+          name: '',
+          model_type: ModelType.embedding,
+          display_name: initialData.display_name || '',
           description: initialData.description || '',
-          model_name: initialData.modelName || '',
-          dimensions: initialData.dimensions,
-          supports_batch: initialData.supportsBatch ?? true,
-          is_active: initialData.isActive ?? true,
+          model_name: initialData.model_name || '',
+          dimensions: initialData.dimensions || 1536,
+          supports_batch: initialData.supports_batch ?? true,
+          is_active: initialData.is_active ?? true,
         });
       } else {
         setFormData({
           provider_id: providers[0]?.id || '',
           name: '',
-          model_type: 'embedding',
+          model_type: ModelType.embedding,
           display_name: '',
           description: '',
           model_name: '',
@@ -109,7 +109,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
               ) : (
                 providers.map((p) => (
                   <MenuItem key={p.id} value={p.id}>
-                    {p.displayName}
+                    {p.display_name}
                   </MenuItem>
                 ))
               )}

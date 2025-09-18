@@ -174,7 +174,7 @@ export const CrudDataTable = forwardRef<
   };
 
   // Expose methods to parent component via ref
-  useImperativeHandle(ref, (): void => ({
+  useImperativeHandle(ref, () => ({
     handleCreate,
     handleRefresh: loadData,
   }));
@@ -203,7 +203,7 @@ export const CrudDataTable = forwardRef<
           operation: `delete ${config.entityName.toLowerCase()}`,
           additionalData: {
             entityType: config.entityName,
-            itemId: item?.id,
+            itemId: item ? getItemId(item) : undefined,
           },
         });
       }
@@ -228,7 +228,7 @@ export const CrudDataTable = forwardRef<
         additionalData: {
           entityType: config.entityName,
           dialogMode,
-          itemId: selectedItem?.id,
+          itemId: selectedItem ? getItemId(selectedItem) : undefined,
         },
       });
     }
@@ -315,11 +315,11 @@ export const CrudDataTable = forwardRef<
                       <TableCell key={String(column.id)}>
                         {column.render
                           ? column.render(
-                              (item as Record<string, unknown>)[column.id],
+                              (item as Record<string, unknown>)[String(column.id)],
                               item
                             )
                           : String(
-                              (item as Record<string, unknown>)[column.id] || ''
+                              (item as Record<string, unknown>)[String(column.id)] || ''
                             )}
                       </TableCell>
                     ))}

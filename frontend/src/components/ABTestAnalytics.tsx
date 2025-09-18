@@ -406,8 +406,8 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, value }: { name?: string; value?: number }) =>
-                      `${name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${value || 0}`
+                    label={(props: any) =>
+                      `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
                     }
                     outerRadius={80}
                     fill="#8884d8"

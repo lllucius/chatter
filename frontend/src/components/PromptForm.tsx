@@ -14,7 +14,7 @@ import {
   Chip,
   Typography,
 } from '@mui/material';
-import { PromptCreate, PromptUpdate } from 'chatter-sdk';
+import { PromptCreate, PromptUpdate, PromptType } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface PromptFormProps extends CrudFormProps<PromptCreate, PromptUpdate> {}
@@ -31,11 +31,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
     description: '',
     content: '',
     category: 'general',
-    prompt_type: 'template' as
-      | 'template'
-      | 'system'
-      | 'few_shot'
-      | 'chain_of_thought',
+    prompt_type: PromptType.template,
     variables: [] as string[],
   });
 
@@ -50,9 +46,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
     'technical',
     'business',
   ];
-  const promptTypes: Array<
-    'template' | 'system' | 'few_shot' | 'chain_of_thought'
-  > = ['template', 'system', 'few_shot', 'chain_of_thought'];
+  const promptTypes = Object.values(PromptType);
 
   useEffect(() => {
     if (open) {
@@ -62,7 +56,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           description: initialData.description || '',
           content: initialData.content || '',
           category: initialData.category || 'general',
-          prompt_type: initialData.prompt_type || 'template',
+          prompt_type: (initialData as any)?.prompt_type || PromptType.template,
           variables: initialData.variables || [],
         });
       } else {
@@ -71,7 +65,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           description: '',
           content: '',
           category: 'general',
-          prompt_type: 'template',
+          prompt_type: PromptType.template,
           variables: [],
         });
       }
@@ -165,7 +159,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               onChange={(e) =>
                 setFormData({
                   ...formData,
-                  prompt_type: e.target.value as PromptCreate['prompt_type'],
+                  prompt_type: e.target.value as PromptType,
                 })
               }
               label="Type"

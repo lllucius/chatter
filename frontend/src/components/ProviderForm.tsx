@@ -53,13 +53,13 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
       if (mode === 'edit' && initialData) {
         // Defensive programming: Ensure all fields are properly extracted from initialData
         setFormData({
-          name: initialData.name || '',
-          provider_type: initialData.provider_type || 'openai',
-          display_name: initialData.display_name || '',
-          description: initialData.description ?? '', // Use nullish coalescing for description
-          api_key_required: initialData.api_key_required ?? true, // Proper boolean handling
-          base_url: initialData.base_url || '',
-          is_active: initialData.is_active ?? true, // Proper boolean handling
+          name: (initialData as any)?.name || '',
+          provider_type: (initialData as any)?.provider_type || 'openai',
+          display_name: (initialData as any)?.display_name || '',
+          description: (initialData as any)?.description ?? '', // Use nullish coalescing for description
+          api_key_required: (initialData as any)?.api_key_required ?? true, // Proper boolean handling
+          base_url: (initialData as any)?.base_url || '',
+          is_active: (initialData as any)?.is_active ?? true, // Proper boolean handling
         });
       } else {
         // Reset to default values for create mode

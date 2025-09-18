@@ -252,67 +252,67 @@ const DashboardPage: React.FC = () => {
       {
         name: 'Mon',
         conversations: Math.max(
-          ((conversationStats.total_conversations as number) ?? 0) * 0.8,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 0.8,
           5
         ),
       },
       {
         name: 'Tue',
         conversations: Math.max(
-          ((conversationStats.total_conversations as number) ?? 0) * 1.2,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 1.2,
           8
         ),
       },
       {
         name: 'Wed',
         conversations: Math.max(
-          ((conversationStats.total_conversations as number) ?? 0) * 0.9,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 0.9,
           6
         ),
       },
       {
         name: 'Thu',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 1.1,
+          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 1.1,
           7
         ),
       },
       {
         name: 'Fri',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 1.3,
+          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 1.3,
           9
         ),
       },
       {
         name: 'Sat',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 0.7,
+          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 0.7,
           4
         ),
       },
       {
         name: 'Sun',
-        conversations: Math.max(conversationStats.total_conversations ?? 0, 5),
+        conversations: Math.max(((conversationStats as any)?.total_conversations || 0) ?? 0, 5),
       },
     ];
 
     const tokenUsageData = [
       {
         name: 'Week 1',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.6, 1000),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.6, 1000),
       },
       {
         name: 'Week 2',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.8, 1500),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.8, 1500),
       },
       {
         name: 'Week 3',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 1.1, 2000),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 1.1, 2000),
       },
       {
         name: 'Week 4',
-        tokens: Math.max(usageMetrics.total_tokens ?? 0, 2500),
+        tokens: Math.max(((usageMetrics as any)?.total_tokens || 0) ?? 0, 2500),
       },
     ];
 
@@ -389,7 +389,7 @@ const DashboardPage: React.FC = () => {
             break;
           case 'xlsx':
             // This would need proper handling if the API returns binary data
-            blob = new Blob([response], {
+            blob = new Blob([JSON.stringify(response)], {
               type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             });
             break;
@@ -540,8 +540,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Total Conversations"
-                value={safeLocaleString(conversationStats.total_conversations)}
-                change={`+${safeLocaleString(conversationStats.total_conversations)} today`}
+                value={safeLocaleString(((conversationStats as any)?.total_conversations || 0))}
+                change={`+${safeLocaleString(((conversationStats as any)?.total_conversations || 0))} today`}
                 changeType="positive"
                 icon={<Message />}
                 color="primary"
@@ -556,8 +556,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Total Messages"
-                value={safeLocaleString(conversationStats.total_messages)}
-                change={`Avg ${safeToFixed(conversationStats.avg_messages_per_conversation, 1)} per conversation`}
+                value={safeLocaleString(((conversationStats as any)?.total_messages || 0))}
+                change={`Avg ${safeToFixed(((conversationStats as any)?.avg_messages_per_conversation || 0), 1)} per conversation`}
                 changeType="neutral"
                 icon={<TrendingUp />}
                 color="secondary"
@@ -572,8 +572,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Token Usage"
-                value={safeLocaleString(usageMetrics.total_tokens)}
-                change={`${safeLocaleString(usageMetrics.total_prompt_tokens)} prompts`}
+                value={safeLocaleString(((usageMetrics as any)?.total_tokens || 0))}
+                change={`${safeLocaleString(((usageMetrics as any)?.total_prompt_tokens || 0))} prompts`}
                 changeType="positive"
                 icon={<Assessment />}
                 color="info"

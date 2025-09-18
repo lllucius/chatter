@@ -82,9 +82,7 @@ const CustomScrollbar: React.FC<CustomScrollbarProps> = ({
         height: '100%',
         ...style,
       }}
-      options={{
-        autoHide: false,
-      }}
+      autoHide={false}
       {...props}
     >
       {children}

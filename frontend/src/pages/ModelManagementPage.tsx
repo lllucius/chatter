@@ -108,19 +108,19 @@ const ModelManagementPage: React.FC = () => {
   // Provider columns and config
   const providerColumns: CrudColumn<Provider>[] = [
     {
-      id: 'displayName',
+      id: 'display_name',
       label: 'Name',
-      render: (value, item): JSX.Element => (
+      render: (value: unknown, item: any): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              {value}
+              {value as string}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {item.name}
             </Typography>
           </Box>
-          {item.isDefault && (
+          {item.is_default && (
             <Chip size="small" label="Default" color="primary" />
           )}
         </Box>
@@ -134,7 +134,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: (value: boolean): JSX.Element => (
+      render: (value: unknown, item: any): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Active' : 'Inactive'}
@@ -145,7 +145,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'api_key_required',
       label: 'API Key',
-      render: (value: boolean): JSX.Element => (
+      render: (value: unknown, item: any): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Required' : 'Optional'}

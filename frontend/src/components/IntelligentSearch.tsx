@@ -100,13 +100,13 @@ const IntelligentSearch: React.FC = () => {
         includeRecommendations: true,
       });
 
-      setSearchResults(response.results || []);
-      setRecommendations(response.recommendations || []);
-      setUserContext(response.user_context);
+      setSearchResults((response as any)?.results || []);
+      setRecommendations((response as any)?.recommendations || []);
+      setUserContext((response as any)?.user_context || null);
 
       // Track search analytics (future implementation)
     } catch (error) {
-      handleError(error);
+      handleError(error, undefined, 'Failed to perform intelligent search');
       setSearchResults([]);
       setRecommendations([]);
     } finally {
@@ -120,9 +120,9 @@ const IntelligentSearch: React.FC = () => {
       const response = await getSDK().analytics.getTrendingContentApiV1AnalyticsRealTimeSearchTrending({
         limit: 10,
       });
-      setTrendingContent(response.trending_content || []);
+      setTrendingContent((response as any)?.trending_content || []);
     } catch (error) {
-      handleError(error);
+      handleError(error, undefined, 'Failed to load trending content');
       setTrendingContent([]);
     } finally {
       setIsLoadingTrending(false);
@@ -351,7 +351,7 @@ const IntelligentSearch: React.FC = () => {
                                 >
                                   Created:{' '}
                                   {format(
-                                    new Date(result.metadata.created_at),
+                                    new Date(result.metadata?.created_at || new Date()),
                                     'MMM d, yyyy'
                                   )}
                                 </Typography>
@@ -464,7 +464,7 @@ const IntelligentSearch: React.FC = () => {
                   {trendingContent.map((item, index) => (
                     <React.Fragment key={item.id}>
                       <ListItem
-                        button
+                        component="button"
                         onClick={() => {
                           setSearchQuery(item.title);
                           setSearchType('documents');

@@ -229,7 +229,7 @@ class DatabaseOptimizationService:
                 select(
                     Message.role,
                     func.count(Message.id).label("message_count"),
-                    func.sum(Message.token_count).label("total_tokens"),
+                    func.sum(Message.total_tokens).label("total_tokens"),
                     func.avg(Message.response_time_ms).label(
                         "avg_response_time"
                     ),
@@ -289,7 +289,7 @@ class DatabaseOptimizationService:
                     func.date(Conversation.created_at).label("date"),
                     func.count(Conversation.id).label("conversations"),
                     func.count(Message.id).label("messages"),
-                    func.sum(Message.token_count).label("tokens"),
+                    func.sum(Message.total_tokens).label("tokens"),
                 )
                 .select_from(
                     Conversation.__table__.join(Message.__table__)

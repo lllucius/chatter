@@ -300,19 +300,19 @@ const DashboardPage: React.FC = () => {
     const tokenUsageData = [
       {
         name: 'Week 1',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.6, 1000),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.6, 1000),
       },
       {
         name: 'Week 2',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 0.8, 1500),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.8, 1500),
       },
       {
         name: 'Week 3',
-        tokens: Math.max((usageMetrics.total_tokens ?? 0) * 1.1, 2000),
+        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 1.1, 2000),
       },
       {
         name: 'Week 4',
-        tokens: Math.max(usageMetrics.total_tokens ?? 0, 2500),
+        tokens: Math.max(((usageMetrics as any)?.total_tokens || 0) ?? 0, 2500),
       },
     ];
 
@@ -389,7 +389,7 @@ const DashboardPage: React.FC = () => {
             break;
           case 'xlsx':
             // This would need proper handling if the API returns binary data
-            blob = new Blob([response], {
+            blob = new Blob([JSON.stringify(response)], {
               type: 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             });
             break;
@@ -572,8 +572,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Token Usage"
-                value={safeLocaleString(usageMetrics.total_tokens)}
-                change={`${safeLocaleString(usageMetrics.total_prompt_tokens)} prompts`}
+                value={safeLocaleString(((usageMetrics as any)?.total_tokens || 0))}
+                change={`${safeLocaleString(((usageMetrics as any)?.total_prompt_tokens || 0))} prompts`}
                 changeType="positive"
                 icon={<Assessment />}
                 color="info"

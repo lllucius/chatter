@@ -3,12 +3,10 @@ import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 import {
   ABTestResponse,
-  ABTestCreate,
-  ABTestUpdate,
+  ABTestUpdateRequest,
   ABTestMetricsResponse,
   ABTestResultsResponse,
-  ABTestPerformanceResponse,
-  ABTestRecommendationsResponse,
+  ABTestActionResponse,
 } from 'chatter-sdk';
 
 export type TestStatus =
@@ -32,14 +30,14 @@ export const useABTestingData = () => {
     null
   );
   const [testPerformance, setTestPerformance] =
-    useState<ABTestPerformanceResponse | null>(null);
+    useState<ABTestActionResponse | null>(null);
   const [testRecommendations, setTestRecommendations] =
-    useState<ABTestRecommendationsResponse | null>(null);
+    useState<ABTestActionResponse | null>(null);
 
   const loadTests = useCallback(async () => {
     try {
       setLoading(true);
-      const response = await getSDK().abTesting.listABTestsApiV1AbTests();
+      const response = await getSDK().abTesting.listAbTestsApiV1AbTests();
       setTests(response.tests || []);
     } catch (error) {
       handleError(error, {
@@ -100,7 +98,7 @@ export const useABTestingData = () => {
     }
   }, []);
 
-  const createTest = useCallback(async (testData: ABTestCreate) => {
+  const createTest = useCallback(async (testData: ABTestUpdateRequest) => {
     try {
       setSaving(true);
       const newTest =
@@ -119,7 +117,7 @@ export const useABTestingData = () => {
   }, []);
 
   const updateTest = useCallback(
-    async (testId: string, testData: ABTestUpdate) => {
+    async (testId: string, testData: ABTestUpdateRequest) => {
       try {
         setSaving(true);
         const updatedTest =

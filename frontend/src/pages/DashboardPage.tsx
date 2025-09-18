@@ -209,8 +209,8 @@ const DashboardPage: React.FC = () => {
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData) {
-          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
+        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData) {
+          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
       } catch (_error) {
@@ -242,31 +242,31 @@ const DashboardPage: React.FC = () => {
     }
 
     // Fallback to real data if chart API isn't available
-    const conversationStats = data?.conversation_stats || {};
-    const usageMetrics = usageData || data?.usage_metrics || {};
+    const conversationStats = (data?.conversation_stats || {}) as Record<string, unknown>;
+    const usageMetrics = (usageData || data?.usage_metrics || {}) as Record<string, unknown>;
     const realPerformanceData =
-      performanceData || data?.performance_metrics || {};
+      (performanceData || data?.performance_metrics || {}) as Record<string, unknown>;
 
     // Provide fallback data when APIs fail
     const conversationChartData = [
       {
         name: 'Mon',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 0.8,
+          ((conversationStats.total_conversations as number) ?? 0) * 0.8,
           5
         ),
       },
       {
         name: 'Tue',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 1.2,
+          ((conversationStats.total_conversations as number) ?? 0) * 1.2,
           8
         ),
       },
       {
         name: 'Wed',
         conversations: Math.max(
-          (conversationStats.total_conversations ?? 0) * 0.9,
+          ((conversationStats.total_conversations as number) ?? 0) * 0.9,
           6
         ),
       },

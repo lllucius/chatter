@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Schedule as DelayIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const DelayNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const DelayNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   const formatDelay = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;

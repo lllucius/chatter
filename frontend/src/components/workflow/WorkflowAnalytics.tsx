@@ -1,4 +1,5 @@
 import React, { useCallback } from 'react';
+import { Node } from '@xyflow/react';
 import {
   Paper,
   Typography,
@@ -21,6 +22,7 @@ import {
 import {
   WorkflowDefinition,
   WorkflowNodeType,
+  WorkflowNodeData,
 } from './WorkflowEditor';
 import { getSDK } from '../../services/auth-service';
 
@@ -43,6 +45,52 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
   );
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
+
+  const calculateNodeTypeDistribution = useCallback((
+    nodes: Node<WorkflowNodeData>[]
+  ): Record<WorkflowNodeType, number> => {
+    return nodes.reduce(
+      (acc, node) => {
+        const nodeType = node.data.nodeType;
+        acc[nodeType] = (acc[nodeType] || 0) + 1;
+        return acc;
+      },
+      {} as Record<WorkflowNodeType, number>
+    );
+  }, []);
+
+  const calculateSimpleMetrics = useCallback((): WorkflowMetrics => {
+    const { nodes, edges } = workflow;
+
+    // Simple fallback calculation for workflows without server-side analytics
+    const nodeTypeDistribution = calculateNodeTypeDistribution(nodes);
+
+    let complexityScore = nodes.length + edges.length;
+
+    const potentialBottlenecks: string[] = [];
+    const recommendations: string[] = [];
+
+    if (nodeTypeDistribution.errorHandler === 0 && nodes.length > 5) {
+      recommendations.push(
+        'Consider adding error handling nodes for better reliability'
+      );
+    }
+
+    if (complexityScore > 20) {
+      recommendations.push(
+        'Workflow complexity is moderate - consider optimizing'
+      );
+    }
+
+    return {
+      totalNodes: nodes.length,
+      nodeTypeDistribution,
+      complexityScore,
+      executionPaths: [],
+      potentialBottlenecks,
+      recommendations,
+    };
+  }, [workflow, calculateNodeTypeDistribution]);
 
   React.useEffect(() => {
     const fetchAnalytics = async () => {
@@ -90,53 +138,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     };
 
     fetchAnalytics();
-  }, [workflow.id, workflow.nodes, workflow.edges, calculateSimpleMetrics]);
-
-  const calculateNodeTypeDistribution = (
-    nodes: WorkflowNode[]
-  ): Record<WorkflowNodeType, number> => {
-    return nodes.reduce(
-      (acc, node) => {
-        const nodeType = node.data.nodeType;
-        acc[nodeType] = (acc[nodeType] || 0) + 1;
-        return acc;
-      },
-      {} as Record<WorkflowNodeType, number>
-    );
-  };
-
-  const calculateSimpleMetrics = useCallback((): WorkflowMetrics => {
-    const { nodes, edges } = workflow;
-
-    // Simple fallback calculation for workflows without server-side analytics
-    const nodeTypeDistribution = calculateNodeTypeDistribution(nodes);
-
-    let complexityScore = nodes.length + edges.length;
-
-    const potentialBottlenecks: string[] = [];
-    const recommendations: string[] = [];
-
-    if (nodeTypeDistribution.errorHandler === 0 && nodes.length > 5) {
-      recommendations.push(
-        'Consider adding error handling nodes for better reliability'
-      );
-    }
-
-    if (complexityScore > 20) {
-      recommendations.push(
-        'Workflow complexity is moderate - consider optimizing'
-      );
-    }
-
-    return {
-      totalNodes: nodes.length,
-      nodeTypeDistribution,
-      complexityScore,
-      executionPaths: [],
-      potentialBottlenecks,
-      recommendations,
-    };
-  }, [workflow]);
+  }, [workflow.id, workflow.nodes, workflow.edges, calculateSimpleMetrics, calculateNodeTypeDistribution]);
 
   if (loading) {
     return (

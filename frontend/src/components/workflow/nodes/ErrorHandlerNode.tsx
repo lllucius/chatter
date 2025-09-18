@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Error as ErrorIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ErrorHandlerNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const ErrorHandlerNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>

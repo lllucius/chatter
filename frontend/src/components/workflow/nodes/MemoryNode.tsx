@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Memory as MemoryIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const MemoryNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>

@@ -96,6 +96,7 @@ export interface WorkflowEdgeData extends Record<string, unknown> {
 }
 
 export interface WorkflowDefinition {
+  id?: string;
   nodes: Node<WorkflowNodeData>[];
   edges: Edge<WorkflowEdgeData>[];
   metadata: {

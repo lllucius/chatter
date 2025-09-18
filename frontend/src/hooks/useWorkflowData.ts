@@ -53,9 +53,11 @@ export const useWorkflowData = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      const response =
-        await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
-      setAvailableTools(response);
+      // TODO: Implement when tools API is available
+      // const response = await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
+      // setAvailableTools(response);
+      console.warn('Available tools API not implemented');
+      setAvailableTools([]);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadAvailableTools',
@@ -66,9 +68,11 @@ export const useWorkflowData = () => {
 
   const loadExecutions = useCallback(async () => {
     try {
-      const response =
-        await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsExecutions();
-      setExecutions(response.executions || []);
+      // TODO: This method requires a specific workflowId
+      // const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecutions(workflowId);
+      // setExecutions(response || []);
+      console.warn('Workflow executions require specific workflow ID');
+      setExecutions([]);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadExecutions',
@@ -98,14 +102,14 @@ export const useWorkflowData = () => {
   }, []);
 
   const executeWorkflow = useCallback(
-    async (templateId: string, input: any) => {
+    async (workflowId: string, input: any) => {
       try {
         setLoading(true);
         const execution =
-          await getSDK().workflows.executeWorkflowApiV1WorkflowsExecute({
-            template_id: templateId,
-            input: input,
-          });
+          await getSDK().workflows.executeWorkflowApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecute(
+            workflowId,
+            { input: input }
+          );
         setExecutions((prev) => [execution, ...prev]);
         return execution;
       } catch (error) {

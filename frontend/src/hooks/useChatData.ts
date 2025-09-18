@@ -182,7 +182,7 @@ export const useChatMessages = () => {
           );
 
         const chatMessages: ExtendedChatMessage[] =
-          response.messages?.map((msg, index) => ({
+          response?.map((msg, index) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,

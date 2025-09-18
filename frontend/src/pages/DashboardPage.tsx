@@ -588,8 +588,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Documents"
-                value={safeLocaleString(documentAnalytics.total_documents)}
-                change={`${safeLocaleString(documentAnalytics.total_chunks)} chunks`}
+                value={safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents)}
+                change={`${safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks)} chunks`}
                 changeType="neutral"
                 icon={<Storage />}
                 color="success"
@@ -693,12 +693,12 @@ const DashboardPage: React.FC = () => {
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Average:{' '}
-                    {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
+                    {safeToFixed((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms, 2)}ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (performanceMetrics.avg_response_time_ms ?? 0) / 10,
+                      (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) / 10,
                       100
                     )}
                     sx={{ mb: 1 }}
@@ -912,9 +912,9 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Avg Response: ${safeToFixed(performanceMetrics.avg_response_time_ms ?? 0, 0)}ms`}
+              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0, 0)}ms`}
               color={
-                (performanceMetrics.avg_response_time_ms ?? 0) < 1000
+                (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) < 1000
                   ? 'success'
                   : 'warning'
               }

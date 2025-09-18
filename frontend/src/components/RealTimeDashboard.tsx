@@ -50,6 +50,7 @@ const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [dashboardData, setDashboardData] = useState<IntegratedDashboardStats | null>(null);
+  const [chartData, setChartData] = useState<ChartReadyAnalytics | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected'
@@ -117,7 +118,6 @@ const RealTimeDashboard: React.FC = () => {
     setConnectionStatus('connecting');
 
     try {
-      const sdk = getSDK();
       const token = authService.getToken();
 
       if (!token) {
@@ -361,6 +361,14 @@ const RealTimeDashboard: React.FC = () => {
                 label={`Documents: ${(dashboardData.agents as Record<string, unknown>)?.total_documents || 0}`}
                 variant="outlined"
               />
+              {chartData && (
+                <Chip
+                  icon={<TrendingIcon />}
+                  label="Chart Data Available"
+                  color="primary"
+                  variant="outlined"
+                />
+              )}
             </Box>
           </Box>
         )}

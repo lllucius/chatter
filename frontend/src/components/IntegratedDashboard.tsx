@@ -60,12 +60,6 @@ interface HourlyPerformanceItem {
   [key: string]: unknown;
 }
 
-interface IntegrationDataItem {
-  value: number;
-  color: string;
-  [key: string]: unknown;
-}
-
 interface IntegratedDashboardProps {
   onNavigate?: (path: string) => void;
 }
@@ -522,8 +516,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry: IntegrationDataItem, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                      {integrationData.map((entry: any, index: number) => (
+                        <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
                       ))}
                     </Pie>
                     <RechartsTooltip />

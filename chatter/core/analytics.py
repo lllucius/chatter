@@ -27,7 +27,10 @@ from chatter.models.conversation import (
 )
 from chatter.models.document import Document, DocumentStatus
 from chatter.models.user import User
-from chatter.schemas.analytics import AnalyticsTimeRange
+from chatter.schemas.analytics import (
+    AnalyticsTimeRange,
+    IntegratedDashboardStats,
+)
 from chatter.utils.logging import get_logger
 from chatter.utils.performance import get_performance_monitor
 
@@ -451,22 +454,36 @@ class AnalyticsService:
             )
 
             # Import the schema
-            from chatter.schemas.analytics import IntegratedDashboardStats
+            from chatter.schemas.analytics import (
+                IntegratedDashboardStats,
+            )
 
             # Build the integrated stats with required structure
             stats = IntegratedDashboardStats(
                 workflows={
-                    "total": max(today_stats["conversation_count"] * 2, 15),
+                    "total": max(
+                        today_stats["conversation_count"] * 2, 15
+                    ),
                     "active": max(today_stats["conversation_count"], 3),
-                    "completed_today": today_stats["conversation_count"],
-                    "avg_execution_time": today_stats["avg_response_time"] / 1000 if today_stats["avg_response_time"] > 0 else 2.5,
+                    "completed_today": today_stats[
+                        "conversation_count"
+                    ],
+                    "avg_execution_time": (
+                        today_stats["avg_response_time"] / 1000
+                        if today_stats["avg_response_time"] > 0
+                        else 2.5
+                    ),
                     "success_rate": 95.2,
                 },
                 agents={
                     "total": 8,
                     "active": min(today_stats["conversation_count"], 5),
-                    "conversations_today": today_stats["conversation_count"],
-                    "avg_response_time": today_stats["avg_response_time"],
+                    "conversations_today": today_stats[
+                        "conversation_count"
+                    ],
+                    "avg_response_time": today_stats[
+                        "avg_response_time"
+                    ],
                     "satisfaction_score": 4.7,
                 },
                 ab_testing={
@@ -481,25 +498,41 @@ class AnalyticsService:
                     "cpu_usage": 45.2,
                     "memory_usage": 62.1,
                     "cache_hit_rate": self._calculate_cache_hit_rate(),
-                    "active_connections": system_stats["active_conversations"],
-                    "conversations_today": today_stats["conversation_count"],
+                    "active_connections": system_stats[
+                        "active_conversations"
+                    ],
+                    "conversations_today": today_stats[
+                        "conversation_count"
+                    ],
                     "messages_today": today_stats["message_count"],
                     "tokens_today": today_stats["token_count"],
                     "cost_today": today_stats["total_cost"],
-                    "conversations_this_week": week_stats["conversation_count"],
+                    "conversations_this_week": week_stats[
+                        "conversation_count"
+                    ],
                     "messages_this_week": week_stats["message_count"],
                     "tokens_this_week": week_stats["token_count"],
                     "cost_this_week": week_stats["total_cost"],
-                    "conversations_this_month": month_stats["conversation_count"],
+                    "conversations_this_month": month_stats[
+                        "conversation_count"
+                    ],
                     "messages_this_month": month_stats["message_count"],
                     "tokens_this_month": month_stats["token_count"],
                     "cost_this_month": month_stats["total_cost"],
-                    "avg_response_time_today": today_stats["avg_response_time"],
-                    "avg_response_time_week": week_stats["avg_response_time"],
-                    "recent_activity_trend": self._calculate_activity_trend(today_stats, week_stats),
-                    "cost_efficiency_score": self._calculate_cost_efficiency(today_stats, week_stats),
+                    "avg_response_time_today": today_stats[
+                        "avg_response_time"
+                    ],
+                    "avg_response_time_week": week_stats[
+                        "avg_response_time"
+                    ],
+                    "recent_activity_trend": self._calculate_activity_trend(
+                        today_stats, week_stats
+                    ),
+                    "cost_efficiency_score": self._calculate_cost_efficiency(
+                        today_stats, week_stats
+                    ),
                     "generated_at": now.isoformat(),
-                }
+                },
             )
 
             # Cache with short TTL for real-time data
@@ -637,11 +670,11 @@ class AnalyticsService:
         self, hourly_activity: dict[str, int]
     ) -> list[dict[str, Any]]:
         """Transform hourly activity dictionary to list format for ChartReadyAnalytics.
-        
+
         Args:
             hourly_activity: Dictionary with keys like "0_0", "1_0" representing day_hour
                            and values representing activity counts
-                           
+
         Returns:
             List of dictionaries with hour and activity data for 24-hour format
         """
@@ -656,7 +689,7 @@ class AnalyticsService:
                 }
                 for hour in range(24)
             ]
-        
+
         # Transform activity data from dictionary to 24-hour list format
         hourly_data = []
         for hour in range(24):
@@ -665,25 +698,27 @@ class AnalyticsService:
             for day in range(7):  # 0 = Sunday, 6 = Saturday
                 key = f"{day}_{hour}"
                 total_activity += hourly_activity.get(key, 0)
-            
+
             # Scale activity to reasonable values for visualization
             workflows = max(1, int(total_activity * 0.3)) + (hour % 4)
-            agents = max(5, int(total_activity * 0.8)) + (hour % 6) * 2  
+            agents = max(5, int(total_activity * 0.8)) + (hour % 6) * 2
             tests = max(1, int(total_activity * 0.1)) + (hour % 3)
-            
-            hourly_data.append({
-                "hour": f"{hour}:00",
-                "workflows": workflows,
-                "agents": agents,
-                "tests": tests,
-            })
-        
+
+            hourly_data.append(
+                {
+                    "hour": f"{hour}:00",
+                    "workflows": workflows,
+                    "agents": agents,
+                    "tests": tests,
+                }
+            )
+
         return hourly_data
 
     def _get_empty_integrated_stats(self) -> "IntegratedDashboardStats":
         """Return empty integrated stats structure."""
         from chatter.schemas.analytics import IntegratedDashboardStats
-        
+
         return IntegratedDashboardStats(
             workflows={
                 "total": 0,
@@ -729,7 +764,7 @@ class AnalyticsService:
                 "recent_activity_trend": "stable",
                 "cost_efficiency_score": 0.0,
                 "generated_at": datetime.now(UTC).isoformat(),
-            }
+            },
         )
 
     # Advanced helper methods for analytics processing
@@ -940,7 +975,9 @@ class AnalyticsService:
                     func.date_trunc('day', Message.created_at).label(
                         'date'
                     ),
-                    func.sum(Message.total_tokens).label('total_tokens'),
+                    func.sum(Message.total_tokens).label(
+                        'total_tokens'
+                    ),
                     func.avg(Message.total_tokens).label('avg_tokens'),
                     func.max(Message.total_tokens).label('max_tokens'),
                 )
@@ -997,7 +1034,9 @@ class AnalyticsService:
                     Message.model_used,
                     Message.provider_used,
                     func.count(Message.id).label('usage_count'),
-                    func.sum(Message.total_tokens).label('total_tokens'),
+                    func.sum(Message.total_tokens).label(
+                        'total_tokens'
+                    ),
                     func.avg(Message.response_time_ms).label(
                         'avg_response_time'
                     ),

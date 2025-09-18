@@ -35,7 +35,7 @@ const DocumentForm: React.FC<
     useBaseForm(
       {
         defaultData: defaultDocumentData,
-        transformInitialData: (data: DocumentUpdateData): void => ({
+        transformInitialData: (data: DocumentUpdateData): JSX.Element => ({
           title: data.title || '',
         }),
       },

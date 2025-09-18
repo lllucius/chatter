@@ -73,7 +73,7 @@ const ConversationsPage: React.FC = () => {
   const renderConversationTitle = (
     title: string | null,
     conversation: ConversationResponse
-  ): void => (
+  ): JSX.Element => (
     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
       <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
         <MessageIcon fontSize="small" />
@@ -90,12 +90,12 @@ const ConversationsPage: React.FC = () => {
   );
 
   // Status renderer - for now all are active
-  const renderStatus = (): void => (
+  const renderStatus = (): JSX.Element => (
     <Chip label="Active" size="small" color="success" variant="outlined" />
   );
 
   // Message count renderer
-  const renderMessageCount = (count: number): void => (
+  const renderMessageCount = (count: number): JSX.Element => (
     <Typography variant="body2">
       {count} {count === 1 ? 'message' : 'messages'}
     </Typography>

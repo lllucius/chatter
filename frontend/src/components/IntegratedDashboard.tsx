@@ -190,7 +190,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     }
 
     // Fallback to generating data
-    return Array.from({ length: 24 }, (_, i): void => ({
+    return Array.from({ length: 24 }, (_, i): JSX.Element => ({
       hour: `${i}:00`,
       workflows: 5 + Math.floor(Math.random() * 15),
       agents: 20 + Math.floor(Math.random() * 30),

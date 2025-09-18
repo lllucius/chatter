@@ -225,7 +225,7 @@ const LayoutFrame: React.FC = () => {
     }
   };
 
-  const renderNavigation = (isMobile: boolean = false): void => (
+  const renderNavigation = (isMobile: boolean = false) => (
     <CustomScrollbar
       style={{
         height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)',

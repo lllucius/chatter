@@ -97,11 +97,6 @@ const ModelForm: React.FC<ModelFormProps> = ({
               }
               disabled={mode === 'edit'}
               label="Provider"
-              helperText={
-                mode === 'edit'
-                  ? 'Provider cannot be changed after creation'
-                  : ''
-              }
             >
               {providers.length === 0 ? (
                 <MenuItem disabled value="">
@@ -115,6 +110,11 @@ const ModelForm: React.FC<ModelFormProps> = ({
                 ))
               )}
             </Select>
+            {mode === 'edit' && (
+              <FormHelperText>
+                Provider cannot be changed after creation
+              </FormHelperText>
+            )}
           </FormControl>
 
           <TextField

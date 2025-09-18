@@ -114,7 +114,7 @@ const DocumentsPage: React.FC = () => {
 
   // Custom file size renderer
   const createFileSizeRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: number): void => (
+    return (value: number): JSX.Element => (
       <Typography variant="body2">{formatFileSize(value)}</Typography>
     );
   };
@@ -134,7 +134,7 @@ const DocumentsPage: React.FC = () => {
 
   // Custom title renderer with filename fallback
   const createTitleRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: string | undefined, item: DocumentResponse): void => (
+    return (value: string | undefined, item: DocumentResponse): JSX.Element => (
       <Box>
         <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
           {value || item.filename}

@@ -28,7 +28,7 @@ import {
   BulkDeleteIcon,
 } from '../utils/icons';
 import { getSDK } from '../services/auth-service';
-import { BackupResponse } from 'chatter-sdk';
+import { BackupResponse, BackupType, JobPriority } from 'chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import PageLayout from '../components/PageLayout';
@@ -176,7 +176,7 @@ const AdministrationPage: React.FC = () => {
           await getSDK().dataManagement.createBackupApiV1DataBackup({
             name: formData.backupName,
             description: formData.description,
-            backup_type: 'full' as const,
+            backup_type: BackupType.full,
             include_user_data: formData.includeUserData,
             include_documents: formData.includeDocuments,
             include_configurations: formData.includeConfigurations,
@@ -546,9 +546,9 @@ const AdministrationPage: React.FC = () => {
                     handleFormChange('jobPriority', e.target.value)
                   }
                 >
-                  <MenuItem value="low">Low</MenuItem>
-                  <MenuItem value="normal">Normal</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
+                  <MenuItem value={JobPriority.low}>Low</MenuItem>
+                  <MenuItem value={JobPriority.normal}>Normal</MenuItem>
+                  <MenuItem value={JobPriority.high}>High</MenuItem>
                 </Select>
               </FormControl>
             </Box>

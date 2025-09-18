@@ -344,7 +344,6 @@ const ChatPage: React.FC = () => {
                 selectedDocuments.length > 0 ? selectedDocuments : undefined,
               temperature,
               max_tokens: maxTokens,
-              stream: streamingEnabled,
               enable_retrieval: enableRetrieval,
             };
 
@@ -533,7 +532,6 @@ const ChatPage: React.FC = () => {
             selectedDocuments.length > 0 ? selectedDocuments : undefined,
           temperature,
           max_tokens: maxTokens,
-          stream: streamingEnabled,
           enable_retrieval: enableRetrieval,
         };
 

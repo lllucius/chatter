@@ -125,7 +125,6 @@ describe('ChatPage sendMessage Fix', () => {
       expect(mockChatChat).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Test message',
-          stream: false,
         })
       );
     });
@@ -183,7 +182,6 @@ describe('ChatPage sendMessage Fix', () => {
       expect(mockChatChat).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Test message',
-          stream: false,
         })
       );
     });

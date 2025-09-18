@@ -28,6 +28,7 @@ import { format } from 'date-fns';
 import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
+import { IntegratedDashboardStats, ChartReadyAnalytics } from 'chatter-sdk';
 
 interface RealTimeEvent {
   id: string;
@@ -48,10 +49,8 @@ interface AlertData {
 const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [dashboardData, setDashboardData] = useState<Record<
-    string,
-    unknown
-  > | null>(null);
+  const [dashboardData, setDashboardData] = useState<IntegratedDashboardStats | null>(null);
+  const [chartData, setChartData] = useState<ChartReadyAnalytics | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected'
@@ -132,11 +131,11 @@ const RealTimeDashboard: React.FC = () => {
 
     switch (event.type) {
       case 'analytics':
-        if (event.data.dashboard_stats) {
-          setDashboardData(event.data.dashboard_stats);
+        if (event.data.dashboard_stats && typeof event.data.dashboard_stats === 'object') {
+          setDashboardData(event.data.dashboard_stats as IntegratedDashboardStats);
         }
-        if (event.data.chart_data) {
-          setChartData(event.data.chart_data);
+        if (event.data.chart_data && typeof event.data.chart_data === 'object') {
+          setChartData(event.data.chart_data as ChartReadyAnalytics);
         }
         break;
 
@@ -192,7 +191,7 @@ const RealTimeDashboard: React.FC = () => {
         setRealTimeEnabled(false);
         toastService.success('Real-time updates stopped');
       } catch (error) {
-        handleError(error);
+        handleError(error, { source: 'RealTimeDashboard.toggleRealTime.stop' });
       } finally {
         setIsConnecting(false);
       }
@@ -210,7 +209,7 @@ const RealTimeDashboard: React.FC = () => {
 
         toastService.success('Real-time updates started');
       } catch (error) {
-        handleError(error);
+        handleError(error, { source: 'RealTimeDashboard.toggleRealTime.start' });
         setRealTimeEnabled(false);
       } finally {
         setIsConnecting(false);
@@ -231,7 +230,7 @@ const RealTimeDashboard: React.FC = () => {
       setLastUpdate(new Date());
       toastService.success('Dashboard data refreshed');
     } catch (error) {
-      handleError(error);
+      handleError(error, { source: 'RealTimeDashboard.refreshData' });
     }
   }, []);
 

@@ -3,12 +3,8 @@
 // expect(element).toHaveTextContent(/react/i)
 // learn more: https://github.com/testing-library/jest-dom
 import '@testing-library/jest-dom';
-import { vi } from 'vitest';
 
-// Make vi available globally for TypeScript
-declare global {
-  const vi: typeof import('vitest').vi;
-}
+// vi is already available globally through vitest/globals in tsconfig.json
 
 // Mock window.getComputedStyle for SimpleBar compatibility with jsdom
 Object.defineProperty(window, 'getComputedStyle', {

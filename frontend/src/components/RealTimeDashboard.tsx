@@ -25,7 +25,7 @@ import {
   Refresh as RefreshIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK } from '../services/auth-service';
+import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 
@@ -72,7 +72,7 @@ const RealTimeDashboard: React.FC = () => {
 
     try {
       const sdk = getSDK();
-      const token = sdk.configuration?.accessToken;
+      const token = authService.getToken();
 
       if (!token) {
         throw new Error('No authentication token available');

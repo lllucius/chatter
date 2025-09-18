@@ -2,7 +2,7 @@ import React from 'react';
 import { render, screen } from '@testing-library/react';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
-import { vi, describe, test, expect } from 'vitest';
+import { describe, test, expect } from 'vitest';
 import PromptsPage from '../PromptsPage';
 
 // Mock the getSDK function and authService

@@ -2,7 +2,7 @@
  * Integration tests for Auth Service and SSE Manager working together
  */
 
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
 import { authService } from '../auth-service';
 import { sseEventManager } from '../sse-manager';
 

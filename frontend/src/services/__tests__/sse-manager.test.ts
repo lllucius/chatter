@@ -2,7 +2,7 @@
  * Tests for SSE Event Manager Service
  */
 
-import { vi, describe, beforeEach, afterEach, expect } from 'vitest';
+import { describe, beforeEach, afterEach, expect, vi } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
 import { SSEEventType } from '../sse-types';
 import { authService } from '../../services/auth-service';

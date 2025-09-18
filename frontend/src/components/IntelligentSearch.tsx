@@ -106,7 +106,7 @@ const IntelligentSearch: React.FC = () => {
 
       // Track search analytics (future implementation)
     } catch (error) {
-      handleError(error, undefined, 'Failed to perform intelligent search');
+      handleError(error, { source: 'IntelligentSearch.performSearch' }, { fallbackMessage: 'Failed to perform intelligent search' });
       setSearchResults([]);
       setRecommendations([]);
     } finally {
@@ -122,7 +122,7 @@ const IntelligentSearch: React.FC = () => {
       });
       setTrendingContent((response as any)?.trending_content || []);
     } catch (error) {
-      handleError(error, undefined, 'Failed to load trending content');
+      handleError(error, { source: 'IntelligentSearch.loadTrendingContent' }, { fallbackMessage: 'Failed to load trending content' });
       setTrendingContent([]);
     } finally {
       setIsLoadingTrending(false);
@@ -294,9 +294,11 @@ const IntelligentSearch: React.FC = () => {
                           primary={
                             <Box display="flex" alignItems="center" gap={1}>
                               <Typography variant="subtitle1">
-                                {result.metadata?.title ||
+                                {String(
+                                  result.metadata?.title ||
                                   result.metadata?.name ||
-                                  `${result.type} ${result.id}`}
+                                  `${result.type} ${result.id}`
+                                ) || 'Untitled'}
                               </Typography>
                               <Tooltip
                                 title={`Relevance: ${formatScore(result.score)}% | Personalized: ${formatScore(result.personalized_score)}%`}
@@ -320,42 +322,48 @@ const IntelligentSearch: React.FC = () => {
                           }
                           secondary={
                             <Box>
-                              <Typography
-                                variant="body2"
-                                color="textSecondary"
-                                paragraph
-                              >
-                                {result.content.substring(0, 200)}
-                                {result.content.length > 200 ? '...' : ''}
-                              </Typography>
-                              {result.personalization_factors &&
-                                result.personalization_factors.length > 0 && (
-                                  <Box>
-                                    <Typography
-                                      variant="caption"
-                                      color="primary"
-                                    >
-                                      Personalized for you:
-                                    </Typography>
-                                    <Box mt={0.5}>
-                                      {getPersonalizationChips(result)}
-                                    </Box>
-                                  </Box>
-                                )}
-                              {result.metadata?.created_at && (
+                              <>
                                 <Typography
-                                  variant="caption"
+                                  variant="body2"
                                   color="textSecondary"
-                                  display="block"
-                                  mt={1}
+                                  paragraph
                                 >
-                                  Created:{' '}
-                                  {format(
-                                    new Date(result.metadata?.created_at || new Date()),
-                                    'MMM d, yyyy'
-                                  )}
+                                  {result.content.substring(0, 200)}
+                                  {result.content.length > 200 ? '...' : ''}
                                 </Typography>
-                              )}
+                                {result.personalization_factors &&
+                                  result.personalization_factors.length > 0 && (
+                                    <Box>
+                                      <Typography
+                                        variant="caption"
+                                        color="primary"
+                                      >
+                                        Personalized for you:
+                                      </Typography>
+                                      <Box mt={0.5}>
+                                        {getPersonalizationChips(result)}
+                                      </Box>
+                                    </Box>
+                                  )}
+                                {result.metadata?.created_at && (
+                                  <Typography
+                                    variant="caption"
+                                    color="textSecondary"
+                                    display="block"
+                                    mt={1}
+                                  >
+                                    Created:{' '}
+                                    {format(
+                                      new Date(
+                                        typeof result.metadata?.created_at === 'string' 
+                                          ? result.metadata.created_at 
+                                          : new Date()
+                                      ),
+                                      'MMM d, yyyy'
+                                    )}
+                                  </Typography>
+                                )}
+                              </>
                             </Box>
                           }
                         />

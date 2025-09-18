@@ -128,7 +128,7 @@ const PasswordResetPage: React.FC = () => {
           </Box>
 
           <Stepper activeStep={stepIndex} sx={{ mb: 4 }}>
-            {steps.map((label): void => (
+            {steps.map((label) => (
               <Step key={label}>
                 <StepLabel>{label}</StepLabel>
               </Step>

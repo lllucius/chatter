@@ -21,7 +21,6 @@ import {
 import {
   WorkflowDefinition,
   WorkflowNodeType,
-  WorkflowNode,
 } from './WorkflowEditor';
 import { getSDK } from '../../services/auth-service';
 
@@ -48,7 +47,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
   React.useEffect(() => {
     const fetchAnalytics = async () => {
       // Only fetch analytics if we have a workflow with an ID
-      if (!workflow.id || !workflow.nodes.length) {
+      if (!workflow.metadata?.name || !workflow.nodes.length) {
         // Fallback to simple client-side calculation for workflows without ID
         setAnalytics(calculateSimpleMetrics());
         return;
@@ -60,8 +59,8 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
       try {
         // Use the new server-side analytics API
         const response =
-          await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
-            workflow.id
+          await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdAnalytics(
+            workflow.metadata.name
           );
 
         // Transform server response to client format

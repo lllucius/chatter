@@ -106,7 +106,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
         {/* Stats chips */}
         {stats.length > 0 && (
           <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
-            {stats.map((stat, index): void => (
+            {stats.map((stat, index) => (
               <Chip
                 key={index}
                 label={`${stat.label}: ${stat.value}`}
@@ -129,7 +129,7 @@ export const PageHeader: React.FC<PageHeaderProps> = ({
             alignItems: 'center',
           }}
         >
-          {allActions.map((action, index): void => (
+          {allActions.map((action, index) => (
             <Button
               key={index}
               variant={action.variant || 'outlined'}

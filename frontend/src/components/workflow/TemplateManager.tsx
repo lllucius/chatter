@@ -432,8 +432,8 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
 
         <DialogContent>
           <Grid container spacing={2}>
-            {templates.map((template): void => (
-              <Grid size={{ xs: 12, sm: 6 }} md={4} key={template.id}>
+            {templates.map((template) => (
+              <Grid size={{ xs: 12, sm: 6, md: 4 }} key={template.id}>
                 <Card>
                   <CardContent>
                     <Box
@@ -475,7 +475,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
                         size="small"
                         sx={{ mr: 1, mb: 1 }}
                       />
-                      {template.tags.map((tag, index): void => (
+                      {template.tags.map((tag, index) => (
                         <Chip
                           key={index}
                           label={tag}

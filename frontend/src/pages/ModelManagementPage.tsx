@@ -110,7 +110,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'displayName',
       label: 'Name',
-      render: (value, item): void => (
+      render: (value, item): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
@@ -134,7 +134,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: (value: boolean): void => (
+      render: (value: boolean): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Active' : 'Inactive'}
@@ -145,7 +145,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'api_key_required',
       label: 'API Key',
-      render: (value: boolean): void => (
+      render: (value: boolean): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Required' : 'Optional'}
@@ -157,7 +157,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'description',
       label: 'Description',
-      render: (value: string): void => (
+      render: (value: string): JSX.Element => (
         <Typography variant="body2" color="text.secondary">
           {value || '—'}
         </Typography>
@@ -251,7 +251,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'displayName',
       label: 'Name',
-      render: (value, item): void => (
+      render: (value, item): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
@@ -270,7 +270,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'provider',
       label: 'Provider',
-      render: (value: any): void => (
+      render: (value: any): JSX.Element => (
         <Typography variant="body2">{value?.displayName || '—'}</Typography>
       ),
     },
@@ -285,7 +285,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: (value: boolean): void => (
+      render: (value: boolean): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Active' : 'Inactive'}
@@ -301,7 +301,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'dimensions',
       label: 'Dimensions',
-      render: (value: number): void => (
+      render: (value: number): JSX.Element => (
         <Typography variant="body2">
           {value ? value.toLocaleString() : '—'}
         </Typography>
@@ -387,7 +387,7 @@ const ModelManagementPage: React.FC = () => {
   const getModelId = (item: ModelDefWithProvider) => item.id || '';
 
   // Enhanced ModelForm component that receives providers
-  const EnhancedModelForm: React.FC<any> = (props): void => (
+  const EnhancedModelForm: React.FC<any> = (props): JSX.Element => (
     <ModelForm {...props} providers={providers} />
   );
 

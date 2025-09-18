@@ -359,7 +359,6 @@ async def update_document(
 @router.delete("/{document_id}", response_model=DocumentDeleteResponse)
 async def delete_document(
     document_id: str,
-    request: DocumentDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     document_service: DocumentService = Depends(get_document_service),
 ) -> DocumentDeleteResponse:

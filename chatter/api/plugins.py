@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
@@ -15,6 +15,8 @@ from chatter.schemas.plugins import (
     PluginListResponse,
     PluginResponse,
     PluginStatsResponse,
+    PluginStatus,
+    PluginType,
     PluginUpdateRequest,
 )
 from chatter.services.plugins import PluginManager
@@ -103,14 +105,24 @@ async def install_plugin(
 
 @router.get("/", response_model=PluginListResponse)
 async def list_plugins(
-    request: PluginListRequest = Depends(),
+    plugin_type: PluginType | None = Query(
+        None, description="Filter by plugin type"
+    ),
+    status: PluginStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    enabled: bool | None = Query(
+        None, description="Filter by enabled status"
+    ),
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
 ) -> PluginListResponse:
     """List installed plugins with optional filtering.
 
     Args:
-        request: List request parameters
+        plugin_type: Filter by plugin type
+        status: Filter by status
+        enabled: Filter by enabled status
         current_user: Current authenticated user
         plugin_manager: Plugin manager instance
 
@@ -121,19 +133,19 @@ async def list_plugins(
         plugins = list(plugin_manager.plugins.values())
 
         # Apply filters
-        if request.plugin_type is not None:
+        if plugin_type is not None:
             plugins = [
                 p
                 for p in plugins
-                if p.manifest.plugin_type == request.plugin_type
+                if p.manifest.plugin_type == plugin_type
             ]
 
-        if request.status is not None:
-            plugins = [p for p in plugins if p.status == request.status]
+        if status is not None:
+            plugins = [p for p in plugins if p.status == status]
 
-        if request.enabled is not None:
+        if enabled is not None:
             plugins = [
-                p for p in plugins if p.enabled == request.enabled
+                p for p in plugins if p.enabled == enabled
             ]
 
         plugin_responses = []

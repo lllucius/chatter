@@ -3,7 +3,7 @@
 import re
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from chatter.api.auth import get_current_user
 from chatter.core.agents import AgentManager
@@ -28,6 +28,7 @@ from chatter.schemas.agents import (
     AgentResponse,
     AgentStatsResponse,
     AgentStatus,
+    AgentType,
     AgentUpdateRequest,
 )
 from chatter.schemas.common import PaginationRequest, SortingRequest
@@ -244,14 +245,26 @@ async def create_agent(
     description="List all agents with optional filtering and pagination. Users can only see their own agents.",
 )
 async def list_agents(
-    request: AgentListRequest = Depends(),
+    agent_type: AgentType | None = Query(None, description="Filter by agent type"),
+    status: AgentStatus | None = Query(None, description="Filter by status"),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
+    limit: int = Query(50, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Sort field"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
     """List all agents with optional filtering and pagination.
 
     Args:
-        request: List request parameters with pagination
+        agent_type: Filter by agent type
+        status: Filter by status
+        tags: Filter by tags
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Sort field
+        sort_order: Sort order
         current_user: Current authenticated user
         agent_manager: Agent manager instance
 
@@ -259,35 +272,25 @@ async def list_agents(
         Paginated list of agents
     """
     try:
-        # Handle None pagination/sorting with defaults
-        pagination = request.pagination or PaginationRequest()
-        request.sorting or SortingRequest()
-
         # Validate pagination parameters
-        offset = (
-            max(0, pagination.offset)
-            if isinstance(pagination.offset, int)
-            else 0
-        )
-        limit = pagination.limit
-        if not isinstance(limit, int) or limit < 1:
-            limit = 10
+        validated_offset = max(0, offset) if isinstance(offset, int) else 0
+        validated_limit = limit if isinstance(limit, int) and limit >= 1 else 10
 
         # Get agents with filtering
         agents, total = await agent_manager.list_agents(
-            agent_type=request.agent_type,
-            status=request.status,
-            offset=offset,
-            limit=limit,
+            agent_type=agent_type,
+            status=status,
+            offset=validated_offset,
+            limit=validated_limit,
             user_id=current_user.id,  # Filter by user's agents only
         )
 
         # Additional client-side filtering by tags if specified
-        if request.tags:
+        if tags:
             filtered_agents = []
             for agent in agents:
                 # Check if any of the requested tags match agent tags
-                if any(tag in agent.tags for tag in request.tags):
+                if any(tag in agent.tags for tag in tags):
                     filtered_agents.append(agent)
             agents = filtered_agents
             # Note: This changes the total count for this page but not the overall total
@@ -307,9 +310,9 @@ async def list_agents(
                 continue
 
         # Calculate pagination info
-        current_page = (offset // limit) + 1 if limit > 0 else 1
+        current_page = (validated_offset // validated_limit) + 1 if validated_limit > 0 else 1
         total_pages = (
-            (total + limit - 1) // limit if limit > 0 else 1
+            (total + validated_limit - 1) // validated_limit if validated_limit > 0 else 1
         )  # Ceiling division
 
         logger.info(
@@ -324,7 +327,7 @@ async def list_agents(
             agents=agent_responses,
             total=total,
             page=current_page,
-            per_page=limit,
+            per_page=validated_limit,
             total_pages=total_pages,
         )
 
@@ -402,7 +405,6 @@ async def get_agent_stats(
 @router.get("/{agent_id}", response_model=AgentResponse)
 async def get_agent(
     agent_id: str,
-    request: AgentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentResponse:

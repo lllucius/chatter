@@ -37,44 +37,24 @@ import {
   Cell,
 } from 'recharts';
 import { ABTestMetricsResponse, ABTestResultsResponse } from 'chatter-sdk';
+import { TestRecommendations, TestPerformance } from '../hooks/useABTestingData';
 
 interface ABTestAnalyticsProps {
-  _testId: string;
-  _testName: string;
+  testId: string;
+  testName: string;
   metrics?: ABTestMetricsResponse;
   results?: ABTestResultsResponse;
-  recommendations?: {
-    recommendations: string[];
-    insights: string[];
-    winner?: string;
-    confidence?: number;
-  };
-  _performance?: {
-    response_times: Array<{
-      timestamp: string;
-      variant: string;
-      response_time: number;
-    }>;
-    error_rates: Array<{
-      timestamp: string;
-      variant: string;
-      error_rate: number;
-    }>;
-    throughput: Array<{
-      timestamp: string;
-      variant: string;
-      requests_per_second: number;
-    }>;
-  };
+  recommendations?: TestRecommendations;
+  performance?: TestPerformance;
 }
 
 const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
-  _testId,
-  _testName,
+  testId,
+  testName,
   metrics,
   results,
   recommendations,
-  _performance,
+  performance,
 }) => {
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {

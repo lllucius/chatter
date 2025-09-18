@@ -10,7 +10,7 @@ import { getSDK, authService } from '../../services/auth-service';
 vi.mock('../../services/auth-service', () => ({
   getSDK: vi.fn(() => ({
     documents: {
-      listDocumentsApiV1Documents: vi.fn(),
+      listDocumentsGetApiV1Documents: vi.fn(),
       uploadDocumentApiV1DocumentsUpload: vi.fn(),
       deleteDocumentApiV1DocumentsDocumentId: vi.fn(),
       getDocumentApiV1DocumentsDocumentId: vi.fn(),
@@ -89,7 +89,7 @@ describe('DocumentsPage', () => {
     vi.clearAllMocks();
 
     // Setup default API responses
-    vi.mocked(getSDK().documents.listDocumentsApiV1Documents).mockResolvedValue(
+    vi.mocked(getSDK().documents.listDocumentsGetApiV1Documents).mockResolvedValue(
       {
         documents: mockDocuments,
       } as any
@@ -115,7 +115,7 @@ describe('DocumentsPage', () => {
     );
 
     expect(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).toHaveBeenCalledTimes(1);
   });
 
@@ -130,7 +130,7 @@ describe('DocumentsPage', () => {
 
     // Should call the API immediately
     expect(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).toHaveBeenCalledTimes(1);
   });
 
@@ -141,7 +141,7 @@ describe('DocumentsPage', () => {
 
     // Override the default mock to simulate API failure for this specific test
     vi.mocked(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).mockRejectedValueOnce(new Error('API Error'));
 
     await act(async () => {

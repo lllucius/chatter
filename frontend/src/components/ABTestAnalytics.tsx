@@ -49,12 +49,12 @@ interface ABTestAnalyticsProps {
 }
 
 const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
-  testId,
-  testName,
+  testId: _testId,
+  testName: _testName,
   metrics,
   results,
   recommendations,
-  performance,
+  performance: _performance,
 }) => {
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {
@@ -386,7 +386,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(props: any) =>
+                    label={(props: { name?: string; value?: number }) =>
                       `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
                     }
                     outerRadius={80}

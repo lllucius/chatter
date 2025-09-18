@@ -11,7 +11,6 @@ from chatter.models.user import User
 from chatter.schemas.jobs import (
     JobActionResponse,
     JobCreateRequest,
-    JobListRequest,
     JobListResponse,
     JobPriority,
     JobResponse,
@@ -136,24 +135,45 @@ async def create_job(
 
 @router.get("/", response_model=JobListResponse)
 async def list_jobs(
-    status: JobStatus | None = Query(None, description="Filter by status"),
-    priority: JobPriority | None = Query(None, description="Filter by priority"),
-    function_name: str | None = Query(None, description="Filter by function name"),
-    created_after: datetime | None = Query(None, description="Filter jobs created after this date"),
-    created_before: datetime | None = Query(None, description="Filter jobs created before this date"),
-    tags: list[str] | None = Query(None, description="Filter by job tags (any of the provided tags)"),
-    search: str | None = Query(None, description="Search in job names and metadata"),
-    limit: int = Query(20, ge=1, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    status: JobStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    priority: JobPriority | None = Query(
+        None, description="Filter by priority"
+    ),
+    function_name: str | None = Query(
+        None, description="Filter by function name"
+    ),
+    created_after: datetime | None = Query(
+        None, description="Filter jobs created after this date"
+    ),
+    created_before: datetime | None = Query(
+        None, description="Filter jobs created before this date"
+    ),
+    tags: list[str] | None = Query(
+        None,
+        description="Filter by job tags (any of the provided tags)",
+    ),
+    search: str | None = Query(
+        None, description="Search in job names and metadata"
+    ),
+    limit: int = Query(
+        20, ge=1, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Field to sort by"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
 ) -> JobListResponse:
     """List jobs with optional filtering and pagination.
 
     Args:
         status: Filter by status
-        priority: Filter by priority  
+        priority: Filter by priority
         function_name: Filter by function name
         created_after: Filter jobs created after this date
         created_before: Filter jobs created before this date
@@ -184,31 +204,19 @@ async def list_jobs(
             jobs = [j for j in jobs if j.priority == priority]
 
         if function_name is not None:
-            jobs = [
-                j
-                for j in jobs
-                if j.function_name == function_name
-            ]
+            jobs = [j for j in jobs if j.function_name == function_name]
 
         # Apply date filters
         if created_after is not None:
-            jobs = [
-                j for j in jobs if j.created_at >= created_after
-            ]
+            jobs = [j for j in jobs if j.created_at >= created_after]
 
         if created_before is not None:
-            jobs = [
-                j
-                for j in jobs
-                if j.created_at <= created_before
-            ]
+            jobs = [j for j in jobs if j.created_at <= created_before]
 
         # Apply tag filter (any of the provided tags)
         if tags:
             jobs = [
-                j
-                for j in jobs
-                if any(tag in j.tags for tag in tags)
+                j for j in jobs if any(tag in j.tags for tag in tags)
             ]
 
         # Apply search filter (search in name and metadata)

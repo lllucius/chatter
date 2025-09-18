@@ -214,7 +214,7 @@ class ErrorHandler {
    * Handle an error and return a formatted error response
    * Useful for functions that need to return error information
    */
-  public handleErrorWithResult<T = unknown>(
+  public handleErrorWithResult(
     error: unknown,
     context: ErrorContext,
     options: ErrorHandlerOptions = {}

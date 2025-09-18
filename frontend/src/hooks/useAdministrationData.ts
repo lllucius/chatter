@@ -21,6 +21,20 @@ import {
   BackupFailedEvent,
 } from '../services/sse-types';
 
+// Simple cache to prevent rapid API calls
+const API_CACHE_DURATION = 5000; // 5 seconds
+const apiCallCache = new Map<string, number>();
+
+const isAPICallRecentlyMade = (key: string): boolean => {
+  const lastCall = apiCallCache.get(key);
+  const now = Date.now();
+  return lastCall ? now - lastCall < API_CACHE_DURATION : false;
+};
+
+const markAPICallMade = (key: string): void => {
+  apiCallCache.set(key, Date.now());
+};
+
 // SSE Event interfaces for type safety
 interface JobSSEEventData {
   job_id: string;
@@ -106,6 +120,11 @@ export const useAdministrationData = () => {
 
   // Data loading functions
   const loadBackups = useCallback(async () => {
+    if (isAPICallRecentlyMade('loadBackups')) {
+      return; // Skip if called recently
+    }
+    markAPICallMade('loadBackups');
+    
     try {
       const response =
         await getSDK().dataManagement.listBackupsApiV1DataBackups();
@@ -119,6 +138,11 @@ export const useAdministrationData = () => {
   }, []);
 
   const loadPlugins = useCallback(async () => {
+    if (isAPICallRecentlyMade('loadPlugins')) {
+      return; // Skip if called recently
+    }
+    markAPICallMade('loadPlugins');
+    
     try {
       const response = await getSDK().plugins.listPluginsApiV1Plugins();
       setPlugins(response?.plugins || []);
@@ -131,6 +155,11 @@ export const useAdministrationData = () => {
   }, []);
 
   const loadJobs = useCallback(async () => {
+    if (isAPICallRecentlyMade('loadJobs')) {
+      return; // Skip if called recently
+    }
+    markAPICallMade('loadJobs');
+    
     try {
       setDataLoading(true);
       const response = await getSDK().jobs.listJobsApiV1Jobs({
@@ -173,6 +202,11 @@ export const useAdministrationData = () => {
   }, []); // Remove dependencies to prevent loop
 
   const loadJobStats = useCallback(async () => {
+    if (isAPICallRecentlyMade('loadJobStats')) {
+      return; // Skip if called recently
+    }
+    markAPICallMade('loadJobStats');
+    
     try {
       const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
       setJobStats(response);

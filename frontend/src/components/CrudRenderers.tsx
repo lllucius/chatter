@@ -18,7 +18,7 @@ export const createStatusChipRenderer = <T,>(colorMapping?: {
     | 'success'
     | 'warning';
 }): CrudColumn<T>['render'] => {
-  const StatusChipRenderer = (value: unknown, item: T) => {
+  const StatusChipRenderer = (value: unknown, _item: T) => {
     const valueStr = String(value || '');
     const color = colorMapping?.[valueStr?.toLowerCase()] || getStatusColor(valueStr);
 
@@ -39,7 +39,7 @@ export const createCategoryChipRenderer = <T,>(
     | 'warning' = 'primary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  const CategoryChipRenderer = (value: unknown, item: T) => (
+  const CategoryChipRenderer = (value: unknown, _item: T) => (
     <Chip label={String(value || '')} size="small" color={color} variant={variant} />
   );
   CategoryChipRenderer.displayName = 'CategoryChipRenderer';
@@ -57,7 +57,7 @@ export const createTypeChipRenderer = <T,>(
     | 'warning' = 'secondary',
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
-  const TypeChipRenderer = (value: unknown, item: T): React.ReactElement => {
+  const TypeChipRenderer = (value: unknown, _item: T): React.ReactElement => {
     const valueStr = String(value || '');
     return (
       <Chip
@@ -75,7 +75,7 @@ export const createTypeChipRenderer = <T,>(
 export const createDateRenderer = <T,>(
   dateFormat: string = 'MMM dd, yyyy'
 ): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T) => {
+  return (value: unknown, _item: T) => {
     if (!value) return '';
     try {
       const date = typeof value === 'string' ? new Date(value) : value instanceof Date ? value : new Date(String(value));
@@ -109,13 +109,13 @@ export const createNameWithDescriptionRenderer = <
 export const createBooleanSwitchRenderer = <T,>(
   disabled: boolean = true
 ): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T): React.ReactElement => (
+  return (value: unknown, _item: T): React.ReactElement => (
     <Switch checked={!!value} disabled={disabled} size="small" />
   );
 };
 
 export const createMonospaceTextRenderer = <T,>(): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T): React.ReactElement => (
+  return (value: unknown, _item: T): React.ReactElement => (
     <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
       {String(value || '') || '—'}
     </Typography>
@@ -127,7 +127,7 @@ export const createCountRenderer = <T,>(
   plural: string,
   unknownText: string = 'Unknown'
 ): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T): React.ReactElement => {
+  return (value: unknown, _item: T): React.ReactElement => {
     const numValue = typeof value === 'number' ? value : value !== undefined && value !== null ? Number(value) : undefined;
     return (
       <Typography variant="body2">
@@ -143,7 +143,7 @@ export const createPerformanceRenderer = <T,>(
   unit: string = 'ms',
   precision: number = 0
 ): CrudColumn<T>['render'] => {
-  return (value: unknown, item: T): React.ReactElement => {
+  return (value: unknown, _item: T): React.ReactElement => {
     const numValue = typeof value === 'number' ? value : value !== undefined && value !== null ? Number(value) : NaN;
     return (
       <Typography variant="body2">

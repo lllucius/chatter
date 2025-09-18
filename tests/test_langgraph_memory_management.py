@@ -297,9 +297,7 @@ class TestMemoryManagementConfiguration:
         # Verify focus_mode parameter exists
         focus_mode_param = sig.parameters.get('focus_mode')
         assert focus_mode_param is not None
-        assert (
-            not focus_mode_param.default
-        )  # Default should be False
+        assert not focus_mode_param.default  # Default should be False
 
     def test_llm_service_memory_window_default(self):
         """Test that LLM service uses new memory window default."""

@@ -13,7 +13,6 @@ from chatter.schemas.toolserver import (
     RoleToolAccessCreate,
     RoleToolAccessResponse,
     ServerStatus,
-    ServerToolsRequest,
     ServerToolsResponse,
     ToolAccessResult,
     ToolOperationResponse,
@@ -23,7 +22,6 @@ from chatter.schemas.toolserver import (
     ToolServerCreate,
     ToolServerDeleteResponse,
     ToolServerHealthCheck,
-    ToolServerListRequest,
     ToolServerMetrics,
     ToolServerOperationResponse,
     ToolServerResponse,
@@ -112,8 +110,12 @@ async def create_tool_server(
 
 @router.get("/servers", response_model=list[ToolServerResponse])
 async def list_tool_servers(
-    status: ServerStatus | None = Query(None, description="Filter by server status"),
-    include_builtin: bool = Query(True, description="Include built-in servers"),
+    status: ServerStatus | None = Query(
+        None, description="Filter by server status"
+    ),
+    include_builtin: bool = Query(
+        True, description="Include built-in servers"
+    ),
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service),
 ) -> list[ToolServerResponse]:
@@ -465,8 +467,12 @@ async def disable_tool_server(
 )
 async def get_server_tools(
     server_id: str,
-    limit: int = Query(50, ge=1, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    limit: int = Query(
+        50, ge=1, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service),
 ) -> ServerToolsResponse:

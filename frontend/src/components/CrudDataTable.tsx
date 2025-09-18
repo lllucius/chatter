@@ -431,7 +431,7 @@ function CrudDataTableInner<T, TCreate, TUpdate>(
   );
 }
 
-export const CrudDataTable = React.forwardRef(CrudDataTableInner) as <T, TCreate, TUpdate>(
+export const CrudDataTable = forwardRef(CrudDataTableInner) as <T, TCreate, TUpdate>(
   props: CrudDataTableProps<T, TCreate, TUpdate> & { ref?: React.Ref<CrudDataTableRef> }
 ) => React.ReactElement;
 

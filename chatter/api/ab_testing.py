@@ -12,7 +12,6 @@ from chatter.schemas.ab_testing import (
     ABTestAnalyticsResponse,
     ABTestCreateRequest,
     ABTestDeleteResponse,
-    ABTestListRequest,
     ABTestListResponse,
     ABTestMetricsResponse,
     ABTestResponse,
@@ -307,8 +306,12 @@ async def create_ab_test(
 
 @router.get("/", response_model=ABTestListResponse)
 async def list_ab_tests(
-    status: TestStatus | None = Query(None, description="Filter by status"),
-    test_type: TestType | None = Query(None, description="Filter by test type"),
+    status: TestStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    test_type: TestType | None = Query(
+        None, description="Filter by test type"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),

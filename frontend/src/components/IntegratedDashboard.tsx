@@ -52,6 +52,20 @@ import { useNavigate } from 'react-router-dom';
 import { getSDK } from '../services/auth-service';
 import { useApi } from '../hooks/useApi';
 
+// Type definitions for chart data
+interface HourlyPerformanceItem {
+  workflows?: number;
+  agents?: number;
+  tests?: number;
+  [key: string]: unknown;
+}
+
+interface IntegrationDataItem {
+  value: number;
+  color: string;
+  [key: string]: unknown;
+}
+
 interface IntegratedDashboardProps {
   onNavigate?: (path: string) => void;
 }
@@ -141,7 +155,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       // Transform backend data to frontend format
       return chartDataApi.data.hourly_performance_data
         .slice(0, 7)
-        .map((item: any, index: number) => ({
+        .map((item: HourlyPerformanceItem, index: number) => ({
           date: format(subDays(new Date(), 6 - index), 'MMM dd'),
           workflows: item.workflows || 40,
           agents: item.agents || 180,
@@ -508,7 +522,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry: any, index: number) => (
+                      {integrationData.map((entry: IntegrationDataItem, index: number) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

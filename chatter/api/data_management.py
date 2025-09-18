@@ -7,7 +7,6 @@ from fastapi import APIRouter, Depends, Query, status
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.data_management import (
-    BackupListRequest,
     BackupListResponse,
     BackupRequest,
     BackupResponse,
@@ -125,9 +124,7 @@ async def list_backups(
     backup_type: BackupType | None = Query(
         None, description="Filter by backup type"
     ),
-    status: str | None = Query(
-        None, description="Filter by status"
-    ),
+    status: str | None = Query(None, description="Filter by status"),
     current_user: User = Depends(get_current_user),
     data_manager: DataManager = Depends(get_data_manager),
 ) -> BackupListResponse:

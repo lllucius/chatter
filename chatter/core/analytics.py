@@ -392,12 +392,18 @@ class AnalyticsService:
 
             # Map data to match ChartReadyAnalytics schema field names
             chart_data = {
-                "conversation_chart_data": time_series_data.get("conversations", []),
+                "conversation_chart_data": time_series_data.get(
+                    "conversations", []
+                ),
                 "token_usage_data": token_trends or [],
-                "performance_chart_data": model_performance.get("performance_metrics", []),
+                "performance_chart_data": model_performance.get(
+                    "performance_metrics", []
+                ),
                 "system_health_data": [],  # Will be populated if available
-                "integration_data": [],    # Will be populated if available
-                "hourly_performance_data": conversation_trends.get("hourly_activity", []),
+                "integration_data": [],  # Will be populated if available
+                "hourly_performance_data": conversation_trends.get(
+                    "hourly_activity", []
+                ),
             }
 
             # Cache with shorter TTL for chart data

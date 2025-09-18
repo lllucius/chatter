@@ -662,7 +662,7 @@ export class SSEEventManager {
    */
   public async triggerTestEvent(): Promise<boolean> {
     try {
-      const response = await authService.executeWithAuth(async (sdk) => {
+      await authService.executeWithAuth(async (sdk) => {
         return await sdk.events.triggerTestEventApiV1EventsTestEvent();
       });
 

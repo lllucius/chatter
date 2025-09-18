@@ -10,7 +10,6 @@ from chatter.models.user import User
 from chatter.schemas.prompt import (
     PromptCloneRequest,
     PromptCreate,
-    PromptDeleteRequest,
     PromptDeleteResponse,
     PromptListResponse,
     PromptResponse,

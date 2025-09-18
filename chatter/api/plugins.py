@@ -11,7 +11,6 @@ from chatter.schemas.plugins import (
     PluginDeleteResponse,
     PluginHealthCheckResponse,
     PluginInstallRequest,
-    PluginListRequest,
     PluginListResponse,
     PluginResponse,
     PluginStatsResponse,
@@ -144,9 +143,7 @@ async def list_plugins(
             plugins = [p for p in plugins if p.status == status]
 
         if enabled is not None:
-            plugins = [
-                p for p in plugins if p.enabled == enabled
-            ]
+            plugins = [p for p in plugins if p.enabled == enabled]
 
         plugin_responses = []
         for plugin in plugins:

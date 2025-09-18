@@ -12,6 +12,14 @@ import {
   JobListResponse,
   JobStatsResponse,
 } from 'chatter-sdk';
+import {
+  JobStartedEvent,
+  JobCompletedEvent,
+  JobFailedEvent,
+  BackupStartedEvent,
+  BackupCompletedEvent,
+  BackupFailedEvent,
+} from '../services/sse-types';
 
 // SSE Event interfaces for type safety
 interface JobSSEEventData {
@@ -170,7 +178,7 @@ export const useAdministrationData = () => {
   useEffect(() => {
     if (!isConnected) return;
 
-    const unsubscribeJobStarted = on('job.started', (event: SSEEvent) => {
+    const unsubscribeJobStarted = on('job.started', (event: JobStartedEvent) => {
       const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Started',
@@ -182,7 +190,7 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobCompleted = on('job.completed', (event: SSEEvent) => {
+    const unsubscribeJobCompleted = on('job.completed', (event: JobCompletedEvent) => {
       const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Completed',
@@ -194,7 +202,7 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobFailed = on('job.failed', (event: SSEEvent) => {
+    const unsubscribeJobFailed = on('job.failed', (event: JobFailedEvent) => {
       const jobData = event.data as JobSSEEventData;
       showNotification({
         title: 'Job Failed',
@@ -206,7 +214,7 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeBackupStarted = on('backup.started', (event: SSEEvent) => {
+    const unsubscribeBackupStarted = on('backup.started', (event: BackupStartedEvent) => {
       const backupData = event.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Started',
@@ -219,7 +227,7 @@ export const useAdministrationData = () => {
 
     const unsubscribeBackupCompleted = on(
       'backup.completed',
-      (event: SSEEvent) => {
+      (event: BackupCompletedEvent) => {
         const backupData = event.data as BackupSSEEventData;
         showNotification({
           title: 'Backup Completed',
@@ -231,7 +239,7 @@ export const useAdministrationData = () => {
       }
     );
 
-    const unsubscribeBackupFailed = on('backup.failed', (event: SSEEvent) => {
+    const unsubscribeBackupFailed = on('backup.failed', (event: BackupFailedEvent) => {
       const backupData = event.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Failed',

@@ -338,15 +338,6 @@ def create_app() -> FastAPI:
             )
             return response
 
-    # Add CORS middleware
-    app.add_middleware(
-        CORSMiddleware,
-        allow_origins=settings.cors_origins,
-        allow_credentials=settings.cors_allow_credentials,
-        allow_methods=settings.cors_allow_methods,
-        allow_headers=settings.cors_allow_headers,
-    )
-
     # Add trusted host middleware
     if settings.trusted_hosts_for_env:
         app.add_middleware(
@@ -432,6 +423,16 @@ def create_app() -> FastAPI:
 
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
+
+    # Add CORS middleware LAST so it processes requests FIRST
+    # This ensures CORS headers are added to all responses and OPTIONS requests are handled properly
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.cors_origins,
+        allow_credentials=settings.cors_allow_credentials,
+        allow_methods=settings.cors_allow_methods,
+        allow_headers=settings.cors_allow_headers,
+    )
 
     # Add exception handlers
     from fastapi.exceptions import RequestValidationError

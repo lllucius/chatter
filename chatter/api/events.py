@@ -154,15 +154,6 @@ async def events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": ", ".join(
-                settings.cors_origins
-            ),
-            "Access-Control-Allow-Headers": ", ".join(
-                settings.cors_allow_headers
-            ),
-            "Access-Control-Allow-Credentials": str(
-                settings.cors_allow_credentials
-            ).lower(),
         },
     )
 
@@ -273,15 +264,6 @@ async def admin_events_stream(
         headers={
             "Cache-Control": "no-cache",
             "Connection": "keep-alive",
-            "Access-Control-Allow-Origin": ", ".join(
-                settings.cors_origins
-            ),
-            "Access-Control-Allow-Headers": ", ".join(
-                settings.cors_allow_headers
-            ),
-            "Access-Control-Allow-Credentials": str(
-                settings.cors_allow_credentials
-            ).lower(),
         },
     )
 

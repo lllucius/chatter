@@ -39,7 +39,7 @@ export const useWorkflowData = () => {
     try {
       setLoading(true);
       const response =
-        await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
+        await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsWorkflowsTemplates();
       setTemplates(response.templates || []);
     } catch (error) {
       handleError(error, {
@@ -81,7 +81,7 @@ export const useWorkflowData = () => {
     try {
       setLoading(true);
       const newTemplate =
-        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
+        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsWorkflowsTemplates(
           templateData
         );
       setTemplates((prev) => [newTemplate, ...prev]);
@@ -123,9 +123,11 @@ export const useWorkflowData = () => {
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
-        templateId
-      );
+      // TODO: Implement delete functionality when API is available
+      // await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
+      //   templateId
+      // );
+      console.warn('Delete workflow template not implemented in API');
       setTemplates((prev) => prev.filter((t) => t.id !== templateId));
     } catch (error) {
       handleError(error, {

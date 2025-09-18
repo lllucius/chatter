@@ -155,7 +155,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
             <FormControlLabel
               control={
                 <Switch
-                  checked={config.parallel || false}
+                  checked={Boolean(config.parallel) || false}
                   onChange={(e) =>
                     setConfig({ ...config, parallel: e.target.checked })
                   }
@@ -169,19 +169,19 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                 Selected Tools:
               </Typography>
               <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mb: 1 }}>
-                {(config.tools || []).map(
-                  (tool: string, index: number): void => (
+                {Array.isArray(config.tools) ? config.tools.map(
+                  (tool: string, index: number) => (
                     <Chip
                       key={index}
                       label={tool}
                       onDelete={() => {
-                        const newTools = [...(config.tools || [])];
+                        const newTools = Array.isArray(config.tools) ? [...config.tools] : [];
                         newTools.splice(index, 1);
                         setConfig({ ...config, tools: newTools });
                       }}
                     />
                   )
-                )}
+                ) : null}
               </Box>
               <FormControl fullWidth>
                 <InputLabel>Add Tool</InputLabel>
@@ -190,10 +190,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
                   label="Add Tool"
                   onChange={(e) => {
                     const tool = e.target.value as string;
-                    if (tool && !config.tools?.includes(tool)) {
+                    if (tool && (!Array.isArray(config.tools) || !config.tools.includes(tool))) {
                       setConfig({
                         ...config,
-                        tools: [...(config.tools || []), tool],
+                        tools: Array.isArray(config.tools) ? [...config.tools, tool] : [tool],
                       });
                     }
                   }}

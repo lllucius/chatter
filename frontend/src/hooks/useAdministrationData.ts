@@ -156,7 +156,7 @@ export const useAdministrationData = () => {
 
   const loadJobStats = useCallback(async () => {
     try {
-      const response = await getSDK().jobs.getJobStatsApiV1JobsStats();
+      const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
       setJobStats(response);
     } catch (error) {
       handleError(error, {

@@ -512,7 +512,7 @@ const DocumentsPage: React.FC = () => {
             <Paper sx={{ mt: 3, maxHeight: 400 }}>
               <CustomScrollbar>
                 <List>
-                  {searchResults.map((result, index): void => (
+                  {searchResults.map((result, index) => (
                     <ListItem key={index} divider>
                       <ListItemText
                         primary={

@@ -88,6 +88,13 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
     };
   }, [metrics]);
 
+  const sampleStatistics = React.useMemo(() => ({
+    confidence_level: 0.95,
+    effect_size: 0.12,
+    power: 0.8,
+    p_value: 0.0234,
+  }), []);
+
   const mockVariants = [
     {
       name: 'control',
@@ -271,7 +278,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
       {/* Conversion Rate Trend */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12 }} lg={8}>
+        <Grid size={{ xs: 12, lg: 8 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -329,7 +336,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12 }} lg={4}>
+        <Grid size={{ xs: 12, lg: 4 }}>
           <Card sx={{ height: '100%' }}>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -386,7 +393,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
 
       {/* Detailed Charts */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
-        <Grid size={{ xs: 12 }} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
@@ -395,12 +402,12 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <ResponsiveContainer width="100%" height={250}>
                 <PieChart>
                   <Pie
-                    data={sampleResults.variants}
+                    data={mockVariants}
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={({ name, participants }) =>
-                      `${name.replace('_', ' ').toUpperCase()}: ${participants}`
+                    label={({ name, value }: { name?: string; value?: number }) =>
+                      `${name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${value || 0}`
                     }
                     outerRadius={80}
                     fill="#8884d8"
@@ -420,14 +427,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
           </Card>
         </Grid>
 
-        <Grid size={{ xs: 12 }} md={6}>
+        <Grid size={{ xs: 12, md: 6 }}>
           <Card>
             <CardContent>
               <Typography variant="h6" gutterBottom>
                 Revenue Comparison
               </Typography>
               <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={sampleResults.variants}>
+                <BarChart data={mockVariants}>
                   <CartesianGrid strokeDasharray="3 3" />
                   <XAxis
                     dataKey="name"
@@ -458,14 +465,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
         (recommendations.recommendations.length > 0 ||
           recommendations.insights.length > 0) && (
           <Grid container spacing={3}>
-            <Grid size={{ xs: 12 }} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     AI Recommendations
                   </Typography>
                   <List>
-                    {recommendations.recommendations.map((rec, index): void => (
+                    {recommendations.recommendations.map((rec, index) => (
                       <ListItem key={index} sx={{ px: 0 }}>
                         <ListItemIcon>
                           {getRecommendationIcon('winner')}
@@ -478,14 +485,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               </Card>
             </Grid>
 
-            <Grid size={{ xs: 12 }} md={6}>
+            <Grid size={{ xs: 12, md: 6 }}>
               <Card>
                 <CardContent>
                   <Typography variant="h6" gutterBottom>
                     Key Insights
                   </Typography>
                   <List>
-                    {recommendations.insights.map((insight, index): void => (
+                    {recommendations.insights.map((insight, index) => (
                       <ListItem key={index} sx={{ px: 0 }}>
                         <ListItemIcon>
                           {getRecommendationIcon('info')}
@@ -512,8 +519,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {((sampleMetrics.confidence_level || 0) * 100).toFixed(0)}
-                      %
+                      {(sampleStatistics.confidence_level * 100).toFixed(0)}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Confidence Level
@@ -523,7 +529,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {((sampleMetrics.effect_size || 0) * 100).toFixed(1)}%
+                      {(sampleStatistics.effect_size * 100).toFixed(1)}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Effect Size
@@ -533,7 +539,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {((sampleMetrics.power || 0) * 100).toFixed(0)}%
+                      {(sampleStatistics.power * 100).toFixed(0)}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Statistical Power
@@ -543,7 +549,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {sampleMetrics.p_value?.toFixed(4) || 'N/A'}
+                      {sampleStatistics.p_value.toFixed(4)}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       P-Value

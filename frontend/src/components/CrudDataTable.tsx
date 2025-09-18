@@ -275,7 +275,7 @@ export const CrudDataTable = forwardRef<
           <Table>
             <TableHead>
               <TableRow>
-                {config.columns.map((column): void => (
+                {config.columns.map((column) => (
                   <TableCell key={String(column.id)} width={column.width}>
                     {column.label}
                   </TableCell>
@@ -309,9 +309,9 @@ export const CrudDataTable = forwardRef<
                   </TableCell>
                 </TableRow>
               ) : (
-                items.map((item): void => (
+                items.map((item) => (
                   <TableRow key={getItemId(item)} hover>
-                    {config.columns.map((column): void => (
+                    {config.columns.map((column) => (
                       <TableCell key={String(column.id)}>
                         {column.render
                           ? column.render(
@@ -395,7 +395,7 @@ export const CrudDataTable = forwardRef<
         {(config.enableEdit || config.enableDelete) &&
           config.actions &&
           config.actions.length > 0 && <Divider />}
-        {config.actions?.map((action, index): void => (
+        {config.actions?.map((action, index) => (
           <MenuItem key={index} onClick={() => handleActionClick(action)}>
             <ListItemIcon>{action.icon}</ListItemIcon>
             {action.label}

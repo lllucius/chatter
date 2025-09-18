@@ -395,7 +395,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={0} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }} lg={8}>
+              <Grid size={{ xs: 12, lg: 8 }}>
                 <Typography variant="h6" gutterBottom>
                   7-Day Activity Trend
                 </Typography>
@@ -434,7 +434,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
 
-              <Grid size={{ xs: 12 }} lg={4}>
+              <Grid size={{ xs: 12, lg: 4 }}>
                 <Typography variant="h6" gutterBottom>
                   Recent Activity
                 </Typography>
@@ -489,7 +489,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={1} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="h6" gutterBottom>
                   Feature Integration Usage
                 </Typography>
@@ -507,7 +507,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry, index): void => (
+                      {integrationData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -516,7 +516,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
 
-              <Grid size={{ xs: 12 }} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="h6" gutterBottom>
                   Integration Benefits
                 </Typography>

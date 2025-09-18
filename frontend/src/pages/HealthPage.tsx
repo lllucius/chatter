@@ -386,7 +386,7 @@ const HealthPage: React.FC = () => {
                 </TableRow>
               </TableHead>
               <TableBody>
-                {(toolServers || []).map((server): void => (
+                {(toolServers || []).map((server) => (
                   <TableRow key={server.id} hover>
                     <TableCell>
                       <Box sx={{ display: 'flex', alignItems: 'center' }}>

@@ -132,7 +132,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
                   : ''
               }
             >
-              {providerOptions.map((opt): void => (
+              {providerOptions.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
                   {opt.label}
                 </MenuItem>

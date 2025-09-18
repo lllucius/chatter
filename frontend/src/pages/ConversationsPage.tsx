@@ -246,7 +246,7 @@ const ConversationsPage: React.FC = () => {
             <Box sx={{ maxHeight: 400, p: 2 }}>
               <CustomScrollbar>
                 <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                  {conversationMessages.map((message): void => (
+                  {conversationMessages.map((message) => (
                     <Box
                       key={message.id}
                       sx={{

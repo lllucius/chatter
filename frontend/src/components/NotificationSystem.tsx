@@ -308,7 +308,7 @@ export const NotificationMenu: React.FC<NotificationMenuProps> = ({
           </Typography>
         </MenuItem>
       ) : (
-        notifications.slice(0, 10).map((notification): void => (
+        notifications.slice(0, 10).map((notification) => (
           <MenuItem
             key={notification.id}
             onClick={() => handleNotificationClick(notification)}

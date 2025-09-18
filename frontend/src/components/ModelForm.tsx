@@ -107,7 +107,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
                   No active providers available
                 </MenuItem>
               ) : (
-                providers.map((p): void => (
+                providers.map((p) => (
                   <MenuItem key={p.id} value={p.id}>
                     {p.displayName}
                   </MenuItem>

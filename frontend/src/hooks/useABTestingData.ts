@@ -105,14 +105,14 @@ export const useABTestingData = () => {
 
       // Handle performance
       if (performanceResp.status === 'fulfilled') {
-        setTestPerformance(performanceResp.value as TestPerformance);
+        setTestPerformance(performanceResp.value as unknown as TestPerformance);
       } else {
         setTestPerformance(null);
       }
 
       // Handle recommendations
       if (recommendationsResp.status === 'fulfilled') {
-        setTestRecommendations(recommendationsResp.value as TestRecommendations);
+        setTestRecommendations(recommendationsResp.value as unknown as TestRecommendations);
       } else {
         setTestRecommendations(null);
       }

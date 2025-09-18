@@ -390,31 +390,14 @@ class AnalyticsService:
                 user_id, time_range
             )
 
+            # Map data to match ChartReadyAnalytics schema field names
             chart_data = {
-                "conversation_timeline": time_series_data[
-                    "conversations"
-                ],
-                "message_timeline": time_series_data["messages"],
-                "token_usage_timeline": token_trends,
-                "cost_timeline": time_series_data["costs"],
-                "response_time_trends": time_series_data[
-                    "response_times"
-                ],
-                "model_usage_distribution": model_performance[
-                    "usage_distribution"
-                ],
-                "provider_comparison": model_performance[
-                    "provider_comparison"
-                ],
-                "hourly_activity_heatmap": conversation_trends[
-                    "hourly_activity"
-                ],
-                "daily_summary_stats": conversation_trends[
-                    "daily_summary"
-                ],
-                "performance_metrics_chart": model_performance[
-                    "performance_metrics"
-                ],
+                "conversation_chart_data": time_series_data.get("conversations", []),
+                "token_usage_data": token_trends or [],
+                "performance_chart_data": model_performance.get("performance_metrics", []),
+                "system_health_data": [],  # Will be populated if available
+                "integration_data": [],    # Will be populated if available
+                "hourly_performance_data": conversation_trends.get("hourly_activity", []),
             }
 
             # Cache with shorter TTL for chart data
@@ -622,18 +605,14 @@ class AnalyticsService:
         }
 
     def _get_empty_chart_data(self) -> dict[str, Any]:
-        """Return empty chart data structure."""
+        """Return empty chart data structure matching ChartReadyAnalytics schema."""
         return {
-            "conversation_timeline": [],
-            "message_timeline": [],
-            "token_usage_timeline": [],
-            "cost_timeline": [],
-            "response_time_trends": [],
-            "model_usage_distribution": {},
-            "provider_comparison": {},
-            "hourly_activity_heatmap": {},
-            "daily_summary_stats": {},
-            "performance_metrics_chart": {},
+            "conversation_chart_data": [],
+            "token_usage_data": [],
+            "performance_chart_data": [],
+            "system_health_data": [],
+            "integration_data": [],
+            "hourly_performance_data": [],
         }
 
     def _get_empty_integrated_stats(self) -> dict[str, Any]:

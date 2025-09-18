@@ -491,7 +491,11 @@ async def get_dashboard_chart_data(
         chart_data = await analytics_service.get_chart_ready_data(
             current_user.id, time_range
         )
-        return chart_data
+        
+        # Convert the dictionary to ChartReadyAnalytics object
+        from chatter.schemas.analytics import ChartReadyAnalytics
+        
+        return ChartReadyAnalytics(**chart_data)
 
     except Exception as e:
         logger.error(f"Error getting chart data: {e}")

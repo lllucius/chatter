@@ -170,7 +170,7 @@ const ModelManagementPage: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (provider) => {
-        if (!provider.isDefault) {
+        if (!provider.is_default) {
           try {
             const defaultProviderBody: DefaultProvider = {
               provider_id: provider.id as any,
@@ -261,7 +261,7 @@ const ModelManagementPage: React.FC = () => {
               {item.name}
             </Typography>
           </Box>
-          {item.isDefault && (
+          {item.is_default && (
             <Chip size="small" label="Default" color="primary" />
           )}
         </Box>

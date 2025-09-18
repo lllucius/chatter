@@ -66,7 +66,7 @@ export const useChatData = () => {
       profilesResponse = profilesResp.profiles || [];
       setProfiles(profilesResponse);
       setPrompts(promptsResponse.prompts || []);
-      setDocuments(documentsResponse.documents || []);
+      setDocuments((documentsResponse as any)?.documents || []);
 
       // Auto-select first profile if none selected and profiles exist
       if (!selectedProfile && profilesResponse.length > 0) {

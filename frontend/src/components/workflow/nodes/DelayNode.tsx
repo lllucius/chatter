@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Schedule as DelayIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const DelayNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const DelayNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   const formatDelay = (seconds: number) => {
     if (seconds < 60) return `${seconds}s`;
@@ -35,28 +36,29 @@ const DelayNode: React.FC<NodeProps<WorkflowNodeData>> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <DelayIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Delay
+          <>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <DelayIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Delay
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Wait before continuing
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Wait before continuing
-          </Typography>
-          {config.duration && (
-            <Chip
-              label={formatDelay(config.duration)}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5,
-              }}
-            />
-          )}
-          {config.type === 'dynamic' && (
+            {config.duration && (
+              <Chip
+                label={formatDelay(Number(config.duration))}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  mr: 0.5,
+                }}
+              />
+            )}
+            {config.type === 'dynamic' && (
             <Chip
               label="Dynamic"
               size="small"
@@ -67,6 +69,7 @@ const DelayNode: React.FC<NodeProps<WorkflowNodeData>> = ({
               }}
             />
           )}
+          </>
         </CardContent>
       </Card>
 

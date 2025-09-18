@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { CallSplit as ConditionalIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ConditionalNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const ConditionalNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>
@@ -38,11 +39,11 @@ const ConditionalNode: React.FC<NodeProps<WorkflowNodeData>> = ({
           <Typography variant="body2" sx={{ mb: 1 }}>
             Decision point
           </Typography>
-          {config.condition && (
+          {String(config.condition) && (
             <Chip
               label={
-                config.condition.slice(0, 20) +
-                (config.condition.length > 20 ? '...' : '')
+                String(config.condition).slice(0, 20) +
+                (String(config.condition).length > 20 ? '...' : '')
               }
               size="small"
               sx={{

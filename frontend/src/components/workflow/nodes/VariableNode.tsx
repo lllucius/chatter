@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Storage as VariableIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const VariableNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>
@@ -29,6 +30,7 @@ const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <VariableIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -40,7 +42,7 @@ const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
           </Typography>
           {config.operation && (
             <Chip
-              label={config.operation}
+              label={String(config.operation)}
               size="small"
               sx={{
                 bgcolor: 'rgba(255,255,255,0.2)',
@@ -53,8 +55,8 @@ const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
           {config.variableName && (
             <Chip
               label={
-                config.variableName.slice(0, 8) +
-                (config.variableName.length > 8 ? '...' : '')
+                String(config.variableName).slice(0, 8) +
+                (String(config.variableName).length > 8 ? '...' : '')
               }
               size="small"
               sx={{
@@ -64,6 +66,7 @@ const VariableNode: React.FC<NodeProps<WorkflowNodeData>> = ({
               }}
             />
           )}
+          </>
         </CardContent>
       </Card>
 

@@ -38,6 +38,7 @@ interface ABTestFormData {
   min_sample_size: number;
   confidence_level: number;
   target_audience: string;
+  [key: string]: unknown;
 }
 
 const ABTestingPage: React.FC = () => {

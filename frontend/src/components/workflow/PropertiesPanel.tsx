@@ -101,11 +101,11 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>Temperature: {config.temperature || 0.7}</Typography>
+              <Typography gutterBottom>{`Temperature: ${config.temperature || 0.7}`}</Typography>
               <Slider
-                value={config.temperature || 0.7}
+                value={Number(config.temperature) || 0.7}
                 onChange={(_, value) =>
-                  setConfig({ ...config, temperature: value })
+                  setConfig({ ...config, temperature: Array.isArray(value) ? value[0] : value })
                 }
                 min={0}
                 max={2}
@@ -276,11 +276,11 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>Similarity Threshold: {config.threshold || 0.7}</Typography>
+              <Typography gutterBottom>{`Similarity Threshold: ${config.threshold || 0.7}`}</Typography>
               <Slider
-                value={config.threshold || 0.7}
+                value={Number(config.threshold) || 0.7}
                 onChange={(_, value) =>
-                  setConfig({ ...config, threshold: value })
+                  setConfig({ ...config, threshold: Array.isArray(value) ? value[0] : value })
                 }
                 min={0}
                 max={1}

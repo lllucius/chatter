@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Build as ToolIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const ToolNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>
@@ -29,6 +30,7 @@ const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <ToolIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -47,7 +49,7 @@ const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({
               sx={{ mr: 0.5 }}
             />
           )}
-          {config.tools && config.tools.length > 0 && (
+          {Array.isArray(config.tools) && config.tools.length > 0 && (
             <Chip
               label={`${config.tools.length} tools`}
               size="small"
@@ -55,6 +57,7 @@ const ToolNode: React.FC<NodeProps<WorkflowNodeData>> = ({
               variant="outlined"
             />
           )}
+          </>
         </CardContent>
       </Card>
 

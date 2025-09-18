@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Loop as LoopIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const LoopNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>
@@ -29,6 +30,7 @@ const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <LoopIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -61,6 +63,7 @@ const LoopNode: React.FC<NodeProps<WorkflowNodeData>> = ({
               }}
             />
           )}
+          </>
         </CardContent>
       </Card>
 

@@ -19,7 +19,7 @@ class AuthService {
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
-    });
+    } as any);
     // Don't call initialize() in constructor anymore - it's async now
   }
 
@@ -255,6 +255,8 @@ class AuthService {
           rethrow: true,
         }
       );
+      // This line should never be reached since handleError with rethrow: true should throw
+      throw error;
     }
   }
 }

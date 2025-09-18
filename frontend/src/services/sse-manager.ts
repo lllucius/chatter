@@ -525,11 +525,12 @@ export class SSEEventManager {
   } | null {
     if (!event.metadata) return null;
 
+    const metadata = event.metadata as Record<string, unknown>;
     return {
-      category: event.metadata.category,
-      priority: event.metadata.priority,
-      source_system: event.metadata.source_system,
-      correlation_id: event.metadata.correlation_id,
+      category: metadata.category as string | undefined,
+      priority: metadata.priority as string | undefined,
+      source_system: metadata.source_system as string | undefined,
+      correlation_id: metadata.correlation_id as string | undefined,
     };
   }
 
@@ -555,8 +556,10 @@ export class SSEEventManager {
   private showCriticalAlert(event: AnySSEEvent): void {
     // This could integrate with a notification system
     if ('Notification' in window && Notification.permission === 'granted') {
+      const eventData = event.data as Record<string, unknown> | undefined;
+      const message = eventData?.message as string | undefined;
       new Notification('Critical System Alert', {
-        body: `${event.type}: ${event.data.message || 'Critical event occurred'}`,
+        body: `${event.type}: ${message || 'Critical event occurred'}`,
         icon: '/favicon.ico',
         tag: 'critical-alert',
       });
@@ -568,8 +571,9 @@ export class SSEEventManager {
    */
   private emitToCategoryListeners(event: AnySSEEvent, category: string): void {
     const categoryKey = `category:${category}`;
-    if (this.listeners[categoryKey]) {
-      this.listeners[categoryKey]!.forEach((listener) => {
+    const listeners = (this.listeners as any)[categoryKey] as SSEEventListener[] | undefined;
+    if (listeners) {
+      listeners.forEach((listener: SSEEventListener) => {
         try {
           listener(event);
         } catch (error) {
@@ -595,10 +599,11 @@ export class SSEEventManager {
    */
   public onCategory(category: string, listener: SSEEventListener): () => void {
     const categoryKey = `category:${category}`;
-    if (!this.listeners[categoryKey]) {
-      this.listeners[categoryKey] = [];
+    const listenersMap = this.listeners as any;
+    if (!listenersMap[categoryKey]) {
+      listenersMap[categoryKey] = [];
     }
-    this.listeners[categoryKey]!.push(listener);
+    listenersMap[categoryKey].push(listener);
 
     // Return unsubscribe function
     return () => {
@@ -611,9 +616,10 @@ export class SSEEventManager {
    */
   public offCategory(category: string, listener: SSEEventListener): void {
     const categoryKey = `category:${category}`;
-    if (this.listeners[categoryKey]) {
-      this.listeners[categoryKey] = this.listeners[categoryKey]!.filter(
-        (l) => l !== listener
+    const listenersMap = this.listeners as any;
+    if (listenersMap[categoryKey]) {
+      listenersMap[categoryKey] = listenersMap[categoryKey].filter(
+        (l: SSEEventListener) => l !== listener
       );
     }
   }
@@ -682,13 +688,13 @@ export class SSEEventManager {
   /**
    * Get SSE statistics using the SDK
    */
-  public async getSSEStats(): Promise<Record<string, unknown>> {
+  public async getSSEStats(): Promise<Record<string, unknown> | null> {
     try {
       const response = await authService.executeWithAuth(async (sdk) => {
         return await sdk.events.getSseStatsApiV1EventsStats();
       });
 
-      return response;
+      return response as unknown as Record<string, unknown>;
     } catch (error) {
       handleError(
         error,

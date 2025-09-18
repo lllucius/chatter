@@ -7,7 +7,7 @@ import { toast } from 'react-toastify';
 import { toastService } from '../toast-service';
 
 // Mock react-toastify
-vi.mock('react-toastify', (): void => ({
+vi.mock('react-toastify', () => ({
   toast: Object.assign(
     vi.fn().mockImplementation(() => 'mock-toast-id'),
     {
@@ -25,7 +25,7 @@ describe('ToastService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset toast count
-    (toastService as unknown).toastCount = 0;
+    (toastService as any).toastCount = 0;
   });
 
   describe('Basic Toast Operations', () => {
@@ -39,8 +39,8 @@ describe('ToastService', () => {
           type: 'success',
           autoClose: 6000,
           closeButton: false,
-          onOpen: expect.unknown(Function),
-          onClose: expect.unknown(Function),
+          onOpen: expect.any(Function),
+          onClose: expect.any(Function),
         })
       );
     });
@@ -55,8 +55,8 @@ describe('ToastService', () => {
           type: 'error',
           autoClose: false,
           closeButton: true, // Error toasts should have close button
-          onOpen: expect.unknown(Function),
-          onClose: expect.unknown(Function),
+          onOpen: expect.any(Function),
+          onClose: expect.any(Function),
         })
       );
     });
@@ -71,8 +71,8 @@ describe('ToastService', () => {
           type: 'info',
           autoClose: 6000,
           closeButton: false,
-          onOpen: expect.unknown(Function),
-          onClose: expect.unknown(Function),
+          onOpen: expect.any(Function),
+          onClose: expect.any(Function),
         })
       );
     });
@@ -87,8 +87,8 @@ describe('ToastService', () => {
           type: 'warning',
           autoClose: 6000,
           closeButton: false,
-          onOpen: expect.unknown(Function),
-          onClose: expect.unknown(Function),
+          onOpen: expect.any(Function),
+          onClose: expect.any(Function),
         })
       );
     });
@@ -111,7 +111,7 @@ describe('ToastService', () => {
 
     test('should accept autoClose false for persistent toasts', () => {
       const message = 'Persistent message';
-      const options = { autoClose: false };
+      const options = { autoClose: false } as any;
 
       toastService.info(message, options);
 
@@ -158,7 +158,7 @@ describe('ToastService', () => {
       const result = toastService.success('Test 1');
 
       // Get the onOpen callback and call it to simulate toast opening
-      const callArgs = (toast as unknown).mock.calls[0];
+      const callArgs = (toast as any).mock.calls[0];
       const options = callArgs[1];
       options.onOpen();
 
@@ -169,7 +169,7 @@ describe('ToastService', () => {
       // Set up service at max capacity
       for (let i = 0; i < 4; i++) {
         toastService.success(`Message ${i}`);
-        const callArgs = (toast as unknown).mock.calls[i];
+        const callArgs = (toast as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen(); // Simulate toast opening
       }
@@ -181,7 +181,7 @@ describe('ToastService', () => {
     test('should decrement count when toast closes', () => {
       toastService.success('Test message');
 
-      const callArgs = (toast as unknown).mock.calls[0];
+      const callArgs = (toast as any).mock.calls[0];
       const options = callArgs[1];
 
       // Simulate toast opening and closing
@@ -231,12 +231,12 @@ describe('ToastService', () => {
   describe('Error Handling', () => {
     test('should handle empty messages gracefully', () => {
       toastService.info('');
-      expect(toast).toHaveBeenCalledWith('', expect.unknown(Object));
+      expect(toast).toHaveBeenCalledWith('', expect.any(Object));
     });
 
     test('should handle null/undefined messages', () => {
-      toastService.info(null as unknown);
-      expect(toast).toHaveBeenCalledWith(null, expect.unknown(Object));
+      toastService.info(null as any);
+      expect(toast).toHaveBeenCalledWith(null, expect.any(Object));
     });
 
     test('should handle invalid autoClose values', () => {
@@ -282,7 +282,7 @@ describe('ToastService', () => {
       const customId = 'unique-toast-id';
 
       // If the service supported custom IDs
-      toastService.info(message, { toastId: customId } as unknown);
+      toastService.info(message, { toastId: customId } as any);
 
       expect(toast).toHaveBeenCalledWith(
         message,
@@ -299,23 +299,23 @@ describe('ToastService', () => {
       // Would update the toast if supported
       if (toastService.update) {
         toastService.update(
-          toastId as unknown,
+          toastId as any,
           {
             type: 'success',
             message: 'Completed!',
             autoClose: 3000,
-          } as unknown
+          } as any
         );
       }
 
-      expect(toast).toHaveBeenCalledWith('Loading...', expect.unknown(Object)); // Called for loading
+      expect(toast).toHaveBeenCalledWith('Loading...', expect.any(Object)); // Called for loading
     });
 
     test('should support toast dismissal', () => {
       const toastId = toastService.info('Dismissible toast');
 
       if (toastService.dismiss) {
-        toastService.dismiss(toastId as unknown);
+        toastService.dismiss(toastId as any);
       } else {
         // Call global dismiss
         toast.dismiss();
@@ -323,7 +323,7 @@ describe('ToastService', () => {
 
       expect(toast).toHaveBeenCalledWith(
         'Dismissible toast',
-        expect.unknown(Object)
+        expect.any(Object)
       );
     });
   });
@@ -335,7 +335,7 @@ describe('ToastService', () => {
       messages.forEach((message, index) => {
         toastService.info(message);
         // Simulate toast opening to trigger count increment
-        const callArgs = (toast as unknown).mock.calls[index];
+        const callArgs = (toast as any).mock.calls[index];
         const options = callArgs[1];
         options.onOpen();
       });
@@ -358,7 +358,7 @@ describe('ToastService', () => {
       const longMessage = 'A'.repeat(500); // Very long message
       toastService.info(longMessage);
 
-      expect(toast).toHaveBeenCalledWith(longMessage, expect.unknown(Object));
+      expect(toast).toHaveBeenCalledWith(longMessage, expect.any(Object));
     });
 
     test('should handle special characters in messages', () => {
@@ -368,7 +368,7 @@ describe('ToastService', () => {
 
       expect(toast).toHaveBeenCalledWith(
         specialMessage,
-        expect.unknown(Object)
+        expect.any(Object)
       );
     });
   });
@@ -380,7 +380,7 @@ describe('ToastService', () => {
         toastService.info(`Toast ${i}`);
 
         // Simulate opening and closing
-        const callArgs = (toast as unknown).mock.calls[i];
+        const callArgs = (toast as any).mock.calls[i];
         const options = callArgs[1];
         options.onOpen();
         options.onClose();
@@ -392,10 +392,8 @@ describe('ToastService', () => {
     test('should handle cleanup on service destruction', () => {
       toastService.success('Test');
 
-      // If service has cleanup method
-      if (toastService.destroy) {
-        toastService.destroy();
-      }
+      // Use dismissAll to clear all toasts
+      toastService.dismissAll();
 
       expect(toastService.getToastCount()).toBe(0);
     });

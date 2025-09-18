@@ -61,7 +61,7 @@ export function useAsyncError() {
       }> => {
         try {
           const data = await fn(...args);
-          return { success: true, data };
+          return { success: true, data: data as Awaited<ReturnType<T>> };
         } catch (error) {
           handleAsyncError(error, context, options);
           const errorMessage =

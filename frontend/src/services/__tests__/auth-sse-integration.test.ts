@@ -2,7 +2,8 @@
  * Integration tests for Auth Service and SSE Manager working together
  */
 
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { authService } from '../auth-service';
 import { sseEventManager } from '../sse-manager';
 
@@ -37,13 +38,13 @@ vi.mock('../auth-service', async () => {
       // Mock the login to simulate token storage in memory
       login: vi.fn(async () => {
         // Simulate successful login by updating mocked methods
-        (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
-        (authService.getToken as vi.Mock).mockReturnValue('test-access-token');
+        (authService.isAuthenticated as Mock).mockReturnValue(true);
+        (authService.getToken as Mock).mockReturnValue('test-access-token');
       }),
       // Mock logout to clear tokens
       logout: vi.fn(async () => {
-        (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
-        (authService.getToken as vi.Mock).mockReturnValue(null);
+        (authService.isAuthenticated as Mock).mockReturnValue(false);
+        (authService.getToken as Mock).mockReturnValue(null);
       }),
     },
   };
@@ -68,7 +69,7 @@ describe('Auth Service and SSE Manager Integration', () => {
       },
     } as any;
 
-    (global.fetch as vi.Mock).mockResolvedValue(mockResponse);
+    (global.fetch as Mock).mockResolvedValue(mockResponse);
 
     // Reset SSE manager
     sseEventManager.disconnect();
@@ -81,7 +82,7 @@ describe('Auth Service and SSE Manager Integration', () => {
 
   it('should not allow SSE connection when not authenticated', () => {
     // Ensure we start unauthenticated
-    (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
+    (authService.isAuthenticated as Mock).mockReturnValue(false);
 
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
 
@@ -97,8 +98,8 @@ describe('Auth Service and SSE Manager Integration', () => {
 
   it('should allow SSE connection after authentication', async () => {
     // Start unauthenticated
-    (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
-    (authService.getToken as vi.Mock).mockReturnValue(null);
+    (authService.isAuthenticated as Mock).mockReturnValue(false);
+    (authService.getToken as Mock).mockReturnValue(null);
 
     // Try to connect - should fail
     const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
@@ -121,19 +122,19 @@ describe('Auth Service and SSE Manager Integration', () => {
 
     // Verify SDK method was called instead of direct fetch
     expect(authService.executeWithAuth).toHaveBeenCalled();
-    const mockSDK = (authService.getSDK as vi.Mock)();
+    const mockSDK = (authService.getSDK as Mock)();
     // We can't easily verify the specific SDK method call in this integration test
     // but the fact that the connection doesn't error out means it's working
   });
 
   it('should handle token refresh during SSE connection', async () => {
     // Setup authenticated state
-    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
-    (authService.getToken as vi.Mock).mockReturnValue('old-token');
+    (authService.isAuthenticated as Mock).mockReturnValue(true);
+    (authService.getToken as Mock).mockReturnValue('old-token');
 
     // Mock fetch to return 401 first time, then succeed
     let callCount = 0;
-    (global.fetch as vi.Mock).mockImplementation(async () => {
+    (global.fetch as Mock).mockImplementation(async () => {
       callCount++;
       if (callCount === 1) {
         // First call - return 401 unauthorized
@@ -158,8 +159,8 @@ describe('Auth Service and SSE Manager Integration', () => {
     });
 
     // Mock refresh to update token
-    (authService.refreshToken as vi.Mock).mockImplementation(async () => {
-      (authService.getToken as vi.Mock).mockReturnValue('new-refreshed-token');
+    (authService.refreshToken as Mock).mockImplementation(async () => {
+      (authService.getToken as Mock).mockReturnValue('new-refreshed-token');
       return true;
     });
 
@@ -176,11 +177,11 @@ describe('Auth Service and SSE Manager Integration', () => {
 
   it('should use executeWithAuth for SDK-based operations', async () => {
     // Setup authenticated state
-    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
+    (authService.isAuthenticated as Mock).mockReturnValue(true);
 
     // Test the new SSE manager SDK integration methods
     const mockApiCall = vi.fn().mockResolvedValue({ event_id: 'test-123' });
-    (authService.executeWithAuth as vi.Mock).mockImplementation((apiCall) =>
+    (authService.executeWithAuth as Mock).mockImplementation((apiCall) =>
       apiCall({})
     );
 

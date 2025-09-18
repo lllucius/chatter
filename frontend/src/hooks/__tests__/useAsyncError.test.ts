@@ -1,5 +1,5 @@
 import { renderHook, act } from '@testing-library/react';
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect, beforeEach, vi } from "vitest";
 import { useAsyncError, useAsyncOperation } from '../useAsyncError';
 import { errorHandler } from '../../utils/error-handler';
 

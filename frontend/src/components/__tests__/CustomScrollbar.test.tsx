@@ -7,7 +7,7 @@ const theme = createTheme();
 
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
-}): void => <ThemeProvider theme={theme}>{children}</ThemeProvider>;
+}) => <ThemeProvider theme={theme}>{children}</ThemeProvider>;
 
 describe('CustomScrollbar', () => {
   it('renders without crashing', () => {

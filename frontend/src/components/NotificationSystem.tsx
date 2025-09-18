@@ -197,7 +197,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
       >
-        {currentSnackbar && (
+        {currentSnackbar ? (
           <Alert
             onClose={handleCloseSnackbar}
             severity={currentSnackbar.type}
@@ -216,7 +216,7 @@ export const NotificationProvider: React.FC<NotificationProviderProps> = ({
             <AlertTitle>{currentSnackbar.title}</AlertTitle>
             {currentSnackbar.message}
           </Alert>
-        )}
+        ) : undefined}
       </Snackbar>
     </NotificationContext.Provider>
   );

@@ -35,9 +35,12 @@ const DocumentForm: React.FC<
     useBaseForm(
       {
         defaultData: defaultDocumentData,
-        transformInitialData: (data: DocumentUpdateData): JSX.Element => ({
-          title: data.title || '',
-        }),
+        transformInitialData: (data: unknown): DocumentUpdateData => {
+          const docData = data as DocumentUpdateData;
+          return {
+            title: docData?.title || '',
+          };
+        },
       },
       open,
       mode,
@@ -111,6 +114,7 @@ const DocumentForm: React.FC<
     <FormDialog
       open={open}
       mode={mode}
+      title={mode === 'create' ? 'Upload Document' : 'Edit Document'}
       entityName="Document"
       onClose={handleCustomClose}
       onSubmit={handleFormSubmit}

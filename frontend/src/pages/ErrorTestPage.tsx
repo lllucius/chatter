@@ -185,7 +185,7 @@ const ErrorTestPage: React.FC = () => {
   };
 
   return (
-    <PageLayout>
+    <PageLayout title="Error Test">
       <Box sx={{ p: 3 }}>
         <Typography variant="h4" gutterBottom>
           <BugIcon sx={{ mr: 1, verticalAlign: 'middle' }} />

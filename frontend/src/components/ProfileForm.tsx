@@ -66,17 +66,20 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     useBaseForm(
       {
         defaultData: defaultProfileData,
-        transformInitialData: (data: ProfileResponse) => ({
-          name: data.name || '',
-          description: data.description || '',
-          llmModel: data.llm_model || '',
-          llmProvider: data.llm_provider || '',
-          temperature: data.temperature ?? 0.7,
-          max_tokens: data.max_tokens ?? 1000,
-          top_p: data.top_p ?? 1.0,
-          frequency_penalty: data.frequency_penalty ?? 0.0,
-          presence_penalty: data.presence_penalty ?? 0.0,
-        }),
+        transformInitialData: (data: unknown) => {
+          const profileData = data as ProfileResponse;
+          return {
+            name: profileData?.name || '',
+            description: profileData?.description || '',
+            llmModel: profileData?.llm_model || '',
+            llmProvider: profileData?.llm_provider || '',
+            temperature: profileData?.temperature ?? 0.7,
+            max_tokens: profileData?.max_tokens ?? 1000,
+            top_p: profileData?.top_p ?? 1.0,
+            frequency_penalty: profileData?.frequency_penalty ?? 0.0,
+            presence_penalty: profileData?.presence_penalty ?? 0.0,
+          };
+        },
       },
       open,
       mode,
@@ -90,7 +93,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     try {
       const response =
         await getSDK().profiles.getAvailableProvidersApiV1ProfilesProvidersAvailable();
-      setProvidersData(response as ProvidersData);
+      setProvidersData(response as unknown as ProvidersData);
     } catch {
       // Failed to fetch providers - handled by setting error state
       setProvidersError('Failed to load available providers');
@@ -143,6 +146,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     <FormDialog
       open={open}
       mode={mode}
+      title={mode === 'create' ? 'Create Profile' : 'Edit Profile'}
       entityName="Profile"
       onClose={handleClose(onClose)}
       onSubmit={handleFormSubmit}

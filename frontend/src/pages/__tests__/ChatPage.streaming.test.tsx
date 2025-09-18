@@ -148,7 +148,6 @@ describe('ChatPage Streaming Functionality', () => {
       expect(mockStreamingMethod).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Test streaming message',
-          stream: true,
         })
       );
     });

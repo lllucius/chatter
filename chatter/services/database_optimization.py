@@ -229,7 +229,9 @@ class DatabaseOptimizationService:
                 select(
                     Message.role,
                     func.count(Message.id).label("message_count"),
-                    func.sum(Message.total_tokens).label("total_tokens"),
+                    func.sum(Message.total_tokens).label(
+                        "total_tokens"
+                    ),
                     func.avg(Message.response_time_ms).label(
                         "avg_response_time"
                     ),

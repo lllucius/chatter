@@ -43,14 +43,14 @@ function processStreamingData(chunks: string[]): {
 
       switch (parsed.type) {
         case 'start':
-          conversationId = parsed.conversation_id;
+          conversationId = parsed.conversation_id as string;
           break;
         case 'token':
-          content += parsed.content || '';
+          content += (parsed.content as string) || '';
           break;
         case 'complete':
           if (parsed.metadata) {
-            metadata = parsed.metadata;
+            metadata = parsed.metadata as Record<string, unknown>;
           }
           break;
         case 'done':
@@ -147,6 +147,6 @@ describe('Streaming Parser Logic', () => {
 
     expect(result.content).toBe('The quick brown fox');
     expect(result.conversationId).toBe('conv-123');
-    expect(result.metadata.total_tokens).toBe(4);
+    expect(result.metadata?.total_tokens).toBe(4);
   });
 });

@@ -588,8 +588,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Documents"
-                value={safeLocaleString(documentAnalytics.total_documents)}
-                change={`${safeLocaleString(documentAnalytics.total_chunks)} chunks`}
+                value={safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents)}
+                change={`${safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks)} chunks`}
                 changeType="neutral"
                 icon={<Storage />}
                 color="success"
@@ -693,12 +693,12 @@ const DashboardPage: React.FC = () => {
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Average:{' '}
-                    {safeToFixed(performanceMetrics.avg_response_time_ms, 2)}ms
+                    {safeToFixed((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms, 2)}ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (performanceMetrics.avg_response_time_ms ?? 0) / 10,
+                      (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) / 10,
                       100
                     )}
                     sx={{ mb: 1 }}
@@ -708,7 +708,7 @@ const DashboardPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     P95:{' '}
                     {safeToFixed(
-                      performanceMetrics.p95_response_time_ms ?? 0,
+                      Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms) ?? 0,
                       1
                     )}
                     ms
@@ -716,7 +716,7 @@ const DashboardPage: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (performanceMetrics.p95_response_time_ms ?? 0) / 20,
+                      (Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms) ?? 0) / 20,
                       100
                     )}
                     color="warning"
@@ -743,7 +743,7 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Active Users</Typography>
                         <Typography variant="h6">
-                          {safeLocaleString(systemHealth.active_users_today)}
+                          {safeLocaleString((systemHealth as Record<string, unknown>)?.active_users_today)}
                         </Typography>
                       </Box>
                     </Box>
@@ -754,7 +754,7 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Storage</Typography>
                         <Typography variant="h6">
-                          {formatBytes(systemHealth.storage_usage_bytes)}
+                          {formatBytes((systemHealth as Record<string, unknown>)?.storage_usage_bytes)}
                         </Typography>
                       </Box>
                     </Box>
@@ -807,7 +807,7 @@ const DashboardPage: React.FC = () => {
                         Total Documents
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(documentAnalytics.total_documents)}
+                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents)}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -912,9 +912,9 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Avg Response: ${safeToFixed(performanceMetrics.avg_response_time_ms ?? 0, 0)}ms`}
+              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0, 0)}ms`}
               color={
-                (performanceMetrics.avg_response_time_ms ?? 0) < 1000
+                (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) < 1000
                   ? 'success'
                   : 'warning'
               }

@@ -165,7 +165,7 @@ const ConversationsPage: React.FC = () => {
         });
       return {
         items: response.conversations || [],
-        total: response.total || 0,
+        total: response.total_count || 0,
       };
     },
 

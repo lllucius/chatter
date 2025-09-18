@@ -56,7 +56,7 @@ export const useChatData = () => {
       ] = await Promise.all([
         sdk.profiles.listProfilesApiV1Profiles({}),
         sdk.prompts.listPromptsApiV1Prompts({}),
-        sdk.documents.listDocumentsApiV1Documents({}),
+        sdk.documents.listDocumentsGetApiV1Documents({}),
         sdk.conversations.listConversationsApiV1Conversations({
           limit: 1,
           offset: 0,
@@ -182,7 +182,7 @@ export const useChatMessages = () => {
           );
 
         const chatMessages: ExtendedChatMessage[] =
-          response.messages?.map((msg, index) => ({
+          response?.map((msg, index) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,

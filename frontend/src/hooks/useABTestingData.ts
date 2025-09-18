@@ -53,12 +53,12 @@ export const useABTestingData = () => {
     try {
       const [metricsResp, resultsResp, performanceResp, recommendationsResp] =
         await Promise.allSettled([
-          getSDK().abTesting.getABTestMetricsApiV1AbTestsTestIdMetrics(testId),
-          getSDK().abTesting.getABTestResultsApiV1AbTestsTestIdResults(testId),
-          getSDK().abTesting.getABTestPerformanceApiV1AbTestsTestIdPerformance(
+          getSDK().abTesting.getAbTestMetricsApiV1AbTestsTestIdMetrics(testId),
+          getSDK().abTesting.getAbTestResultsApiV1AbTestsTestIdResults(testId),
+          getSDK().abTesting.getAbTestPerformanceApiV1AbTestsTestIdPerformance(
             testId
           ),
-          getSDK().abTesting.getABTestRecommendationsApiV1AbTestsTestIdRecommendations(
+          getSDK().abTesting.getAbTestRecommendationsApiV1AbTestsTestIdRecommendations(
             testId
           ),
         ]);
@@ -102,7 +102,7 @@ export const useABTestingData = () => {
     try {
       setSaving(true);
       const newTest =
-        await getSDK().abTesting.createABTestApiV1AbTests(testData);
+        await getSDK().abTesting.createAbTestApiV1AbTests(testData);
       setTests((prev) => [newTest, ...prev]);
       return newTest;
     } catch (error) {
@@ -121,7 +121,7 @@ export const useABTestingData = () => {
       try {
         setSaving(true);
         const updatedTest =
-          await getSDK().abTesting.updateABTestApiV1AbTestsTestId(
+          await getSDK().abTesting.updateAbTestApiV1AbTestsTestId(
             testId,
             testData
           );
@@ -149,7 +149,7 @@ export const useABTestingData = () => {
     async (testId: string) => {
       try {
         setSaving(true);
-        await getSDK().abTesting.deleteABTestApiV1AbTestsTestId(testId);
+        await getSDK().abTesting.deleteAbTestApiV1AbTestsTestId(testId);
         setTests((prev) => prev.filter((test) => test.id !== testId));
         if (selectedTest?.id === testId) {
           setSelectedTest(null);
@@ -170,7 +170,7 @@ export const useABTestingData = () => {
   const startTest = useCallback(
     async (testId: string) => {
       try {
-        await getSDK().abTesting.startABTestApiV1AbTestsTestIdStart(testId);
+        await getSDK().abTesting.startAbTestApiV1AbTestsTestIdStart(testId);
         await loadTests(); // Reload to get updated status
       } catch (error) {
         handleError(error, {
@@ -185,7 +185,7 @@ export const useABTestingData = () => {
   const stopTest = useCallback(
     async (testId: string) => {
       try {
-        await getSDK().abTesting.stopABTestApiV1AbTestsTestIdStop(testId);
+        await getSDK().abTesting.pauseAbTestApiV1AbTestsTestIdPause(testId);
         await loadTests(); // Reload to get updated status
       } catch (error) {
         handleError(error, {

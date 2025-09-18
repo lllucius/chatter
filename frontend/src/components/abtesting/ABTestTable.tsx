@@ -98,7 +98,7 @@ const ABTestTable: React.FC<ABTestTableProps> = memo(
         case 'cancelled':
           return <StopIcon />;
         default:
-          return null;
+          return <StartIcon />;
       }
     };
 

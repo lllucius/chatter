@@ -125,15 +125,11 @@ const WorkflowMonitor: React.FC<WorkflowMonitorProps> = ({
     if (runningExecutions.length === 0) return;
 
     const newData = runningExecutions.map((execution) => ({
-      time: new Date().toISOString(),
-      executionId: execution.id,
+      timestamp: new Date().toISOString(),
       tokensPerSecond:
         execution.metrics.tokensUsed /
         Math.max(execution.metrics.executionTime, 1),
-      memoryUsage: execution.metrics.memoryUsage,
-      apiCallsPerMinute:
-        execution.metrics.apiCalls /
-        Math.max(execution.metrics.executionTime / 60, 1),
+      latency: execution.metrics.executionTime,
     }));
 
     setPerformanceData((prev) => [...prev.slice(-20), ...newData]);

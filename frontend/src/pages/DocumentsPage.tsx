@@ -198,27 +198,13 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        const chunksResponse =
-          await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
-            document.id,
-            {
-              limit: 3,
-              offset: 0,
-            }
-          );
-        if (
-          chunksResponse.data &&
-          chunksResponse.data.chunks &&
-          chunksResponse.data.chunks.length > 0
-        ) {
-          contentPreview = chunksResponse.data.chunks
-            .map((chunk) => chunk.content)
-            .join('\n\n')
-            .substring(0, 1000);
-          if (contentPreview.length >= 1000) {
-            contentPreview += '...';
-          }
-        }
+        // TODO: Implement when chunks API is available
+        // const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
+        //   document.id,
+        //   { limit: 3, offset: 0 }
+        // );
+        console.warn('Document chunks API not yet implemented');
+        contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       } catch {
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       }
@@ -321,23 +307,19 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      const response =
-        await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(
-          document.id
-        );
-
-      // Create a blob URL and trigger download
-      const blob = new Blob([response.data], {
-        type: 'application/octet-stream',
-      });
-      const url = window.URL.createObjectURL(blob);
-      const a = window.document.createElement('a');
-      a.href = url;
-      a.download = document.filename;
-      window.document.body.appendChild(a);
-      a.click();
-      window.URL.revokeObjectURL(url);
-      window.document.body.removeChild(a);
+      // TODO: Implement when download API is available
+      // const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(document.id);
+      // const blob = new Blob([response.data], { type: 'application/octet-stream' });
+      // const url = window.URL.createObjectURL(blob);
+      // const a = window.document.createElement('a');
+      // a.href = url;
+      // a.download = document.filename;
+      // window.document.body.appendChild(a);
+      // a.click();
+      // window.URL.revokeObjectURL(url);
+      // window.document.body.removeChild(a);
+      console.warn('Document download API not yet implemented');
+      toastService.error('Document download not yet implemented');
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleDownloadDocument',
@@ -407,7 +389,7 @@ const DocumentsPage: React.FC = () => {
     DocumentUpdateData
   > = {
     list: async (page: number, pageSize: number) => {
-      const response = await getSDK().documents.listDocumentsApiV1Documents({
+      const response = await getSDK().documents.listDocumentsGetApiV1Documents({
         limit: pageSize,
         offset: page * pageSize,
       });

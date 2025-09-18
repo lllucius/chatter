@@ -138,9 +138,14 @@ const ChatPage: React.FC = () => {
         if (isRegeneration) {
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = initialAssistantMessage;
             }
@@ -295,9 +300,14 @@ const ChatPage: React.FC = () => {
         if (isRegeneration) {
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = errorMessage;
             }
@@ -393,9 +403,14 @@ const ChatPage: React.FC = () => {
             // Replace the last assistant message
             setMessages((prev) => {
               const newMessages = [...prev];
-              const lastAssistantIndex = newMessages.findLastIndex(
-                (msg) => msg.role === 'assistant'
-              );
+              // Find last index by iterating backwards
+              let lastAssistantIndex = -1;
+              for (let i = newMessages.length - 1; i >= 0; i--) {
+                if (newMessages[i].role === 'assistant') {
+                  lastAssistantIndex = i;
+                  break;
+                }
+              }
               if (lastAssistantIndex !== -1) {
                 newMessages[lastAssistantIndex] = assistantMessage;
               }
@@ -582,9 +597,14 @@ const ChatPage: React.FC = () => {
           // Replace the last assistant message
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = assistantMessage;
             }

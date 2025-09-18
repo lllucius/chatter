@@ -170,7 +170,7 @@ describe('SSEEventManager', () => {
     test('should not connect when not authenticated', () => {
       (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
 
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       sseManager.connect();
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -196,7 +196,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should not create multiple connections', async () => {
-      const consoleSpy = vi.spyOn(console, 'log').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'log').mockImplementation(() => {});
 
       sseManager.connect();
 
@@ -405,7 +405,7 @@ describe('SSEEventManager', () => {
 
   describe('Error Handling', () => {
     test('should handle malformed messages gracefully', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Create mock stream with malformed data
       const mockSDK = (authService.getSDK as vi.Mock)();
@@ -429,7 +429,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should handle connection errors', () => {
-      const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Mock SDK to reject the stream request
       const mockSDK = (authService.getSDK as vi.Mock)();

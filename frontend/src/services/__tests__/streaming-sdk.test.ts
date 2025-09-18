@@ -2,7 +2,7 @@
  * Simple test to verify the streaming method can be called
  */
 
-import { ChatterSDK, ChatRequest } from 'chatter-sdk';
+import { ChatterSDK, ChatRequest, Configuration } from 'chatter-sdk';
 
 describe('Streaming SDK Method', () => {
   it('should have streamingChatApiV1ChatStreaming method', () => {
@@ -16,9 +16,9 @@ describe('Streaming SDK Method', () => {
       conversation_id: 'test-id',
     };
 
-    const sdk = new ChatterSDK({
+    const sdk = new ChatterSDK(new Configuration({
       basePath: 'http://localhost:8000',
-    });
+    }));
 
     // This will fail without a real server, but we can at least verify the method signature
     try {

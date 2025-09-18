@@ -607,7 +607,7 @@ async def get_dashboard(
                 **dashboard_data.get("system_health", {})
             ),
             custom_metrics=dashboard_data.get("custom_metrics", []),
-            chart_data=chart_data,
+            chart_data=ChartReadyAnalytics(**chart_data),
             generated_at=dashboard_data.get(
                 "generated_at", datetime.now(UTC)
             ),

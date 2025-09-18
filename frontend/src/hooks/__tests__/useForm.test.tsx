@@ -39,7 +39,7 @@ describe('useForm hook', () => {
   it('should handle validation options', () => {
     const validate = vi.fn();
     const { result } = renderHook(() =>
-      useForm({ username: '' }, { validate })
+      useForm({ initialValues: { username: '' }, validate })
     );
 
     expect(result.current.isValid).toBe(true);

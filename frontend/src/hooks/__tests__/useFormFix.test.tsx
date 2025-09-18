@@ -5,6 +5,7 @@ import { useForm } from '../useForm';
 interface TestFormValues {
   username: string;
   password: string;
+  [key: string]: unknown;
 }
 
 describe('useForm fix for login button disabled issue', () => {

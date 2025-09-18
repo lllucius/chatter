@@ -4,6 +4,7 @@ import { handleError } from '../utils/error-handler';
 import {
   ABTestResponse,
   ABTestUpdateRequest,
+  ABTestCreateRequest,
   ABTestMetricsResponse,
   ABTestResultsResponse,
   ABTestActionResponse,
@@ -79,14 +80,14 @@ export const useABTestingData = () => {
 
       // Handle performance
       if (performanceResp.status === 'fulfilled') {
-        setTestPerformance(performanceResp.value);
+        setTestPerformance(performanceResp.value as unknown as ABTestActionResponse);
       } else {
         setTestPerformance(null);
       }
 
       // Handle recommendations
       if (recommendationsResp.status === 'fulfilled') {
-        setTestRecommendations(recommendationsResp.value);
+        setTestRecommendations(recommendationsResp.value as unknown as ABTestActionResponse);
       } else {
         setTestRecommendations(null);
       }
@@ -98,7 +99,7 @@ export const useABTestingData = () => {
     }
   }, []);
 
-  const createTest = useCallback(async (testData: ABTestUpdateRequest) => {
+  const createTest = useCallback(async (testData: ABTestCreateRequest) => {
     try {
       setSaving(true);
       const newTest =

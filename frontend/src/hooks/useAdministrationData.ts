@@ -120,13 +120,10 @@ export const useAdministrationData = () => {
   const loadJobs = useCallback(async () => {
     try {
       setDataLoading(true);
-      const response = await getSDK().jobs.listJobsApiV1Jobs(
-        {},
-        {
-          limit: 100,
-          offset: 0,
-        }
-      );
+      const response = await getSDK().jobs.listJobsApiV1Jobs({
+        limit: 100,
+        offset: 0,
+      });
       const newJobs = response.jobs || [];
       newJobs.forEach((job) => {
         const previousState = lastJobStates.get(job.id);
@@ -178,8 +175,9 @@ export const useAdministrationData = () => {
   useEffect(() => {
     if (!isConnected) return;
 
-    const unsubscribeJobStarted = on('job.started', (event: JobStartedEvent) => {
-      const jobData = event.data as JobSSEEventData;
+    const unsubscribeJobStarted = on('job.started', (event) => {
+      const jobEvent = event as JobStartedEvent;
+      const jobData = jobEvent.data as JobSSEEventData;
       showNotification({
         title: 'Job Started',
         message: `Job "${jobData.job_name || jobData.job_id}" has started`,
@@ -190,8 +188,9 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobCompleted = on('job.completed', (event: JobCompletedEvent) => {
-      const jobData = event.data as JobSSEEventData;
+    const unsubscribeJobCompleted = on('job.completed', (event) => {
+      const jobEvent = event as JobCompletedEvent;
+      const jobData = jobEvent.data as JobSSEEventData;
       showNotification({
         title: 'Job Completed',
         message: `Job "${jobData.job_name || jobData.job_id}" completed successfully`,
@@ -202,8 +201,9 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeJobFailed = on('job.failed', (event: JobFailedEvent) => {
-      const jobData = event.data as JobSSEEventData;
+    const unsubscribeJobFailed = on('job.failed', (event) => {
+      const jobEvent = event as JobFailedEvent;
+      const jobData = jobEvent.data as JobSSEEventData;
       showNotification({
         title: 'Job Failed',
         message: `Job "${jobData.job_name || jobData.job_id}" failed: ${jobData.error}`,
@@ -214,8 +214,9 @@ export const useAdministrationData = () => {
       loadJobStats();
     });
 
-    const unsubscribeBackupStarted = on('backup.started', (event: BackupStartedEvent) => {
-      const backupData = event.data as BackupSSEEventData;
+    const unsubscribeBackupStarted = on('backup.started', (event) => {
+      const backupEvent = event as BackupStartedEvent;
+      const backupData = backupEvent.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Started',
         message: `Backup "${backupData.backup_id}" has started`,
@@ -227,8 +228,9 @@ export const useAdministrationData = () => {
 
     const unsubscribeBackupCompleted = on(
       'backup.completed',
-      (event: BackupCompletedEvent) => {
-        const backupData = event.data as BackupSSEEventData;
+      (event) => {
+        const backupEvent = event as BackupCompletedEvent;
+        const backupData = backupEvent.data as BackupSSEEventData;
         showNotification({
           title: 'Backup Completed',
           message: `Backup "${backupData.backup_id}" completed successfully`,
@@ -239,8 +241,9 @@ export const useAdministrationData = () => {
       }
     );
 
-    const unsubscribeBackupFailed = on('backup.failed', (event: BackupFailedEvent) => {
-      const backupData = event.data as BackupSSEEventData;
+    const unsubscribeBackupFailed = on('backup.failed', (event) => {
+      const backupEvent = event as BackupFailedEvent;
+      const backupData = backupEvent.data as BackupSSEEventData;
       showNotification({
         title: 'Backup Failed',
         message: `Backup "${backupData.backup_id}" failed: ${backupData.error}`,

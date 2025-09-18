@@ -30,6 +30,7 @@ const LoopNode: React.FC<NodeProps> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <LoopIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -62,6 +63,7 @@ const LoopNode: React.FC<NodeProps> = ({
               }}
             />
           )}
+          </>
         </CardContent>
       </Card>
 

@@ -30,6 +30,7 @@ const ModelNode: React.FC<NodeProps> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <ModelIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -56,6 +57,7 @@ const ModelNode: React.FC<NodeProps> = ({
               variant="outlined"
             />
           )}
+          </>
         </CardContent>
       </Card>
 

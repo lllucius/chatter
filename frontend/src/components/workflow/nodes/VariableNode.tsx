@@ -30,6 +30,7 @@ const VariableNode: React.FC<NodeProps> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <VariableIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -41,7 +42,7 @@ const VariableNode: React.FC<NodeProps> = ({
           </Typography>
           {config.operation && (
             <Chip
-              label={config.operation}
+              label={String(config.operation)}
               size="small"
               sx={{
                 bgcolor: 'rgba(255,255,255,0.2)',
@@ -54,8 +55,8 @@ const VariableNode: React.FC<NodeProps> = ({
           {config.variableName && (
             <Chip
               label={
-                config.variableName.slice(0, 8) +
-                (config.variableName.length > 8 ? '...' : '')
+                String(config.variableName).slice(0, 8) +
+                (String(config.variableName).length > 8 ? '...' : '')
               }
               size="small"
               sx={{
@@ -65,6 +66,7 @@ const VariableNode: React.FC<NodeProps> = ({
               }}
             />
           )}
+          </>
         </CardContent>
       </Card>
 

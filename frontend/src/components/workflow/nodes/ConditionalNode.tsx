@@ -39,11 +39,11 @@ const ConditionalNode: React.FC<NodeProps> = ({
           <Typography variant="body2" sx={{ mb: 1 }}>
             Decision point
           </Typography>
-          {config.condition && (
+          {String(config.condition) && (
             <Chip
               label={
-                config.condition.slice(0, 20) +
-                (config.condition.length > 20 ? '...' : '')
+                String(config.condition).slice(0, 20) +
+                (String(config.condition).length > 20 ? '...' : '')
               }
               size="small"
               sx={{

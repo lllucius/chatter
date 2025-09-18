@@ -30,38 +30,40 @@ const ErrorHandlerNode: React.FC<NodeProps> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <ErrorIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Error Handler
+          <>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <ErrorIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Error Handler
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Catch & handle errors
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Catch & handle errors
-          </Typography>
-          {config.retryCount && (
-            <Chip
-              label={`Retry: ${config.retryCount}`}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5,
-              }}
-            />
-          )}
-          {config.fallbackAction && (
-            <Chip
-              label={config.fallbackAction}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}
-            />
-          )}
+            {config.retryCount && (
+              <Chip
+                label={`Retry: ${config.retryCount}`}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  mr: 0.5,
+                }}
+              />
+            )}
+            {config.fallbackAction && (
+              <Chip
+                label={String(config.fallbackAction)}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                }}
+              />
+            )}
+          </>
         </CardContent>
       </Card>
 

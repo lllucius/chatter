@@ -107,7 +107,7 @@ describe('ChatPage sendMessage Fix', () => {
 
     // Disable streaming to test the non-streaming path
     const streamingToggle = screen.getByRole('checkbox');
-    if (streamingToggle.checked) {
+    if ((streamingToggle as HTMLInputElement).checked) {
       fireEvent.click(streamingToggle);
     }
 
@@ -164,7 +164,7 @@ describe('ChatPage sendMessage Fix', () => {
 
     // Disable streaming to test the non-streaming path
     const streamingToggle = screen.getByRole('checkbox');
-    if (streamingToggle.checked) {
+    if ((streamingToggle as HTMLInputElement).checked) {
       fireEvent.click(streamingToggle);
     }
 

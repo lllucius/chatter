@@ -256,7 +256,7 @@ describe('ChatPage Improvements', () => {
       // After sending, input should be available for focus again
       await waitFor(() => {
         expect(inputField).not.toBeDisabled();
-        expect(inputField.value).toBe('');
+        expect((inputField as HTMLInputElement).value).toBe('');
       });
     });
   });

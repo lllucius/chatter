@@ -51,9 +51,17 @@ const mockSSEContext = {
 
 // Override the useSSE hook for testing
 React.createContext = () => ({
-  Provider: ({ children }: { children: React.ReactNode }) => children,
-  Consumer: () => null,
-});
+  $$typeof: Symbol.for('react.context'),
+  Provider: Object.assign(
+    ({ children }: { children: React.ReactNode }) => children,
+    { $$typeof: Symbol.for('react.provider') }
+  ),
+  Consumer: Object.assign(
+    () => null,
+    { $$typeof: Symbol.for('react.consumer') }
+  ),
+  displayName: 'MockContext'
+} as any);
 
 // Mock the useSSE hook
 const useSSE = () => mockSSEContext;
@@ -77,7 +85,7 @@ const SSEMonitorDemo: React.FC = () => {
     const randomChoice = <T,>(arr: T[]): T =>
       arr[Math.floor(Math.random() * arr.length)];
 
-    const event: AnySSEEvent = {
+    const event: AnySSEEvent = ({
       id: `event-${Date.now()}-${eventCount}`,
       type: randomChoice(eventTypes),
       data: {
@@ -93,7 +101,7 @@ const SSEMonitorDemo: React.FC = () => {
         source_system: randomChoice(sourceSystems),
         correlation_id: `corr-${Math.random().toString(36).substring(7)}`,
       },
-    } as AnySSEEvent;
+    } as unknown) as AnySSEEvent;
 
     mockSSEManager.simulateEvent(event);
     setEventCount((prev) => prev + 1);

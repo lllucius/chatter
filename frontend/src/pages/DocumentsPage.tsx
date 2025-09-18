@@ -114,19 +114,20 @@ const DocumentsPage: React.FC = () => {
 
   // Custom file size renderer
   const createFileSizeRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: number): JSX.Element => (
-      <Typography variant="body2">{formatFileSize(value)}</Typography>
+    return (value: unknown): JSX.Element => (
+      <Typography variant="body2">{formatFileSize(value as number)}</Typography>
     );
   };
 
   // Custom chunk count renderer
   const createChunkCountRenderer =
     (): CrudColumn<DocumentResponse>['render'] => {
-      return (value: number | undefined) => {
-        if (!value) return '—';
+      return (value: unknown) => {
+        const numValue = value as number | undefined;
+        if (!numValue) return '—';
         return (
           <Typography variant="body2" color="info.main">
-            {value} chunks
+            {numValue} chunks
           </Typography>
         );
       };
@@ -134,17 +135,17 @@ const DocumentsPage: React.FC = () => {
 
   // Custom title renderer with filename fallback
   const createTitleRenderer = (): CrudColumn<DocumentResponse>['render'] => {
-    return (value: string | undefined, item: DocumentResponse): JSX.Element => (
-      <Box>
+    return (value: unknown, item: DocumentResponse): JSX.Element => (
+      <>
         <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-          {value || item.filename}
+          {(value as string | undefined) || item.filename}
         </Typography>
         {value && (
           <Typography variant="body2" color="text.secondary">
             {item.filename}
           </Typography>
         )}
-      </Box>
+      </>
     );
   };
 
@@ -346,7 +347,7 @@ const DocumentsPage: React.FC = () => {
         await getSDK().documents.searchDocumentsApiV1DocumentsSearch(
           searchRequest
         );
-      setSearchResults(response.results);
+      setSearchResults((response as any)?.results || []);
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleSearch',
@@ -393,11 +394,11 @@ const DocumentsPage: React.FC = () => {
         limit: pageSize,
         offset: page * pageSize,
       });
-      const documents = response.documents || [];
+      const documents = (response.documents || []) as DocumentResponse[];
 
       return {
         items: documents,
-        total: response.total_count || documents.length,
+        total: (response.total_count as number) || documents.length,
       };
     },
 

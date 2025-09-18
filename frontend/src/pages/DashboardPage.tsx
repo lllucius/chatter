@@ -588,8 +588,8 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Documents"
-                value={safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents)}
-                change={`${safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks)} chunks`}
+                value={safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents as number | undefined | null)}
+                change={`${safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks as number | undefined | null)} chunks`}
                 changeType="neutral"
                 icon={<Storage />}
                 color="success"
@@ -693,12 +693,12 @@ const DashboardPage: React.FC = () => {
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Average:{' '}
-                    {safeToFixed((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms, 2)}ms
+                    {safeToFixed((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null, 2)}ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) / 10,
+                      (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0) / 10,
                       100
                     )}
                     sx={{ mb: 1 }}
@@ -708,7 +708,7 @@ const DashboardPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     P95:{' '}
                     {safeToFixed(
-                      Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms) ?? 0,
+                      Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms as number | undefined | null) ?? 0,
                       1
                     )}
                     ms
@@ -716,7 +716,7 @@ const DashboardPage: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms) ?? 0) / 20,
+                      (Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms as number | undefined | null) ?? 0) / 20,
                       100
                     )}
                     color="warning"
@@ -743,7 +743,7 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Active Users</Typography>
                         <Typography variant="h6">
-                          {safeLocaleString((systemHealth as Record<string, unknown>)?.active_users_today)}
+                          {safeLocaleString((systemHealth as Record<string, unknown>)?.active_users_today as number | undefined | null)}
                         </Typography>
                       </Box>
                     </Box>
@@ -754,7 +754,7 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Storage</Typography>
                         <Typography variant="h6">
-                          {formatBytes((systemHealth as Record<string, unknown>)?.storage_usage_bytes)}
+                          {formatBytes((systemHealth as Record<string, unknown>)?.storage_usage_bytes as number | undefined | null)}
                         </Typography>
                       </Box>
                     </Box>
@@ -780,7 +780,7 @@ const DashboardPage: React.FC = () => {
                       dataKey="value"
                     >
                       {chartData.systemHealthData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color} />
+                        <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -807,7 +807,7 @@ const DashboardPage: React.FC = () => {
                         Total Documents
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents)}
+                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents as number | undefined | null)}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -815,7 +815,7 @@ const DashboardPage: React.FC = () => {
                         Total Chunks
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(documentAnalytics.total_chunks)}
+                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks as number | undefined | null)}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -823,7 +823,7 @@ const DashboardPage: React.FC = () => {
                         Storage Size
                       </Typography>
                       <Typography variant="h5">
-                        {formatBytes(documentAnalytics.total_size_bytes ?? 0)}
+                        {formatBytes((documentAnalytics as Record<string, unknown>)?.total_size_bytes as number | undefined | null ?? 0)}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -851,7 +851,7 @@ const DashboardPage: React.FC = () => {
                         Active Servers
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(toolServerData.active_servers ?? 0)}
+                        {safeLocaleString(toolServerData.active_servers as number | undefined | null ?? 0)}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -859,7 +859,7 @@ const DashboardPage: React.FC = () => {
                         Total Requests
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(toolServerData.total_requests ?? 0)}
+                        {safeLocaleString(toolServerData.total_requests as number | undefined | null ?? 0)}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -868,7 +868,7 @@ const DashboardPage: React.FC = () => {
                       </Typography>
                       <Typography variant="h5">
                         {safeToFixed(
-                          toolServerData.avg_response_time_ms ?? 0,
+                          toolServerData.avg_response_time_ms as number | undefined | null ?? 0,
                           1
                         )}
                         ms
@@ -912,9 +912,9 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0, 0)}ms`}
+              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0, 0)}ms`}
               color={
-                (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms) ?? 0) < 1000
+                (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0) < 1000
                   ? 'success'
                   : 'warning'
               }

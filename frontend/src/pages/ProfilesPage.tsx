@@ -27,10 +27,10 @@ const ProfilesPage: React.FC = () => {
       id: 'name',
       label: 'Name',
       width: '200px',
-      render: createNameWithDescriptionRenderer<ProfileResponse>(),
+      render: createNameWithDescriptionRenderer<any>(),
     },
     {
-      id: 'llmProvider',
+      id: 'llm_provider',
       label: 'Provider',
       width: '120px',
       render: createCategoryChipRenderer<ProfileResponse>(
@@ -39,7 +39,7 @@ const ProfilesPage: React.FC = () => {
       ),
     },
     {
-      id: 'llmModel',
+      id: 'llm_model',
       label: 'Model',
       width: '180px',
       render: createMonospaceTextRenderer<ProfileResponse>(),
@@ -54,12 +54,12 @@ const ProfilesPage: React.FC = () => {
       ),
     },
     {
-      id: 'maxTokens',
+      id: 'max_tokens',
       label: 'Max Tokens',
       width: '120px',
-      render: (value?: number): void =>
-        value ? (
-          <Typography variant="body2">{value.toLocaleString()}</Typography>
+      render: (value: unknown): React.ReactNode =>
+        (value as number) ? (
+          <Typography variant="body2">{(value as number).toLocaleString()}</Typography>
         ) : (
           <Typography variant="body2" color="text.secondary">
             Unlimited
@@ -67,10 +67,10 @@ const ProfilesPage: React.FC = () => {
         ),
     },
     {
-      id: 'createdAt',
+      id: 'created_at',
       label: 'Created',
       width: '140px',
-      render: (value: Date) => (value ? format(value, 'MMM dd, yyyy') : ''),
+      render: (value: unknown) => ((value as Date) ? format((value as Date), 'MMM dd, yyyy') : ''),
     },
   ];
 

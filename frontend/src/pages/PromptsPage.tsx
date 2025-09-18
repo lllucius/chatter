@@ -69,8 +69,8 @@ const PromptsPage: React.FC = () => {
       id: 'variables',
       label: 'Variables',
       width: '150px',
-      render: (variables: any[]) =>
-        variables?.length > 0 ? `${variables.length} variables` : 'None',
+      render: (variables: unknown) =>
+        (variables as any[])?.length > 0 ? `${(variables as any[]).length} variables` : 'None',
     },
     {
       id: 'updated_at',

@@ -19,6 +19,7 @@ from chatter.schemas.ab_testing import (
     ABTestResultsResponse,
     ABTestUpdateRequest,
     TestStatus,
+    TestType,
 )
 from chatter.services.ab_testing import (
     ABTestManager,
@@ -306,14 +307,18 @@ async def create_ab_test(
 
 @router.get("/", response_model=ABTestListResponse)
 async def list_ab_tests(
-    request: ABTestListRequest = Depends(),
+    status: TestStatus | None = Query(None, description="Filter by status"),
+    test_type: TestType | None = Query(None, description="Filter by test type"),
+    tags: list[str] | None = Query(None, description="Filter by tags"),
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
 ) -> ABTestListResponse:
     """List A/B tests with optional filtering.
 
     Args:
-        request: List request parameters
+        status: Filter by status
+        test_type: Filter by test type
+        tags: Filter by tags
         current_user: Current authenticated user
         ab_test_manager: A/B test manager instance
 
@@ -322,15 +327,15 @@ async def list_ab_tests(
     """
     try:
         tests = await ab_test_manager.list_tests(
-            status=request.status,
-            test_type=request.test_type,
+            status=status,
+            test_type=test_type,
         )
 
         # Filter by tags if specified
-        if request.tags:
+        if tags:
             filtered_tests = []
             for test in tests:
-                if any(tag in test.tags for tag in request.tags):
+                if any(tag in test.tags for tag in tags):
                     filtered_tests.append(test)
             tests = filtered_tests
 

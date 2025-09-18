@@ -2,7 +2,7 @@
 
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
@@ -12,6 +12,7 @@ from chatter.schemas.toolserver import (
     BulkToolServerOperation,
     RoleToolAccessCreate,
     RoleToolAccessResponse,
+    ServerStatus,
     ServerToolsRequest,
     ServerToolsResponse,
     ToolAccessResult,
@@ -111,14 +112,16 @@ async def create_tool_server(
 
 @router.get("/servers", response_model=list[ToolServerResponse])
 async def list_tool_servers(
-    request: ToolServerListRequest = Depends(),
+    status: ServerStatus | None = Query(None, description="Filter by server status"),
+    include_builtin: bool = Query(True, description="Include built-in servers"),
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service),
 ) -> list[ToolServerResponse]:
     """List tool servers with optional filtering.
 
     Args:
-        request: List request with filter parameters
+        status: Filter by server status
+        include_builtin: Include built-in servers
         current_user: Current authenticated user
         service: Tool server service
 
@@ -127,8 +130,8 @@ async def list_tool_servers(
     """
     try:
         return await service.list_servers(
-            status=request.status,
-            include_builtin=request.include_builtin,
+            status=status,
+            include_builtin=include_builtin,
         )
     except Exception as e:
         logger.error("Failed to list tool servers", error=str(e))
@@ -462,7 +465,8 @@ async def disable_tool_server(
 )
 async def get_server_tools(
     server_id: str,
-    request: ServerToolsRequest = Depends(),
+    limit: int = Query(50, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
     current_user: User = Depends(get_current_user),
     service: ToolServerService = Depends(get_tool_server_service),
 ) -> ServerToolsResponse:
@@ -470,7 +474,8 @@ async def get_server_tools(
 
     Args:
         server_id: Server ID
-        request: Server tools request with pagination
+        limit: Maximum number of results
+        offset: Number of results to skip
         current_user: Current authenticated user
         service: Tool server service
 
@@ -482,15 +487,15 @@ async def get_server_tools(
 
         # Apply pagination manually for now
         total_count = len(tools)
-        start_index = request.offset
-        end_index = start_index + request.limit
+        start_index = offset
+        end_index = start_index + limit
         paginated_tools = tools[start_index:end_index]
 
         return ServerToolsResponse(
             tools=paginated_tools,
             total_count=total_count,
-            limit=request.limit,
-            offset=request.offset,
+            limit=limit,
+            offset=offset,
         )
     except Exception as e:
         logger.error(

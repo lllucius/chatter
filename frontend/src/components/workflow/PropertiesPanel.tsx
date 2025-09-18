@@ -101,9 +101,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>
-                Temperature: {config.temperature || 0.7}
-              </Typography>
+              <Typography gutterBottom>Temperature: {config.temperature || 0.7}</Typography>
               <Slider
                 value={config.temperature || 0.7}
                 onChange={(_, value) =>
@@ -278,9 +276,7 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
               sx={{ mb: 2 }}
             />
             <Box sx={{ mb: 2 }}>
-              <Typography gutterBottom>
-                Similarity Threshold: {config.threshold || 0.7}
-              </Typography>
+              <Typography gutterBottom>Similarity Threshold: {config.threshold || 0.7}</Typography>
               <Slider
                 value={config.threshold || 0.7}
                 onChange={(_, value) =>

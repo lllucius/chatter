@@ -155,7 +155,7 @@ describe('ToastService', () => {
   describe('Toast Limit Management', () => {
     test('should track toast count', () => {
       // Simulate toast opening
-      const result = toastService.success('Test 1');
+      toastService.success('Test 1');
 
       // Get the onOpen callback and call it to simulate toast opening
       const callArgs = (toast as any).mock.calls[0];

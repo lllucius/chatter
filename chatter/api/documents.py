@@ -22,7 +22,6 @@ from chatter.schemas.document import (
     DocumentChunkResponse,
     DocumentChunksResponse,
     DocumentCreate,
-    DocumentDeleteRequest,
     DocumentDeleteResponse,
     DocumentListResponse,
     DocumentProcessingRequest,

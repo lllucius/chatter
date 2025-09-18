@@ -49,12 +49,12 @@ interface ABTestAnalyticsProps {
 }
 
 const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
-  testId,
-  testName,
+  testId: _testId,
+  testName: _testName,
   metrics,
   results,
   recommendations,
-  performance,
+  performance: _performance,
 }) => {
   // Generate sample data if real data isn't available
   const sampleMetrics = React.useMemo(() => {

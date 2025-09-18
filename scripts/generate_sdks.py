@@ -24,7 +24,9 @@ from scripts.utils.config import (  # noqa: E402
 # Import standalone generators
 sys.path.insert(0, str(project_root))
 from generate_ts_apis import main as generate_apis_main  # noqa: E402
-from generate_ts_models import main as generate_models_main  # noqa: E402
+from generate_ts_models import (  # noqa: E402
+    main as generate_models_main,
+)
 
 
 def generate_python_sdk(

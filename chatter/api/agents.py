@@ -19,11 +19,9 @@ from chatter.schemas.agents import (
     AgentBulkDeleteRequest,
     AgentCreateRequest,
     AgentDeleteResponse,
-    AgentGetRequest,
     AgentHealthResponse,
     AgentInteractRequest,
     AgentInteractResponse,
-    AgentListRequest,
     AgentListResponse,
     AgentResponse,
     AgentStatsResponse,
@@ -31,7 +29,6 @@ from chatter.schemas.agents import (
     AgentType,
     AgentUpdateRequest,
 )
-from chatter.schemas.common import PaginationRequest, SortingRequest
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem, NotFoundProblem
 from chatter.utils.unified_rate_limiter import (
@@ -245,13 +242,23 @@ async def create_agent(
     description="List all agents with optional filtering and pagination. Users can only see their own agents.",
 )
 async def list_agents(
-    agent_type: AgentType | None = Query(None, description="Filter by agent type"),
-    status: AgentStatus | None = Query(None, description="Filter by status"),
+    agent_type: AgentType | None = Query(
+        None, description="Filter by agent type"
+    ),
+    status: AgentStatus | None = Query(
+        None, description="Filter by status"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    limit: int = Query(50, ge=1, description="Maximum number of results"),
-    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    limit: int = Query(
+        50, ge=1, description="Maximum number of results"
+    ),
+    offset: int = Query(
+        0, ge=0, description="Number of results to skip"
+    ),
     sort_by: str = Query("created_at", description="Sort field"),
-    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
+    sort_order: str = Query(
+        "desc", pattern="^(asc|desc)$", description="Sort order"
+    ),
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentListResponse:
@@ -273,8 +280,12 @@ async def list_agents(
     """
     try:
         # Validate pagination parameters
-        validated_offset = max(0, offset) if isinstance(offset, int) else 0
-        validated_limit = limit if isinstance(limit, int) and limit >= 1 else 10
+        validated_offset = (
+            max(0, offset) if isinstance(offset, int) else 0
+        )
+        validated_limit = (
+            limit if isinstance(limit, int) and limit >= 1 else 10
+        )
 
         # Get agents with filtering
         agents, total = await agent_manager.list_agents(
@@ -310,9 +321,15 @@ async def list_agents(
                 continue
 
         # Calculate pagination info
-        current_page = (validated_offset // validated_limit) + 1 if validated_limit > 0 else 1
+        current_page = (
+            (validated_offset // validated_limit) + 1
+            if validated_limit > 0
+            else 1
+        )
         total_pages = (
-            (total + validated_limit - 1) // validated_limit if validated_limit > 0 else 1
+            (total + validated_limit - 1) // validated_limit
+            if validated_limit > 0
+            else 1
         )  # Ceiling division
 
         logger.info(

@@ -6,7 +6,6 @@ from fastapi import APIRouter, Depends, Request
 from fastapi.responses import StreamingResponse
 
 from chatter.api.auth import get_current_admin_user, get_current_user
-from chatter.config import settings
 from chatter.models.user import User
 from chatter.schemas.events import SSEStatsResponse, TestEventResponse
 from chatter.services.sse_events import EventType, sse_service

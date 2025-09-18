@@ -11,7 +11,6 @@ from chatter.schemas.profile import (
     AvailableProvidersResponse,
     ProfileCloneRequest,
     ProfileCreate,
-    ProfileDeleteRequest,
     ProfileDeleteResponse,
     ProfileListResponse,
     ProfileResponse,

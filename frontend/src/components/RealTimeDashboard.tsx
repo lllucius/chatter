@@ -50,7 +50,6 @@ const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
   const [dashboardData, setDashboardData] = useState<IntegratedDashboardStats | null>(null);
-  const [chartData, setChartData] = useState<ChartReadyAnalytics | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<
     'disconnected' | 'connecting' | 'connected'

@@ -2,7 +2,7 @@
 
 from datetime import UTC, datetime
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
@@ -122,15 +122,20 @@ async def create_backup(
 
 @router.get("/backups", response_model=BackupListResponse)
 async def list_backups(
-    request: BackupListRequest = Depends(),
+    backup_type: BackupType | None = Query(
+        None, description="Filter by backup type"
+    ),
+    status: str | None = Query(
+        None, description="Filter by status"
+    ),
     current_user: User = Depends(get_current_user),
     data_manager: DataManager = Depends(get_data_manager),
 ) -> BackupListResponse:
     """List available backups."""
     try:
         backups = await data_manager.list_backups(
-            backup_type=request.backup_type,
-            status=request.status,
+            backup_type=backup_type,
+            status=status,
         )
 
         backup_responses = []

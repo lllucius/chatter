@@ -402,7 +402,6 @@ async def get_agent_stats(
 @router.get("/{agent_id}", response_model=AgentResponse)
 async def get_agent(
     agent_id: str,
-    request: AgentGetRequest = Depends(),
     current_user: User = Depends(get_current_user),
     agent_manager: AgentManager = Depends(get_agent_manager),
 ) -> AgentResponse:

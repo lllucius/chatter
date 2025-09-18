@@ -288,7 +288,6 @@ async def update_profile(
 @router.delete("/{profile_id}", response_model=ProfileDeleteResponse)
 async def delete_profile(
     profile_id: str,
-    request: ProfileDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     profile_service: ProfileService = Depends(get_profile_service),
 ) -> ProfileDeleteResponse:

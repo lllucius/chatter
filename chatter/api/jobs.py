@@ -1,21 +1,22 @@
 """Job management endpoints."""
 
+from datetime import datetime
 from typing import Any
 
-from fastapi import APIRouter, Depends, status
+from fastapi import APIRouter, Depends, Query, status
 from ulid import ULID
 
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
-from chatter.schemas.jobs import JobPriority  # Add JobPriority import
-from chatter.schemas.jobs import JobStatus  # Add JobStatus import
 from chatter.schemas.jobs import (
     JobActionResponse,
     JobCreateRequest,
     JobListRequest,
     JobListResponse,
+    JobPriority,
     JobResponse,
     JobStatsResponse,
+    JobStatus,
 )
 from chatter.services.job_queue import job_queue
 from chatter.utils.logging import get_logger
@@ -135,13 +136,33 @@ async def create_job(
 
 @router.get("/", response_model=JobListResponse)
 async def list_jobs(
-    request: JobListRequest = Depends(),
+    status: JobStatus | None = Query(None, description="Filter by status"),
+    priority: JobPriority | None = Query(None, description="Filter by priority"),
+    function_name: str | None = Query(None, description="Filter by function name"),
+    created_after: datetime | None = Query(None, description="Filter jobs created after this date"),
+    created_before: datetime | None = Query(None, description="Filter jobs created before this date"),
+    tags: list[str] | None = Query(None, description="Filter by job tags (any of the provided tags)"),
+    search: str | None = Query(None, description="Search in job names and metadata"),
+    limit: int = Query(20, ge=1, description="Maximum number of results"),
+    offset: int = Query(0, ge=0, description="Number of results to skip"),
+    sort_by: str = Query("created_at", description="Field to sort by"),
+    sort_order: str = Query("desc", pattern="^(asc|desc)$", description="Sort order"),
     current_user: User = Depends(get_current_user),
 ) -> JobListResponse:
     """List jobs with optional filtering and pagination.
 
     Args:
-        request: List request parameters
+        status: Filter by status
+        priority: Filter by priority  
+        function_name: Filter by function name
+        created_after: Filter jobs created after this date
+        created_before: Filter jobs created before this date
+        tags: Filter by job tags (any of the provided tags)
+        search: Search in job names and metadata
+        limit: Maximum number of results
+        offset: Number of results to skip
+        sort_by: Field to sort by
+        sort_order: Sort order
         current_user: Current authenticated user
 
     Returns:
@@ -156,43 +177,43 @@ async def list_jobs(
         ]
 
         # Apply other filters
-        if request.status is not None:
-            jobs = [j for j in jobs if j.status == request.status]
+        if status is not None:
+            jobs = [j for j in jobs if j.status == status]
 
-        if request.priority is not None:
-            jobs = [j for j in jobs if j.priority == request.priority]
+        if priority is not None:
+            jobs = [j for j in jobs if j.priority == priority]
 
-        if request.function_name is not None:
+        if function_name is not None:
             jobs = [
                 j
                 for j in jobs
-                if j.function_name == request.function_name
+                if j.function_name == function_name
             ]
 
         # Apply date filters
-        if request.created_after is not None:
+        if created_after is not None:
             jobs = [
-                j for j in jobs if j.created_at >= request.created_after
+                j for j in jobs if j.created_at >= created_after
             ]
 
-        if request.created_before is not None:
+        if created_before is not None:
             jobs = [
                 j
                 for j in jobs
-                if j.created_at <= request.created_before
+                if j.created_at <= created_before
             ]
 
         # Apply tag filter (any of the provided tags)
-        if request.tags:
+        if tags:
             jobs = [
                 j
                 for j in jobs
-                if any(tag in j.tags for tag in request.tags)
+                if any(tag in j.tags for tag in tags)
             ]
 
         # Apply search filter (search in name and metadata)
-        if request.search:
-            search_lower = request.search.lower()
+        if search:
+            search_lower = search.lower()
             jobs = [
                 j
                 for j in jobs
@@ -209,12 +230,12 @@ async def list_jobs(
         total_jobs = len(jobs)
 
         # Apply sorting
-        reverse_sort = request.sort_order == "desc"
-        if request.sort_by == "created_at":
+        reverse_sort = sort_order == "desc"
+        if sort_by == "created_at":
             jobs.sort(key=lambda x: x.created_at, reverse=reverse_sort)
-        elif request.sort_by == "name":
+        elif sort_by == "name":
             jobs.sort(key=lambda x: x.name, reverse=reverse_sort)
-        elif request.sort_by == "priority":
+        elif sort_by == "priority":
             # Sort by priority order (critical > high > normal > low)
             priority_order = {
                 JobPriority.CRITICAL: 4,
@@ -226,14 +247,14 @@ async def list_jobs(
                 key=lambda x: priority_order.get(x.priority, 0),
                 reverse=reverse_sort,
             )
-        elif request.sort_by == "status":
+        elif sort_by == "status":
             jobs.sort(
                 key=lambda x: x.status.value, reverse=reverse_sort
             )
 
         # Apply pagination
-        start_idx = request.offset
-        end_idx = start_idx + request.limit
+        start_idx = offset
+        end_idx = start_idx + limit
         paginated_jobs = jobs[start_idx:end_idx]
         has_more = end_idx < total_jobs
 
@@ -263,8 +284,8 @@ async def list_jobs(
         return JobListResponse(
             jobs=job_responses,
             total=total_jobs,
-            limit=request.limit,
-            offset=request.offset,
+            limit=limit,
+            offset=offset,
             has_more=has_more,
         )
 

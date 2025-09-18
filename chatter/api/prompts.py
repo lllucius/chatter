@@ -287,7 +287,6 @@ async def update_prompt(
 @router.delete("/{prompt_id}", response_model=PromptDeleteResponse)
 async def delete_prompt(
     prompt_id: str,
-    request: PromptDeleteRequest = Depends(),
     current_user: User = Depends(get_current_user),
     prompt_service: PromptService = Depends(get_prompt_service),
 ) -> PromptDeleteResponse:

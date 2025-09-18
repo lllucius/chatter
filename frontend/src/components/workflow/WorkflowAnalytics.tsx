@@ -65,7 +65,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           );
 
         // Transform server response to client format
-        const serverAnalytics = response.data;
+        const serverAnalytics = response;
         const clientMetrics: WorkflowMetrics = {
           totalNodes: serverAnalytics.complexity.node_count,
           nodeTypeDistribution: calculateNodeTypeDistribution(workflow.nodes),

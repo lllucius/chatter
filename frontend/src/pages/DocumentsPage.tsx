@@ -427,7 +427,7 @@ const DocumentsPage: React.FC = () => {
       }
       const response =
         await getSDK().documents.uploadDocumentApiV1DocumentsUpload(formData);
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {

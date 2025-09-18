@@ -12,6 +12,7 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
+  FormHelperText,
   Box,
 } from '@mui/material';
 import { ProviderCreate, ProviderUpdate, ProviderType } from 'chatter-sdk';
@@ -29,7 +30,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
 }) => {
   const [formData, setFormData] = useState<ProviderCreate>({
     name: '',
-    provider_type: 'openai',
+    provider_type: ProviderType.openai,
     display_name: '',
     description: '',
     api_key_required: true,
@@ -64,7 +65,7 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
         // Reset to default values for create mode
         setFormData({
           name: '',
-          provider_type: 'openai',
+          provider_type: ProviderType.openai,
           display_name: '',
           description: '',
           api_key_required: true,
@@ -126,11 +127,6 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
               }
               disabled={mode === 'edit'}
               label="Provider Type"
-              helperText={
-                mode === 'edit'
-                  ? 'Provider type cannot be changed after creation'
-                  : ''
-              }
             >
               {providerOptions.map((opt) => (
                 <MenuItem key={opt.value} value={opt.value}>
@@ -138,6 +134,11 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
                 </MenuItem>
               ))}
             </Select>
+            {mode === 'edit' && (
+              <FormHelperText>
+                Provider type cannot be changed after creation
+              </FormHelperText>
+            )}
           </FormControl>
 
           <TextField

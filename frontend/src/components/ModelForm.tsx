@@ -12,6 +12,7 @@ import {
   MenuItem,
   Switch,
   FormControlLabel,
+  FormHelperText,
   Box,
 } from '@mui/material';
 import { ModelDefCreate, ModelDefUpdate, Provider, ModelType } from 'chatter-sdk';
@@ -135,7 +136,7 @@ const ModelForm: React.FC<ModelFormProps> = ({
               onChange={(e) => {
                 const modelType = e.target
                   .value as ModelDefCreate['model_type'];
-                setFormData((f): void => ({
+                setFormData((f) => ({
                   ...f,
                   model_type: modelType,
                   dimensions:
@@ -146,15 +147,15 @@ const ModelForm: React.FC<ModelFormProps> = ({
               }}
               disabled={mode === 'edit'}
               label="Model Type"
-              helperText={
-                mode === 'edit'
-                  ? 'Model type cannot be changed after creation'
-                  : ''
-              }
             >
               <MenuItem value="embedding">Embedding</MenuItem>
               <MenuItem value="llm">LLM</MenuItem>
             </Select>
+            {mode === 'edit' && (
+              <FormHelperText>
+                Model type cannot be changed after creation
+              </FormHelperText>
+            )}
           </FormControl>
 
           <TextField
@@ -237,8 +238,8 @@ const ModelForm: React.FC<ModelFormProps> = ({
           onClick={handleSubmit}
           disabled={
             !formData.name ||
-            !formData.displayName ||
-            !formData.modelName ||
+            !formData.display_name ||
+            !formData.model_name ||
             providers.length === 0 ||
             saving
           }

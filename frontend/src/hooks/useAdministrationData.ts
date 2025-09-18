@@ -1,4 +1,4 @@
-import { useState, useEffect, useCallback } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 import { getSDK } from '../services/auth-service';
 import { useSSE } from '../services/sse-context';
 import { useNotifications } from '../components/NotificationSystem';
@@ -91,6 +91,19 @@ export const useAdministrationData = () => {
     new Map()
   );
 
+  // Use refs to store the latest values without causing re-renders
+  const lastJobStatesRef = useRef(lastJobStates);
+  const showNotificationRef = useRef(showNotification);
+
+  // Update refs when values change
+  useEffect(() => {
+    lastJobStatesRef.current = lastJobStates;
+  }, [lastJobStates]);
+
+  useEffect(() => {
+    showNotificationRef.current = showNotification;
+  }, [showNotification]);
+
   // Data loading functions
   const loadBackups = useCallback(async () => {
     try {
@@ -126,9 +139,9 @@ export const useAdministrationData = () => {
       });
       const newJobs = response.jobs || [];
       newJobs.forEach((job) => {
-        const previousState = lastJobStates.get(job.id);
+        const previousState = lastJobStatesRef.current.get(job.id);
         if (previousState && previousState !== job.status) {
-          showNotification({
+          showNotificationRef.current({
             title: 'Job Status Update',
             message: `Job "${job.name || job.id.substring(0, 8)}" changed from ${previousState} to ${job.status}`,
             type:
@@ -143,7 +156,7 @@ export const useAdministrationData = () => {
       });
 
       // Update last known states
-      const newStates = new Map(lastJobStates);
+      const newStates = new Map(lastJobStatesRef.current);
       newJobs.forEach((job) => {
         newStates.set(job.id, job.status);
       });
@@ -157,7 +170,7 @@ export const useAdministrationData = () => {
     } finally {
       setDataLoading(false);
     }
-  }, [lastJobStates, showNotification]);
+  }, []); // Remove dependencies to prevent loop
 
   const loadJobStats = useCallback(async () => {
     try {
@@ -178,7 +191,7 @@ export const useAdministrationData = () => {
     const unsubscribeJobStarted = on('job.started', (event) => {
       const jobEvent = event as JobStartedEvent;
       const jobData = jobEvent.data as JobSSEEventData;
-      showNotification({
+      showNotificationRef.current({
         title: 'Job Started',
         message: `Job "${jobData.job_name || jobData.job_id}" has started`,
         type: 'info',
@@ -191,7 +204,7 @@ export const useAdministrationData = () => {
     const unsubscribeJobCompleted = on('job.completed', (event) => {
       const jobEvent = event as JobCompletedEvent;
       const jobData = jobEvent.data as JobSSEEventData;
-      showNotification({
+      showNotificationRef.current({
         title: 'Job Completed',
         message: `Job "${jobData.job_name || jobData.job_id}" completed successfully`,
         type: 'success',
@@ -204,7 +217,7 @@ export const useAdministrationData = () => {
     const unsubscribeJobFailed = on('job.failed', (event) => {
       const jobEvent = event as JobFailedEvent;
       const jobData = jobEvent.data as JobSSEEventData;
-      showNotification({
+      showNotificationRef.current({
         title: 'Job Failed',
         message: `Job "${jobData.job_name || jobData.job_id}" failed: ${jobData.error}`,
         type: 'error',
@@ -217,7 +230,7 @@ export const useAdministrationData = () => {
     const unsubscribeBackupStarted = on('backup.started', (event) => {
       const backupEvent = event as BackupStartedEvent;
       const backupData = backupEvent.data as BackupSSEEventData;
-      showNotification({
+      showNotificationRef.current({
         title: 'Backup Started',
         message: `Backup "${backupData.backup_id}" has started`,
         type: 'info',
@@ -231,7 +244,7 @@ export const useAdministrationData = () => {
       (event) => {
         const backupEvent = event as BackupCompletedEvent;
         const backupData = backupEvent.data as BackupSSEEventData;
-        showNotification({
+        showNotificationRef.current({
           title: 'Backup Completed',
           message: `Backup "${backupData.backup_id}" completed successfully`,
           type: 'success',
@@ -244,7 +257,7 @@ export const useAdministrationData = () => {
     const unsubscribeBackupFailed = on('backup.failed', (event) => {
       const backupEvent = event as BackupFailedEvent;
       const backupData = backupEvent.data as BackupSSEEventData;
-      showNotification({
+      showNotificationRef.current({
         title: 'Backup Failed',
         message: `Backup "${backupData.backup_id}" failed: ${backupData.error}`,
         type: 'error',
@@ -261,15 +274,15 @@ export const useAdministrationData = () => {
       unsubscribeBackupCompleted();
       unsubscribeBackupFailed();
     };
-  }, [isConnected, on, showNotification, loadJobs, loadJobStats, loadBackups]);
+  }, [isConnected, on, loadJobs, loadJobStats, loadBackups]);
 
-  // Load initial data
+  // Load initial data only once
   useEffect(() => {
     loadBackups();
     loadPlugins();
     loadJobs();
     loadJobStats();
-  }, [loadBackups, loadPlugins, loadJobs, loadJobStats]);
+  }, []); // Empty dependency array - load only once on mount
 
   return {
     // Data

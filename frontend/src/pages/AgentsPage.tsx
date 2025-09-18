@@ -126,12 +126,12 @@ const AgentsPage: React.FC = () => {
       render: createNameWithDescriptionRenderer<AgentResponse>(),
     },
     {
-      id: 'model',
+      id: 'primary_llm',
       label: 'Model',
       width: '150px',
     },
     {
-      id: 'is_active',
+      id: 'status',
       label: 'Active',
       width: '100px',
       render: createBooleanSwitchRenderer<AgentResponse>(),
@@ -173,10 +173,8 @@ const AgentsPage: React.FC = () => {
   > = {
     list: async (page: number, pageSize: number) => {
       const response = await getSDK().agents.listAgentsApiV1Agents({
-        pagination: {
-          limit: pageSize,
-          offset: page * pageSize,
-        },
+        limit: pageSize,
+        offset: page * pageSize,
       });
       return {
         items: response.agents || [],
@@ -211,7 +209,7 @@ const AgentsPage: React.FC = () => {
         onRefresh={() => crudTableRef.current?.handleRefresh()}
         onAdd={() => crudTableRef.current?.handleCreate()}
       />
-      <CrudDataTable
+      <CrudDataTable<AgentResponse, AgentCreateRequest, AgentUpdateRequest>
         ref={crudTableRef}
         config={config}
         service={service}

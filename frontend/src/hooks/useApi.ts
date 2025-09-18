@@ -46,14 +46,14 @@ export function useApi<T>(
       setData(result);
       onSuccessRef.current?.(result);
     } catch (err: unknown) {
-      const errorMessage =
-        err instanceof Error ? err.message : 'An error occurred';
+      const errorInstance = err instanceof Error ? err : new Error(String(err));
+      const errorMessage = errorInstance.message;
       setError(errorMessage);
-      onErrorRef.current?.(err);
+      onErrorRef.current?.(errorInstance);
 
       // Use standardized error handling
       handleError(
-        err,
+        errorInstance,
         {
           source: 'useApi.execute',
           operation: 'API call execution',

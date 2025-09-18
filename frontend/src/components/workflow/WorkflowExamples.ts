@@ -1,4 +1,5 @@
-import { WorkflowDefinition } from '../WorkflowEditor';
+import { WorkflowDefinition } from './WorkflowEditor';
+import type { Node, Edge } from '@xyflow/react';
 
 // Example workflows that demonstrate different patterns
 export const exampleWorkflows: Record<string, WorkflowDefinition> = {
@@ -303,7 +304,7 @@ export class WorkflowValidator {
     const errors: string[] = [];
 
     // Check for entry point
-    const hasStartNode = workflow.nodes.some((node) => node.type === 'start');
+    const hasStartNode = workflow.nodes.some((node: Node) => node.type === 'start');
     if (!hasStartNode) {
       errors.push('Workflow must have at least one start node');
     }
@@ -311,18 +312,18 @@ export class WorkflowValidator {
     // Check for isolated nodes
     const connectedNodes = new Set<string>();
 
-    workflow.edges.forEach((edge) => {
+    workflow.edges.forEach((edge: Edge) => {
       connectedNodes.add(edge.source);
       connectedNodes.add(edge.target);
     });
 
     const isolatedNodes = workflow.nodes.filter(
-      (node) => node.type !== 'start' && !connectedNodes.has(node.id)
+      (node: Node) => node.type !== 'start' && !connectedNodes.has(node.id)
     );
 
     if (isolatedNodes.length > 0) {
       errors.push(
-        `Isolated nodes found: ${isolatedNodes.map((n) => n.data.label).join(', ')}`
+        `Isolated nodes found: ${isolatedNodes.map((n: Node) => n.data.label).join(', ')}`
       );
     }
 
@@ -333,10 +334,11 @@ export class WorkflowValidator {
 
     // Validate conditional nodes have proper configuration
     const conditionalNodes = workflow.nodes.filter(
-      (node) => node.type === 'conditional'
+      (node: Node) => node.type === 'conditional'
     );
-    conditionalNodes.forEach((node) => {
-      if (!node.data.config?.condition) {
+    conditionalNodes.forEach((node: Node) => {
+      const config = node.data.config as Record<string, unknown> | undefined;
+      if (!config?.condition) {
         errors.push(`Conditional node "${node.data.label}" needs a condition`);
       }
     });
@@ -352,11 +354,11 @@ export class WorkflowValidator {
     const graph = new Map<string, string[]>();
 
     // Build adjacency list
-    workflow.nodes.forEach((node) => {
+    workflow.nodes.forEach((node: Node) => {
       graph.set(node.id, []);
     });
 
-    workflow.edges.forEach((edge) => {
+    workflow.edges.forEach((edge: Edge) => {
       const sources = graph.get(edge.source) || [];
       sources.push(edge.target);
       graph.set(edge.source, sources);

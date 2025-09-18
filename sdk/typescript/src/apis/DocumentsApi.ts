@@ -1,7 +1,7 @@
 /**
  * Generated API client for Documents
  */
-import { DocumentListRequest, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
+import { DocumentResponse, DocumentSearchRequest, DocumentStatsResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
@@ -78,7 +78,7 @@ the embedding processing pipeline asynchronously.
   /**List Documents Post
    * List documents with filtering and pagination (POST endpoint for advanced filtering).
    */
-  public async listDocumentsPostApiV1DocumentsList(data: DocumentListRequest): Promise<Record<string, unknown>> {
+  public async listDocumentsPostApiV1DocumentsList(data: any): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/documents/list`,
       method: 'POST' as HTTPMethod,
@@ -94,7 +94,7 @@ the embedding processing pipeline asynchronously.
   /**Search Documents
    * Search documents using semantic similarity.
    */
-  public async searchDocumentsApiV1DocumentsSearch(data: DocumentSearchRequest): Promise<SearchResultResponse[]> {
+  public async searchDocumentsApiV1DocumentsSearch(data: DocumentSearchRequest): Promise<any[]> {
     const requestContext: RequestOpts = {
       path: `/api/v1/documents/search`,
       method: 'POST' as HTTPMethod,
@@ -105,7 +105,7 @@ the embedding processing pipeline asynchronously.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<SearchResultResponse[]>;
+    return response.json() as Promise<any[]>;
   }
   /**Reprocess Document
    * Reprocess a document through the embedding pipeline.

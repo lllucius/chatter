@@ -3,7 +3,7 @@
  * This test verifies that the SDK initialization error is properly handled
  */
 
-import { vi, describe, beforeEach, afterEach, it, expect } from 'vitest';
+import { describe, beforeEach, afterEach, it, expect } from 'vitest';
 import { authService, getSDK, isSDKInitialized } from '../auth-service';
 
 // Mock ChatterSDK

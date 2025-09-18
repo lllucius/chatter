@@ -2,7 +2,7 @@
  * Tests for Toast Service
  */
 
-import { vi, describe, beforeEach, expect, test } from 'vitest';
+import { describe, beforeEach, expect, test } from 'vitest';
 import { toast } from 'react-toastify';
 import { toastService } from '../toast-service';
 

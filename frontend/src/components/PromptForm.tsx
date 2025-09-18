@@ -14,7 +14,7 @@ import {
   Chip,
   Typography,
 } from '@mui/material';
-import { PromptCreate, PromptUpdate, PromptType } from 'chatter-sdk';
+import { PromptCreate, PromptUpdate, PromptType, PromptCategory } from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface PromptFormProps extends CrudFormProps<PromptCreate, PromptUpdate> {}
@@ -30,7 +30,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
     name: '',
     description: '',
     content: '',
-    category: 'general',
+    category: PromptCategory.general,
     prompt_type: PromptType.template,
     variables: [] as string[],
   });
@@ -38,14 +38,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
   const [variableInput, setVariableInput] = useState('');
   const [saving, setSaving] = useState(false);
 
-  const categories = [
-    'general',
-    'chat',
-    'analysis',
-    'creative',
-    'technical',
-    'business',
-  ];
+  const categories = Object.values(PromptCategory);
   const promptTypes = Object.values(PromptType);
 
   useEffect(() => {
@@ -55,7 +48,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           name: initialData.name || '',
           description: initialData.description || '',
           content: initialData.content || '',
-          category: initialData.category || 'general',
+          category: initialData.category || PromptCategory.general,
           prompt_type: (initialData as any)?.prompt_type || PromptType.template,
           variables: initialData.variables || [],
         });
@@ -64,7 +57,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           name: '',
           description: '',
           content: '',
-          category: 'general',
+          category: PromptCategory.general,
           prompt_type: PromptType.template,
           variables: [],
         });

@@ -221,18 +221,18 @@ const DashboardPage: React.FC = () => {
     { immediate: true }
   );
 
-  const data = dashboardApi.data?.data;
-  const performanceData = performanceApi.data?.data;
-  const systemData = systemApi.data?.data;
-  const usageData = usageApi.data?.data;
-  const documentData = documentApi.data?.data;
-  const toolServerData = toolServerApi.data?.data;
+  const data = dashboardApi.data;
+  const performanceData = performanceApi.data;
+  const systemData = systemApi.data;
+  const usageData = usageApi.data;
+  const documentData = documentApi.data;
+  const toolServerData = toolServerApi.data;
 
   // Use chart-ready data from backend instead of client-side calculations
   const chartData = useMemo(() => {
     // If we have chart-ready data from the backend, use it directly
-    if (chartDataApi.data?.data) {
-      const backendChartData = chartDataApi.data.data;
+    if (chartDataApi.data) {
+      const backendChartData = chartDataApi.data;
       return {
         conversationChartData: backendChartData.conversation_chart_data || [],
         tokenUsageData: backendChartData.token_usage_data || [],

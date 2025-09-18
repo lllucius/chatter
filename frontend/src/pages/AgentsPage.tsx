@@ -89,7 +89,7 @@ const AgentsPage: React.FC = () => {
           request
         );
 
-      setTestResponse(response.data);
+      setTestResponse(response);
     } catch (error: unknown) {
       const errorMessage =
         error instanceof Error ? error.message : 'Failed to test agent';
@@ -186,7 +186,7 @@ const AgentsPage: React.FC = () => {
 
     create: async (data: AgentCreateRequest) => {
       const response = await getSDK().agents.createAgentApiV1Agents(data);
-      return response.data;
+      return response;
     },
 
     update: async (id: string, data: AgentUpdateRequest) => {
@@ -194,7 +194,7 @@ const AgentsPage: React.FC = () => {
         id,
         data
       );
-      return response.data;
+      return response;
     },
 
     delete: async (id: string) => {

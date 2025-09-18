@@ -146,6 +146,7 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     <FormDialog
       open={open}
       mode={mode}
+      title={mode === 'create' ? 'Create Profile' : 'Edit Profile'}
       entityName="Profile"
       onClose={handleClose(onClose)}
       onSubmit={handleFormSubmit}

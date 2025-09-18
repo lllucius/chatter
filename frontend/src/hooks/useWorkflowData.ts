@@ -1,31 +1,16 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
+import { 
+  WorkflowTemplateResponse, 
+  AvailableToolsResponse, 
+  WorkflowExecutionResponse,
+  WorkflowExecutionRequest 
+} from 'chatter-sdk';
 
-interface WorkflowTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: string;
-  workflow: any;
-  created_at: string;
-  updated_at: string;
-}
-
-interface AvailableToolsResponse {
-  tools: any[];
-}
-
-interface WorkflowExecution {
-  id: string;
-  workflow_name: string;
-  status: string;
-  started_at: string;
-  completed_at?: string;
-  input: any;
-  output?: any;
-  error?: string;
-}
+// Use the SDK types directly
+type WorkflowTemplate = WorkflowTemplateResponse;
+type WorkflowExecution = WorkflowExecutionResponse;
 
 export const useWorkflowData = () => {
   const [loading, setLoading] = useState(false);
@@ -57,7 +42,7 @@ export const useWorkflowData = () => {
       // const response = await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
       // setAvailableTools(response);
       console.warn('Available tools API not implemented');
-      setAvailableTools([]);
+      setAvailableTools(null);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadAvailableTools',
@@ -105,10 +90,14 @@ export const useWorkflowData = () => {
     async (workflowId: string, input: any) => {
       try {
         setLoading(true);
+        const requestData: WorkflowExecutionRequest = {
+          definition_id: workflowId,
+          input_data: input
+        };
         const execution =
           await getSDK().workflows.executeWorkflowApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecute(
             workflowId,
-            { input: input }
+            requestData
           );
         setExecutions((prev) => [execution, ...prev]);
         return execution;

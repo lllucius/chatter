@@ -28,7 +28,7 @@ import {
   BulkDeleteIcon,
 } from '../utils/icons';
 import { getSDK } from '../services/auth-service';
-import { BackupResponse } from 'chatter-sdk';
+import { BackupResponse, BackupType, JobPriority } from 'chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import PageLayout from '../components/PageLayout';
@@ -176,10 +176,10 @@ const AdministrationPage: React.FC = () => {
           await getSDK().dataManagement.createBackupApiV1DataBackup({
             name: formData.backupName,
             description: formData.description,
-            backup_type: 'full' as const,
-            include_user_data: formData.includeUserData,
-            include_documents: formData.includeDocuments,
-            include_configurations: formData.includeConfigurations,
+            backup_type: BackupType.full,
+            include_files: formData.includeUserData,
+            include_logs: formData.includeDocuments,
+            compress: formData.includeConfigurations,
           });
           toastService.success('Backup created successfully!');
           loadBackups();
@@ -190,7 +190,7 @@ const AdministrationPage: React.FC = () => {
             function: formData.jobFunction,
             args: formData.jobArgs ? JSON.parse(formData.jobArgs) : [],
             kwargs: formData.jobKwargs ? JSON.parse(formData.jobKwargs) : {},
-            priority: formData.jobPriority,
+            priority: formData.jobPriority as JobPriority,
             schedule_at: formData.scheduleAt || null,
             max_retries: formData.maxRetries,
           });
@@ -546,9 +546,9 @@ const AdministrationPage: React.FC = () => {
                     handleFormChange('jobPriority', e.target.value)
                   }
                 >
-                  <MenuItem value="low">Low</MenuItem>
-                  <MenuItem value="normal">Normal</MenuItem>
-                  <MenuItem value="high">High</MenuItem>
+                  <MenuItem value={JobPriority.low}>Low</MenuItem>
+                  <MenuItem value={JobPriority.normal}>Normal</MenuItem>
+                  <MenuItem value={JobPriority.high}>High</MenuItem>
                 </Select>
               </FormControl>
             </Box>

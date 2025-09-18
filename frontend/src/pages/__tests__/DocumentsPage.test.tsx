@@ -7,8 +7,8 @@ import DocumentsPage from '../DocumentsPage';
 import { getSDK, authService } from '../../services/auth-service';
 
 // Mock dependencies
-vi.mock('../../services/auth-service', (): void => ({
-  getSDK: vi.fn((): void => ({
+vi.mock('../../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     documents: {
       listDocumentsApiV1Documents: vi.fn(),
       uploadDocumentApiV1DocumentsUpload: vi.fn(),
@@ -25,8 +25,8 @@ vi.mock('../../services/auth-service', (): void => ({
 }));
 
 // Mock SSE context
-vi.mock('../../services/sse-context', (): void => ({
-  useSSE: (): void => ({
+vi.mock('../../services/sse-context', () => ({
+  useSSE: () => ({
     on: vi.fn(() => vi.fn()),
     off: vi.fn(),
     isConnected: false,
@@ -37,7 +37,7 @@ vi.mock('../../services/sse-context', (): void => ({
 }));
 
 // Mock App context
-vi.mock('../../App', (): void => ({
+vi.mock('../../App', () => ({
   ThemeContext: React.createContext({
     darkMode: false,
     toggleDarkMode: vi.fn(),

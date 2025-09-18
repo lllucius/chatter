@@ -36,7 +36,7 @@ export function useForm<T extends Record<string, unknown>>(
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const handleChange = useCallback(
-    (name: keyof T): void =>
+    (name: keyof T) =>
       (event: ChangeEvent<HTMLInputElement | HTMLTextAreaElement>) => {
         const { value, type, checked } = event.target as HTMLInputElement;
         const newValue = type === 'checkbox' ? checked : value;

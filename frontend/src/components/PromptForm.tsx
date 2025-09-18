@@ -150,7 +150,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               }
               label="Category"
             >
-              {categories.map((category): void => (
+              {categories.map((category) => (
                 <MenuItem key={category} value={category}>
                   {category.charAt(0).toUpperCase() + category.slice(1)}
                 </MenuItem>
@@ -170,7 +170,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               }
               label="Type"
             >
-              {promptTypes.map((type): void => (
+              {promptTypes.map((type) => (
                 <MenuItem key={type} value={type}>
                   {type
                     .replace('_', ' ')
@@ -198,7 +198,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
               Variables
             </Typography>
             <Box sx={{ display: 'flex', gap: 1, mb: 2, flexWrap: 'wrap' }}>
-              {formData.variables.map((variable): void => (
+              {formData.variables.map((variable) => (
                 <Chip
                   key={variable}
                   label={variable}

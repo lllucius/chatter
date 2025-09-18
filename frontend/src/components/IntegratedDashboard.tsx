@@ -67,9 +67,9 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       try {
         // Try the new endpoint, fall back if not available
         if (
-          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated
+          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated
         ) {
-          return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsIntegrated();
+          return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated();
         }
         return null;
       } catch {
@@ -85,8 +85,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData) {
-          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsChartData();
+        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData) {
+          return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
       } catch {
@@ -190,7 +190,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     }
 
     // Fallback to generating data
-    return Array.from({ length: 24 }, (_, i): void => ({
+    return Array.from({ length: 24 }, (_, i): JSX.Element => ({
       hour: `${i}:00`,
       workflows: 5 + Math.floor(Math.random() * 15),
       agents: 20 + Math.floor(Math.random() * 30),
@@ -395,7 +395,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={0} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }} lg={8}>
+              <Grid size={{ xs: 12, lg: 8 }}>
                 <Typography variant="h6" gutterBottom>
                   7-Day Activity Trend
                 </Typography>
@@ -434,7 +434,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
 
-              <Grid size={{ xs: 12 }} lg={4}>
+              <Grid size={{ xs: 12, lg: 4 }}>
                 <Typography variant="h6" gutterBottom>
                   Recent Activity
                 </Typography>
@@ -489,7 +489,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
           <TabPanel value={selectedTab} index={1} idPrefix="dashboard">
             <Grid container spacing={3}>
-              <Grid size={{ xs: 12 }} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="h6" gutterBottom>
                   Feature Integration Usage
                 </Typography>
@@ -507,7 +507,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry, index): void => (
+                      {integrationData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>
@@ -516,7 +516,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 </ResponsiveContainer>
               </Grid>
 
-              <Grid size={{ xs: 12 }} md={6}>
+              <Grid size={{ xs: 12, md: 6 }}>
                 <Typography variant="h6" gutterBottom>
                   Integration Benefits
                 </Typography>

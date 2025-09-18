@@ -429,7 +429,7 @@ const UserSettingsPage: React.FC = () => {
                         </TableCell>
                       </TableRow>
                     ) : (
-                      apiKeys.map((key): void => (
+                      apiKeys.map((key) => (
                         <TableRow key={key.id}>
                           <TableCell>{key.name}</TableCell>
                           <TableCell>

@@ -174,7 +174,7 @@ export const CrudDataTable = forwardRef<
   };
 
   // Expose methods to parent component via ref
-  useImperativeHandle(ref, (): void => ({
+  useImperativeHandle(ref, () => ({
     handleCreate,
     handleRefresh: loadData,
   }));
@@ -203,7 +203,7 @@ export const CrudDataTable = forwardRef<
           operation: `delete ${config.entityName.toLowerCase()}`,
           additionalData: {
             entityType: config.entityName,
-            itemId: item?.id,
+            itemId: item ? getItemId(item) : undefined,
           },
         });
       }
@@ -228,7 +228,7 @@ export const CrudDataTable = forwardRef<
         additionalData: {
           entityType: config.entityName,
           dialogMode,
-          itemId: selectedItem?.id,
+          itemId: selectedItem ? getItemId(selectedItem) : undefined,
         },
       });
     }
@@ -275,7 +275,7 @@ export const CrudDataTable = forwardRef<
           <Table>
             <TableHead>
               <TableRow>
-                {config.columns.map((column): void => (
+                {config.columns.map((column) => (
                   <TableCell key={String(column.id)} width={column.width}>
                     {column.label}
                   </TableCell>
@@ -309,17 +309,17 @@ export const CrudDataTable = forwardRef<
                   </TableCell>
                 </TableRow>
               ) : (
-                items.map((item): void => (
+                items.map((item) => (
                   <TableRow key={getItemId(item)} hover>
-                    {config.columns.map((column): void => (
+                    {config.columns.map((column) => (
                       <TableCell key={String(column.id)}>
                         {column.render
                           ? column.render(
-                              (item as Record<string, unknown>)[column.id],
+                              (item as Record<string, unknown>)[String(column.id)],
                               item
                             )
                           : String(
-                              (item as Record<string, unknown>)[column.id] || ''
+                              (item as Record<string, unknown>)[String(column.id)] || ''
                             )}
                       </TableCell>
                     ))}
@@ -395,7 +395,7 @@ export const CrudDataTable = forwardRef<
         {(config.enableEdit || config.enableDelete) &&
           config.actions &&
           config.actions.length > 0 && <Divider />}
-        {config.actions?.map((action, index): void => (
+        {config.actions?.map((action, index) => (
           <MenuItem key={index} onClick={() => handleActionClick(action)}>
             <ListItemIcon>{action.icon}</ListItemIcon>
             {action.label}

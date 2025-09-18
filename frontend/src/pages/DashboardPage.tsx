@@ -779,7 +779,7 @@ const DashboardPage: React.FC = () => {
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {chartData.systemHealthData.map((entry, index): void => (
+                      {chartData.systemHealthData.map((entry, index) => (
                         <Cell key={`cell-${index}`} fill={entry.color} />
                       ))}
                     </Pie>

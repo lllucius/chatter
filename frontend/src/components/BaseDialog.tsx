@@ -131,6 +131,7 @@ export const FormDialog: React.FC<FormDialogProps> = ({
   entityName = 'Item',
   title,
   submitText,
+  onSubmit,
   ...props
 }) => {
   const defaultTitle =
@@ -139,9 +140,10 @@ export const FormDialog: React.FC<FormDialogProps> = ({
 
   return (
     <BaseDialog
-      {...props}
       title={title || defaultTitle}
       submitText={submitText || defaultSubmitText}
+      onSubmit={onSubmit as () => void | Promise<void>}
+      {...props}
     />
   );
 };

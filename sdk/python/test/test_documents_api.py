@@ -34,10 +34,10 @@ class TestDocumentsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_download_document_api_v1_documents_document_id_download_get(self) -> None:
-        """Test case for download_document_api_v1_documents_document_id_download_get
+    async def test_delete_document_api_v1_documents_document_id_delete_0(self) -> None:
+        """Test case for delete_document_api_v1_documents_document_id_delete_0
 
-        Download Document
+        Delete Document
         """
         pass
 
@@ -48,36 +48,64 @@ class TestDocumentsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_get_document_chunks_api_v1_documents_document_id_chunks_get(self) -> None:
-        """Test case for get_document_chunks_api_v1_documents_document_id_chunks_get
+    async def test_get_document_api_v1_documents_document_id_get_0(self) -> None:
+        """Test case for get_document_api_v1_documents_document_id_get_0
 
-        Get Document Chunks
+        Get Document
         """
         pass
 
-    async def test_get_document_stats_api_v1_documents_stats_overview_get(self) -> None:
-        """Test case for get_document_stats_api_v1_documents_stats_overview_get
+    async def test_get_user_document_stats_api_v1_documents_stats_user_get(self) -> None:
+        """Test case for get_user_document_stats_api_v1_documents_stats_user_get
 
-        Get Document Stats
+        Get User Document Stats
         """
         pass
 
-    async def test_list_documents_api_v1_documents_get(self) -> None:
-        """Test case for list_documents_api_v1_documents_get
+    async def test_get_user_document_stats_api_v1_documents_stats_user_get_0(self) -> None:
+        """Test case for get_user_document_stats_api_v1_documents_stats_user_get_0
 
-        List Documents
+        Get User Document Stats
         """
         pass
 
-    async def test_process_document_api_v1_documents_document_id_process_post(self) -> None:
-        """Test case for process_document_api_v1_documents_document_id_process_post
+    async def test_list_documents_get_api_v1_documents_get(self) -> None:
+        """Test case for list_documents_get_api_v1_documents_get
 
-        Process Document
+        List Documents Get
+        """
+        pass
+
+    async def test_list_documents_get_api_v1_documents_get_0(self) -> None:
+        """Test case for list_documents_get_api_v1_documents_get_0
+
+        List Documents Get
+        """
+        pass
+
+    async def test_list_documents_post_api_v1_documents_list_post(self) -> None:
+        """Test case for list_documents_post_api_v1_documents_list_post
+
+        List Documents Post
+        """
+        pass
+
+    async def test_list_documents_post_api_v1_documents_list_post_0(self) -> None:
+        """Test case for list_documents_post_api_v1_documents_list_post_0
+
+        List Documents Post
         """
         pass
 
     async def test_reprocess_document_api_v1_documents_document_id_reprocess_post(self) -> None:
         """Test case for reprocess_document_api_v1_documents_document_id_reprocess_post
+
+        Reprocess Document
+        """
+        pass
+
+    async def test_reprocess_document_api_v1_documents_document_id_reprocess_post_0(self) -> None:
+        """Test case for reprocess_document_api_v1_documents_document_id_reprocess_post_0
 
         Reprocess Document
         """
@@ -90,15 +118,22 @@ class TestDocumentsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_update_document_api_v1_documents_document_id_put(self) -> None:
-        """Test case for update_document_api_v1_documents_document_id_put
+    async def test_search_documents_api_v1_documents_search_post_0(self) -> None:
+        """Test case for search_documents_api_v1_documents_search_post_0
 
-        Update Document
+        Search Documents
         """
         pass
 
     async def test_upload_document_api_v1_documents_upload_post(self) -> None:
         """Test case for upload_document_api_v1_documents_upload_post
+
+        Upload Document
+        """
+        pass
+
+    async def test_upload_document_api_v1_documents_upload_post_0(self) -> None:
+        """Test case for upload_document_api_v1_documents_upload_post_0
 
         Upload Document
         """

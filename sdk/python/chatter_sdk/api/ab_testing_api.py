@@ -2729,9 +2729,9 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get(
         self,
-        status: Optional[TestStatus] = None,
-        test_type: Optional[TestType] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[TestStatus], Field(description="Filter by status")] = None,
+        test_type: Annotated[Optional[TestType], Field(description="Filter by test type")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2747,14 +2747,14 @@ class ABTestingApi:
     ) -> ABTestListResponse:
         """List Ab Tests
 
-        List A/B tests with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
+        List A/B tests with optional filtering.  Args:     status: Filter by status     test_type: Filter by test type     tags: Filter by tags     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
 
-        :param status:
+        :param status: Filter by status
         :type status: TestStatus
-        :param test_type:
+        :param test_type: Filter by test type
         :type test_type: TestType
-        :param request_body:
-        :type request_body: List[str]
+        :param tags: Filter by tags
+        :type tags: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2780,7 +2780,7 @@ class ABTestingApi:
         _param = self._list_ab_tests_api_v1_ab_tests_get_serialize(
             status=status,
             test_type=test_type,
-            request_body=request_body,
+            tags=tags,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2805,9 +2805,9 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get_with_http_info(
         self,
-        status: Optional[TestStatus] = None,
-        test_type: Optional[TestType] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[TestStatus], Field(description="Filter by status")] = None,
+        test_type: Annotated[Optional[TestType], Field(description="Filter by test type")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2823,14 +2823,14 @@ class ABTestingApi:
     ) -> ApiResponse[ABTestListResponse]:
         """List Ab Tests
 
-        List A/B tests with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
+        List A/B tests with optional filtering.  Args:     status: Filter by status     test_type: Filter by test type     tags: Filter by tags     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
 
-        :param status:
+        :param status: Filter by status
         :type status: TestStatus
-        :param test_type:
+        :param test_type: Filter by test type
         :type test_type: TestType
-        :param request_body:
-        :type request_body: List[str]
+        :param tags: Filter by tags
+        :type tags: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2856,7 +2856,7 @@ class ABTestingApi:
         _param = self._list_ab_tests_api_v1_ab_tests_get_serialize(
             status=status,
             test_type=test_type,
-            request_body=request_body,
+            tags=tags,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2881,9 +2881,9 @@ class ABTestingApi:
     @validate_call
     async def list_ab_tests_api_v1_ab_tests_get_without_preload_content(
         self,
-        status: Optional[TestStatus] = None,
-        test_type: Optional[TestType] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[TestStatus], Field(description="Filter by status")] = None,
+        test_type: Annotated[Optional[TestType], Field(description="Filter by test type")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2899,14 +2899,14 @@ class ABTestingApi:
     ) -> RESTResponseType:
         """List Ab Tests
 
-        List A/B tests with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
+        List A/B tests with optional filtering.  Args:     status: Filter by status     test_type: Filter by test type     tags: Filter by tags     current_user: Current authenticated user     ab_test_manager: A/B test manager instance  Returns:     List of A/B tests
 
-        :param status:
+        :param status: Filter by status
         :type status: TestStatus
-        :param test_type:
+        :param test_type: Filter by test type
         :type test_type: TestType
-        :param request_body:
-        :type request_body: List[str]
+        :param tags: Filter by tags
+        :type tags: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2932,7 +2932,7 @@ class ABTestingApi:
         _param = self._list_ab_tests_api_v1_ab_tests_get_serialize(
             status=status,
             test_type=test_type,
-            request_body=request_body,
+            tags=tags,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2954,7 +2954,7 @@ class ABTestingApi:
         self,
         status,
         test_type,
-        request_body,
+        tags,
         _request_auth,
         _content_type,
         _headers,
@@ -2964,7 +2964,7 @@ class ABTestingApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
-            'request_body': '',
+            'tags': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -2986,11 +2986,13 @@ class ABTestingApi:
             
             _query_params.append(('test_type', test_type.value))
             
+        if tags is not None:
+            
+            _query_params.append(('tags', tags))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if request_body is not None:
-            _body_params = request_body
 
 
         # set the HTTP header `Accept`
@@ -3001,19 +3003,6 @@ class ABTestingApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [

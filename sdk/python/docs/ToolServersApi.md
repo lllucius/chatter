@@ -1089,7 +1089,8 @@ Get tools for a specific server.
 
 Args:
     server_id: Server ID
-    request: Server tools request with pagination
+    limit: Maximum number of results
+    offset: Number of results to skip
     current_user: Current authenticated user
     service: Tool server service
 
@@ -1127,8 +1128,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ToolServersApi(api_client)
     server_id = 'server_id_example' # str | 
-    limit = 50 # int |  (optional) (default to 50)
-    offset = 0 # int |  (optional) (default to 0)
+    limit = 50 # int | Maximum number of results (optional) (default to 50)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
 
     try:
         # Get Server Tools
@@ -1147,8 +1148,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **server_id** | **str**|  | 
- **limit** | **int**|  | [optional] [default to 50]
- **offset** | **int**|  | [optional] [default to 0]
+ **limit** | **int**| Maximum number of results | [optional] [default to 50]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
 
 ### Return type
 
@@ -1522,7 +1523,8 @@ List Tool Servers
 List tool servers with optional filtering.
 
 Args:
-    request: List request with filter parameters
+    status: Filter by server status
+    include_builtin: Include built-in servers
     current_user: Current authenticated user
     service: Tool server service
 
@@ -1560,8 +1562,8 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ToolServersApi(api_client)
-    status = chatter_sdk.ServerStatus() # ServerStatus |  (optional)
-    include_builtin = True # bool |  (optional) (default to True)
+    status = chatter_sdk.ServerStatus() # ServerStatus | Filter by server status (optional)
+    include_builtin = True # bool | Include built-in servers (optional) (default to True)
 
     try:
         # List Tool Servers
@@ -1579,8 +1581,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **status** | [**ServerStatus**](.md)|  | [optional] 
- **include_builtin** | **bool**|  | [optional] [default to True]
+ **status** | [**ServerStatus**](.md)| Filter by server status | [optional] 
+ **include_builtin** | **bool**| Include built-in servers | [optional] [default to True]
 
 ### Return type
 

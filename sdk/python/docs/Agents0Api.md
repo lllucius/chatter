@@ -818,7 +818,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_agents_api_v1_agents_get**
-> AgentListResponse list_agents_api_v1_agents_get(agent_type=agent_type, status=status, body_list_agents_api_v1_agents_get=body_list_agents_api_v1_agents_get)
+> AgentListResponse list_agents_api_v1_agents_get(agent_type=agent_type, status=status, tags=tags, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order)
 
 List agents
 
@@ -833,7 +833,6 @@ import chatter_sdk
 from chatter_sdk.models.agent_list_response import AgentListResponse
 from chatter_sdk.models.agent_status import AgentStatus
 from chatter_sdk.models.agent_type import AgentType
-from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -857,13 +856,17 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.AgentsApi(api_client)
-    agent_type = chatter_sdk.AgentType() # AgentType |  (optional)
-    status = chatter_sdk.AgentStatus() # AgentStatus |  (optional)
-    body_list_agents_api_v1_agents_get = chatter_sdk.BodyListAgentsApiV1AgentsGet() # BodyListAgentsApiV1AgentsGet |  (optional)
+    agent_type = chatter_sdk.AgentType() # AgentType | Filter by agent type (optional)
+    status = chatter_sdk.AgentStatus() # AgentStatus | Filter by status (optional)
+    tags = ['tags_example'] # List[str] | Filter by tags (optional)
+    limit = 50 # int | Maximum number of results (optional) (default to 50)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
+    sort_by = 'created_at' # str | Sort field (optional) (default to 'created_at')
+    sort_order = 'desc' # str | Sort order (optional) (default to 'desc')
 
     try:
         # List agents
-        api_response = await api_instance.list_agents_api_v1_agents_get(agent_type=agent_type, status=status, body_list_agents_api_v1_agents_get=body_list_agents_api_v1_agents_get)
+        api_response = await api_instance.list_agents_api_v1_agents_get(agent_type=agent_type, status=status, tags=tags, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order)
         print("The response of AgentsApi->list_agents_api_v1_agents_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -877,9 +880,13 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **agent_type** | [**AgentType**](.md)|  | [optional] 
- **status** | [**AgentStatus**](.md)|  | [optional] 
- **body_list_agents_api_v1_agents_get** | [**BodyListAgentsApiV1AgentsGet**](BodyListAgentsApiV1AgentsGet.md)|  | [optional] 
+ **agent_type** | [**AgentType**](.md)| Filter by agent type | [optional] 
+ **status** | [**AgentStatus**](.md)| Filter by status | [optional] 
+ **tags** | [**List[str]**](str.md)| Filter by tags | [optional] 
+ **limit** | **int**| Maximum number of results | [optional] [default to 50]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
+ **sort_by** | **str**| Sort field | [optional] [default to &#39;created_at&#39;]
+ **sort_order** | **str**| Sort order | [optional] [default to &#39;desc&#39;]
 
 ### Return type
 
@@ -891,7 +898,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

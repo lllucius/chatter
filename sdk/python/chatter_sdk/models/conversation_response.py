@@ -95,7 +95,7 @@ class ConversationResponse(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
-            mode='json',
+    mode='json',
         )
         # set to None if description (nullable) is None
         # and model_fields_set contains the field

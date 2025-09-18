@@ -104,7 +104,7 @@ class ToolServerResponse(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
-            mode='json',
+    mode='json',
         )
         # override the default output from pydantic by calling `to_dict()` of oauth_config
         if self.oauth_config:

@@ -67,7 +67,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Analyze Query Performance
 
-        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Query performance analysis and optimization recommendations
+        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Query performance analysis and optimization recommendations
 
         :param query_type:
         :type query_type: str
@@ -135,7 +135,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Analyze Query Performance
 
-        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Query performance analysis and optimization recommendations
+        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Query performance analysis and optimization recommendations
 
         :param query_type:
         :type query_type: str
@@ -203,7 +203,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Analyze Query Performance
 
-        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Query performance analysis and optimization recommendations
+        Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Query performance analysis and optimization recommendations
 
         :param query_type:
         :type query_type: str
@@ -1423,7 +1423,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Get Cache Warming Status
 
-        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming status and metrics
+        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming status and metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1486,7 +1486,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Get Cache Warming Status
 
-        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming status and metrics
+        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming status and metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1549,7 +1549,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Get Cache Warming Status
 
-        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming status and metrics
+        Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming status and metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2308,7 +2308,7 @@ class AnalyticsApi:
     ) -> ChartReadyAnalytics:
         """Get Dashboard Chart Data
 
-        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics       period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Chart-ready analytics data
+        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Chart-ready analytics data
 
         :param start_date: Start date for analytics
         :type start_date: datetime
@@ -2384,7 +2384,7 @@ class AnalyticsApi:
     ) -> ApiResponse[ChartReadyAnalytics]:
         """Get Dashboard Chart Data
 
-        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics       period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Chart-ready analytics data
+        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Chart-ready analytics data
 
         :param start_date: Start date for analytics
         :type start_date: datetime
@@ -2460,7 +2460,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Get Dashboard Chart Data
 
-        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics       period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Chart-ready analytics data
+        Get chart-ready analytics data for dashboard visualization.  Args:     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Chart-ready analytics data
 
         :param start_date: Start date for analytics
         :type start_date: datetime
@@ -2623,7 +2623,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Get Database Health Metrics
 
-        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Database health metrics and recommendations
+        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Database health metrics and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2686,7 +2686,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Get Database Health Metrics
 
-        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Database health metrics and recommendations
+        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Database health metrics and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2749,7 +2749,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Get Database Health Metrics
 
-        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service      Returns:     Database health metrics and recommendations
+        Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Database health metrics and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2869,7 +2869,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Get Detailed Performance Metrics
 
-        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Detailed performance metrics
+        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Detailed performance metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2932,7 +2932,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Get Detailed Performance Metrics
 
-        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Detailed performance metrics
+        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Detailed performance metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2995,7 +2995,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Get Detailed Performance Metrics
 
-        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Detailed performance metrics
+        Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Detailed performance metrics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3433,7 +3433,7 @@ class AnalyticsApi:
     ) -> IntegratedDashboardStats:
         """Get Integrated Dashboard Stats
 
-        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Integrated dashboard statistics
+        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Integrated dashboard statistics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3496,7 +3496,7 @@ class AnalyticsApi:
     ) -> ApiResponse[IntegratedDashboardStats]:
         """Get Integrated Dashboard Stats
 
-        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Integrated dashboard statistics
+        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Integrated dashboard statistics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3559,7 +3559,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Get Integrated Dashboard Stats
 
-        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service      Returns:     Integrated dashboard statistics
+        Get integrated dashboard statistics.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Integrated dashboard statistics
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6060,7 +6060,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Invalidate Stale Cache
 
-        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache invalidation results
+        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache invalidation results
 
         :param max_age_hours:
         :type max_age_hours: int
@@ -6128,7 +6128,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Invalidate Stale Cache
 
-        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache invalidation results
+        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache invalidation results
 
         :param max_age_hours:
         :type max_age_hours: int
@@ -6196,7 +6196,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Invalidate Stale Cache
 
-        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache invalidation results
+        Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache invalidation results
 
         :param max_age_hours:
         :type max_age_hours: int
@@ -6325,7 +6325,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Optimize Cache Performance
 
-        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Optimization results and recommendations
+        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Optimization results and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6388,7 +6388,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Optimize Cache Performance
 
-        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Optimization results and recommendations
+        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Optimization results and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -6451,7 +6451,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Optimize Cache Performance
 
-        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Optimization results and recommendations
+        Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Optimization results and recommendations
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -7650,7 +7650,7 @@ class AnalyticsApi:
     ) -> Dict[str, object]:
         """Warm Analytics Cache
 
-        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming results
+        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming results
 
         :param force_refresh:
         :type force_refresh: bool
@@ -7718,7 +7718,7 @@ class AnalyticsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Warm Analytics Cache
 
-        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming results
+        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming results
 
         :param force_refresh:
         :type force_refresh: bool
@@ -7786,7 +7786,7 @@ class AnalyticsApi:
     ) -> RESTResponseType:
         """Warm Analytics Cache
 
-        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service      Returns:     Cache warming results
+        Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming results
 
         :param force_refresh:
         :type force_refresh: bool

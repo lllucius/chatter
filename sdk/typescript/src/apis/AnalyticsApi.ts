@@ -307,11 +307,11 @@ Returns:
 
 Args:
     start_date: Start date for analytics
-    end_date: End date for analytics  
+    end_date: End date for analytics
     period: Predefined period
     current_user: Current authenticated user
     analytics_service: Analytics service
-    
+
 Returns:
     Chart-ready analytics data
    */
@@ -339,7 +339,7 @@ Returns:
 Args:
     current_user: Current authenticated user
     analytics_service: Analytics service
-    
+
 Returns:
     Integrated dashboard statistics
    */
@@ -520,7 +520,7 @@ Args:
     force_refresh: Force refresh of existing cache entries
     current_user: Current authenticated user
     cache_warming_service: Cache warming service
-    
+
 Returns:
     Cache warming results
    */
@@ -546,7 +546,7 @@ Returns:
 Args:
     current_user: Current authenticated user
     cache_warming_service: Cache warming service
-    
+
 Returns:
     Cache warming status and metrics
    */
@@ -567,7 +567,7 @@ Returns:
 Args:
     current_user: Current authenticated user
     cache_warming_service: Cache warming service
-    
+
 Returns:
     Optimization results and recommendations
    */
@@ -589,7 +589,7 @@ Args:
     max_age_hours: Maximum age in hours for cache entries to keep
     current_user: Current authenticated user
     cache_warming_service: Cache warming service
-    
+
 Returns:
     Cache invalidation results
    */
@@ -615,7 +615,7 @@ Returns:
 Args:
     current_user: Current authenticated user
     analytics_service: Analytics service
-    
+
 Returns:
     Detailed performance metrics
    */
@@ -636,7 +636,7 @@ Returns:
 Args:
     current_user: Current authenticated user
     db_optimization_service: Database optimization service
-    
+
 Returns:
     Database health metrics and recommendations
    */
@@ -658,7 +658,7 @@ Args:
     query_type: Specific query type to analyze (optional)
     current_user: Current authenticated user
     db_optimization_service: Database optimization service
-    
+
 Returns:
     Query performance analysis and optimization recommendations
    */

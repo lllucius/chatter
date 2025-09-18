@@ -1,7 +1,7 @@
 /**
  * Generated API client for Agents
  */
-import { AgentBulkCreateRequest, AgentBulkCreateResponse, AgentBulkDeleteRequest, AgentCreateRequest, AgentDeleteResponse, AgentHealthResponse, AgentInteractRequest, AgentInteractResponse, AgentListResponse, AgentResponse, AgentStatsResponse, AgentStatus, AgentType, AgentUpdateRequest, Body_list_agents_api_v1_agents__get } from '../models/index';
+import { AgentBulkCreateRequest, AgentBulkCreateResponse, AgentBulkDeleteRequest, AgentCreateRequest, AgentDeleteResponse, AgentHealthResponse, AgentInteractRequest, AgentInteractResponse, AgentListResponse, AgentResponse, AgentStatsResponse, AgentStatus, AgentType, AgentUpdateRequest } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AgentsApi extends BaseAPI {
@@ -28,20 +28,23 @@ export class AgentsApi extends BaseAPI {
   /**List agents
    * List all agents with optional filtering and pagination. Users can only see their own agents.
    */
-  public async listAgentsApiV1Agents(data: Body_list_agents_api_v1_agents__get, options?: { agentType?: AgentType | null; status?: AgentStatus | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<AgentListResponse> {
+  public async listAgentsApiV1Agents(options?: { agentType?: AgentType | null; status?: AgentStatus | null; tags?: string[] | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<AgentListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/agents/`,
       method: 'GET' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
         'agent_type': options?.agentType,
         'status': options?.status,
+        'tags': options?.tags,
+        'limit': options?.limit,
+        'offset': options?.offset,
+        'sort_by': options?.sortBy,
+        'sort_order': options?.sortOrder,
         ...options?.query
       },
-      body: data,
     };
 
     const response = await this.request(requestContext);

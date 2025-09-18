@@ -1367,17 +1367,17 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[JobStatus], Field(description="Filter by status")] = None,
+        priority: Annotated[Optional[JobPriority], Field(description="Filter by priority")] = None,
+        function_name: Annotated[Optional[StrictStr], Field(description="Filter by function name")] = None,
+        created_after: Annotated[Optional[datetime], Field(description="Filter jobs created after this date")] = None,
+        created_before: Annotated[Optional[datetime], Field(description="Filter jobs created before this date")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by job tags (any of the provided tags)")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Search in job names and metadata")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1393,30 +1393,30 @@ class JobsApi:
     ) -> JobListResponse:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     request: List request parameters     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
-        :param status:
+        :param status: Filter by status
         :type status: JobStatus
-        :param priority:
+        :param priority: Filter by priority
         :type priority: JobPriority
-        :param function_name:
+        :param function_name: Filter by function name
         :type function_name: str
-        :param created_after:
+        :param created_after: Filter jobs created after this date
         :type created_after: datetime
-        :param created_before:
+        :param created_before: Filter jobs created before this date
         :type created_before: datetime
-        :param search:
+        :param tags: Filter by job tags (any of the provided tags)
+        :type tags: List[str]
+        :param search: Search in job names and metadata
         :type search: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
-        :param sort_by:
+        :param sort_by: Field to sort by
         :type sort_by: str
-        :param sort_order:
+        :param sort_order: Sort order
         :type sort_order: str
-        :param request_body:
-        :type request_body: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1445,12 +1445,12 @@ class JobsApi:
             function_name=function_name,
             created_after=created_after,
             created_before=created_before,
+            tags=tags,
             search=search,
             limit=limit,
             offset=offset,
             sort_by=sort_by,
             sort_order=sort_order,
-            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1475,17 +1475,17 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get_with_http_info(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[JobStatus], Field(description="Filter by status")] = None,
+        priority: Annotated[Optional[JobPriority], Field(description="Filter by priority")] = None,
+        function_name: Annotated[Optional[StrictStr], Field(description="Filter by function name")] = None,
+        created_after: Annotated[Optional[datetime], Field(description="Filter jobs created after this date")] = None,
+        created_before: Annotated[Optional[datetime], Field(description="Filter jobs created before this date")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by job tags (any of the provided tags)")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Search in job names and metadata")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1501,30 +1501,30 @@ class JobsApi:
     ) -> ApiResponse[JobListResponse]:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     request: List request parameters     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
-        :param status:
+        :param status: Filter by status
         :type status: JobStatus
-        :param priority:
+        :param priority: Filter by priority
         :type priority: JobPriority
-        :param function_name:
+        :param function_name: Filter by function name
         :type function_name: str
-        :param created_after:
+        :param created_after: Filter jobs created after this date
         :type created_after: datetime
-        :param created_before:
+        :param created_before: Filter jobs created before this date
         :type created_before: datetime
-        :param search:
+        :param tags: Filter by job tags (any of the provided tags)
+        :type tags: List[str]
+        :param search: Search in job names and metadata
         :type search: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
-        :param sort_by:
+        :param sort_by: Field to sort by
         :type sort_by: str
-        :param sort_order:
+        :param sort_order: Sort order
         :type sort_order: str
-        :param request_body:
-        :type request_body: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1553,12 +1553,12 @@ class JobsApi:
             function_name=function_name,
             created_after=created_after,
             created_before=created_before,
+            tags=tags,
             search=search,
             limit=limit,
             offset=offset,
             sort_by=sort_by,
             sort_order=sort_order,
-            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1583,17 +1583,17 @@ class JobsApi:
     @validate_call
     async def list_jobs_api_v1_jobs_get_without_preload_content(
         self,
-        status: Optional[JobStatus] = None,
-        priority: Optional[JobPriority] = None,
-        function_name: Optional[StrictStr] = None,
-        created_after: Optional[datetime] = None,
-        created_before: Optional[datetime] = None,
-        search: Optional[StrictStr] = None,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
-        sort_by: Optional[StrictStr] = None,
-        sort_order: Optional[Annotated[str, Field(strict=True)]] = None,
-        request_body: Optional[List[StrictStr]] = None,
+        status: Annotated[Optional[JobStatus], Field(description="Filter by status")] = None,
+        priority: Annotated[Optional[JobPriority], Field(description="Filter by priority")] = None,
+        function_name: Annotated[Optional[StrictStr], Field(description="Filter by function name")] = None,
+        created_after: Annotated[Optional[datetime], Field(description="Filter jobs created after this date")] = None,
+        created_before: Annotated[Optional[datetime], Field(description="Filter jobs created before this date")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by job tags (any of the provided tags)")] = None,
+        search: Annotated[Optional[StrictStr], Field(description="Search in job names and metadata")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Field to sort by")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1609,30 +1609,30 @@ class JobsApi:
     ) -> RESTResponseType:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     request: List request parameters     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
-        :param status:
+        :param status: Filter by status
         :type status: JobStatus
-        :param priority:
+        :param priority: Filter by priority
         :type priority: JobPriority
-        :param function_name:
+        :param function_name: Filter by function name
         :type function_name: str
-        :param created_after:
+        :param created_after: Filter jobs created after this date
         :type created_after: datetime
-        :param created_before:
+        :param created_before: Filter jobs created before this date
         :type created_before: datetime
-        :param search:
+        :param tags: Filter by job tags (any of the provided tags)
+        :type tags: List[str]
+        :param search: Search in job names and metadata
         :type search: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
-        :param sort_by:
+        :param sort_by: Field to sort by
         :type sort_by: str
-        :param sort_order:
+        :param sort_order: Sort order
         :type sort_order: str
-        :param request_body:
-        :type request_body: List[str]
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1661,12 +1661,12 @@ class JobsApi:
             function_name=function_name,
             created_after=created_after,
             created_before=created_before,
+            tags=tags,
             search=search,
             limit=limit,
             offset=offset,
             sort_by=sort_by,
             sort_order=sort_order,
-            request_body=request_body,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1691,12 +1691,12 @@ class JobsApi:
         function_name,
         created_after,
         created_before,
+        tags,
         search,
         limit,
         offset,
         sort_by,
         sort_order,
-        request_body,
         _request_auth,
         _content_type,
         _headers,
@@ -1706,7 +1706,7 @@ class JobsApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
-            'request_body': '',
+            'tags': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -1758,6 +1758,10 @@ class JobsApi:
             else:
                 _query_params.append(('created_before', created_before))
             
+        if tags is not None:
+            
+            _query_params.append(('tags', tags))
+            
         if search is not None:
             
             _query_params.append(('search', search))
@@ -1781,8 +1785,6 @@ class JobsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if request_body is not None:
-            _body_params = request_body
 
 
         # set the HTTP header `Accept`
@@ -1793,19 +1795,6 @@ class JobsApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [

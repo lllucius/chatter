@@ -17,21 +17,13 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import Field, StrictBool, StrictBytes, StrictInt, StrictStr, field_validator
-from typing import Any, List, Optional, Tuple, Union
-from typing_extensions import Annotated
-from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
-from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
-from chatter_sdk.models.document_list_response import DocumentListResponse
-from chatter_sdk.models.document_processing_request import DocumentProcessingRequest
-from chatter_sdk.models.document_processing_response import DocumentProcessingResponse
+from pydantic import StrictBool, StrictBytes, StrictInt, StrictStr
+from typing import Any, Dict, List, Optional, Tuple, Union
+from chatter_sdk.models.document_list_request import DocumentListRequest
 from chatter_sdk.models.document_response import DocumentResponse
 from chatter_sdk.models.document_search_request import DocumentSearchRequest
-from chatter_sdk.models.document_search_response import DocumentSearchResponse
 from chatter_sdk.models.document_stats_response import DocumentStatsResponse
-from chatter_sdk.models.document_status import DocumentStatus
-from chatter_sdk.models.document_type import DocumentType
-from chatter_sdk.models.document_update import DocumentUpdate
+from chatter_sdk.models.search_result_response import SearchResultResponse
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
@@ -67,10 +59,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentDeleteResponse:
+    ) -> Dict[str, str]:
         """Delete Document
 
-        Delete document.  Args:     document_id: Document ID     request: Delete request parameters     current_user: Current authenticated user     document_service: Document service  Returns:     Success message
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -105,7 +97,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -135,10 +127,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentDeleteResponse]:
+    ) -> ApiResponse[Dict[str, str]]:
         """Delete Document
 
-        Delete document.  Args:     document_id: Document ID     request: Delete request parameters     current_user: Current authenticated user     document_service: Document service  Returns:     Success message
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -173,7 +165,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -206,7 +198,7 @@ class DocumentsApi:
     ) -> RESTResponseType:
         """Delete Document
 
-        Delete document.  Args:     document_id: Document ID     request: Delete request parameters     current_user: Current authenticated user     document_service: Document service  Returns:     Success message
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -241,7 +233,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentDeleteResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -316,7 +308,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def download_document_api_v1_documents_document_id_download_get(
+    async def delete_document_api_v1_documents_document_id_delete_0(
         self,
         document_id: StrictStr,
         _request_timeout: Union[
@@ -331,10 +323,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
-        """Download Document
+    ) -> Dict[str, str]:
+        """Delete Document
 
-        Download original document file.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     File download response
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -360,7 +352,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._download_document_api_v1_documents_document_id_download_get_serialize(
+        _param = self._delete_document_api_v1_documents_document_id_delete_0_serialize(
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -369,7 +361,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -384,7 +376,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def download_document_api_v1_documents_document_id_download_get_with_http_info(
+    async def delete_document_api_v1_documents_document_id_delete_0_with_http_info(
         self,
         document_id: StrictStr,
         _request_timeout: Union[
@@ -399,10 +391,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
-        """Download Document
+    ) -> ApiResponse[Dict[str, str]]:
+        """Delete Document
 
-        Download original document file.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     File download response
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -428,7 +420,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._download_document_api_v1_documents_document_id_download_get_serialize(
+        _param = self._delete_document_api_v1_documents_document_id_delete_0_serialize(
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -437,7 +429,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -452,7 +444,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def download_document_api_v1_documents_document_id_download_get_without_preload_content(
+    async def delete_document_api_v1_documents_document_id_delete_0_without_preload_content(
         self,
         document_id: StrictStr,
         _request_timeout: Union[
@@ -468,9 +460,9 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Download Document
+        """Delete Document
 
-        Download original document file.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     File download response
+        Delete a document.
 
         :param document_id: (required)
         :type document_id: str
@@ -496,7 +488,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._download_document_api_v1_documents_document_id_download_get_serialize(
+        _param = self._delete_document_api_v1_documents_document_id_delete_0_serialize(
             document_id=document_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -505,7 +497,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -515,7 +507,7 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _download_document_api_v1_documents_document_id_download_get_serialize(
+    def _delete_document_api_v1_documents_document_id_delete_0_serialize(
         self,
         document_id,
         _request_auth,
@@ -562,8 +554,8 @@ class DocumentsApi:
         ]
 
         return self.api_client.param_serialize(
-            method='GET',
-            resource_path='/api/v1/documents/{document_id}/download',
+            method='DELETE',
+            resource_path='/api/v1/documents/{document_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -598,7 +590,7 @@ class DocumentsApi:
     ) -> DocumentResponse:
         """Get Document
 
-        Get document details.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Document information
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
@@ -634,10 +626,7 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -669,7 +658,7 @@ class DocumentsApi:
     ) -> ApiResponse[DocumentResponse]:
         """Get Document
 
-        Get document details.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Document information
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
@@ -705,10 +694,7 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -740,7 +726,7 @@ class DocumentsApi:
     ) -> RESTResponseType:
         """Get Document
 
-        Get document details.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Document information
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
@@ -776,10 +762,7 @@ class DocumentsApi:
 
         _response_types_map: Dict[str, Optional[str]] = {
             '200': "DocumentResponse",
-            '401': None,
-            '403': None,
-            '404': None,
-            '422': None,
+            '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -853,11 +836,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_chunks_api_v1_documents_document_id_chunks_get(
+    async def get_document_api_v1_documents_document_id_get_0(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -870,17 +851,13 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentChunksResponse:
-        """Get Document Chunks
+    ) -> DocumentResponse:
+        """Get Document
 
-        Get document chunks.  Args:     document_id: Document ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     document_service: Document service  Returns:     List of document chunks with pagination
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -903,10 +880,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_chunks_api_v1_documents_document_id_chunks_get_serialize(
+        _param = self._get_document_api_v1_documents_document_id_get_0_serialize(
             document_id=document_id,
-            limit=limit,
-            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -914,7 +889,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -929,11 +904,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_chunks_api_v1_documents_document_id_chunks_get_with_http_info(
+    async def get_document_api_v1_documents_document_id_get_0_with_http_info(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -946,17 +919,13 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentChunksResponse]:
-        """Get Document Chunks
+    ) -> ApiResponse[DocumentResponse]:
+        """Get Document
 
-        Get document chunks.  Args:     document_id: Document ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     document_service: Document service  Returns:     List of document chunks with pagination
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -979,10 +948,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_chunks_api_v1_documents_document_id_chunks_get_serialize(
+        _param = self._get_document_api_v1_documents_document_id_get_0_serialize(
             document_id=document_id,
-            limit=limit,
-            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -990,7 +957,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1005,11 +972,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_chunks_api_v1_documents_document_id_chunks_get_without_preload_content(
+    async def get_document_api_v1_documents_document_id_get_0_without_preload_content(
         self,
         document_id: StrictStr,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1023,16 +988,12 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get Document Chunks
+        """Get Document
 
-        Get document chunks.  Args:     document_id: Document ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     document_service: Document service  Returns:     List of document chunks with pagination
+        Get a document by ID.
 
         :param document_id: (required)
         :type document_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1055,10 +1016,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_chunks_api_v1_documents_document_id_chunks_get_serialize(
+        _param = self._get_document_api_v1_documents_document_id_get_0_serialize(
             document_id=document_id,
-            limit=limit,
-            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1066,7 +1025,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentChunksResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1076,11 +1035,9 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _get_document_chunks_api_v1_documents_document_id_chunks_get_serialize(
+    def _get_document_api_v1_documents_document_id_get_0_serialize(
         self,
         document_id,
-        limit,
-        offset,
         _request_auth,
         _content_type,
         _headers,
@@ -1105,14 +1062,6 @@ class DocumentsApi:
         if document_id is not None:
             _path_params['document_id'] = document_id
         # process the query parameters
-        if limit is not None:
-            
-            _query_params.append(('limit', limit))
-            
-        if offset is not None:
-            
-            _query_params.append(('offset', offset))
-            
         # process the header parameters
         # process the form parameters
         # process the body parameter
@@ -1134,7 +1083,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/documents/{document_id}/chunks',
+            resource_path='/api/v1/documents/{document_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1151,7 +1100,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_stats_api_v1_documents_stats_overview_get(
+    async def get_user_document_stats_api_v1_documents_stats_user_get(
         self,
         _request_timeout: Union[
             None,
@@ -1166,9 +1115,9 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> DocumentStatsResponse:
-        """Get Document Stats
+        """Get User Document Stats
 
-        Get document statistics.  Args:     current_user: Current authenticated user     document_service: Document service  Returns:     Document statistics
+        Get document statistics for the current user.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1192,7 +1141,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_stats_api_v1_documents_stats_overview_get_serialize(
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1214,7 +1163,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_stats_api_v1_documents_stats_overview_get_with_http_info(
+    async def get_user_document_stats_api_v1_documents_stats_user_get_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -1229,9 +1178,9 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> ApiResponse[DocumentStatsResponse]:
-        """Get Document Stats
+        """Get User Document Stats
 
-        Get document statistics.  Args:     current_user: Current authenticated user     document_service: Document service  Returns:     Document statistics
+        Get document statistics for the current user.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1255,7 +1204,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_stats_api_v1_documents_stats_overview_get_serialize(
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1277,7 +1226,7 @@ class DocumentsApi:
 
 
     @validate_call
-    async def get_document_stats_api_v1_documents_stats_overview_get_without_preload_content(
+    async def get_user_document_stats_api_v1_documents_stats_user_get_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -1292,9 +1241,9 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Get Document Stats
+        """Get User Document Stats
 
-        Get document statistics.  Args:     current_user: Current authenticated user     document_service: Document service  Returns:     Document statistics
+        Get document statistics for the current user.
 
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -1318,7 +1267,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_document_stats_api_v1_documents_stats_overview_get_serialize(
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1335,7 +1284,7 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _get_document_stats_api_v1_documents_stats_overview_get_serialize(
+    def _get_user_document_stats_api_v1_documents_stats_user_get_serialize(
         self,
         _request_auth,
         _content_type,
@@ -1380,7 +1329,7 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/documents/stats/overview',
+            resource_path='/api/v1/documents/stats/user',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1397,16 +1346,8 @@ class DocumentsApi:
 
 
     @validate_call
-    async def list_documents_api_v1_documents_get(
+    async def get_user_document_stats_api_v1_documents_stats_user_get_0(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1419,27 +1360,11 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentListResponse:
-        """List Documents
+    ) -> DocumentStatsResponse:
+        """Get User Document Stats
 
-        List user's documents.  Args:     status: Filter by document status     document_type: Filter by document type     tags: Filter by tags     owner_id: Filter by owner (admin only)     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     document_service: Document service  Returns:     List of documents with pagination info
+        Get document statistics for the current user.
 
-        :param status: Filter by status
-        :type status: DocumentStatus
-        :param document_type: Filter by document type
-        :type document_type: DocumentType
-        :param tags: Filter by tags
-        :type tags: List[str]
-        :param owner_id: Filter by owner (admin only)
-        :type owner_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
-        :param sort_by: Sort field
-        :type sort_by: str
-        :param sort_order: Sort order
-        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1462,15 +1387,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_documents_api_v1_documents_get_serialize(
-            status=status,
-            document_type=document_type,
-            tags=tags,
-            owner_id=owner_id,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_0_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1478,10 +1395,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+            '200': "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1495,16 +1409,8 @@ class DocumentsApi:
 
 
     @validate_call
-    async def list_documents_api_v1_documents_get_with_http_info(
+    async def get_user_document_stats_api_v1_documents_stats_user_get_0_with_http_info(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1517,27 +1423,11 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentListResponse]:
-        """List Documents
+    ) -> ApiResponse[DocumentStatsResponse]:
+        """Get User Document Stats
 
-        List user's documents.  Args:     status: Filter by document status     document_type: Filter by document type     tags: Filter by tags     owner_id: Filter by owner (admin only)     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     document_service: Document service  Returns:     List of documents with pagination info
+        Get document statistics for the current user.
 
-        :param status: Filter by status
-        :type status: DocumentStatus
-        :param document_type: Filter by document type
-        :type document_type: DocumentType
-        :param tags: Filter by tags
-        :type tags: List[str]
-        :param owner_id: Filter by owner (admin only)
-        :type owner_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
-        :param sort_by: Sort field
-        :type sort_by: str
-        :param sort_order: Sort order
-        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1560,15 +1450,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_documents_api_v1_documents_get_serialize(
-            status=status,
-            document_type=document_type,
-            tags=tags,
-            owner_id=owner_id,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_0_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1576,10 +1458,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+            '200': "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1593,16 +1472,8 @@ class DocumentsApi:
 
 
     @validate_call
-    async def list_documents_api_v1_documents_get_without_preload_content(
+    async def get_user_document_stats_api_v1_documents_stats_user_get_0_without_preload_content(
         self,
-        status: Annotated[Optional[DocumentStatus], Field(description="Filter by status")] = None,
-        document_type: Annotated[Optional[DocumentType], Field(description="Filter by document type")] = None,
-        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
-        owner_id: Annotated[Optional[StrictStr], Field(description="Filter by owner (admin only)")] = None,
-        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
-        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
-        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
-        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1616,26 +1487,10 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """List Documents
+        """Get User Document Stats
 
-        List user's documents.  Args:     status: Filter by document status     document_type: Filter by document type     tags: Filter by tags     owner_id: Filter by owner (admin only)     limit: Maximum number of results     offset: Number of results to skip     sort_by: Sort field     sort_order: Sort order (asc/desc)     current_user: Current authenticated user     document_service: Document service  Returns:     List of documents with pagination info
+        Get document statistics for the current user.
 
-        :param status: Filter by status
-        :type status: DocumentStatus
-        :param document_type: Filter by document type
-        :type document_type: DocumentType
-        :param tags: Filter by tags
-        :type tags: List[str]
-        :param owner_id: Filter by owner (admin only)
-        :type owner_id: str
-        :param limit: Maximum number of results
-        :type limit: int
-        :param offset: Number of results to skip
-        :type offset: int
-        :param sort_by: Sort field
-        :type sort_by: str
-        :param sort_order: Sort order
-        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1658,15 +1513,7 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_documents_api_v1_documents_get_serialize(
-            status=status,
-            document_type=document_type,
-            tags=tags,
-            owner_id=owner_id,
-            limit=limit,
-            offset=offset,
-            sort_by=sort_by,
-            sort_order=sort_order,
+        _param = self._get_user_document_stats_api_v1_documents_stats_user_get_0_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1674,10 +1521,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentListResponse",
-            '401': None,
-            '403': None,
-            '422': None,
+            '200': "DocumentStatsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1686,16 +1530,8 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _list_documents_api_v1_documents_get_serialize(
+    def _get_user_document_stats_api_v1_documents_stats_user_get_0_serialize(
         self,
-        status,
-        document_type,
-        tags,
-        owner_id,
-        limit,
-        offset,
-        sort_by,
-        sort_order,
         _request_auth,
         _content_type,
         _headers,
@@ -1705,7 +1541,6 @@ class DocumentsApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
-            'tags': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -1719,22 +1554,281 @@ class DocumentsApi:
 
         # process the path parameters
         # process the query parameters
-        if status is not None:
-            
-            _query_params.append(('status', status.value))
-            
-        if document_type is not None:
-            
-            _query_params.append(('document_type', document_type.value))
-            
-        if tags is not None:
-            
-            _query_params.append(('tags', tags))
-            
-        if owner_id is not None:
-            
-            _query_params.append(('owner_id', owner_id))
-            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/api/v1/documents/stats/user',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def list_documents_get_api_v1_documents_get(
+        self,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Dict[str, object]:
+        """List Documents Get
+
+        List documents with pagination (GET endpoint for frontend compatibility).
+
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_get_api_v1_documents_get_serialize(
+            limit=limit,
+            offset=offset,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def list_documents_get_api_v1_documents_get_with_http_info(
+        self,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Dict[str, object]]:
+        """List Documents Get
+
+        List documents with pagination (GET endpoint for frontend compatibility).
+
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_get_api_v1_documents_get_serialize(
+            limit=limit,
+            offset=offset,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def list_documents_get_api_v1_documents_get_without_preload_content(
+        self,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List Documents Get
+
+        List documents with pagination (GET endpoint for frontend compatibility).
+
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_get_api_v1_documents_get_serialize(
+            limit=limit,
+            offset=offset,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _list_documents_get_api_v1_documents_get_serialize(
+        self,
+        limit,
+        offset,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
         if limit is not None:
             
             _query_params.append(('limit', limit))
@@ -1742,14 +1836,6 @@ class DocumentsApi:
         if offset is not None:
             
             _query_params.append(('offset', offset))
-            
-        if sort_by is not None:
-            
-            _query_params.append(('sort_by', sort_by))
-            
-        if sort_order is not None:
-            
-            _query_params.append(('sort_order', sort_order))
             
         # process the header parameters
         # process the form parameters
@@ -1789,10 +1875,10 @@ class DocumentsApi:
 
 
     @validate_call
-    async def process_document_api_v1_documents_document_id_process_post(
+    async def list_documents_get_api_v1_documents_get_0(
         self,
-        document_id: StrictStr,
-        document_processing_request: DocumentProcessingRequest,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1805,15 +1891,15 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentProcessingResponse:
-        """Process Document
+    ) -> Dict[str, object]:
+        """List Documents Get
 
-        Trigger document processing.  Args:     document_id: Document ID     processing_request: Processing request     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        List documents with pagination (GET endpoint for frontend compatibility).
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_processing_request: (required)
-        :type document_processing_request: DocumentProcessingRequest
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1836,9 +1922,9 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._process_document_api_v1_documents_document_id_process_post_serialize(
-            document_id=document_id,
-            document_processing_request=document_processing_request,
+        _param = self._list_documents_get_api_v1_documents_get_0_serialize(
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1846,7 +1932,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, object]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1861,10 +1947,10 @@ class DocumentsApi:
 
 
     @validate_call
-    async def process_document_api_v1_documents_document_id_process_post_with_http_info(
+    async def list_documents_get_api_v1_documents_get_0_with_http_info(
         self,
-        document_id: StrictStr,
-        document_processing_request: DocumentProcessingRequest,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1877,15 +1963,15 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentProcessingResponse]:
-        """Process Document
+    ) -> ApiResponse[Dict[str, object]]:
+        """List Documents Get
 
-        Trigger document processing.  Args:     document_id: Document ID     processing_request: Processing request     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        List documents with pagination (GET endpoint for frontend compatibility).
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_processing_request: (required)
-        :type document_processing_request: DocumentProcessingRequest
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1908,9 +1994,9 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._process_document_api_v1_documents_document_id_process_post_serialize(
-            document_id=document_id,
-            document_processing_request=document_processing_request,
+        _param = self._list_documents_get_api_v1_documents_get_0_serialize(
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1918,7 +2004,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, object]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1933,10 +2019,10 @@ class DocumentsApi:
 
 
     @validate_call
-    async def process_document_api_v1_documents_document_id_process_post_without_preload_content(
+    async def list_documents_get_api_v1_documents_get_0_without_preload_content(
         self,
-        document_id: StrictStr,
-        document_processing_request: DocumentProcessingRequest,
+        limit: Optional[StrictInt] = None,
+        offset: Optional[StrictInt] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1950,14 +2036,14 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Process Document
+        """List Documents Get
 
-        Trigger document processing.  Args:     document_id: Document ID     processing_request: Processing request     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        List documents with pagination (GET endpoint for frontend compatibility).
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_processing_request: (required)
-        :type document_processing_request: DocumentProcessingRequest
+        :param limit:
+        :type limit: int
+        :param offset:
+        :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -1980,9 +2066,9 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._process_document_api_v1_documents_document_id_process_post_serialize(
-            document_id=document_id,
-            document_processing_request=document_processing_request,
+        _param = self._list_documents_get_api_v1_documents_get_0_serialize(
+            limit=limit,
+            offset=offset,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1990,7 +2076,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, object]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2000,10 +2086,10 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _process_document_api_v1_documents_document_id_process_post_serialize(
+    def _list_documents_get_api_v1_documents_get_0_serialize(
         self,
-        document_id,
-        document_processing_request,
+        limit,
+        offset,
         _request_auth,
         _content_type,
         _headers,
@@ -2025,14 +2111,282 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if document_id is not None:
-            _path_params['document_id'] = document_id
+        # process the query parameters
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if offset is not None:
+            
+            _query_params.append(('offset', offset))
+            
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
+        ]
+
+        return self.api_client.param_serialize(
+            method='GET',
+            resource_path='/api/v1/documents',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Dict[str, object]:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post_with_http_info(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Dict[str, object]]:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post_without_preload_content(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _list_documents_post_api_v1_documents_list_post_serialize(
+        self,
+        document_list_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
         # process the query parameters
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if document_processing_request is not None:
-            _body_params = document_processing_request
+        if document_list_request is not None:
+            _body_params = document_list_request
 
 
         # set the HTTP header `Accept`
@@ -2064,7 +2418,284 @@ class DocumentsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/api/v1/documents/{document_id}/process',
+            resource_path='/api/v1/documents/list',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post_0(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Dict[str, object]:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_0_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post_0_with_http_info(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Dict[str, object]]:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_0_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def list_documents_post_api_v1_documents_list_post_0_without_preload_content(
+        self,
+        document_list_request: DocumentListRequest,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """List Documents Post
+
+        List documents with filtering and pagination (POST endpoint for advanced filtering).
+
+        :param document_list_request: (required)
+        :type document_list_request: DocumentListRequest
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._list_documents_post_api_v1_documents_list_post_0_serialize(
+            document_list_request=document_list_request,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, object]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _list_documents_post_api_v1_documents_list_post_0_serialize(
+        self,
+        document_list_request,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+        if document_list_request is not None:
+            _body_params = document_list_request
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'application/json'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/api/v1/documents/list',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2096,10 +2727,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentProcessingResponse:
+    ) -> Dict[str, str]:
         """Reprocess Document
 
-        Reprocess an existing document.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        Reprocess a document through the embedding pipeline.
 
         :param document_id: (required)
         :type document_id: str
@@ -2134,7 +2765,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2164,10 +2795,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentProcessingResponse]:
+    ) -> ApiResponse[Dict[str, str]]:
         """Reprocess Document
 
-        Reprocess an existing document.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        Reprocess a document through the embedding pipeline.
 
         :param document_id: (required)
         :type document_id: str
@@ -2202,7 +2833,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2235,7 +2866,7 @@ class DocumentsApi:
     ) -> RESTResponseType:
         """Reprocess Document
 
-        Reprocess an existing document.  Args:     document_id: Document ID     current_user: Current authenticated user     document_service: Document service  Returns:     Processing status
+        Reprocess a document through the embedding pipeline.
 
         :param document_id: (required)
         :type document_id: str
@@ -2270,7 +2901,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentProcessingResponse",
+            '200': "Dict[str, str]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2281,6 +2912,270 @@ class DocumentsApi:
 
 
     def _reprocess_document_api_v1_documents_document_id_reprocess_post_serialize(
+        self,
+        document_id,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        if document_id is not None:
+            _path_params['document_id'] = document_id
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/api/v1/documents/{document_id}/reprocess',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def reprocess_document_api_v1_documents_document_id_reprocess_post_0(
+        self,
+        document_id: StrictStr,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> Dict[str, str]:
+        """Reprocess Document
+
+        Reprocess a document through the embedding pipeline.
+
+        :param document_id: (required)
+        :type document_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._reprocess_document_api_v1_documents_document_id_reprocess_post_0_serialize(
+            document_id=document_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, str]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def reprocess_document_api_v1_documents_document_id_reprocess_post_0_with_http_info(
+        self,
+        document_id: StrictStr,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[Dict[str, str]]:
+        """Reprocess Document
+
+        Reprocess a document through the embedding pipeline.
+
+        :param document_id: (required)
+        :type document_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._reprocess_document_api_v1_documents_document_id_reprocess_post_0_serialize(
+            document_id=document_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, str]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def reprocess_document_api_v1_documents_document_id_reprocess_post_0_without_preload_content(
+        self,
+        document_id: StrictStr,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Reprocess Document
+
+        Reprocess a document through the embedding pipeline.
+
+        :param document_id: (required)
+        :type document_id: str
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._reprocess_document_api_v1_documents_document_id_reprocess_post_0_serialize(
+            document_id=document_id,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "Dict[str, str]",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _reprocess_document_api_v1_documents_document_id_reprocess_post_0_serialize(
         self,
         document_id,
         _request_auth,
@@ -2360,10 +3255,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentSearchResponse:
+    ) -> List[SearchResultResponse]:
         """Search Documents
 
-        Search documents using vector similarity.  Args:     search_request: Search request     current_user: Current authenticated user     document_service: Document service  Returns:     Search results
+        Search documents using semantic similarity.
 
         :param document_search_request: (required)
         :type document_search_request: DocumentSearchRequest
@@ -2398,7 +3293,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2428,10 +3323,10 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentSearchResponse]:
+    ) -> ApiResponse[List[SearchResultResponse]]:
         """Search Documents
 
-        Search documents using vector similarity.  Args:     search_request: Search request     current_user: Current authenticated user     document_service: Document service  Returns:     Search results
+        Search documents using semantic similarity.
 
         :param document_search_request: (required)
         :type document_search_request: DocumentSearchRequest
@@ -2466,7 +3361,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2499,7 +3394,7 @@ class DocumentsApi:
     ) -> RESTResponseType:
         """Search Documents
 
-        Search documents using vector similarity.  Args:     search_request: Search request     current_user: Current authenticated user     document_service: Document service  Returns:     Search results
+        Search documents using semantic similarity.
 
         :param document_search_request: (required)
         :type document_search_request: DocumentSearchRequest
@@ -2534,7 +3429,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentSearchResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2622,10 +3517,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def update_document_api_v1_documents_document_id_put(
+    async def search_documents_api_v1_documents_search_post_0(
         self,
-        document_id: StrictStr,
-        document_update: DocumentUpdate,
+        document_search_request: DocumentSearchRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2638,15 +3532,13 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> DocumentResponse:
-        """Update Document
+    ) -> List[SearchResultResponse]:
+        """Search Documents
 
-        Update document metadata.  Args:     document_id: Document ID     update_data: Update data     current_user: Current authenticated user     document_service: Document service  Returns:     Updated document information
+        Search documents using semantic similarity.
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_update: (required)
-        :type document_update: DocumentUpdate
+        :param document_search_request: (required)
+        :type document_search_request: DocumentSearchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2669,9 +3561,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_document_api_v1_documents_document_id_put_serialize(
-            document_id=document_id,
-            document_update=document_update,
+        _param = self._search_documents_api_v1_documents_search_post_0_serialize(
+            document_search_request=document_search_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2679,7 +3570,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2694,10 +3585,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def update_document_api_v1_documents_document_id_put_with_http_info(
+    async def search_documents_api_v1_documents_search_post_0_with_http_info(
         self,
-        document_id: StrictStr,
-        document_update: DocumentUpdate,
+        document_search_request: DocumentSearchRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2710,15 +3600,13 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[DocumentResponse]:
-        """Update Document
+    ) -> ApiResponse[List[SearchResultResponse]]:
+        """Search Documents
 
-        Update document metadata.  Args:     document_id: Document ID     update_data: Update data     current_user: Current authenticated user     document_service: Document service  Returns:     Updated document information
+        Search documents using semantic similarity.
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_update: (required)
-        :type document_update: DocumentUpdate
+        :param document_search_request: (required)
+        :type document_search_request: DocumentSearchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2741,9 +3629,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_document_api_v1_documents_document_id_put_serialize(
-            document_id=document_id,
-            document_update=document_update,
+        _param = self._search_documents_api_v1_documents_search_post_0_serialize(
+            document_search_request=document_search_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2751,7 +3638,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2766,10 +3653,9 @@ class DocumentsApi:
 
 
     @validate_call
-    async def update_document_api_v1_documents_document_id_put_without_preload_content(
+    async def search_documents_api_v1_documents_search_post_0_without_preload_content(
         self,
-        document_id: StrictStr,
-        document_update: DocumentUpdate,
+        document_search_request: DocumentSearchRequest,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2783,14 +3669,12 @@ class DocumentsApi:
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
     ) -> RESTResponseType:
-        """Update Document
+        """Search Documents
 
-        Update document metadata.  Args:     document_id: Document ID     update_data: Update data     current_user: Current authenticated user     document_service: Document service  Returns:     Updated document information
+        Search documents using semantic similarity.
 
-        :param document_id: (required)
-        :type document_id: str
-        :param document_update: (required)
-        :type document_update: DocumentUpdate
+        :param document_search_request: (required)
+        :type document_search_request: DocumentSearchRequest
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2813,9 +3697,8 @@ class DocumentsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_document_api_v1_documents_document_id_put_serialize(
-            document_id=document_id,
-            document_update=document_update,
+        _param = self._search_documents_api_v1_documents_search_post_0_serialize(
+            document_search_request=document_search_request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2823,7 +3706,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "DocumentResponse",
+            '200': "List[SearchResultResponse]",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2833,10 +3716,9 @@ class DocumentsApi:
         return response_data.response
 
 
-    def _update_document_api_v1_documents_document_id_put_serialize(
+    def _search_documents_api_v1_documents_search_post_0_serialize(
         self,
-        document_id,
-        document_update,
+        document_search_request,
         _request_auth,
         _content_type,
         _headers,
@@ -2858,14 +3740,12 @@ class DocumentsApi:
         _body_params: Optional[bytes] = None
 
         # process the path parameters
-        if document_id is not None:
-            _path_params['document_id'] = document_id
         # process the query parameters
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if document_update is not None:
-            _body_params = document_update
+        if document_search_request is not None:
+            _body_params = document_search_request
 
 
         # set the HTTP header `Accept`
@@ -2896,8 +3776,8 @@ class DocumentsApi:
         ]
 
         return self.api_client.param_serialize(
-            method='PUT',
-            resource_path='/api/v1/documents/{document_id}',
+            method='POST',
+            resource_path='/api/v1/documents/search',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2938,7 +3818,7 @@ class DocumentsApi:
     ) -> DocumentResponse:
         """Upload Document
 
-        Upload a document.  Args:     file: Document file to upload     title: Document title     description: Document description     tags: Document tags (JSON array string)     chunk_size: Text chunk size for processing     chunk_overlap: Text chunk overlap     is_public: Whether document is public     current_user: Current authenticated user     document_service: Document service  Returns:     Created document information
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
 
         :param file: (required)
         :type file: bytearray
@@ -2991,7 +3871,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -3030,7 +3910,7 @@ class DocumentsApi:
     ) -> ApiResponse[DocumentResponse]:
         """Upload Document
 
-        Upload a document.  Args:     file: Document file to upload     title: Document title     description: Document description     tags: Document tags (JSON array string)     chunk_size: Text chunk size for processing     chunk_overlap: Text chunk overlap     is_public: Whether document is public     current_user: Current authenticated user     document_service: Document service  Returns:     Created document information
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
 
         :param file: (required)
         :type file: bytearray
@@ -3083,7 +3963,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -3122,7 +4002,7 @@ class DocumentsApi:
     ) -> RESTResponseType:
         """Upload Document
 
-        Upload a document.  Args:     file: Document file to upload     title: Document title     description: Document description     tags: Document tags (JSON array string)     chunk_size: Text chunk size for processing     chunk_overlap: Text chunk overlap     is_public: Whether document is public     current_user: Current authenticated user     document_service: Document service  Returns:     Created document information
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
 
         :param file: (required)
         :type file: bytearray
@@ -3175,7 +4055,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '201': "DocumentResponse",
+            '200': "DocumentResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -3186,6 +4066,373 @@ class DocumentsApi:
 
 
     def _upload_document_api_v1_documents_upload_post_serialize(
+        self,
+        file,
+        title,
+        description,
+        tags,
+        chunk_size,
+        chunk_overlap,
+        is_public,
+        _request_auth,
+        _content_type,
+        _headers,
+        _host_index,
+    ) -> RequestSerialized:
+
+        _host = None
+
+        _collection_formats: Dict[str, str] = {
+        }
+
+        _path_params: Dict[str, str] = {}
+        _query_params: List[Tuple[str, str]] = []
+        _header_params: Dict[str, Optional[str]] = _headers or {}
+        _form_params: List[Tuple[str, str]] = []
+        _files: Dict[
+            str, Union[str, bytes, List[str], List[bytes], List[Tuple[str, bytes]]]
+        ] = {}
+        _body_params: Optional[bytes] = None
+
+        # process the path parameters
+        # process the query parameters
+        # process the header parameters
+        # process the form parameters
+        if file is not None:
+            _files['file'] = file
+        if title is not None:
+            _form_params.append(('title', title))
+        if description is not None:
+            _form_params.append(('description', description))
+        if tags is not None:
+            _form_params.append(('tags', tags))
+        if chunk_size is not None:
+            _form_params.append(('chunk_size', chunk_size))
+        if chunk_overlap is not None:
+            _form_params.append(('chunk_overlap', chunk_overlap))
+        if is_public is not None:
+            _form_params.append(('is_public', is_public))
+        # process the body parameter
+
+
+        # set the HTTP header `Accept`
+        if 'Accept' not in _header_params:
+            _header_params['Accept'] = self.api_client.select_header_accept(
+                [
+                    'application/json'
+                ]
+            )
+
+        # set the HTTP header `Content-Type`
+        if _content_type:
+            _header_params['Content-Type'] = _content_type
+        else:
+            _default_content_type = (
+                self.api_client.select_header_content_type(
+                    [
+                        'multipart/form-data'
+                    ]
+                )
+            )
+            if _default_content_type is not None:
+                _header_params['Content-Type'] = _default_content_type
+
+        # authentication setting
+        _auth_settings: List[str] = [
+            'CustomHTTPBearer'
+        ]
+
+        return self.api_client.param_serialize(
+            method='POST',
+            resource_path='/api/v1/documents/upload',
+            path_params=_path_params,
+            query_params=_query_params,
+            header_params=_header_params,
+            body=_body_params,
+            post_params=_form_params,
+            files=_files,
+            auth_settings=_auth_settings,
+            collection_formats=_collection_formats,
+            _host=_host,
+            _request_auth=_request_auth
+        )
+
+
+
+
+    @validate_call
+    async def upload_document_api_v1_documents_upload_post_0(
+        self,
+        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        title: Optional[StrictStr] = None,
+        description: Optional[StrictStr] = None,
+        tags: Optional[StrictStr] = None,
+        chunk_size: Optional[StrictInt] = None,
+        chunk_overlap: Optional[StrictInt] = None,
+        is_public: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> DocumentResponse:
+        """Upload Document
+
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
+
+        :param file: (required)
+        :type file: bytearray
+        :param title:
+        :type title: str
+        :param description:
+        :type description: str
+        :param tags:
+        :type tags: str
+        :param chunk_size:
+        :type chunk_size: int
+        :param chunk_overlap:
+        :type chunk_overlap: int
+        :param is_public:
+        :type is_public: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upload_document_api_v1_documents_upload_post_0_serialize(
+            file=file,
+            title=title,
+            description=description,
+            tags=tags,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            is_public=is_public,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DocumentResponse",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        ).data
+
+
+    @validate_call
+    async def upload_document_api_v1_documents_upload_post_0_with_http_info(
+        self,
+        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        title: Optional[StrictStr] = None,
+        description: Optional[StrictStr] = None,
+        tags: Optional[StrictStr] = None,
+        chunk_size: Optional[StrictInt] = None,
+        chunk_overlap: Optional[StrictInt] = None,
+        is_public: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> ApiResponse[DocumentResponse]:
+        """Upload Document
+
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
+
+        :param file: (required)
+        :type file: bytearray
+        :param title:
+        :type title: str
+        :param description:
+        :type description: str
+        :param tags:
+        :type tags: str
+        :param chunk_size:
+        :type chunk_size: int
+        :param chunk_overlap:
+        :type chunk_overlap: int
+        :param is_public:
+        :type is_public: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upload_document_api_v1_documents_upload_post_0_serialize(
+            file=file,
+            title=title,
+            description=description,
+            tags=tags,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            is_public=is_public,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DocumentResponse",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        await response_data.read()
+        return self.api_client.response_deserialize(
+            response_data=response_data,
+            response_types_map=_response_types_map,
+        )
+
+
+    @validate_call
+    async def upload_document_api_v1_documents_upload_post_0_without_preload_content(
+        self,
+        file: Union[StrictBytes, StrictStr, Tuple[StrictStr, StrictBytes]],
+        title: Optional[StrictStr] = None,
+        description: Optional[StrictStr] = None,
+        tags: Optional[StrictStr] = None,
+        chunk_size: Optional[StrictInt] = None,
+        chunk_overlap: Optional[StrictInt] = None,
+        is_public: Optional[StrictBool] = None,
+        _request_timeout: Union[
+            None,
+            Annotated[StrictFloat, Field(gt=0)],
+            Tuple[
+                Annotated[StrictFloat, Field(gt=0)],
+                Annotated[StrictFloat, Field(gt=0)]
+            ]
+        ] = None,
+        _request_auth: Optional[Dict[StrictStr, Any]] = None,
+        _content_type: Optional[StrictStr] = None,
+        _headers: Optional[Dict[StrictStr, Any]] = None,
+        _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
+    ) -> RESTResponseType:
+        """Upload Document
+
+        Upload and process a new document.  This endpoint uploads a file, creates a document record, and starts the embedding processing pipeline asynchronously.
+
+        :param file: (required)
+        :type file: bytearray
+        :param title:
+        :type title: str
+        :param description:
+        :type description: str
+        :param tags:
+        :type tags: str
+        :param chunk_size:
+        :type chunk_size: int
+        :param chunk_overlap:
+        :type chunk_overlap: int
+        :param is_public:
+        :type is_public: bool
+        :param _request_timeout: timeout setting for this request. If one
+                                 number provided, it will be total request
+                                 timeout. It can also be a pair (tuple) of
+                                 (connection, read) timeouts.
+        :type _request_timeout: int, tuple(int, int), optional
+        :param _request_auth: set to override the auth_settings for an a single
+                              request; this effectively ignores the
+                              authentication in the spec for a single request.
+        :type _request_auth: dict, optional
+        :param _content_type: force content-type for the request.
+        :type _content_type: str, Optional
+        :param _headers: set to override the headers for a single
+                         request; this effectively ignores the headers
+                         in the spec for a single request.
+        :type _headers: dict, optional
+        :param _host_index: set to override the host_index for a single
+                            request; this effectively ignores the host_index
+                            in the spec for a single request.
+        :type _host_index: int, optional
+        :return: Returns the result object.
+        """ # noqa: E501
+
+        _param = self._upload_document_api_v1_documents_upload_post_0_serialize(
+            file=file,
+            title=title,
+            description=description,
+            tags=tags,
+            chunk_size=chunk_size,
+            chunk_overlap=chunk_overlap,
+            is_public=is_public,
+            _request_auth=_request_auth,
+            _content_type=_content_type,
+            _headers=_headers,
+            _host_index=_host_index
+        )
+
+        _response_types_map: Dict[str, Optional[str]] = {
+            '200': "DocumentResponse",
+            '422': "HTTPValidationError",
+        }
+        response_data = await self.api_client.call_api(
+            *_param,
+            _request_timeout=_request_timeout
+        )
+        return response_data.response
+
+
+    def _upload_document_api_v1_documents_upload_post_0_serialize(
         self,
         file,
         title,

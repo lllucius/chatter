@@ -605,8 +605,8 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.DataManagementApi(api_client)
-    backup_type = chatter_sdk.BackupType() # BackupType |  (optional)
-    status = 'status_example' # str |  (optional)
+    backup_type = chatter_sdk.BackupType() # BackupType | Filter by backup type (optional)
+    status = 'status_example' # str | Filter by status (optional)
 
     try:
         # List Backups
@@ -624,8 +624,8 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **backup_type** | [**BackupType**](.md)|  | [optional] 
- **status** | **str**|  | [optional] 
+ **backup_type** | [**BackupType**](.md)| Filter by backup type | [optional] 
+ **status** | **str**| Filter by status | [optional] 
 
 ### Return type
 

@@ -27,7 +27,8 @@
         "breaking_changes": [
           "Changed response format for chat endpoints",
           "Updated authentication token structure",
-          "Modified error response schema"
+          "Modified error response schema",
+          "Replaced PostgreSQL checkpointing with Redis checkpointing for LangGraph"
         ],
         "new_features": [
           "AI agent management",
@@ -36,7 +37,7 @@
           "A/B testing infrastructure",
           "Enhanced security validation",
           "Advanced vector store filtering",
-          "PostgreSQL checkpointer for LangGraph"
+          "Redis checkpointer for LangGraph"
         ]
       }
     ]
@@ -3330,10 +3331,11 @@
     "/api/v1/documents/upload": {
       "post": {
         "tags": [
+          "Documents",
           "Documents"
         ],
         "summary": "Upload Document",
-        "description": "Upload a document.\n\nArgs:\n    file: Document file to upload\n    title: Document title\n    description: Document description\n    tags: Document tags (JSON array string)\n    chunk_size: Text chunk size for processing\n    chunk_overlap: Text chunk overlap\n    is_public: Whether document is public\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Created document information",
+        "description": "Upload and process a new document.\n\nThis endpoint uploads a file, creates a document record, and starts\nthe embedding processing pipeline asynchronously.",
         "operationId": "upload_document_api_v1_documents_upload_post",
         "requestBody": {
           "content": {
@@ -3346,7 +3348,7 @@
           "required": true
         },
         "responses": {
-          "201": {
+          "200": {
             "description": "Successful Response",
             "content": {
               "application/json": {
@@ -3440,309 +3442,14 @@
         ]
       }
     },
-    "/api/v1/documents": {
-      "get": {
-        "tags": [
-          "Documents"
-        ],
-        "summary": "List Documents",
-        "description": "List user's documents.\n\nArgs:\n    status: Filter by document status\n    document_type: Filter by document type\n    tags: Filter by tags\n    owner_id: Filter by owner (admin only)\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Sort field\n    sort_order: Sort order (asc/desc)\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    List of documents with pagination info",
-        "operationId": "list_documents_api_v1_documents_get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "status",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DocumentStatus"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by status",
-              "title": "Status"
-            },
-            "description": "Filter by status"
-          },
-          {
-            "name": "document_type",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "$ref": "#/components/schemas/DocumentType"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by document type",
-              "title": "Document Type"
-            },
-            "description": "Filter by document type"
-          },
-          {
-            "name": "tags",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "array",
-                  "items": {
-                    "type": "string"
-                  }
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by tags",
-              "title": "Tags"
-            },
-            "description": "Filter by tags"
-          },
-          {
-            "name": "owner_id",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "anyOf": [
-                {
-                  "type": "string"
-                },
-                {
-                  "type": "null"
-                }
-              ],
-              "description": "Filter by owner (admin only)",
-              "title": "Owner Id"
-            },
-            "description": "Filter by owner (admin only)"
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Maximum number of results",
-              "default": 50,
-              "title": "Limit"
-            },
-            "description": "Maximum number of results"
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Number of results to skip",
-              "default": 0,
-              "title": "Offset"
-            },
-            "description": "Number of results to skip"
-          },
-          {
-            "name": "sort_by",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "description": "Sort field",
-              "default": "created_at",
-              "title": "Sort By"
-            },
-            "description": "Sort field"
-          },
-          {
-            "name": "sort_order",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "string",
-              "pattern": "^(asc|desc)$",
-              "description": "Sort order",
-              "default": "desc",
-              "title": "Sort Order"
-            },
-            "description": "Sort order"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentListResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Invalid or missing authentication token",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - User lacks permission to access documents",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
     "/api/v1/documents/{document_id}": {
       "get": {
         "tags": [
+          "Documents",
           "Documents"
         ],
         "summary": "Get Document",
-        "description": "Get document details.\n\nArgs:\n    document_id: Document ID\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Document information",
+        "description": "Get a document by ID.",
         "operationId": "get_document_api_v1_documents__document_id__get",
         "security": [
           {
@@ -3760,229 +3467,6 @@
             }
           }
         ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "401": {
-            "description": "Unauthorized - Invalid or missing authentication token",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden - User lacks permission to access this document",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "404": {
-            "description": "Not Found - Document does not exist",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      },
-      "put": {
-        "tags": [
-          "Documents"
-        ],
-        "summary": "Update Document",
-        "description": "Update document metadata.\n\nArgs:\n    document_id: Document ID\n    update_data: Update data\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Updated document information",
-        "operationId": "update_document_api_v1_documents__document_id__put",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          }
-        ],
-        "requestBody": {
-          "required": true,
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/DocumentUpdate"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -4074,10 +3558,11 @@
       },
       "delete": {
         "tags": [
+          "Documents",
           "Documents"
         ],
         "summary": "Delete Document",
-        "description": "Delete document.\n\nArgs:\n    document_id: Document ID\n    request: Delete request parameters\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Success message",
+        "description": "Delete a document.",
         "operationId": "delete_document_api_v1_documents__document_id__delete",
         "security": [
           {
@@ -4101,7 +3586,11 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DocumentDeleteResponse"
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Delete Document Api V1 Documents  Document Id  Delete"
                 }
               }
             },
@@ -4185,19 +3674,148 @@
         }
       }
     },
-    "/api/v1/documents/search": {
-      "post": {
+    "/api/v1/documents": {
+      "get": {
         "tags": [
+          "Documents",
           "Documents"
         ],
-        "summary": "Search Documents",
-        "description": "Search documents using vector similarity.\n\nArgs:\n    search_request: Search request\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Search results",
-        "operationId": "search_documents_api_v1_documents_search_post",
+        "summary": "List Documents Get",
+        "description": "List documents with pagination (GET endpoint for frontend compatibility).",
+        "operationId": "list_documents_get_api_v1_documents_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 0,
+              "title": "Offset"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List Documents Get Api V1 Documents Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/documents/list": {
+      "post": {
+        "tags": [
+          "Documents",
+          "Documents"
+        ],
+        "summary": "List Documents Post",
+        "description": "List documents with filtering and pagination (POST endpoint for advanced filtering).",
+        "operationId": "list_documents_post_api_v1_documents_list_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DocumentSearchRequest"
+                "$ref": "#/components/schemas/DocumentListRequest"
               }
             }
           },
@@ -4209,7 +3827,9 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DocumentSearchResponse"
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response List Documents Post Api V1 Documents List Post"
                 }
               }
             },
@@ -4298,179 +3918,24 @@
         ]
       }
     },
-    "/api/v1/documents/{document_id}/chunks": {
-      "get": {
-        "tags": [
-          "Documents"
-        ],
-        "summary": "Get Document Chunks",
-        "description": "Get document chunks.\n\nArgs:\n    document_id: Document ID\n    limit: Maximum number of results\n    offset: Number of results to skip\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    List of document chunks with pagination",
-        "operationId": "get_document_chunks_api_v1_documents__document_id__chunks_get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          },
-          {
-            "name": "limit",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 1,
-              "description": "Maximum number of results",
-              "default": 50,
-              "title": "Limit"
-            },
-            "description": "Maximum number of results"
-          },
-          {
-            "name": "offset",
-            "in": "query",
-            "required": false,
-            "schema": {
-              "type": "integer",
-              "minimum": 0,
-              "description": "Number of results to skip",
-              "default": 0,
-              "title": "Offset"
-            },
-            "description": "Number of results to skip"
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentChunksResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/documents/{document_id}/process": {
+    "/api/v1/documents/search": {
       "post": {
         "tags": [
+          "Documents",
           "Documents"
         ],
-        "summary": "Process Document",
-        "description": "Trigger document processing.\n\nArgs:\n    document_id: Document ID\n    processing_request: Processing request\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Processing status",
-        "operationId": "process_document_api_v1_documents__document_id__process_post",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          }
-        ],
+        "summary": "Search Documents",
+        "description": "Search documents using semantic similarity.",
+        "operationId": "search_documents_api_v1_documents_search_post",
         "requestBody": {
-          "required": true,
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/DocumentProcessingRequest"
+                "$ref": "#/components/schemas/DocumentSearchRequest"
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -4478,7 +3943,135 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/DocumentProcessingResponse"
+                  "items": {
+                    "$ref": "#/components/schemas/SearchResultResponse"
+                  },
+                  "type": "array",
+                  "title": "Response Search Documents Api V1 Documents Search Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/documents/{document_id}/reprocess": {
+      "post": {
+        "tags": [
+          "Documents",
+          "Documents"
+        ],
+        "summary": "Reprocess Document",
+        "description": "Reprocess a document through the embedding pipeline.",
+        "operationId": "reprocess_document_api_v1_documents__document_id__reprocess_post",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "document_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Document Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": {
+                    "type": "string"
+                  },
+                  "title": "Response Reprocess Document Api V1 Documents  Document Id  Reprocess Post"
                 }
               }
             },
@@ -4562,14 +4155,15 @@
         }
       }
     },
-    "/api/v1/documents/stats/overview": {
+    "/api/v1/documents/stats/user": {
       "get": {
         "tags": [
+          "Documents",
           "Documents"
         ],
-        "summary": "Get Document Stats",
-        "description": "Get document statistics.\n\nArgs:\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Document statistics",
-        "operationId": "get_document_stats_api_v1_documents_stats_overview_get",
+        "summary": "Get User Document Stats",
+        "description": "Get document statistics for the current user.",
+        "operationId": "get_user_document_stats_api_v1_documents_stats_user_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -4620,232 +4214,6 @@
             "CustomHTTPBearer": []
           }
         ]
-      }
-    },
-    "/api/v1/documents/{document_id}/download": {
-      "get": {
-        "tags": [
-          "Documents"
-        ],
-        "summary": "Download Document",
-        "description": "Download original document file.\n\nArgs:\n    document_id: Document ID\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    File download response",
-        "operationId": "download_document_api_v1_documents__document_id__download_get",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {}
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
-      }
-    },
-    "/api/v1/documents/{document_id}/reprocess": {
-      "post": {
-        "tags": [
-          "Documents"
-        ],
-        "summary": "Reprocess Document",
-        "description": "Reprocess an existing document.\n\nArgs:\n    document_id: Document ID\n    current_user: Current authenticated user\n    document_service: Document service\n\nReturns:\n    Processing status",
-        "operationId": "reprocess_document_api_v1_documents__document_id__reprocess_post",
-        "security": [
-          {
-            "CustomHTTPBearer": []
-          }
-        ],
-        "parameters": [
-          {
-            "name": "document_id",
-            "in": "path",
-            "required": true,
-            "schema": {
-              "type": "string",
-              "title": "Document Id"
-            }
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "Successful Response",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/DocumentProcessingResponse"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          },
-          "422": {
-            "description": "Validation Error",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/HTTPValidationError"
-                }
-              }
-            },
-            "headers": {
-              "x-correlation-id": {
-                "description": "Request correlation ID for tracing",
-                "schema": {
-                  "type": "string",
-                  "format": "ulid"
-                }
-              },
-              "X-RateLimit-Limit-Minute": {
-                "description": "Requests allowed per minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Limit-Hour": {
-                "description": "Requests allowed per hour",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Minute": {
-                "description": "Requests remaining this minute",
-                "schema": {
-                  "type": "integer"
-                }
-              },
-              "X-RateLimit-Remaining-Hour": {
-                "description": "Requests remaining this hour",
-                "schema": {
-                  "type": "integer"
-                }
-              }
-            }
-          }
-        }
       }
     },
     "/api/v1/profiles/": {
@@ -8439,7 +7807,7 @@
           "Analytics"
         ],
         "summary": "Get Dashboard Chart Data",
-        "description": "Get chart-ready analytics data for dashboard visualization.\n\nArgs:\n    start_date: Start date for analytics\n    end_date: End date for analytics  \n    period: Predefined period\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n    \nReturns:\n    Chart-ready analytics data",
+        "description": "Get chart-ready analytics data for dashboard visualization.\n\nArgs:\n    start_date: Start date for analytics\n    end_date: End date for analytics\n    period: Predefined period\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n\nReturns:\n    Chart-ready analytics data",
         "operationId": "get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get",
         "security": [
           {
@@ -8594,7 +7962,7 @@
           "Analytics"
         ],
         "summary": "Get Integrated Dashboard Stats",
-        "description": "Get integrated dashboard statistics.\n\nArgs:\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n    \nReturns:\n    Integrated dashboard statistics",
+        "description": "Get integrated dashboard statistics.\n\nArgs:\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n\nReturns:\n    Integrated dashboard statistics",
         "operationId": "get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get",
         "responses": {
           "200": {
@@ -9435,7 +8803,7 @@
           "Analytics"
         ],
         "summary": "Warm Analytics Cache",
-        "description": "Warm analytics cache to improve performance.\n\nArgs:\n    force_refresh: Force refresh of existing cache entries\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n    \nReturns:\n    Cache warming results",
+        "description": "Warm analytics cache to improve performance.\n\nArgs:\n    force_refresh: Force refresh of existing cache entries\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n\nReturns:\n    Cache warming results",
         "operationId": "warm_analytics_cache_api_v1_analytics_cache_warm_post",
         "security": [
           {
@@ -9552,7 +8920,7 @@
           "Analytics"
         ],
         "summary": "Get Cache Warming Status",
-        "description": "Get cache warming status and performance metrics.\n\nArgs:\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n    \nReturns:\n    Cache warming status and metrics",
+        "description": "Get cache warming status and performance metrics.\n\nArgs:\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n\nReturns:\n    Cache warming status and metrics",
         "operationId": "get_cache_warming_status_api_v1_analytics_cache_status_get",
         "responses": {
           "200": {
@@ -9614,7 +8982,7 @@
           "Analytics"
         ],
         "summary": "Optimize Cache Performance",
-        "description": "Analyze and optimize cache performance automatically.\n\nArgs:\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n    \nReturns:\n    Optimization results and recommendations",
+        "description": "Analyze and optimize cache performance automatically.\n\nArgs:\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n\nReturns:\n    Optimization results and recommendations",
         "operationId": "optimize_cache_performance_api_v1_analytics_cache_optimize_post",
         "responses": {
           "200": {
@@ -9676,7 +9044,7 @@
           "Analytics"
         ],
         "summary": "Invalidate Stale Cache",
-        "description": "Invalidate stale cache entries to free up memory.\n\nArgs:\n    max_age_hours: Maximum age in hours for cache entries to keep\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n    \nReturns:\n    Cache invalidation results",
+        "description": "Invalidate stale cache entries to free up memory.\n\nArgs:\n    max_age_hours: Maximum age in hours for cache entries to keep\n    current_user: Current authenticated user\n    cache_warming_service: Cache warming service\n\nReturns:\n    Cache invalidation results",
         "operationId": "invalidate_stale_cache_api_v1_analytics_cache_invalidate_post",
         "security": [
           {
@@ -9793,7 +9161,7 @@
           "Analytics"
         ],
         "summary": "Get Detailed Performance Metrics",
-        "description": "Get detailed performance metrics for analytics service.\n\nArgs:\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n    \nReturns:\n    Detailed performance metrics",
+        "description": "Get detailed performance metrics for analytics service.\n\nArgs:\n    current_user: Current authenticated user\n    analytics_service: Analytics service\n\nReturns:\n    Detailed performance metrics",
         "operationId": "get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get",
         "responses": {
           "200": {
@@ -9855,7 +9223,7 @@
           "Analytics"
         ],
         "summary": "Get Database Health Metrics",
-        "description": "Get comprehensive database health metrics for analytics.\n\nArgs:\n    current_user: Current authenticated user\n    db_optimization_service: Database optimization service\n    \nReturns:\n    Database health metrics and recommendations",
+        "description": "Get comprehensive database health metrics for analytics.\n\nArgs:\n    current_user: Current authenticated user\n    db_optimization_service: Database optimization service\n\nReturns:\n    Database health metrics and recommendations",
         "operationId": "get_database_health_metrics_api_v1_analytics_database_health_get",
         "responses": {
           "200": {
@@ -9917,7 +9285,7 @@
           "Analytics"
         ],
         "summary": "Analyze Query Performance",
-        "description": "Analyze performance of analytics database queries.\n\nArgs:\n    query_type: Specific query type to analyze (optional)\n    current_user: Current authenticated user\n    db_optimization_service: Database optimization service\n    \nReturns:\n    Query performance analysis and optimization recommendations",
+        "description": "Analyze performance of analytics database queries.\n\nArgs:\n    query_type: Specific query type to analyze (optional)\n    current_user: Current authenticated user\n    db_optimization_service: Database optimization service\n\nReturns:\n    Query performance analysis and optimization recommendations",
         "operationId": "analyze_query_performance_api_v1_analytics_database_analyze_queries_post",
         "security": [
           {
@@ -11526,7 +10894,7 @@
           "Tool Servers"
         ],
         "summary": "List Tool Servers",
-        "description": "List tool servers with optional filtering.\n\nArgs:\n    request: List request with filter parameters\n    current_user: Current authenticated user\n    service: Tool server service\n\nReturns:\n    List of server responses",
+        "description": "List tool servers with optional filtering.\n\nArgs:\n    status: Filter by server status\n    include_builtin: Include built-in servers\n    current_user: Current authenticated user\n    service: Tool server service\n\nReturns:\n    List of server responses",
         "operationId": "list_tool_servers_api_v1_toolservers_servers_get",
         "security": [
           {
@@ -11547,8 +10915,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by server status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by server status"
           },
           {
             "name": "include_builtin",
@@ -11556,9 +10926,11 @@
             "required": false,
             "schema": {
               "type": "boolean",
+              "description": "Include built-in servers",
               "default": true,
               "title": "Include Builtin"
-            }
+            },
+            "description": "Include built-in servers"
           }
         ],
         "responses": {
@@ -12579,7 +11951,7 @@
           "Tool Servers"
         ],
         "summary": "Get Server Tools",
-        "description": "Get tools for a specific server.\n\nArgs:\n    server_id: Server ID\n    request: Server tools request with pagination\n    current_user: Current authenticated user\n    service: Tool server service\n\nReturns:\n    List of server tools with pagination",
+        "description": "Get tools for a specific server.\n\nArgs:\n    server_id: Server ID\n    limit: Maximum number of results\n    offset: Number of results to skip\n    current_user: Current authenticated user\n    service: Tool server service\n\nReturns:\n    List of server tools with pagination",
         "operationId": "get_server_tools_api_v1_toolservers_servers__server_id__tools_get",
         "security": [
           {
@@ -12603,9 +11975,11 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
+              "description": "Maximum number of results",
               "default": 50,
               "title": "Limit"
-            }
+            },
+            "description": "Maximum number of results"
           },
           {
             "name": "offset",
@@ -12614,9 +11988,11 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
+              "description": "Number of results to skip",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Number of results to skip"
           }
         ],
         "responses": {
@@ -14749,8 +14125,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by agent type",
               "title": "Agent Type"
-            }
+            },
+            "description": "Filter by agent type"
           },
           {
             "name": "status",
@@ -14765,19 +14143,84 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by tags",
+              "title": "Tags"
+            },
+            "description": "Filter by tags"
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 1,
+              "description": "Maximum number of results",
+              "default": 50,
+              "title": "Limit"
+            },
+            "description": "Maximum number of results"
+          },
+          {
+            "name": "offset",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "minimum": 0,
+              "description": "Number of results to skip",
+              "default": 0,
+              "title": "Offset"
+            },
+            "description": "Number of results to skip"
+          },
+          {
+            "name": "sort_by",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "description": "Sort field",
+              "default": "created_at",
+              "title": "Sort By"
+            },
+            "description": "Sort field"
+          },
+          {
+            "name": "sort_order",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "pattern": "^(asc|desc)$",
+              "description": "Sort order",
+              "default": "desc",
+              "title": "Sort Order"
+            },
+            "description": "Sort order"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "$ref": "#/components/schemas/Body_list_agents_api_v1_agents__get"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -18091,7 +17534,7 @@
           "A/B Testing"
         ],
         "summary": "List Ab Tests",
-        "description": "List A/B tests with optional filtering.\n\nArgs:\n    request: List request parameters\n    current_user: Current authenticated user\n    ab_test_manager: A/B test manager instance\n\nReturns:\n    List of A/B tests",
+        "description": "List A/B tests with optional filtering.\n\nArgs:\n    status: Filter by status\n    test_type: Filter by test type\n    tags: Filter by tags\n    current_user: Current authenticated user\n    ab_test_manager: A/B test manager instance\n\nReturns:\n    List of A/B tests",
         "operationId": "list_ab_tests_api_v1_ab_tests__get",
         "security": [
           {
@@ -18112,8 +17555,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status"
           },
           {
             "name": "test_type",
@@ -18128,30 +17573,33 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by test type",
               "title": "Test Type"
-            }
+            },
+            "description": "Filter by test type"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by tags",
+              "title": "Tags"
+            },
+            "description": "Filter by tags"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Tags"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -20135,7 +19583,7 @@
           "Plugins"
         ],
         "summary": "List Plugins",
-        "description": "List installed plugins with optional filtering.\n\nArgs:\n    request: List request parameters\n    current_user: Current authenticated user\n    plugin_manager: Plugin manager instance\n\nReturns:\n    List of installed plugins",
+        "description": "List installed plugins with optional filtering.\n\nArgs:\n    plugin_type: Filter by plugin type\n    status: Filter by status\n    enabled: Filter by enabled status\n    current_user: Current authenticated user\n    plugin_manager: Plugin manager instance\n\nReturns:\n    List of installed plugins",
         "operationId": "list_plugins_api_v1_plugins__get",
         "security": [
           {
@@ -20156,8 +19604,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by plugin type",
               "title": "Plugin Type"
-            }
+            },
+            "description": "Filter by plugin type"
           },
           {
             "name": "status",
@@ -20172,8 +19622,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status"
           },
           {
             "name": "enabled",
@@ -20188,8 +19640,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by enabled status",
               "title": "Enabled"
-            }
+            },
+            "description": "Filter by enabled status"
           }
         ],
         "responses": {
@@ -21504,7 +20958,7 @@
           "Jobs"
         ],
         "summary": "List Jobs",
-        "description": "List jobs with optional filtering and pagination.\n\nArgs:\n    request: List request parameters\n    current_user: Current authenticated user\n\nReturns:\n    List of jobs with pagination info",
+        "description": "List jobs with optional filtering and pagination.\n\nArgs:\n    status: Filter by status\n    priority: Filter by priority  \n    function_name: Filter by function name\n    created_after: Filter jobs created after this date\n    created_before: Filter jobs created before this date\n    tags: Filter by job tags (any of the provided tags)\n    search: Search in job names and metadata\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Field to sort by\n    sort_order: Sort order\n    current_user: Current authenticated user\n\nReturns:\n    List of jobs with pagination info",
         "operationId": "list_jobs_api_v1_jobs__get",
         "security": [
           {
@@ -21525,8 +20979,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status"
           },
           {
             "name": "priority",
@@ -21541,8 +20997,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by priority",
               "title": "Priority"
-            }
+            },
+            "description": "Filter by priority"
           },
           {
             "name": "function_name",
@@ -21557,8 +21015,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by function name",
               "title": "Function Name"
-            }
+            },
+            "description": "Filter by function name"
           },
           {
             "name": "created_after",
@@ -21574,8 +21034,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter jobs created after this date",
               "title": "Created After"
-            }
+            },
+            "description": "Filter jobs created after this date"
           },
           {
             "name": "created_before",
@@ -21591,8 +21053,31 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter jobs created before this date",
               "title": "Created Before"
-            }
+            },
+            "description": "Filter jobs created before this date"
+          },
+          {
+            "name": "tags",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "array",
+                  "items": {
+                    "type": "string"
+                  }
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "description": "Filter by job tags (any of the provided tags)",
+              "title": "Tags"
+            },
+            "description": "Filter by job tags (any of the provided tags)"
           },
           {
             "name": "search",
@@ -21607,8 +21092,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Search in job names and metadata",
               "title": "Search"
-            }
+            },
+            "description": "Search in job names and metadata"
           },
           {
             "name": "limit",
@@ -21617,9 +21104,11 @@
             "schema": {
               "type": "integer",
               "minimum": 1,
+              "description": "Maximum number of results",
               "default": 20,
               "title": "Limit"
-            }
+            },
+            "description": "Maximum number of results"
           },
           {
             "name": "offset",
@@ -21628,9 +21117,11 @@
             "schema": {
               "type": "integer",
               "minimum": 0,
+              "description": "Number of results to skip",
               "default": 0,
               "title": "Offset"
-            }
+            },
+            "description": "Number of results to skip"
           },
           {
             "name": "sort_by",
@@ -21638,9 +21129,11 @@
             "required": false,
             "schema": {
               "type": "string",
+              "description": "Field to sort by",
               "default": "created_at",
               "title": "Sort By"
-            }
+            },
+            "description": "Field to sort by"
           },
           {
             "name": "sort_order",
@@ -21649,31 +21142,13 @@
             "schema": {
               "type": "string",
               "pattern": "^(asc|desc)$",
+              "description": "Sort order",
               "default": "desc",
               "title": "Sort Order"
-            }
+            },
+            "description": "Sort order"
           }
         ],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "anyOf": [
-                  {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  {
-                    "type": "null"
-                  }
-                ],
-                "title": "Tags"
-              }
-            }
-          }
-        },
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -22422,8 +21897,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by backup type",
               "title": "Backup Type"
-            }
+            },
+            "description": "Filter by backup type"
           },
           {
             "name": "status",
@@ -22438,8 +21915,10 @@
                   "type": "null"
                 }
               ],
+              "description": "Filter by status",
               "title": "Status"
-            }
+            },
+            "description": "Filter by status"
           }
         ],
         "responses": {
@@ -27927,46 +27406,6 @@
         "title": "BackupType",
         "description": "Types of backups."
       },
-      "Body_list_agents_api_v1_agents__get": {
-        "properties": {
-          "pagination": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/PaginationRequest"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "sorting": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/SortingRequest"
-              },
-              {
-                "type": "null"
-              }
-            ]
-          },
-          "tags": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tags"
-          }
-        },
-        "type": "object",
-        "title": "Body_list_agents_api_v1_agents__get"
-      },
       "Body_upload_document_api_v1_documents_upload_post": {
         "properties": {
           "file": {
@@ -27975,15 +27414,36 @@
             "title": "File"
           },
           "title": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Title"
           },
           "description": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Description"
           },
           "tags": {
-            "type": "string",
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
             "title": "Tags"
           },
           "chunk_size": {
@@ -29782,329 +29242,88 @@
         "title": "DocumentAnalyticsResponse",
         "description": "Schema for document analytics response."
       },
-      "DocumentChunkResponse": {
+      "DocumentListRequest": {
         "properties": {
-          "id": {
-            "type": "string",
-            "title": "Id",
-            "description": "Chunk ID"
-          },
-          "document_id": {
-            "type": "string",
-            "title": "Document Id",
-            "description": "Document ID"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content",
-            "description": "Chunk content"
-          },
-          "chunk_index": {
-            "type": "integer",
-            "title": "Chunk Index",
-            "description": "Chunk index"
-          },
-          "start_char": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Start Char",
-            "description": "Start character position"
-          },
-          "end_char": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "End Char",
-            "description": "End character position"
-          },
-          "extra_metadata": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extra Metadata",
-            "description": "Chunk metadata"
-          },
-          "token_count": {
-            "anyOf": [
-              {
-                "type": "integer"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Token Count",
-            "description": "Token count"
-          },
-          "language": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Language",
-            "description": "Detected language"
-          },
-          "embedding_model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Embedding Model",
-            "description": "Embedding model used"
-          },
-          "embedding_provider": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Embedding Provider",
-            "description": "Embedding provider"
-          },
-          "embedding_created_at": {
-            "anyOf": [
-              {
-                "type": "string",
-                "format": "date-time"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Embedding Created At",
-            "description": "Embedding creation time"
-          },
-          "content_hash": {
-            "type": "string",
-            "title": "Content Hash",
-            "description": "Content hash"
-          },
-          "created_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Created At",
-            "description": "Creation time"
-          },
-          "updated_at": {
-            "type": "string",
-            "format": "date-time",
-            "title": "Updated At",
-            "description": "Last update time"
-          }
-        },
-        "type": "object",
-        "required": [
-          "id",
-          "document_id",
-          "content",
-          "chunk_index",
-          "content_hash",
-          "created_at",
-          "updated_at"
-        ],
-        "title": "DocumentChunkResponse",
-        "description": "Schema for document chunk response."
-      },
-      "DocumentChunksResponse": {
-        "properties": {
-          "chunks": {
-            "items": {
-              "$ref": "#/components/schemas/DocumentChunkResponse"
-            },
-            "type": "array",
-            "title": "Chunks",
-            "description": "List of document chunks"
-          },
-          "total_count": {
-            "type": "integer",
-            "title": "Total Count",
-            "description": "Total number of chunks"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit",
-            "description": "Applied limit"
-          },
-          "offset": {
-            "type": "integer",
-            "title": "Offset",
-            "description": "Applied offset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "chunks",
-          "total_count",
-          "limit",
-          "offset"
-        ],
-        "title": "DocumentChunksResponse",
-        "description": "Schema for document chunks response with pagination."
-      },
-      "DocumentDeleteResponse": {
-        "properties": {
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Deletion result message"
-          }
-        },
-        "type": "object",
-        "required": [
-          "message"
-        ],
-        "title": "DocumentDeleteResponse",
-        "description": "Response schema for document deletion."
-      },
-      "DocumentListResponse": {
-        "properties": {
-          "documents": {
-            "items": {
-              "$ref": "#/components/schemas/DocumentResponse"
-            },
-            "type": "array",
-            "title": "Documents",
-            "description": "List of documents"
-          },
-          "total_count": {
-            "type": "integer",
-            "title": "Total Count",
-            "description": "Total number of documents"
-          },
-          "limit": {
-            "type": "integer",
-            "title": "Limit",
-            "description": "Applied limit"
-          },
-          "offset": {
-            "type": "integer",
-            "title": "Offset",
-            "description": "Applied offset"
-          }
-        },
-        "type": "object",
-        "required": [
-          "documents",
-          "total_count",
-          "limit",
-          "offset"
-        ],
-        "title": "DocumentListResponse",
-        "description": "Schema for document list response."
-      },
-      "DocumentProcessingRequest": {
-        "properties": {
-          "reprocess": {
-            "type": "boolean",
-            "title": "Reprocess",
-            "description": "Force reprocessing",
-            "default": false
-          },
-          "chunk_size": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 10000.0,
-                "minimum": 100.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Chunk Size",
-            "description": "Override chunk size"
-          },
-          "chunk_overlap": {
-            "anyOf": [
-              {
-                "type": "integer",
-                "maximum": 2000.0,
-                "minimum": 0.0
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Chunk Overlap",
-            "description": "Override chunk overlap"
-          },
-          "generate_embeddings": {
-            "type": "boolean",
-            "title": "Generate Embeddings",
-            "description": "Generate embeddings for chunks",
-            "default": true
-          }
-        },
-        "type": "object",
-        "title": "DocumentProcessingRequest",
-        "description": "Schema for document processing request."
-      },
-      "DocumentProcessingResponse": {
-        "properties": {
-          "document_id": {
-            "type": "string",
-            "title": "Document Id",
-            "description": "Document ID"
-          },
           "status": {
-            "$ref": "#/components/schemas/DocumentStatus",
-            "description": "Processing status"
-          },
-          "message": {
-            "type": "string",
-            "title": "Message",
-            "description": "Status message"
-          },
-          "processing_started_at": {
             "anyOf": [
               {
-                "type": "string",
-                "format": "date-time"
+                "$ref": "#/components/schemas/DocumentStatus"
               },
               {
                 "type": "null"
               }
             ],
-            "title": "Processing Started At",
-            "description": "Processing start time"
+            "description": "Filter by status"
+          },
+          "document_type": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/DocumentType"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Filter by document type"
+          },
+          "tags": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Tags",
+            "description": "Filter by tags"
+          },
+          "owner_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Owner Id",
+            "description": "Filter by owner (admin only)"
+          },
+          "limit": {
+            "type": "integer",
+            "minimum": 1.0,
+            "title": "Limit",
+            "description": "Maximum number of results",
+            "default": 50
+          },
+          "offset": {
+            "type": "integer",
+            "minimum": 0.0,
+            "title": "Offset",
+            "description": "Number of results to skip",
+            "default": 0
+          },
+          "sort_by": {
+            "type": "string",
+            "title": "Sort By",
+            "description": "Sort field",
+            "default": "created_at"
+          },
+          "sort_order": {
+            "type": "string",
+            "pattern": "^(asc|desc)$",
+            "title": "Sort Order",
+            "description": "Sort order",
+            "default": "desc"
           }
         },
         "type": "object",
-        "required": [
-          "document_id",
-          "status",
-          "message"
-        ],
-        "title": "DocumentProcessingResponse",
-        "description": "Schema for document processing response."
+        "title": "DocumentListRequest",
+        "description": "Schema for document list request."
       },
       "DocumentResponse": {
         "properties": {
@@ -30406,93 +29625,6 @@
         "title": "DocumentSearchRequest",
         "description": "Schema for document search request."
       },
-      "DocumentSearchResponse": {
-        "properties": {
-          "results": {
-            "items": {
-              "$ref": "#/components/schemas/DocumentSearchResult"
-            },
-            "type": "array",
-            "title": "Results",
-            "description": "Search results"
-          },
-          "total_results": {
-            "type": "integer",
-            "title": "Total Results",
-            "description": "Total number of matching results"
-          },
-          "query": {
-            "type": "string",
-            "title": "Query",
-            "description": "Original search query"
-          },
-          "score_threshold": {
-            "type": "number",
-            "title": "Score Threshold",
-            "description": "Applied score threshold"
-          }
-        },
-        "type": "object",
-        "required": [
-          "results",
-          "total_results",
-          "query",
-          "score_threshold"
-        ],
-        "title": "DocumentSearchResponse",
-        "description": "Schema for document search response."
-      },
-      "DocumentSearchResult": {
-        "properties": {
-          "document_id": {
-            "type": "string",
-            "title": "Document Id",
-            "description": "Document ID"
-          },
-          "chunk_id": {
-            "type": "string",
-            "title": "Chunk Id",
-            "description": "Chunk ID"
-          },
-          "score": {
-            "type": "number",
-            "title": "Score",
-            "description": "Similarity score"
-          },
-          "content": {
-            "type": "string",
-            "title": "Content",
-            "description": "Matching content"
-          },
-          "metadata": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Metadata",
-            "description": "Chunk metadata"
-          },
-          "document": {
-            "$ref": "#/components/schemas/DocumentResponse",
-            "description": "Document information"
-          }
-        },
-        "type": "object",
-        "required": [
-          "document_id",
-          "chunk_id",
-          "score",
-          "content",
-          "document"
-        ],
-        "title": "DocumentSearchResult",
-        "description": "Schema for document search result."
-      },
       "DocumentStatsResponse": {
         "properties": {
           "total_documents": {
@@ -30575,77 +29707,6 @@
         ],
         "title": "DocumentType",
         "description": "Enumeration for document types."
-      },
-      "DocumentUpdate": {
-        "properties": {
-          "title": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Title",
-            "description": "Document title"
-          },
-          "description": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Description",
-            "description": "Document description"
-          },
-          "tags": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Tags",
-            "description": "Document tags"
-          },
-          "extra_metadata": {
-            "anyOf": [
-              {
-                "additionalProperties": true,
-                "type": "object"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Extra Metadata",
-            "description": "Additional metadata"
-          },
-          "is_public": {
-            "anyOf": [
-              {
-                "type": "boolean"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Is Public",
-            "description": "Whether document is public"
-          }
-        },
-        "type": "object",
-        "title": "DocumentUpdate",
-        "description": "Schema for updating a document."
       },
       "EmbeddingSpaceCreate": {
         "properties": {
@@ -32931,27 +31992,6 @@
         ],
         "title": "OptimizationSuggestion",
         "description": "Schema for optimization suggestions."
-      },
-      "PaginationRequest": {
-        "properties": {
-          "limit": {
-            "type": "integer",
-            "minimum": 1.0,
-            "title": "Limit",
-            "description": "Maximum number of results",
-            "default": 50
-          },
-          "offset": {
-            "type": "integer",
-            "minimum": 0.0,
-            "title": "Offset",
-            "description": "Number of results to skip",
-            "default": 0
-          }
-        },
-        "type": "object",
-        "title": "PaginationRequest",
-        "description": "Common pagination request schema."
       },
       "PasswordChange": {
         "properties": {
@@ -37091,6 +36131,63 @@
         "title": "SSEStatsResponse",
         "description": "Response schema for SSE service statistics."
       },
+      "SearchResultResponse": {
+        "properties": {
+          "chunk_id": {
+            "type": "string",
+            "title": "Chunk Id",
+            "description": "Chunk ID"
+          },
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "Document ID"
+          },
+          "content": {
+            "type": "string",
+            "title": "Content",
+            "description": "Matching content"
+          },
+          "similarity_score": {
+            "type": "number",
+            "title": "Similarity Score",
+            "description": "Similarity score"
+          },
+          "document_title": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Title",
+            "description": "Document title"
+          },
+          "document_filename": {
+            "type": "string",
+            "title": "Document Filename",
+            "description": "Document filename"
+          },
+          "chunk_index": {
+            "type": "integer",
+            "title": "Chunk Index",
+            "description": "Chunk index"
+          }
+        },
+        "type": "object",
+        "required": [
+          "chunk_id",
+          "document_id",
+          "content",
+          "similarity_score",
+          "document_filename",
+          "chunk_index"
+        ],
+        "title": "SearchResultResponse",
+        "description": "Schema for individual search result."
+      },
       "ServerStatus": {
         "type": "string",
         "enum": [
@@ -37280,26 +36377,6 @@
         ],
         "title": "ServerToolsResponse",
         "description": "Schema for server tools response with pagination."
-      },
-      "SortingRequest": {
-        "properties": {
-          "sort_by": {
-            "type": "string",
-            "title": "Sort By",
-            "description": "Sort field",
-            "default": "created_at"
-          },
-          "sort_order": {
-            "type": "string",
-            "pattern": "^(asc|desc)$",
-            "title": "Sort Order",
-            "description": "Sort order",
-            "default": "desc"
-          }
-        },
-        "type": "object",
-        "title": "SortingRequest",
-        "description": "Common sorting request schema."
       },
       "StatisticalAnalysis": {
         "properties": {

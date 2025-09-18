@@ -36,18 +36,27 @@ Returns:
    * List jobs with optional filtering and pagination.
 
 Args:
-    request: List request parameters
+    status: Filter by status
+    priority: Filter by priority  
+    function_name: Filter by function name
+    created_after: Filter jobs created after this date
+    created_before: Filter jobs created before this date
+    tags: Filter by job tags (any of the provided tags)
+    search: Search in job names and metadata
+    limit: Maximum number of results
+    offset: Number of results to skip
+    sort_by: Field to sort by
+    sort_order: Sort order
     current_user: Current authenticated user
 
 Returns:
     List of jobs with pagination info
    */
-  public async listJobsApiV1Jobs(data: string[] | null, options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
+  public async listJobsApiV1Jobs(options?: { status?: JobStatus | null; priority?: JobPriority | null; functionName?: string | null; createdAfter?: string | null; createdBefore?: string | null; tags?: string[] | null; search?: string | null; limit?: number; offset?: number; sortBy?: string; sortOrder?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<JobListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/jobs/`,
       method: 'GET' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
@@ -56,6 +65,7 @@ Returns:
         'function_name': options?.functionName,
         'created_after': options?.createdAfter,
         'created_before': options?.createdBefore,
+        'tags': options?.tags,
         'search': options?.search,
         'limit': options?.limit,
         'offset': options?.offset,
@@ -63,7 +73,6 @@ Returns:
         'sort_order': options?.sortOrder,
         ...options?.query
       },
-      body: data,
     };
 
     const response = await this.request(requestContext);

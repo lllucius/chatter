@@ -77,6 +77,7 @@ class BulkOperationFilters(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
         # set to None if created_before (nullable) is None
         # and model_fields_set contains the field

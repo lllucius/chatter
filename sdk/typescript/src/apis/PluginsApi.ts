@@ -37,7 +37,9 @@ Returns:
    * List installed plugins with optional filtering.
 
 Args:
-    request: List request parameters
+    plugin_type: Filter by plugin type
+    status: Filter by status
+    enabled: Filter by enabled status
     current_user: Current authenticated user
     plugin_manager: Plugin manager instance
 

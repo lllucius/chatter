@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictStr
+from pydantic import Field, StrictStr
 from typing import List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.backup_list_response import BackupListResponse
 from chatter_sdk.models.backup_request import BackupRequest
 from chatter_sdk.models.backup_response import BackupResponse
@@ -1964,8 +1965,8 @@ class DataManagementApi:
     @validate_call
     async def list_backups_api_v1_data_backups_get(
         self,
-        backup_type: Optional[BackupType] = None,
-        status: Optional[StrictStr] = None,
+        backup_type: Annotated[Optional[BackupType], Field(description="Filter by backup type")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -1983,9 +1984,9 @@ class DataManagementApi:
 
         List available backups.
 
-        :param backup_type:
+        :param backup_type: Filter by backup type
         :type backup_type: BackupType
-        :param status:
+        :param status: Filter by status
         :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2036,8 +2037,8 @@ class DataManagementApi:
     @validate_call
     async def list_backups_api_v1_data_backups_get_with_http_info(
         self,
-        backup_type: Optional[BackupType] = None,
-        status: Optional[StrictStr] = None,
+        backup_type: Annotated[Optional[BackupType], Field(description="Filter by backup type")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2055,9 +2056,9 @@ class DataManagementApi:
 
         List available backups.
 
-        :param backup_type:
+        :param backup_type: Filter by backup type
         :type backup_type: BackupType
-        :param status:
+        :param status: Filter by status
         :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2108,8 +2109,8 @@ class DataManagementApi:
     @validate_call
     async def list_backups_api_v1_data_backups_get_without_preload_content(
         self,
-        backup_type: Optional[BackupType] = None,
-        status: Optional[StrictStr] = None,
+        backup_type: Annotated[Optional[BackupType], Field(description="Filter by backup type")] = None,
+        status: Annotated[Optional[StrictStr], Field(description="Filter by status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2127,9 +2128,9 @@ class DataManagementApi:
 
         List available backups.
 
-        :param backup_type:
+        :param backup_type: Filter by backup type
         :type backup_type: BackupType
-        :param status:
+        :param status: Filter by status
         :type status: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

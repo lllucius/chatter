@@ -72,7 +72,6 @@ class ChatResponse(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
-            mode='json',
         )
         # override the default output from pydantic by calling `to_dict()` of message
         if self.message:

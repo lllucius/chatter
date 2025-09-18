@@ -37,7 +37,8 @@ Returns:
    * List tool servers with optional filtering.
 
 Args:
-    request: List request with filter parameters
+    status: Filter by server status
+    include_builtin: Include built-in servers
     current_user: Current authenticated user
     service: Tool server service
 
@@ -245,7 +246,8 @@ Returns:
 
 Args:
     server_id: Server ID
-    request: Server tools request with pagination
+    limit: Maximum number of results
+    offset: Number of results to skip
     current_user: Current authenticated user
     service: Tool server service
 

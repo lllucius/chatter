@@ -77,6 +77,7 @@ class JobCreateRequest(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
         # set to None if schedule_at (nullable) is None
         # and model_fields_set contains the field

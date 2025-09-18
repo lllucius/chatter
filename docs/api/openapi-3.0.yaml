@@ -1508,25 +1508,6 @@ components:
       - differential
       title: BackupType
       type: string
-    Body_list_agents_api_v1_agents__get:
-      properties:
-        pagination:
-          anyOf:
-          - $ref: '#/components/schemas/PaginationRequest'
-          - type: 'null'
-        sorting:
-          anyOf:
-          - $ref: '#/components/schemas/SortingRequest'
-          - type: 'null'
-        tags:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          title: Tags
-      title: Body_list_agents_api_v1_agents__get
-      type: object
     Body_upload_document_api_v1_documents_upload_post:
       properties:
         chunk_overlap:
@@ -1538,8 +1519,10 @@ components:
           title: Chunk Size
           type: integer
         description:
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Description
-          type: string
         file:
           format: binary
           title: File
@@ -1549,11 +1532,15 @@ components:
           title: Is Public
           type: boolean
         tags:
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Tags
-          type: string
         title:
+          anyOf:
+          - type: string
+          - type: 'null'
           title: Title
-          type: string
       required:
       - file
       title: Body_upload_document_api_v1_documents_upload_post
@@ -2765,223 +2752,57 @@ components:
       - documents_by_access_level
       title: DocumentAnalyticsResponse
       type: object
-    DocumentChunkResponse:
-      description: Schema for document chunk response.
+    DocumentListRequest:
+      description: Schema for document list request.
       properties:
-        chunk_index:
-          description: Chunk index
-          title: Chunk Index
-          type: integer
-        content:
-          description: Chunk content
-          title: Content
-          type: string
-        content_hash:
-          description: Content hash
-          title: Content Hash
-          type: string
-        created_at:
-          description: Creation time
-          format: date-time
-          title: Created At
-          type: string
-        document_id:
-          description: Document ID
-          title: Document Id
-          type: string
-        embedding_created_at:
+        document_type:
           anyOf:
-          - format: date-time
-            type: string
+          - $ref: '#/components/schemas/DocumentType'
           - type: 'null'
-          description: Embedding creation time
-          title: Embedding Created At
-        embedding_model:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Embedding model used
-          title: Embedding Model
-        embedding_provider:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Embedding provider
-          title: Embedding Provider
-        end_char:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          description: End character position
-          title: End Char
-        extra_metadata:
-          anyOf:
-          - additionalProperties: true
-            type: object
-          - type: 'null'
-          description: Chunk metadata
-          title: Extra Metadata
-        id:
-          description: Chunk ID
-          title: Id
-          type: string
-        language:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Detected language
-          title: Language
-        start_char:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          description: Start character position
-          title: Start Char
-        token_count:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          description: Token count
-          title: Token Count
-        updated_at:
-          description: Last update time
-          format: date-time
-          title: Updated At
-          type: string
-      required:
-      - id
-      - document_id
-      - content
-      - chunk_index
-      - content_hash
-      - created_at
-      - updated_at
-      title: DocumentChunkResponse
-      type: object
-    DocumentChunksResponse:
-      description: Schema for document chunks response with pagination.
-      properties:
-        chunks:
-          description: List of document chunks
-          items:
-            $ref: '#/components/schemas/DocumentChunkResponse'
-          title: Chunks
-          type: array
+          description: Filter by document type
         limit:
-          description: Applied limit
+          default: 50
+          description: Maximum number of results
+          minimum: 1.0
           title: Limit
           type: integer
         offset:
-          description: Applied offset
+          default: 0
+          description: Number of results to skip
+          minimum: 0.0
           title: Offset
           type: integer
-        total_count:
-          description: Total number of chunks
-          title: Total Count
-          type: integer
-      required:
-      - chunks
-      - total_count
-      - limit
-      - offset
-      title: DocumentChunksResponse
-      type: object
-    DocumentDeleteResponse:
-      description: Response schema for document deletion.
-      properties:
-        message:
-          description: Deletion result message
-          title: Message
-          type: string
-      required:
-      - message
-      title: DocumentDeleteResponse
-      type: object
-    DocumentListResponse:
-      description: Schema for document list response.
-      properties:
-        documents:
-          description: List of documents
-          items:
-            $ref: '#/components/schemas/DocumentResponse'
-          title: Documents
-          type: array
-        limit:
-          description: Applied limit
-          title: Limit
-          type: integer
-        offset:
-          description: Applied offset
-          title: Offset
-          type: integer
-        total_count:
-          description: Total number of documents
-          title: Total Count
-          type: integer
-      required:
-      - documents
-      - total_count
-      - limit
-      - offset
-      title: DocumentListResponse
-      type: object
-    DocumentProcessingRequest:
-      description: Schema for document processing request.
-      properties:
-        chunk_overlap:
+        owner_id:
           anyOf:
-          - maximum: 2000.0
-            minimum: 0.0
-            type: integer
+          - type: string
           - type: 'null'
-          description: Override chunk overlap
-          title: Chunk Overlap
-        chunk_size:
-          anyOf:
-          - maximum: 10000.0
-            minimum: 100.0
-            type: integer
-          - type: 'null'
-          description: Override chunk size
-          title: Chunk Size
-        generate_embeddings:
-          default: true
-          description: Generate embeddings for chunks
-          title: Generate Embeddings
-          type: boolean
-        reprocess:
-          default: false
-          description: Force reprocessing
-          title: Reprocess
-          type: boolean
-      title: DocumentProcessingRequest
-      type: object
-    DocumentProcessingResponse:
-      description: Schema for document processing response.
-      properties:
-        document_id:
-          description: Document ID
-          title: Document Id
+          description: Filter by owner (admin only)
+          title: Owner Id
+        sort_by:
+          default: created_at
+          description: Sort field
+          title: Sort By
           type: string
-        message:
-          description: Status message
-          title: Message
+        sort_order:
+          default: desc
+          description: Sort order
+          pattern: ^(asc|desc)$
+          title: Sort Order
           type: string
-        processing_started_at:
-          anyOf:
-          - format: date-time
-            type: string
-          - type: 'null'
-          description: Processing start time
-          title: Processing Started At
         status:
-          $ref: '#/components/schemas/DocumentStatus'
-          description: Processing status
-      required:
-      - document_id
-      - status
-      - message
-      title: DocumentProcessingResponse
+          anyOf:
+          - $ref: '#/components/schemas/DocumentStatus'
+          - type: 'null'
+          description: Filter by status
+        tags:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Filter by tags
+          title: Tags
+      title: DocumentListRequest
       type: object
     DocumentResponse:
       description: Schema for document response.
@@ -3186,71 +3007,6 @@ components:
       - query
       title: DocumentSearchRequest
       type: object
-    DocumentSearchResponse:
-      description: Schema for document search response.
-      properties:
-        query:
-          description: Original search query
-          title: Query
-          type: string
-        results:
-          description: Search results
-          items:
-            $ref: '#/components/schemas/DocumentSearchResult'
-          title: Results
-          type: array
-        score_threshold:
-          description: Applied score threshold
-          title: Score Threshold
-          type: number
-        total_results:
-          description: Total number of matching results
-          title: Total Results
-          type: integer
-      required:
-      - results
-      - total_results
-      - query
-      - score_threshold
-      title: DocumentSearchResponse
-      type: object
-    DocumentSearchResult:
-      description: Schema for document search result.
-      properties:
-        chunk_id:
-          description: Chunk ID
-          title: Chunk Id
-          type: string
-        content:
-          description: Matching content
-          title: Content
-          type: string
-        document:
-          $ref: '#/components/schemas/DocumentResponse'
-          description: Document information
-        document_id:
-          description: Document ID
-          title: Document Id
-          type: string
-        metadata:
-          anyOf:
-          - additionalProperties: true
-            type: object
-          - type: 'null'
-          description: Chunk metadata
-          title: Metadata
-        score:
-          description: Similarity score
-          title: Score
-          type: number
-      required:
-      - document_id
-      - chunk_id
-      - score
-      - content
-      - document
-      title: DocumentSearchResult
-      type: object
     DocumentStatsResponse:
       description: Schema for document statistics response.
       properties:
@@ -3319,44 +3075,6 @@ components:
       - other
       title: DocumentType
       type: string
-    DocumentUpdate:
-      description: Schema for updating a document.
-      properties:
-        description:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Document description
-          title: Description
-        extra_metadata:
-          anyOf:
-          - additionalProperties: true
-            type: object
-          - type: 'null'
-          description: Additional metadata
-          title: Extra Metadata
-        is_public:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          description: Whether document is public
-          title: Is Public
-        tags:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Document tags
-          title: Tags
-        title:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Document title
-          title: Title
-      title: DocumentUpdate
-      type: object
     EmbeddingSpaceCreate:
       description: Schema for creating an embedding space.
       properties:
@@ -4910,23 +4628,6 @@ components:
       - description
       - impact
       title: OptimizationSuggestion
-      type: object
-    PaginationRequest:
-      description: Common pagination request schema.
-      properties:
-        limit:
-          default: 50
-          description: Maximum number of results
-          minimum: 1.0
-          title: Limit
-          type: integer
-        offset:
-          default: 0
-          description: Number of results to skip
-          minimum: 0.0
-          title: Offset
-          type: integer
-      title: PaginationRequest
       type: object
     PasswordChange:
       description: Schema for password change.
@@ -7611,6 +7312,48 @@ components:
       - your_connections
       title: SSEStatsResponse
       type: object
+    SearchResultResponse:
+      description: Schema for individual search result.
+      properties:
+        chunk_id:
+          description: Chunk ID
+          title: Chunk Id
+          type: string
+        chunk_index:
+          description: Chunk index
+          title: Chunk Index
+          type: integer
+        content:
+          description: Matching content
+          title: Content
+          type: string
+        document_filename:
+          description: Document filename
+          title: Document Filename
+          type: string
+        document_id:
+          description: Document ID
+          title: Document Id
+          type: string
+        document_title:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Document title
+          title: Document Title
+        similarity_score:
+          description: Similarity score
+          title: Similarity Score
+          type: number
+      required:
+      - chunk_id
+      - document_id
+      - content
+      - similarity_score
+      - document_filename
+      - chunk_index
+      title: SearchResultResponse
+      type: object
     ServerStatus:
       description: Enumeration for server status.
       enum:
@@ -7746,22 +7489,6 @@ components:
       - limit
       - offset
       title: ServerToolsResponse
-      type: object
-    SortingRequest:
-      description: Common sorting request schema.
-      properties:
-        sort_by:
-          default: created_at
-          description: Sort field
-          title: Sort By
-          type: string
-        sort_order:
-          default: desc
-          description: Sort order
-          pattern: ^(asc|desc)$
-          title: Sort Order
-          type: string
-      title: SortingRequest
       type: object
     StatisticalAnalysis:
       description: Statistical analysis results.
@@ -10204,6 +9931,7 @@ info:
     - Changed response format for chat endpoints
     - Updated authentication token structure
     - Modified error response schema
+    - Replaced PostgreSQL checkpointing with Redis checkpointing for LangGraph
     documentation_url: http://localhost:8000/docs/v2
     new_features:
     - AI agent management
@@ -10212,7 +9940,7 @@ info:
     - A/B testing infrastructure
     - Enhanced security validation
     - Advanced vector store filtering
-    - PostgreSQL checkpointer for LangGraph
+    - Redis checkpointer for LangGraph
     release_date: '2024-08-01'
     status: active
     version: v2
@@ -10253,38 +9981,44 @@ paths:
       summary: Root
   /api/v1/ab-tests/:
     get:
-      description: "List A/B tests with optional filtering.\n\nArgs:\n    request:\
-        \ List request parameters\n    current_user: Current authenticated user\n\
-        \    ab_test_manager: A/B test manager instance\n\nReturns:\n    List of A/B\
-        \ tests"
+      description: "List A/B tests with optional filtering.\n\nArgs:\n    status:\
+        \ Filter by status\n    test_type: Filter by test type\n    tags: Filter by\
+        \ tags\n    current_user: Current authenticated user\n    ab_test_manager:\
+        \ A/B test manager instance\n\nReturns:\n    List of A/B tests"
       operationId: list_ab_tests_api_v1_ab_tests__get
       parameters:
-      - in: query
+      - description: Filter by status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/TestStatus'
           - type: 'null'
+          description: Filter by status
           title: Status
-      - in: query
+      - description: Filter by test type
+        in: query
         name: test_type
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/TestType'
           - type: 'null'
+          description: Filter by test type
           title: Test Type
-      requestBody:
-        content:
-          application/json:
-            schema:
-              anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: 'null'
-              title: Tags
+      - description: Filter by tags
+        in: query
+        name: tags
+        required: false
+        schema:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Filter by tags
+          title: Tags
       responses:
         '200':
           content:
@@ -10914,27 +10648,77 @@ paths:
         only see their own agents.
       operationId: list_agents_api_v1_agents__get
       parameters:
-      - in: query
+      - description: Filter by agent type
+        in: query
         name: agent_type
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/AgentType'
           - type: 'null'
+          description: Filter by agent type
           title: Agent Type
-      - in: query
+      - description: Filter by status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/AgentStatus'
           - type: 'null'
+          description: Filter by status
           title: Status
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/Body_list_agents_api_v1_agents__get'
+      - description: Filter by tags
+        in: query
+        name: tags
+        required: false
+        schema:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Filter by tags
+          title: Tags
+      - description: Maximum number of results
+        in: query
+        name: limit
+        required: false
+        schema:
+          default: 50
+          description: Maximum number of results
+          minimum: 1
+          title: Limit
+          type: integer
+      - description: Number of results to skip
+        in: query
+        name: offset
+        required: false
+        schema:
+          default: 0
+          description: Number of results to skip
+          minimum: 0
+          title: Offset
+          type: integer
+      - description: Sort field
+        in: query
+        name: sort_by
+        required: false
+        schema:
+          default: created_at
+          description: Sort field
+          title: Sort By
+          type: string
+      - description: Sort order
+        in: query
+        name: sort_order
+        required: false
+        schema:
+          default: desc
+          description: Sort order
+          pattern: ^(asc|desc)$
+          title: Sort Order
+          type: string
       responses:
         '200':
           content:
@@ -11905,7 +11689,7 @@ paths:
       description: "Invalidate stale cache entries to free up memory.\n\nArgs:\n \
         \   max_age_hours: Maximum age in hours for cache entries to keep\n    current_user:\
         \ Current authenticated user\n    cache_warming_service: Cache warming service\n\
-        \    \nReturns:\n    Cache invalidation results"
+        \nReturns:\n    Cache invalidation results"
       operationId: invalidate_stale_cache_api_v1_analytics_cache_invalidate_post
       parameters:
       - in: query
@@ -11952,7 +11736,7 @@ paths:
     post:
       description: "Analyze and optimize cache performance automatically.\n\nArgs:\n\
         \    current_user: Current authenticated user\n    cache_warming_service:\
-        \ Cache warming service\n    \nReturns:\n    Optimization results and recommendations"
+        \ Cache warming service\n\nReturns:\n    Optimization results and recommendations"
       operationId: optimize_cache_performance_api_v1_analytics_cache_optimize_post
       responses:
         '200':
@@ -11979,7 +11763,7 @@ paths:
     get:
       description: "Get cache warming status and performance metrics.\n\nArgs:\n \
         \   current_user: Current authenticated user\n    cache_warming_service: Cache\
-        \ warming service\n    \nReturns:\n    Cache warming status and metrics"
+        \ warming service\n\nReturns:\n    Cache warming status and metrics"
       operationId: get_cache_warming_status_api_v1_analytics_cache_status_get
       responses:
         '200':
@@ -12006,8 +11790,8 @@ paths:
     post:
       description: "Warm analytics cache to improve performance.\n\nArgs:\n    force_refresh:\
         \ Force refresh of existing cache entries\n    current_user: Current authenticated\
-        \ user\n    cache_warming_service: Cache warming service\n    \nReturns:\n\
-        \    Cache warming results"
+        \ user\n    cache_warming_service: Cache warming service\n\nReturns:\n   \
+        \ Cache warming results"
       operationId: warm_analytics_cache_api_v1_analytics_cache_warm_post
       parameters:
       - in: query
@@ -12190,8 +11974,8 @@ paths:
     get:
       description: "Get chart-ready analytics data for dashboard visualization.\n\n\
         Args:\n    start_date: Start date for analytics\n    end_date: End date for\
-        \ analytics  \n    period: Predefined period\n    current_user: Current authenticated\
-        \ user\n    analytics_service: Analytics service\n    \nReturns:\n    Chart-ready\
+        \ analytics\n    period: Predefined period\n    current_user: Current authenticated\
+        \ user\n    analytics_service: Analytics service\n\nReturns:\n    Chart-ready\
         \ analytics data"
       operationId: get_dashboard_chart_data_api_v1_analytics_dashboard_chart_data_get
       parameters:
@@ -12259,8 +12043,8 @@ paths:
   /api/v1/analytics/dashboard/integrated:
     get:
       description: "Get integrated dashboard statistics.\n\nArgs:\n    current_user:\
-        \ Current authenticated user\n    analytics_service: Analytics service\n \
-        \   \nReturns:\n    Integrated dashboard statistics"
+        \ Current authenticated user\n    analytics_service: Analytics service\n\n\
+        Returns:\n    Integrated dashboard statistics"
       operationId: get_integrated_dashboard_stats_api_v1_analytics_dashboard_integrated_get
       responses:
         '200':
@@ -12285,8 +12069,7 @@ paths:
       description: "Analyze performance of analytics database queries.\n\nArgs:\n\
         \    query_type: Specific query type to analyze (optional)\n    current_user:\
         \ Current authenticated user\n    db_optimization_service: Database optimization\
-        \ service\n    \nReturns:\n    Query performance analysis and optimization\
-        \ recommendations"
+        \ service\n\nReturns:\n    Query performance analysis and optimization recommendations"
       operationId: analyze_query_performance_api_v1_analytics_database_analyze_queries_post
       parameters:
       - in: query
@@ -12332,8 +12115,8 @@ paths:
     get:
       description: "Get comprehensive database health metrics for analytics.\n\nArgs:\n\
         \    current_user: Current authenticated user\n    db_optimization_service:\
-        \ Database optimization service\n    \nReturns:\n    Database health metrics\
-        \ and recommendations"
+        \ Database optimization service\n\nReturns:\n    Database health metrics and\
+        \ recommendations"
       operationId: get_database_health_metrics_api_v1_analytics_database_health_get
       responses:
         '200':
@@ -12635,7 +12418,7 @@ paths:
     get:
       description: "Get detailed performance metrics for analytics service.\n\nArgs:\n\
         \    current_user: Current authenticated user\n    analytics_service: Analytics\
-        \ service\n    \nReturns:\n    Detailed performance metrics"
+        \ service\n\nReturns:\n    Detailed performance metrics"
       operationId: get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get
       responses:
         '200':
@@ -14595,21 +14378,25 @@ paths:
       description: List available backups.
       operationId: list_backups_api_v1_data_backups_get
       parameters:
-      - in: query
+      - description: Filter by backup type
+        in: query
         name: backup_type
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/BackupType'
           - type: 'null'
+          description: Filter by backup type
           title: Backup Type
-      - in: query
+      - description: Filter by status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - type: string
           - type: 'null'
+          description: Filter by status
           title: Status
       responses:
         '200':
@@ -14954,102 +14741,31 @@ paths:
       - Data Management
   /api/v1/documents:
     get:
-      description: "List user's documents.\n\nArgs:\n    status: Filter by document\
-        \ status\n    document_type: Filter by document type\n    tags: Filter by\
-        \ tags\n    owner_id: Filter by owner (admin only)\n    limit: Maximum number\
-        \ of results\n    offset: Number of results to skip\n    sort_by: Sort field\n\
-        \    sort_order: Sort order (asc/desc)\n    current_user: Current authenticated\
-        \ user\n    document_service: Document service\n\nReturns:\n    List of documents\
-        \ with pagination info"
-      operationId: list_documents_api_v1_documents_get
+      description: List documents with pagination (GET endpoint for frontend compatibility).
+      operationId: list_documents_get_api_v1_documents_get
       parameters:
-      - description: Filter by status
-        in: query
-        name: status
-        required: false
-        schema:
-          anyOf:
-          - $ref: '#/components/schemas/DocumentStatus'
-          - type: 'null'
-          description: Filter by status
-          title: Status
-      - description: Filter by document type
-        in: query
-        name: document_type
-        required: false
-        schema:
-          anyOf:
-          - $ref: '#/components/schemas/DocumentType'
-          - type: 'null'
-          description: Filter by document type
-          title: Document Type
-      - description: Filter by tags
-        in: query
-        name: tags
-        required: false
-        schema:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Filter by tags
-          title: Tags
-      - description: Filter by owner (admin only)
-        in: query
-        name: owner_id
-        required: false
-        schema:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Filter by owner (admin only)
-          title: Owner Id
-      - description: Maximum number of results
-        in: query
+      - in: query
         name: limit
         required: false
         schema:
-          default: 50
-          description: Maximum number of results
-          minimum: 1
+          default: 10
           title: Limit
           type: integer
-      - description: Number of results to skip
-        in: query
+      - in: query
         name: offset
         required: false
         schema:
           default: 0
-          description: Number of results to skip
-          minimum: 0
           title: Offset
           type: integer
-      - description: Sort field
-        in: query
-        name: sort_by
-        required: false
-        schema:
-          default: created_at
-          description: Sort field
-          title: Sort By
-          type: string
-      - description: Sort order
-        in: query
-        name: sort_order
-        required: false
-        schema:
-          default: desc
-          description: Sort order
-          pattern: ^(asc|desc)$
-          title: Sort Order
-          type: string
       responses:
         '200':
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentListResponse'
+                additionalProperties: true
+                title: Response List Documents Get Api V1 Documents Get
+                type: object
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15057,23 +14773,11 @@ paths:
             X-RateLimit-Remaining-Hour: *id003
             X-RateLimit-Remaining-Minute: *id004
             x-correlation-id: *id005
-        '401':
-          description: Unauthorized - Invalid or missing authentication token
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '403':
-          description: Forbidden - User lacks permission to access documents
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
         '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15083,14 +14787,57 @@ paths:
             x-correlation-id: *id005
       security:
       - CustomHTTPBearer: []
-      summary: List Documents
+      summary: List Documents Get
       tags:
+      - Documents
+      - Documents
+  /api/v1/documents/list:
+    post:
+      description: List documents with filtering and pagination (POST endpoint for
+        advanced filtering).
+      operationId: list_documents_post_api_v1_documents_list_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/DocumentListRequest'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response List Documents Post Api V1 Documents List Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List Documents Post
+      tags:
+      - Documents
       - Documents
   /api/v1/documents/search:
     post:
-      description: "Search documents using vector similarity.\n\nArgs:\n    search_request:\
-        \ Search request\n    current_user: Current authenticated user\n    document_service:\
-        \ Document service\n\nReturns:\n    Search results"
+      description: Search documents using semantic similarity.
       operationId: search_documents_api_v1_documents_search_post
       requestBody:
         content:
@@ -15103,7 +14850,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentSearchResponse'
+                items:
+                  $ref: '#/components/schemas/SearchResultResponse'
+                title: Response Search Documents Api V1 Documents Search Post
+                type: array
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15128,11 +14878,11 @@ paths:
       summary: Search Documents
       tags:
       - Documents
-  /api/v1/documents/stats/overview:
+      - Documents
+  /api/v1/documents/stats/user:
     get:
-      description: "Get document statistics.\n\nArgs:\n    current_user: Current authenticated\
-        \ user\n    document_service: Document service\n\nReturns:\n    Document statistics"
-      operationId: get_document_stats_api_v1_documents_stats_overview_get
+      description: Get document statistics for the current user.
+      operationId: get_user_document_stats_api_v1_documents_stats_user_get
       responses:
         '200':
           content:
@@ -15148,17 +14898,18 @@ paths:
             x-correlation-id: *id005
       security:
       - CustomHTTPBearer: []
-      summary: Get Document Stats
+      summary: Get User Document Stats
       tags:
+      - Documents
       - Documents
   /api/v1/documents/upload:
     post:
-      description: "Upload a document.\n\nArgs:\n    file: Document file to upload\n\
-        \    title: Document title\n    description: Document description\n    tags:\
-        \ Document tags (JSON array string)\n    chunk_size: Text chunk size for processing\n\
-        \    chunk_overlap: Text chunk overlap\n    is_public: Whether document is\
-        \ public\n    current_user: Current authenticated user\n    document_service:\
-        \ Document service\n\nReturns:\n    Created document information"
+      description: 'Upload and process a new document.
+
+
+        This endpoint uploads a file, creates a document record, and starts
+
+        the embedding processing pipeline asynchronously.'
       operationId: upload_document_api_v1_documents_upload_post
       requestBody:
         content:
@@ -15167,7 +14918,7 @@ paths:
               $ref: '#/components/schemas/Body_upload_document_api_v1_documents_upload_post'
         required: true
       responses:
-        '201':
+        '200':
           content:
             application/json:
               schema:
@@ -15196,11 +14947,10 @@ paths:
       summary: Upload Document
       tags:
       - Documents
+      - Documents
   /api/v1/documents/{document_id}:
     delete:
-      description: "Delete document.\n\nArgs:\n    document_id: Document ID\n    request:\
-        \ Delete request parameters\n    current_user: Current authenticated user\n\
-        \    document_service: Document service\n\nReturns:\n    Success message"
+      description: Delete a document.
       operationId: delete_document_api_v1_documents__document_id__delete
       parameters:
       - in: path
@@ -15214,7 +14964,10 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentDeleteResponse'
+                additionalProperties:
+                  type: string
+                title: Response Delete Document Api V1 Documents  Document Id  Delete
+                type: object
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15239,10 +14992,9 @@ paths:
       summary: Delete Document
       tags:
       - Documents
+      - Documents
     get:
-      description: "Get document details.\n\nArgs:\n    document_id: Document ID\n\
-        \    current_user: Current authenticated user\n    document_service: Document\
-        \ service\n\nReturns:\n    Document information"
+      description: Get a document by ID.
       operationId: get_document_api_v1_documents__document_id__get
       parameters:
       - in: path
@@ -15264,31 +15016,11 @@ paths:
             X-RateLimit-Remaining-Hour: *id003
             X-RateLimit-Remaining-Minute: *id004
             x-correlation-id: *id005
-        '401':
-          description: Unauthorized - Invalid or missing authentication token
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '403':
-          description: Forbidden - User lacks permission to access this document
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '404':
-          description: Not Found - Document does not exist
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
         '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
           description: Validation Error
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15301,216 +15033,10 @@ paths:
       summary: Get Document
       tags:
       - Documents
-    put:
-      description: "Update document metadata.\n\nArgs:\n    document_id: Document\
-        \ ID\n    update_data: Update data\n    current_user: Current authenticated\
-        \ user\n    document_service: Document service\n\nReturns:\n    Updated document\
-        \ information"
-      operationId: update_document_api_v1_documents__document_id__put
-      parameters:
-      - in: path
-        name: document_id
-        required: true
-        schema:
-          title: Document Id
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentUpdate'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Update Document
-      tags:
-      - Documents
-  /api/v1/documents/{document_id}/chunks:
-    get:
-      description: "Get document chunks.\n\nArgs:\n    document_id: Document ID\n\
-        \    limit: Maximum number of results\n    offset: Number of results to skip\n\
-        \    current_user: Current authenticated user\n    document_service: Document\
-        \ service\n\nReturns:\n    List of document chunks with pagination"
-      operationId: get_document_chunks_api_v1_documents__document_id__chunks_get
-      parameters:
-      - in: path
-        name: document_id
-        required: true
-        schema:
-          title: Document Id
-          type: string
-      - description: Maximum number of results
-        in: query
-        name: limit
-        required: false
-        schema:
-          default: 50
-          description: Maximum number of results
-          minimum: 1
-          title: Limit
-          type: integer
-      - description: Number of results to skip
-        in: query
-        name: offset
-        required: false
-        schema:
-          default: 0
-          description: Number of results to skip
-          minimum: 0
-          title: Offset
-          type: integer
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentChunksResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Document Chunks
-      tags:
-      - Documents
-  /api/v1/documents/{document_id}/download:
-    get:
-      description: "Download original document file.\n\nArgs:\n    document_id: Document\
-        \ ID\n    current_user: Current authenticated user\n    document_service:\
-        \ Document service\n\nReturns:\n    File download response"
-      operationId: download_document_api_v1_documents__document_id__download_get
-      parameters:
-      - in: path
-        name: document_id
-        required: true
-        schema:
-          title: Document Id
-          type: string
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Download Document
-      tags:
-      - Documents
-  /api/v1/documents/{document_id}/process:
-    post:
-      description: "Trigger document processing.\n\nArgs:\n    document_id: Document\
-        \ ID\n    processing_request: Processing request\n    current_user: Current\
-        \ authenticated user\n    document_service: Document service\n\nReturns:\n\
-        \    Processing status"
-      operationId: process_document_api_v1_documents__document_id__process_post
-      parameters:
-      - in: path
-        name: document_id
-        required: true
-        schema:
-          title: Document Id
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/DocumentProcessingRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/DocumentProcessingResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Process Document
-      tags:
       - Documents
   /api/v1/documents/{document_id}/reprocess:
     post:
-      description: "Reprocess an existing document.\n\nArgs:\n    document_id: Document\
-        \ ID\n    current_user: Current authenticated user\n    document_service:\
-        \ Document service\n\nReturns:\n    Processing status"
+      description: Reprocess a document through the embedding pipeline.
       operationId: reprocess_document_api_v1_documents__document_id__reprocess_post
       parameters:
       - in: path
@@ -15524,7 +15050,11 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/DocumentProcessingResponse'
+                additionalProperties:
+                  type: string
+                title: Response Reprocess Document Api V1 Documents  Document Id  Reprocess
+                  Post
+                type: object
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -15548,6 +15078,7 @@ paths:
       - CustomHTTPBearer: []
       summary: Reprocess Document
       tags:
+      - Documents
       - Documents
   /api/v1/events/admin/stream:
     get:
@@ -15674,35 +15205,48 @@ paths:
   /api/v1/jobs/:
     get:
       description: "List jobs with optional filtering and pagination.\n\nArgs:\n \
-        \   request: List request parameters\n    current_user: Current authenticated\
-        \ user\n\nReturns:\n    List of jobs with pagination info"
+        \   status: Filter by status\n    priority: Filter by priority  \n    function_name:\
+        \ Filter by function name\n    created_after: Filter jobs created after this\
+        \ date\n    created_before: Filter jobs created before this date\n    tags:\
+        \ Filter by job tags (any of the provided tags)\n    search: Search in job\
+        \ names and metadata\n    limit: Maximum number of results\n    offset: Number\
+        \ of results to skip\n    sort_by: Field to sort by\n    sort_order: Sort\
+        \ order\n    current_user: Current authenticated user\n\nReturns:\n    List\
+        \ of jobs with pagination info"
       operationId: list_jobs_api_v1_jobs__get
       parameters:
-      - in: query
+      - description: Filter by status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/JobStatus'
           - type: 'null'
+          description: Filter by status
           title: Status
-      - in: query
+      - description: Filter by priority
+        in: query
         name: priority
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/JobPriority'
           - type: 'null'
+          description: Filter by priority
           title: Priority
-      - in: query
+      - description: Filter by function name
+        in: query
         name: function_name
         required: false
         schema:
           anyOf:
           - type: string
           - type: 'null'
+          description: Filter by function name
           title: Function Name
-      - in: query
+      - description: Filter jobs created after this date
+        in: query
         name: created_after
         required: false
         schema:
@@ -15710,8 +15254,10 @@ paths:
           - format: date-time
             type: string
           - type: 'null'
+          description: Filter jobs created after this date
           title: Created After
-      - in: query
+      - description: Filter jobs created before this date
+        in: query
         name: created_before
         required: false
         schema:
@@ -15719,56 +15265,69 @@ paths:
           - format: date-time
             type: string
           - type: 'null'
+          description: Filter jobs created before this date
           title: Created Before
-      - in: query
+      - description: Filter by job tags (any of the provided tags)
+        in: query
+        name: tags
+        required: false
+        schema:
+          anyOf:
+          - items:
+              type: string
+            type: array
+          - type: 'null'
+          description: Filter by job tags (any of the provided tags)
+          title: Tags
+      - description: Search in job names and metadata
+        in: query
         name: search
         required: false
         schema:
           anyOf:
           - type: string
           - type: 'null'
+          description: Search in job names and metadata
           title: Search
-      - in: query
+      - description: Maximum number of results
+        in: query
         name: limit
         required: false
         schema:
           default: 20
+          description: Maximum number of results
           minimum: 1
           title: Limit
           type: integer
-      - in: query
+      - description: Number of results to skip
+        in: query
         name: offset
         required: false
         schema:
           default: 0
+          description: Number of results to skip
           minimum: 0
           title: Offset
           type: integer
-      - in: query
+      - description: Field to sort by
+        in: query
         name: sort_by
         required: false
         schema:
           default: created_at
+          description: Field to sort by
           title: Sort By
           type: string
-      - in: query
+      - description: Sort order
+        in: query
         name: sort_order
         required: false
         schema:
           default: desc
+          description: Sort order
           pattern: ^(asc|desc)$
           title: Sort Order
           type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              anyOf:
-              - items:
-                  type: string
-                type: array
-              - type: 'null'
-              title: Tags
       responses:
         '200':
           content:
@@ -16942,34 +16501,41 @@ paths:
   /api/v1/plugins/:
     get:
       description: "List installed plugins with optional filtering.\n\nArgs:\n   \
-        \ request: List request parameters\n    current_user: Current authenticated\
-        \ user\n    plugin_manager: Plugin manager instance\n\nReturns:\n    List\
-        \ of installed plugins"
+        \ plugin_type: Filter by plugin type\n    status: Filter by status\n    enabled:\
+        \ Filter by enabled status\n    current_user: Current authenticated user\n\
+        \    plugin_manager: Plugin manager instance\n\nReturns:\n    List of installed\
+        \ plugins"
       operationId: list_plugins_api_v1_plugins__get
       parameters:
-      - in: query
+      - description: Filter by plugin type
+        in: query
         name: plugin_type
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/PluginType'
           - type: 'null'
+          description: Filter by plugin type
           title: Plugin Type
-      - in: query
+      - description: Filter by status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/PluginStatus'
           - type: 'null'
+          description: Filter by status
           title: Status
-      - in: query
+      - description: Filter by enabled status
+        in: query
         name: enabled
         required: false
         schema:
           anyOf:
           - type: boolean
           - type: 'null'
+          description: Filter by enabled status
           title: Enabled
       responses:
         '200':
@@ -18613,24 +18179,29 @@ paths:
       - Tool Servers
   /api/v1/toolservers/servers:
     get:
-      description: "List tool servers with optional filtering.\n\nArgs:\n    request:\
-        \ List request with filter parameters\n    current_user: Current authenticated\
-        \ user\n    service: Tool server service\n\nReturns:\n    List of server responses"
+      description: "List tool servers with optional filtering.\n\nArgs:\n    status:\
+        \ Filter by server status\n    include_builtin: Include built-in servers\n\
+        \    current_user: Current authenticated user\n    service: Tool server service\n\
+        \nReturns:\n    List of server responses"
       operationId: list_tool_servers_api_v1_toolservers_servers_get
       parameters:
-      - in: query
+      - description: Filter by server status
+        in: query
         name: status
         required: false
         schema:
           anyOf:
           - $ref: '#/components/schemas/ServerStatus'
           - type: 'null'
+          description: Filter by server status
           title: Status
-      - in: query
+      - description: Include built-in servers
+        in: query
         name: include_builtin
         required: false
         schema:
           default: true
+          description: Include built-in servers
           title: Include Builtin
           type: boolean
       responses:
@@ -19278,9 +18849,9 @@ paths:
   /api/v1/toolservers/servers/{server_id}/tools:
     get:
       description: "Get tools for a specific server.\n\nArgs:\n    server_id: Server\
-        \ ID\n    request: Server tools request with pagination\n    current_user:\
-        \ Current authenticated user\n    service: Tool server service\n\nReturns:\n\
-        \    List of server tools with pagination"
+        \ ID\n    limit: Maximum number of results\n    offset: Number of results\
+        \ to skip\n    current_user: Current authenticated user\n    service: Tool\
+        \ server service\n\nReturns:\n    List of server tools with pagination"
       operationId: get_server_tools_api_v1_toolservers_servers__server_id__tools_get
       parameters:
       - in: path
@@ -19289,19 +18860,23 @@ paths:
         schema:
           title: Server Id
           type: string
-      - in: query
+      - description: Maximum number of results
+        in: query
         name: limit
         required: false
         schema:
           default: 50
+          description: Maximum number of results
           minimum: 1
           title: Limit
           type: integer
-      - in: query
+      - description: Number of results to skip
+        in: query
         name: offset
         required: false
         schema:
           default: 0
+          description: Number of results to skip
           minimum: 0
           title: Offset
           type: integer

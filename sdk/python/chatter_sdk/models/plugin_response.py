@@ -86,6 +86,7 @@ class PluginResponse(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
         # set to None if error_message (nullable) is None
         # and model_fields_set contains the field

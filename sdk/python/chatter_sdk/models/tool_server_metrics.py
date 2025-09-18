@@ -81,6 +81,7 @@ class ToolServerMetrics(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
         # set to None if avg_response_time_ms (nullable) is None
         # and model_fields_set contains the field

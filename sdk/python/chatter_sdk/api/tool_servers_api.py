@@ -3284,8 +3284,8 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3301,13 +3301,13 @@ class ToolServersApi:
     ) -> ServerToolsResponse:
         """Get Server Tools
 
-        Get tools for a specific server.  Args:     server_id: Server ID     request: Server tools request with pagination     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
+        Get tools for a specific server.  Args:     server_id: Server ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
 
         :param server_id: (required)
         :type server_id: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3360,8 +3360,8 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_with_http_info(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3377,13 +3377,13 @@ class ToolServersApi:
     ) -> ApiResponse[ServerToolsResponse]:
         """Get Server Tools
 
-        Get tools for a specific server.  Args:     server_id: Server ID     request: Server tools request with pagination     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
+        Get tools for a specific server.  Args:     server_id: Server ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
 
         :param server_id: (required)
         :type server_id: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -3436,8 +3436,8 @@ class ToolServersApi:
     async def get_server_tools_api_v1_toolservers_servers_server_id_tools_get_without_preload_content(
         self,
         server_id: StrictStr,
-        limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None,
-        offset: Optional[Annotated[int, Field(strict=True, ge=0)]] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -3453,13 +3453,13 @@ class ToolServersApi:
     ) -> RESTResponseType:
         """Get Server Tools
 
-        Get tools for a specific server.  Args:     server_id: Server ID     request: Server tools request with pagination     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
+        Get tools for a specific server.  Args:     server_id: Server ID     limit: Maximum number of results     offset: Number of results to skip     current_user: Current authenticated user     service: Tool server service  Returns:     List of server tools with pagination
 
         :param server_id: (required)
         :type server_id: str
-        :param limit:
+        :param limit: Maximum number of results
         :type limit: int
-        :param offset:
+        :param offset: Number of results to skip
         :type offset: int
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4632,8 +4632,8 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get(
         self,
-        status: Optional[ServerStatus] = None,
-        include_builtin: Optional[StrictBool] = None,
+        status: Annotated[Optional[ServerStatus], Field(description="Filter by server status")] = None,
+        include_builtin: Annotated[Optional[StrictBool], Field(description="Include built-in servers")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4649,11 +4649,11 @@ class ToolServersApi:
     ) -> List[ToolServerResponse]:
         """List Tool Servers
 
-        List tool servers with optional filtering.  Args:     request: List request with filter parameters     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
+        List tool servers with optional filtering.  Args:     status: Filter by server status     include_builtin: Include built-in servers     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
 
-        :param status:
+        :param status: Filter by server status
         :type status: ServerStatus
-        :param include_builtin:
+        :param include_builtin: Include built-in servers
         :type include_builtin: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4704,8 +4704,8 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get_with_http_info(
         self,
-        status: Optional[ServerStatus] = None,
-        include_builtin: Optional[StrictBool] = None,
+        status: Annotated[Optional[ServerStatus], Field(description="Filter by server status")] = None,
+        include_builtin: Annotated[Optional[StrictBool], Field(description="Include built-in servers")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4721,11 +4721,11 @@ class ToolServersApi:
     ) -> ApiResponse[List[ToolServerResponse]]:
         """List Tool Servers
 
-        List tool servers with optional filtering.  Args:     request: List request with filter parameters     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
+        List tool servers with optional filtering.  Args:     status: Filter by server status     include_builtin: Include built-in servers     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
 
-        :param status:
+        :param status: Filter by server status
         :type status: ServerStatus
-        :param include_builtin:
+        :param include_builtin: Include built-in servers
         :type include_builtin: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -4776,8 +4776,8 @@ class ToolServersApi:
     @validate_call
     async def list_tool_servers_api_v1_toolservers_servers_get_without_preload_content(
         self,
-        status: Optional[ServerStatus] = None,
-        include_builtin: Optional[StrictBool] = None,
+        status: Annotated[Optional[ServerStatus], Field(description="Filter by server status")] = None,
+        include_builtin: Annotated[Optional[StrictBool], Field(description="Include built-in servers")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -4793,11 +4793,11 @@ class ToolServersApi:
     ) -> RESTResponseType:
         """List Tool Servers
 
-        List tool servers with optional filtering.  Args:     request: List request with filter parameters     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
+        List tool servers with optional filtering.  Args:     status: Filter by server status     include_builtin: Include built-in servers     current_user: Current authenticated user     service: Tool server service  Returns:     List of server responses
 
-        :param status:
+        :param status: Filter by server status
         :type status: ServerStatus
-        :param include_builtin:
+        :param include_builtin: Include built-in servers
         :type include_builtin: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

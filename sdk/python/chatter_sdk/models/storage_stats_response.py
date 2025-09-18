@@ -81,6 +81,7 @@ class StorageStatsResponse(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
         return _dict
 

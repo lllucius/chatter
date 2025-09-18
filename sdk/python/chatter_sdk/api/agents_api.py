@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictStr
+from pydantic import Field, StrictStr, field_validator
 from typing import Any, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.agent_bulk_create_request import AgentBulkCreateRequest
 from chatter_sdk.models.agent_bulk_create_response import AgentBulkCreateResponse
 from chatter_sdk.models.agent_bulk_delete_request import AgentBulkDeleteRequest
@@ -33,7 +34,6 @@ from chatter_sdk.models.agent_stats_response import AgentStatsResponse
 from chatter_sdk.models.agent_status import AgentStatus
 from chatter_sdk.models.agent_type import AgentType
 from chatter_sdk.models.agent_update_request import AgentUpdateRequest
-from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
@@ -2625,9 +2625,13 @@ class AgentsApi:
     @validate_call
     async def list_agents_api_v1_agents_get(
         self,
-        agent_type: Optional[AgentType] = None,
-        status: Optional[AgentStatus] = None,
-        body_list_agents_api_v1_agents_get: Optional[BodyListAgentsApiV1AgentsGet] = None,
+        agent_type: Annotated[Optional[AgentType], Field(description="Filter by agent type")] = None,
+        status: Annotated[Optional[AgentStatus], Field(description="Filter by status")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2645,12 +2649,20 @@ class AgentsApi:
 
         List all agents with optional filtering and pagination. Users can only see their own agents.
 
-        :param agent_type:
+        :param agent_type: Filter by agent type
         :type agent_type: AgentType
-        :param status:
+        :param status: Filter by status
         :type status: AgentStatus
-        :param body_list_agents_api_v1_agents_get:
-        :type body_list_agents_api_v1_agents_get: BodyListAgentsApiV1AgentsGet
+        :param tags: Filter by tags
+        :type tags: List[str]
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
+        :param sort_by: Sort field
+        :type sort_by: str
+        :param sort_order: Sort order
+        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2676,7 +2688,11 @@ class AgentsApi:
         _param = self._list_agents_api_v1_agents_get_serialize(
             agent_type=agent_type,
             status=status,
-            body_list_agents_api_v1_agents_get=body_list_agents_api_v1_agents_get,
+            tags=tags,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2707,9 +2723,13 @@ class AgentsApi:
     @validate_call
     async def list_agents_api_v1_agents_get_with_http_info(
         self,
-        agent_type: Optional[AgentType] = None,
-        status: Optional[AgentStatus] = None,
-        body_list_agents_api_v1_agents_get: Optional[BodyListAgentsApiV1AgentsGet] = None,
+        agent_type: Annotated[Optional[AgentType], Field(description="Filter by agent type")] = None,
+        status: Annotated[Optional[AgentStatus], Field(description="Filter by status")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2727,12 +2747,20 @@ class AgentsApi:
 
         List all agents with optional filtering and pagination. Users can only see their own agents.
 
-        :param agent_type:
+        :param agent_type: Filter by agent type
         :type agent_type: AgentType
-        :param status:
+        :param status: Filter by status
         :type status: AgentStatus
-        :param body_list_agents_api_v1_agents_get:
-        :type body_list_agents_api_v1_agents_get: BodyListAgentsApiV1AgentsGet
+        :param tags: Filter by tags
+        :type tags: List[str]
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
+        :param sort_by: Sort field
+        :type sort_by: str
+        :param sort_order: Sort order
+        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2758,7 +2786,11 @@ class AgentsApi:
         _param = self._list_agents_api_v1_agents_get_serialize(
             agent_type=agent_type,
             status=status,
-            body_list_agents_api_v1_agents_get=body_list_agents_api_v1_agents_get,
+            tags=tags,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2789,9 +2821,13 @@ class AgentsApi:
     @validate_call
     async def list_agents_api_v1_agents_get_without_preload_content(
         self,
-        agent_type: Optional[AgentType] = None,
-        status: Optional[AgentStatus] = None,
-        body_list_agents_api_v1_agents_get: Optional[BodyListAgentsApiV1AgentsGet] = None,
+        agent_type: Annotated[Optional[AgentType], Field(description="Filter by agent type")] = None,
+        status: Annotated[Optional[AgentStatus], Field(description="Filter by status")] = None,
+        tags: Annotated[Optional[List[StrictStr]], Field(description="Filter by tags")] = None,
+        limit: Annotated[Optional[Annotated[int, Field(strict=True, ge=1)]], Field(description="Maximum number of results")] = None,
+        offset: Annotated[Optional[Annotated[int, Field(strict=True, ge=0)]], Field(description="Number of results to skip")] = None,
+        sort_by: Annotated[Optional[StrictStr], Field(description="Sort field")] = None,
+        sort_order: Annotated[Optional[Annotated[str, Field(strict=True)]], Field(description="Sort order")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2809,12 +2845,20 @@ class AgentsApi:
 
         List all agents with optional filtering and pagination. Users can only see their own agents.
 
-        :param agent_type:
+        :param agent_type: Filter by agent type
         :type agent_type: AgentType
-        :param status:
+        :param status: Filter by status
         :type status: AgentStatus
-        :param body_list_agents_api_v1_agents_get:
-        :type body_list_agents_api_v1_agents_get: BodyListAgentsApiV1AgentsGet
+        :param tags: Filter by tags
+        :type tags: List[str]
+        :param limit: Maximum number of results
+        :type limit: int
+        :param offset: Number of results to skip
+        :type offset: int
+        :param sort_by: Sort field
+        :type sort_by: str
+        :param sort_order: Sort order
+        :type sort_order: str
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -2840,7 +2884,11 @@ class AgentsApi:
         _param = self._list_agents_api_v1_agents_get_serialize(
             agent_type=agent_type,
             status=status,
-            body_list_agents_api_v1_agents_get=body_list_agents_api_v1_agents_get,
+            tags=tags,
+            limit=limit,
+            offset=offset,
+            sort_by=sort_by,
+            sort_order=sort_order,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2868,7 +2916,11 @@ class AgentsApi:
         self,
         agent_type,
         status,
-        body_list_agents_api_v1_agents_get,
+        tags,
+        limit,
+        offset,
+        sort_by,
+        sort_order,
         _request_auth,
         _content_type,
         _headers,
@@ -2878,6 +2930,7 @@ class AgentsApi:
         _host = None
 
         _collection_formats: Dict[str, str] = {
+            'tags': 'multi',
         }
 
         _path_params: Dict[str, str] = {}
@@ -2899,11 +2952,29 @@ class AgentsApi:
             
             _query_params.append(('status', status.value))
             
+        if tags is not None:
+            
+            _query_params.append(('tags', tags))
+            
+        if limit is not None:
+            
+            _query_params.append(('limit', limit))
+            
+        if offset is not None:
+            
+            _query_params.append(('offset', offset))
+            
+        if sort_by is not None:
+            
+            _query_params.append(('sort_by', sort_by))
+            
+        if sort_order is not None:
+            
+            _query_params.append(('sort_order', sort_order))
+            
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body_list_agents_api_v1_agents_get is not None:
-            _body_params = body_list_agents_api_v1_agents_get
 
 
         # set the HTTP header `Accept`
@@ -2914,19 +2985,6 @@ class AgentsApi:
                 ]
             )
 
-        # set the HTTP header `Content-Type`
-        if _content_type:
-            _header_params['Content-Type'] = _content_type
-        else:
-            _default_content_type = (
-                self.api_client.select_header_content_type(
-                    [
-                        'application/json'
-                    ]
-                )
-            )
-            if _default_content_type is not None:
-                _header_params['Content-Type'] = _default_content_type
 
         # authentication setting
         _auth_settings: List[str] = [

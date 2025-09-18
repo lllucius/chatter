@@ -186,16 +186,21 @@ Class | Method | HTTP request | Description
 *DataManagementApi* | [**preview_bulk_delete_api_v1_data_bulk_preview_post**](docs/DataManagementApi.md#preview_bulk_delete_api_v1_data_bulk_preview_post) | **POST** /api/v1/data/bulk/preview | Preview Bulk Delete
 *DataManagementApi* | [**restore_from_backup_api_v1_data_restore_post**](docs/DataManagementApi.md#restore_from_backup_api_v1_data_restore_post) | **POST** /api/v1/data/restore | Restore From Backup
 *DocumentsApi* | [**delete_document_api_v1_documents_document_id_delete**](docs/DocumentsApi.md#delete_document_api_v1_documents_document_id_delete) | **DELETE** /api/v1/documents/{document_id} | Delete Document
-*DocumentsApi* | [**download_document_api_v1_documents_document_id_download_get**](docs/DocumentsApi.md#download_document_api_v1_documents_document_id_download_get) | **GET** /api/v1/documents/{document_id}/download | Download Document
+*DocumentsApi* | [**delete_document_api_v1_documents_document_id_delete_0**](docs/DocumentsApi.md#delete_document_api_v1_documents_document_id_delete_0) | **DELETE** /api/v1/documents/{document_id} | Delete Document
 *DocumentsApi* | [**get_document_api_v1_documents_document_id_get**](docs/DocumentsApi.md#get_document_api_v1_documents_document_id_get) | **GET** /api/v1/documents/{document_id} | Get Document
-*DocumentsApi* | [**get_document_chunks_api_v1_documents_document_id_chunks_get**](docs/DocumentsApi.md#get_document_chunks_api_v1_documents_document_id_chunks_get) | **GET** /api/v1/documents/{document_id}/chunks | Get Document Chunks
-*DocumentsApi* | [**get_document_stats_api_v1_documents_stats_overview_get**](docs/DocumentsApi.md#get_document_stats_api_v1_documents_stats_overview_get) | **GET** /api/v1/documents/stats/overview | Get Document Stats
-*DocumentsApi* | [**list_documents_api_v1_documents_get**](docs/DocumentsApi.md#list_documents_api_v1_documents_get) | **GET** /api/v1/documents | List Documents
-*DocumentsApi* | [**process_document_api_v1_documents_document_id_process_post**](docs/DocumentsApi.md#process_document_api_v1_documents_document_id_process_post) | **POST** /api/v1/documents/{document_id}/process | Process Document
+*DocumentsApi* | [**get_document_api_v1_documents_document_id_get_0**](docs/DocumentsApi.md#get_document_api_v1_documents_document_id_get_0) | **GET** /api/v1/documents/{document_id} | Get Document
+*DocumentsApi* | [**get_user_document_stats_api_v1_documents_stats_user_get**](docs/DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get) | **GET** /api/v1/documents/stats/user | Get User Document Stats
+*DocumentsApi* | [**get_user_document_stats_api_v1_documents_stats_user_get_0**](docs/DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get_0) | **GET** /api/v1/documents/stats/user | Get User Document Stats
+*DocumentsApi* | [**list_documents_get_api_v1_documents_get**](docs/DocumentsApi.md#list_documents_get_api_v1_documents_get) | **GET** /api/v1/documents | List Documents Get
+*DocumentsApi* | [**list_documents_get_api_v1_documents_get_0**](docs/DocumentsApi.md#list_documents_get_api_v1_documents_get_0) | **GET** /api/v1/documents | List Documents Get
+*DocumentsApi* | [**list_documents_post_api_v1_documents_list_post**](docs/DocumentsApi.md#list_documents_post_api_v1_documents_list_post) | **POST** /api/v1/documents/list | List Documents Post
+*DocumentsApi* | [**list_documents_post_api_v1_documents_list_post_0**](docs/DocumentsApi.md#list_documents_post_api_v1_documents_list_post_0) | **POST** /api/v1/documents/list | List Documents Post
 *DocumentsApi* | [**reprocess_document_api_v1_documents_document_id_reprocess_post**](docs/DocumentsApi.md#reprocess_document_api_v1_documents_document_id_reprocess_post) | **POST** /api/v1/documents/{document_id}/reprocess | Reprocess Document
+*DocumentsApi* | [**reprocess_document_api_v1_documents_document_id_reprocess_post_0**](docs/DocumentsApi.md#reprocess_document_api_v1_documents_document_id_reprocess_post_0) | **POST** /api/v1/documents/{document_id}/reprocess | Reprocess Document
 *DocumentsApi* | [**search_documents_api_v1_documents_search_post**](docs/DocumentsApi.md#search_documents_api_v1_documents_search_post) | **POST** /api/v1/documents/search | Search Documents
-*DocumentsApi* | [**update_document_api_v1_documents_document_id_put**](docs/DocumentsApi.md#update_document_api_v1_documents_document_id_put) | **PUT** /api/v1/documents/{document_id} | Update Document
+*DocumentsApi* | [**search_documents_api_v1_documents_search_post_0**](docs/DocumentsApi.md#search_documents_api_v1_documents_search_post_0) | **POST** /api/v1/documents/search | Search Documents
 *DocumentsApi* | [**upload_document_api_v1_documents_upload_post**](docs/DocumentsApi.md#upload_document_api_v1_documents_upload_post) | **POST** /api/v1/documents/upload | Upload Document
+*DocumentsApi* | [**upload_document_api_v1_documents_upload_post_0**](docs/DocumentsApi.md#upload_document_api_v1_documents_upload_post_0) | **POST** /api/v1/documents/upload | Upload Document
 *EventsApi* | [**admin_events_stream_api_v1_events_admin_stream_get**](docs/EventsApi.md#admin_events_stream_api_v1_events_admin_stream_get) | **GET** /api/v1/events/admin/stream | Admin Events Stream
 *EventsApi* | [**events_stream_api_v1_events_stream_get**](docs/EventsApi.md#events_stream_api_v1_events_stream_get) | **GET** /api/v1/events/stream | Events Stream
 *EventsApi* | [**get_sse_stats_api_v1_events_stats_get**](docs/EventsApi.md#get_sse_stats_api_v1_events_stats_get) | **GET** /api/v1/events/stats | Get Sse Stats
@@ -373,7 +378,6 @@ Class | Method | HTTP request | Description
  - [BackupRequest](docs/BackupRequest.md)
  - [BackupResponse](docs/BackupResponse.md)
  - [BackupType](docs/BackupType.md)
- - [BodyListAgentsApiV1AgentsGet](docs/BodyListAgentsApiV1AgentsGet.md)
  - [BottleneckInfo](docs/BottleneckInfo.md)
  - [BulkDeleteFilteredRequest](docs/BulkDeleteFilteredRequest.md)
  - [BulkDeletePreviewResponse](docs/BulkDeletePreviewResponse.md)
@@ -402,20 +406,12 @@ Class | Method | HTTP request | Description
  - [DefaultProvider](docs/DefaultProvider.md)
  - [DistanceMetric](docs/DistanceMetric.md)
  - [DocumentAnalyticsResponse](docs/DocumentAnalyticsResponse.md)
- - [DocumentChunkResponse](docs/DocumentChunkResponse.md)
- - [DocumentChunksResponse](docs/DocumentChunksResponse.md)
- - [DocumentDeleteResponse](docs/DocumentDeleteResponse.md)
- - [DocumentListResponse](docs/DocumentListResponse.md)
- - [DocumentProcessingRequest](docs/DocumentProcessingRequest.md)
- - [DocumentProcessingResponse](docs/DocumentProcessingResponse.md)
+ - [DocumentListRequest](docs/DocumentListRequest.md)
  - [DocumentResponse](docs/DocumentResponse.md)
  - [DocumentSearchRequest](docs/DocumentSearchRequest.md)
- - [DocumentSearchResponse](docs/DocumentSearchResponse.md)
- - [DocumentSearchResult](docs/DocumentSearchResult.md)
  - [DocumentStatsResponse](docs/DocumentStatsResponse.md)
  - [DocumentStatus](docs/DocumentStatus.md)
  - [DocumentType](docs/DocumentType.md)
- - [DocumentUpdate](docs/DocumentUpdate.md)
  - [EmbeddingSpaceCreate](docs/EmbeddingSpaceCreate.md)
  - [EmbeddingSpaceDefaultResponse](docs/EmbeddingSpaceDefaultResponse.md)
  - [EmbeddingSpaceDeleteResponse](docs/EmbeddingSpaceDeleteResponse.md)
@@ -460,7 +456,6 @@ Class | Method | HTTP request | Description
  - [NodeTypeResponse](docs/NodeTypeResponse.md)
  - [OAuthConfigSchema](docs/OAuthConfigSchema.md)
  - [OptimizationSuggestion](docs/OptimizationSuggestion.md)
- - [PaginationRequest](docs/PaginationRequest.md)
  - [PasswordChange](docs/PasswordChange.md)
  - [PasswordChangeResponse](docs/PasswordChangeResponse.md)
  - [PasswordResetConfirmResponse](docs/PasswordResetConfirmResponse.md)
@@ -513,10 +508,10 @@ Class | Method | HTTP request | Description
  - [RoleToolAccessCreate](docs/RoleToolAccessCreate.md)
  - [RoleToolAccessResponse](docs/RoleToolAccessResponse.md)
  - [SSEStatsResponse](docs/SSEStatsResponse.md)
+ - [SearchResultResponse](docs/SearchResultResponse.md)
  - [ServerStatus](docs/ServerStatus.md)
  - [ServerToolResponse](docs/ServerToolResponse.md)
  - [ServerToolsResponse](docs/ServerToolsResponse.md)
- - [SortingRequest](docs/SortingRequest.md)
  - [StatisticalAnalysis](docs/StatisticalAnalysis.md)
  - [StorageStatsResponse](docs/StorageStatsResponse.md)
  - [SystemAnalyticsResponse](docs/SystemAnalyticsResponse.md)

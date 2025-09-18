@@ -84,7 +84,6 @@ __all__ = [
     "BackupRequest",
     "BackupResponse",
     "BackupType",
-    "BodyListAgentsApiV1AgentsGet",
     "BottleneckInfo",
     "BulkDeleteFilteredRequest",
     "BulkDeletePreviewResponse",
@@ -113,20 +112,12 @@ __all__ = [
     "DefaultProvider",
     "DistanceMetric",
     "DocumentAnalyticsResponse",
-    "DocumentChunkResponse",
-    "DocumentChunksResponse",
-    "DocumentDeleteResponse",
-    "DocumentListResponse",
-    "DocumentProcessingRequest",
-    "DocumentProcessingResponse",
+    "DocumentListRequest",
     "DocumentResponse",
     "DocumentSearchRequest",
-    "DocumentSearchResponse",
-    "DocumentSearchResult",
     "DocumentStatsResponse",
     "DocumentStatus",
     "DocumentType",
-    "DocumentUpdate",
     "EmbeddingSpaceCreate",
     "EmbeddingSpaceDefaultResponse",
     "EmbeddingSpaceDeleteResponse",
@@ -171,7 +162,6 @@ __all__ = [
     "NodeTypeResponse",
     "OAuthConfigSchema",
     "OptimizationSuggestion",
-    "PaginationRequest",
     "PasswordChange",
     "PasswordChangeResponse",
     "PasswordResetConfirmResponse",
@@ -224,10 +214,10 @@ __all__ = [
     "RoleToolAccessCreate",
     "RoleToolAccessResponse",
     "SSEStatsResponse",
+    "SearchResultResponse",
     "ServerStatus",
     "ServerToolResponse",
     "ServerToolsResponse",
-    "SortingRequest",
     "StatisticalAnalysis",
     "StorageStatsResponse",
     "SystemAnalyticsResponse",
@@ -351,7 +341,6 @@ from chatter_sdk.models.backup_list_response import BackupListResponse as Backup
 from chatter_sdk.models.backup_request import BackupRequest as BackupRequest
 from chatter_sdk.models.backup_response import BackupResponse as BackupResponse
 from chatter_sdk.models.backup_type import BackupType as BackupType
-from chatter_sdk.models.body_list_agents_api_v1_agents_get import BodyListAgentsApiV1AgentsGet as BodyListAgentsApiV1AgentsGet
 from chatter_sdk.models.bottleneck_info import BottleneckInfo as BottleneckInfo
 from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest as BulkDeleteFilteredRequest
 from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse as BulkDeletePreviewResponse
@@ -380,20 +369,12 @@ from chatter_sdk.models.data_format import DataFormat as DataFormat
 from chatter_sdk.models.default_provider import DefaultProvider as DefaultProvider
 from chatter_sdk.models.distance_metric import DistanceMetric as DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse as DocumentAnalyticsResponse
-from chatter_sdk.models.document_chunk_response import DocumentChunkResponse as DocumentChunkResponse
-from chatter_sdk.models.document_chunks_response import DocumentChunksResponse as DocumentChunksResponse
-from chatter_sdk.models.document_delete_response import DocumentDeleteResponse as DocumentDeleteResponse
-from chatter_sdk.models.document_list_response import DocumentListResponse as DocumentListResponse
-from chatter_sdk.models.document_processing_request import DocumentProcessingRequest as DocumentProcessingRequest
-from chatter_sdk.models.document_processing_response import DocumentProcessingResponse as DocumentProcessingResponse
+from chatter_sdk.models.document_list_request import DocumentListRequest as DocumentListRequest
 from chatter_sdk.models.document_response import DocumentResponse as DocumentResponse
 from chatter_sdk.models.document_search_request import DocumentSearchRequest as DocumentSearchRequest
-from chatter_sdk.models.document_search_response import DocumentSearchResponse as DocumentSearchResponse
-from chatter_sdk.models.document_search_result import DocumentSearchResult as DocumentSearchResult
 from chatter_sdk.models.document_stats_response import DocumentStatsResponse as DocumentStatsResponse
 from chatter_sdk.models.document_status import DocumentStatus as DocumentStatus
 from chatter_sdk.models.document_type import DocumentType as DocumentType
-from chatter_sdk.models.document_update import DocumentUpdate as DocumentUpdate
 from chatter_sdk.models.embedding_space_create import EmbeddingSpaceCreate as EmbeddingSpaceCreate
 from chatter_sdk.models.embedding_space_default_response import EmbeddingSpaceDefaultResponse as EmbeddingSpaceDefaultResponse
 from chatter_sdk.models.embedding_space_delete_response import EmbeddingSpaceDeleteResponse as EmbeddingSpaceDeleteResponse
@@ -438,7 +419,6 @@ from chatter_sdk.models.node_property_definition import NodePropertyDefinition a
 from chatter_sdk.models.node_type_response import NodeTypeResponse as NodeTypeResponse
 from chatter_sdk.models.o_auth_config_schema import OAuthConfigSchema as OAuthConfigSchema
 from chatter_sdk.models.optimization_suggestion import OptimizationSuggestion as OptimizationSuggestion
-from chatter_sdk.models.pagination_request import PaginationRequest as PaginationRequest
 from chatter_sdk.models.password_change import PasswordChange as PasswordChange
 from chatter_sdk.models.password_change_response import PasswordChangeResponse as PasswordChangeResponse
 from chatter_sdk.models.password_reset_confirm_response import PasswordResetConfirmResponse as PasswordResetConfirmResponse
@@ -491,10 +471,10 @@ from chatter_sdk.models.restore_response import RestoreResponse as RestoreRespon
 from chatter_sdk.models.role_tool_access_create import RoleToolAccessCreate as RoleToolAccessCreate
 from chatter_sdk.models.role_tool_access_response import RoleToolAccessResponse as RoleToolAccessResponse
 from chatter_sdk.models.sse_stats_response import SSEStatsResponse as SSEStatsResponse
+from chatter_sdk.models.search_result_response import SearchResultResponse as SearchResultResponse
 from chatter_sdk.models.server_status import ServerStatus as ServerStatus
 from chatter_sdk.models.server_tool_response import ServerToolResponse as ServerToolResponse
 from chatter_sdk.models.server_tools_response import ServerToolsResponse as ServerToolsResponse
-from chatter_sdk.models.sorting_request import SortingRequest as SortingRequest
 from chatter_sdk.models.statistical_analysis import StatisticalAnalysis as StatisticalAnalysis
 from chatter_sdk.models.storage_stats_response import StorageStatsResponse as StorageStatsResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse as SystemAnalyticsResponse

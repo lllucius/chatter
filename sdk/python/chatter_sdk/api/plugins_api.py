@@ -17,8 +17,9 @@ from pydantic import validate_call, Field, StrictFloat, StrictStr, StrictInt
 from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
-from pydantic import StrictBool, StrictStr
+from pydantic import Field, StrictBool, StrictStr
 from typing import Any, Dict, List, Optional
+from typing_extensions import Annotated
 from chatter_sdk.models.plugin_action_response import PluginActionResponse
 from chatter_sdk.models.plugin_delete_response import PluginDeleteResponse
 from chatter_sdk.models.plugin_health_check_response import PluginHealthCheckResponse
@@ -2452,9 +2453,9 @@ class PluginsApi:
     @validate_call
     async def list_plugins_api_v1_plugins_get(
         self,
-        plugin_type: Optional[PluginType] = None,
-        status: Optional[PluginStatus] = None,
-        enabled: Optional[StrictBool] = None,
+        plugin_type: Annotated[Optional[PluginType], Field(description="Filter by plugin type")] = None,
+        status: Annotated[Optional[PluginStatus], Field(description="Filter by status")] = None,
+        enabled: Annotated[Optional[StrictBool], Field(description="Filter by enabled status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2470,13 +2471,13 @@ class PluginsApi:
     ) -> PluginListResponse:
         """List Plugins
 
-        List installed plugins with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
+        List installed plugins with optional filtering.  Args:     plugin_type: Filter by plugin type     status: Filter by status     enabled: Filter by enabled status     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
 
-        :param plugin_type:
+        :param plugin_type: Filter by plugin type
         :type plugin_type: PluginType
-        :param status:
+        :param status: Filter by status
         :type status: PluginStatus
-        :param enabled:
+        :param enabled: Filter by enabled status
         :type enabled: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2528,9 +2529,9 @@ class PluginsApi:
     @validate_call
     async def list_plugins_api_v1_plugins_get_with_http_info(
         self,
-        plugin_type: Optional[PluginType] = None,
-        status: Optional[PluginStatus] = None,
-        enabled: Optional[StrictBool] = None,
+        plugin_type: Annotated[Optional[PluginType], Field(description="Filter by plugin type")] = None,
+        status: Annotated[Optional[PluginStatus], Field(description="Filter by status")] = None,
+        enabled: Annotated[Optional[StrictBool], Field(description="Filter by enabled status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2546,13 +2547,13 @@ class PluginsApi:
     ) -> ApiResponse[PluginListResponse]:
         """List Plugins
 
-        List installed plugins with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
+        List installed plugins with optional filtering.  Args:     plugin_type: Filter by plugin type     status: Filter by status     enabled: Filter by enabled status     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
 
-        :param plugin_type:
+        :param plugin_type: Filter by plugin type
         :type plugin_type: PluginType
-        :param status:
+        :param status: Filter by status
         :type status: PluginStatus
-        :param enabled:
+        :param enabled: Filter by enabled status
         :type enabled: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
@@ -2604,9 +2605,9 @@ class PluginsApi:
     @validate_call
     async def list_plugins_api_v1_plugins_get_without_preload_content(
         self,
-        plugin_type: Optional[PluginType] = None,
-        status: Optional[PluginStatus] = None,
-        enabled: Optional[StrictBool] = None,
+        plugin_type: Annotated[Optional[PluginType], Field(description="Filter by plugin type")] = None,
+        status: Annotated[Optional[PluginStatus], Field(description="Filter by status")] = None,
+        enabled: Annotated[Optional[StrictBool], Field(description="Filter by enabled status")] = None,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -2622,13 +2623,13 @@ class PluginsApi:
     ) -> RESTResponseType:
         """List Plugins
 
-        List installed plugins with optional filtering.  Args:     request: List request parameters     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
+        List installed plugins with optional filtering.  Args:     plugin_type: Filter by plugin type     status: Filter by status     enabled: Filter by enabled status     current_user: Current authenticated user     plugin_manager: Plugin manager instance  Returns:     List of installed plugins
 
-        :param plugin_type:
+        :param plugin_type: Filter by plugin type
         :type plugin_type: PluginType
-        :param status:
+        :param status: Filter by status
         :type status: PluginStatus
-        :param enabled:
+        :param enabled: Filter by enabled status
         :type enabled: bool
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request

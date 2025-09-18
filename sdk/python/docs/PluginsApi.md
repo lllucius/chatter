@@ -801,7 +801,9 @@ List Plugins
 List installed plugins with optional filtering.
 
 Args:
-    request: List request parameters
+    plugin_type: Filter by plugin type
+    status: Filter by status
+    enabled: Filter by enabled status
     current_user: Current authenticated user
     plugin_manager: Plugin manager instance
 
@@ -840,9 +842,9 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.PluginsApi(api_client)
-    plugin_type = chatter_sdk.PluginType() # PluginType |  (optional)
-    status = chatter_sdk.PluginStatus() # PluginStatus |  (optional)
-    enabled = True # bool |  (optional)
+    plugin_type = chatter_sdk.PluginType() # PluginType | Filter by plugin type (optional)
+    status = chatter_sdk.PluginStatus() # PluginStatus | Filter by status (optional)
+    enabled = True # bool | Filter by enabled status (optional)
 
     try:
         # List Plugins
@@ -860,9 +862,9 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **plugin_type** | [**PluginType**](.md)|  | [optional] 
- **status** | [**PluginStatus**](.md)|  | [optional] 
- **enabled** | **bool**|  | [optional] 
+ **plugin_type** | [**PluginType**](.md)| Filter by plugin type | [optional] 
+ **status** | [**PluginStatus**](.md)| Filter by status | [optional] 
+ **enabled** | **bool**| Filter by enabled status | [optional] 
 
 ### Return type
 

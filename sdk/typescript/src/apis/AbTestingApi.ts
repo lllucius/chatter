@@ -37,27 +37,28 @@ Returns:
    * List A/B tests with optional filtering.
 
 Args:
-    request: List request parameters
+    status: Filter by status
+    test_type: Filter by test type
+    tags: Filter by tags
     current_user: Current authenticated user
     ab_test_manager: A/B test manager instance
 
 Returns:
     List of A/B tests
    */
-  public async listAbTestsApiV1AbTests(data: string[] | null, options?: { status?: TestStatus | null; testType?: TestType | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ABTestListResponse> {
+  public async listAbTestsApiV1AbTests(options?: { status?: TestStatus | null; testType?: TestType | null; tags?: string[] | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ABTestListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/ab-tests/`,
       method: 'GET' as HTTPMethod,
       headers: {
-        'Content-Type': 'application/json',
         ...options?.headers,
       },
       query: {
         'status': options?.status,
         'test_type': options?.testType,
+        'tags': options?.tags,
         ...options?.query
       },
-      body: data,
     };
 
     const response = await this.request(requestContext);

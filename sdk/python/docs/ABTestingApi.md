@@ -887,14 +887,16 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_ab_tests_api_v1_ab_tests_get**
-> ABTestListResponse list_ab_tests_api_v1_ab_tests_get(status=status, test_type=test_type, request_body=request_body)
+> ABTestListResponse list_ab_tests_api_v1_ab_tests_get(status=status, test_type=test_type, tags=tags)
 
 List Ab Tests
 
 List A/B tests with optional filtering.
 
 Args:
-    request: List request parameters
+    status: Filter by status
+    test_type: Filter by test type
+    tags: Filter by tags
     current_user: Current authenticated user
     ab_test_manager: A/B test manager instance
 
@@ -933,13 +935,13 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.ABTestingApi(api_client)
-    status = chatter_sdk.TestStatus() # TestStatus |  (optional)
-    test_type = chatter_sdk.TestType() # TestType |  (optional)
-    request_body = ['request_body_example'] # List[str] |  (optional)
+    status = chatter_sdk.TestStatus() # TestStatus | Filter by status (optional)
+    test_type = chatter_sdk.TestType() # TestType | Filter by test type (optional)
+    tags = ['tags_example'] # List[str] | Filter by tags (optional)
 
     try:
         # List Ab Tests
-        api_response = await api_instance.list_ab_tests_api_v1_ab_tests_get(status=status, test_type=test_type, request_body=request_body)
+        api_response = await api_instance.list_ab_tests_api_v1_ab_tests_get(status=status, test_type=test_type, tags=tags)
         print("The response of ABTestingApi->list_ab_tests_api_v1_ab_tests_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -953,9 +955,9 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **status** | [**TestStatus**](.md)|  | [optional] 
- **test_type** | [**TestType**](.md)|  | [optional] 
- **request_body** | [**List[str]**](str.md)|  | [optional] 
+ **status** | [**TestStatus**](.md)| Filter by status | [optional] 
+ **test_type** | [**TestType**](.md)| Filter by test type | [optional] 
+ **tags** | [**List[str]**](str.md)| Filter by tags | [optional] 
 
 ### Return type
 
@@ -967,7 +969,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

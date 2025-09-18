@@ -440,14 +440,24 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_jobs_api_v1_jobs_get**
-> JobListResponse list_jobs_api_v1_jobs_get(status=status, priority=priority, function_name=function_name, created_after=created_after, created_before=created_before, search=search, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order, request_body=request_body)
+> JobListResponse list_jobs_api_v1_jobs_get(status=status, priority=priority, function_name=function_name, created_after=created_after, created_before=created_before, tags=tags, search=search, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order)
 
 List Jobs
 
 List jobs with optional filtering and pagination.
 
 Args:
-    request: List request parameters
+    status: Filter by status
+    priority: Filter by priority  
+    function_name: Filter by function name
+    created_after: Filter jobs created after this date
+    created_before: Filter jobs created before this date
+    tags: Filter by job tags (any of the provided tags)
+    search: Search in job names and metadata
+    limit: Maximum number of results
+    offset: Number of results to skip
+    sort_by: Field to sort by
+    sort_order: Sort order
     current_user: Current authenticated user
 
 Returns:
@@ -485,21 +495,21 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.JobsApi(api_client)
-    status = chatter_sdk.JobStatus() # JobStatus |  (optional)
-    priority = chatter_sdk.JobPriority() # JobPriority |  (optional)
-    function_name = 'function_name_example' # str |  (optional)
-    created_after = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
-    created_before = '2013-10-20T19:20:30+01:00' # datetime |  (optional)
-    search = 'search_example' # str |  (optional)
-    limit = 20 # int |  (optional) (default to 20)
-    offset = 0 # int |  (optional) (default to 0)
-    sort_by = 'created_at' # str |  (optional) (default to 'created_at')
-    sort_order = 'desc' # str |  (optional) (default to 'desc')
-    request_body = ['request_body_example'] # List[str] |  (optional)
+    status = chatter_sdk.JobStatus() # JobStatus | Filter by status (optional)
+    priority = chatter_sdk.JobPriority() # JobPriority | Filter by priority (optional)
+    function_name = 'function_name_example' # str | Filter by function name (optional)
+    created_after = '2013-10-20T19:20:30+01:00' # datetime | Filter jobs created after this date (optional)
+    created_before = '2013-10-20T19:20:30+01:00' # datetime | Filter jobs created before this date (optional)
+    tags = ['tags_example'] # List[str] | Filter by job tags (any of the provided tags) (optional)
+    search = 'search_example' # str | Search in job names and metadata (optional)
+    limit = 20 # int | Maximum number of results (optional) (default to 20)
+    offset = 0 # int | Number of results to skip (optional) (default to 0)
+    sort_by = 'created_at' # str | Field to sort by (optional) (default to 'created_at')
+    sort_order = 'desc' # str | Sort order (optional) (default to 'desc')
 
     try:
         # List Jobs
-        api_response = await api_instance.list_jobs_api_v1_jobs_get(status=status, priority=priority, function_name=function_name, created_after=created_after, created_before=created_before, search=search, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order, request_body=request_body)
+        api_response = await api_instance.list_jobs_api_v1_jobs_get(status=status, priority=priority, function_name=function_name, created_after=created_after, created_before=created_before, tags=tags, search=search, limit=limit, offset=offset, sort_by=sort_by, sort_order=sort_order)
         print("The response of JobsApi->list_jobs_api_v1_jobs_get:\n")
         pprint(api_response)
     except Exception as e:
@@ -513,17 +523,17 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **status** | [**JobStatus**](.md)|  | [optional] 
- **priority** | [**JobPriority**](.md)|  | [optional] 
- **function_name** | **str**|  | [optional] 
- **created_after** | **datetime**|  | [optional] 
- **created_before** | **datetime**|  | [optional] 
- **search** | **str**|  | [optional] 
- **limit** | **int**|  | [optional] [default to 20]
- **offset** | **int**|  | [optional] [default to 0]
- **sort_by** | **str**|  | [optional] [default to &#39;created_at&#39;]
- **sort_order** | **str**|  | [optional] [default to &#39;desc&#39;]
- **request_body** | [**List[str]**](str.md)|  | [optional] 
+ **status** | [**JobStatus**](.md)| Filter by status | [optional] 
+ **priority** | [**JobPriority**](.md)| Filter by priority | [optional] 
+ **function_name** | **str**| Filter by function name | [optional] 
+ **created_after** | **datetime**| Filter jobs created after this date | [optional] 
+ **created_before** | **datetime**| Filter jobs created before this date | [optional] 
+ **tags** | [**List[str]**](str.md)| Filter by job tags (any of the provided tags) | [optional] 
+ **search** | **str**| Search in job names and metadata | [optional] 
+ **limit** | **int**| Maximum number of results | [optional] [default to 20]
+ **offset** | **int**| Number of results to skip | [optional] [default to 0]
+ **sort_by** | **str**| Field to sort by | [optional] [default to &#39;created_at&#39;]
+ **sort_order** | **str**| Sort order | [optional] [default to &#39;desc&#39;]
 
 ### Return type
 
@@ -535,7 +545,7 @@ Name | Type | Description  | Notes
 
 ### HTTP request headers
 
- - **Content-Type**: application/json
+ - **Content-Type**: Not defined
  - **Accept**: application/json
 
 ### HTTP response details

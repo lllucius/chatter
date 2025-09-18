@@ -17,6 +17,31 @@ export type TestStatus =
   | 'completed'
   | 'cancelled';
 
+export interface TestRecommendations {
+  recommendations: string[];
+  insights: string[];
+  winner?: string;
+  confidence?: number;
+}
+
+export interface TestPerformance {
+  response_times: Array<{
+    timestamp: string;
+    variant: string;
+    response_time: number;
+  }>;
+  error_rates: Array<{
+    timestamp: string;
+    variant: string;
+    error_rate: number;
+  }>;
+  throughput: Array<{
+    timestamp: string;
+    variant: string;
+    requests_per_second: number;
+  }>;
+}
+
 export const useABTestingData = () => {
   const [tests, setTests] = useState<ABTestResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -31,9 +56,9 @@ export const useABTestingData = () => {
     null
   );
   const [testPerformance, setTestPerformance] =
-    useState<ABTestActionResponse | null>(null);
+    useState<TestPerformance | null>(null);
   const [testRecommendations, setTestRecommendations] =
-    useState<ABTestActionResponse | null>(null);
+    useState<TestRecommendations | null>(null);
 
   const loadTests = useCallback(async () => {
     try {
@@ -80,14 +105,14 @@ export const useABTestingData = () => {
 
       // Handle performance
       if (performanceResp.status === 'fulfilled') {
-        setTestPerformance(performanceResp.value as unknown as ABTestActionResponse);
+        setTestPerformance(performanceResp.value as unknown as TestPerformance);
       } else {
         setTestPerformance(null);
       }
 
       // Handle recommendations
       if (recommendationsResp.status === 'fulfilled') {
-        setTestRecommendations(recommendationsResp.value as unknown as ABTestActionResponse);
+        setTestRecommendations(recommendationsResp.value as unknown as TestRecommendations);
       } else {
         setTestRecommendations(null);
       }

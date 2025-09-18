@@ -47,6 +47,9 @@ export interface ChatMessage {
       progress?: number;
       isStreaming?: boolean;
       status?: 'thinking' | 'processing' | 'streaming' | 'complete';
+      currentStep?: number;
+      totalSteps?: number;
+      stepDescriptions?: string[];
     };
   };
 }

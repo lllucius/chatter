@@ -320,15 +320,15 @@ const DashboardPage: React.FC = () => {
     const performanceChartData = [
       {
         name: 'API Latency',
-        value: Math.max(realPerformanceData.avg_response_time_ms ?? 250, 100),
+        value: Math.max((realPerformanceData.avg_response_time_ms as number) ?? 250, 100),
       },
       {
         name: 'P95 Latency',
-        value: Math.max(realPerformanceData.p95_response_time_ms ?? 500, 200),
+        value: Math.max((realPerformanceData.p95_response_time_ms as number) ?? 500, 200),
       },
       {
         name: 'P99 Latency',
-        value: Math.max(realPerformanceData.p99_response_time_ms ?? 800, 400),
+        value: Math.max((realPerformanceData.p99_response_time_ms as number) ?? 800, 400),
       },
     ];
 

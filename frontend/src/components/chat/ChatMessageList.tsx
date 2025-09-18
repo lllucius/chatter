@@ -5,12 +5,16 @@ import EnhancedMessage, { ChatMessage } from '../EnhancedMessage';
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
   loading: boolean;
+  onEdit?: (messageId: string, newContent: string) => void;
+  onRegenerate?: (messageId: string) => void;
+  onDelete?: (messageId: string) => void;
+  onRate?: (messageId: string, rating: number) => Promise<void> | void;
 }
 
 const ChatMessageList: React.FC<ChatMessageListProps> = memo(
-  ({ messages, messagesEndRef, loading }) => {
+  ({ messages, messagesEndRef, loading, onEdit, onRegenerate, onDelete, onRate }) => {
     return (
       <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
         <CustomScrollbar style={{ maxHeight: 'calc(100vh - 200px)' }}>
@@ -19,6 +23,10 @@ const ChatMessageList: React.FC<ChatMessageListProps> = memo(
               <EnhancedMessage
                 key={msg.id}
                 message={msg}
+                onEdit={onEdit}
+                onRegenerate={onRegenerate}
+                onDelete={onDelete}
+                onRate={onRate}
               />
             ))}
 

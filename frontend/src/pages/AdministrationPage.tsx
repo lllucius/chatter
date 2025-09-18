@@ -187,7 +187,7 @@ const AdministrationPage: React.FC = () => {
         case 'job':
           await getSDK().jobs.createJobApiV1Jobs({
             name: formData.jobName,
-            function: formData.jobFunction,
+            function_name: formData.jobFunction,
             args: formData.jobArgs ? JSON.parse(formData.jobArgs) : [],
             kwargs: formData.jobKwargs ? JSON.parse(formData.jobKwargs) : {},
             priority: formData.jobPriority as JobPriority,

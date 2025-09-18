@@ -20,7 +20,7 @@ interface ChatInputProps {
   onSendMessage: () => void;
   onClearMessages: () => void;
   onKeyDown: (e: React.KeyboardEvent<HTMLDivElement>) => void;
-  inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement>;
+  inputRef: React.RefObject<HTMLInputElement | HTMLTextAreaElement | null>;
 }
 
 const ChatInput: React.FC<ChatInputProps> = memo(

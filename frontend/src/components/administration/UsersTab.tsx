@@ -68,8 +68,8 @@ const UsersTab: React.FC<UsersTabProps> = memo(
               </ListItemIcon>
               <ListItemText
                 primary={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                    <Typography variant="subtitle1">{user.name}</Typography>
+                  <Box component="span" sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <Typography component="span" variant="subtitle1">{user.name}</Typography>
                     <Chip
                       size="small"
                       label={user.role}
@@ -80,17 +80,17 @@ const UsersTab: React.FC<UsersTabProps> = memo(
                   </Box>
                 }
                 secondary={
-                  <Box sx={{ mt: 1 }}>
-                    <Typography variant="body2" color="text.secondary">
+                  <Box component="span" sx={{ display: 'block', mt: 1 }}>
+                    <Typography component="span" variant="body2" color="text.secondary" sx={{ display: 'block' }}>
                       {user.email}
                     </Typography>
-                    <Box sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
+                    <Box component="span" sx={{ display: 'flex', gap: 1, mt: 0.5 }}>
                       <Chip
                         size="small"
                         label={user.status}
                         color={user.isActive ? 'success' : 'default'}
                       />
-                      <Typography variant="caption" color="text.secondary">
+                      <Typography component="span" variant="caption" color="text.secondary">
                         Last login: {user.lastLogin}
                       </Typography>
                     </Box>

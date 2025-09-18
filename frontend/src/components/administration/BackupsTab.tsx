@@ -54,7 +54,7 @@ const BackupsTab: React.FC<BackupsTabProps> = memo(
               <ListItemText
                 primary={backup.name}
                 secondary={
-                  <Box sx={{ display: 'flex', gap: 1, mt: 1 }}>
+                  <Box component="span" sx={{ display: 'flex', gap: 1, mt: 1 }}>
                     <Chip
                       size="small"
                       label={backup.status}
@@ -66,7 +66,7 @@ const BackupsTab: React.FC<BackupsTabProps> = memo(
                             : 'default'
                       }
                     />
-                    <Typography variant="caption" color="text.secondary">
+                    <Typography component="span" variant="caption" color="text.secondary">
                       {new Date(backup.created_at).toLocaleString()}
                     </Typography>
                   </Box>

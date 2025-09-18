@@ -48,6 +48,17 @@ class ErrorHandler {
   }
 
   /**
+   * Check if error is a rate limit error (429)
+   */
+  private isRateLimitError(error: unknown): boolean {
+    if (error && typeof error === 'object') {
+      const errorResponse = error as ErrorResponse;
+      return errorResponse?.response?.status === 429;
+    }
+    return false;
+  }
+
+  /**
    * Extract a meaningful error message from various error types
    */
   private extractErrorMessage(
@@ -67,6 +78,11 @@ class ErrorHandler {
     // Handle API error responses with problem details
     if (error && typeof error === 'object') {
       const errorResponse = error as ErrorResponse;
+
+      // Handle rate limiting errors specifically
+      if (this.isRateLimitError(error)) {
+        return 'Too many requests. Please wait a moment before trying again.';
+      }
 
       // Try to extract problem detail information
       const problemDetail = errorResponse?.response?.data as ProblemDetail;
@@ -188,14 +204,17 @@ class ErrorHandler {
 
     // Show toast notification if requested
     if (showToast) {
+      // Don't show toast for rate limit errors in production to reduce noise
+      const isRateLimit = this.isRateLimitError(error);
+      
       if (isDev) {
         // In development, show detailed error in toast
         const devMessage = `${userMessage}\n\nSource: ${context.source}${
           context.operation ? `\nOperation: ${context.operation}` : ''
         }`;
         toastService.error(devMessage, { autoClose: false });
-      } else {
-        // In production, show user-friendly message
+      } else if (!isRateLimit) {
+        // In production, show user-friendly message (but skip rate limit errors)
         const prodMessage = this.generateProductionMessage(
           userMessage,
           context
@@ -239,35 +258,37 @@ class ErrorHandler {
   /**
    * Create a wrapper function for handling async operations
    */
-  public wrapAsync<T extends (...args: any[]) => Promise<any>>(
-    fn: T,
+  public wrapAsync<TArgs extends readonly unknown[], TReturn>(
+    fn: (...args: TArgs) => Promise<TReturn>,
     context: ErrorContext,
     options: ErrorHandlerOptions = {}
-  ): T {
-    return (async (...args: Parameters<T>) => {
+  ): (...args: TArgs) => Promise<TReturn> {
+    return async (...args: TArgs) => {
       try {
         return await fn(...args);
       } catch (error) {
         this.handleError(error, context, { ...options, rethrow: true });
+        throw error; // This will never execute but TypeScript needs it
       }
-    }) as T;
+    };
   }
 
   /**
    * Create a wrapper function for handling sync operations
    */
-  public wrapSync<T extends (...args: any[]) => any>(
-    fn: T,
+  public wrapSync<TArgs extends readonly unknown[], TReturn>(
+    fn: (...args: TArgs) => TReturn,
     context: ErrorContext,
     options: ErrorHandlerOptions = {}
-  ): T {
-    return ((...args: Parameters<T>) => {
+  ): (...args: TArgs) => TReturn {
+    return (...args: TArgs) => {
       try {
         return fn(...args);
       } catch (error) {
         this.handleError(error, context, { ...options, rethrow: true });
+        throw error; // This will never execute but TypeScript needs it
       }
-    }) as T;
+    };
   }
 }
 
@@ -284,10 +305,10 @@ export const handleError = (
 };
 
 // Convenience function for handling errors with result
-export const handleErrorWithResult = <T = unknown>(
+export const handleErrorWithResult = (
   error: unknown,
   context: ErrorContext,
   options?: ErrorHandlerOptions
 ) => {
-  return errorHandler.handleErrorWithResult<T>(error, context, options);
+  return errorHandler.handleErrorWithResult(error, context, options);
 };

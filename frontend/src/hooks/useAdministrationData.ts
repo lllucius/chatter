@@ -5,11 +5,8 @@ import { useNotifications } from '../components/NotificationSystem';
 import { handleError } from '../utils/error-handler';
 import {
   BackupResponse,
-  BackupListResponse,
   PluginResponse,
-  PluginListResponse,
   JobResponse,
-  JobListResponse,
   JobStatsResponse,
 } from 'chatter-sdk';
 import {
@@ -35,6 +32,63 @@ const markAPICallMade = (key: string): void => {
   apiCallCache.set(key, Date.now());
 };
 
+// Rate limit backoff tracking
+const rateLimitBackoffs = new Map<string, number>();
+
+const getRateLimitDelay = (key: string): number => {
+  const currentBackoff = rateLimitBackoffs.get(key) || 1000; // Start with 1 second
+  return Math.min(currentBackoff, 30000); // Cap at 30 seconds
+};
+
+const incrementRateLimitBackoff = (key: string): void => {
+  const currentBackoff = rateLimitBackoffs.get(key) || 1000;
+  rateLimitBackoffs.set(key, Math.min(currentBackoff * 2, 30000));
+};
+
+const resetRateLimitBackoff = (key: string): void => {
+  rateLimitBackoffs.delete(key);
+};
+
+const isRateLimitError = (error: unknown): boolean => {
+  if (error && typeof error === 'object') {
+    const errorResponse = error as { response?: { status?: number } };
+    return errorResponse?.response?.status === 429;
+  }
+  return false;
+};
+
+// Utility function to handle API calls with rate limit retry
+const callWithRateLimitRetry = async <T>(
+  key: string,
+  apiCall: () => Promise<T>,
+  maxRetries: number = 2
+): Promise<T> => {
+  let attempts = 0;
+  
+  while (attempts <= maxRetries) {
+    try {
+      const result = await apiCall();
+      resetRateLimitBackoff(key);
+      return result;
+    } catch (error) {
+      if (isRateLimitError(error) && attempts < maxRetries) {
+        incrementRateLimitBackoff(key);
+        const delay = getRateLimitDelay(key);
+        
+        // Wait before retrying
+        await new Promise(resolve => setTimeout(resolve, delay));
+        attempts++;
+        continue;
+      }
+      
+      // If it's not a rate limit error or we've exhausted retries, throw the error
+      throw error;
+    }
+  }
+  
+  throw new Error('Max retries exceeded');
+};
+
 // SSE Event interfaces for type safety
 interface JobSSEEventData {
   job_id: string;
@@ -46,16 +100,6 @@ interface BackupSSEEventData {
   backup_id: string;
   backup_name?: string;
   error?: string;
-}
-
-interface PluginSSEEventData {
-  plugin_id: string;
-  plugin_name?: string;
-  error?: string;
-}
-
-interface SSEEvent {
-  data: JobSSEEventData | BackupSSEEventData | PluginSSEEventData;
 }
 
 interface User {
@@ -126,8 +170,10 @@ export const useAdministrationData = () => {
     markAPICallMade('loadBackups');
     
     try {
-      const response =
-        await getSDK().dataManagement.listBackupsApiV1DataBackups();
+      const response = await callWithRateLimitRetry(
+        'loadBackups',
+        () => getSDK().dataManagement.listBackupsApiV1DataBackups()
+      );
       setBackups(response?.backups || []);
     } catch (error) {
       handleError(error, {
@@ -144,7 +190,10 @@ export const useAdministrationData = () => {
     markAPICallMade('loadPlugins');
     
     try {
-      const response = await getSDK().plugins.listPluginsApiV1Plugins();
+      const response = await callWithRateLimitRetry(
+        'loadPlugins',
+        () => getSDK().plugins.listPluginsApiV1Plugins()
+      );
       setPlugins(response?.plugins || []);
     } catch (error) {
       handleError(error, {
@@ -162,10 +211,13 @@ export const useAdministrationData = () => {
     
     try {
       setDataLoading(true);
-      const response = await getSDK().jobs.listJobsApiV1Jobs({
-        limit: 100,
-        offset: 0,
-      });
+      const response = await callWithRateLimitRetry(
+        'loadJobs',
+        () => getSDK().jobs.listJobsApiV1Jobs({
+          limit: 100,
+          offset: 0,
+        })
+      );
       const newJobs = response.jobs || [];
       newJobs.forEach((job) => {
         const previousState = lastJobStatesRef.current.get(job.id);
@@ -208,7 +260,10 @@ export const useAdministrationData = () => {
     markAPICallMade('loadJobStats');
     
     try {
-      const response = await getSDK().jobs.getJobStatsApiV1JobsStatsOverview();
+      const response = await callWithRateLimitRetry(
+        'loadJobStats',
+        () => getSDK().jobs.getJobStatsApiV1JobsStatsOverview()
+      );
       setJobStats(response);
     } catch (error) {
       handleError(error, {
@@ -316,7 +371,7 @@ export const useAdministrationData = () => {
     loadPlugins();
     loadJobs();
     loadJobStats();
-  }, []); // Empty dependency array - load only once on mount
+  }, [loadBackups, loadPlugins, loadJobs, loadJobStats]); // Include dependencies
 
   return {
     // Data

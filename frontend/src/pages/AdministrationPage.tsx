@@ -177,9 +177,9 @@ const AdministrationPage: React.FC = () => {
             name: formData.backupName,
             description: formData.description,
             backup_type: BackupType.full,
-            include_user_data: formData.includeUserData,
-            include_documents: formData.includeDocuments,
-            include_configurations: formData.includeConfigurations,
+            include_files: formData.includeUserData,
+            include_logs: formData.includeDocuments,
+            compress: formData.includeConfigurations,
           });
           toastService.success('Backup created successfully!');
           loadBackups();
@@ -190,7 +190,7 @@ const AdministrationPage: React.FC = () => {
             function: formData.jobFunction,
             args: formData.jobArgs ? JSON.parse(formData.jobArgs) : [],
             kwargs: formData.jobKwargs ? JSON.parse(formData.jobKwargs) : {},
-            priority: formData.jobPriority,
+            priority: formData.jobPriority as JobPriority,
             schedule_at: formData.scheduleAt || null,
             max_retries: formData.maxRetries,
           });

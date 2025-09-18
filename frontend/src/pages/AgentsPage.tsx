@@ -209,7 +209,7 @@ const AgentsPage: React.FC = () => {
         onRefresh={() => crudTableRef.current?.handleRefresh()}
         onAdd={() => crudTableRef.current?.handleCreate()}
       />
-      <CrudDataTable<AgentResponse, AgentCreateRequest, AgentUpdateRequest>
+      <CrudDataTable
         ref={crudTableRef}
         config={config}
         service={service}

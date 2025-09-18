@@ -493,8 +493,6 @@ async def get_dashboard_chart_data(
         )
 
         # Convert the dictionary to ChartReadyAnalytics object
-        from chatter.schemas.analytics import ChartReadyAnalytics
-
         return ChartReadyAnalytics(**chart_data)
 
     except Exception as e:

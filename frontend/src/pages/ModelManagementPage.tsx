@@ -157,9 +157,9 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'description',
       label: 'Description',
-      render: (value: string): JSX.Element => (
+      render: (value: unknown): JSX.Element => (
         <Typography variant="body2" color="text.secondary">
-          {value || '—'}
+          {(value as string) || '—'}
         </Typography>
       ),
     },
@@ -170,7 +170,7 @@ const ModelManagementPage: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (provider) => {
-        if (!provider.isDefault) {
+        if (!provider.is_default) {
           try {
             const defaultProviderBody: DefaultProvider = {
               provider_id: provider.id as any,
@@ -249,19 +249,19 @@ const ModelManagementPage: React.FC = () => {
   // Model columns and config
   const modelColumns: CrudColumn<ModelDefWithProvider>[] = [
     {
-      id: 'displayName',
+      id: 'display_name',
       label: 'Name',
-      render: (value, item): JSX.Element => (
+      render: (value: unknown, item: any): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
-              {value}
+              {value as string}
             </Typography>
             <Typography variant="body2" color="text.secondary">
               {item.name}
             </Typography>
           </Box>
-          {item.isDefault && (
+          {item.is_default && (
             <Chip size="small" label="Default" color="primary" />
           )}
         </Box>
@@ -285,11 +285,11 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: (value: boolean): JSX.Element => (
+      render: (value: unknown): JSX.Element => (
         <Chip
           size="small"
-          label={value ? 'Active' : 'Inactive'}
-          color={value ? 'success' : 'default'}
+          label={(value as boolean) ? 'Active' : 'Inactive'}
+          color={(value as boolean) ? 'success' : 'default'}
         />
       ),
     },
@@ -301,9 +301,9 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'dimensions',
       label: 'Dimensions',
-      render: (value: number): JSX.Element => (
+      render: (value: unknown): JSX.Element => (
         <Typography variant="body2">
-          {value ? value.toLocaleString() : '—'}
+          {(value as number) ? (value as number).toLocaleString() : '—'}
         </Typography>
       ),
     },
@@ -314,7 +314,7 @@ const ModelManagementPage: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (model) => {
-        if (!model.isDefault) {
+        if (!(model as any).is_default) {
           try {
             await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(
               model.id

@@ -56,7 +56,7 @@ export function useForm<T extends Record<string, unknown>>(
   );
 
   const handleBlur = useCallback(
-    (name: keyof T): void =>
+    (name: keyof T) =>
       () => {
         setTouched((prev) => ({
           ...prev,
@@ -112,7 +112,7 @@ export function useForm<T extends Record<string, unknown>>(
 
       // Mark all fields as touched
       const allTouched = Object.keys(values).reduce(
-        (acc, key): void => ({
+        (acc, key) => ({
           ...acc,
           [key]: true,
         }),

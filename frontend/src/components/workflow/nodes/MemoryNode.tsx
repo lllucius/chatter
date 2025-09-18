@@ -4,11 +4,12 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Memory as MemoryIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({
+const MemoryNode: React.FC<NodeProps> = ({
   data,
   selected,
 }) => {
-  const config = data.config || {};
+  const nodeData = data as WorkflowNodeData;
+  const config = nodeData.config || {};
 
   return (
     <>
@@ -29,6 +30,7 @@ const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
+          <>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
             <MemoryIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
@@ -53,6 +55,7 @@ const MemoryNode: React.FC<NodeProps<WorkflowNodeData>> = ({
             color={config.enabled ? 'success' : 'error'}
             variant="outlined"
           />
+          </>
         </CardContent>
       </Card>
 

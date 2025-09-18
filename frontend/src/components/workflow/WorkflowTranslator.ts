@@ -65,28 +65,28 @@ export class WorkflowTranslator {
     const retrieverNode = workflow.nodes.find((n) => n.type === 'retrieval');
     if (retrieverNode?.data.config) {
       config.retriever = {
-        collection: retrieverNode.data.config.collection || 'default',
-        top_k: retrieverNode.data.config.topK || 5,
+        collection: String(retrieverNode.data.config.collection || 'default'),
+        top_k: Number(retrieverNode.data.config.topK) || 5,
       };
     }
 
     // Add memory configuration if present
     const memoryNode = workflow.nodes.find((n) => n.type === 'memory');
     if (memoryNode?.data.config) {
-      config.memory_window = memoryNode.data.config.window || 20;
+      config.memory_window = Number(memoryNode.data.config.window) || 20;
     }
 
     // Extract system message from model nodes
     const modelNodes = workflow.nodes.filter((n) => n.type === 'model');
     if (modelNodes.length > 0 && modelNodes[0].data.config?.systemMessage) {
-      config.system_message = modelNodes[0].data.config.systemMessage;
+      config.system_message = String(modelNodes[0].data.config.systemMessage);
     }
 
     // Extract tools from tool nodes
     const toolNodes = workflow.nodes.filter((n) => n.type === 'tool');
     if (toolNodes.length > 0) {
       const allTools = toolNodes.flatMap(
-        (node) => node.data.config?.tools || []
+        (node) => (node.data.config?.tools as string[]) || []
       );
       config.tools = [...new Set(allTools)];
     }

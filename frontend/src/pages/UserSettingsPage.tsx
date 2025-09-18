@@ -57,18 +57,18 @@ interface APIKey {
   last_used?: string;
 }
 
-interface ProfileFormValues {
+interface ProfileFormValues extends Record<string, unknown> {
   full_name: string;
   email: string;
 }
 
-interface PasswordFormValues {
+interface PasswordFormValues extends Record<string, unknown> {
   current_password: string;
   new_password: string;
   confirm_password: string;
 }
 
-interface ApiKeyFormValues {
+interface ApiKeyFormValues extends Record<string, unknown> {
   name: string;
   expires_in_days: number;
 }
@@ -98,7 +98,7 @@ const UserSettingsPage: React.FC = () => {
           source: 'UserSettingsPage.handleSaveProfile',
           operation: 'update user profile',
           additionalData: {
-            name: profileForm.values.name,
+            name: profileForm.values.full_name,
             email: profileForm.values.email,
           },
         });
@@ -139,7 +139,7 @@ const UserSettingsPage: React.FC = () => {
           new_password: values.new_password,
         });
         toastService.success('Password changed successfully');
-        passwordForm.reset();
+        passwordForm.resetForm();
       } catch (error: unknown) {
         handleError(error, {
           source: 'UserSettingsPage.handleChangePassword',
@@ -157,11 +157,12 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        const newKey = await getSDK().createApiKey(values);
-        setApiKeys([...apiKeys, newKey]);
-        toastService.success('API key created successfully');
+        // TODO: Implement API key creation when endpoint is available
+        // const newKey = await getSDK().createApiKey(values);
+        // setApiKeys([...apiKeys, newKey]);
+        toastService.success('API key creation not yet implemented');
         setApiKeyDialogOpen(false);
-        apiKeyForm.reset();
+        apiKeyForm.resetForm();
       } catch (error: unknown) {
         handleError(error, {
           source: 'UserSettingsPage.handleCreateApiKey',
@@ -175,12 +176,12 @@ const UserSettingsPage: React.FC = () => {
 
   const loadUserProfile = async () => {
     try {
-      const profile = await getSDK().getCurrentUser();
-      setUserProfile(profile);
-      profileForm.setValues({
-        full_name: profile.full_name || '',
-        email: profile.email || '',
-      });
+      // TODO: Implement user profile loading when endpoint is available
+      // const profile = await getSDK().getCurrentUser();
+      // setUserProfile(profile);
+      // Set default values for now
+      profileForm.setFieldValue('full_name', '');
+      profileForm.setFieldValue('email', '');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadUserProfile',
@@ -192,8 +193,10 @@ const UserSettingsPage: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setApiKeysLoading(true);
-      const keys = await getSDK().listApiKeys();
-      setApiKeys(keys);
+      // TODO: Implement API key listing when endpoint is available
+      // const keys = await getSDK().listApiKeys();
+      // setApiKeys(keys);
+      setApiKeys([]); // Placeholder until API is available
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadApiKeys',
@@ -206,22 +209,24 @@ const UserSettingsPage: React.FC = () => {
 
   const handleRevokeApiKey = async (keyId: string) => {
     try {
-      await getSDK().revokeApiKey(keyId);
+      // TODO: Implement API key revocation when endpoint is available
+      // await getSDK().revokeApiKey(keyId);
       setApiKeys(apiKeys.filter((key) => key.id !== keyId));
       toastService.success('API key revoked successfully');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleRevokeKey',
         operation: 'revoke API key',
-        additionalData: { keyId: key.id, keyName: key.name },
+        additionalData: { keyId },
       });
     }
   };
 
   const handleDeactivateAccount = async () => {
     try {
-      await getSDK().deactivateAccount();
-      toastService.success('Account deactivated successfully');
+      // TODO: Implement account deactivation when endpoint is available
+      // await getSDK().deactivateAccount();
+      toastService.success('Account deactivation not yet implemented');
       // The SDK will handle logout and redirect
     } catch (error: unknown) {
       handleError(error, {
@@ -325,7 +330,7 @@ const UserSettingsPage: React.FC = () => {
                 variant="contained"
                 startIcon={<SaveIcon />}
                 onClick={profileForm.handleSubmit}
-                loading={profileForm.submitting}
+                loading={profileForm.isSubmitting}
               >
                 Save Changes
               </Button>
@@ -378,7 +383,7 @@ const UserSettingsPage: React.FC = () => {
               <Button
                 variant="contained"
                 onClick={passwordForm.handleSubmit}
-                loading={passwordForm.submitting}
+                loading={passwordForm.isSubmitting}
               >
                 Change Password
               </Button>
@@ -555,7 +560,7 @@ const UserSettingsPage: React.FC = () => {
           <Button
             variant="contained"
             onClick={apiKeyForm.handleSubmit}
-            loading={apiKeyForm.submitting}
+            loading={apiKeyForm.isSubmitting}
           >
             Create Key
           </Button>

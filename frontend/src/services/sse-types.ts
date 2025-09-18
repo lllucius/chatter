@@ -246,6 +246,66 @@ export interface ConnectionEstablishedEvent extends SSEEvent {
   };
 }
 
+// Chat Events
+export interface ChatMessageChunkEvent extends SSEEvent {
+  type: 'chat.message_chunk';
+  data: {
+    message_id: string;
+    chunk: string;
+    chunk_index: number;
+    is_final: boolean;
+  };
+}
+
+export interface ChatMessageCompleteEvent extends SSEEvent {
+  type: 'chat.message_complete';
+  data: {
+    message_id: string;
+    complete_message: string;
+    tokens_used: number;
+  };
+}
+
+// Workflow Events
+export interface WorkflowStatusEvent extends SSEEvent {
+  type: 'workflow.status';
+  data: {
+    workflow_id: string;
+    status: 'running' | 'completed' | 'failed' | 'paused';
+    current_step: string;
+    progress_percentage: number;
+  };
+}
+
+export interface WorkflowStartedEvent extends SSEEvent {
+  type: 'workflow.started';
+  data: {
+    workflow_id: string;
+    started_at: string;
+    input_data: Record<string, unknown>;
+  };
+}
+
+export interface WorkflowCompletedEvent extends SSEEvent {
+  type: 'workflow.completed';
+  data: {
+    workflow_id: string;
+    completed_at: string;
+    output_data: Record<string, unknown>;
+    execution_time_ms: number;
+  };
+}
+
+export interface WorkflowFailedEvent extends SSEEvent {
+  type: 'workflow.failed';
+  data: {
+    workflow_id: string;
+    failed_at: string;
+    error_message: string;
+    error_code?: string;
+  };
+}
+
 // Union type for all possible events
 export type AnySSEEvent =
   | BackupStartedEvent
@@ -264,7 +324,13 @@ export type AnySSEEvent =
   | PluginEvent
   | SystemAlertEvent
   | SystemStatusEvent
-  | ConnectionEstablishedEvent;
+  | ConnectionEstablishedEvent
+  | ChatMessageChunkEvent
+  | ChatMessageCompleteEvent
+  | WorkflowStatusEvent
+  | WorkflowStartedEvent
+  | WorkflowCompletedEvent
+  | WorkflowFailedEvent;
 
 // Event listener callback type
 export type SSEEventListener = (event: AnySSEEvent) => void;
@@ -308,6 +374,14 @@ export const STATIC_EVENT_TYPES = [
   'conversation.ended',
   'message.received',
   'message.sent',
+  'chat.message_chunk',
+  'chat.message_complete',
+
+  // Workflow events
+  'workflow.status',
+  'workflow.started',
+  'workflow.completed',
+  'workflow.failed',
 
   // User events
   'user.registered',

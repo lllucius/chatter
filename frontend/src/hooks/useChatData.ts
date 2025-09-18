@@ -56,7 +56,7 @@ export const useChatData = () => {
       ] = await Promise.all([
         sdk.profiles.listProfilesApiV1Profiles({}),
         sdk.prompts.listPromptsApiV1Prompts({}),
-        sdk.documents.listDocumentsApiV1Documents({}),
+        sdk.documents.listDocumentsGetApiV1Documents({}),
         sdk.conversations.listConversationsApiV1Conversations({
           limit: 1,
           offset: 0,
@@ -66,7 +66,7 @@ export const useChatData = () => {
       profilesResponse = profilesResp.profiles || [];
       setProfiles(profilesResponse);
       setPrompts(promptsResponse.prompts || []);
-      setDocuments(documentsResponse.documents || []);
+      setDocuments((documentsResponse as any)?.documents || []);
 
       // Auto-select first profile if none selected and profiles exist
       if (!selectedProfile && profilesResponse.length > 0) {
@@ -182,7 +182,7 @@ export const useChatMessages = () => {
           );
 
         const chatMessages: ExtendedChatMessage[] =
-          response.messages?.map((msg, index) => ({
+          response?.map((msg, index) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,

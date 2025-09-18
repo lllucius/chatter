@@ -17,7 +17,7 @@ vi.mock('../../services/auth-service', () => ({
       listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
     },
     documents: {
-      listDocumentsApiV1Documents: vi.fn(() =>
+      listDocumentsGetApiV1Documents: vi.fn(() =>
         Promise.resolve({ documents: [] })
       ),
     },
@@ -107,7 +107,7 @@ describe('ChatPage sendMessage Fix', () => {
 
     // Disable streaming to test the non-streaming path
     const streamingToggle = screen.getByRole('checkbox');
-    if (streamingToggle.checked) {
+    if ((streamingToggle as HTMLInputElement).checked) {
       fireEvent.click(streamingToggle);
     }
 
@@ -164,7 +164,7 @@ describe('ChatPage sendMessage Fix', () => {
 
     // Disable streaming to test the non-streaming path
     const streamingToggle = screen.getByRole('checkbox');
-    if (streamingToggle.checked) {
+    if ((streamingToggle as HTMLInputElement).checked) {
       fireEvent.click(streamingToggle);
     }
 

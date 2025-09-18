@@ -96,6 +96,7 @@ export interface WorkflowEdgeData extends Record<string, unknown> {
 }
 
 export interface WorkflowDefinition {
+  id?: string;
   nodes: Node<WorkflowNodeData>[];
   edges: Edge<WorkflowEdgeData>[];
   metadata: {
@@ -242,7 +243,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const onConnect = useCallback(
     (params: Connection) => {
       saveToHistory();
-      const newEdge = {
+      const newEdge: Edge<WorkflowEdgeData> = {
         ...params,
         id: `e${edges.length + 1}`,
         type: 'custom',

@@ -28,16 +28,11 @@ import { useABTestingData, TestStatus } from '../hooks/useABTestingData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
 import { format } from 'date-fns';
+import { ABTestCreateRequest, MetricType, TestType, TestVariant, VariantAllocation } from 'chatter-sdk';
 
-interface ABTestFormData {
-  name: string;
-  description: string;
-  test_type: string;
-  hypothesis: string;
-  duration_days: number;
-  min_sample_size: number;
-  confidence_level: number;
-  target_audience: string;
+// Extend ABTestCreateRequest for form data
+interface ABTestFormData extends ABTestCreateRequest {
+  [key: string]: unknown;
 }
 
 const ABTestingPage: React.FC = () => {
@@ -74,12 +69,15 @@ const ABTestingPage: React.FC = () => {
     initialValues: {
       name: '',
       description: '',
-      test_type: 'a_b',
+      test_type: 'a_b' as TestType,
+      allocation_strategy: 'equal' as VariantAllocation,
+      variants: [] as TestVariant[],
+      metrics: [] as MetricType[],
       hypothesis: '',
       duration_days: 14,
       min_sample_size: 1000,
       confidence_level: 0.95,
-      target_audience: '',
+      target_audience: {},
     },
     onSubmit: async (values) => {
       try {
@@ -121,11 +119,14 @@ const ABTestingPage: React.FC = () => {
       name: test.name || '',
       description: test.description || '',
       test_type: test.test_type || 'a_b',
+      allocation_strategy: test.allocation_strategy || 'equal',
+      variants: test.variants || [],
+      metrics: test.metrics || [],
       hypothesis: test.hypothesis || '',
       duration_days: test.duration_days || 14,
       min_sample_size: test.min_sample_size || 1000,
       confidence_level: test.confidence_level || 0.95,
-      target_audience: test.target_audience || '',
+      target_audience: test.target_audience || {},
     });
     setDialogOpen(true);
   };
@@ -176,12 +177,12 @@ const ABTestingPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: TestStatus) => {
+  const getStatusIcon = (status: TestStatus): React.ReactElement | undefined => {
     switch (status) {
       case 'running':
         return <TrendingUpIcon />;
       default:
-        return null;
+        return undefined;
     }
   };
 
@@ -390,10 +391,10 @@ const ABTestingPage: React.FC = () => {
               <ABTestAnalytics
                 testId={selectedTest.id}
                 testName={selectedTest.name}
-                metrics={testMetrics}
-                results={testResults}
-                recommendations={testRecommendations}
-                performance={testPerformance}
+                metrics={testMetrics || undefined}
+                results={testResults || undefined}
+                recommendations={testRecommendations || undefined}
+                performance={testPerformance || undefined}
               />
             )}
           </TabPanel>
@@ -403,10 +404,10 @@ const ABTestingPage: React.FC = () => {
               <ABTestAnalytics
                 testId={selectedTest.id}
                 testName={selectedTest.name}
-                metrics={testMetrics}
-                results={testResults}
-                recommendations={testRecommendations}
-                performance={testPerformance}
+                metrics={testMetrics || undefined}
+                results={testResults || undefined}
+                recommendations={testRecommendations || undefined}
+                performance={testPerformance || undefined}
               />
             )}
           </TabPanel>
@@ -416,10 +417,10 @@ const ABTestingPage: React.FC = () => {
               <ABTestAnalytics
                 testId={selectedTest?.id || ''}
                 testName={selectedTest?.name || ''}
-                metrics={testMetrics}
-                results={testResults}
-                recommendations={testRecommendations}
-                performance={testPerformance}
+                metrics={testMetrics || undefined}
+                results={testResults || undefined}
+                recommendations={testRecommendations || undefined}
+                performance={testPerformance || undefined}
               />
             ) : (
               <Alert severity="info">

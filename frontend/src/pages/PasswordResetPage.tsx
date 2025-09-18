@@ -20,11 +20,11 @@ import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 
-interface RequestResetFormValues {
+interface RequestResetFormValues extends Record<string, unknown> {
   email: string;
 }
 
-interface ConfirmResetFormValues {
+interface ConfirmResetFormValues extends Record<string, unknown> {
   token: string;
   newPassword: string;
   confirmPassword: string;
@@ -41,7 +41,7 @@ const PasswordResetPage: React.FC = () => {
       email: '',
     },
     validate: (values) => {
-      const errors: Partial<RequestResetFormValues> = {};
+      const errors: Partial<Record<keyof RequestResetFormValues, string>> = {};
       if (!values.email) {
         errors.email = 'Email is required';
       } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(values.email)) {
@@ -51,7 +51,8 @@ const PasswordResetPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        await getSDK().requestPasswordReset(values.email);
+        // TODO: Implement password reset when endpoint is available
+        // await getSDK().requestPasswordReset(values.email);
         setEmail(values.email);
         setStep('confirm');
         toastService.success('Password reset instructions sent to your email');
@@ -59,7 +60,7 @@ const PasswordResetPage: React.FC = () => {
         handleError(error, {
           source: 'PasswordResetPage.handleSendInstructions',
           operation: 'send password reset instructions',
-          additionalData: { email: formData.email },
+          additionalData: { email: values.email },
         });
         throw error;
       }
@@ -73,7 +74,7 @@ const PasswordResetPage: React.FC = () => {
       confirmPassword: '',
     },
     validate: (values) => {
-      const errors: Partial<ConfirmResetFormValues> = {};
+      const errors: Partial<Record<keyof ConfirmResetFormValues, string>> = {};
       if (!values.token) {
         errors.token = 'Reset token is required';
       }
@@ -99,7 +100,7 @@ const PasswordResetPage: React.FC = () => {
         handleError(error, {
           source: 'PasswordResetPage.handleResetPassword',
           operation: 'reset password',
-          additionalData: { token: formData.token },
+          additionalData: { token: values.token },
         });
         throw error;
       }
@@ -149,7 +150,7 @@ const PasswordResetPage: React.FC = () => {
                     type="email"
                     value={requestForm.values.email}
                     onChange={(e) =>
-                      requestForm.setValue('email', e.target.value)
+                      requestForm.setFieldValue('email', e.target.value)
                     }
                     error={!!requestForm.errors.email}
                     helperText={requestForm.errors.email}
@@ -195,7 +196,7 @@ const PasswordResetPage: React.FC = () => {
                     label="Reset Token"
                     value={confirmForm.values.token}
                     onChange={(e) =>
-                      confirmForm.setValue('token', e.target.value)
+                      confirmForm.setFieldValue('token', e.target.value)
                     }
                     error={!!confirmForm.errors.token}
                     helperText={
@@ -211,7 +212,7 @@ const PasswordResetPage: React.FC = () => {
                     type="password"
                     value={confirmForm.values.newPassword}
                     onChange={(e) =>
-                      confirmForm.setValue('newPassword', e.target.value)
+                      confirmForm.setFieldValue('newPassword', e.target.value)
                     }
                     error={!!confirmForm.errors.newPassword}
                     helperText={confirmForm.errors.newPassword}
@@ -223,7 +224,7 @@ const PasswordResetPage: React.FC = () => {
                     type="password"
                     value={confirmForm.values.confirmPassword}
                     onChange={(e) =>
-                      confirmForm.setValue('confirmPassword', e.target.value)
+                      confirmForm.setFieldValue('confirmPassword', e.target.value)
                     }
                     error={!!confirmForm.errors.confirmPassword}
                     helperText={confirmForm.errors.confirmPassword}

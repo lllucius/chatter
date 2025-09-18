@@ -7,10 +7,10 @@ import DocumentsPage from '../DocumentsPage';
 import { getSDK, authService } from '../../services/auth-service';
 
 // Mock dependencies
-vi.mock('../../services/auth-service', (): void => ({
-  getSDK: vi.fn((): void => ({
+vi.mock('../../services/auth-service', () => ({
+  getSDK: vi.fn(() => ({
     documents: {
-      listDocumentsApiV1Documents: vi.fn(),
+      listDocumentsGetApiV1Documents: vi.fn(),
       uploadDocumentApiV1DocumentsUpload: vi.fn(),
       deleteDocumentApiV1DocumentsDocumentId: vi.fn(),
       getDocumentApiV1DocumentsDocumentId: vi.fn(),
@@ -25,8 +25,8 @@ vi.mock('../../services/auth-service', (): void => ({
 }));
 
 // Mock SSE context
-vi.mock('../../services/sse-context', (): void => ({
-  useSSE: (): void => ({
+vi.mock('../../services/sse-context', () => ({
+  useSSE: () => ({
     on: vi.fn(() => vi.fn()),
     off: vi.fn(),
     isConnected: false,
@@ -37,7 +37,7 @@ vi.mock('../../services/sse-context', (): void => ({
 }));
 
 // Mock App context
-vi.mock('../../App', (): void => ({
+vi.mock('../../App', () => ({
   ThemeContext: React.createContext({
     darkMode: false,
     toggleDarkMode: vi.fn(),
@@ -89,7 +89,7 @@ describe('DocumentsPage', () => {
     vi.clearAllMocks();
 
     // Setup default API responses
-    vi.mocked(getSDK().documents.listDocumentsApiV1Documents).mockResolvedValue(
+    vi.mocked(getSDK().documents.listDocumentsGetApiV1Documents).mockResolvedValue(
       {
         documents: mockDocuments,
       } as any
@@ -115,7 +115,7 @@ describe('DocumentsPage', () => {
     );
 
     expect(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).toHaveBeenCalledTimes(1);
   });
 
@@ -130,7 +130,7 @@ describe('DocumentsPage', () => {
 
     // Should call the API immediately
     expect(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).toHaveBeenCalledTimes(1);
   });
 
@@ -141,7 +141,7 @@ describe('DocumentsPage', () => {
 
     // Override the default mock to simulate API failure for this specific test
     vi.mocked(
-      getSDK().documents.listDocumentsApiV1Documents
+      getSDK().documents.listDocumentsGetApiV1Documents
     ).mockRejectedValueOnce(new Error('API Error'));
 
     await act(async () => {

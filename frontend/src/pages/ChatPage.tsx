@@ -17,7 +17,7 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
-import type { ConversationResponse } from 'chatter-sdk';
+import type { ConversationResponse, ChatRequest } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
@@ -89,16 +89,17 @@ const ChatPage: React.FC = () => {
   );
 
   const handleRateMessage = useCallback(
-    (messageId: string, rating: 'good' | 'bad') => {
+    (messageId: string, rating: number) => {
       // Implementation for message rating
-      toastService.info(`Message rated as ${rating}`);
+      const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
+      toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
     },
     []
   );
 
   // Handle streaming response from chat API
   const handleStreamingResponse = useCallback(
-    async (chatRequest: Record<string, unknown>, isRegeneration: boolean) => {
+    async (chatRequest: ChatRequest, isRegeneration: boolean) => {
       try {
         // Get the streaming response
         const stream =
@@ -125,22 +126,20 @@ const ChatPage: React.FC = () => {
               stepDescriptions: ['Receiving response...'],
             },
           },
-          onEdit: handleEditMessage,
-          onRegenerate: (messageId: string) => {
-            // Use the ref to avoid circular dependency
-            handleRegenerateMessageRef.current?.(messageId);
-          },
-          onDelete: handleDeleteMessage,
-          onRate: handleRateMessage,
         };
 
         // Add the initial message to the chat
         if (isRegeneration) {
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = initialAssistantMessage;
             }
@@ -283,21 +282,19 @@ const ChatPage: React.FC = () => {
               stepDescriptions: ['Error occurred during streaming'],
             },
           },
-          onEdit: handleEditMessage,
-          onRegenerate: (messageId: string) => {
-            // Use the ref to avoid circular dependency
-            handleRegenerateMessageRef.current?.(messageId);
-          },
-          onDelete: handleDeleteMessage,
-          onRate: handleRateMessage,
         };
 
         if (isRegeneration) {
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = errorMessage;
             }
@@ -384,18 +381,19 @@ const ChatPage: React.FC = () => {
                   stepDescriptions: ['Message processed'],
                 },
               },
-              onEdit: handleEditMessage,
-              onRegenerate: handleRegenerateMessage,
-              onDelete: handleDeleteMessage,
-              onRate: handleRateMessage,
             };
 
             // Replace the last assistant message
             setMessages((prev) => {
               const newMessages = [...prev];
-              const lastAssistantIndex = newMessages.findLastIndex(
-                (msg) => msg.role === 'assistant'
-              );
+              // Find last index by iterating backwards
+              let lastAssistantIndex = -1;
+              for (let i = newMessages.length - 1; i >= 0; i--) {
+                if (newMessages[i].role === 'assistant') {
+                  lastAssistantIndex = i;
+                  break;
+                }
+              }
               if (lastAssistantIndex !== -1) {
                 newMessages[lastAssistantIndex] = assistantMessage;
               }
@@ -513,10 +511,6 @@ const ChatPage: React.FC = () => {
           role: 'user',
           content: textToSend,
           timestamp: new Date(),
-          onEdit: handleEditMessage,
-          onRegenerate: handleRegenerateMessage,
-          onDelete: handleDeleteMessage,
-          onRate: handleRateMessage,
         };
 
         if (!isRegeneration) {
@@ -572,19 +566,20 @@ const ChatPage: React.FC = () => {
               stepDescriptions: ['Message processed'],
             },
           },
-          onEdit: handleEditMessage,
-          onRegenerate: handleRegenerateMessage,
-          onDelete: handleDeleteMessage,
-          onRate: handleRateMessage,
         };
 
         if (isRegeneration) {
           // Replace the last assistant message
           setMessages((prev) => {
             const newMessages = [...prev];
-            const lastAssistantIndex = newMessages.findLastIndex(
-              (msg) => msg.role === 'assistant'
-            );
+            // Find last index by iterating backwards
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = assistantMessage;
             }
@@ -732,6 +727,10 @@ const ChatPage: React.FC = () => {
               messages={messages}
               messagesEndRef={messagesEndRef}
               loading={loading}
+              onEdit={handleEditMessage}
+              onRegenerate={handleRegenerateMessage}
+              onDelete={handleDeleteMessage}
+              onRate={handleRateMessage}
             />
           )}
         </CardContent>

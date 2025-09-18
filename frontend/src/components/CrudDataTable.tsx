@@ -96,10 +96,7 @@ interface CrudDataTableProps<T, TCreate, TUpdate> {
   onExternalDialogClose?: () => void;
 }
 
-export const CrudDataTable = forwardRef<
-  CrudDataTableRef,
-  CrudDataTableProps<unknown, unknown, unknown>
->(function CrudDataTable<T, TCreate, TUpdate>(
+function CrudDataTableInner<T, TCreate, TUpdate>(
   {
     config,
     service,
@@ -107,7 +104,7 @@ export const CrudDataTable = forwardRef<
     getItemId,
     externalDialogOpen,
     onExternalDialogClose,
-  }: CrudDataTableProps<T, TCreate, TUpdate>,
+    }: CrudDataTableProps<T, TCreate, TUpdate>,
   ref: React.ForwardedRef<CrudDataTableRef>
 ) {
   // State management
@@ -432,6 +429,10 @@ export const CrudDataTable = forwardRef<
       )}
     </Box>
   );
-});
+}
+
+export const CrudDataTable = React.forwardRef(CrudDataTableInner) as <T, TCreate, TUpdate>(
+  props: CrudDataTableProps<T, TCreate, TUpdate> & { ref?: React.Ref<CrudDataTableRef> }
+) => React.ReactElement;
 
 export default CrudDataTable;

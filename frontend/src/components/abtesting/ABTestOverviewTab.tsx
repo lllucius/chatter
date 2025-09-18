@@ -96,7 +96,7 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
                 Target Audience
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                {test.target_audience}
+                {typeof test.target_audience === 'string' ? test.target_audience : JSON.stringify(test.target_audience)}
               </Typography>
             </Box>
           )}

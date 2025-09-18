@@ -212,11 +212,11 @@ const ToolsPage: React.FC = () => {
     RemoteServerCreate,
     RemoteServerUpdate
   > = {
-    list: async () => {
+    list: async (page: number, pageSize: number) => {
       const response =
         await getSDK().toolServers.listToolServersApiV1ToolserversServers({});
       return {
-        items: response || [],
+        items: (response || []) as any[],
         total: response?.length || 0,
       };
     },
@@ -226,7 +226,7 @@ const ToolsPage: React.FC = () => {
         await getSDK().toolServers.createToolServerApiV1ToolserversServers(
           data
         );
-      return response;
+      return response as any;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
@@ -235,7 +235,7 @@ const ToolsPage: React.FC = () => {
           id,
           data
         );
-      return response;
+      return response as any;
     },
 
     delete: async (id: string) => {
@@ -261,7 +261,7 @@ const ToolsPage: React.FC = () => {
       label: 'Status',
       render: (value, item): JSX.Element => (
         <Box sx={{ display: 'flex', gap: 1, alignItems: 'center' }}>
-          {createStatusChipRenderer<Tool>()(value, item)}
+          {createStatusChipRenderer<Tool>()?.(value, item)}
           {!item.is_available && (
             <Chip label="Unavailable" color="warning" size="small" />
           )}
@@ -323,11 +323,11 @@ const ToolsPage: React.FC = () => {
   };
 
   const toolService: CrudService<Tool, never, never> = {
-    list: async () => {
+    list: async (page: number, pageSize: number) => {
       const response =
         await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
       return {
-        items: response || [],
+        items: ((response || []) as unknown) as Tool[],
         total: response?.length || 0,
       };
     },

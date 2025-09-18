@@ -19,7 +19,11 @@ export const useForm = <T extends Record<string, unknown>>(
       setValues((prev) => ({ ...prev, [field]: value }));
       // Clear error when field is changed
       if (errors[field as string]) {
-        setErrors((prev) => ({ ...prev, [field]: undefined }));
+        setErrors((prev) => {
+          const newErrors = { ...prev };
+          delete newErrors[field as string];
+          return newErrors;
+        });
       }
     },
     [errors]

@@ -56,7 +56,7 @@ const CustomEdge: React.FC<EdgeProps> = ({
             className="nodrag nopan"
           >
             <Chip
-              label={data?.label || data?.condition || 'condition'}
+              label={String(data?.label || data?.condition || 'condition')}
               size="small"
               color="warning"
               sx={{

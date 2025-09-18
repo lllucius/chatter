@@ -19,7 +19,7 @@ vi.mock('../auth-service', async () => {
       getToken: vi.fn(() => null),
       getURL: vi.fn(() => 'http://localhost:8000'),
       refreshToken: vi.fn(() => Promise.resolve(true)),
-      getSDK: vi.fn((): void => ({
+      getSDK: vi.fn(() => ({
         events: {
           eventsStreamApiV1EventsStream: vi.fn(() =>
             Promise.resolve(new ReadableStream())
@@ -63,7 +63,7 @@ describe('Auth Service and SSE Manager Integration', () => {
       status: 200,
       statusText: 'OK',
       body: {
-        getReader: (): void => ({
+        getReader: () => ({
           read: vi.fn().mockResolvedValue({ done: true }),
         }),
       },
@@ -84,7 +84,7 @@ describe('Auth Service and SSE Manager Integration', () => {
     // Ensure we start unauthenticated
     (authService.isAuthenticated as Mock).mockReturnValue(false);
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
     sseEventManager.connect();
 
@@ -102,7 +102,7 @@ describe('Auth Service and SSE Manager Integration', () => {
     (authService.getToken as Mock).mockReturnValue(null);
 
     // Try to connect - should fail
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation();
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
     sseEventManager.connect();
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
@@ -150,7 +150,7 @@ describe('Auth Service and SSE Manager Integration', () => {
           status: 200,
           statusText: 'OK',
           body: {
-            getReader: (): void => ({
+            getReader: () => ({
               read: vi.fn().mockResolvedValue({ done: true }),
             }),
           },

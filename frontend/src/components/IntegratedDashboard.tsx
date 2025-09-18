@@ -628,12 +628,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Stack spacing={0.5} alignItems="center">
-                    <Typography variant="h6" color="info">
-                      {stats.system.uptime}%
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      System Uptime
-                    </Typography>
+                    <Typography variant="h6" color="info">{`${stats.system.uptime}%`}</Typography>
+                    <Typography variant="caption" color="text.secondary">System Uptime</Typography>
                   </Stack>
                 </Paper>
               </Grid>

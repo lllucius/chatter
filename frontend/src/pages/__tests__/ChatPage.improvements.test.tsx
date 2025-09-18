@@ -21,7 +21,7 @@ vi.mock('../../services/auth-service', () => ({
       listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
     },
     documents: {
-      listDocumentsApiV1Documents: vi.fn(() =>
+      listDocumentsGetApiV1Documents: vi.fn(() =>
         Promise.resolve({ documents: [] })
       ),
     },
@@ -256,7 +256,7 @@ describe('ChatPage Improvements', () => {
       // After sending, input should be available for focus again
       await waitFor(() => {
         expect(inputField).not.toBeDisabled();
-        expect(inputField.value).toBe('');
+        expect((inputField as HTMLInputElement).value).toBe('');
       });
     });
   });

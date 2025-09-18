@@ -62,6 +62,54 @@ const RealTimeDashboard: React.FC = () => {
   const reconnectAttempts = useRef(0);
   const maxReconnectAttempts = 5;
 
+  const handleRealTimeEvent = useCallback((event: RealTimeEvent) => {
+    setLastUpdate(new Date());
+
+    switch (event.type) {
+      case 'analytics':
+        if (event.data.dashboard_stats && typeof event.data.dashboard_stats === 'object') {
+          setDashboardData(event.data.dashboard_stats as IntegratedDashboardStats);
+        }
+        if (event.data.chart_data && typeof event.data.chart_data === 'object') {
+          setChartData(event.data.chart_data as ChartReadyAnalytics);
+        }
+        break;
+
+      case 'notification':
+        if (event.data.alert && typeof event.data.alert === 'object') {
+          const alertData = event.data.alert as Record<string, unknown>;
+          const alert: AlertData = {
+            type: String(alertData.type || 'info'),
+            severity: (alertData.severity as AlertData['severity']) || 'info',
+            title: String(alertData.title || 'Notification'),
+            message: String(alertData.message || 'No message'),
+            threshold: alertData.threshold ? Number(alertData.threshold) : undefined,
+            recommendation: alertData.recommendation ? String(alertData.recommendation) : undefined
+          };
+          setAlerts((prev) => [alert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
+
+          // Show toast notification for critical alerts
+          if (alert.severity === 'error' || alert.severity === 'warning') {
+            toastService[alert.severity](alert.message);
+          }
+        }
+        break;
+
+      case 'health':
+        if (event.data.health && typeof event.data.health === 'object') {
+          const healthData = event.data.health as Record<string, unknown>;
+          toastService.info(
+            `System Alert: ${healthData.status || 'Critical issue detected'}`
+          );
+        }
+        break;
+
+      default:
+        // Handle unknown event types
+        console.debug('Unknown real-time event type:', event.type);
+    }
+  }, []);
+
   const connectToSSE = useCallback(() => {
     if (eventSourceRef.current) {
       eventSourceRef.current.close();
@@ -125,50 +173,6 @@ const RealTimeDashboard: React.FC = () => {
       setRealTimeEnabled(false);
     }
   }, [handleRealTimeEvent]);
-
-  const handleRealTimeEvent = useCallback((event: RealTimeEvent) => {
-    setLastUpdate(new Date());
-
-    switch (event.type) {
-      case 'analytics':
-        if (event.data.dashboard_stats && typeof event.data.dashboard_stats === 'object') {
-          setDashboardData(event.data.dashboard_stats as IntegratedDashboardStats);
-        }
-        if (event.data.chart_data && typeof event.data.chart_data === 'object') {
-          setChartData(event.data.chart_data as ChartReadyAnalytics);
-        }
-        break;
-
-      case 'notification':
-        if (event.data.alert) {
-          const alert: AlertData = event.data.alert;
-          setAlerts((prev) => [alert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
-
-          // Show toast notification for critical alerts
-          if (alert.severity === 'error' || alert.severity === 'warning') {
-            toastService[alert.severity](alert.message);
-          }
-        }
-        break;
-
-      case 'workflow':
-        // Handle workflow updates
-        // Workflow update received
-        break;
-
-      case 'system':
-        // Handle system health updates
-        if (event.data.severity === 'critical') {
-          toastService.error(
-            `System Alert: ${event.data.health.status || 'Critical issue detected'}`
-          );
-        }
-        break;
-
-      default:
-      // Unknown event type - ignore
-    }
-  }, []);
 
   const toggleRealTime = useCallback(async () => {
     if (realTimeEnabled) {
@@ -345,17 +349,17 @@ const RealTimeDashboard: React.FC = () => {
             <Box display="flex" gap={2} flexWrap="wrap">
               <Chip
                 icon={<TrendingIcon />}
-                label={`Active Users: ${dashboardData.active_users || 0}`}
+                label={`Active Users: ${(dashboardData.system as Record<string, unknown>)?.active_users || 0}`}
                 variant="outlined"
               />
               <Chip
                 icon={<PerformanceIcon />}
-                label={`Conversations: ${dashboardData.total_conversations || 0}`}
+                label={`Conversations: ${(dashboardData.workflows as Record<string, unknown>)?.total_conversations || 0}`}
                 variant="outlined"
               />
               <Chip
                 icon={<TrendingIcon />}
-                label={`Documents: ${dashboardData.total_documents || 0}`}
+                label={`Documents: ${(dashboardData.agents as Record<string, unknown>)?.total_documents || 0}`}
                 variant="outlined"
               />
             </Box>

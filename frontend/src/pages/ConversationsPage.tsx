@@ -71,23 +71,26 @@ const ConversationsPage: React.FC = () => {
 
   // Conversation title renderer
   const renderConversationTitle = (
-    title: string | null,
+    value: unknown,
     conversation: ConversationResponse
-  ): JSX.Element => (
-    <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-      <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
-        <MessageIcon fontSize="small" />
-      </Avatar>
-      <Box>
-        <Typography variant="body2" fontWeight="medium">
-          {title || `Conversation ${conversation.id.slice(0, 8)}`}
-        </Typography>
-        <Typography variant="caption" color="text.secondary">
-          {conversation.id}
-        </Typography>
+  ): JSX.Element => {
+    const title = value as string | null;
+    return (
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <Avatar sx={{ width: 32, height: 32, bgcolor: 'primary.main' }}>
+          <MessageIcon fontSize="small" />
+        </Avatar>
+        <Box>
+          <Typography variant="body2" fontWeight="medium">
+            {title || `Conversation ${conversation.id.slice(0, 8)}`}
+          </Typography>
+          <Typography variant="caption" color="text.secondary">
+            {conversation.id}
+          </Typography>
+        </Box>
       </Box>
-    </Box>
-  );
+    );
+  };
 
   // Status renderer - for now all are active
   const renderStatus = (): JSX.Element => (
@@ -95,11 +98,14 @@ const ConversationsPage: React.FC = () => {
   );
 
   // Message count renderer
-  const renderMessageCount = (count: number): JSX.Element => (
-    <Typography variant="body2">
-      {count} {count === 1 ? 'message' : 'messages'}
-    </Typography>
-  );
+  const renderMessageCount = (value: unknown): JSX.Element => {
+    const count = value as number;
+    return (
+      <Typography variant="body2">
+        {count} {count === 1 ? 'message' : 'messages'}
+      </Typography>
+    );
+  };
 
   // Define columns
   const columns: CrudColumn<ConversationResponse>[] = [
@@ -165,7 +171,7 @@ const ConversationsPage: React.FC = () => {
         });
       return {
         items: response.conversations || [],
-        total: response.total || 0,
+        total: response.total_count || 0,
       };
     },
 

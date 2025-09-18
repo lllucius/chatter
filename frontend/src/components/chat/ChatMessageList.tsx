@@ -5,24 +5,28 @@ import EnhancedMessage, { ChatMessage } from '../EnhancedMessage';
 
 interface ChatMessageListProps {
   messages: ChatMessage[];
-  messagesEndRef: React.RefObject<HTMLDivElement>;
+  messagesEndRef: React.RefObject<HTMLDivElement | null>;
   loading: boolean;
+  onEdit?: (messageId: string, newContent: string) => void;
+  onRegenerate?: (messageId: string) => void;
+  onDelete?: (messageId: string) => void;
+  onRate?: (messageId: string, rating: number) => Promise<void> | void;
 }
 
 const ChatMessageList: React.FC<ChatMessageListProps> = memo(
-  ({ messages, messagesEndRef, loading }) => {
+  ({ messages, messagesEndRef, loading, onEdit, onRegenerate, onDelete, onRate }) => {
     return (
       <Box sx={{ flexGrow: 1, overflow: 'hidden' }}>
-        <CustomScrollbar maxHeight="calc(100vh - 200px)">
+        <CustomScrollbar style={{ maxHeight: 'calc(100vh - 200px)' }}>
           <Box sx={{ p: 2, minHeight: '100%' }}>
             {messages.map((msg) => (
               <EnhancedMessage
                 key={msg.id}
                 message={msg}
-                onEdit={msg.onEdit}
-                onRegenerate={msg.onRegenerate}
-                onDelete={msg.onDelete}
-                onRate={msg.onRate}
+                onEdit={onEdit}
+                onRegenerate={onRegenerate}
+                onDelete={onDelete}
+                onRate={onRate}
               />
             ))}
 
@@ -34,44 +38,14 @@ const ChatMessageList: React.FC<ChatMessageListProps> = memo(
                     role: 'assistant',
                     content: '',
                     timestamp: new Date(),
-                    isStreaming: true,
-                    streamingContent: '',
                     metadata: {
                       workflow: {
                         stage: 'Processing',
-                        currentStep: 1,
-                        totalSteps: 3,
-                        stepDescriptions: [
-                          'Analyzing input',
-                          'Generating response',
-                          'Finalizing',
-                        ],
+                        progress: 33,
+                        isStreaming: true,
+                        status: 'processing',
                       },
                     },
-                    onEdit: () => {
-                      // Mock function for loading state
-                    },
-                    onRegenerate: () => {
-                      // Mock function for loading state
-                    },
-                    onDelete: () => {
-                      // Mock function for loading state
-                    },
-                    onRate: () => {
-                      // Mock function for loading state
-                    },
-                  }}
-                  onEdit={() => {
-                    // Mock function for loading state
-                  }}
-                  onRegenerate={() => {
-                    // Mock function for loading state
-                  }}
-                  onDelete={() => {
-                    // Mock function for loading state
-                  }}
-                  onRate={() => {
-                    // Mock function for loading state
                   }}
                 />
               </Box>

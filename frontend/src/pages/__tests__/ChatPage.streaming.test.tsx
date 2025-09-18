@@ -21,7 +21,7 @@ vi.mock('../../services/auth-service', () => {
         listPromptsApiV1Prompts: vi.fn(() => Promise.resolve({ prompts: [] })),
       },
       documents: {
-        listDocumentsApiV1Documents: vi.fn(() =>
+        listDocumentsGetApiV1Documents: vi.fn(() =>
           Promise.resolve({ documents: [] })
         ),
       },

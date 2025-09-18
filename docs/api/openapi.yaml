@@ -15205,7 +15205,7 @@ paths:
   /api/v1/jobs/:
     get:
       description: "List jobs with optional filtering and pagination.\n\nArgs:\n \
-        \   status: Filter by status\n    priority: Filter by priority  \n    function_name:\
+        \   status: Filter by status\n    priority: Filter by priority\n    function_name:\
         \ Filter by function name\n    created_after: Filter jobs created after this\
         \ date\n    created_before: Filter jobs created before this date\n    tags:\
         \ Filter by job tags (any of the provided tags)\n    search: Search in job\

@@ -20958,7 +20958,7 @@
           "Jobs"
         ],
         "summary": "List Jobs",
-        "description": "List jobs with optional filtering and pagination.\n\nArgs:\n    status: Filter by status\n    priority: Filter by priority  \n    function_name: Filter by function name\n    created_after: Filter jobs created after this date\n    created_before: Filter jobs created before this date\n    tags: Filter by job tags (any of the provided tags)\n    search: Search in job names and metadata\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Field to sort by\n    sort_order: Sort order\n    current_user: Current authenticated user\n\nReturns:\n    List of jobs with pagination info",
+        "description": "List jobs with optional filtering and pagination.\n\nArgs:\n    status: Filter by status\n    priority: Filter by priority\n    function_name: Filter by function name\n    created_after: Filter jobs created after this date\n    created_before: Filter jobs created before this date\n    tags: Filter by job tags (any of the provided tags)\n    search: Search in job names and metadata\n    limit: Maximum number of results\n    offset: Number of results to skip\n    sort_by: Field to sort by\n    sort_order: Sort order\n    current_user: Current authenticated user\n\nReturns:\n    List of jobs with pagination info",
         "operationId": "list_jobs_api_v1_jobs__get",
         "security": [
           {

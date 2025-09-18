@@ -37,7 +37,7 @@ Returns:
 
 Args:
     status: Filter by status
-    priority: Filter by priority  
+    priority: Filter by priority
     function_name: Filter by function name
     created_after: Filter jobs created after this date
     created_before: Filter jobs created before this date

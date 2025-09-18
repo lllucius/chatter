@@ -1393,7 +1393,7 @@ class JobsApi:
     ) -> JobListResponse:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority     function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
         :param status: Filter by status
         :type status: JobStatus
@@ -1501,7 +1501,7 @@ class JobsApi:
     ) -> ApiResponse[JobListResponse]:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority     function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
         :param status: Filter by status
         :type status: JobStatus
@@ -1609,7 +1609,7 @@ class JobsApi:
     ) -> RESTResponseType:
         """List Jobs
 
-        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority       function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
+        List jobs with optional filtering and pagination.  Args:     status: Filter by status     priority: Filter by priority     function_name: Filter by function name     created_after: Filter jobs created after this date     created_before: Filter jobs created before this date     tags: Filter by job tags (any of the provided tags)     search: Search in job names and metadata     limit: Maximum number of results     offset: Number of results to skip     sort_by: Field to sort by     sort_order: Sort order     current_user: Current authenticated user  Returns:     List of jobs with pagination info
 
         :param status: Filter by status
         :type status: JobStatus

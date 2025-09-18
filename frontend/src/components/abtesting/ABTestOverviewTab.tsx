@@ -67,9 +67,9 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
                     size="small"
                     sx={{ mr: 1 }}
                   />
-                  {variant.traffic_percentage && (
+                  {variant.weight && (
                     <Typography variant="caption" color="text.secondary">
-                      {variant.traffic_percentage}% traffic
+                      {variant.weight}% traffic
                     </Typography>
                   )}
                 </Box>
@@ -77,12 +77,12 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
             </Box>
           )}
 
-          {test.success_metrics && test.success_metrics.length > 0 && (
+          {test.metrics && test.metrics.length > 0 && (
             <Box sx={{ mb: 2 }}>
               <Typography variant="subtitle2" gutterBottom>
                 Success Metrics
               </Typography>
-              {test.success_metrics.map((metric, index) => (
+              {test.metrics.map((metric, index) => (
                 <Typography key={index} variant="body2">
                   • {metric}
                 </Typography>
@@ -103,13 +103,13 @@ const ABTestOverviewTab: React.FC<ABTestOverviewTabProps> = memo(({ test }) => {
         </Paper>
       </Grid>
 
-      {test.hypothesis && (
+      {test.description && (
         <Grid size={{ xs: 12 }}>
           <Paper sx={{ p: 2 }}>
             <Typography variant="h6" gutterBottom>
-              Hypothesis
+              Test Description
             </Typography>
-            <Typography variant="body1">{test.hypothesis}</Typography>
+            <Typography variant="body1">{test.description}</Typography>
           </Paper>
         </Grid>
       )}

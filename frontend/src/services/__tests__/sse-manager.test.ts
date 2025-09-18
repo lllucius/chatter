@@ -3,6 +3,7 @@
  */
 
 import { describe, beforeEach, afterEach, expect, vi } from 'vitest';
+import type { Mock } from 'vitest';
 import { SSEEventManager } from '../sse-manager';
 import { SSEEventType } from '../sse-types';
 import { authService } from '../../services/auth-service';
@@ -133,13 +134,13 @@ describe('SSEEventManager', () => {
     vi.clearAllMocks();
 
     // Reset authentication mock
-    (authService.isAuthenticated as vi.Mock).mockReturnValue(true);
-    (authService.getURL as vi.Mock).mockReturnValue('http://localhost:8000');
-    (authService.getToken as vi.Mock).mockReturnValue('test-token');
-    (authService.refreshToken as vi.Mock).mockResolvedValue(true);
+    (authService.isAuthenticated as Mock).mockReturnValue(true);
+    (authService.getURL as Mock).mockReturnValue('http://localhost:8000');
+    (authService.getToken as Mock).mockReturnValue('test-token');
+    (authService.refreshToken as Mock).mockResolvedValue(true);
 
     // Mock the SDK events stream method
-    const mockSDK = (authService.getSDK as vi.Mock)();
+    const mockSDK = (authService.getSDK as Mock)();
     if (mockSDK.events) {
       mockSDK.events.eventsStreamApiV1EventsStream = vi.fn(() =>
         Promise.resolve(
@@ -151,12 +152,12 @@ describe('SSEEventManager', () => {
     }
 
     // Setup executeWithAuth to use the mock SDK
-    (authService.executeWithAuth as vi.Mock).mockImplementation((apiCall) =>
+    (authService.executeWithAuth as Mock).mockImplementation((apiCall) =>
       apiCall(mockSDK)
     );
 
     // Setup default fetch mock (still needed for some tests)
-    (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+    (global.fetch as Mock).mockResolvedValue(createMockResponse());
   });
 
   afterEach(() => {
@@ -168,7 +169,7 @@ describe('SSEEventManager', () => {
 
   describe('Connection Management', () => {
     test('should not connect when not authenticated', () => {
-      (authService.isAuthenticated as vi.Mock).mockReturnValue(false);
+      (authService.isAuthenticated as Mock).mockReturnValue(false);
 
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
       sseManager.connect();
@@ -255,14 +256,14 @@ describe('SSEEventManager', () => {
   describe('Event Processing', () => {
     beforeEach(async () => {
       // Mock fetch to return a stream with test events
-      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+      (global.fetch as Mock).mockResolvedValue(createMockResponse());
       sseManager.connect();
       // Wait for connection - make sure mockStreamReader is available
       await new Promise((resolve) => setTimeout(resolve, 50));
 
       // Ensure mockStreamReader is not null
       if (!mockStreamReader) {
-        (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+        (global.fetch as Mock).mockResolvedValue(createMockResponse());
       }
     });
 
@@ -342,7 +343,7 @@ describe('SSEEventManager', () => {
     });
 
     test('should increment event count on messages', () => {
-      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+      (global.fetch as Mock).mockResolvedValue(createMockResponse());
       sseManager.connect();
 
       return new Promise<void>((resolve) => {
@@ -382,7 +383,7 @@ describe('SSEEventManager', () => {
       vi.useFakeTimers();
 
       // Mock fetch to reject on first call (simulate connection error) then succeed
-      (global.fetch as vi.Mock)
+      (global.fetch as Mock)
         .mockRejectedValueOnce(new Error('Connection failed'))
         .mockResolvedValue(createMockResponse());
 
@@ -408,7 +409,7 @@ describe('SSEEventManager', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Create mock stream with malformed data
-      const mockSDK = (authService.getSDK as vi.Mock)();
+      const mockSDK = (authService.getSDK as Mock)();
       const malformedStream = new MockReadableStream([
         'data: invalid json{\n\n',
       ]);
@@ -432,7 +433,7 @@ describe('SSEEventManager', () => {
       const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
 
       // Mock SDK to reject the stream request
-      const mockSDK = (authService.getSDK as vi.Mock)();
+      const mockSDK = (authService.getSDK as Mock)();
       mockSDK.events.eventsStreamApiV1EventsStream = vi.fn(() =>
         Promise.reject(new Error('Connection failed'))
       );
@@ -451,7 +452,7 @@ describe('SSEEventManager', () => {
 
   describe('Cleanup', () => {
     test('should cleanup resources on disconnect', () => {
-      (global.fetch as vi.Mock).mockResolvedValue(createMockResponse());
+      (global.fetch as Mock).mockResolvedValue(createMockResponse());
       sseManager.connect();
 
       return new Promise<void>((resolve) => {

@@ -78,7 +78,7 @@ const mockDocuments = [
 // Wrapper component
 const TestWrapper: React.FC<{ children: React.ReactNode }> = ({
   children,
-}): void => (
+}) => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>{children}</ThemeProvider>
   </BrowserRouter>

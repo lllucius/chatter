@@ -1,7 +1,7 @@
 /**
  * Generated API client for Documents
  */
-import { DocumentListRequest, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
+import { DocumentListRequest, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse, DocumentChunksResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
@@ -134,5 +134,25 @@ the embedding processing pipeline asynchronously.
 
     const response = await this.request(requestContext);
     return response.json() as Promise<DocumentStatsResponse>;
+  }
+  /**Get Document Chunks
+   * Get document chunks with pagination.
+   */
+  public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentChunksResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/chunks`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'limit': options?.limit,
+        'offset': options?.offset,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentChunksResponse>;
   }
 }

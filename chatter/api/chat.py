@@ -44,15 +44,7 @@ async def get_chat_service(
     return ChatService(session, llm_service)
 
 
-def _map_workflow_type(workflow: str | None) -> str:
-    """Map API workflow to internal workflow types."""
-    workflow_mapping = {
-        "plain": "basic",
-        "rag": "rag",
-        "tools": "tools",
-        "full": "full",
-    }
-    return workflow_mapping.get(workflow or "plain", "basic")
+
 
 
 # Core Chat Endpoints
@@ -71,9 +63,6 @@ async def chat(
     chat_service: ChatService = Depends(get_chat_service),
 ) -> ChatResponse:
     """Non-streaming chat endpoint supporting all workflow types."""
-    workflow_type = _map_workflow_type(chat_request.workflow)
-    chat_request.workflow_type = workflow_type
-
     try:
         conversation, assistant_message = await chat_service.chat(
             current_user.id, chat_request
@@ -119,9 +108,6 @@ async def streaming_chat(
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """Streaming chat endpoint supporting all workflow types."""
-    workflow_type = _map_workflow_type(chat_request.workflow)
-    chat_request.workflow_type = workflow_type
-
     # Streaming mode
     async def generate_stream():
         try:

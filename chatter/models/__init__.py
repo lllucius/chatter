@@ -31,7 +31,6 @@ from chatter.models.workflow import (
     TemplateCategory,
     TemplateSpec,
     WorkflowTemplate,
-    WorkflowType,
 )
 from chatter.utils.audit_logging import AuditLog
 
@@ -63,7 +62,6 @@ __all__ = [
     "AgentInteractionDB",
     "WorkflowTemplate",
     "TemplateSpec",
-    "WorkflowType",
     "TemplateCategory",
     "AuditLog",
 ]

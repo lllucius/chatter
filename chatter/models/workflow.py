@@ -32,13 +32,7 @@ if TYPE_CHECKING:
     from chatter.models.user import User
 
 
-class WorkflowType(str, Enum):
-    """Enumeration for workflow types."""
 
-    PLAIN = "plain"
-    TOOLS = "tools"
-    RAG = "rag"
-    FULL = "full"
 
 
 class TemplateCategory(str, Enum):
@@ -111,10 +105,11 @@ class WorkflowTemplate(Base):
         String(255), nullable=False, index=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    workflow_type: Mapped[WorkflowType] = mapped_column(
-        SQLEnum(WorkflowType),
-        nullable=False,
+    workflow_type: Mapped[str | None] = mapped_column(
+        String(50), 
+        nullable=True,
         index=True,
+        comment="Dynamic workflow type identifier",
     )
     category: Mapped[TemplateCategory] = mapped_column(
         SQLEnum(TemplateCategory),
@@ -318,10 +313,11 @@ class TemplateSpec(Base):
         String(255), nullable=False, index=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    workflow_type: Mapped[WorkflowType] = mapped_column(
-        SQLEnum(WorkflowType),
-        nullable=False,
+    workflow_type: Mapped[str | None] = mapped_column(
+        String(50),
+        nullable=True,
         index=True,
+        comment="Dynamic workflow type identifier",
     )
 
     # Spec configuration

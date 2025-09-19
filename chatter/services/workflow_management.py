@@ -16,7 +16,6 @@ from chatter.models.workflow import (
     WorkflowDefinition,
     WorkflowExecution,
     WorkflowTemplate,
-    WorkflowType,
 )
 from chatter.utils.logging import get_logger
 
@@ -413,8 +412,7 @@ class WorkflowManagementService:
     ) -> WorkflowTemplate:
         """Create a new workflow template."""
         try:
-            # Map workflow type
-            workflow_type_enum = WorkflowType(workflow_type)
+            # Validate workflow type and category
             category_enum = TemplateCategory(category)
 
             # Generate config hash

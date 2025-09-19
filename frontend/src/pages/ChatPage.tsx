@@ -344,6 +344,16 @@ const ChatPage: React.FC = () => {
             if (!textToSend) return;
 
             // Prepare chat request
+            // Determine workflow type based on enabled features
+            let workflowType = 'simple_chat';
+            if (enableRetrieval && enableTools) {
+              workflowType = 'advanced_chat';
+            } else if (enableRetrieval) {
+              workflowType = 'rag_chat';
+            } else if (enableTools) {
+              workflowType = 'function_chat';
+            }
+
             const chatRequest = {
               message: textToSend,
               profile_id: selectedProfile || undefined,
@@ -355,6 +365,7 @@ const ChatPage: React.FC = () => {
               max_tokens: maxTokens,
               enable_retrieval: enableRetrieval,
               enable_tools: enableTools,
+              workflow_type: workflowType,
             };
 
             // Send message to API
@@ -539,6 +550,16 @@ const ChatPage: React.FC = () => {
         }
 
         // Prepare chat request
+        // Determine workflow type based on enabled features
+        let workflowType = 'simple_chat';
+        if (enableRetrieval && enableTools) {
+          workflowType = 'advanced_chat';
+        } else if (enableRetrieval) {
+          workflowType = 'rag_chat';
+        } else if (enableTools) {
+          workflowType = 'function_chat';
+        }
+
         const chatRequest = {
           message: textToSend,
           profile_id: selectedProfile || undefined,
@@ -550,6 +571,7 @@ const ChatPage: React.FC = () => {
           max_tokens: maxTokens,
           enable_retrieval: enableRetrieval,
           enable_tools: enableTools,
+          workflow_type: workflowType,
         };
 
         // Send message to API

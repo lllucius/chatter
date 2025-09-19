@@ -19071,10 +19071,10 @@ paths:
       summary: Get User Permissions
       tags:
       - Tool Servers
-  /api/v1/workflows/workflows/definitions:
+  /api/v1/workflows/definitions:
     get:
       description: List all workflow definitions for the current user.
-      operationId: list_workflow_definitions_api_v1_workflows_workflows_definitions_get
+      operationId: list_workflow_definitions_api_v1_workflows_definitions_get
       responses:
         '200':
           content:
@@ -19093,10 +19093,9 @@ paths:
       summary: List Workflow Definitions
       tags:
       - Workflows
-      - workflows
     post:
       description: Create a new workflow definition.
-      operationId: create_workflow_definition_api_v1_workflows_workflows_definitions_post
+      operationId: create_workflow_definition_api_v1_workflows_definitions_post
       requestBody:
         content:
           application/json:
@@ -19133,11 +19132,10 @@ paths:
       summary: Create Workflow Definition
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/definitions/validate:
+  /api/v1/workflows/definitions/validate:
     post:
       description: Validate a workflow definition.
-      operationId: validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post
+      operationId: validate_workflow_definition_api_v1_workflows_definitions_validate_post
       requestBody:
         content:
           application/json:
@@ -19174,11 +19172,10 @@ paths:
       summary: Validate Workflow Definition
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/definitions/{workflow_id}:
+  /api/v1/workflows/definitions/{workflow_id}:
     delete:
       description: Delete a workflow definition.
-      operationId: delete_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__delete
+      operationId: delete_workflow_definition_api_v1_workflows_definitions__workflow_id__delete
       parameters:
       - description: Workflow ID
         in: path
@@ -19196,8 +19193,8 @@ paths:
               schema:
                 additionalProperties:
                   type: string
-                title: Response Delete Workflow Definition Api V1 Workflows Workflows
-                  Definitions  Workflow Id  Delete
+                title: Response Delete Workflow Definition Api V1 Workflows Definitions  Workflow
+                  Id  Delete
                 type: object
           description: Successful Response
           headers:
@@ -19223,10 +19220,9 @@ paths:
       summary: Delete Workflow Definition
       tags:
       - Workflows
-      - workflows
     get:
       description: Get a specific workflow definition.
-      operationId: get_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__get
+      operationId: get_workflow_definition_api_v1_workflows_definitions__workflow_id__get
       parameters:
       - description: Workflow ID
         in: path
@@ -19267,10 +19263,9 @@ paths:
       summary: Get Workflow Definition
       tags:
       - Workflows
-      - workflows
     put:
       description: Update a workflow definition.
-      operationId: update_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__put
+      operationId: update_workflow_definition_api_v1_workflows_definitions__workflow_id__put
       parameters:
       - description: Workflow ID
         in: path
@@ -19317,11 +19312,10 @@ paths:
       summary: Update Workflow Definition
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/definitions/{workflow_id}/analytics:
+  /api/v1/workflows/definitions/{workflow_id}/analytics:
     get:
       description: Get analytics for a specific workflow definition.
-      operationId: get_workflow_analytics_api_v1_workflows_workflows_definitions__workflow_id__analytics_get
+      operationId: get_workflow_analytics_api_v1_workflows_definitions__workflow_id__analytics_get
       parameters:
       - description: Workflow ID
         in: path
@@ -19362,11 +19356,10 @@ paths:
       summary: Get Workflow Analytics
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/definitions/{workflow_id}/execute:
+  /api/v1/workflows/definitions/{workflow_id}/execute:
     post:
       description: Execute a workflow definition.
-      operationId: execute_workflow_api_v1_workflows_workflows_definitions__workflow_id__execute_post
+      operationId: execute_workflow_api_v1_workflows_definitions__workflow_id__execute_post
       parameters:
       - description: Workflow ID
         in: path
@@ -19413,11 +19406,10 @@ paths:
       summary: Execute Workflow
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/definitions/{workflow_id}/executions:
+  /api/v1/workflows/definitions/{workflow_id}/executions:
     get:
       description: List executions for a workflow definition.
-      operationId: list_workflow_executions_api_v1_workflows_workflows_definitions__workflow_id__executions_get
+      operationId: list_workflow_executions_api_v1_workflows_definitions__workflow_id__executions_get
       parameters:
       - description: Workflow ID
         in: path
@@ -19435,8 +19427,8 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/WorkflowExecutionResponse'
-                title: Response List Workflow Executions Api V1 Workflows Workflows
-                  Definitions  Workflow Id  Executions Get
+                title: Response List Workflow Executions Api V1 Workflows Definitions  Workflow
+                  Id  Executions Get
                 type: array
           description: Successful Response
           headers:
@@ -19462,11 +19454,10 @@ paths:
       summary: List Workflow Executions
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/node-types:
+  /api/v1/workflows/node-types:
     get:
       description: Get list of supported workflow node types.
-      operationId: get_supported_node_types_api_v1_workflows_workflows_node_types_get
+      operationId: get_supported_node_types_api_v1_workflows_node_types_get
       responses:
         '200':
           content:
@@ -19474,8 +19465,8 @@ paths:
               schema:
                 items:
                   $ref: '#/components/schemas/NodeTypeResponse'
-                title: Response Get Supported Node Types Api V1 Workflows Workflows
-                  Node Types Get
+                title: Response Get Supported Node Types Api V1 Workflows Node Types
+                  Get
                 type: array
           description: Successful Response
           headers:
@@ -19489,11 +19480,10 @@ paths:
       summary: Get Supported Node Types
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/templates:
+  /api/v1/workflows/templates:
     get:
       description: List all workflow templates accessible to the current user.
-      operationId: list_workflow_templates_api_v1_workflows_workflows_templates_get
+      operationId: list_workflow_templates_api_v1_workflows_templates_get
       responses:
         '200':
           content:
@@ -19512,10 +19502,9 @@ paths:
       summary: List Workflow Templates
       tags:
       - Workflows
-      - workflows
     post:
       description: Create a new workflow template.
-      operationId: create_workflow_template_api_v1_workflows_workflows_templates_post
+      operationId: create_workflow_template_api_v1_workflows_templates_post
       requestBody:
         content:
           application/json:
@@ -19552,11 +19541,10 @@ paths:
       summary: Create Workflow Template
       tags:
       - Workflows
-      - workflows
-  /api/v1/workflows/workflows/templates/{template_id}:
+  /api/v1/workflows/templates/{template_id}:
     put:
       description: Update a workflow template.
-      operationId: update_workflow_template_api_v1_workflows_workflows_templates__template_id__put
+      operationId: update_workflow_template_api_v1_workflows_templates__template_id__put
       parameters:
       - in: path
         name: template_id
@@ -19600,7 +19588,6 @@ paths:
       summary: Update Workflow Template
       tags:
       - Workflows
-      - workflows
   /healthz:
     get:
       description: "Basic health check endpoint.\n\nReturns:\n    Health status"

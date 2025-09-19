@@ -12,9 +12,9 @@ export class WorkflowsApi extends BaseAPI {
   /**List Workflow Definitions
    * List all workflow definitions for the current user.
    */
-  public async listWorkflowDefinitionsApiV1WorkflowsWorkflowsDefinitions(): Promise<WorkflowDefinitionsResponse> {
+  public async listWorkflowDefinitionsApiV1WorkflowsDefinitions(): Promise<WorkflowDefinitionsResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions`,
+      path: `/api/v1/workflows/definitions`,
       method: 'GET' as HTTPMethod,
       headers: {
       },
@@ -26,9 +26,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Create Workflow Definition
    * Create a new workflow definition.
    */
-  public async createWorkflowDefinitionApiV1WorkflowsWorkflowsDefinitions(data: WorkflowDefinitionCreate): Promise<WorkflowDefinitionResponse> {
+  public async createWorkflowDefinitionApiV1WorkflowsDefinitions(data: WorkflowDefinitionCreate): Promise<WorkflowDefinitionResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions`,
+      path: `/api/v1/workflows/definitions`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -42,9 +42,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Get Workflow Definition
    * Get a specific workflow definition.
    */
-  public async getWorkflowDefinitionApiV1WorkflowsWorkflowsDefinitionsWorkflowId(workflowId: string): Promise<WorkflowDefinitionResponse> {
+  public async getWorkflowDefinitionApiV1WorkflowsDefinitionsWorkflowId(workflowId: string): Promise<WorkflowDefinitionResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}`,
+      path: `/api/v1/workflows/definitions/${workflowId}`,
       method: 'GET' as HTTPMethod,
       headers: {
       },
@@ -56,9 +56,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Update Workflow Definition
    * Update a workflow definition.
    */
-  public async updateWorkflowDefinitionApiV1WorkflowsWorkflowsDefinitionsWorkflowId(workflowId: string, data: WorkflowDefinitionUpdate): Promise<WorkflowDefinitionResponse> {
+  public async updateWorkflowDefinitionApiV1WorkflowsDefinitionsWorkflowId(workflowId: string, data: WorkflowDefinitionUpdate): Promise<WorkflowDefinitionResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}`,
+      path: `/api/v1/workflows/definitions/${workflowId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -72,9 +72,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Delete Workflow Definition
    * Delete a workflow definition.
    */
-  public async deleteWorkflowDefinitionApiV1WorkflowsWorkflowsDefinitionsWorkflowId(workflowId: string): Promise<Record<string, unknown>> {
+  public async deleteWorkflowDefinitionApiV1WorkflowsDefinitionsWorkflowId(workflowId: string): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}`,
+      path: `/api/v1/workflows/definitions/${workflowId}`,
       method: 'DELETE' as HTTPMethod,
       headers: {
       },
@@ -86,9 +86,9 @@ export class WorkflowsApi extends BaseAPI {
   /**List Workflow Templates
    * List all workflow templates accessible to the current user.
    */
-  public async listWorkflowTemplatesApiV1WorkflowsWorkflowsTemplates(): Promise<chatter__schemas__workflows__WorkflowTemplatesResponse> {
+  public async listWorkflowTemplatesApiV1WorkflowsTemplates(): Promise<chatter__schemas__workflows__WorkflowTemplatesResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/templates`,
+      path: `/api/v1/workflows/templates`,
       method: 'GET' as HTTPMethod,
       headers: {
       },
@@ -100,9 +100,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Create Workflow Template
    * Create a new workflow template.
    */
-  public async createWorkflowTemplateApiV1WorkflowsWorkflowsTemplates(data: WorkflowTemplateCreate): Promise<WorkflowTemplateResponse> {
+  public async createWorkflowTemplateApiV1WorkflowsTemplates(data: WorkflowTemplateCreate): Promise<WorkflowTemplateResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/templates`,
+      path: `/api/v1/workflows/templates`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -116,9 +116,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Update Workflow Template
    * Update a workflow template.
    */
-  public async updateWorkflowTemplateApiV1WorkflowsWorkflowsTemplatesTemplateId(templateId: string, data: WorkflowTemplateUpdate): Promise<WorkflowTemplateResponse> {
+  public async updateWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId: string, data: WorkflowTemplateUpdate): Promise<WorkflowTemplateResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/templates/${templateId}`,
+      path: `/api/v1/workflows/templates/${templateId}`,
       method: 'PUT' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -132,9 +132,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Get Workflow Analytics
    * Get analytics for a specific workflow definition.
    */
-  public async getWorkflowAnalyticsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdAnalytics(workflowId: string): Promise<WorkflowAnalyticsResponse> {
+  public async getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(workflowId: string): Promise<WorkflowAnalyticsResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}/analytics`,
+      path: `/api/v1/workflows/definitions/${workflowId}/analytics`,
       method: 'GET' as HTTPMethod,
       headers: {
       },
@@ -146,9 +146,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Execute Workflow
    * Execute a workflow definition.
    */
-  public async executeWorkflowApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecute(workflowId: string, data: WorkflowExecutionRequest): Promise<WorkflowExecutionResponse> {
+  public async executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(workflowId: string, data: WorkflowExecutionRequest): Promise<WorkflowExecutionResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}/execute`,
+      path: `/api/v1/workflows/definitions/${workflowId}/execute`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -162,9 +162,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Validate Workflow Definition
    * Validate a workflow definition.
    */
-  public async validateWorkflowDefinitionApiV1WorkflowsWorkflowsDefinitionsValidate(data: WorkflowDefinitionCreate): Promise<WorkflowValidationResponse> {
+  public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: WorkflowDefinitionCreate): Promise<WorkflowValidationResponse> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/validate`,
+      path: `/api/v1/workflows/definitions/validate`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',
@@ -178,9 +178,9 @@ export class WorkflowsApi extends BaseAPI {
   /**Get Supported Node Types
    * Get list of supported workflow node types.
    */
-  public async getSupportedNodeTypesApiV1WorkflowsWorkflowsNodeTypes(): Promise<NodeTypeResponse[]> {
+  public async getSupportedNodeTypesApiV1WorkflowsNodeTypes(): Promise<NodeTypeResponse[]> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/node-types`,
+      path: `/api/v1/workflows/node-types`,
       method: 'GET' as HTTPMethod,
       headers: {
       },
@@ -192,9 +192,9 @@ export class WorkflowsApi extends BaseAPI {
   /**List Workflow Executions
    * List executions for a workflow definition.
    */
-  public async listWorkflowExecutionsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecutions(workflowId: string): Promise<WorkflowExecutionResponse[]> {
+  public async listWorkflowExecutionsApiV1WorkflowsDefinitionsWorkflowIdExecutions(workflowId: string): Promise<WorkflowExecutionResponse[]> {
     const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/workflows/definitions/${workflowId}/executions`,
+      path: `/api/v1/workflows/definitions/${workflowId}/executions`,
       method: 'GET' as HTTPMethod,
       headers: {
       },

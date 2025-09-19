@@ -9395,15 +9395,14 @@
         }
       }
     },
-    "/api/v1/workflows/workflows/definitions": {
+    "/api/v1/workflows/definitions": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "List Workflow Definitions",
         "description": "List all workflow definitions for the current user.",
-        "operationId": "list_workflow_definitions_api_v1_workflows_workflows_definitions_get",
+        "operationId": "list_workflow_definitions_api_v1_workflows_definitions_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9457,12 +9456,11 @@
       },
       "post": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Create Workflow Definition",
         "description": "Create a new workflow definition.",
-        "operationId": "create_workflow_definition_api_v1_workflows_workflows_definitions_post",
+        "operationId": "create_workflow_definition_api_v1_workflows_definitions_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -9568,15 +9566,14 @@
         ]
       }
     },
-    "/api/v1/workflows/workflows/definitions/{workflow_id}": {
+    "/api/v1/workflows/definitions/{workflow_id}": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Get Workflow Definition",
         "description": "Get a specific workflow definition.",
-        "operationId": "get_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__get",
+        "operationId": "get_workflow_definition_api_v1_workflows_definitions__workflow_id__get",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -9687,12 +9684,11 @@
       },
       "put": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Update Workflow Definition",
         "description": "Update a workflow definition.",
-        "operationId": "update_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__put",
+        "operationId": "update_workflow_definition_api_v1_workflows_definitions__workflow_id__put",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -9813,12 +9809,11 @@
       },
       "delete": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Delete Workflow Definition",
         "description": "Delete a workflow definition.",
-        "operationId": "delete_workflow_definition_api_v1_workflows_workflows_definitions__workflow_id__delete",
+        "operationId": "delete_workflow_definition_api_v1_workflows_definitions__workflow_id__delete",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -9848,7 +9843,7 @@
                   "additionalProperties": {
                     "type": "string"
                   },
-                  "title": "Response Delete Workflow Definition Api V1 Workflows Workflows Definitions  Workflow Id  Delete"
+                  "title": "Response Delete Workflow Definition Api V1 Workflows Definitions  Workflow Id  Delete"
                 }
               }
             },
@@ -9932,15 +9927,14 @@
         }
       }
     },
-    "/api/v1/workflows/workflows/templates": {
+    "/api/v1/workflows/templates": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "List Workflow Templates",
         "description": "List all workflow templates accessible to the current user.",
-        "operationId": "list_workflow_templates_api_v1_workflows_workflows_templates_get",
+        "operationId": "list_workflow_templates_api_v1_workflows_templates_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -9994,12 +9988,11 @@
       },
       "post": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Create Workflow Template",
         "description": "Create a new workflow template.",
-        "operationId": "create_workflow_template_api_v1_workflows_workflows_templates_post",
+        "operationId": "create_workflow_template_api_v1_workflows_templates_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -10105,15 +10098,14 @@
         ]
       }
     },
-    "/api/v1/workflows/workflows/templates/{template_id}": {
+    "/api/v1/workflows/templates/{template_id}": {
       "put": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Update Workflow Template",
         "description": "Update a workflow template.",
-        "operationId": "update_workflow_template_api_v1_workflows_workflows_templates__template_id__put",
+        "operationId": "update_workflow_template_api_v1_workflows_templates__template_id__put",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -10230,15 +10222,14 @@
         }
       }
     },
-    "/api/v1/workflows/workflows/definitions/{workflow_id}/analytics": {
+    "/api/v1/workflows/definitions/{workflow_id}/analytics": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Get Workflow Analytics",
         "description": "Get analytics for a specific workflow definition.",
-        "operationId": "get_workflow_analytics_api_v1_workflows_workflows_definitions__workflow_id__analytics_get",
+        "operationId": "get_workflow_analytics_api_v1_workflows_definitions__workflow_id__analytics_get",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -10348,15 +10339,14 @@
         }
       }
     },
-    "/api/v1/workflows/workflows/definitions/{workflow_id}/execute": {
+    "/api/v1/workflows/definitions/{workflow_id}/execute": {
       "post": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Execute Workflow",
         "description": "Execute a workflow definition.",
-        "operationId": "execute_workflow_api_v1_workflows_workflows_definitions__workflow_id__execute_post",
+        "operationId": "execute_workflow_api_v1_workflows_definitions__workflow_id__execute_post",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -10476,15 +10466,14 @@
         }
       }
     },
-    "/api/v1/workflows/workflows/definitions/validate": {
+    "/api/v1/workflows/definitions/validate": {
       "post": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Validate Workflow Definition",
         "description": "Validate a workflow definition.",
-        "operationId": "validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post",
+        "operationId": "validate_workflow_definition_api_v1_workflows_definitions_validate_post",
         "requestBody": {
           "content": {
             "application/json": {
@@ -10590,15 +10579,14 @@
         ]
       }
     },
-    "/api/v1/workflows/workflows/node-types": {
+    "/api/v1/workflows/node-types": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "Get Supported Node Types",
         "description": "Get list of supported workflow node types.",
-        "operationId": "get_supported_node_types_api_v1_workflows_workflows_node_types_get",
+        "operationId": "get_supported_node_types_api_v1_workflows_node_types_get",
         "responses": {
           "200": {
             "description": "Successful Response",
@@ -10609,7 +10597,7 @@
                     "$ref": "#/components/schemas/NodeTypeResponse"
                   },
                   "type": "array",
-                  "title": "Response Get Supported Node Types Api V1 Workflows Workflows Node Types Get"
+                  "title": "Response Get Supported Node Types Api V1 Workflows Node Types Get"
                 }
               }
             },
@@ -10655,15 +10643,14 @@
         ]
       }
     },
-    "/api/v1/workflows/workflows/definitions/{workflow_id}/executions": {
+    "/api/v1/workflows/definitions/{workflow_id}/executions": {
       "get": {
         "tags": [
-          "Workflows",
-          "workflows"
+          "Workflows"
         ],
         "summary": "List Workflow Executions",
         "description": "List executions for a workflow definition.",
-        "operationId": "list_workflow_executions_api_v1_workflows_workflows_definitions__workflow_id__executions_get",
+        "operationId": "list_workflow_executions_api_v1_workflows_definitions__workflow_id__executions_get",
         "security": [
           {
             "CustomHTTPBearer": []
@@ -10693,7 +10680,7 @@
                   "items": {
                     "$ref": "#/components/schemas/WorkflowExecutionResponse"
                   },
-                  "title": "Response List Workflow Executions Api V1 Workflows Workflows Definitions  Workflow Id  Executions Get"
+                  "title": "Response List Workflow Executions Api V1 Workflows Definitions  Workflow Id  Executions Get"
                 }
               }
             },

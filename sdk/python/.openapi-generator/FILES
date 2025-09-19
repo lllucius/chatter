@@ -25,7 +25,6 @@ chatter_sdk/api/profiles_api.py
 chatter_sdk/api/prompts_api.py
 chatter_sdk/api/real_time_analytics_api.py
 chatter_sdk/api/tool_servers_api.py
-chatter_sdk/api/workflows0_api.py
 chatter_sdk/api/workflows_api.py
 chatter_sdk/api_client.py
 chatter_sdk/api_response.py
@@ -493,7 +492,6 @@ docs/WorkflowTemplateInfo.md
 docs/WorkflowTemplateResponse.md
 docs/WorkflowTemplateUpdate.md
 docs/WorkflowValidationResponse.md
-docs/Workflows0Api.md
 docs/WorkflowsApi.md
 git_push.sh
 pyproject.toml
@@ -741,6 +739,5 @@ test/test_workflow_template_info.py
 test/test_workflow_template_response.py
 test/test_workflow_template_update.py
 test/test_workflow_validation_response.py
-test/test_workflows0_api.py
 test/test_workflows_api.py
 tox.ini

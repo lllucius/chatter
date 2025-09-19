@@ -53,7 +53,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_definition_api_v1_workflows_workflows_definitions_post(
+    async def create_workflow_definition_api_v1_workflows_definitions_post(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -97,7 +97,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_definition_api_v1_workflows_workflows_definitions_post_serialize(
+        _param = self._create_workflow_definition_api_v1_workflows_definitions_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -121,7 +121,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_definition_api_v1_workflows_workflows_definitions_post_with_http_info(
+    async def create_workflow_definition_api_v1_workflows_definitions_post_with_http_info(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -165,7 +165,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_definition_api_v1_workflows_workflows_definitions_post_serialize(
+        _param = self._create_workflow_definition_api_v1_workflows_definitions_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -189,7 +189,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_definition_api_v1_workflows_workflows_definitions_post_without_preload_content(
+    async def create_workflow_definition_api_v1_workflows_definitions_post_without_preload_content(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -233,7 +233,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_definition_api_v1_workflows_workflows_definitions_post_serialize(
+        _param = self._create_workflow_definition_api_v1_workflows_definitions_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -252,7 +252,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _create_workflow_definition_api_v1_workflows_workflows_definitions_post_serialize(
+    def _create_workflow_definition_api_v1_workflows_definitions_post_serialize(
         self,
         workflow_definition_create,
         _request_auth,
@@ -313,7 +313,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/api/v1/workflows/workflows/definitions',
+            resource_path='/api/v1/workflows/definitions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -330,7 +330,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_template_api_v1_workflows_workflows_templates_post(
+    async def create_workflow_template_api_v1_workflows_templates_post(
         self,
         workflow_template_create: WorkflowTemplateCreate,
         _request_timeout: Union[
@@ -374,7 +374,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_template_api_v1_workflows_workflows_templates_post_serialize(
+        _param = self._create_workflow_template_api_v1_workflows_templates_post_serialize(
             workflow_template_create=workflow_template_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -398,7 +398,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_template_api_v1_workflows_workflows_templates_post_with_http_info(
+    async def create_workflow_template_api_v1_workflows_templates_post_with_http_info(
         self,
         workflow_template_create: WorkflowTemplateCreate,
         _request_timeout: Union[
@@ -442,7 +442,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_template_api_v1_workflows_workflows_templates_post_serialize(
+        _param = self._create_workflow_template_api_v1_workflows_templates_post_serialize(
             workflow_template_create=workflow_template_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -466,7 +466,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def create_workflow_template_api_v1_workflows_workflows_templates_post_without_preload_content(
+    async def create_workflow_template_api_v1_workflows_templates_post_without_preload_content(
         self,
         workflow_template_create: WorkflowTemplateCreate,
         _request_timeout: Union[
@@ -510,7 +510,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._create_workflow_template_api_v1_workflows_workflows_templates_post_serialize(
+        _param = self._create_workflow_template_api_v1_workflows_templates_post_serialize(
             workflow_template_create=workflow_template_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -529,7 +529,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _create_workflow_template_api_v1_workflows_workflows_templates_post_serialize(
+    def _create_workflow_template_api_v1_workflows_templates_post_serialize(
         self,
         workflow_template_create,
         _request_auth,
@@ -590,7 +590,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/api/v1/workflows/workflows/templates',
+            resource_path='/api/v1/workflows/templates',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -607,7 +607,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete(
+    async def delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -651,7 +651,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_serialize(
+        _param = self._delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -675,7 +675,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_with_http_info(
+    async def delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -719,7 +719,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_serialize(
+        _param = self._delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -743,7 +743,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_without_preload_content(
+    async def delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -787,7 +787,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_serialize(
+        _param = self._delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -806,7 +806,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _delete_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_delete_serialize(
+    def _delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete_serialize(
         self,
         workflow_id,
         _request_auth,
@@ -854,7 +854,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='DELETE',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -871,7 +871,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post(
+    async def execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_execution_request: WorkflowExecutionRequest,
@@ -918,7 +918,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_serialize(
+        _param = self._execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_serialize(
             workflow_id=workflow_id,
             workflow_execution_request=workflow_execution_request,
             _request_auth=_request_auth,
@@ -943,7 +943,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_with_http_info(
+    async def execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_execution_request: WorkflowExecutionRequest,
@@ -990,7 +990,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_serialize(
+        _param = self._execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_serialize(
             workflow_id=workflow_id,
             workflow_execution_request=workflow_execution_request,
             _request_auth=_request_auth,
@@ -1015,7 +1015,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_without_preload_content(
+    async def execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_execution_request: WorkflowExecutionRequest,
@@ -1062,7 +1062,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_serialize(
+        _param = self._execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_serialize(
             workflow_id=workflow_id,
             workflow_execution_request=workflow_execution_request,
             _request_auth=_request_auth,
@@ -1082,7 +1082,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _execute_workflow_api_v1_workflows_workflows_definitions_workflow_id_execute_post_serialize(
+    def _execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post_serialize(
         self,
         workflow_id,
         workflow_execution_request,
@@ -1146,7 +1146,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}/execute',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}/execute',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1163,7 +1163,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_supported_node_types_api_v1_workflows_workflows_node_types_get(
+    async def get_supported_node_types_api_v1_workflows_node_types_get(
         self,
         _request_timeout: Union[
             None,
@@ -1204,7 +1204,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_supported_node_types_api_v1_workflows_workflows_node_types_get_serialize(
+        _param = self._get_supported_node_types_api_v1_workflows_node_types_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1226,7 +1226,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_supported_node_types_api_v1_workflows_workflows_node_types_get_with_http_info(
+    async def get_supported_node_types_api_v1_workflows_node_types_get_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -1267,7 +1267,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_supported_node_types_api_v1_workflows_workflows_node_types_get_serialize(
+        _param = self._get_supported_node_types_api_v1_workflows_node_types_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1289,7 +1289,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_supported_node_types_api_v1_workflows_workflows_node_types_get_without_preload_content(
+    async def get_supported_node_types_api_v1_workflows_node_types_get_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -1330,7 +1330,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_supported_node_types_api_v1_workflows_workflows_node_types_get_serialize(
+        _param = self._get_supported_node_types_api_v1_workflows_node_types_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -1347,7 +1347,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _get_supported_node_types_api_v1_workflows_workflows_node_types_get_serialize(
+    def _get_supported_node_types_api_v1_workflows_node_types_get_serialize(
         self,
         _request_auth,
         _content_type,
@@ -1392,7 +1392,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/node-types',
+            resource_path='/api/v1/workflows/node-types',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1409,7 +1409,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get(
+    async def get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1453,7 +1453,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_serialize(
+        _param = self._get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1477,7 +1477,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_with_http_info(
+    async def get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1521,7 +1521,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_serialize(
+        _param = self._get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1545,7 +1545,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_without_preload_content(
+    async def get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1589,7 +1589,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_serialize(
+        _param = self._get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1608,7 +1608,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _get_workflow_analytics_api_v1_workflows_workflows_definitions_workflow_id_analytics_get_serialize(
+    def _get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get_serialize(
         self,
         workflow_id,
         _request_auth,
@@ -1656,7 +1656,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}/analytics',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}/analytics',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1673,7 +1673,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get(
+    async def get_workflow_definition_api_v1_workflows_definitions_workflow_id_get(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1717,7 +1717,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_serialize(
+        _param = self._get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1741,7 +1741,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_with_http_info(
+    async def get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1785,7 +1785,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_serialize(
+        _param = self._get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1809,7 +1809,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_without_preload_content(
+    async def get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -1853,7 +1853,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_serialize(
+        _param = self._get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -1872,7 +1872,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _get_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_get_serialize(
+    def _get_workflow_definition_api_v1_workflows_definitions_workflow_id_get_serialize(
         self,
         workflow_id,
         _request_auth,
@@ -1920,7 +1920,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -1937,7 +1937,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_definitions_api_v1_workflows_workflows_definitions_get(
+    async def list_workflow_definitions_api_v1_workflows_definitions_get(
         self,
         _request_timeout: Union[
             None,
@@ -1978,7 +1978,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_definitions_api_v1_workflows_workflows_definitions_get_serialize(
+        _param = self._list_workflow_definitions_api_v1_workflows_definitions_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2000,7 +2000,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_definitions_api_v1_workflows_workflows_definitions_get_with_http_info(
+    async def list_workflow_definitions_api_v1_workflows_definitions_get_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -2041,7 +2041,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_definitions_api_v1_workflows_workflows_definitions_get_serialize(
+        _param = self._list_workflow_definitions_api_v1_workflows_definitions_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2063,7 +2063,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_definitions_api_v1_workflows_workflows_definitions_get_without_preload_content(
+    async def list_workflow_definitions_api_v1_workflows_definitions_get_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -2104,7 +2104,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_definitions_api_v1_workflows_workflows_definitions_get_serialize(
+        _param = self._list_workflow_definitions_api_v1_workflows_definitions_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2121,7 +2121,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _list_workflow_definitions_api_v1_workflows_workflows_definitions_get_serialize(
+    def _list_workflow_definitions_api_v1_workflows_definitions_get_serialize(
         self,
         _request_auth,
         _content_type,
@@ -2166,7 +2166,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/definitions',
+            resource_path='/api/v1/workflows/definitions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2183,7 +2183,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get(
+    async def list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -2227,7 +2227,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_serialize(
+        _param = self._list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2251,7 +2251,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_with_http_info(
+    async def list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -2295,7 +2295,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_serialize(
+        _param = self._list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2319,7 +2319,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_without_preload_content(
+    async def list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         _request_timeout: Union[
@@ -2363,7 +2363,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_serialize(
+        _param = self._list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_serialize(
             workflow_id=workflow_id,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -2382,7 +2382,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _list_workflow_executions_api_v1_workflows_workflows_definitions_workflow_id_executions_get_serialize(
+    def _list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get_serialize(
         self,
         workflow_id,
         _request_auth,
@@ -2430,7 +2430,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}/executions',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}/executions',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2447,7 +2447,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_templates_api_v1_workflows_workflows_templates_get(
+    async def list_workflow_templates_api_v1_workflows_templates_get(
         self,
         _request_timeout: Union[
             None,
@@ -2488,7 +2488,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_templates_api_v1_workflows_workflows_templates_get_serialize(
+        _param = self._list_workflow_templates_api_v1_workflows_templates_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2510,7 +2510,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_templates_api_v1_workflows_workflows_templates_get_with_http_info(
+    async def list_workflow_templates_api_v1_workflows_templates_get_with_http_info(
         self,
         _request_timeout: Union[
             None,
@@ -2551,7 +2551,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_templates_api_v1_workflows_workflows_templates_get_serialize(
+        _param = self._list_workflow_templates_api_v1_workflows_templates_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2573,7 +2573,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def list_workflow_templates_api_v1_workflows_workflows_templates_get_without_preload_content(
+    async def list_workflow_templates_api_v1_workflows_templates_get_without_preload_content(
         self,
         _request_timeout: Union[
             None,
@@ -2614,7 +2614,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._list_workflow_templates_api_v1_workflows_workflows_templates_get_serialize(
+        _param = self._list_workflow_templates_api_v1_workflows_templates_get_serialize(
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -2631,7 +2631,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _list_workflow_templates_api_v1_workflows_workflows_templates_get_serialize(
+    def _list_workflow_templates_api_v1_workflows_templates_get_serialize(
         self,
         _request_auth,
         _content_type,
@@ -2676,7 +2676,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='GET',
-            resource_path='/api/v1/workflows/workflows/templates',
+            resource_path='/api/v1/workflows/templates',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2693,7 +2693,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put(
+    async def update_workflow_definition_api_v1_workflows_definitions_workflow_id_put(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_definition_update: WorkflowDefinitionUpdate,
@@ -2740,7 +2740,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_serialize(
+        _param = self._update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_serialize(
             workflow_id=workflow_id,
             workflow_definition_update=workflow_definition_update,
             _request_auth=_request_auth,
@@ -2765,7 +2765,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_with_http_info(
+    async def update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_with_http_info(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_definition_update: WorkflowDefinitionUpdate,
@@ -2812,7 +2812,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_serialize(
+        _param = self._update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_serialize(
             workflow_id=workflow_id,
             workflow_definition_update=workflow_definition_update,
             _request_auth=_request_auth,
@@ -2837,7 +2837,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_without_preload_content(
+    async def update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_without_preload_content(
         self,
         workflow_id: Annotated[str, Field(min_length=1, strict=True, description="Workflow ID")],
         workflow_definition_update: WorkflowDefinitionUpdate,
@@ -2884,7 +2884,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_serialize(
+        _param = self._update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_serialize(
             workflow_id=workflow_id,
             workflow_definition_update=workflow_definition_update,
             _request_auth=_request_auth,
@@ -2904,7 +2904,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _update_workflow_definition_api_v1_workflows_workflows_definitions_workflow_id_put_serialize(
+    def _update_workflow_definition_api_v1_workflows_definitions_workflow_id_put_serialize(
         self,
         workflow_id,
         workflow_definition_update,
@@ -2968,7 +2968,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/api/v1/workflows/workflows/definitions/{workflow_id}',
+            resource_path='/api/v1/workflows/definitions/{workflow_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -2985,7 +2985,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_template_api_v1_workflows_workflows_templates_template_id_put(
+    async def update_workflow_template_api_v1_workflows_templates_template_id_put(
         self,
         template_id: StrictStr,
         workflow_template_update: WorkflowTemplateUpdate,
@@ -3032,7 +3032,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_serialize(
+        _param = self._update_workflow_template_api_v1_workflows_templates_template_id_put_serialize(
             template_id=template_id,
             workflow_template_update=workflow_template_update,
             _request_auth=_request_auth,
@@ -3057,7 +3057,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_with_http_info(
+    async def update_workflow_template_api_v1_workflows_templates_template_id_put_with_http_info(
         self,
         template_id: StrictStr,
         workflow_template_update: WorkflowTemplateUpdate,
@@ -3104,7 +3104,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_serialize(
+        _param = self._update_workflow_template_api_v1_workflows_templates_template_id_put_serialize(
             template_id=template_id,
             workflow_template_update=workflow_template_update,
             _request_auth=_request_auth,
@@ -3129,7 +3129,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_without_preload_content(
+    async def update_workflow_template_api_v1_workflows_templates_template_id_put_without_preload_content(
         self,
         template_id: StrictStr,
         workflow_template_update: WorkflowTemplateUpdate,
@@ -3176,7 +3176,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_serialize(
+        _param = self._update_workflow_template_api_v1_workflows_templates_template_id_put_serialize(
             template_id=template_id,
             workflow_template_update=workflow_template_update,
             _request_auth=_request_auth,
@@ -3196,7 +3196,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _update_workflow_template_api_v1_workflows_workflows_templates_template_id_put_serialize(
+    def _update_workflow_template_api_v1_workflows_templates_template_id_put_serialize(
         self,
         template_id,
         workflow_template_update,
@@ -3260,7 +3260,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='PUT',
-            resource_path='/api/v1/workflows/workflows/templates/{template_id}',
+            resource_path='/api/v1/workflows/templates/{template_id}',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,
@@ -3277,7 +3277,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post(
+    async def validate_workflow_definition_api_v1_workflows_definitions_validate_post(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -3321,7 +3321,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_serialize(
+        _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3345,7 +3345,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_with_http_info(
+    async def validate_workflow_definition_api_v1_workflows_definitions_validate_post_with_http_info(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -3389,7 +3389,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_serialize(
+        _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3413,7 +3413,7 @@ class WorkflowsApi:
 
 
     @validate_call
-    async def validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_without_preload_content(
+    async def validate_workflow_definition_api_v1_workflows_definitions_validate_post_without_preload_content(
         self,
         workflow_definition_create: WorkflowDefinitionCreate,
         _request_timeout: Union[
@@ -3457,7 +3457,7 @@ class WorkflowsApi:
         :return: Returns the result object.
         """ # noqa: E501
 
-        _param = self._validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_serialize(
+        _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
             workflow_definition_create=workflow_definition_create,
             _request_auth=_request_auth,
             _content_type=_content_type,
@@ -3476,7 +3476,7 @@ class WorkflowsApi:
         return response_data.response
 
 
-    def _validate_workflow_definition_api_v1_workflows_workflows_definitions_validate_post_serialize(
+    def _validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
         self,
         workflow_definition_create,
         _request_auth,
@@ -3537,7 +3537,7 @@ class WorkflowsApi:
 
         return self.api_client.param_serialize(
             method='POST',
-            resource_path='/api/v1/workflows/workflows/definitions/validate',
+            resource_path='/api/v1/workflows/definitions/validate',
             path_params=_path_params,
             query_params=_query_params,
             header_params=_header_params,

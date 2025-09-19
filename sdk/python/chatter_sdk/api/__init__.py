@@ -21,5 +21,4 @@ from chatter_sdk.api.workflows_api import WorkflowsApi
 from chatter_sdk.api.agents_api import AgentsApi
 from chatter_sdk.api.default_api import DefaultApi
 from chatter_sdk.api.real_time_analytics_api import RealTimeAnalyticsApi
-from chatter_sdk.api.workflows_api import WorkflowsApi
 

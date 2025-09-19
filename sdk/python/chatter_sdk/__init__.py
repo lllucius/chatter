@@ -39,7 +39,6 @@ __all__ = [
     "AgentsApi",
     "DefaultApi",
     "RealTimeAnalyticsApi",
-    "WorkflowsApi",
     "ApiResponse",
     "ApiClient",
     "Configuration",
@@ -292,7 +291,6 @@ from chatter_sdk.api.workflows_api import WorkflowsApi as WorkflowsApi
 from chatter_sdk.api.agents_api import AgentsApi as AgentsApi
 from chatter_sdk.api.default_api import DefaultApi as DefaultApi
 from chatter_sdk.api.real_time_analytics_api import RealTimeAnalyticsApi as RealTimeAnalyticsApi
-from chatter_sdk.api.workflows_api import WorkflowsApi as WorkflowsApi
 
 # import ApiClient
 from chatter_sdk.api_response import ApiResponse as ApiResponse

@@ -250,9 +250,16 @@ class WorkflowExecutionService:
             )
             
             # Save the message to database so it has all required fields for MessageResponse
-            saved_message = await self.message_service.create_message(
-                message=message,
-                usage_info=usage_info
+            saved_message = await self.message_service.add_message_to_conversation(
+                conversation_id=message.conversation_id,
+                user_id=user_id,
+                role=message.role,
+                content=message.content,
+                metadata=message.extra_metadata,
+                input_tokens=usage_info.get("prompt_tokens"),
+                output_tokens=usage_info.get("completion_tokens"),
+                cost=usage_info.get("cost"),
+                provider=usage_info.get("provider_used"),
             )
             
             return conversation, saved_message

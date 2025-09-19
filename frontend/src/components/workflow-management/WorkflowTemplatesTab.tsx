@@ -16,7 +16,7 @@ interface WorkflowTemplate {
   name: string;
   description: string;
   category: string;
-  workflow: any;
+  workflow: Record<string, unknown>;
   created_at: string;
   updated_at: string;
 }

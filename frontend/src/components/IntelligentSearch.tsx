@@ -64,6 +64,16 @@ interface TrendingContent {
   metadata: Record<string, unknown>;
 }
 
+interface SearchResponse {
+  results?: SearchResult[];
+  recommendations?: SearchRecommendation[];
+  user_context?: Record<string, unknown>;
+}
+
+interface TrendingResponse {
+  trending_content?: TrendingContent[];
+}
+
 const IntelligentSearch: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [searchType, setSearchType] = useState<
@@ -103,9 +113,10 @@ const IntelligentSearch: React.FC = () => {
           }
         );
 
-      setSearchResults((response as any)?.results || []);
-      setRecommendations((response as any)?.recommendations || []);
-      setUserContext((response as any)?.user_context || null);
+      const searchResponse = response as SearchResponse;
+      setSearchResults(searchResponse?.results || []);
+      setRecommendations(searchResponse?.recommendations || []);
+      setUserContext(searchResponse?.user_context || null);
 
       // Track search analytics (future implementation)
     } catch (error) {
@@ -130,7 +141,8 @@ const IntelligentSearch: React.FC = () => {
             limit: 10,
           }
         );
-      setTrendingContent((response as any)?.trending_content || []);
+      const trendingResponse = response as TrendingResponse;
+      setTrendingContent(trendingResponse?.trending_content || []);
     } catch (error) {
       handleError(
         error,

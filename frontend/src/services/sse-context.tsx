@@ -3,6 +3,7 @@
  *
  * Provides SSE event manager to React components via context
  */
+/* eslint-disable no-console */
 
 import React, {
   createContext,

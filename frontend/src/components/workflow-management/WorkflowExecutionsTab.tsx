@@ -19,8 +19,8 @@ interface WorkflowExecution {
   status: string;
   started_at: string;
   completed_at?: string;
-  input: any;
-  output?: any;
+  input: Record<string, unknown>;
+  output?: Record<string, unknown>;
   error?: string;
 }
 

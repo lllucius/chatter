@@ -16,10 +16,11 @@ class AuthService {
   constructor() {
     this.basePath =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
-    } as any);
+    } as any); // ChatterSDK configuration type mismatch with our needs
     // Don't call initialize() in constructor anymore - it's async now
   }
 

@@ -36,6 +36,7 @@ describe('Conversation Selection Type Safety', () => {
     };
 
     // Simulate old broken behavior
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const oldResult = oldBrokenHandler(testConversation as any);
     expect(oldResult).toBe('api/v1/conversations/[object Object]');
 

@@ -1,5 +1,5 @@
 // Test that workflow types and functions work correctly
-import { describe, it, expect, vi } from 'vitest';
+import { describe, it, expect } from 'vitest';
 
 // Import the types we've updated
 import type {

@@ -21,6 +21,17 @@ import { CrudFormProps } from './CrudDataTable';
 interface ProviderFormProps
   extends CrudFormProps<ProviderCreate, ProviderUpdate> {}
 
+// Extended type for better type safety with all possible provider fields
+type ProviderFormData = ProviderCreate & Partial<ProviderUpdate> & {
+  name?: string;
+  provider_type?: string;
+  display_name?: string;
+  description?: string;
+  api_key_required?: boolean;
+  base_url?: string;
+  is_active?: boolean;
+};
+
 const ProviderForm: React.FC<ProviderFormProps> = ({
   open,
   mode,
@@ -52,14 +63,15 @@ const ProviderForm: React.FC<ProviderFormProps> = ({
     if (open) {
       if (mode === 'edit' && initialData) {
         // Defensive programming: Ensure all fields are properly extracted from initialData
+        const providerData = initialData as ProviderFormData;
         setFormData({
-          name: (initialData as any)?.name || '',
-          provider_type: (initialData as any)?.provider_type || 'openai',
-          display_name: (initialData as any)?.display_name || '',
-          description: (initialData as any)?.description ?? '', // Use nullish coalescing for description
-          api_key_required: (initialData as any)?.api_key_required ?? true, // Proper boolean handling
-          base_url: (initialData as any)?.base_url || '',
-          is_active: (initialData as any)?.is_active ?? true, // Proper boolean handling
+          name: providerData?.name || '',
+          provider_type: providerData?.provider_type || 'openai',
+          display_name: providerData?.display_name || '',
+          description: providerData?.description ?? '', // Use nullish coalescing for description
+          api_key_required: providerData?.api_key_required ?? true, // Proper boolean handling
+          base_url: providerData?.base_url || '',
+          is_active: providerData?.is_active ?? true, // Proper boolean handling
         });
       } else {
         // Reset to default values for create mode

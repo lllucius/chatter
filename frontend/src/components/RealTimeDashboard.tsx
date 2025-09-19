@@ -119,6 +119,7 @@ const RealTimeDashboard: React.FC = () => {
 
       default:
         // Handle unknown event types
+        // eslint-disable-next-line no-console
         console.debug('Unknown real-time event type:', event.type);
     }
   }, []);

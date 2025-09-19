@@ -324,9 +324,6 @@ class UnifiedTemplateManager:
                 from chatter.models.workflow import (
                     WorkflowTemplate as DBWorkflowTemplate,
                 )
-                from chatter.models.workflow import (
-                    WorkflowType,
-                )
 
                 # Determine category based on name/type
                 category = self._determine_template_category(

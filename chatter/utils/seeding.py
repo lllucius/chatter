@@ -883,7 +883,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "document_qa",
-                "workflow_type": WorkflowType.RAG,
+                "workflow_type": "rag_chat",
                 "category": TemplateCategory.RESEARCH,
                 "description": "Document question answering with retrieval",
                 "default_params": {
@@ -969,7 +969,7 @@ Keep the summary {length} and focused on {focus_area}.""",
         extended_templates_data = [
             {
                 "name": "customer_support",
-                "workflow_type": WorkflowType.FULL,
+                "workflow_type": "advanced_chat",
                 "category": TemplateCategory.CUSTOMER_SUPPORT,
                 "description": "Customer support with knowledge base and tools",
                 "default_params": {
@@ -987,7 +987,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "research_assistant",
-                "workflow_type": WorkflowType.RAG,
+                "workflow_type": "rag_chat",
                 "category": TemplateCategory.RESEARCH,
                 "description": "Research assistant with document retrieval",
                 "default_params": {
@@ -1034,7 +1034,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "meeting_summarizer",
-                "workflow_type": WorkflowType.RAG,
+                "workflow_type": "rag_chat",
                 "category": TemplateCategory.BUSINESS,
                 "description": "Meeting transcript summarizer and action item extractor",
                 "default_params": {
@@ -1046,7 +1046,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "learning_tutor",
-                "workflow_type": WorkflowType.FULL,
+                "workflow_type": "advanced_chat",
                 "category": TemplateCategory.EDUCATIONAL,
                 "description": "Personalized learning tutor with assessment tools",
                 "default_params": {

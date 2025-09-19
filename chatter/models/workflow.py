@@ -32,16 +32,6 @@ if TYPE_CHECKING:
     from chatter.models.user import User
 
 
-# DEPRECATED: WorkflowType enum removed in favor of dynamic workflow types
-# Keeping for backward compatibility during migration phase
-class WorkflowType(str, Enum):
-    """DEPRECATED: Enumeration for workflow types. Use dynamic workflow_type string instead."""
-
-    PLAIN = "plain"
-    TOOLS = "tools"
-    RAG = "rag"
-    FULL = "full"
-
 
 class TemplateCategory(str, Enum):
     """Enumeration for template categories."""

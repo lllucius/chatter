@@ -8,7 +8,7 @@ export interface ChatWorkflowConfig {
   enable_tools: boolean;
   enable_memory: boolean;
   enable_web_search?: boolean;
-  model_config?: {
+  llm_config?: {
     provider?: string;
     model?: string;
     temperature: number;
@@ -71,7 +71,7 @@ export const useWorkflowChat = () => {
   // Load available workflow templates
   const loadWorkflowTemplates = useCallback(async () => {
     try {
-      const response = await getSDK().workflows.getChatWorkflowTemplates();
+      const response = await getSDK().workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat();
       setWorkflowTemplates(response.templates);
     } catch (error) {
       handleError(error, {
@@ -117,10 +117,10 @@ export const useWorkflowChat = () => {
     try {
       if (streaming) {
         // Use streaming workflow endpoint
-        return await getSDK().workflows.executeChatWorkflowStreaming(request);
+        return await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(request);
       } else {
         // Use non-streaming workflow endpoint
-        return await getSDK().workflows.executeChatWorkflow(request);
+        return await getSDK().workflows.executeChatWorkflowApiV1WorkflowsExecuteChat(request);
       }
     } catch (error) {
       handleError(error, {

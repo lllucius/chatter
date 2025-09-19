@@ -531,13 +531,9 @@ class ChatWorkflowConfig(BaseModel):
     enable_web_search: bool = Field(False, description="Enable web search")
     
     # Configuration objects
-    model_config: ModelConfig | None = Field(None, description="Model configuration")
+    llm_config: ModelConfig | None = Field(None, description="Model configuration")
     retrieval_config: RetrievalConfig | None = Field(None, description="Retrieval configuration")
     tool_config: ToolConfig | None = Field(None, description="Tool configuration")
-    
-    # Advanced workflow customization
-    custom_nodes: list[WorkflowNode] | None = Field(None, description="Custom nodes")
-    custom_edges: list[WorkflowEdge] | None = Field(None, description="Custom edges")
 
 
 class ChatWorkflowRequest(BaseModel):

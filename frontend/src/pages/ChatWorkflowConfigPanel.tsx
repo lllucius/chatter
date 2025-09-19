@@ -257,13 +257,13 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                     </Typography>
                     
                     <Typography gutterBottom>
-                      Temperature: {workflowConfig.model_config?.temperature || 0.7}
+                      Temperature: {workflowConfig.llm_config?.temperature || 0.7}
                     </Typography>
                     <Slider
-                      value={workflowConfig.model_config?.temperature || 0.7}
+                      value={workflowConfig.llm_config?.temperature || 0.7}
                       onChange={(_, value) => updateWorkflowConfig({
-                        model_config: {
-                          ...workflowConfig.model_config,
+                        llm_config: {
+                          ...workflowConfig.llm_config,
                           temperature: value as number
                         }
                       })}
@@ -274,13 +274,13 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                     />
 
                     <Typography gutterBottom>
-                      Max Tokens: {workflowConfig.model_config?.max_tokens || 1000}
+                      Max Tokens: {workflowConfig.llm_config?.max_tokens || 1000}
                     </Typography>
                     <Slider
-                      value={workflowConfig.model_config?.max_tokens || 1000}
+                      value={workflowConfig.llm_config?.max_tokens || 1000}
                       onChange={(_, value) => updateWorkflowConfig({
-                        model_config: {
-                          ...workflowConfig.model_config,
+                        llm_config: {
+                          ...workflowConfig.llm_config,
                           max_tokens: value as number
                         }
                       })}

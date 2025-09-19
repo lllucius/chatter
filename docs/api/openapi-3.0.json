@@ -10764,6 +10764,290 @@
         }
       }
     },
+    "/api/v1/workflows/execute/chat": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Execute Chat Workflow",
+        "description": "Execute chat using dynamically built workflow.\n## Workflow Types\n\nThis endpoint supports multiple workflow types through the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation with document search.\n```json\n{\n    \"message\": \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find recent customer feedback and create a summary report\",\n    \"workflow\": \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet `stream: true` to receive real-time responses:\n```json\n{\n    \"message\": \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n}\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n- `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates for common scenarios:\n```json\n{\n    \"message\": \"I need help with my order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable templates:\n- `customer_support`: Customer service with knowledge base\n- `code_assistant`: Programming help with code tools\n- `research_assistant`: Document research and analysis\n- `general_chat`: General conversation\n- `document_qa`: Document question answering\n- `data_analyst`: Data analysis with computation tools\n",
+        "operationId": "execute_chat_workflow_api_v1_workflows_execute_chat_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatWorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/workflows/execute/chat/streaming": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Execute Chat Workflow Streaming",
+        "description": "Execute chat using dynamically built workflow with streaming.\n## Workflow Types\n\nThis endpoint supports multiple workflow types through the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation with document search.\n```json\n{\n    \"message\": \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find recent customer feedback and create a summary report\",\n    \"workflow\": \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet `stream: true` to receive real-time responses:\n```json\n{\n    \"message\": \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n}\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n- `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates for common scenarios:\n```json\n{\n    \"message\": \"I need help with my order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable templates:\n- `customer_support`: Customer service with knowledge base\n- `code_assistant`: Programming help with code tools\n- `research_assistant`: Document research and analysis\n- `general_chat`: General conversation\n- `document_qa`: Document question answering\n- `data_analyst`: Data analysis with computation tools\n",
+        "operationId": "execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/ChatWorkflowRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {}
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/workflows/templates/chat": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Get Chat Workflow Templates",
+        "description": "Get pre-built workflow templates optimized for chat.",
+        "operationId": "get_chat_workflow_templates_api_v1_workflows_templates_chat_get",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ChatWorkflowTemplatesResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/toolservers/servers": {
       "post": {
         "tags": [
@@ -28045,6 +28329,315 @@
         "title": "ChatResponse",
         "description": "Schema for chat response."
       },
+      "ChatWorkflowConfig": {
+        "properties": {
+          "enable_retrieval": {
+            "type": "boolean",
+            "title": "Enable Retrieval",
+            "description": "Enable document retrieval",
+            "default": false
+          },
+          "enable_tools": {
+            "type": "boolean",
+            "title": "Enable Tools",
+            "description": "Enable function calling",
+            "default": false
+          },
+          "enable_memory": {
+            "type": "boolean",
+            "title": "Enable Memory",
+            "description": "Enable conversation memory",
+            "default": true
+          },
+          "enable_web_search": {
+            "type": "boolean",
+            "title": "Enable Web Search",
+            "description": "Enable web search",
+            "default": false
+          },
+          "llm_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ModelConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Model configuration"
+          },
+          "retrieval_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/RetrievalConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Retrieval configuration"
+          },
+          "tool_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ToolConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Tool configuration"
+          }
+        },
+        "type": "object",
+        "title": "ChatWorkflowConfig",
+        "description": "Configuration for building chat workflows dynamically."
+      },
+      "ChatWorkflowRequest": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "minLength": 1,
+            "title": "Message",
+            "description": "User message"
+          },
+          "conversation_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Conversation Id",
+            "description": "Conversation ID"
+          },
+          "workflow_config": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/ChatWorkflowConfig"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Dynamic workflow config"
+          },
+          "workflow_definition_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Definition Id",
+            "description": "Existing workflow definition ID"
+          },
+          "workflow_template_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Template Name",
+            "description": "Template name"
+          },
+          "profile_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Profile Id",
+            "description": "Profile ID"
+          },
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider",
+            "description": "LLM provider"
+          },
+          "temperature": {
+            "anyOf": [
+              {
+                "type": "number",
+                "maximum": 2.0,
+                "minimum": 0.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Temperature",
+            "description": "Temperature"
+          },
+          "max_tokens": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "maximum": 8192.0,
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Max Tokens",
+            "description": "Max tokens"
+          },
+          "context_limit": {
+            "anyOf": [
+              {
+                "type": "integer",
+                "minimum": 1.0
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Context Limit",
+            "description": "Context limit"
+          },
+          "document_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Ids",
+            "description": "Document IDs"
+          },
+          "system_prompt_override": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "System Prompt Override",
+            "description": "System prompt override"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "ChatWorkflowRequest",
+        "description": "Request for executing chat via workflow system."
+      },
+      "ChatWorkflowTemplate": {
+        "properties": {
+          "name": {
+            "type": "string",
+            "title": "Name",
+            "description": "Template name"
+          },
+          "description": {
+            "type": "string",
+            "title": "Description",
+            "description": "Template description"
+          },
+          "config": {
+            "$ref": "#/components/schemas/ChatWorkflowConfig",
+            "description": "Workflow configuration"
+          },
+          "estimated_tokens": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Tokens",
+            "description": "Estimated token usage"
+          },
+          "estimated_cost": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Estimated Cost",
+            "description": "Estimated cost"
+          },
+          "complexity_score": {
+            "type": "integer",
+            "maximum": 10.0,
+            "minimum": 1.0,
+            "title": "Complexity Score",
+            "description": "Complexity score",
+            "default": 1
+          },
+          "use_cases": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Use Cases",
+            "description": "Use cases"
+          }
+        },
+        "type": "object",
+        "required": [
+          "name",
+          "description",
+          "config"
+        ],
+        "title": "ChatWorkflowTemplate",
+        "description": "Chat-optimized workflow template."
+      },
+      "ChatWorkflowTemplatesResponse": {
+        "properties": {
+          "templates": {
+            "additionalProperties": {
+              "$ref": "#/components/schemas/ChatWorkflowTemplate"
+            },
+            "type": "object",
+            "title": "Templates",
+            "description": "Available templates"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total template count"
+          }
+        },
+        "type": "object",
+        "required": [
+          "templates",
+          "total_count"
+        ],
+        "title": "ChatWorkflowTemplatesResponse",
+        "description": "Response for chat workflow templates."
+      },
       "ComplexityMetrics": {
         "properties": {
           "score": {
@@ -31184,6 +31777,77 @@
         ],
         "title": "MetricsResponse",
         "description": "Schema for application metrics response."
+      },
+      "ModelConfig": {
+        "properties": {
+          "provider": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Provider",
+            "description": "LLM provider"
+          },
+          "model": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Model",
+            "description": "Model name"
+          },
+          "temperature": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": 0.0,
+            "title": "Temperature",
+            "description": "Temperature",
+            "default": 0.7
+          },
+          "max_tokens": {
+            "type": "integer",
+            "maximum": 8192.0,
+            "minimum": 1.0,
+            "title": "Max Tokens",
+            "description": "Max tokens",
+            "default": 1000
+          },
+          "top_p": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Top P",
+            "description": "Top-p sampling",
+            "default": 1.0
+          },
+          "presence_penalty": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": -2.0,
+            "title": "Presence Penalty",
+            "description": "Presence penalty",
+            "default": 0.0
+          },
+          "frequency_penalty": {
+            "type": "number",
+            "maximum": 2.0,
+            "minimum": -2.0,
+            "title": "Frequency Penalty",
+            "description": "Frequency penalty",
+            "default": 0.0
+          }
+        },
+        "type": "object",
+        "title": "ModelConfig",
+        "description": "Model configuration for chat workflows."
       },
       "ModelDefCreate": {
         "properties": {
@@ -35888,6 +36552,71 @@
         "title": "RestoreResponse",
         "description": "Response schema for restore operation."
       },
+      "RetrievalConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Enable retrieval",
+            "default": true
+          },
+          "max_documents": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Documents",
+            "description": "Max documents to retrieve",
+            "default": 5
+          },
+          "similarity_threshold": {
+            "type": "number",
+            "maximum": 1.0,
+            "minimum": 0.0,
+            "title": "Similarity Threshold",
+            "description": "Similarity threshold",
+            "default": 0.7
+          },
+          "document_ids": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Document Ids",
+            "description": "Specific document IDs"
+          },
+          "collections": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Collections",
+            "description": "Document collections"
+          },
+          "rerank": {
+            "type": "boolean",
+            "title": "Rerank",
+            "description": "Enable reranking",
+            "default": false
+          }
+        },
+        "type": "object",
+        "title": "RetrievalConfig",
+        "description": "Retrieval configuration for RAG workflows."
+      },
       "RoleToolAccessCreate": {
         "properties": {
           "role": {
@@ -36986,6 +37715,56 @@
         ],
         "title": "ToolAccessResult",
         "description": "Schema for tool access check result."
+      },
+      "ToolConfig": {
+        "properties": {
+          "enabled": {
+            "type": "boolean",
+            "title": "Enabled",
+            "description": "Enable tools",
+            "default": true
+          },
+          "allowed_tools": {
+            "anyOf": [
+              {
+                "items": {
+                  "type": "string"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Allowed Tools",
+            "description": "Allowed tool names"
+          },
+          "max_tool_calls": {
+            "type": "integer",
+            "maximum": 20.0,
+            "minimum": 1.0,
+            "title": "Max Tool Calls",
+            "description": "Max tool calls",
+            "default": 5
+          },
+          "parallel_tool_calls": {
+            "type": "boolean",
+            "title": "Parallel Tool Calls",
+            "description": "Enable parallel tool calls",
+            "default": false
+          },
+          "tool_timeout_ms": {
+            "type": "integer",
+            "maximum": 300000.0,
+            "minimum": 1000.0,
+            "title": "Tool Timeout Ms",
+            "description": "Tool timeout in ms",
+            "default": 30000
+          }
+        },
+        "type": "object",
+        "title": "ToolConfig",
+        "description": "Tool configuration for function calling workflows."
       },
       "ToolOperationResponse": {
         "properties": {

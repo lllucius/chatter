@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowValidationResponse, chatter__schemas__workflows__WorkflowTemplatesResponse } from '../models/index';
+import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowValidationResponse, chatter__schemas__workflows__WorkflowTemplatesResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -203,11 +203,88 @@ export class WorkflowsApi extends BaseAPI {
     const response = await this.request(requestContext);
     return response.json() as Promise<WorkflowExecutionResponse[]>;
   }
-
   /**Execute Chat Workflow
    * Execute chat using dynamically built workflow.
+## Workflow Types
+
+This endpoint supports multiple workflow types through the `workflow` parameter:
+
+### Plain Chat (`plain`)
+Basic conversation without tools or retrieval.
+```json
+{
+    "message": "Hello, how are you?",
+    "workflow": "plain"
+}
+```
+
+### RAG Workflow (`rag`)
+Retrieval-Augmented Generation with document search.
+```json
+{
+    "message": "What are the latest sales figures?",
+    "workflow": "rag",
+    "enable_retrieval": true
+}
+```
+
+### Tools Workflow (`tools`)
+Function calling with available tools.
+```json
+{
+    "message": "Calculate the square root of 144",
+    "workflow": "tools"
+}
+```
+
+### Full Workflow (`full`)
+Combination of RAG and tools for complex tasks.
+```json
+{
+    "message": "Find recent customer feedback and create a summary report",
+    "workflow": "full",
+    "enable_retrieval": true
+}
+```
+
+## Streaming
+
+Set `stream: true` to receive real-time responses:
+```json
+{
+    "message": "Tell me a story",
+    "workflow": "plain",
+    "stream": true
+}
+```
+
+Streaming responses use Server-Sent Events (SSE) format with event types:
+- `token`: Content chunks
+- `node_start`: Workflow node started
+- `node_complete`: Workflow node completed
+- `usage`: Final usage statistics
+- `error`: Error occurred
+
+## Templates
+
+Use pre-configured templates for common scenarios:
+```json
+{
+    "message": "I need help with my order",
+    "workflow_template": "customer_support"
+}
+```
+
+Available templates:
+- `customer_support`: Customer service with knowledge base
+- `code_assistant`: Programming help with code tools
+- `research_assistant`: Document research and analysis
+- `general_chat`: General conversation
+- `document_qa`: Document question answering
+- `data_analyst`: Data analysis with computation tools
+
    */
-  public async executeChatWorkflow(data: any): Promise<any> {
+  public async executeChatWorkflowApiV1WorkflowsExecuteChat(data: ChatWorkflowRequest): Promise<ChatResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/execute/chat`,
       method: 'POST' as HTTPMethod,
@@ -218,13 +295,90 @@ export class WorkflowsApi extends BaseAPI {
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<any>;
+    return response.json() as Promise<ChatResponse>;
   }
-
   /**Execute Chat Workflow Streaming
    * Execute chat using dynamically built workflow with streaming.
+## Workflow Types
+
+This endpoint supports multiple workflow types through the `workflow` parameter:
+
+### Plain Chat (`plain`)
+Basic conversation without tools or retrieval.
+```json
+{
+    "message": "Hello, how are you?",
+    "workflow": "plain"
+}
+```
+
+### RAG Workflow (`rag`)
+Retrieval-Augmented Generation with document search.
+```json
+{
+    "message": "What are the latest sales figures?",
+    "workflow": "rag",
+    "enable_retrieval": true
+}
+```
+
+### Tools Workflow (`tools`)
+Function calling with available tools.
+```json
+{
+    "message": "Calculate the square root of 144",
+    "workflow": "tools"
+}
+```
+
+### Full Workflow (`full`)
+Combination of RAG and tools for complex tasks.
+```json
+{
+    "message": "Find recent customer feedback and create a summary report",
+    "workflow": "full",
+    "enable_retrieval": true
+}
+```
+
+## Streaming
+
+Set `stream: true` to receive real-time responses:
+```json
+{
+    "message": "Tell me a story",
+    "workflow": "plain",
+    "stream": true
+}
+```
+
+Streaming responses use Server-Sent Events (SSE) format with event types:
+- `token`: Content chunks
+- `node_start`: Workflow node started
+- `node_complete`: Workflow node completed
+- `usage`: Final usage statistics
+- `error`: Error occurred
+
+## Templates
+
+Use pre-configured templates for common scenarios:
+```json
+{
+    "message": "I need help with my order",
+    "workflow_template": "customer_support"
+}
+```
+
+Available templates:
+- `customer_support`: Customer service with knowledge base
+- `code_assistant`: Programming help with code tools
+- `research_assistant`: Document research and analysis
+- `general_chat`: General conversation
+- `document_qa`: Document question answering
+- `data_analyst`: Data analysis with computation tools
+
    */
-  public async executeChatWorkflowStreaming(data: any): Promise<Response> {
+  public async executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(data: ChatWorkflowRequest): Promise<Record<string, unknown>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/execute/chat/streaming`,
       method: 'POST' as HTTPMethod,
@@ -234,13 +388,13 @@ export class WorkflowsApi extends BaseAPI {
       body: data,
     };
 
-    return await this.request(requestContext);
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
-
   /**Get Chat Workflow Templates
    * Get pre-built workflow templates optimized for chat.
    */
-  public async getChatWorkflowTemplates(): Promise<any> {
+  public async getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat(): Promise<ChatWorkflowTemplatesResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/templates/chat`,
       method: 'GET' as HTTPMethod,
@@ -249,6 +403,6 @@ export class WorkflowsApi extends BaseAPI {
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<any>;
+    return response.json() as Promise<ChatWorkflowTemplatesResponse>;
   }
 }

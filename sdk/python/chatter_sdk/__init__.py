@@ -23,7 +23,6 @@ __all__ = [
     "AgentsApi",
     "AnalyticsApi",
     "AuthenticationApi",
-    "ChatApi",
     "ConversationsApi",
     "DataManagementApi",
     "DocumentsApi",
@@ -77,8 +76,6 @@ __all__ = [
     "AgentType",
     "AgentUpdateRequest",
     "AvailableProvidersResponse",
-    "AvailableToolResponse",
-    "AvailableToolsResponse",
     "BackupListResponse",
     "BackupRequest",
     "BackupResponse",
@@ -92,14 +89,11 @@ __all__ = [
     "BulkToolServerOperation",
     "ChartDataPoint",
     "ChartReadyAnalytics",
-    "ChatRequest",
     "ChatResponse",
     "ChatWorkflowConfig",
     "ChatWorkflowRequest",
     "ChatWorkflowTemplate",
     "ChatWorkflowTemplatesResponse",
-    "ChatterSchemasChatWorkflowTemplatesResponse",
-    "ChatterSchemasWorkflowsWorkflowTemplatesResponse",
     "ComplexityMetrics",
     "ConversationCreate",
     "ConversationDeleteResponse",
@@ -145,7 +139,6 @@ __all__ = [
     "LocationInner",
     "LogoutResponse",
     "MaxValue",
-    "McpStatusResponse",
     "MessageDeleteResponse",
     "MessageRatingResponse",
     "MessageRatingUpdate",
@@ -171,7 +164,6 @@ __all__ = [
     "PasswordResetConfirmResponse",
     "PasswordResetRequestResponse",
     "PerformanceMetricsResponse",
-    "PerformanceStatsResponse",
     "PluginActionResponse",
     "PluginDeleteResponse",
     "PluginHealthCheckResponse",
@@ -271,9 +263,9 @@ __all__ = [
     "WorkflowNode",
     "WorkflowNodeData",
     "WorkflowTemplateCreate",
-    "WorkflowTemplateInfo",
     "WorkflowTemplateResponse",
     "WorkflowTemplateUpdate",
+    "WorkflowTemplatesResponse",
     "WorkflowValidationResponse",
 ]
 
@@ -282,7 +274,6 @@ from chatter_sdk.api.ab_testing_api import ABTestingApi as ABTestingApi
 from chatter_sdk.api.agents_api import AgentsApi as AgentsApi
 from chatter_sdk.api.analytics_api import AnalyticsApi as AnalyticsApi
 from chatter_sdk.api.authentication_api import AuthenticationApi as AuthenticationApi
-from chatter_sdk.api.chat_api import ChatApi as ChatApi
 from chatter_sdk.api.conversations_api import ConversationsApi as ConversationsApi
 from chatter_sdk.api.data_management_api import DataManagementApi as DataManagementApi
 from chatter_sdk.api.documents_api import DocumentsApi as DocumentsApi
@@ -340,8 +331,6 @@ from chatter_sdk.models.agent_status import AgentStatus as AgentStatus
 from chatter_sdk.models.agent_type import AgentType as AgentType
 from chatter_sdk.models.agent_update_request import AgentUpdateRequest as AgentUpdateRequest
 from chatter_sdk.models.available_providers_response import AvailableProvidersResponse as AvailableProvidersResponse
-from chatter_sdk.models.available_tool_response import AvailableToolResponse as AvailableToolResponse
-from chatter_sdk.models.available_tools_response import AvailableToolsResponse as AvailableToolsResponse
 from chatter_sdk.models.backup_list_response import BackupListResponse as BackupListResponse
 from chatter_sdk.models.backup_request import BackupRequest as BackupRequest
 from chatter_sdk.models.backup_response import BackupResponse as BackupResponse
@@ -355,14 +344,11 @@ from chatter_sdk.models.bulk_operation_result import BulkOperationResult as Bulk
 from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperation as BulkToolServerOperation
 from chatter_sdk.models.chart_data_point import ChartDataPoint as ChartDataPoint
 from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics as ChartReadyAnalytics
-from chatter_sdk.models.chat_request import ChatRequest as ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse as ChatResponse
 from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig as ChatWorkflowConfig
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest as ChatWorkflowRequest
 from chatter_sdk.models.chat_workflow_template import ChatWorkflowTemplate as ChatWorkflowTemplate
 from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse as ChatWorkflowTemplatesResponse
-from chatter_sdk.models.chatter_schemas_chat_workflow_templates_response import ChatterSchemasChatWorkflowTemplatesResponse as ChatterSchemasChatWorkflowTemplatesResponse
-from chatter_sdk.models.chatter_schemas_workflows_workflow_templates_response import ChatterSchemasWorkflowsWorkflowTemplatesResponse as ChatterSchemasWorkflowsWorkflowTemplatesResponse
 from chatter_sdk.models.complexity_metrics import ComplexityMetrics as ComplexityMetrics
 from chatter_sdk.models.conversation_create import ConversationCreate as ConversationCreate
 from chatter_sdk.models.conversation_delete_response import ConversationDeleteResponse as ConversationDeleteResponse
@@ -408,7 +394,6 @@ from chatter_sdk.models.job_status import JobStatus as JobStatus
 from chatter_sdk.models.location_inner import LocationInner as LocationInner
 from chatter_sdk.models.logout_response import LogoutResponse as LogoutResponse
 from chatter_sdk.models.max_value import MaxValue as MaxValue
-from chatter_sdk.models.mcp_status_response import McpStatusResponse as McpStatusResponse
 from chatter_sdk.models.message_delete_response import MessageDeleteResponse as MessageDeleteResponse
 from chatter_sdk.models.message_rating_response import MessageRatingResponse as MessageRatingResponse
 from chatter_sdk.models.message_rating_update import MessageRatingUpdate as MessageRatingUpdate
@@ -434,7 +419,6 @@ from chatter_sdk.models.password_change_response import PasswordChangeResponse a
 from chatter_sdk.models.password_reset_confirm_response import PasswordResetConfirmResponse as PasswordResetConfirmResponse
 from chatter_sdk.models.password_reset_request_response import PasswordResetRequestResponse as PasswordResetRequestResponse
 from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse as PerformanceMetricsResponse
-from chatter_sdk.models.performance_stats_response import PerformanceStatsResponse as PerformanceStatsResponse
 from chatter_sdk.models.plugin_action_response import PluginActionResponse as PluginActionResponse
 from chatter_sdk.models.plugin_delete_response import PluginDeleteResponse as PluginDeleteResponse
 from chatter_sdk.models.plugin_health_check_response import PluginHealthCheckResponse as PluginHealthCheckResponse
@@ -534,7 +518,7 @@ from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResp
 from chatter_sdk.models.workflow_node import WorkflowNode as WorkflowNode
 from chatter_sdk.models.workflow_node_data import WorkflowNodeData as WorkflowNodeData
 from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate as WorkflowTemplateCreate
-from chatter_sdk.models.workflow_template_info import WorkflowTemplateInfo as WorkflowTemplateInfo
 from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse as WorkflowTemplateResponse
 from chatter_sdk.models.workflow_template_update import WorkflowTemplateUpdate as WorkflowTemplateUpdate
+from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse as WorkflowTemplatesResponse
 from chatter_sdk.models.workflow_validation_response import WorkflowValidationResponse as WorkflowValidationResponse

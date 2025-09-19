@@ -1309,46 +1309,6 @@ components:
       - supported_features
       title: AvailableProvidersResponse
       type: object
-    AvailableToolResponse:
-      description: Schema for individual available tool.
-      properties:
-        args_schema:
-          additionalProperties: true
-          description: Tool arguments schema
-          title: Args Schema
-          type: object
-        description:
-          description: Tool description
-          title: Description
-          type: string
-        name:
-          description: Tool name
-          title: Name
-          type: string
-        type:
-          description: Tool type (mcp, builtin)
-          title: Type
-          type: string
-      required:
-      - name
-      - description
-      - type
-      - args_schema
-      title: AvailableToolResponse
-      type: object
-    AvailableToolsResponse:
-      description: Schema for available tools response.
-      properties:
-        tools:
-          description: Available tools
-          items:
-            $ref: '#/components/schemas/AvailableToolResponse'
-          title: Tools
-          type: array
-      required:
-      - tools
-      title: AvailableToolsResponse
-      type: object
     BackupListResponse:
       description: Response schema for backup list.
       properties:
@@ -1822,107 +1782,6 @@ components:
       - integration_data
       - hourly_performance_data
       title: ChartReadyAnalytics
-      type: object
-    ChatRequest:
-      description: Schema for chat request.
-      properties:
-        context_limit:
-          anyOf:
-          - minimum: 1.0
-            type: integer
-          - type: 'null'
-          description: Context limit override
-          title: Context Limit
-        conversation_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Conversation ID for continuing chat
-          title: Conversation Id
-        document_ids:
-          anyOf:
-          - items:
-              type: string
-            type: array
-          - type: 'null'
-          description: Document IDs to include in context
-          title: Document Ids
-        enable_retrieval:
-          anyOf:
-          - type: boolean
-          - type: 'null'
-          description: Enable retrieval override
-          title: Enable Retrieval
-        max_tokens:
-          anyOf:
-          - maximum: 8192.0
-            minimum: 1.0
-            type: integer
-          - type: 'null'
-          description: Max tokens override
-          title: Max Tokens
-        message:
-          description: User message
-          title: Message
-          type: string
-        profile_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Profile ID to use
-          title: Profile Id
-        prompt_id:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Prompt template ID to use for this request
-          title: Prompt Id
-        provider:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Override LLM provider for this request
-          title: Provider
-        system_prompt_override:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Override system prompt for this request
-          title: System Prompt Override
-        temperature:
-          anyOf:
-          - maximum: 2.0
-            minimum: 0.0
-            type: number
-          - type: 'null'
-          description: Temperature override
-          title: Temperature
-        workflow:
-          default: plain
-          description: 'Workflow type: plain, rag, tools, or full (rag + tools)'
-          enum:
-          - plain
-          - rag
-          - tools
-          - full
-          title: Workflow
-          type: string
-        workflow_config:
-          anyOf:
-          - additionalProperties: true
-            type: object
-          - type: 'null'
-          description: Workflow configuration
-          title: Workflow Config
-        workflow_type:
-          anyOf:
-          - type: string
-          - type: 'null'
-          description: Internal workflow type (set by API processing)
-          title: Workflow Type
-      required:
-      - message
-      title: ChatRequest
       type: object
     ChatResponse:
       description: Schema for chat response.
@@ -4057,38 +3916,6 @@ components:
       - message
       title: LogoutResponse
       type: object
-    McpStatusResponse:
-      description: Schema for MCP status response.
-      properties:
-        errors:
-          description: Any error messages
-          items:
-            type: string
-          title: Errors
-          type: array
-        last_check:
-          anyOf:
-          - format: date-time
-            type: string
-          - type: 'null'
-          description: Last health check time
-          title: Last Check
-        servers:
-          description: Connected servers
-          items:
-            additionalProperties: true
-            type: object
-          title: Servers
-          type: array
-        status:
-          description: MCP service status
-          title: Status
-          type: string
-      required:
-      - status
-      - servers
-      title: McpStatusResponse
-      type: object
     MessageDeleteResponse:
       description: Response schema for message deletion.
       properties:
@@ -5004,63 +4831,6 @@ components:
       - vector_search_time_ms
       - embedding_generation_time_ms
       title: PerformanceMetricsResponse
-      type: object
-    PerformanceStatsResponse:
-      description: Schema for performance statistics response.
-      properties:
-        avg_execution_time_ms:
-          description: Average execution time in milliseconds
-          title: Avg Execution Time Ms
-          type: integer
-        cache_stats:
-          additionalProperties: true
-          description: Cache statistics
-          title: Cache Stats
-          type: object
-        error_counts:
-          additionalProperties:
-            type: integer
-          description: Error count by type
-          title: Error Counts
-          type: object
-        max_execution_time_ms:
-          description: Maximum execution time in milliseconds
-          title: Max Execution Time Ms
-          type: integer
-        min_execution_time_ms:
-          description: Minimum execution time in milliseconds
-          title: Min Execution Time Ms
-          type: integer
-        timestamp:
-          description: Statistics timestamp
-          title: Timestamp
-          type: number
-        tool_stats:
-          additionalProperties: true
-          description: Tool usage statistics
-          title: Tool Stats
-          type: object
-        total_executions:
-          description: Total number of executions
-          title: Total Executions
-          type: integer
-        workflow_types:
-          additionalProperties:
-            type: integer
-          description: Execution count by workflow type
-          title: Workflow Types
-          type: object
-      required:
-      - total_executions
-      - avg_execution_time_ms
-      - min_execution_time_ms
-      - max_execution_time_ms
-      - workflow_types
-      - error_counts
-      - cache_stats
-      - tool_stats
-      - timestamp
-      title: PerformanceStatsResponse
       type: object
     PluginActionResponse:
       description: Response schema for plugin actions.
@@ -9931,47 +9701,6 @@ components:
       - workflow_type
       title: WorkflowTemplateCreate
       type: object
-    WorkflowTemplateInfo:
-      description: Schema for workflow template information.
-      properties:
-        default_params:
-          additionalProperties: true
-          description: Default parameters
-          title: Default Params
-          type: object
-        description:
-          description: Template description
-          title: Description
-          type: string
-        name:
-          description: Template name
-          title: Name
-          type: string
-        required_retrievers:
-          description: Required retrievers
-          items:
-            type: string
-          title: Required Retrievers
-          type: array
-        required_tools:
-          description: Required tools
-          items:
-            type: string
-          title: Required Tools
-          type: array
-        workflow_type:
-          description: Workflow type
-          title: Workflow Type
-          type: string
-      required:
-      - name
-      - workflow_type
-      - description
-      - required_tools
-      - required_retrievers
-      - default_params
-      title: WorkflowTemplateInfo
-      type: object
     WorkflowTemplateResponse:
       description: Schema for workflow template response.
       properties:
@@ -10160,6 +9889,24 @@ components:
           title: Tags
       title: WorkflowTemplateUpdate
       type: object
+    WorkflowTemplatesResponse:
+      description: Schema for workflow templates list response.
+      properties:
+        templates:
+          description: Workflow templates
+          items:
+            $ref: '#/components/schemas/WorkflowTemplateResponse'
+          title: Templates
+          type: array
+        total_count:
+          description: Total number of templates
+          title: Total Count
+          type: integer
+      required:
+      - templates
+      - total_count
+      title: WorkflowTemplatesResponse
+      type: object
     WorkflowValidationResponse:
       description: Schema for workflow validation response.
       properties:
@@ -10191,42 +9938,6 @@ components:
       - warnings
       - suggestions
       title: WorkflowValidationResponse
-      type: object
-    chatter__schemas__chat__WorkflowTemplatesResponse:
-      description: Schema for workflow templates response.
-      properties:
-        templates:
-          additionalProperties:
-            $ref: '#/components/schemas/WorkflowTemplateInfo'
-          description: Available templates
-          title: Templates
-          type: object
-        total_count:
-          description: Total number of templates
-          title: Total Count
-          type: integer
-      required:
-      - templates
-      - total_count
-      title: WorkflowTemplatesResponse
-      type: object
-    chatter__schemas__workflows__WorkflowTemplatesResponse:
-      description: Schema for workflow templates list response.
-      properties:
-        templates:
-          description: Workflow templates
-          items:
-            $ref: '#/components/schemas/WorkflowTemplateResponse'
-          title: Templates
-          type: array
-        total_count:
-          description: Total number of templates
-          title: Total Count
-          type: integer
-      required:
-      - templates
-      - total_count
-      title: WorkflowTemplatesResponse
       type: object
   securitySchemes:
     CustomHTTPBearer:
@@ -13833,330 +13544,6 @@ paths:
       summary: Register
       tags:
       - Authentication
-  /api/v1/chat/chat:
-    post:
-      description: "Non-streaming chat endpoint supporting all workflow types.\n##\
-        \ Workflow Types\n\nThis endpoint supports multiple workflow types through\
-        \ the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation\
-        \ without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are\
-        \ you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\n\
-        Retrieval-Augmented Generation with document search.\n```json\n{\n    \"message\"\
-        : \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n  \
-        \  \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction\
-        \ calling with available tools.\n```json\n{\n    \"message\": \"Calculate\
-        \ the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full\
-        \ Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n\
-        {\n    \"message\": \"Find recent customer feedback and create a summary report\"\
-        ,\n    \"workflow\": \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n\
-        ## Streaming\n\nSet `stream: true` to receive real-time responses:\n```json\n\
-        {\n    \"message\": \"Tell me a story\",\n    \"workflow\": \"plain\",\n \
-        \   \"stream\": true\n}\n```\n\nStreaming responses use Server-Sent Events\
-        \ (SSE) format with event types:\n- `token`: Content chunks\n- `node_start`:\
-        \ Workflow node started\n- `node_complete`: Workflow node completed\n- `usage`:\
-        \ Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\nUse\
-        \ pre-configured templates for common scenarios:\n```json\n{\n    \"message\"\
-        : \"I need help with my order\",\n    \"workflow_template\": \"customer_support\"\
-        \n}\n```\n\nAvailable templates:\n- `customer_support`: Customer service with\
-        \ knowledge base\n- `code_assistant`: Programming help with code tools\n-\
-        \ `research_assistant`: Document research and analysis\n- `general_chat`:\
-        \ General conversation\n- `document_qa`: Document question answering\n- `data_analyst`:\
-        \ Data analysis with computation tools\n"
-      operationId: chat_api_v1_chat_chat_post
-      requestBody:
-        content:
-          application/json:
-            example:
-              message: Write a Python function to calculate fibonacci numbers
-              stream: true
-              workflow: tools
-            schema:
-              $ref: '#/components/schemas/ChatRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              example: &id008
-                data:
-                  content: "Here's a Python function to calculate Fibonacci numbers:\n\
-                    \n```python\ndef fibonacci(n):\n    if n <= 1:\n        return\
-                    \ n\n    return fibonacci(n-1) + fibonacci(n-2)\n```"
-                  type: token
-                event: token
-              schema:
-                $ref: '#/components/schemas/ChatResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              example: *id008
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Chat
-      tags:
-      - Chat
-  /api/v1/chat/mcp/status:
-    get:
-      description: Get MCP service status.
-      operationId: get_mcp_status_api_v1_chat_mcp_status_get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/McpStatusResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Mcp Status
-      tags:
-      - Chat
-  /api/v1/chat/performance/stats:
-    get:
-      description: Get workflow performance statistics.
-      operationId: get_performance_stats_api_v1_chat_performance_stats_get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PerformanceStatsResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Performance Stats
-      tags:
-      - Chat
-  /api/v1/chat/streaming:
-    post:
-      description: "Streaming chat endpoint supporting all workflow types.\n## Workflow\
-        \ Types\n\nThis endpoint supports multiple workflow types through the `workflow`\
-        \ parameter:\n\n### Plain Chat (`plain`)\nBasic conversation without tools\
-        \ or retrieval.\n```json\n{\n    \"message\": \"Hello, how are you?\",\n \
-        \   \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented\
-        \ Generation with document search.\n```json\n{\n    \"message\": \"What are\
-        \ the latest sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\"\
-        : true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available\
-        \ tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\"\
-        ,\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination\
-        \ of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find\
-        \ recent customer feedback and create a summary report\",\n    \"workflow\"\
-        : \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet\
-        \ `stream: true` to receive real-time responses:\n```json\n{\n    \"message\"\
-        : \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n\
-        }\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event\
-        \ types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n\
-        - `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n\
-        - `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates\
-        \ for common scenarios:\n```json\n{\n    \"message\": \"I need help with my\
-        \ order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable\
-        \ templates:\n- `customer_support`: Customer service with knowledge base\n\
-        - `code_assistant`: Programming help with code tools\n- `research_assistant`:\
-        \ Document research and analysis\n- `general_chat`: General conversation\n\
-        - `document_qa`: Document question answering\n- `data_analyst`: Data analysis\
-        \ with computation tools\n"
-      operationId: streaming_chat_api_v1_chat_streaming_post
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChatRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema: {}
-            text/event-stream:
-              schema:
-                type: string
-          description: Streaming chat response using Server-Sent Events
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Streaming Chat
-      tags:
-      - Chat
-  /api/v1/chat/template/{template_name}:
-    post:
-      description: "Chat using a specific workflow template.\n## Workflow Types\n\n\
-        This endpoint supports multiple workflow types through the `workflow` parameter:\n\
-        \n### Plain Chat (`plain`)\nBasic conversation without tools or retrieval.\n\
-        ```json\n{\n    \"message\": \"Hello, how are you?\",\n    \"workflow\": \"\
-        plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation\
-        \ with document search.\n```json\n{\n    \"message\": \"What are the latest\
-        \ sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\"\
-        : true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available\
-        \ tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\"\
-        ,\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination\
-        \ of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find\
-        \ recent customer feedback and create a summary report\",\n    \"workflow\"\
-        : \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet\
-        \ `stream: true` to receive real-time responses:\n```json\n{\n    \"message\"\
-        : \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n\
-        }\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event\
-        \ types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n\
-        - `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n\
-        - `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates\
-        \ for common scenarios:\n```json\n{\n    \"message\": \"I need help with my\
-        \ order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable\
-        \ templates:\n- `customer_support`: Customer service with knowledge base\n\
-        - `code_assistant`: Programming help with code tools\n- `research_assistant`:\
-        \ Document research and analysis\n- `general_chat`: General conversation\n\
-        - `document_qa`: Document question answering\n- `data_analyst`: Data analysis\
-        \ with computation tools\n"
-      operationId: chat_with_template_api_v1_chat_template__template_name__post
-      parameters:
-      - in: path
-        name: template_name
-        required: true
-        schema:
-          title: Template Name
-          type: string
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/ChatRequest'
-        required: true
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-        '422':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/HTTPValidationError'
-          description: Validation Error
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Chat With Template
-      tags:
-      - Chat
-  /api/v1/chat/templates:
-    get:
-      description: Get available workflow templates.
-      operationId: get_workflow_templates_api_v1_chat_templates_get
-      responses:
-        '200':
-          content:
-            application/json:
-              example:
-                templates:
-                  code_assistant:
-                    description: Programming assistant with code tools
-                    name: code_assistant
-                    required_tools:
-                    - execute_code
-                    - search_docs
-                    - generate_tests
-                    workflow_type: tools
-                  customer_support:
-                    description: Customer support with knowledge base and tools
-                    name: customer_support
-                    required_retrievers:
-                    - support_docs
-                    required_tools:
-                    - search_kb
-                    - create_ticket
-                    - escalate
-                    workflow_type: full
-              schema:
-                $ref: '#/components/schemas/chatter__schemas__chat__WorkflowTemplatesResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Workflow Templates
-      tags:
-      - Chat
-  /api/v1/chat/tools/available:
-    get:
-      description: Get list of available MCP tools.
-      operationId: get_available_tools_api_v1_chat_tools_available_get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AvailableToolsResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Available Tools
-      tags:
-      - Chat
   /api/v1/conversations/:
     get:
       description: "List conversations for the current user.\n\nArgs:\n    status:\
@@ -19939,7 +19326,7 @@ paths:
           content:
             application/json:
               schema:
-                $ref: '#/components/schemas/chatter__schemas__workflows__WorkflowTemplatesResponse'
+                $ref: '#/components/schemas/WorkflowTemplatesResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001

@@ -6,7 +6,6 @@ export * from './AbTestingApi';
 export * from './AgentsApi';
 export * from './AnalyticsApi';
 export * from './AuthenticationApi';
-export * from './ChatApi';
 export * from './ConversationsApi';
 export * from './DataManagementApi';
 export * from './DefaultApi';

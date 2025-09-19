@@ -11,7 +11,6 @@ chatter_sdk/api/agents0_api.py
 chatter_sdk/api/agents_api.py
 chatter_sdk/api/analytics_api.py
 chatter_sdk/api/authentication_api.py
-chatter_sdk/api/chat_api.py
 chatter_sdk/api/conversations_api.py
 chatter_sdk/api/data_management_api.py
 chatter_sdk/api/default_api.py
@@ -60,8 +59,6 @@ chatter_sdk/models/api_key_create.py
 chatter_sdk/models/api_key_response.py
 chatter_sdk/models/api_key_revoke_response.py
 chatter_sdk/models/available_providers_response.py
-chatter_sdk/models/available_tool_response.py
-chatter_sdk/models/available_tools_response.py
 chatter_sdk/models/backup_list_response.py
 chatter_sdk/models/backup_request.py
 chatter_sdk/models/backup_response.py
@@ -75,14 +72,11 @@ chatter_sdk/models/bulk_operation_result.py
 chatter_sdk/models/bulk_tool_server_operation.py
 chatter_sdk/models/chart_data_point.py
 chatter_sdk/models/chart_ready_analytics.py
-chatter_sdk/models/chat_request.py
 chatter_sdk/models/chat_response.py
 chatter_sdk/models/chat_workflow_config.py
 chatter_sdk/models/chat_workflow_request.py
 chatter_sdk/models/chat_workflow_template.py
 chatter_sdk/models/chat_workflow_templates_response.py
-chatter_sdk/models/chatter_schemas_chat_workflow_templates_response.py
-chatter_sdk/models/chatter_schemas_workflows_workflow_templates_response.py
 chatter_sdk/models/complexity_metrics.py
 chatter_sdk/models/conversation_create.py
 chatter_sdk/models/conversation_delete_response.py
@@ -128,7 +122,6 @@ chatter_sdk/models/job_status.py
 chatter_sdk/models/location_inner.py
 chatter_sdk/models/logout_response.py
 chatter_sdk/models/max_value.py
-chatter_sdk/models/mcp_status_response.py
 chatter_sdk/models/message_delete_response.py
 chatter_sdk/models/message_rating_response.py
 chatter_sdk/models/message_rating_update.py
@@ -154,7 +147,6 @@ chatter_sdk/models/password_change_response.py
 chatter_sdk/models/password_reset_confirm_response.py
 chatter_sdk/models/password_reset_request_response.py
 chatter_sdk/models/performance_metrics_response.py
-chatter_sdk/models/performance_stats_response.py
 chatter_sdk/models/plugin_action_response.py
 chatter_sdk/models/plugin_delete_response.py
 chatter_sdk/models/plugin_health_check_response.py
@@ -254,9 +246,9 @@ chatter_sdk/models/workflow_execution_response.py
 chatter_sdk/models/workflow_node.py
 chatter_sdk/models/workflow_node_data.py
 chatter_sdk/models/workflow_template_create.py
-chatter_sdk/models/workflow_template_info.py
 chatter_sdk/models/workflow_template_response.py
 chatter_sdk/models/workflow_template_update.py
+chatter_sdk/models/workflow_templates_response.py
 chatter_sdk/models/workflow_validation_response.py
 chatter_sdk/py.typed
 chatter_sdk/rest.py
@@ -294,8 +286,6 @@ docs/AgentsApi.md
 docs/AnalyticsApi.md
 docs/AuthenticationApi.md
 docs/AvailableProvidersResponse.md
-docs/AvailableToolResponse.md
-docs/AvailableToolsResponse.md
 docs/BackupListResponse.md
 docs/BackupRequest.md
 docs/BackupResponse.md
@@ -309,15 +299,11 @@ docs/BulkOperationResult.md
 docs/BulkToolServerOperation.md
 docs/ChartDataPoint.md
 docs/ChartReadyAnalytics.md
-docs/ChatApi.md
-docs/ChatRequest.md
 docs/ChatResponse.md
 docs/ChatWorkflowConfig.md
 docs/ChatWorkflowRequest.md
 docs/ChatWorkflowTemplate.md
 docs/ChatWorkflowTemplatesResponse.md
-docs/ChatterSchemasChatWorkflowTemplatesResponse.md
-docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md
 docs/ComplexityMetrics.md
 docs/ConversationCreate.md
 docs/ConversationDeleteResponse.md
@@ -370,7 +356,6 @@ docs/JobsApi.md
 docs/LocationInner.md
 docs/LogoutResponse.md
 docs/MaxValue.md
-docs/McpStatusResponse.md
 docs/MessageDeleteResponse.md
 docs/MessageRatingResponse.md
 docs/MessageRatingUpdate.md
@@ -397,7 +382,6 @@ docs/PasswordChangeResponse.md
 docs/PasswordResetConfirmResponse.md
 docs/PasswordResetRequestResponse.md
 docs/PerformanceMetricsResponse.md
-docs/PerformanceStatsResponse.md
 docs/PluginActionResponse.md
 docs/PluginDeleteResponse.md
 docs/PluginHealthCheckResponse.md
@@ -502,9 +486,9 @@ docs/WorkflowExecutionResponse.md
 docs/WorkflowNode.md
 docs/WorkflowNodeData.md
 docs/WorkflowTemplateCreate.md
-docs/WorkflowTemplateInfo.md
 docs/WorkflowTemplateResponse.md
 docs/WorkflowTemplateUpdate.md
+docs/WorkflowTemplatesResponse.md
 docs/WorkflowValidationResponse.md
 docs/WorkflowsApi.md
 git_push.sh
@@ -548,8 +532,6 @@ test/test_api_key_response.py
 test/test_api_key_revoke_response.py
 test/test_authentication_api.py
 test/test_available_providers_response.py
-test/test_available_tool_response.py
-test/test_available_tools_response.py
 test/test_backup_list_response.py
 test/test_backup_request.py
 test/test_backup_response.py
@@ -563,15 +545,11 @@ test/test_bulk_operation_result.py
 test/test_bulk_tool_server_operation.py
 test/test_chart_data_point.py
 test/test_chart_ready_analytics.py
-test/test_chat_api.py
-test/test_chat_request.py
 test/test_chat_response.py
 test/test_chat_workflow_config.py
 test/test_chat_workflow_request.py
 test/test_chat_workflow_template.py
 test/test_chat_workflow_templates_response.py
-test/test_chatter_schemas_chat_workflow_templates_response.py
-test/test_chatter_schemas_workflows_workflow_templates_response.py
 test/test_complexity_metrics.py
 test/test_conversation_create.py
 test/test_conversation_delete_response.py
@@ -624,7 +602,6 @@ test/test_jobs_api.py
 test/test_location_inner.py
 test/test_logout_response.py
 test/test_max_value.py
-test/test_mcp_status_response.py
 test/test_message_delete_response.py
 test/test_message_rating_response.py
 test/test_message_rating_update.py
@@ -651,7 +628,6 @@ test/test_password_change_response.py
 test/test_password_reset_confirm_response.py
 test/test_password_reset_request_response.py
 test/test_performance_metrics_response.py
-test/test_performance_stats_response.py
 test/test_plugin_action_response.py
 test/test_plugin_delete_response.py
 test/test_plugin_health_check_response.py
@@ -756,9 +732,9 @@ test/test_workflow_execution_response.py
 test/test_workflow_node.py
 test/test_workflow_node_data.py
 test/test_workflow_template_create.py
-test/test_workflow_template_info.py
 test/test_workflow_template_response.py
 test/test_workflow_template_update.py
+test/test_workflow_templates_response.py
 test/test_workflow_validation_response.py
 test/test_workflows_api.py
 tox.ini

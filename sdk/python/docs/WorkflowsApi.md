@@ -1117,7 +1117,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_workflow_templates_api_v1_workflows_templates_get**
-> ChatterSchemasWorkflowsWorkflowTemplatesResponse list_workflow_templates_api_v1_workflows_templates_get()
+> WorkflowTemplatesResponse list_workflow_templates_api_v1_workflows_templates_get()
 
 List Workflow Templates
 
@@ -1129,7 +1129,7 @@ List all workflow templates accessible to the current user.
 
 ```python
 import chatter_sdk
-from chatter_sdk.models.chatter_schemas_workflows_workflow_templates_response import ChatterSchemasWorkflowsWorkflowTemplatesResponse
+from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1171,7 +1171,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-[**ChatterSchemasWorkflowsWorkflowTemplatesResponse**](ChatterSchemasWorkflowsWorkflowTemplatesResponse.md)
+[**WorkflowTemplatesResponse**](WorkflowTemplatesResponse.md)
 
 ### Authorization
 

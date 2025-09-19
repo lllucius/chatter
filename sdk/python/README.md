@@ -160,13 +160,6 @@ Class | Method | HTTP request | Description
 *AuthenticationApi* | [**request_password_reset_api_v1_auth_password_reset_request_post**](docs/AuthenticationApi.md#request_password_reset_api_v1_auth_password_reset_request_post) | **POST** /api/v1/auth/password-reset/request | Request Password Reset
 *AuthenticationApi* | [**revoke_api_key_api_v1_auth_api_key_delete**](docs/AuthenticationApi.md#revoke_api_key_api_v1_auth_api_key_delete) | **DELETE** /api/v1/auth/api-key | Revoke Api Key
 *AuthenticationApi* | [**update_profile_api_v1_auth_me_put**](docs/AuthenticationApi.md#update_profile_api_v1_auth_me_put) | **PUT** /api/v1/auth/me | Update Profile
-*ChatApi* | [**chat_api_v1_chat_chat_post**](docs/ChatApi.md#chat_api_v1_chat_chat_post) | **POST** /api/v1/chat/chat | Chat
-*ChatApi* | [**chat_with_template_api_v1_chat_template_template_name_post**](docs/ChatApi.md#chat_with_template_api_v1_chat_template_template_name_post) | **POST** /api/v1/chat/template/{template_name} | Chat With Template
-*ChatApi* | [**get_available_tools_api_v1_chat_tools_available_get**](docs/ChatApi.md#get_available_tools_api_v1_chat_tools_available_get) | **GET** /api/v1/chat/tools/available | Get Available Tools
-*ChatApi* | [**get_mcp_status_api_v1_chat_mcp_status_get**](docs/ChatApi.md#get_mcp_status_api_v1_chat_mcp_status_get) | **GET** /api/v1/chat/mcp/status | Get Mcp Status
-*ChatApi* | [**get_performance_stats_api_v1_chat_performance_stats_get**](docs/ChatApi.md#get_performance_stats_api_v1_chat_performance_stats_get) | **GET** /api/v1/chat/performance/stats | Get Performance Stats
-*ChatApi* | [**get_workflow_templates_api_v1_chat_templates_get**](docs/ChatApi.md#get_workflow_templates_api_v1_chat_templates_get) | **GET** /api/v1/chat/templates | Get Workflow Templates
-*ChatApi* | [**streaming_chat_api_v1_chat_streaming_post**](docs/ChatApi.md#streaming_chat_api_v1_chat_streaming_post) | **POST** /api/v1/chat/streaming | Streaming Chat
 *ConversationsApi* | [**create_conversation_api_v1_conversations_post**](docs/ConversationsApi.md#create_conversation_api_v1_conversations_post) | **POST** /api/v1/conversations/ | Create Conversation
 *ConversationsApi* | [**delete_conversation_api_v1_conversations_conversation_id_delete**](docs/ConversationsApi.md#delete_conversation_api_v1_conversations_conversation_id_delete) | **DELETE** /api/v1/conversations/{conversation_id} | Delete Conversation
 *ConversationsApi* | [**delete_message_api_v1_conversations_conversation_id_messages_message_id_delete**](docs/ConversationsApi.md#delete_message_api_v1_conversations_conversation_id_messages_message_id_delete) | **DELETE** /api/v1/conversations/{conversation_id}/messages/{message_id} | Delete Message
@@ -362,8 +355,6 @@ Class | Method | HTTP request | Description
  - [AgentType](docs/AgentType.md)
  - [AgentUpdateRequest](docs/AgentUpdateRequest.md)
  - [AvailableProvidersResponse](docs/AvailableProvidersResponse.md)
- - [AvailableToolResponse](docs/AvailableToolResponse.md)
- - [AvailableToolsResponse](docs/AvailableToolsResponse.md)
  - [BackupListResponse](docs/BackupListResponse.md)
  - [BackupRequest](docs/BackupRequest.md)
  - [BackupResponse](docs/BackupResponse.md)
@@ -377,14 +368,11 @@ Class | Method | HTTP request | Description
  - [BulkToolServerOperation](docs/BulkToolServerOperation.md)
  - [ChartDataPoint](docs/ChartDataPoint.md)
  - [ChartReadyAnalytics](docs/ChartReadyAnalytics.md)
- - [ChatRequest](docs/ChatRequest.md)
  - [ChatResponse](docs/ChatResponse.md)
  - [ChatWorkflowConfig](docs/ChatWorkflowConfig.md)
  - [ChatWorkflowRequest](docs/ChatWorkflowRequest.md)
  - [ChatWorkflowTemplate](docs/ChatWorkflowTemplate.md)
  - [ChatWorkflowTemplatesResponse](docs/ChatWorkflowTemplatesResponse.md)
- - [ChatterSchemasChatWorkflowTemplatesResponse](docs/ChatterSchemasChatWorkflowTemplatesResponse.md)
- - [ChatterSchemasWorkflowsWorkflowTemplatesResponse](docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md)
  - [ComplexityMetrics](docs/ComplexityMetrics.md)
  - [ConversationCreate](docs/ConversationCreate.md)
  - [ConversationDeleteResponse](docs/ConversationDeleteResponse.md)
@@ -430,7 +418,6 @@ Class | Method | HTTP request | Description
  - [LocationInner](docs/LocationInner.md)
  - [LogoutResponse](docs/LogoutResponse.md)
  - [MaxValue](docs/MaxValue.md)
- - [McpStatusResponse](docs/McpStatusResponse.md)
  - [MessageDeleteResponse](docs/MessageDeleteResponse.md)
  - [MessageRatingResponse](docs/MessageRatingResponse.md)
  - [MessageRatingUpdate](docs/MessageRatingUpdate.md)
@@ -456,7 +443,6 @@ Class | Method | HTTP request | Description
  - [PasswordResetConfirmResponse](docs/PasswordResetConfirmResponse.md)
  - [PasswordResetRequestResponse](docs/PasswordResetRequestResponse.md)
  - [PerformanceMetricsResponse](docs/PerformanceMetricsResponse.md)
- - [PerformanceStatsResponse](docs/PerformanceStatsResponse.md)
  - [PluginActionResponse](docs/PluginActionResponse.md)
  - [PluginDeleteResponse](docs/PluginDeleteResponse.md)
  - [PluginHealthCheckResponse](docs/PluginHealthCheckResponse.md)
@@ -556,9 +542,9 @@ Class | Method | HTTP request | Description
  - [WorkflowNode](docs/WorkflowNode.md)
  - [WorkflowNodeData](docs/WorkflowNodeData.md)
  - [WorkflowTemplateCreate](docs/WorkflowTemplateCreate.md)
- - [WorkflowTemplateInfo](docs/WorkflowTemplateInfo.md)
  - [WorkflowTemplateResponse](docs/WorkflowTemplateResponse.md)
  - [WorkflowTemplateUpdate](docs/WorkflowTemplateUpdate.md)
+ - [WorkflowTemplatesResponse](docs/WorkflowTemplatesResponse.md)
  - [WorkflowValidationResponse](docs/WorkflowValidationResponse.md)
 
 

@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowValidationResponse, chatter__schemas__workflows__WorkflowTemplatesResponse } from '../models/index';
+import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -86,7 +86,7 @@ export class WorkflowsApi extends BaseAPI {
   /**List Workflow Templates
    * List all workflow templates accessible to the current user.
    */
-  public async listWorkflowTemplatesApiV1WorkflowsTemplates(): Promise<chatter__schemas__workflows__WorkflowTemplatesResponse> {
+  public async listWorkflowTemplatesApiV1WorkflowsTemplates(): Promise<WorkflowTemplatesResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/templates`,
       method: 'GET' as HTTPMethod,
@@ -95,7 +95,7 @@ export class WorkflowsApi extends BaseAPI {
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<chatter__schemas__workflows__WorkflowTemplatesResponse>;
+    return response.json() as Promise<WorkflowTemplatesResponse>;
   }
   /**Create Workflow Template
    * Create a new workflow template.

@@ -18,22 +18,19 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
 from typing import Any, ClassVar, Dict, List
+from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkflowTemplateInfo(BaseModel):
+class WorkflowTemplatesResponse(BaseModel):
     """
-    Schema for workflow template information.
+    Schema for workflow templates list response.
     """ # noqa: E501
-    name: StrictStr = Field(description="Template name")
-    workflow_type: StrictStr = Field(description="Workflow type")
-    description: StrictStr = Field(description="Template description")
-    required_tools: List[StrictStr] = Field(description="Required tools")
-    required_retrievers: List[StrictStr] = Field(description="Required retrievers")
-    default_params: Dict[str, Any] = Field(description="Default parameters")
-    __properties: ClassVar[List[str]] = ["name", "workflow_type", "description", "required_tools", "required_retrievers", "default_params"]
+    templates: List[WorkflowTemplateResponse] = Field(description="Workflow templates")
+    total_count: StrictInt = Field(description="Total number of templates")
+    __properties: ClassVar[List[str]] = ["templates", "total_count"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -53,7 +50,7 @@ class WorkflowTemplateInfo(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkflowTemplateInfo from a JSON string"""
+        """Create an instance of WorkflowTemplatesResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -74,11 +71,18 @@ class WorkflowTemplateInfo(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in templates (list)
+        _items = []
+        if self.templates:
+            for _item_templates in self.templates:
+                if _item_templates:
+                    _items.append(_item_templates.to_dict())
+            _dict['templates'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkflowTemplateInfo from a dict"""
+        """Create an instance of WorkflowTemplatesResponse from a dict"""
         if obj is None:
             return None
 
@@ -86,12 +90,8 @@ class WorkflowTemplateInfo(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "name": obj.get("name"),
-            "workflow_type": obj.get("workflow_type"),
-            "description": obj.get("description"),
-            "required_tools": obj.get("required_tools"),
-            "required_retrievers": obj.get("required_retrievers"),
-            "default_params": obj.get("default_params")
+            "templates": [WorkflowTemplateResponse.from_dict(_item) for _item in obj["templates"]] if obj.get("templates") is not None else None,
+            "total_count": obj.get("total_count")
         })
         return _obj
 

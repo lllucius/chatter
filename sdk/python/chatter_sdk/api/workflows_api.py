@@ -23,7 +23,6 @@ from typing_extensions import Annotated
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse
-from chatter_sdk.models.chatter_schemas_workflows_workflow_templates_response import ChatterSchemasWorkflowsWorkflowTemplatesResponse
 from chatter_sdk.models.node_type_response import NodeTypeResponse
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate
@@ -35,6 +34,7 @@ from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResp
 from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate
 from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse
 from chatter_sdk.models.workflow_template_update import WorkflowTemplateUpdate
+from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse
 from chatter_sdk.models.workflow_validation_response import WorkflowValidationResponse
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
@@ -3264,7 +3264,7 @@ class WorkflowsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ChatterSchemasWorkflowsWorkflowTemplatesResponse:
+    ) -> WorkflowTemplatesResponse:
         """List Workflow Templates
 
         List all workflow templates accessible to the current user.
@@ -3299,7 +3299,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatterSchemasWorkflowsWorkflowTemplatesResponse",
+            '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3327,7 +3327,7 @@ class WorkflowsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[ChatterSchemasWorkflowsWorkflowTemplatesResponse]:
+    ) -> ApiResponse[WorkflowTemplatesResponse]:
         """List Workflow Templates
 
         List all workflow templates accessible to the current user.
@@ -3362,7 +3362,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatterSchemasWorkflowsWorkflowTemplatesResponse",
+            '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3425,7 +3425,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "ChatterSchemasWorkflowsWorkflowTemplatesResponse",
+            '200': "WorkflowTemplatesResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

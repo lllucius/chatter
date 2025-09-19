@@ -1,9 +1,9 @@
 /**
- * Generated from OpenAPI schema: chatter__schemas__workflows__WorkflowTemplatesResponse
+ * Generated from OpenAPI schema: WorkflowTemplatesResponse
  */
 import { WorkflowTemplateResponse } from './WorkflowTemplateResponse';
 
-export interface chatter__schemas__workflows__WorkflowTemplatesResponse {
+export interface WorkflowTemplatesResponse {
   /** Workflow templates */
   templates: WorkflowTemplateResponse[];
   /** Total number of templates */

@@ -1,280 +1,37 @@
-INFO:     127.0.0.1:56073 - "GET /api/v1/conversations/?limit=10&offset=0 HTTP/1.1" 500 Internal Server Error
-ERROR:    Exception in ASGI application
-  + Exception Group Traceback (most recent call last):
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 77, in collapse_excgroups
-  |     yield
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 183, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  |   File "/home/yam/.local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 772, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    |     result = await app(  # type: ignore[func-returns-value]
-    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    |     return await self.app(scope, receive, send)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    |     await self.app(scope, receive, _send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    |     await self.simple_response(scope, receive, send, request_headers=headers)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    |     await responder(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    |     await self.app(scope, receive, self.send_with_compression)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 329, in add_security_headers
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    |     await route.handle(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    |     response = await f(request)
-    |                ^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 302, in app
-    |     raw_response = await run_endpoint_function(
-    |                    ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
-    |     return await dependant.call(**values)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 617, in wrapper
-    |     return await func(*args, **kwargs)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/api/conversations.py", line 145, in list_conversations
-    |     return await handler.list_conversations(
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/api/resources.py", line 56, in list_conversations
-    |     conversations, total = (
-    |     ^^^^^^^^^^^^^^^^^^^^
-    | ValueError: too many values to unpack (expected 2)
-    +------------------------------------
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    await self.simple_response(scope, receive, send, request_headers=headers)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    await responder(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    await self.app(scope, receive, self.send_with_compression)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 329, in add_security_headers
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 302, in app
-    raw_response = await run_endpoint_function(
-                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 213, in run_endpoint_function
-    return await dependant.call(**values)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 617, in wrapper
-    return await func(*args, **kwargs)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/api/conversations.py", line 145, in list_conversations
-    return await handler.list_conversations(
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/api/resources.py", line 56, in list_conversations
-    conversations, total = (
-    ^^^^^^^^^^^^^^^^^^^^
-ValueError: too many values to unpack (expected 2)
+Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-59746fcf-3e14-461e-bff7-96574f04b298', 'json_data': {'messages': [{'content': 'what is the weather in denver', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'MvfykoGiT8XiOm3VxC0FW4H7eKKfOKXk', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-19T15:10:53.374593', 'role': 'tool', 'tool_call_id': 'MvfykoGiT8XiOm3VxC0FW4H7eKKfOKXk'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'gcdgwCvhIdb4XzatWF7carzVHh0lG0vb', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather in Denver"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'gcdgwCvhIdb4XzatWF7carzVHh0lG0vb'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': '7ckkIO1yFb6v1zOhI3rf2nZDBPHiGk6n', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather in Denver, CO"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': '7ckkIO1yFb6v1zOhI3rf2nZDBPHiGk6n'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pcVKeZUS5gNNXWBRPwMkgJCBFc6bPg9U', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather in Denver, USA"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'pcVKeZUS5gNNXWBRPwMkgJCBFc6bPg9U'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'ZkKs19EvH1pmtI2sDbFJwc1KKqgW6GeY', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather in Denver"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'ZkKs19EvH1pmtI2sDbFJwc1KKqgW6GeY'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'dLdsB5XJsvnxsCf73YXvQgvumdtebEqt', 'function': {'name': 'calculator', 'arguments': '{"expression": "current weather in Denver, Colorado"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'dLdsB5XJsvnxsCf73YXvQgvumdtebEqt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'zUbVvxrh6gjzMwHdm2O3HtFU7UzHdNO1', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather today in Denver, CO"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'zUbVvxrh6gjzMwHdm2O3HtFU7UzHdNO1'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'OaGhlaueA7BLEGcsoPP6efZJB8365mQa', 'function': {'name': 'calculator', 'arguments': '{"expression": "denver weather"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'OaGhlaueA7BLEGcsoPP6efZJB8365mQa'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'O3ry8TKPOXUY6yMOwGCD1yxSV5rxfvYB', 'function': {'name': 'calculator', 'arguments': '{"expression": "weather in Denver, Colorado, today"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'O3ry8TKPOXUY6yMOwGCD1yxSV5rxfvYB'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'mgQXxMUdNgknWrx4emvnyMMv3DKriQd8', 'function': {'name': 'calculator', 'arguments': '{"expression": "high and low temperature in Denver today"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'mgQXxMUdNgknWrx4emvnyMMv3DKriQd8'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'SqlToakJP32ITtXUtqTlKUjVlTl2rmXf', 'function': {'name': 'calculator', 'arguments': '{"expression": "Denver weather conditions"}'}}]}, {'content': 'Error: Invalid characters in expression', 'role': 'tool', 'tool_call_id': 'SqlToakJP32ITtXUtqTlKUjVlTl2rmXf'}], 'model': 'gpt-4', 'max_completion_tokens': 4096, 'stream': False, 'temperature': 0.7, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'descr
+Sending HTTP Request: POST http://localhost:8080/v1/chat/completions
+send_request_headers.started request=<Request [b'POST']>
+send_request_headers.complete
+send_request_body.started request=<Request [b'POST']>
+send_request_body.complete
+receive_response_headers.started request=<Request [b'POST']>
+receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'7544'), (b'Access-Control-Allow-Origin', b'')])
+HTTP Request: POST http://localhost:8080/v1/chat/completions "HTTP/1.1 200 OK"
+receive_response_body.started request=<Request [b'POST']>
+receive_response_body.complete
+response_closed.started
+response_closed.complete
+HTTP Response: POST http://localhost:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '7544', 'access-control-allow-origin': ''})
+request_id: None
+2025-09-19T20:11:22.131449Z [info     ] Ended workflow tracking        [chatter.core.workflow_limits] correlation_id=01K5HSKM05EDY2RJVFEC03SD2M errors_count=0 memory_used_mb=0.0 steps_completed=0 tokens_used=0 total_time_seconds=33.405160427093506 user_id=01K58A9TXQB9VPVJXARP2T14F8 workflow_id=01K5HSKM05EDY2RJVFEC03SD2M_tools
+2025-09-19T20:11:22.131627Z [error    ] Failed to execute chat workflow: Tools workflow execution failed: Recursion limit of 25 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/GRAPH_RECURSION_LIMIT [chatter.api.workflows] correlation_id=01K5HSKM05EDY2RJVFEC03SD2M
+2025-09-19T20:11:22.132891Z [error    ] Problem exception              [chatter.main] correlation_id=01K5HSKM05EDY2RJVFEC03SD2M detail=Failed to execute chat workflow: Tools workflow execution failed: Recursion limit of 25 reached without hitting a stop condition. You can increase the limit by setting the `recursion_limit` config key.
+For troubleshooting, visit: https://python.langchain.com/docs/troubleshooting/errors/GRAPH_RECURSION_LIMIT method=POST status_code=500 title=Internal Server Error url=http://localhost:8000/api/v1/workflows/execute/chat
+2025-09-19T20:11:22.133732Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K5HSKM05EDY2RJVFEC03SD2M duration=33.42730903625488 duration_ms=33427.30903625488 method=POST rate_limited=False request_body={"message":"what is the weather in denver","profile_id":"01K58A9TZ81G5F8V0CR31PN3ZD","workflow_config":{"enable_retrieval":false,"enable_tools":true,"enable_memory":true,"enable_web_search":false,"llm_config":{"temperature":0.1,"max_tokens":2048},"tool_config":{"enabled":true,"allowed_tools":null,"max_tool_calls":3,"parallel_tool_calls":false,"tool_timeout_ms":15000}},"workflow_template_name":"function_chat"} request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '412', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1OEE5VFhRQjlWUFZKWEFSUDJUMTRGOCIsImp0aSI6IjAxSzVIU0pNUDlYOTBQUlo2N1gwUDJLUFcwIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODMxMjYxNiwic2Vzc2lvbl9pZCI6IjAxSzVIOFlSNzQ3QUFCMjhRUDREWUdCODlFIiwiZXhwIjoxNzU4MzE0NDE2fQ.Y5OkDfV4EwvrPLQaH74p_5rVc4j6aEMuBN6rhcE8Jn8', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1OEE5VFhRQjlWUFZKWEFSUDJUMTRGOCIsImp0aSI6IjAxSzVIU0pNUDlYOTBQUlo2N1gwUDJLUFcwIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTgzMTI2MTYsInNlc3Npb25faWQiOiIwMUs1SDhZUjc0N0FBQjI4UVA0RFlHQjg5RSIsImV4cCI6MTc1ODkxNzQxNn0.iZ3hggCrmZ--tTXB5k-62Zcw-6F0YkaXbre6fQCSHr4'} response_body=None response_headers={
+    "content-type": "application/problem+json",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block",
+    "strict-transport-security": "max-age=31536000; includeSubDomains",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "vary": "Accept-Encoding",
+    "content-encoding": "gzip",
+    "x-correlation-id": "01K5HSKM05EDY2RJVFEC03SD2M",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1758312708",
+    "x-ratelimit-window": "60"
+} status_code=500 url=http://localhost:8000/api/v1/workflows/execute/chat
+2025-09-19T20:11:22.133935Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/execute/chat response_time_ms=33427.30903625488
+INFO:     127.0.0.1:65382 - "POST /api/v1/workflows/execute/chat HTTP/1.1" 500 Internal Server Error

@@ -18,7 +18,7 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
-import type { ConversationResponse, ChatRequest } from 'chatter-sdk';
+import type { ConversationResponse, ChatRequest, ChatResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
@@ -348,12 +348,70 @@ const ChatPage: React.FC = () => {
     async (workflowRequest: any, isRegeneration: boolean) => {
       try {
         // Get the streaming response from workflow API
-        const stream = await sendWorkflowMessage(workflowRequest, true);
+        // Note: Current SDK doesn't properly support streaming, this needs to be fixed
+        const streamResponse = await sendWorkflowMessage(workflowRequest, true);
+        
+        // For now, handle as a regular response until streaming is properly implemented
+        if (streamResponse && typeof streamResponse === 'object' && 'message' in streamResponse) {
+          const response = streamResponse as ChatResponse;
+          
+          // Create assistant message from response
+          const assistantMessage: ChatMessage = {
+            id: `assistant-${Date.now()}`,
+            role: 'assistant',
+            content: response.message.content,
+            timestamp: new Date(),
+            metadata: {
+              model: response.message.model_used || undefined,
+              tokens: response.message.total_tokens || undefined,
+              processingTime: response.message.response_time_ms || undefined,
+              workflow: {
+                stage: 'Complete',
+                currentStep: 1,
+                totalSteps: 1,
+                stepDescriptions: ['Message generated'],
+              },
+            },
+          };
 
+          if (isRegeneration) {
+            // For regeneration, replace the last assistant message
+            setMessages((prev) => {
+              const newMessages = [...prev];
+              let lastAssistantIndex = -1;
+              for (let i = newMessages.length - 1; i >= 0; i--) {
+                if (newMessages[i].role === 'assistant') {
+                  lastAssistantIndex = i;
+                  break;
+                }
+              }
+              if (lastAssistantIndex !== -1) {
+                newMessages[lastAssistantIndex] = {
+                  ...newMessages[lastAssistantIndex],
+                  content: assistantMessage.content,
+                  metadata: assistantMessage.metadata
+                };
+              }
+              return newMessages;
+            });
+          } else {
+            // Add new assistant message
+            setMessages((prev) => [...prev, assistantMessage]);
+          }
+          
+          return;
+        }
+        
+        // Legacy streaming code (commented out until SDK supports streaming properly)
+        /*
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();
         const reader = stream.getReader();
 
+        
+        // Legacy streaming code (commented out until SDK supports streaming properly)
+        // This would need to be rewritten to use proper streaming API when available
+        /*
         // Create initial assistant message for streaming
         const assistantMessageId = `assistant-${Date.now()}`;
         let streamedContent = '';
@@ -502,8 +560,12 @@ const ChatPage: React.FC = () => {
 
         // Focus input after streaming is complete
         focusInput();
+        */
+        
+        // For now, focus input after non-streaming completion  
+        focusInput();
       } catch (error) {
-        // Handle streaming errors by showing an error message
+        // Handle errors by showing an error message
         const errorMessage: ChatMessage = {
           id: `assistant-error-${Date.now()}`,
           role: 'assistant',
@@ -515,7 +577,7 @@ const ChatPage: React.FC = () => {
               stage: 'Error',
               currentStep: 0,
               totalSteps: 1,
-              stepDescriptions: ['Error occurred during workflow streaming'],
+              stepDescriptions: ['Error occurred during workflow processing'],
             },
           },
         };
@@ -541,7 +603,7 @@ const ChatPage: React.FC = () => {
 
         handleError(error, {
           source: 'ChatPage.handleWorkflowStreamingResponse',
-          operation: 'stream workflow chat response',
+          operation: 'process workflow chat response',
         });
       }
     },
@@ -575,8 +637,8 @@ const ChatPage: React.FC = () => {
                 document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
                 workflow_config: {
                   ...getEffectiveConfig(),
-                  model_config: {
-                    ...getEffectiveConfig().model_config,
+                  llm_config: {
+                    ...getEffectiveConfig().llm_config,
                     temperature,
                     max_tokens: maxTokens,
                   },
@@ -592,14 +654,14 @@ const ChatPage: React.FC = () => {
             );
 
             // Send message to workflow API
-            let response;
+            let response: ChatResponse;
             if (streamingEnabled) {
               // Use streaming workflow endpoint
               await handleWorkflowStreamingResponse(workflowRequest, true);
               return; // Streaming handling is complete
             } else {
               // Use non-streaming workflow endpoint
-              response = await sendWorkflowMessage(workflowRequest, false);
+              response = await sendWorkflowMessage(workflowRequest, false) as ChatResponse;
             }
 
             // Validate response structure
@@ -778,8 +840,8 @@ const ChatPage: React.FC = () => {
             // Merge with effective workflow configuration
             workflow_config: {
               ...getEffectiveConfig(),
-              model_config: {
-                ...getEffectiveConfig().model_config,
+              llm_config: {
+                ...getEffectiveConfig().llm_config,
                 temperature,
                 max_tokens: maxTokens,
               },
@@ -795,14 +857,14 @@ const ChatPage: React.FC = () => {
         );
 
         // Send message to workflow API
-        let response;
+        let response: ChatResponse;
         if (streamingEnabled) {
           // Use streaming workflow endpoint
           await handleWorkflowStreamingResponse(workflowRequest, isRegeneration);
           return; // Streaming handling is complete
         } else {
           // Use non-streaming workflow endpoint
-          response = await sendWorkflowMessage(workflowRequest, false);
+          response = await sendWorkflowMessage(workflowRequest, false) as ChatResponse;
         }
 
         // Validate response structure

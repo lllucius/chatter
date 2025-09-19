@@ -1,63 +1,15 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
+import { 
+  ChatWorkflowConfig, 
+  ChatWorkflowRequest, 
+  ChatWorkflowTemplate,
+  ChatWorkflowTemplatesResponse
+} from 'chatter-sdk';
 
-// New workflow-based chat types
-export interface ChatWorkflowConfig {
-  enable_retrieval: boolean;
-  enable_tools: boolean;
-  enable_memory: boolean;
-  enable_web_search?: boolean;
-  llm_config?: {
-    provider?: string;
-    model?: string;
-    temperature: number;
-    max_tokens: number;
-    top_p?: number;
-    presence_penalty?: number;
-    frequency_penalty?: number;
-  };
-  retrieval_config?: {
-    enabled: boolean;
-    max_documents: number;
-    similarity_threshold: number;
-    document_ids?: string[];
-    collections?: string[];
-    rerank: boolean;
-  };
-  tool_config?: {
-    enabled: boolean;
-    allowed_tools?: string[];
-    max_tool_calls: number;
-    parallel_tool_calls: boolean;
-    tool_timeout_ms: number;
-  };
-}
-
-export interface ChatWorkflowRequest {
-  message: string;
-  conversation_id?: string;
-  workflow_config?: ChatWorkflowConfig;
-  workflow_definition_id?: string;
-  workflow_template_name?: string;
-  profile_id?: string;
-  provider?: string;
-  temperature?: number;
-  max_tokens?: number;
-  context_limit?: number;
-  document_ids?: string[];
-  system_prompt_override?: string;
-}
-
-export interface ChatWorkflowTemplate {
-  name: string;
-  description: string;
-  config: ChatWorkflowConfig;
-  estimated_tokens?: number;
-  estimated_cost?: number;
-  complexity_score: number;
-  use_cases: string[];
-}
+// Re-export types for components
+export type { ChatWorkflowConfig, ChatWorkflowRequest, ChatWorkflowTemplate } from 'chatter-sdk';
 
 export const useWorkflowChat = () => {
   const [workflowTemplates, setWorkflowTemplates] = useState<Record<string, ChatWorkflowTemplate>>({});

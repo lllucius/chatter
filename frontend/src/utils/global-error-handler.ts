@@ -70,6 +70,20 @@ class GlobalErrorHandler {
       return;
     }
 
+    // Filter out Chrome extension errors that don't affect the app
+    if (this.isChromeExtensionError(message, error, filename)) {
+      // Only log in development mode for debugging purposes
+      if (process.env.NODE_ENV === 'development') {
+        // eslint-disable-next-line no-console
+        console.debug(
+          '[Global Error Handler] Chrome extension error (filtered):',
+          message,
+          filename
+        );
+      }
+      return;
+    }
+
     errorHandler.handleError(
       error || new Error(message),
       {
@@ -180,6 +194,37 @@ class GlobalErrorHandler {
 
     if (error && error.message && resizeObserverPattern.test(error.message)) {
       return true;
+    }
+
+    return false;
+  }
+
+  /**
+   * Check if an error is from a Chrome extension that should be filtered out
+   */
+  private isChromeExtensionError(message: string, error?: Error, filename?: string): boolean {
+    // Check for chrome-extension URLs or typical extension error patterns
+    const chromeExtensionPatterns = [
+      /chrome-extension:\/\//i,
+      /Cannot read properties of undefined \(reading 'isCheckout'\)/i,
+      /Unchecked runtime\.lastError/i,
+      /message channel closed before a response was received/i,
+      /extension.*content.*script/i,
+    ];
+
+    // Check filename for extension scripts
+    if (filename && filename.includes('chrome-extension://')) {
+      return true;
+    }
+
+    // Check message against patterns
+    for (const pattern of chromeExtensionPatterns) {
+      if (message && pattern.test(message)) {
+        return true;
+      }
+      if (error && error.message && pattern.test(error.message)) {
+        return true;
+      }
     }
 
     return false;

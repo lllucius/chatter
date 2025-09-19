@@ -59,6 +59,41 @@ class ErrorHandler {
   }
 
   /**
+   * Check if error is a CORS error
+   */
+  private isCorsError(error: unknown): boolean {
+    const errorMessage = (error as Error)?.message || String(error);
+    return (
+      errorMessage.includes('CORS') ||
+      errorMessage.includes('blocked by CORS policy') ||
+      errorMessage.includes('Access to fetch') ||
+      errorMessage.includes('No \'Access-Control-Allow-Origin\'')
+    );
+  }
+
+  /**
+   * Check if error is a network/connection error
+   */
+  private isNetworkError(error: unknown): boolean {
+    const errorMessage = (error as Error)?.message || String(error);
+    return (
+      errorMessage.includes('Failed to fetch') ||
+      errorMessage.includes('Network Error') ||
+      errorMessage.includes('net::ERR_FAILED') ||
+      (error as { code?: string })?.code === 'NETWORK_ERROR' ||
+      (error as { name?: string })?.name === 'NetworkError'
+    );
+  }
+
+  /**
+   * Check if error is a server error (5xx)
+   */
+  private isServerError(error: unknown): boolean {
+    const status = (error as ErrorResponse)?.response?.status || (error as { status?: number })?.status;
+    return status !== undefined && status >= 500 && status < 600;
+  }
+
+  /**
    * Extract a meaningful error message from various error types
    */
   private extractErrorMessage(
@@ -84,7 +119,21 @@ class ErrorHandler {
         return 'Too many requests. Please wait a moment before trying again.';
       }
 
+      // Handle specific error types
+      if (this.isCorsError(error)) {
+        return 'Cannot connect to the server. Please check your connection and try again.';
+      }
+
+      if (this.isNetworkError(error)) {
+        return 'Network error. Please check your internet connection and try again.';
+      }
+
+      if (this.isServerError(error)) {
+        return 'Server error. Please try again in a moment.';
+      }
+
       // Try to extract problem detail information
+      const errorResponse = error as ErrorResponse;
       const problemDetail = errorResponse?.response?.data as ProblemDetail;
 
       if (problemDetail && typeof problemDetail === 'object') {
@@ -194,18 +243,23 @@ class ErrorHandler {
       if (isDev) {
         // In development, show full error details
         const errorDetails = this.extractErrorDetails(error, context);
+        // eslint-disable-next-line no-console
         console.error(`[Error Handler] ${context.source}:`, error);
+        // eslint-disable-next-line no-console
         console.error('Full Error Details:\n', errorDetails);
       } else {
         // In production, log minimal information
+        // eslint-disable-next-line no-console
         console.error(`[Error] ${context.source}: ${userMessage}`);
       }
     }
 
     // Show toast notification if requested
     if (showToast) {
-      // Don't show toast for rate limit errors in production to reduce noise
+      // Don't show toast for rate limit errors or repeated network errors in production to reduce noise
       const isRateLimit = this.isRateLimitError(error);
+      const isCors = this.isCorsError(error);
+      const isNetwork = this.isNetworkError(error);
       
       if (isDev) {
         // In development, show detailed error in toast
@@ -213,13 +267,19 @@ class ErrorHandler {
           context.operation ? `\nOperation: ${context.operation}` : ''
         }`;
         toastService.error(devMessage, { autoClose: false });
-      } else if (!isRateLimit) {
-        // In production, show user-friendly message (but skip rate limit errors)
+      } else if (!isRateLimit && !isCors && !isNetwork) {
+        // In production, show user-friendly message (but skip common network errors)
         const prodMessage = this.generateProductionMessage(
           userMessage,
           context
         );
         toastService.error(prodMessage);
+      } else if (isCors || isNetwork) {
+        // For network/CORS errors, show a simplified message less frequently
+        toastService.error(
+          'Connection issue. Please check your network and try again.',
+          { autoClose: 3000 }
+        );
       }
     }
 

@@ -148,10 +148,14 @@ describe('ChatPage Improvements', () => {
           if (key === 'chatter_temperature') return '0.7';
           if (key === 'chatter_maxTokens') return '2048';
           if (key === 'chatter_enableRetrieval') return 'true';
+          if (key === 'chatter_enableTools') return 'false';
+          if (key === 'chatter_customPromptText') return '';
+          if (key === 'chatter_currentConversation') return null;
           if (key === 'chatter_rightDrawerOpen') return 'true';
           return null;
         }),
         setItem: vi.fn(),
+        removeItem: vi.fn(),
       },
       writable: true,
     });
@@ -188,7 +192,8 @@ describe('ChatPage Improvements', () => {
       // Check that token and timing stats are displayed
       await waitFor(() => {
         expect(screen.getByText('150 tokens')).toBeInTheDocument();
-        expect(screen.getByText('1500ms')).toBeInTheDocument();
+        expect(screen.getByText('1.50s')).toBeInTheDocument(); // Updated to seconds format
+        expect(screen.getByText('100 tok/s')).toBeInTheDocument(); // Should show tokens per second
       });
 
       // Check that the model is displayed

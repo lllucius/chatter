@@ -16,15 +16,17 @@ from chatter.schemas.chat import (
     MessageRatingUpdate,
     MessageResponse,
 )
-from chatter.services.chat import ChatService
+from chatter.services.conversation import ConversationService
+from chatter.services.message import MessageService
 from chatter.utils.problem import NotFoundProblem
 
 
 class ConversationResourceHandler:
     """Resource handler for conversation CRUD operations."""
 
-    def __init__(self, chat_service: ChatService):
-        self.chat_service = chat_service
+    def __init__(self, conversation_service: ConversationService, message_service: MessageService):
+        self.conversation_service = conversation_service
+        self.message_service = message_service
 
     async def create_conversation(
         self,
@@ -32,7 +34,7 @@ class ConversationResourceHandler:
         current_user: User,
     ) -> ConversationResponse:
         """Create a new conversation."""
-        conversation = await self.chat_service.create_conversation(
+        conversation = await self.conversation_service.create_conversation(
             current_user.id, conversation_data
         )
         return ConversationResponse.model_validate(conversation)
@@ -52,7 +54,7 @@ class ConversationResourceHandler:
     ) -> ConversationListResponse:
         """List conversations for current user with filters."""
         conversations, total = (
-            await self.chat_service.list_conversations(
+            await self.conversation_service.list_conversations(
                 user_id=current_user.id,
                 limit=limit,
                 offset=offset,
@@ -83,7 +85,7 @@ class ConversationResourceHandler:
         include_messages: bool = True,
     ) -> ConversationWithMessages:
         """Get conversation details with optional messages."""
-        conversation = await self.chat_service.get_conversation(
+        conversation = await self.conversation_service.get_conversation(
             conversation_id,
             current_user.id,
             include_messages=include_messages,
@@ -130,7 +132,7 @@ class ConversationResourceHandler:
     ) -> ConversationResponse:
         """Update a conversation."""
         try:
-            conversation = await self.chat_service.update_conversation(
+            conversation = await self.conversation_service.update_conversation(
                 conversation_id, current_user.id, update_data
             )
             return ConversationResponse.model_validate(conversation)
@@ -147,7 +149,7 @@ class ConversationResourceHandler:
     ) -> ConversationDeleteResponse:
         """Delete a conversation."""
         try:
-            await self.chat_service.delete_conversation(
+            await self.conversation_service.delete_conversation(
                 conversation_id, current_user.id
             )
             return ConversationDeleteResponse(
@@ -163,8 +165,9 @@ class ConversationResourceHandler:
 class MessageResourceHandler:
     """Resource handler for message CRUD operations."""
 
-    def __init__(self, chat_service: ChatService):
-        self.chat_service = chat_service
+    def __init__(self, conversation_service: ConversationService, message_service: MessageService):
+        self.conversation_service = conversation_service
+        self.message_service = message_service
 
     async def get_conversation_messages(
         self,
@@ -174,7 +177,7 @@ class MessageResourceHandler:
         offset: int,
     ) -> list[MessageResponse]:
         """Get messages from a conversation."""
-        messages = await self.chat_service.get_conversation_messages(
+        messages = await self.message_service.get_conversation_messages(
             conversation_id, current_user.id, limit, offset
         )
         return [
@@ -198,7 +201,7 @@ class MessageResourceHandler:
     ) -> MessageDeleteResponse:
         """Delete a message from a conversation."""
         try:
-            await self.chat_service.delete_message(
+            await self.message_service.delete_message(
                 conversation_id, message_id, current_user.id
             )
             return MessageDeleteResponse(
@@ -227,7 +230,7 @@ class MessageResourceHandler:
 
         try:
             updated_message = (
-                await self.chat_service.update_message_rating(
+                await self.message_service.update_message_rating(
                     conversation_id,
                     message_id,
                     current_user.id,

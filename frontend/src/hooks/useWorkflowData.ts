@@ -24,7 +24,7 @@ export const useWorkflowData = () => {
     try {
       setLoading(true);
       const response =
-        await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsWorkflowsTemplates();
+        await getSDK().workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
       setTemplates(response.templates || []);
     } catch (error) {
       handleError(error, {
@@ -70,7 +70,7 @@ export const useWorkflowData = () => {
     try {
       setLoading(true);
       const newTemplate =
-        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsWorkflowsTemplates(
+        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
           templateData
         );
       setTemplates((prev) => [newTemplate, ...prev]);
@@ -95,7 +95,7 @@ export const useWorkflowData = () => {
           input_data: input
         };
         const execution =
-          await getSDK().workflows.executeWorkflowApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecute(
+          await getSDK().workflows.executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(
             workflowId,
             requestData
           );

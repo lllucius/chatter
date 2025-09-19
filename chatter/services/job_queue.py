@@ -1041,16 +1041,6 @@ async def document_processing_job(
                 "status": "processed",
                 "success": True,
                 }
-            else:
-                logger.error(
-                    f"Document {document_id} processing failed in background"
-                )
-                return {
-                    "document_id": document_id,
-                    "status": "failed",
-                    "success": False,
-                    "error": "Processing failed",
-                }
 
     except Exception as e:
         logger.error(

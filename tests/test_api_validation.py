@@ -3,40 +3,7 @@
 import pytest
 from ulid import ULID
 
-from chatter.api.chat import _map_workflow_type
 from chatter.utils.problem import BadRequestProblem
-
-
-class TestWorkflowMapping:
-    """Test workflow type mapping functionality."""
-
-    def test_valid_workflow_types(self):
-        """Test mapping of valid workflow types."""
-        assert _map_workflow_type("plain") == "basic"
-        assert _map_workflow_type("rag") == "rag"
-        assert _map_workflow_type("tools") == "tools"
-        assert _map_workflow_type("full") == "full"
-
-    def test_case_insensitive_workflow_types(self):
-        """Test case-insensitive workflow mapping."""
-        assert _map_workflow_type("PLAIN") == "basic"
-        assert _map_workflow_type("Plain") == "basic"
-        assert _map_workflow_type("RAG") == "rag"
-        assert _map_workflow_type("Tools") == "tools"
-
-    def test_none_workflow_type(self):
-        """Test None workflow type defaults to basic."""
-        assert _map_workflow_type(None) == "basic"
-
-    def test_empty_workflow_type(self):
-        """Test empty workflow type defaults to basic."""
-        assert _map_workflow_type("") == "basic"
-        assert _map_workflow_type("   ") == "basic"
-
-    def test_invalid_workflow_type(self):
-        """Test invalid workflow type defaults to basic."""
-        assert _map_workflow_type("invalid") == "basic"
-        assert _map_workflow_type("unknown") == "basic"
 
 
 class TestULIDValidation:

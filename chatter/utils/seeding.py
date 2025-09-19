@@ -34,7 +34,6 @@ from chatter.models.user import User
 from chatter.models.workflow import (
     TemplateCategory,
     WorkflowTemplate,
-    WorkflowType,
 )
 from chatter.utils.database import DatabaseManager
 from chatter.utils.logging import get_logger
@@ -873,7 +872,7 @@ Keep the summary {length} and focused on {focus_area}.""",
         templates_data = [
             {
                 "name": "general_chat",
-                "workflow_type": WorkflowType.PLAIN,
+                "workflow_type": "simple_chat",
                 "category": TemplateCategory.GENERAL,
                 "description": "General conversation assistant",
                 "default_params": {
@@ -897,7 +896,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "code_assistant",
-                "workflow_type": WorkflowType.TOOLS,
+                "workflow_type": "function_chat",
                 "category": TemplateCategory.PROGRAMMING,
                 "description": "Programming assistant with code tools",
                 "default_params": {
@@ -1001,7 +1000,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "data_analyst",
-                "workflow_type": WorkflowType.TOOLS,
+                "workflow_type": "function_chat",
                 "category": TemplateCategory.DATA_ANALYSIS,
                 "description": "Data analysis assistant with computation tools",
                 "default_params": {
@@ -1018,7 +1017,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "blog_writing_assistant",
-                "workflow_type": WorkflowType.TOOLS,
+                "workflow_type": "function_chat",
                 "category": TemplateCategory.CREATIVE,
                 "description": "Blog writing assistant with research and editing tools",
                 "default_params": {

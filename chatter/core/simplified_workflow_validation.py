@@ -6,7 +6,7 @@ implementation that focuses on the essential validations needed.
 
 from typing import Any
 
-from chatter.models.workflow import WorkflowTemplate, WorkflowType
+from chatter.models.workflow import WorkflowTemplate
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -101,11 +101,12 @@ class SimplifiedWorkflowValidationService:
 
         if not template.workflow_type:
             errors.append("Workflow type is required")
-        elif template.workflow_type not in [
-            t.value for t in WorkflowType
-        ]:
+        elif (
+            not isinstance(template.workflow_type, str)
+            or len(template.workflow_type.strip()) == 0
+        ):
             errors.append(
-                f"Invalid workflow type: {template.workflow_type}"
+                "Invalid workflow type: must be a non-empty string"
             )
 
         if not template.description:

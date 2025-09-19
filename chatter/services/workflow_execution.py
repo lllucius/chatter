@@ -143,11 +143,7 @@ class WorkflowExecutionService:
         Returns:
             Dictionary with validation results
         """
-        workflow_type = (
-            chat_request.workflow_type
-            or chat_request.workflow
-            or "plain"
-        )
+        workflow_type = chat_request.workflow_type or "simple_chat"
 
         # Check if workflow type is supported
         supported_types = self.executor.get_supported_types()
@@ -223,90 +219,6 @@ class WorkflowExecutionService:
         }
 
         return capabilities.get(workflow_type, {})
-
-    # Legacy node-based execution support (simplified)
-    async def execute_workflow_definition(
-        self,
-        workflow_definition: Any,  # WorkflowDefinition object
-        input_data: dict[str, Any],
-        context: dict[str, Any] | None = None,
-    ) -> dict[str, Any]:
-        """Execute a node-based workflow definition (legacy support).
-
-        This is a simplified version that supports basic node execution
-        for backwards compatibility. For new workflows, use the main
-        execute_workflow method.
-
-        Args:
-            workflow_definition: Workflow definition with nodes and edges
-            input_data: Input data for the workflow
-            context: Optional execution context
-
-        Returns:
-            Dictionary with execution results
-        """
-        from datetime import datetime
-
-        from chatter.models.base import generate_ulid
-
-        execution_id = generate_ulid()
-        started_at = datetime.utcnow()
-
-        try:
-            # Simple validation
-            if (
-                not hasattr(workflow_definition, 'nodes')
-                or not workflow_definition.nodes
-            ):
-                raise ValueError("Workflow definition must have nodes")
-
-            # For now, return a simple success response
-            # In the future, this could be extended to support specific node types
-            # that are actually needed by the application
-            completed_at = datetime.utcnow()
-            total_time = int(
-                (completed_at - started_at).total_seconds() * 1000
-            )
-
-            return {
-                "execution_id": execution_id,
-                "status": "completed",
-                "result": input_data,  # Pass through input data
-                "steps": [
-                    {
-                        "node_id": "simplified_execution",
-                        "node_type": "passthrough",
-                        "status": "completed",
-                        "input_data": input_data,
-                        "output_data": input_data,
-                        "error": None,
-                        "execution_time_ms": total_time,
-                        "timestamp": started_at,
-                    }
-                ],
-                "total_execution_time_ms": total_time,
-                "error": None,
-                "started_at": started_at,
-                "completed_at": completed_at,
-            }
-
-        except Exception as e:
-            logger.error(f"Workflow definition execution failed: {e}")
-            completed_at = datetime.utcnow()
-            total_time = int(
-                (completed_at - started_at).total_seconds() * 1000
-            )
-
-            return {
-                "execution_id": execution_id,
-                "status": "failed",
-                "result": None,
-                "steps": [],
-                "total_execution_time_ms": total_time,
-                "error": str(e),
-                "started_at": started_at,
-                "completed_at": completed_at,
-            }
 
     # New Chat Workflow Methods
     async def execute_chat_workflow(

@@ -25,6 +25,7 @@ import {
   WorkflowNodeData,
 } from './WorkflowEditor';
 import { getSDK } from '../../services/auth-service';
+import { BottleneckInfo, OptimizationSuggestion } from 'chatter-sdk';
 
 interface WorkflowAnalyticsProps {
   workflow: WorkflowDefinition;
@@ -107,7 +108,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
       try {
         // Use the new server-side analytics API
         const response =
-          await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdAnalytics(
+          await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
             workflow.metadata.name
           );
 
@@ -119,10 +120,10 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
           complexityScore: serverAnalytics.complexity.score,
           executionPaths: [], // Server returns count, not paths
           potentialBottlenecks: serverAnalytics.bottlenecks.map(
-            (b) => b.reason
+            (b: BottleneckInfo) => b.reason
           ),
           recommendations: serverAnalytics.optimization_suggestions.map(
-            (s) => s.description
+            (s: OptimizationSuggestion) => s.description
           ),
         };
 

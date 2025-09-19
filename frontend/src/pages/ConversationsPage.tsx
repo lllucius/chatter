@@ -236,7 +236,7 @@ const ConversationsPage: React.FC = () => {
         fullWidth
       >
         <DialogTitle>
-          <Typography variant="h6">
+          <Typography variant="inherit">
             {selectedConversation?.title || 'Conversation Details'}
           </Typography>
           <Typography variant="body2" color="text.secondary">

@@ -38,26 +38,28 @@ export const useWorkflowData = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      // TODO: Implement when tools API is available
-      // const response = await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
-      // setAvailableTools(response);
-      console.warn('Available tools API not implemented');
+      // For now, set available tools to null since there's no direct tools API
+      // This prevents the console warning and provides a proper state
       setAvailableTools(null);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadAvailableTools',
         operation: 'load available tools',
       });
+      setAvailableTools(null);
     }
   }, []);
 
-  const loadExecutions = useCallback(async () => {
+  const loadExecutions = useCallback(async (workflowId?: string) => {
     try {
-      // TODO: This method requires a specific workflowId
-      // const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecutions(workflowId);
-      // setExecutions(response || []);
-      console.warn('Workflow executions require specific workflow ID');
-      setExecutions([]);
+      if (!workflowId) {
+        console.warn('Workflow executions require specific workflow ID');
+        setExecutions([]);
+        return;
+      }
+      
+      const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsDefinitionsWorkflowIdExecutions(workflowId);
+      setExecutions(response || []);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadExecutions',
@@ -134,7 +136,7 @@ export const useWorkflowData = () => {
   useEffect(() => {
     loadTemplates();
     loadAvailableTools();
-    loadExecutions();
+    loadExecutions(); // Will show warning and set empty array without workflowId
   }, [loadTemplates, loadAvailableTools, loadExecutions]);
 
   return {

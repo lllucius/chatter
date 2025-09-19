@@ -6,27 +6,12 @@ implementation that focuses on the essential validations needed.
 
 from typing import Any
 
+from chatter.core.exceptions import ValidationError
+from chatter.core.validation.results import ValidationResult
 from chatter.models.workflow import WorkflowTemplate
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
-
-
-class ValidationResult:
-    """Simplified validation result."""
-
-    def __init__(
-        self,
-        is_valid: bool,
-        errors: list[str],
-        warnings: list[str],
-        requirements_met: bool = True,
-    ):
-        self.is_valid = is_valid
-        self.valid = is_valid  # Alias for compatibility
-        self.errors = errors
-        self.warnings = warnings
-        self.requirements_met = requirements_met
 
 
 class SimplifiedWorkflowValidationService:
@@ -84,7 +69,7 @@ class SimplifiedWorkflowValidationService:
 
         return ValidationResult(
             is_valid=len(errors) == 0,
-            errors=errors,
+            errors=[ValidationError(error) for error in errors],
             warnings=warnings,
         )
 
@@ -114,7 +99,7 @@ class SimplifiedWorkflowValidationService:
 
         return ValidationResult(
             is_valid=len(errors) == 0,
-            errors=errors,
+            errors=[ValidationError(error) for error in errors],
             warnings=warnings,
         )
 

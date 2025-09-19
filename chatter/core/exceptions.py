@@ -296,6 +296,69 @@ class ValidationError(ChatterBaseException):
         )
 
 
+class SecurityValidationError(ValidationError):
+    """Security-related validation error."""
+
+    def __init__(
+        self,
+        message: str,
+        threat_type: str | None = None,
+        **kwargs: Any,
+    ) -> None:
+        super().__init__(message, **kwargs)
+        self.threat_type = threat_type
+
+
+class BusinessValidationError(ValidationError):
+    """Business logic validation error."""
+
+    def __init__(
+        self, message: str, rule_name: str | None = None, **kwargs: Any
+    ) -> None:
+        super().__init__(message, **kwargs)
+        self.rule_name = rule_name
+
+
+class ConfigurationValidationError(ValidationError):
+    """Configuration validation error."""
+
+    def __init__(
+        self, message: str, config_key: str | None = None, **kwargs: Any
+    ) -> None:
+        super().__init__(message, **kwargs)
+        self.config_key = config_key
+
+
+class ValidationErrors(Exception):
+    """Container for multiple validation errors."""
+
+    def __init__(self, errors: list[ValidationError]):
+        self.errors = errors
+        message = f"Multiple validation errors ({len(errors)})"
+        super().__init__(message)
+
+    def __str__(self) -> str:
+        error_messages = [str(error) for error in self.errors]
+        return "\n".join(error_messages)
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary format for API responses."""
+        return {
+            "type": "validation_errors",
+            "message": f"Validation failed with {len(self.errors)} error(s)",
+            "errors": [
+                {
+                    "field": getattr(error, "field", None),
+                    "message": error.message,
+                    "code": getattr(error, "code", None),
+                    "value": getattr(error, "value", None),
+                    "context": getattr(error, "context", {}),
+                }
+                for error in self.errors
+            ],
+        }
+
+
 class AuthenticationError(ChatterBaseException):
     """Authentication-related errors."""
 
@@ -575,15 +638,13 @@ def create_error_response(error: Exception) -> dict[str, Any]:
         Dictionary suitable for JSON response
     """
     if isinstance(error, ChatterBaseException):
-        return error.to_problem_detail().model_dump(exclude_none=True)
+        return error.to_problem_detail()
     else:
         # Handle non-ChatterBaseException exceptions
         chatter_error = handle_service_error(
             func_name="unknown", service_name="system", error=error
         )
-        return chatter_error.to_problem_detail().model_dump(
-            exclude_none=True
-        )
+        return chatter_error.to_problem_detail()
 
 
 

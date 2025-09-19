@@ -486,3 +486,97 @@ class NodeTypeResponse(BaseModel):
     )
     icon: str | None = Field(default=None, description="Icon name")
     color: str | None = Field(default=None, description="Node color")
+
+
+# Chat Workflow Schemas
+class ModelConfig(BaseModel):
+    """Model configuration for chat workflows."""
+
+    provider: str | None = Field(None, description="LLM provider")
+    model: str | None = Field(None, description="Model name")
+    temperature: float = Field(0.7, ge=0.0, le=2.0, description="Temperature")
+    max_tokens: int = Field(1000, ge=1, le=8192, description="Max tokens")
+    top_p: float = Field(1.0, ge=0.0, le=1.0, description="Top-p sampling")
+    presence_penalty: float = Field(0.0, ge=-2.0, le=2.0, description="Presence penalty")
+    frequency_penalty: float = Field(0.0, ge=-2.0, le=2.0, description="Frequency penalty")
+
+
+class RetrievalConfig(BaseModel):
+    """Retrieval configuration for RAG workflows."""
+
+    enabled: bool = Field(True, description="Enable retrieval")
+    max_documents: int = Field(5, ge=1, le=20, description="Max documents to retrieve")
+    similarity_threshold: float = Field(0.7, ge=0.0, le=1.0, description="Similarity threshold")
+    document_ids: list[str] | None = Field(None, description="Specific document IDs")
+    collections: list[str] | None = Field(None, description="Document collections")
+    rerank: bool = Field(False, description="Enable reranking")
+
+
+class ToolConfig(BaseModel):
+    """Tool configuration for function calling workflows."""
+
+    enabled: bool = Field(True, description="Enable tools")
+    allowed_tools: list[str] | None = Field(None, description="Allowed tool names")
+    max_tool_calls: int = Field(5, ge=1, le=20, description="Max tool calls")
+    parallel_tool_calls: bool = Field(False, description="Enable parallel tool calls")
+    tool_timeout_ms: int = Field(30000, ge=1000, le=300000, description="Tool timeout in ms")
+
+
+class ChatWorkflowConfig(BaseModel):
+    """Configuration for building chat workflows dynamically."""
+
+    enable_retrieval: bool = Field(False, description="Enable document retrieval")
+    enable_tools: bool = Field(False, description="Enable function calling")
+    enable_memory: bool = Field(True, description="Enable conversation memory")
+    enable_web_search: bool = Field(False, description="Enable web search")
+    
+    # Configuration objects
+    model_config: ModelConfig | None = Field(None, description="Model configuration")
+    retrieval_config: RetrievalConfig | None = Field(None, description="Retrieval configuration")
+    tool_config: ToolConfig | None = Field(None, description="Tool configuration")
+    
+    # Advanced workflow customization
+    custom_nodes: list[WorkflowNode] | None = Field(None, description="Custom nodes")
+    custom_edges: list[WorkflowEdge] | None = Field(None, description="Custom edges")
+
+
+class ChatWorkflowRequest(BaseModel):
+    """Request for executing chat via workflow system."""
+
+    message: str = Field(..., min_length=1, description="User message")
+    conversation_id: str | None = Field(None, description="Conversation ID")
+    
+    # Workflow specification (exactly one must be provided)
+    workflow_config: ChatWorkflowConfig | None = Field(None, description="Dynamic workflow config")
+    workflow_definition_id: str | None = Field(None, description="Existing workflow definition ID")
+    workflow_template_name: str | None = Field(None, description="Template name")
+    
+    # Legacy compatibility fields
+    profile_id: str | None = Field(None, description="Profile ID")
+    provider: str | None = Field(None, description="LLM provider")
+    temperature: float | None = Field(None, ge=0.0, le=2.0, description="Temperature")
+    max_tokens: int | None = Field(None, ge=1, le=8192, description="Max tokens")
+    context_limit: int | None = Field(None, ge=1, description="Context limit")
+    document_ids: list[str] | None = Field(None, description="Document IDs")
+    
+    # System override
+    system_prompt_override: str | None = Field(None, description="System prompt override")
+
+
+class ChatWorkflowTemplate(BaseModel):
+    """Chat-optimized workflow template."""
+
+    name: str = Field(..., description="Template name")
+    description: str = Field(..., description="Template description")
+    config: ChatWorkflowConfig = Field(..., description="Workflow configuration")
+    estimated_tokens: int | None = Field(None, description="Estimated token usage")
+    estimated_cost: float | None = Field(None, description="Estimated cost")
+    complexity_score: int = Field(1, ge=1, le=10, description="Complexity score")
+    use_cases: list[str] = Field(default_factory=list, description="Use cases")
+
+
+class ChatWorkflowTemplatesResponse(BaseModel):
+    """Response for chat workflow templates."""
+
+    templates: dict[str, ChatWorkflowTemplate] = Field(..., description="Available templates")
+    total_count: int = Field(..., description="Total template count")

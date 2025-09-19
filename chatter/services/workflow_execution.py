@@ -46,6 +46,7 @@ class WorkflowExecutionService:
         """Initialize simplified workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
+        self.session = session
         self.template_manager = get_template_manager_with_session(
             session
         )
@@ -306,3 +307,122 @@ class WorkflowExecutionService:
                 "started_at": started_at,
                 "completed_at": completed_at,
             }
+
+    # New Chat Workflow Methods
+    async def execute_chat_workflow(
+        self,
+        user_id: str,
+        request: "ChatWorkflowRequest",
+        streaming: bool = False,
+    ):
+        """Execute chat using workflow system."""
+        from chatter.schemas.chat import ChatRequest
+        
+        # Convert ChatWorkflowRequest to ChatRequest and get conversation
+        chat_request, conversation = await self._convert_chat_workflow_request(
+            user_id, request
+        )
+        
+        # Generate correlation ID
+        from chatter.utils.correlation import get_correlation_id
+        correlation_id = get_correlation_id()
+        
+        if streaming:
+            return self.execute_workflow_streaming(
+                conversation, chat_request, correlation_id, user_id
+            )
+        else:
+            return await self.execute_workflow(
+                conversation, chat_request, correlation_id, user_id
+            )
+
+    async def _convert_chat_workflow_request(
+        self, user_id: str, request: "ChatWorkflowRequest"
+    ):
+        """Convert ChatWorkflowRequest to ChatRequest and setup conversation."""
+        from chatter.schemas.chat import ChatRequest
+        from chatter.services.conversation import ConversationService
+        from chatter.schemas.chat import ConversationCreate as ConversationCreateSchema
+        
+        # Setup conversation service
+        conversation_service = ConversationService(self.session)
+        
+        # Get or create conversation
+        if request.conversation_id:
+            conversation = await conversation_service.get_conversation(
+                request.conversation_id, user_id, include_messages=True
+            )
+        else:
+            # Create new conversation
+            conv_data = ConversationCreateSchema(
+                title=(
+                    request.message[:50] + "..."
+                    if len(request.message) > 50
+                    else request.message
+                ),
+                description=None,
+                profile_id=request.profile_id,
+                temperature=request.temperature,
+                max_tokens=request.max_tokens,
+                workflow_config=request.workflow_config.model_dump() if request.workflow_config else None,
+                extra_metadata=None,
+            )
+            conversation = await conversation_service.create_conversation(
+                user_id, conv_data
+            )
+        
+        # Convert to ChatRequest based on workflow configuration
+        workflow_type = self._determine_workflow_type(request)
+        
+        chat_request = ChatRequest(
+            message=request.message,
+            conversation_id=conversation.id,
+            profile_id=request.profile_id,
+            workflow=workflow_type,
+            provider=request.provider,
+            temperature=request.temperature,
+            max_tokens=request.max_tokens,
+            context_limit=request.context_limit,
+            enable_retrieval=self._should_enable_retrieval(request),
+            document_ids=request.document_ids,
+            system_prompt_override=request.system_prompt_override,
+            workflow_type=workflow_type,
+        )
+        
+        return chat_request, conversation
+
+    def _determine_workflow_type(self, request: "ChatWorkflowRequest") -> str:
+        """Determine workflow type from ChatWorkflowRequest."""
+        if request.workflow_template_name:
+            # Map template names to workflow types
+            template_mapping = {
+                "simple_chat": "plain",
+                "rag_chat": "rag", 
+                "function_chat": "tools",
+                "advanced_chat": "full"
+            }
+            return template_mapping.get(request.workflow_template_name, "plain")
+        
+        elif request.workflow_config:
+            config = request.workflow_config
+            # Determine type based on enabled features
+            if config.enable_retrieval and config.enable_tools:
+                return "full"
+            elif config.enable_tools:
+                return "tools"
+            elif config.enable_retrieval:
+                return "rag"
+            else:
+                return "plain"
+        
+        else:
+            return "plain"
+
+    def _should_enable_retrieval(self, request: "ChatWorkflowRequest") -> bool:
+        """Determine if retrieval should be enabled."""
+        if request.workflow_config:
+            return request.workflow_config.enable_retrieval
+        elif request.workflow_template_name in ["rag_chat", "advanced_chat"]:
+            return True
+        else:
+            return False

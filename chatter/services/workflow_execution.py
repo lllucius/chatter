@@ -248,7 +248,14 @@ class WorkflowExecutionService:
             message, usage_info = await self.execute_workflow(
                 conversation, chat_request, correlation_id, user_id
             )
-            return conversation, message
+            
+            # Save the message to database so it has all required fields for MessageResponse
+            saved_message = await self.message_service.create_message(
+                message=message,
+                usage_info=usage_info
+            )
+            
+            return conversation, saved_message
 
     async def _convert_chat_workflow_request(
         self, user_id: str, request: "ChatWorkflowRequest"

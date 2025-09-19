@@ -3,7 +3,7 @@
 from collections.abc import Sequence
 from typing import Any
 
-from .exceptions import ValidationError
+from chatter.core.exceptions import ValidationError
 
 
 class ValidationResult:
@@ -22,6 +22,16 @@ class ValidationResult:
         self.errors = list(errors) if errors else []
         self.warnings = warnings or []
         self.metadata = metadata or {}
+
+    @property
+    def valid(self) -> bool:
+        """Alias for is_valid for backward compatibility."""
+        return self.is_valid
+
+    @property
+    def requirements_met(self) -> bool:
+        """Alias for is_valid for backward compatibility."""
+        return self.is_valid
 
     def add_error(self, error: ValidationError) -> None:
         """Add a validation error."""

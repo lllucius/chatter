@@ -19,7 +19,7 @@ from sqlalchemy.orm import selectinload
 from chatter.core.simplified_workflow_validation import (
     simplified_workflow_validation_service as workflow_validation_service,
 )
-from chatter.core.validation.exceptions import ValidationError
+from chatter.core.exceptions import ValidationError
 
 # Use the centralized validation result from the workflow validation service
 from chatter.core.validation.results import ValidationResult

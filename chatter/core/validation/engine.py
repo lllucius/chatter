@@ -3,8 +3,9 @@
 import asyncio
 from typing import Any
 
+from chatter.core.exceptions import ValidationError
+
 from .context import DEFAULT_CONTEXT, ValidationContext
-from .exceptions import ValidationError
 from .results import ValidationResult
 from .validators import BaseValidator
 

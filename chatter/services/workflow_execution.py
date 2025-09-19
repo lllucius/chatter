@@ -226,7 +226,7 @@ class WorkflowExecutionService:
         user_id: str,
         request: "ChatWorkflowRequest",
         streaming: bool = False,
-    ):
+    ) -> tuple[Conversation, Message] | AsyncGenerator[StreamingChatChunk, None]:
         """Execute chat using workflow system."""
         from chatter.schemas.chat import ChatRequest
         

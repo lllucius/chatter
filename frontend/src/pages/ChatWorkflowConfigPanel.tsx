@@ -146,8 +146,8 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
           )}
           <Chip 
             size="small" 
-            label={`Score: ${template.complexity_score}`}
-            color={template.complexity_score <= 3 ? 'success' : template.complexity_score <= 6 ? 'warning' : 'error'}
+            label={`Score: ${template.complexity_score ?? 'N/A'}`}
+            color={(template.complexity_score ?? 5) <= 3 ? 'success' : (template.complexity_score ?? 5) <= 6 ? 'warning' : 'error'}
           />
         </Box>
       </CardContent>

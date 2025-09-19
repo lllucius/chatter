@@ -2,10 +2,10 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { authService, getSDK } from '../auth-service';
 
 describe('AuthService and ChatterSDK', () => {
-  beforeEach(() => {
+  beforeEach(async () => {
     // Reset auth service state before each test
     // Note: We no longer use localStorage - tokens are memory-only
-    authService.initialize();
+    await authService.initialize();
   });
 
   it('should be properly initialized', () => {

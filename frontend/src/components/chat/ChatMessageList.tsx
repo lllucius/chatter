@@ -6,6 +6,7 @@ interface ChatMessageListProps {
   messages: ChatMessage[];
   messagesEndRef: React.RefObject<HTMLDivElement | null>;
   loading: boolean;
+  streamingEnabled?: boolean;
   onEdit?: (messageId: string, newContent: string) => void;
   onRegenerate?: (messageId: string) => void;
   onDelete?: (messageId: string) => void;
@@ -13,7 +14,7 @@ interface ChatMessageListProps {
 }
 
 const ChatMessageList: React.FC<ChatMessageListProps> = memo(
-  ({ messages, messagesEndRef, loading, onEdit, onRegenerate, onDelete, onRate }) => {
+  ({ messages, messagesEndRef, loading, streamingEnabled = false, onEdit, onRegenerate, onDelete, onRate }) => {
     return (
       <Box sx={{ flexGrow: 1, minHeight: '100%', p: 2 }}>
         {messages.map((msg) => (
@@ -27,7 +28,7 @@ const ChatMessageList: React.FC<ChatMessageListProps> = memo(
           />
         ))}
 
-        {loading && (
+        {loading && !streamingEnabled && (
           <Box sx={{ display: 'flex', justifyContent: 'center', p: 2 }}>
             <EnhancedMessage
               message={{

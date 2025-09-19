@@ -37,6 +37,8 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
+    enableTools,
+    customPromptText,
     setSelectedProfile,
     setSelectedPrompt,
     setSelectedDocuments,
@@ -45,6 +47,8 @@ const ChatPage: React.FC = () => {
     setTemperature,
     setMaxTokens,
     setEnableRetrieval,
+    setEnableTools,
+    setCustomPromptText,
     loadData,
   } = useChatData();
 
@@ -65,6 +69,13 @@ const ChatPage: React.FC = () => {
   // Dialog state
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
+
+  // Load conversation messages if we have a current conversation on mount
+  useEffect(() => {
+    if (currentConversation && currentConversation.id && messages.length === 0) {
+      loadMessagesForConversation(currentConversation.id);
+    }
+  }, [currentConversation, loadMessagesForConversation, messages.length]);
 
   // Create a ref to handle circular dependency between handleStreamingResponse and handleRegenerateMessage
   const handleRegenerateMessageRef = useRef<((messageId: string) => Promise<void>) | null>(null);
@@ -337,11 +348,13 @@ const ChatPage: React.FC = () => {
               message: textToSend,
               profile_id: selectedProfile || undefined,
               prompt_id: selectedPrompt || undefined,
+              custom_prompt: customPromptText.trim() || undefined,
               document_ids:
                 selectedDocuments.length > 0 ? selectedDocuments : undefined,
               temperature,
               max_tokens: maxTokens,
               enable_retrieval: enableRetrieval,
+              enable_tools: enableTools,
             };
 
             // Send message to API
@@ -420,6 +433,8 @@ const ChatPage: React.FC = () => {
       maxTokens,
       streamingEnabled,
       enableRetrieval,
+      enableTools,
+      customPromptText,
       setMessages,
       handleEditMessage,
       handleDeleteMessage,
@@ -472,6 +487,10 @@ const ChatPage: React.FC = () => {
         setMaxTokens={setMaxTokens}
         enableRetrieval={enableRetrieval}
         setEnableRetrieval={setEnableRetrieval}
+        enableTools={enableTools}
+        setEnableTools={setEnableTools}
+        customPromptText={customPromptText}
+        setCustomPromptText={setCustomPromptText}
         onSelectConversation={handleSelectConversation}
       />
     );
@@ -490,6 +509,8 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
+    enableTools,
+    customPromptText,
     handleSelectConversation,
   ]);
 
@@ -522,11 +543,13 @@ const ChatPage: React.FC = () => {
           message: textToSend,
           profile_id: selectedProfile || undefined,
           prompt_id: selectedPrompt || undefined,
+          custom_prompt: customPromptText.trim() || undefined,
           document_ids:
             selectedDocuments.length > 0 ? selectedDocuments : undefined,
           temperature,
           max_tokens: maxTokens,
           enable_retrieval: enableRetrieval,
+          enable_tools: enableTools,
         };
 
         // Send message to API
@@ -609,6 +632,8 @@ const ChatPage: React.FC = () => {
       maxTokens,
       streamingEnabled,
       enableRetrieval,
+      enableTools,
+      customPromptText,
       setMessage,
       setMessages,
       setLoading,
@@ -727,6 +752,7 @@ const ChatPage: React.FC = () => {
               messages={messages}
               messagesEndRef={messagesEndRef}
               loading={loading}
+              streamingEnabled={streamingEnabled}
               onEdit={handleEditMessage}
               onRegenerate={handleRegenerateMessage}
               onDelete={handleDeleteMessage}

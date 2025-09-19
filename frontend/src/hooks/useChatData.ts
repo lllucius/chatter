@@ -20,7 +20,11 @@ export const useChatData = () => {
   const [selectedPrompt, setSelectedPrompt] = useState<string>('');
   const [selectedDocuments, setSelectedDocuments] = useState<string[]>([]);
   const [currentConversation, setCurrentConversation] =
-    useState<ConversationResponse | null>(null);
+    useState<ConversationResponse | null>(() => {
+      // Try to restore the current conversation from localStorage
+      const saved = localStorage.getItem('chatter_currentConversation');
+      return saved ? JSON.parse(saved) : null;
+    });
 
   // Chat configuration state with localStorage persistence
   const [streamingEnabled, setStreamingEnabled] = useState(() => {
@@ -41,6 +45,16 @@ export const useChatData = () => {
   const [enableRetrieval, setEnableRetrieval] = useState(() => {
     const saved = localStorage.getItem('chatter_enableRetrieval');
     return saved ? JSON.parse(saved) : false;
+  });
+
+  const [enableTools, setEnableTools] = useState(() => {
+    const saved = localStorage.getItem('chatter_enableTools');
+    return saved ? JSON.parse(saved) : false;
+  });
+
+  const [customPromptText, setCustomPromptText] = useState(() => {
+    const saved = localStorage.getItem('chatter_customPromptText');
+    return saved ? saved : '';
   });
 
   // Load initial data
@@ -109,6 +123,26 @@ export const useChatData = () => {
     );
   }, [enableRetrieval]);
 
+  useEffect(() => {
+    localStorage.setItem(
+      'chatter_enableTools',
+      JSON.stringify(enableTools)
+    );
+  }, [enableTools]);
+
+  useEffect(() => {
+    localStorage.setItem('chatter_customPromptText', customPromptText);
+  }, [customPromptText]);
+
+  // Persist current conversation
+  useEffect(() => {
+    if (currentConversation) {
+      localStorage.setItem('chatter_currentConversation', JSON.stringify(currentConversation));
+    } else {
+      localStorage.removeItem('chatter_currentConversation');
+    }
+  }, [currentConversation]);
+
   // Load data on mount
   useEffect(() => {
     loadData();
@@ -131,6 +165,8 @@ export const useChatData = () => {
     temperature,
     maxTokens,
     enableRetrieval,
+    enableTools,
+    customPromptText,
 
     // Actions
     setSelectedProfile,
@@ -141,6 +177,8 @@ export const useChatData = () => {
     setTemperature,
     setMaxTokens,
     setEnableRetrieval,
+    setEnableTools,
+    setCustomPromptText,
     loadData,
   };
 };

@@ -317,7 +317,11 @@ export class SSEEventManager {
 
     // Extract unified event metadata if available
     const unifiedMetadata = this.extractUnifiedMetadata(event);
-    // TODO: Process unified metadata when ready
+    
+    // Process unified metadata for enhanced event tracking
+    if (unifiedMetadata) {
+      this.processUnifiedMetadata(event, unifiedMetadata);
+    }
 
     // Route high priority events to special handlers
     if (
@@ -532,6 +536,42 @@ export class SSEEventManager {
       source_system: metadata.source_system as string | undefined,
       correlation_id: metadata.correlation_id as string | undefined,
     };
+  }
+
+  /**
+   * Process unified metadata for enhanced event tracking and analysis
+   */
+  private processUnifiedMetadata(
+    event: AnySSEEvent,
+    metadata: { category?: string; priority?: string; source_system?: string; correlation_id?: string }
+  ): void {
+    // Track metadata patterns for analytics
+    if (metadata.correlation_id) {
+      // Could be used for tracing related events across the system
+      console.debug(`SSE Event correlation: ${metadata.correlation_id}`, {
+        type: event.type,
+        category: metadata.category,
+        priority: metadata.priority,
+      });
+    }
+
+    // Track source system metrics
+    if (metadata.source_system) {
+      // This could be used for system health monitoring
+      console.debug(`SSE Event from system: ${metadata.source_system}`, {
+        type: event.type,
+        timestamp: Date.now(),
+      });
+    }
+
+    // Enhanced logging for high-value events
+    if (metadata.priority === 'critical' || metadata.category === 'system') {
+      console.info('Critical SSE Event processed', {
+        type: event.type,
+        metadata,
+        timestamp: new Date().toISOString(),
+      });
+    }
   }
 
   /**

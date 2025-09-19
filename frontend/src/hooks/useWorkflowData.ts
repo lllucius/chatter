@@ -51,13 +51,16 @@ export const useWorkflowData = () => {
     }
   }, []);
 
-  const loadExecutions = useCallback(async () => {
+  const loadExecutions = useCallback(async (workflowId?: string) => {
     try {
-      // TODO: This method requires a specific workflowId
-      // const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsWorkflowsDefinitionsWorkflowIdExecutions(workflowId);
-      // setExecutions(response || []);
-      console.warn('Workflow executions require specific workflow ID');
-      setExecutions([]);
+      if (workflowId) {
+        const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsDefinitionsWorkflowIdExecutions(workflowId);
+        setExecutions(response || []);
+      } else {
+        // If no workflow ID provided, clear executions
+        console.warn('Workflow executions require specific workflow ID');
+        setExecutions([]);
+      }
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadExecutions',

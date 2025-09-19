@@ -30,7 +30,7 @@ import {
   createCategoryChipRenderer,
   createDateRenderer,
 } from '../components/CrudRenderers';
-import { getSDK } from '../services/auth-service';
+import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
@@ -199,13 +199,36 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        // TODO: Implement when chunks API is available
-        // const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
-        //   document.id,
-        //   { limit: 3, offset: 0 }
-        // );
-        console.warn('Document chunks API not yet implemented');
-        contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
+        // Fetch document chunks using direct API call since SDK doesn't include this endpoint yet
+        const token = authService.getToken();
+        if (!token) {
+          throw new Error('No authentication token available');
+        }
+        
+        const response = await fetch(`/api/v1/documents/${document.id}/chunks?limit=3&offset=0`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${token}`,
+            'Content-Type': 'application/json',
+          },
+        });
+        
+        if (response.ok) {
+          const chunksResponse = await response.json();
+          const chunks = chunksResponse.chunks || [];
+          if (chunks.length > 0) {
+            contentPreview = chunks
+              .slice(0, 3)
+              .map((chunk: any, index: number) => 
+                `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`
+              )
+              .join('\n\n');
+          } else {
+            contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. No chunk content available for preview.`;
+          }
+        } else {
+          contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
+        }
       } catch {
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       }
@@ -308,19 +331,33 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      // TODO: Implement when download API is available
-      // const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(document.id);
-      // const blob = new Blob([response.data], { type: 'application/octet-stream' });
-      // const url = window.URL.createObjectURL(blob);
-      // const a = window.document.createElement('a');
-      // a.href = url;
-      // a.download = document.filename;
-      // window.document.body.appendChild(a);
-      // a.click();
-      // window.URL.revokeObjectURL(url);
-      // window.document.body.removeChild(a);
-      console.warn('Document download API not yet implemented');
-      toastService.error('Document download not yet implemented');
+      // Implement document download using direct API call since SDK doesn't include this endpoint yet
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
+      const response = await fetch(`/api/v1/documents/${document.id}/download`, {
+        method: 'GET',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+        },
+      });
+      
+      if (response.ok) {
+        const blob = await response.blob();
+        const url = window.URL.createObjectURL(blob);
+        const a = window.document.createElement('a');
+        a.href = url;
+        a.download = document.filename || `document_${document.id}`;
+        window.document.body.appendChild(a);
+        a.click();
+        window.URL.revokeObjectURL(url);
+        window.document.body.removeChild(a);
+        toastService.success('Document downloaded successfully');
+      } else {
+        throw new Error(`Download failed: ${response.status} ${response.statusText}`);
+      }
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleDownloadDocument',

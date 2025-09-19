@@ -244,9 +244,11 @@ class WorkflowExecutionService:
                 conversation, chat_request, correlation_id, user_id
             )
         else:
-            return await self.execute_workflow(
+            # Execute workflow and return (conversation, message) tuple as expected by API
+            message, usage_info = await self.execute_workflow(
                 conversation, chat_request, correlation_id, user_id
             )
+            return conversation, message
 
     async def _convert_chat_workflow_request(
         self, user_id: str, request: "ChatWorkflowRequest"

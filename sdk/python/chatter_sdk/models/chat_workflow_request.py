@@ -21,7 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
-from chatter_sdk.models.chat_workflow_config_input import ChatWorkflowConfigInput
+from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,7 +31,7 @@ class ChatWorkflowRequest(BaseModel):
     """ # noqa: E501
     message: Annotated[str, Field(min_length=1, strict=True)] = Field(description="User message")
     conversation_id: Optional[StrictStr] = None
-    workflow_config: Optional[ChatWorkflowConfigInput] = None
+    workflow_config: Optional[ChatWorkflowConfig] = None
     workflow_definition_id: Optional[StrictStr] = None
     workflow_template_name: Optional[StrictStr] = None
     profile_id: Optional[StrictStr] = None
@@ -154,7 +154,7 @@ class ChatWorkflowRequest(BaseModel):
         _obj = cls.model_validate({
             "message": obj.get("message"),
             "conversation_id": obj.get("conversation_id"),
-            "workflow_config": ChatWorkflowConfigInput.from_dict(obj["workflow_config"]) if obj.get("workflow_config") is not None else None,
+            "workflow_config": ChatWorkflowConfig.from_dict(obj["workflow_config"]) if obj.get("workflow_config") is not None else None,
             "workflow_definition_id": obj.get("workflow_definition_id"),
             "workflow_template_name": obj.get("workflow_template_name"),
             "profile_id": obj.get("profile_id"),

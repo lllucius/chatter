@@ -77,8 +77,7 @@ chatter_sdk/models/chart_data_point.py
 chatter_sdk/models/chart_ready_analytics.py
 chatter_sdk/models/chat_request.py
 chatter_sdk/models/chat_response.py
-chatter_sdk/models/chat_workflow_config_input.py
-chatter_sdk/models/chat_workflow_config_output.py
+chatter_sdk/models/chat_workflow_config.py
 chatter_sdk/models/chat_workflow_request.py
 chatter_sdk/models/chat_workflow_template.py
 chatter_sdk/models/chat_workflow_templates_response.py
@@ -313,8 +312,7 @@ docs/ChartReadyAnalytics.md
 docs/ChatApi.md
 docs/ChatRequest.md
 docs/ChatResponse.md
-docs/ChatWorkflowConfigInput.md
-docs/ChatWorkflowConfigOutput.md
+docs/ChatWorkflowConfig.md
 docs/ChatWorkflowRequest.md
 docs/ChatWorkflowTemplate.md
 docs/ChatWorkflowTemplatesResponse.md
@@ -568,8 +566,7 @@ test/test_chart_ready_analytics.py
 test/test_chat_api.py
 test/test_chat_request.py
 test/test_chat_response.py
-test/test_chat_workflow_config_input.py
-test/test_chat_workflow_config_output.py
+test/test_chat_workflow_config.py
 test/test_chat_workflow_request.py
 test/test_chat_workflow_template.py
 test/test_chat_workflow_templates_response.py

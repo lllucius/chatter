@@ -15,10 +15,10 @@
 
 import unittest
 
-from chatter_sdk.models.chat_workflow_config_input import ChatWorkflowConfigInput
+from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 
-class TestChatWorkflowConfigInput(unittest.TestCase):
-    """ChatWorkflowConfigInput unit test stubs"""
+class TestChatWorkflowConfig(unittest.TestCase):
+    """ChatWorkflowConfig unit test stubs"""
 
     def setUp(self):
         pass
@@ -26,16 +26,16 @@ class TestChatWorkflowConfigInput(unittest.TestCase):
     def tearDown(self):
         pass
 
-    def make_instance(self, include_optional) -> ChatWorkflowConfigInput:
-        """Test ChatWorkflowConfigInput
+    def make_instance(self, include_optional) -> ChatWorkflowConfig:
+        """Test ChatWorkflowConfig
             include_optional is a boolean, when False only required
             params are included, when True both required and
             optional params are included """
-        # uncomment below to create an instance of `ChatWorkflowConfigInput`
+        # uncomment below to create an instance of `ChatWorkflowConfig`
         """
-        model = ChatWorkflowConfigInput()
+        model = ChatWorkflowConfig()
         if include_optional:
-            return ChatWorkflowConfigInput(
+            return ChatWorkflowConfig(
                 enable_retrieval = True,
                 enable_tools = True,
                 enable_memory = True,
@@ -66,41 +66,15 @@ class TestChatWorkflowConfigInput(unittest.TestCase):
                         ], 
                     max_tool_calls = 1.0, 
                     parallel_tool_calls = True, 
-                    tool_timeout_ms = 1000.0, ),
-                custom_nodes = [
-                    chatter_sdk.models.workflow_node.WorkflowNode(
-                        id = '', 
-                        type = '', 
-                        position = {
-                            'key' : 1.337
-                            }, 
-                        data = chatter_sdk.models.workflow_node_data.WorkflowNodeData(
-                            label = '', 
-                            node_type = '', 
-                            config = { }, ), 
-                        selected = True, 
-                        dragging = True, )
-                    ],
-                custom_edges = [
-                    chatter_sdk.models.workflow_edge.WorkflowEdge(
-                        id = '', 
-                        source = '', 
-                        target = '', 
-                        source_handle = '', 
-                        target_handle = '', 
-                        type = '', 
-                        data = chatter_sdk.models.workflow_edge_data.WorkflowEdgeData(
-                            condition = '', 
-                            label = '', ), )
-                    ]
+                    tool_timeout_ms = 1000.0, )
             )
         else:
-            return ChatWorkflowConfigInput(
+            return ChatWorkflowConfig(
         )
         """
 
-    def testChatWorkflowConfigInput(self):
-        """Test ChatWorkflowConfigInput"""
+    def testChatWorkflowConfig(self):
+        """Test ChatWorkflowConfig"""
         # inst_req_only = self.make_instance(include_optional=False)
         # inst_req_and_optional = self.make_instance(include_optional=True)
 

@@ -42,7 +42,7 @@ class EnhancedRedisCache(CacheInterface):
         self.redis: Redis | None = None
         self._connected = False
         self._connection_attempts = 0
-        self._enabled = settings.cache_enabled
+        self._enabled = not settings.cache_disabled
 
         # Connection configuration
         self._connect_timeout = settings.redis_connect_timeout

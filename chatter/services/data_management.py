@@ -463,11 +463,9 @@ class DataManager:
                     success_count += 1
                 except Exception as e:
                     error_count += 1
-                        errors.append(
-                            f"Document {document_id} not found or not owned by user"
-                        )
-                except Exception as e:
-                    error_count += 1
+                    errors.append(
+                        f"Document {document_id} not found or not owned by user"
+                    )
                     errors.append(f"Document {document_id}: {str(e)}")
                     logger.error(
                         "Failed to delete document in bulk operation",

@@ -32,7 +32,7 @@ from chatter.schemas.analytics import (
     IntegratedDashboardStats,
 )
 from chatter.utils.logging import get_logger
-from chatter.utils.performance import get_performance_monitor
+from chatter.utils.performance import get_performance_metrics
 
 logger = get_logger(__name__)
 
@@ -83,7 +83,7 @@ class AnalyticsService:
             session: Database session
         """
         self.session = session
-        self.performance_monitor = get_performance_monitor()
+        self.performance_monitor = get_performance_metrics()
         self.cache_factory = (
             cache_factory  # Use global singleton instance
         )

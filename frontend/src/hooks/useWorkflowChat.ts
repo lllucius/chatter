@@ -23,23 +23,21 @@ export const useWorkflowChat = () => {
   // Load available workflow templates
   const loadWorkflowTemplates = useCallback(async () => {
     try {
-      console.log('[DEBUG] Getting SDK instance...');
       const sdk = getSDK();
-      console.log('[DEBUG] SDK instance:', !!sdk);
-      console.log('[DEBUG] SDK workflows:', !!sdk.workflows);
-      console.log('[DEBUG] workflows type:', typeof sdk.workflows);
       
-      if (sdk.workflows) {
-        console.log('[DEBUG] workflows keys:', Object.keys(sdk.workflows));
-        console.log('[DEBUG] workflows constructor:', sdk.workflows.constructor?.name);
-        console.log('[DEBUG] method exists:', 'getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat' in sdk.workflows);
-        console.log('[DEBUG] method type:', typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat);
+      // Check if SDK and workflows are properly initialized
+      if (!sdk || !sdk.workflows) {
+        throw new Error('SDK or workflows API not initialized');
+      }
+      
+      // Check if the method exists
+      if (typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat !== 'function') {
+        throw new Error('getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available');
       }
       
       const response = await sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat();
       setWorkflowTemplates(response.templates);
     } catch (error) {
-      console.error('[DEBUG] Error in loadWorkflowTemplates:', error);
       handleError(error, {
         source: 'useWorkflowChat.loadWorkflowTemplates',
         operation: 'load workflow templates',

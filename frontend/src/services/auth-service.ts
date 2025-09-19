@@ -67,7 +67,7 @@ class AuthService {
     }
 
     // Verify the SDK is properly constructed with all expected APIs
-    if (!sdk || !sdk.conversations) {
+    if (!sdk || !sdk.conversations || !sdk.workflows) {
       throw new Error('SDK not properly initialized. Please reload the page.');
     }
 

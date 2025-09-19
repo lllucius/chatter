@@ -296,10 +296,7 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_definitions_post) | **POST** /api/v1/workflows/definitions | Create Workflow Definition
 *WorkflowsApi* | [**create_workflow_template_api_v1_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 *WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
-*WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
-*WorkflowsApi* | [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](docs/WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 *WorkflowsApi* | [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
-*WorkflowsApi* | [**get_chat_workflow_templates_api_v1_workflows_templates_chat_get**](docs/WorkflowsApi.md#get_chat_workflow_templates_api_v1_workflows_templates_chat_get) | **GET** /api/v1/workflows/templates/chat | Get Chat Workflow Templates
 *WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 *WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
 *WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
@@ -379,11 +376,6 @@ Class | Method | HTTP request | Description
  - [ChartReadyAnalytics](docs/ChartReadyAnalytics.md)
  - [ChatRequest](docs/ChatRequest.md)
  - [ChatResponse](docs/ChatResponse.md)
- - [ChatWorkflowConfigInput](docs/ChatWorkflowConfigInput.md)
- - [ChatWorkflowConfigOutput](docs/ChatWorkflowConfigOutput.md)
- - [ChatWorkflowRequest](docs/ChatWorkflowRequest.md)
- - [ChatWorkflowTemplate](docs/ChatWorkflowTemplate.md)
- - [ChatWorkflowTemplatesResponse](docs/ChatWorkflowTemplatesResponse.md)
  - [ChatterSchemasChatWorkflowTemplatesResponse](docs/ChatterSchemasChatWorkflowTemplatesResponse.md)
  - [ChatterSchemasWorkflowsWorkflowTemplatesResponse](docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md)
  - [ComplexityMetrics](docs/ComplexityMetrics.md)
@@ -440,7 +432,6 @@ Class | Method | HTTP request | Description
  - [MetricType](docs/MetricType.md)
  - [MetricsResponse](docs/MetricsResponse.md)
  - [MinValue](docs/MinValue.md)
- - [ModelConfig](docs/ModelConfig.md)
  - [ModelDefCreate](docs/ModelDefCreate.md)
  - [ModelDefList](docs/ModelDefList.md)
  - [ModelDefUpdate](docs/ModelDefUpdate.md)
@@ -501,7 +492,6 @@ Class | Method | HTTP request | Description
  - [ReductionStrategy](docs/ReductionStrategy.md)
  - [RestoreRequest](docs/RestoreRequest.md)
  - [RestoreResponse](docs/RestoreResponse.md)
- - [RetrievalConfig](docs/RetrievalConfig.md)
  - [RoleToolAccessCreate](docs/RoleToolAccessCreate.md)
  - [RoleToolAccessResponse](docs/RoleToolAccessResponse.md)
  - [SSEStatsResponse](docs/SSEStatsResponse.md)
@@ -522,7 +512,6 @@ Class | Method | HTTP request | Description
  - [TokenResponse](docs/TokenResponse.md)
  - [ToolAccessLevel](docs/ToolAccessLevel.md)
  - [ToolAccessResult](docs/ToolAccessResult.md)
- - [ToolConfig](docs/ToolConfig.md)
  - [ToolOperationResponse](docs/ToolOperationResponse.md)
  - [ToolPermissionCreate](docs/ToolPermissionCreate.md)
  - [ToolPermissionResponse](docs/ToolPermissionResponse.md)

@@ -77,11 +77,6 @@ chatter_sdk/models/chart_data_point.py
 chatter_sdk/models/chart_ready_analytics.py
 chatter_sdk/models/chat_request.py
 chatter_sdk/models/chat_response.py
-chatter_sdk/models/chat_workflow_config_input.py
-chatter_sdk/models/chat_workflow_config_output.py
-chatter_sdk/models/chat_workflow_request.py
-chatter_sdk/models/chat_workflow_template.py
-chatter_sdk/models/chat_workflow_templates_response.py
 chatter_sdk/models/chatter_schemas_chat_workflow_templates_response.py
 chatter_sdk/models/chatter_schemas_workflows_workflow_templates_response.py
 chatter_sdk/models/complexity_metrics.py
@@ -138,7 +133,6 @@ chatter_sdk/models/message_role.py
 chatter_sdk/models/metric_type.py
 chatter_sdk/models/metrics_response.py
 chatter_sdk/models/min_value.py
-chatter_sdk/models/model_config.py
 chatter_sdk/models/model_def_create.py
 chatter_sdk/models/model_def_list.py
 chatter_sdk/models/model_def_update.py
@@ -199,7 +193,6 @@ chatter_sdk/models/readiness_status.py
 chatter_sdk/models/reduction_strategy.py
 chatter_sdk/models/restore_request.py
 chatter_sdk/models/restore_response.py
-chatter_sdk/models/retrieval_config.py
 chatter_sdk/models/role_tool_access_create.py
 chatter_sdk/models/role_tool_access_response.py
 chatter_sdk/models/search_result_response.py
@@ -220,7 +213,6 @@ chatter_sdk/models/token_refresh_response.py
 chatter_sdk/models/token_response.py
 chatter_sdk/models/tool_access_level.py
 chatter_sdk/models/tool_access_result.py
-chatter_sdk/models/tool_config.py
 chatter_sdk/models/tool_operation_response.py
 chatter_sdk/models/tool_permission_create.py
 chatter_sdk/models/tool_permission_response.py
@@ -313,11 +305,6 @@ docs/ChartReadyAnalytics.md
 docs/ChatApi.md
 docs/ChatRequest.md
 docs/ChatResponse.md
-docs/ChatWorkflowConfigInput.md
-docs/ChatWorkflowConfigOutput.md
-docs/ChatWorkflowRequest.md
-docs/ChatWorkflowTemplate.md
-docs/ChatWorkflowTemplatesResponse.md
 docs/ChatterSchemasChatWorkflowTemplatesResponse.md
 docs/ChatterSchemasWorkflowsWorkflowTemplatesResponse.md
 docs/ComplexityMetrics.md
@@ -381,7 +368,6 @@ docs/MessageRole.md
 docs/MetricType.md
 docs/MetricsResponse.md
 docs/MinValue.md
-docs/ModelConfig.md
 docs/ModelDefCreate.md
 docs/ModelDefList.md
 docs/ModelDefUpdate.md
@@ -447,7 +433,6 @@ docs/RealTimeAnalyticsApi.md
 docs/ReductionStrategy.md
 docs/RestoreRequest.md
 docs/RestoreResponse.md
-docs/RetrievalConfig.md
 docs/RoleToolAccessCreate.md
 docs/RoleToolAccessResponse.md
 docs/SSEStatsResponse.md
@@ -468,7 +453,6 @@ docs/TokenRefreshResponse.md
 docs/TokenResponse.md
 docs/ToolAccessLevel.md
 docs/ToolAccessResult.md
-docs/ToolConfig.md
 docs/ToolOperationResponse.md
 docs/ToolPermissionCreate.md
 docs/ToolPermissionResponse.md
@@ -568,11 +552,6 @@ test/test_chart_ready_analytics.py
 test/test_chat_api.py
 test/test_chat_request.py
 test/test_chat_response.py
-test/test_chat_workflow_config_input.py
-test/test_chat_workflow_config_output.py
-test/test_chat_workflow_request.py
-test/test_chat_workflow_template.py
-test/test_chat_workflow_templates_response.py
 test/test_chatter_schemas_chat_workflow_templates_response.py
 test/test_chatter_schemas_workflows_workflow_templates_response.py
 test/test_complexity_metrics.py
@@ -636,7 +615,6 @@ test/test_message_role.py
 test/test_metric_type.py
 test/test_metrics_response.py
 test/test_min_value.py
-test/test_model_config.py
 test/test_model_def_create.py
 test/test_model_def_list.py
 test/test_model_def_update.py
@@ -702,7 +680,6 @@ test/test_real_time_analytics_api.py
 test/test_reduction_strategy.py
 test/test_restore_request.py
 test/test_restore_response.py
-test/test_retrieval_config.py
 test/test_role_tool_access_create.py
 test/test_role_tool_access_response.py
 test/test_search_result_response.py
@@ -723,7 +700,6 @@ test/test_token_refresh_response.py
 test/test_token_response.py
 test/test_tool_access_level.py
 test/test_tool_access_result.py
-test/test_tool_config.py
 test/test_tool_operation_response.py
 test/test_tool_permission_create.py
 test/test_tool_permission_response.py

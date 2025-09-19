@@ -32,10 +32,8 @@ if TYPE_CHECKING:
     from chatter.models.user import User
 
 
-# DEPRECATED: WorkflowType enum removed in favor of dynamic workflow types
-# Keeping for backward compatibility during migration phase
 class WorkflowType(str, Enum):
-    """DEPRECATED: Enumeration for workflow types. Use dynamic workflow_type string instead."""
+    """Enumeration for workflow types."""
 
     PLAIN = "plain"
     TOOLS = "tools"
@@ -113,23 +111,11 @@ class WorkflowTemplate(Base):
         String(255), nullable=False, index=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    
-    # Dynamic workflow type (replaces enum constraint)
-    workflow_type: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, index=True,
-        comment="Dynamic workflow type identifier (e.g., simple_chat, rag_chat)"
+    workflow_type: Mapped[WorkflowType] = mapped_column(
+        SQLEnum(WorkflowType),
+        nullable=False,
+        index=True,
     )
-    
-    # Enhanced dynamic workflow fields
-    is_dynamic: Mapped[bool] = mapped_column(
-        Boolean, default=False, nullable=False, index=True,
-        comment="Whether workflow is dynamically generated"
-    )
-    execution_pattern: Mapped[str | None] = mapped_column(
-        String(100), nullable=True, index=True,
-        comment="Execution pattern hint (chat, batch, streaming)"
-    )
-    
     category: Mapped[TemplateCategory] = mapped_column(
         SQLEnum(TemplateCategory),
         default=TemplateCategory.CUSTOM,
@@ -253,7 +239,7 @@ class WorkflowTemplate(Base):
         """Convert to UnifiedTemplateManager format."""
         return {
             "name": self.name,
-            "workflow_type": self.workflow_type or "unknown",  # Handle None values
+            "workflow_type": self.workflow_type.value,
             "description": self.description,
             "default_params": self.default_params,
             "required_tools": self.required_tools,
@@ -267,7 +253,7 @@ class WorkflowTemplate(Base):
             "owner_id": self.owner_id,
             "name": self.name,
             "description": self.description,
-            "workflow_type": self.workflow_type or "unknown",  # Handle None values
+            "workflow_type": self.workflow_type.value,
             "category": self.category.value,
             "default_params": self.default_params,
             "required_tools": self.required_tools,
@@ -332,11 +318,10 @@ class TemplateSpec(Base):
         String(255), nullable=False, index=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-    
-    # Dynamic workflow type (replaces enum constraint)
-    workflow_type: Mapped[str | None] = mapped_column(
-        String(50), nullable=True, index=True,
-        comment="Dynamic workflow type identifier"
+    workflow_type: Mapped[WorkflowType] = mapped_column(
+        SQLEnum(WorkflowType),
+        nullable=False,
+        index=True,
     )
 
     # Spec configuration
@@ -383,7 +368,7 @@ class TemplateSpec(Base):
             "owner_id": self.owner_id,
             "name": self.name,
             "description": self.description,
-            "workflow_type": self.workflow_type or "unknown",  # Handle None values
+            "workflow_type": self.workflow_type.value,
             "default_params": self.default_params,
             "required_tools": self.required_tools,
             "required_retrievers": self.required_retrievers,

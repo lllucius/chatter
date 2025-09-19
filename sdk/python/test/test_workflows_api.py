@@ -48,31 +48,10 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_execute_chat_workflow_api_v1_workflows_execute_chat_post(self) -> None:
-        """Test case for execute_chat_workflow_api_v1_workflows_execute_chat_post
-
-        Execute Chat Workflow
-        """
-        pass
-
-    async def test_execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(self) -> None:
-        """Test case for execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post
-
-        Execute Chat Workflow Streaming
-        """
-        pass
-
     async def test_execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post(self) -> None:
         """Test case for execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post
 
         Execute Workflow
-        """
-        pass
-
-    async def test_get_chat_workflow_templates_api_v1_workflows_templates_chat_get(self) -> None:
-        """Test case for get_chat_workflow_templates_api_v1_workflows_templates_chat_get
-
-        Get Chat Workflow Templates
         """
         pass
 

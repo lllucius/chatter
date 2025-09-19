@@ -47,18 +47,19 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
   const [loading, setLoading] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
 
-  const calculateNodeTypeDistribution = useCallback((
-    nodes: Node<WorkflowNodeData>[]
-  ): Record<WorkflowNodeType, number> => {
-    return nodes.reduce(
-      (acc, node) => {
-        const nodeType = node.data.nodeType;
-        acc[nodeType] = (acc[nodeType] || 0) + 1;
-        return acc;
-      },
-      {} as Record<WorkflowNodeType, number>
-    );
-  }, []);
+  const calculateNodeTypeDistribution = useCallback(
+    (nodes: Node<WorkflowNodeData>[]): Record<WorkflowNodeType, number> => {
+      return nodes.reduce(
+        (acc, node) => {
+          const nodeType = node.data.nodeType;
+          acc[nodeType] = (acc[nodeType] || 0) + 1;
+          return acc;
+        },
+        {} as Record<WorkflowNodeType, number>
+      );
+    },
+    []
+  );
 
   const calculateSimpleMetrics = useCallback((): WorkflowMetrics => {
     const { nodes, edges } = workflow;
@@ -139,7 +140,13 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     };
 
     fetchAnalytics();
-  }, [workflow.id, workflow.nodes, workflow.edges, calculateSimpleMetrics, calculateNodeTypeDistribution]);
+  }, [
+    workflow.id,
+    workflow.nodes,
+    workflow.edges,
+    calculateSimpleMetrics,
+    calculateNodeTypeDistribution,
+  ]);
 
   if (loading) {
     return (

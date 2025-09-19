@@ -2,7 +2,11 @@
 import { describe, it, expect, vi } from 'vitest';
 
 // Import the types we've updated
-import type { ChatWorkflowConfig, ChatWorkflowRequest, ChatWorkflowTemplate } from '../../hooks/useWorkflowChat';
+import type {
+  ChatWorkflowConfig,
+  ChatWorkflowRequest,
+  ChatWorkflowTemplate,
+} from '../../hooks/useWorkflowChat';
 
 describe('SDK Type Integration', () => {
   it('should properly type ChatWorkflowConfig', () => {

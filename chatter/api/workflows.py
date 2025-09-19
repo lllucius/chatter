@@ -1,6 +1,7 @@
 """Comprehensive workflows API supporting advanced workflow editor features."""
 
 import json
+
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -683,27 +684,37 @@ async def list_workflow_executions(
 
 # Chat Workflow Endpoints
 
+
 @router.post("/execute/chat", response_model=ChatResponse)
 @rate_limit(max_requests=30, window_seconds=60)
 async def execute_chat_workflow(
     request: ChatWorkflowRequest,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(get_workflow_execution_service),
+    workflow_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
 ) -> ChatResponse:
     """Execute chat using dynamically built workflow."""
     try:
-        conversation, message = await workflow_service.execute_chat_workflow(
-            user_id=current_user.id,
-            request=request,
-            streaming=False
+        conversation, message = (
+            await workflow_service.execute_chat_workflow(
+                user_id=current_user.id,
+                request=request,
+                streaming=False,
+            )
         )
-        
-        from chatter.schemas.chat import ConversationResponse, MessageResponse
-        
+
+        from chatter.schemas.chat import (
+            ConversationResponse,
+            MessageResponse,
+        )
+
         return ChatResponse(
             conversation_id=conversation.id,
             message=MessageResponse.model_validate(message),
-            conversation=ConversationResponse.model_validate(conversation)
+            conversation=ConversationResponse.model_validate(
+                conversation
+            ),
         )
     except Exception as e:
         logger.error(f"Failed to execute chat workflow: {e}")
@@ -718,16 +729,16 @@ async def execute_chat_workflow_streaming(
     request: ChatWorkflowRequest,
     chat_request: Request,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(get_workflow_execution_service),
+    workflow_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
 ):
     """Execute chat using dynamically built workflow with streaming."""
-    
+
     async def generate_stream():
         try:
             async for chunk in workflow_service.execute_chat_workflow(
-                user_id=current_user.id,
-                request=request,
-                streaming=True
+                user_id=current_user.id, request=request, streaming=True
             ):
                 if await chat_request.is_disconnected():
                     logger.info("Client disconnected during streaming")
@@ -749,22 +760,25 @@ async def execute_chat_workflow_streaming(
     )
 
 
-@router.get("/templates/chat", response_model=ChatWorkflowTemplatesResponse)
+@router.get(
+    "/templates/chat", response_model=ChatWorkflowTemplatesResponse
+)
 async def get_chat_workflow_templates(
     current_user: User = Depends(get_current_user),
 ) -> ChatWorkflowTemplatesResponse:
     """Get pre-built workflow templates optimized for chat."""
     try:
-        from chatter.core.unified_template_manager import get_template_manager_with_session
+        from chatter.core.unified_template_manager import (
+            get_template_manager_with_session,
+        )
         from chatter.utils.database import get_session_generator
-        
+
         session = await anext(get_session_generator())
         template_manager = get_template_manager_with_session(session)
         templates = await template_manager.get_chat_templates()
-        
+
         return ChatWorkflowTemplatesResponse(
-            templates=templates,
-            total_count=len(templates)
+            templates=templates, total_count=len(templates)
         )
     except Exception as e:
         logger.error(f"Failed to get chat workflow templates: {e}")

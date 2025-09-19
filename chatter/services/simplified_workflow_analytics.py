@@ -223,6 +223,3 @@ class SimplifiedWorkflowAnalyticsService:
             "analysis_timestamp": None,
             "cache_info": {"cached": False, "error": True},
         }
-
-
-

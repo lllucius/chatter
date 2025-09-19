@@ -130,9 +130,9 @@ const ChatConfigPanel: React.FC<Props> = ({
   // Handle profile selection and populate settings from profile
   const handleProfileChange = (profileId: string) => {
     setSelectedProfile(profileId);
-    
+
     // Find the selected profile and populate settings
-    const profile = profiles.find(p => p.id === profileId);
+    const profile = profiles.find((p) => p.id === profileId);
     if (profile) {
       setTemperature(profile.temperature || 0.7);
       setMaxTokens(profile.max_tokens || 1000);
@@ -144,9 +144,9 @@ const ChatConfigPanel: React.FC<Props> = ({
   // Handle prompt selection and populate custom prompt text
   const handlePromptChange = (promptId: string) => {
     setSelectedPrompt(promptId);
-    
+
     // Find the selected prompt and populate custom text
-    const prompt = prompts.find(p => p.id === promptId);
+    const prompt = prompts.find((p) => p.id === promptId);
     if (prompt && prompt.content) {
       setCustomPromptText(prompt.content);
     } else if (!promptId) {
@@ -354,7 +354,7 @@ const ChatConfigPanel: React.FC<Props> = ({
               ))}
             </Select>
           </FormControl>
-          
+
           {/* Custom Prompt Text Editor */}
           <TextField
             label="Custom Prompt Text"
@@ -367,7 +367,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             sx={{ mb: 2 }}
             helperText="Edit the prompt text or select a predefined template above"
           />
-          
+
           {selectedPrompt && (
             <Box>
               <Typography variant="body2" color="text.secondary">
@@ -517,7 +517,8 @@ const ChatConfigPanel: React.FC<Props> = ({
           />
 
           <Typography variant="body2" color="text.secondary">
-            Enable AI assistant to execute tools and functions during conversation
+            Enable AI assistant to execute tools and functions during
+            conversation
           </Typography>
         </AccordionDetails>
       </Accordion>

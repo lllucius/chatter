@@ -104,7 +104,7 @@ function CrudDataTableInner<T, TCreate, TUpdate>(
     getItemId,
     externalDialogOpen,
     onExternalDialogClose,
-    }: CrudDataTableProps<T, TCreate, TUpdate>,
+  }: CrudDataTableProps<T, TCreate, TUpdate>,
   ref: React.ForwardedRef<CrudDataTableRef>
 ) {
   // State management
@@ -312,11 +312,15 @@ function CrudDataTableInner<T, TCreate, TUpdate>(
                       <TableCell key={String(column.id)}>
                         {column.render
                           ? column.render(
-                              (item as Record<string, unknown>)[String(column.id)],
+                              (item as Record<string, unknown>)[
+                                String(column.id)
+                              ],
                               item
                             )
                           : String(
-                              (item as Record<string, unknown>)[String(column.id)] || ''
+                              (item as Record<string, unknown>)[
+                                String(column.id)
+                              ] || ''
                             )}
                       </TableCell>
                     ))}
@@ -431,8 +435,14 @@ function CrudDataTableInner<T, TCreate, TUpdate>(
   );
 }
 
-export const CrudDataTable = forwardRef(CrudDataTableInner) as <T, TCreate, TUpdate>(
-  props: CrudDataTableProps<T, TCreate, TUpdate> & { ref?: React.Ref<CrudDataTableRef> }
+export const CrudDataTable = forwardRef(CrudDataTableInner) as <
+  T,
+  TCreate,
+  TUpdate,
+>(
+  props: CrudDataTableProps<T, TCreate, TUpdate> & {
+    ref?: React.Ref<CrudDataTableRef>;
+  }
 ) => React.ReactElement;
 
 export default CrudDataTable;

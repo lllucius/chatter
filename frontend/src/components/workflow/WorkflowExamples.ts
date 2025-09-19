@@ -304,7 +304,9 @@ export class WorkflowValidator {
     const errors: string[] = [];
 
     // Check for entry point
-    const hasStartNode = workflow.nodes.some((node: Node) => node.type === 'start');
+    const hasStartNode = workflow.nodes.some(
+      (node: Node) => node.type === 'start'
+    );
     if (!hasStartNode) {
       errors.push('Workflow must have at least one start node');
     }

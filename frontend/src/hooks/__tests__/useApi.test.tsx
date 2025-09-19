@@ -1,6 +1,6 @@
 import React from 'react';
 import { render, renderHook, waitFor, act } from '@testing-library/react';
-import { describe, it, expect, beforeEach, vi } from "vitest";
+import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { useApi } from '../useApi';
 
 // Mock API function that tracks how many times it's called

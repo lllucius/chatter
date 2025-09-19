@@ -51,15 +51,21 @@ async def get_message_service(
 
 
 async def get_conversation_handler(
-    conversation_service: ConversationService = Depends(get_conversation_service),
+    conversation_service: ConversationService = Depends(
+        get_conversation_service
+    ),
     message_service: MessageService = Depends(get_message_service),
 ) -> ConversationResourceHandler:
     """Get conversation resource handler."""
-    return ConversationResourceHandler(conversation_service, message_service)
+    return ConversationResourceHandler(
+        conversation_service, message_service
+    )
 
 
 async def get_message_handler(
-    conversation_service: ConversationService = Depends(get_conversation_service),
+    conversation_service: ConversationService = Depends(
+        get_conversation_service
+    ),
     message_service: MessageService = Depends(get_message_service),
 ) -> MessageResourceHandler:
     """Get message resource handler."""

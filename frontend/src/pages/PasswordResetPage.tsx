@@ -224,7 +224,10 @@ const PasswordResetPage: React.FC = () => {
                     type="password"
                     value={confirmForm.values.confirmPassword}
                     onChange={(e) =>
-                      confirmForm.setFieldValue('confirmPassword', e.target.value)
+                      confirmForm.setFieldValue(
+                        'confirmPassword',
+                        e.target.value
+                      )
                     }
                     error={!!confirmForm.errors.confirmPassword}
                     helperText={confirmForm.errors.confirmPassword}

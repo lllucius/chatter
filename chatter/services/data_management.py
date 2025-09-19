@@ -444,7 +444,9 @@ class DataManager:
         self, document_ids: list[str], user_id: str
     ) -> dict[str, Any]:
         """Bulk delete documents using NewDocumentService."""
-        from chatter.services.new_document_service import NewDocumentService
+        from chatter.services.new_document_service import (
+            NewDocumentService,
+        )
         from chatter.utils.database import get_session_maker
 
         success_count = 0

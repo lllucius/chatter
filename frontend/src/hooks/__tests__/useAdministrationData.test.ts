@@ -45,7 +45,7 @@ describe('useAdministrationData - Infinite Loop Prevention', () => {
 
   it('should not cause infinite re-renders', async () => {
     let renderCount = 0;
-    
+
     const { result } = renderHook(() => {
       renderCount++;
       return useAdministrationData();
@@ -53,19 +53,19 @@ describe('useAdministrationData - Infinite Loop Prevention', () => {
 
     // Wait for initial effects to run
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 10));
+      await new Promise((resolve) => setTimeout(resolve, 10));
     });
 
     const initialRenderCount = renderCount;
 
     // Wait a bit more to see if there are additional renders
     await act(async () => {
-      await new Promise(resolve => setTimeout(resolve, 50));
+      await new Promise((resolve) => setTimeout(resolve, 50));
     });
 
     // Should not have significantly more renders
     expect(renderCount).toBeLessThanOrEqual(initialRenderCount + 2); // Allow for React StrictMode double rendering
-    
+
     // Verify the hook returns expected structure
     expect(result.current).toHaveProperty('backups');
     expect(result.current).toHaveProperty('plugins');
@@ -102,21 +102,21 @@ describe('useAdministrationData - Infinite Loop Prevention', () => {
   it('should prevent infinite loop patterns', () => {
     // This test verifies the code structure rather than runtime behavior
     // since the infinite loop was a structural issue
-    
+
     const { result } = renderHook(() => useAdministrationData());
-    
+
     // Verify hook structure is correct
     expect(result.current).toBeDefined();
     expect(typeof result.current.loadBackups).toBe('function');
     expect(typeof result.current.loadPlugins).toBe('function');
     expect(typeof result.current.loadJobs).toBe('function');
     expect(typeof result.current.loadJobStats).toBe('function');
-    
+
     // The fix prevents infinite loops by:
     // 1. Using empty dependency arrays for stable callbacks
     // 2. Using useRef for accessing changing values without dependencies
     // 3. Loading data only once on mount
-    
+
     expect(true).toBe(true); // Test passes if no infinite loop crashes the test
   });
 });

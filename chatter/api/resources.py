@@ -24,7 +24,11 @@ from chatter.utils.problem import NotFoundProblem
 class ConversationResourceHandler:
     """Resource handler for conversation CRUD operations."""
 
-    def __init__(self, conversation_service: ConversationService, message_service: MessageService):
+    def __init__(
+        self,
+        conversation_service: ConversationService,
+        message_service: MessageService,
+    ):
         self.conversation_service = conversation_service
         self.message_service = message_service
 
@@ -34,8 +38,10 @@ class ConversationResourceHandler:
         current_user: User,
     ) -> ConversationResponse:
         """Create a new conversation."""
-        conversation = await self.conversation_service.create_conversation(
-            current_user.id, conversation_data
+        conversation = (
+            await self.conversation_service.create_conversation(
+                current_user.id, conversation_data
+            )
         )
         return ConversationResponse.model_validate(conversation)
 
@@ -132,8 +138,10 @@ class ConversationResourceHandler:
     ) -> ConversationResponse:
         """Update a conversation."""
         try:
-            conversation = await self.conversation_service.update_conversation(
-                conversation_id, current_user.id, update_data
+            conversation = (
+                await self.conversation_service.update_conversation(
+                    conversation_id, current_user.id, update_data
+                )
             )
             return ConversationResponse.model_validate(conversation)
         except NotFoundError as e:
@@ -165,7 +173,11 @@ class ConversationResourceHandler:
 class MessageResourceHandler:
     """Resource handler for message CRUD operations."""
 
-    def __init__(self, conversation_service: ConversationService, message_service: MessageService):
+    def __init__(
+        self,
+        conversation_service: ConversationService,
+        message_service: MessageService,
+    ):
         self.conversation_service = conversation_service
         self.message_service = message_service
 

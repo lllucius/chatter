@@ -327,7 +327,7 @@ const ToolsPage: React.FC = () => {
       const response =
         await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
       return {
-        items: ((response || []) as unknown) as Tool[],
+        items: (response || []) as unknown as Tool[],
         total: response?.length || 0,
       };
     },

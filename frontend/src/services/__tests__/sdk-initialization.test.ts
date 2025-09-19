@@ -13,10 +13,16 @@ vi.mock('chatter-sdk', () => ({
       listConversationsApiV1Conversations: vi.fn(),
       deleteConversationApiV1ConversationsConversationId: vi.fn(),
     },
+    workflows: {
+      getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat: vi.fn(),
+    },
     withAuth: vi.fn().mockImplementation(() => ({
       conversations: {
         listConversationsApiV1Conversations: vi.fn(),
         deleteConversationApiV1ConversationsConversationId: vi.fn(),
+      },
+      workflows: {
+        getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat: vi.fn(),
       },
     })),
   })),
@@ -61,6 +67,17 @@ describe('SDK Initialization Fix', () => {
     const sdk = getSDK();
     expect(sdk.conversations).toBeDefined();
     expect(sdk.conversations.listConversationsApiV1Conversations).toBeDefined();
+  });
+
+  it('should verify SDK has workflows property', async () => {
+    // Mock the refresh token to avoid network calls
+    vi.spyOn(authService as any, 'refreshToken').mockResolvedValue(false);
+
+    await authService.initialize();
+
+    const sdk = getSDK();
+    expect(sdk.workflows).toBeDefined();
+    expect(sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat).toBeDefined();
   });
 
   it('should check initialization status correctly', async () => {

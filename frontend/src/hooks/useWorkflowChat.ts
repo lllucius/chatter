@@ -23,7 +23,19 @@ export const useWorkflowChat = () => {
   // Load available workflow templates
   const loadWorkflowTemplates = useCallback(async () => {
     try {
-      const response = await getSDK().workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat();
+      const sdk = getSDK();
+      
+      // Check if SDK and workflows are properly initialized
+      if (!sdk || !sdk.workflows) {
+        throw new Error('SDK or workflows API not initialized');
+      }
+      
+      // Check if the method exists
+      if (typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat !== 'function') {
+        throw new Error('getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available');
+      }
+      
+      const response = await sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat();
       setWorkflowTemplates(response.templates);
     } catch (error) {
       handleError(error, {

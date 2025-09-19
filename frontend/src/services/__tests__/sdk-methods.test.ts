@@ -1,6 +1,6 @@
 // Integration test for SDK methods
 import { describe, it, expect, vi, beforeEach } from 'vitest';
-import { ChatterSDK } from 'chatter-sdk';
+import { ChatterSDK, Configuration } from 'chatter-sdk';
 
 // Mock fetch to simulate API responses
 global.fetch = vi.fn();
@@ -10,9 +10,9 @@ describe('SDK Method Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    sdk = new ChatterSDK({
+    sdk = new ChatterSDK(new Configuration({
       basePath: 'http://localhost:8000',
-    });
+    }));
   });
 
   it('should have all expected API groups', () => {

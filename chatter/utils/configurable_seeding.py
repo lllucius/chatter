@@ -326,16 +326,13 @@ class ConfigurableSeeder(DatabaseSeeder):
             from chatter.models.workflow import (
                 TemplateCategory,
                 WorkflowTemplate,
-                WorkflowType,
             )
 
             return WorkflowTemplate(
                 owner_id=admin_user.id,
                 name=entity_data["name"],
                 description=entity_data["description"],
-                workflow_type=WorkflowType(
-                    entity_data["workflow_type"]
-                ),
+                workflow_type=entity_data["workflow_type"],
                 category=TemplateCategory(entity_data["category"]),
                 default_params=entity_data["default_params"],
                 required_tools=entity_data.get("required_tools"),

@@ -208,7 +208,7 @@ class ConversationWithMessages(ConversationResponse):
     )
 
 
-WorkflowType = Literal["plain", "rag", "tools", "full"]
+
 
 
 class WorkflowTemplateInfo(BaseModel):
@@ -278,10 +278,10 @@ class ChatRequest(BaseModel):
         None, description="Profile ID to use"
     )
 
-    # Workflow selection (preferred)
-    workflow: WorkflowType = Field(
-        default="plain",
-        description="Workflow type: plain, rag, tools, or full (rag + tools)",
+    # Workflow selection - dynamic workflow type
+    workflow_type: str = Field(
+        default="simple_chat",
+        description="Dynamic workflow type identifier",
     )
 
     # Provider override (optional)
@@ -315,11 +315,7 @@ class ChatRequest(BaseModel):
         None, description="Workflow configuration"
     )
 
-    # Internal field set by API processing
-    workflow_type: str | None = Field(
-        None,
-        description="Internal workflow type (set by API processing)",
-    )
+
 
 
 class ChatResponse(BaseModel):

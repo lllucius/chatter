@@ -7,12 +7,13 @@ import {
   RefreshIcon,
 } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import ChatConfigPanel from './ChatConfigPanel';
+import ChatWorkflowConfigPanel from './ChatWorkflowConfigPanel';
 import ConversationHistory from '../components/ConversationHistory';
 import ChatExport from '../components/ChatExport';
 import ChatMessageList from '../components/chat/ChatMessageList';
 import ChatInput from '../components/chat/ChatInput';
 import { useChatData, useChatMessages } from '../hooks/useChatData';
+import { useWorkflowChat } from '../hooks/useWorkflowChat';
 import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
@@ -65,6 +66,19 @@ const ChatPage: React.FC = () => {
     clearMessages,
     focusInput,
   } = useChatMessages();
+
+  // Use workflow-based chat hook
+  const {
+    workflowTemplates,
+    selectedTemplate,
+    customWorkflowConfig,
+    setSelectedTemplate,
+    updateWorkflowConfig,
+    resetToTemplate,
+    buildWorkflowRequest,
+    sendWorkflowMessage,
+    getEffectiveConfig,
+  } = useWorkflowChat();
 
   // Dialog state
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
@@ -330,6 +344,214 @@ const ChatPage: React.FC = () => {
     ]
   );
 
+  const handleWorkflowStreamingResponse = useCallback(
+    async (workflowRequest: any, isRegeneration: boolean) => {
+      try {
+        // Get the streaming response from workflow API
+        const stream = await sendWorkflowMessage(workflowRequest, true);
+
+        // Create a text decoder to handle the stream
+        const decoder = new TextDecoder();
+        const reader = stream.getReader();
+
+        // Create initial assistant message for streaming
+        const assistantMessageId = `assistant-${Date.now()}`;
+        let streamedContent = '';
+        let totalTokens = 0;
+        let model = '';
+        let processingTime = 0;
+
+        const initialAssistantMessage: ChatMessage = {
+          id: assistantMessageId,
+          role: 'assistant',
+          content: '',
+          timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: 'Starting',
+              currentStep: 0,
+              totalSteps: 1,
+              stepDescriptions: ['Initializing workflow...'],
+            },
+          },
+        };
+
+        if (isRegeneration) {
+          // For regeneration, replace the last assistant message
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
+            if (lastAssistantIndex !== -1) {
+              newMessages[lastAssistantIndex] = initialAssistantMessage;
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => [...prev, initialAssistantMessage]);
+        }
+
+        // Process the stream
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            break;
+          }
+
+          // Decode the chunk
+          const chunk = decoder.decode(value, { stream: true });
+
+          // Split by lines and process each event
+          const lines = chunk.split('\n');
+
+          for (const line of lines) {
+            if (line.startsWith('data: ')) {
+              const data = line.slice(6);
+
+              if (data === '[DONE]') {
+                // Stream is complete
+                break;
+              }
+
+              try {
+                const eventData = JSON.parse(data);
+
+                switch (eventData.type) {
+                  case 'token':
+                    // Add the token to our streamed content
+                    streamedContent += eventData.content || '';
+
+                    // Update the message with the new content
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantMessageId
+                          ? {
+                              ...msg,
+                              content: streamedContent,
+                              metadata: {
+                                ...msg.metadata,
+                                workflow: {
+                                  stage: 'Streaming',
+                                  currentStep: 0,
+                                  totalSteps: 1,
+                                  stepDescriptions: ['Receiving response...'],
+                                },
+                              },
+                            }
+                          : msg
+                      )
+                    );
+                    break;
+
+                  case 'complete':
+                    // Extract final metadata
+                    if (eventData.metadata) {
+                      totalTokens = eventData.metadata.total_tokens;
+                      model = eventData.metadata.model_used;
+                      processingTime = eventData.metadata.response_time_ms;
+                    }
+
+                    // Update the message with final metadata
+                    setMessages((prev) =>
+                      prev.map((msg) =>
+                        msg.id === assistantMessageId
+                          ? {
+                              ...msg,
+                              content: streamedContent,
+                              metadata: {
+                                model,
+                                tokens: totalTokens,
+                                processingTime,
+                                workflow: {
+                                  stage: 'Complete',
+                                  currentStep: 1,
+                                  totalSteps: 1,
+                                  stepDescriptions: ['Response completed'],
+                                },
+                              },
+                            }
+                          : msg
+                      )
+                    );
+                    break;
+
+                  case 'error':
+                    throw new Error(
+                      eventData.message || 'Workflow streaming error occurred'
+                    );
+
+                  default:
+                    // Handle other event types if needed
+                    break;
+                }
+              } catch (parseError) {
+                // Skip malformed data
+              }
+            }
+          }
+        }
+
+        // Clean up
+        reader.releaseLock();
+
+        // Focus input after streaming is complete
+        focusInput();
+      } catch (error) {
+        // Handle streaming errors by showing an error message
+        const errorMessage: ChatMessage = {
+          id: `assistant-error-${Date.now()}`,
+          role: 'assistant',
+          content:
+            'Sorry, I encountered an error while processing your request. Please try again.',
+          timestamp: new Date(),
+          metadata: {
+            workflow: {
+              stage: 'Error',
+              currentStep: 0,
+              totalSteps: 1,
+              stepDescriptions: ['Error occurred during workflow streaming'],
+            },
+          },
+        };
+
+        if (isRegeneration) {
+          setMessages((prev) => {
+            const newMessages = [...prev];
+            let lastAssistantIndex = -1;
+            for (let i = newMessages.length - 1; i >= 0; i--) {
+              if (newMessages[i].role === 'assistant') {
+                lastAssistantIndex = i;
+                break;
+              }
+            }
+            if (lastAssistantIndex !== -1) {
+              newMessages[lastAssistantIndex] = errorMessage;
+            }
+            return newMessages;
+          });
+        } else {
+          setMessages((prev) => [...prev, errorMessage]);
+        }
+
+        handleError(error, {
+          source: 'ChatPage.handleWorkflowStreamingResponse',
+          operation: 'stream workflow chat response',
+        });
+      }
+    },
+    [
+      setMessages,
+      sendWorkflowMessage,
+      focusInput,
+    ]
+  );
+
   const handleRegenerateMessage = useCallback(
     async (messageId: string) => {
       try {
@@ -343,29 +565,41 @@ const ChatPage: React.FC = () => {
             const textToSend = userMessage.content;
             if (!textToSend) return;
 
-            // Prepare chat request
-            const chatRequest = {
-              message: textToSend,
-              profile_id: selectedProfile || undefined,
-              prompt_id: selectedPrompt || undefined,
-              custom_prompt: customPromptText.trim() || undefined,
-              document_ids:
-                selectedDocuments.length > 0 ? selectedDocuments : undefined,
-              temperature,
-              max_tokens: maxTokens,
-              enable_retrieval: enableRetrieval,
-              enable_tools: enableTools,
-            };
+            // Prepare workflow chat request
+            const workflowRequest = buildWorkflowRequest(
+              textToSend,
+              currentConversation?.id,
+              {
+                profile_id: selectedProfile || undefined,
+                system_prompt_override: customPromptText.trim() || undefined,
+                document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+                workflow_config: {
+                  ...getEffectiveConfig(),
+                  model_config: {
+                    ...getEffectiveConfig().model_config,
+                    temperature,
+                    max_tokens: maxTokens,
+                  },
+                  retrieval_config: enableRetrieval ? {
+                    enabled: true,
+                    max_documents: 5,
+                    similarity_threshold: 0.7,
+                    document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+                    rerank: false,
+                  } : undefined,
+                },
+              }
+            );
 
-            // Send message to API
+            // Send message to workflow API
             let response;
             if (streamingEnabled) {
-              // Use streaming endpoint
-              await handleStreamingResponse(chatRequest, true);
+              // Use streaming workflow endpoint
+              await handleWorkflowStreamingResponse(workflowRequest, true);
               return; // Streaming handling is complete
             } else {
-              // Use non-streaming endpoint
-              response = await getSDK().chat.chatChat(chatRequest);
+              // Use non-streaming workflow endpoint
+              response = await sendWorkflowMessage(workflowRequest, false);
             }
 
             // Validate response structure
@@ -429,17 +663,15 @@ const ChatPage: React.FC = () => {
       selectedProfile,
       selectedPrompt,
       selectedDocuments,
-      temperature,
-      maxTokens,
+      currentConversation,
+      customPromptText,
       streamingEnabled,
       enableRetrieval,
-      enableTools,
-      customPromptText,
       setMessages,
-      handleEditMessage,
-      handleDeleteMessage,
-      handleRateMessage,
-      handleStreamingResponse,
+      buildWorkflowRequest,
+      getEffectiveConfig,
+      sendWorkflowMessage,
+      handleWorkflowStreamingResponse,
     ]
   );
 
@@ -470,7 +702,7 @@ const ChatPage: React.FC = () => {
   useEffect(() => {
     setTitle('Chat Settings');
     setPanelContent(
-      <ChatConfigPanel
+      <ChatWorkflowConfigPanel
         profiles={profiles}
         prompts={prompts}
         documents={documents}
@@ -481,16 +713,14 @@ const ChatPage: React.FC = () => {
         setSelectedPrompt={setSelectedPrompt}
         selectedDocuments={selectedDocuments}
         setSelectedDocuments={setSelectedDocuments}
-        temperature={temperature}
-        setTemperature={setTemperature}
-        maxTokens={maxTokens}
-        setMaxTokens={setMaxTokens}
-        enableRetrieval={enableRetrieval}
-        setEnableRetrieval={setEnableRetrieval}
-        enableTools={enableTools}
-        setEnableTools={setEnableTools}
         customPromptText={customPromptText}
         setCustomPromptText={setCustomPromptText}
+        workflowTemplates={workflowTemplates}
+        selectedTemplate={selectedTemplate}
+        setSelectedTemplate={setSelectedTemplate}
+        workflowConfig={customWorkflowConfig}
+        updateWorkflowConfig={updateWorkflowConfig}
+        resetToTemplate={resetToTemplate}
         onSelectConversation={handleSelectConversation}
       />
     );
@@ -506,11 +736,10 @@ const ChatPage: React.FC = () => {
     selectedProfile,
     selectedPrompt,
     selectedDocuments,
-    temperature,
-    maxTokens,
-    enableRetrieval,
-    enableTools,
     customPromptText,
+    workflowTemplates,
+    selectedTemplate,
+    customWorkflowConfig,
     handleSelectConversation,
   ]);
 
@@ -538,29 +767,42 @@ const ChatPage: React.FC = () => {
           setMessages((prev) => [...prev, userMessage]);
         }
 
-        // Prepare chat request
-        const chatRequest = {
-          message: textToSend,
-          profile_id: selectedProfile || undefined,
-          prompt_id: selectedPrompt || undefined,
-          custom_prompt: customPromptText.trim() || undefined,
-          document_ids:
-            selectedDocuments.length > 0 ? selectedDocuments : undefined,
-          temperature,
-          max_tokens: maxTokens,
-          enable_retrieval: enableRetrieval,
-          enable_tools: enableTools,
-        };
+        // Prepare workflow chat request
+        const workflowRequest = buildWorkflowRequest(
+          textToSend,
+          currentConversation?.id,
+          {
+            profile_id: selectedProfile || undefined,
+            system_prompt_override: customPromptText.trim() || undefined,
+            document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+            // Merge with effective workflow configuration
+            workflow_config: {
+              ...getEffectiveConfig(),
+              model_config: {
+                ...getEffectiveConfig().model_config,
+                temperature,
+                max_tokens: maxTokens,
+              },
+              retrieval_config: enableRetrieval ? {
+                enabled: true,
+                max_documents: 5,
+                similarity_threshold: 0.7,
+                document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+                rerank: false,
+              } : undefined,
+            },
+          }
+        );
 
-        // Send message to API
+        // Send message to workflow API
         let response;
         if (streamingEnabled) {
-          // Use streaming endpoint
-          await handleStreamingResponse(chatRequest, isRegeneration);
+          // Use streaming workflow endpoint
+          await handleWorkflowStreamingResponse(workflowRequest, isRegeneration);
           return; // Streaming handling is complete
         } else {
-          // Use non-streaming endpoint
-          response = await getSDK().chat.chatChat(chatRequest);
+          // Use non-streaming workflow endpoint
+          response = await sendWorkflowMessage(workflowRequest, false);
         }
 
         // Validate response structure
@@ -628,21 +870,18 @@ const ChatPage: React.FC = () => {
       selectedProfile,
       selectedPrompt,
       selectedDocuments,
-      temperature,
-      maxTokens,
+      currentConversation,
+      customPromptText,
       streamingEnabled,
       enableRetrieval,
-      enableTools,
-      customPromptText,
       setMessage,
       setMessages,
       setLoading,
-      handleEditMessage,
-      handleRegenerateMessage,
-      handleDeleteMessage,
-      handleRateMessage,
+      buildWorkflowRequest,
+      getEffectiveConfig,
+      sendWorkflowMessage,
+      handleWorkflowStreamingResponse,
       focusInput,
-      handleStreamingResponse,
     ]
   );
 

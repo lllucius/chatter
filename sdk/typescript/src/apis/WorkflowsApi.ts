@@ -203,4 +203,52 @@ export class WorkflowsApi extends BaseAPI {
     const response = await this.request(requestContext);
     return response.json() as Promise<WorkflowExecutionResponse[]>;
   }
+
+  /**Execute Chat Workflow
+   * Execute chat using dynamically built workflow.
+   */
+  public async executeChatWorkflow(data: any): Promise<any> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/execute/chat`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<any>;
+  }
+
+  /**Execute Chat Workflow Streaming
+   * Execute chat using dynamically built workflow with streaming.
+   */
+  public async executeChatWorkflowStreaming(data: any): Promise<Response> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/execute/chat/streaming`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    return await this.request(requestContext);
+  }
+
+  /**Get Chat Workflow Templates
+   * Get pre-built workflow templates optimized for chat.
+   */
+  public async getChatWorkflowTemplates(): Promise<any> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/chat`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<any>;
+  }
 }

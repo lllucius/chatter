@@ -90,6 +90,10 @@ describe('Fixed Components - No Infinite Loops', () => {
       setMaxTokens: vi.fn(),
       enableRetrieval: false,
       setEnableRetrieval: vi.fn(),
+      enableTools: false,
+      setEnableTools: vi.fn(),
+      customPromptText: '',
+      setCustomPromptText: vi.fn(),
       onSelectConversation: vi.fn(),
     };
 
@@ -98,7 +102,7 @@ describe('Fixed Components - No Infinite Loops', () => {
     // Wait a bit to ensure no infinite loops occur
     await new Promise((resolve) => setTimeout(resolve, 100));
 
-    expect(screen.getByText('Conversations')).toBeInTheDocument();
+    expect(screen.getByText('Profile Settings')).toBeInTheDocument();
 
     // Component should not crash or cause infinite re-renders
     unmount();

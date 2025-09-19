@@ -33,7 +33,7 @@ from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem, NotFoundProblem
 
 logger = get_logger(__name__)
-router = APIRouter(prefix="/workflows", tags=["workflows"])
+router = APIRouter()
 
 
 # Dependency injection

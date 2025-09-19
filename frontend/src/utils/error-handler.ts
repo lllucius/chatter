@@ -206,7 +206,7 @@ class ErrorHandler {
     if (showToast) {
       // Don't show toast for rate limit errors in production to reduce noise
       const isRateLimit = this.isRateLimitError(error);
-      
+
       if (isDev) {
         // In development, show detailed error in toast
         const devMessage = `${userMessage}\n\nSource: ${context.source}${

@@ -44,7 +44,8 @@ export interface SelectFieldProps extends BaseFieldProps {
   emptyLabel?: string;
 }
 
-export interface SliderFieldProps extends Omit<BaseFieldProps, 'value' | 'onChange'> {
+export interface SliderFieldProps
+  extends Omit<BaseFieldProps, 'value' | 'onChange'> {
   value: number;
   onChange: (value: number) => void;
   min: number;

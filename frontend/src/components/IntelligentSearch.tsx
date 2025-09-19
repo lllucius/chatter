@@ -93,12 +93,15 @@ const IntelligentSearch: React.FC = () => {
 
     setIsSearching(true);
     try {
-      const response = await getSDK().analytics.intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent({
-        query: query.trim(),
-        searchType: type,
-        limit: 10,
-        includeRecommendations: true,
-      });
+      const response =
+        await getSDK().analytics.intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent(
+          {
+            query: query.trim(),
+            searchType: type,
+            limit: 10,
+            includeRecommendations: true,
+          }
+        );
 
       setSearchResults((response as any)?.results || []);
       setRecommendations((response as any)?.recommendations || []);
@@ -106,7 +109,11 @@ const IntelligentSearch: React.FC = () => {
 
       // Track search analytics (future implementation)
     } catch (error) {
-      handleError(error, { source: 'IntelligentSearch.performSearch' }, { fallbackMessage: 'Failed to perform intelligent search' });
+      handleError(
+        error,
+        { source: 'IntelligentSearch.performSearch' },
+        { fallbackMessage: 'Failed to perform intelligent search' }
+      );
       setSearchResults([]);
       setRecommendations([]);
     } finally {
@@ -117,12 +124,19 @@ const IntelligentSearch: React.FC = () => {
   const loadTrendingContent = useCallback(async () => {
     setIsLoadingTrending(true);
     try {
-      const response = await getSDK().analytics.getTrendingContentApiV1AnalyticsRealTimeSearchTrending({
-        limit: 10,
-      });
+      const response =
+        await getSDK().analytics.getTrendingContentApiV1AnalyticsRealTimeSearchTrending(
+          {
+            limit: 10,
+          }
+        );
       setTrendingContent((response as any)?.trending_content || []);
     } catch (error) {
-      handleError(error, { source: 'IntelligentSearch.loadTrendingContent' }, { fallbackMessage: 'Failed to load trending content' });
+      handleError(
+        error,
+        { source: 'IntelligentSearch.loadTrendingContent' },
+        { fallbackMessage: 'Failed to load trending content' }
+      );
       setTrendingContent([]);
     } finally {
       setIsLoadingTrending(false);
@@ -296,8 +310,8 @@ const IntelligentSearch: React.FC = () => {
                               <Typography variant="subtitle1">
                                 {String(
                                   result.metadata?.title ||
-                                  result.metadata?.name ||
-                                  `${result.type} ${result.id}`
+                                    result.metadata?.name ||
+                                    `${result.type} ${result.id}`
                                 ) || 'Untitled'}
                               </Typography>
                               <Tooltip
@@ -355,8 +369,9 @@ const IntelligentSearch: React.FC = () => {
                                     Created:{' '}
                                     {format(
                                       new Date(
-                                        typeof result.metadata?.created_at === 'string' 
-                                          ? result.metadata.created_at 
+                                        typeof result.metadata?.created_at ===
+                                        'string'
+                                          ? result.metadata.created_at
                                           : new Date()
                                       ),
                                       'MMM d, yyyy'

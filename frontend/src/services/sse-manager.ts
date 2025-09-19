@@ -571,7 +571,9 @@ export class SSEEventManager {
    */
   private emitToCategoryListeners(event: AnySSEEvent, category: string): void {
     const categoryKey = `category:${category}`;
-    const listeners = (this.listeners as any)[categoryKey] as SSEEventListener[] | undefined;
+    const listeners = (this.listeners as any)[categoryKey] as
+      | SSEEventListener[]
+      | undefined;
     if (listeners) {
       listeners.forEach((listener: SSEEventListener) => {
         try {

@@ -448,7 +448,10 @@ const AgentForm: React.FC<AgentFormProps> = ({
                     label="Personality"
                     value={formData.response_style}
                     onChange={(e) =>
-                      setFormData({ ...formData, response_style: e.target.value })
+                      setFormData({
+                        ...formData,
+                        response_style: e.target.value,
+                      })
                     }
                     placeholder="Describe the agent's personality traits and communication style..."
                   />

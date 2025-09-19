@@ -64,7 +64,7 @@ const callWithRateLimitRetry = async <T>(
   maxRetries: number = 2
 ): Promise<T> => {
   let attempts = 0;
-  
+
   while (attempts <= maxRetries) {
     try {
       const result = await apiCall();
@@ -74,18 +74,18 @@ const callWithRateLimitRetry = async <T>(
       if (isRateLimitError(error) && attempts < maxRetries) {
         incrementRateLimitBackoff(key);
         const delay = getRateLimitDelay(key);
-        
+
         // Wait before retrying
-        await new Promise(resolve => setTimeout(resolve, delay));
+        await new Promise((resolve) => setTimeout(resolve, delay));
         attempts++;
         continue;
       }
-      
+
       // If it's not a rate limit error or we've exhausted retries, throw the error
       throw error;
     }
   }
-  
+
   throw new Error('Max retries exceeded');
 };
 
@@ -168,11 +168,10 @@ export const useAdministrationData = () => {
       return; // Skip if called recently
     }
     markAPICallMade('loadBackups');
-    
+
     try {
-      const response = await callWithRateLimitRetry(
-        'loadBackups',
-        () => getSDK().dataManagement.listBackupsApiV1DataBackups()
+      const response = await callWithRateLimitRetry('loadBackups', () =>
+        getSDK().dataManagement.listBackupsApiV1DataBackups()
       );
       setBackups(response?.backups || []);
     } catch (error) {
@@ -188,11 +187,10 @@ export const useAdministrationData = () => {
       return; // Skip if called recently
     }
     markAPICallMade('loadPlugins');
-    
+
     try {
-      const response = await callWithRateLimitRetry(
-        'loadPlugins',
-        () => getSDK().plugins.listPluginsApiV1Plugins()
+      const response = await callWithRateLimitRetry('loadPlugins', () =>
+        getSDK().plugins.listPluginsApiV1Plugins()
       );
       setPlugins(response?.plugins || []);
     } catch (error) {
@@ -208,12 +206,11 @@ export const useAdministrationData = () => {
       return; // Skip if called recently
     }
     markAPICallMade('loadJobs');
-    
+
     try {
       setDataLoading(true);
-      const response = await callWithRateLimitRetry(
-        'loadJobs',
-        () => getSDK().jobs.listJobsApiV1Jobs({
+      const response = await callWithRateLimitRetry('loadJobs', () =>
+        getSDK().jobs.listJobsApiV1Jobs({
           limit: 100,
           offset: 0,
         })
@@ -258,11 +255,10 @@ export const useAdministrationData = () => {
       return; // Skip if called recently
     }
     markAPICallMade('loadJobStats');
-    
+
     try {
-      const response = await callWithRateLimitRetry(
-        'loadJobStats',
-        () => getSDK().jobs.getJobStatsApiV1JobsStatsOverview()
+      const response = await callWithRateLimitRetry('loadJobStats', () =>
+        getSDK().jobs.getJobStatsApiV1JobsStatsOverview()
       );
       setJobStats(response);
     } catch (error) {
@@ -328,20 +324,17 @@ export const useAdministrationData = () => {
       loadBackups();
     });
 
-    const unsubscribeBackupCompleted = on(
-      'backup.completed',
-      (event) => {
-        const backupEvent = event as BackupCompletedEvent;
-        const backupData = backupEvent.data as BackupSSEEventData;
-        showNotificationRef.current({
-          title: 'Backup Completed',
-          message: `Backup "${backupData.backup_id}" completed successfully`,
-          type: 'success',
-          category: 'system',
-        });
-        loadBackups();
-      }
-    );
+    const unsubscribeBackupCompleted = on('backup.completed', (event) => {
+      const backupEvent = event as BackupCompletedEvent;
+      const backupData = backupEvent.data as BackupSSEEventData;
+      showNotificationRef.current({
+        title: 'Backup Completed',
+        message: `Backup "${backupData.backup_id}" completed successfully`,
+        type: 'success',
+        category: 'system',
+      });
+      loadBackups();
+    });
 
     const unsubscribeBackupFailed = on('backup.failed', (event) => {
       const backupEvent = event as BackupFailedEvent;

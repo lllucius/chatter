@@ -16,9 +16,11 @@ describe('Streaming SDK Method', () => {
       conversation_id: 'test-id',
     };
 
-    const sdk = new ChatterSDK(new Configuration({
-      basePath: 'http://localhost:8000',
-    }));
+    const sdk = new ChatterSDK(
+      new Configuration({
+        basePath: 'http://localhost:8000',
+      })
+    );
 
     // This will fail without a real server, but we can at least verify the method signature
     try {

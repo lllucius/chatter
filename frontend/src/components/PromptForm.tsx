@@ -14,7 +14,12 @@ import {
   Chip,
   Typography,
 } from '@mui/material';
-import { PromptCreate, PromptUpdate, PromptType, PromptCategory } from 'chatter-sdk';
+import {
+  PromptCreate,
+  PromptUpdate,
+  PromptType,
+  PromptCategory,
+} from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface PromptFormProps extends CrudFormProps<PromptCreate, PromptUpdate> {}

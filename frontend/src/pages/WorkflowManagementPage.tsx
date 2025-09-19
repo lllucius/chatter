@@ -39,9 +39,11 @@ const deriveWorkflowType = (name: string, category: string): string => {
   // Check template name for specific workflow type hints
   const nameLower = name.toLowerCase();
   if (nameLower.includes('tool')) return 'tools';
-  if (nameLower.includes('rag') || nameLower.includes('retrieval')) return 'rag';
-  if (nameLower.includes('full') || nameLower.includes('complete')) return 'full';
-  
+  if (nameLower.includes('rag') || nameLower.includes('retrieval'))
+    return 'rag';
+  if (nameLower.includes('full') || nameLower.includes('complete'))
+    return 'full';
+
   // Default to plain for general category or unknown cases
   return 'plain';
 };
@@ -79,7 +81,7 @@ const WorkflowManagementPage: React.FC = () => {
       try {
         // Determine workflow_type based on template name or category
         const workflowType = deriveWorkflowType(values.name, values.category);
-        
+
         // This would create a template with the workflow data
         const templateData = {
           ...values,
@@ -208,7 +210,10 @@ const WorkflowManagementPage: React.FC = () => {
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          <WorkflowExecutionsTab executions={executions as any} loading={loading} />
+          <WorkflowExecutionsTab
+            executions={executions as any}
+            loading={loading}
+          />
         </TabPanel>
       </Box>
 
@@ -304,9 +309,7 @@ const WorkflowManagementPage: React.FC = () => {
               borderRadius: 1,
             }}
           >
-            <WorkflowEditor
-              initialWorkflow={editingTemplate?.workflow}
-            />
+            <WorkflowEditor initialWorkflow={editingTemplate?.workflow} />
           </Box>
         </DialogContent>
         <DialogActions>

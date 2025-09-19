@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Search as RetrievalIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const RetrievalNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const RetrievalNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -31,32 +28,32 @@ const RetrievalNode: React.FC<NodeProps> = ({
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <RetrievalIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Retrieval
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <RetrievalIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Retrieval
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Fetch context
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Fetch context
-          </Typography>
-          {config.topK && (
-            <Chip
-              label={`Top K: ${config.topK}`}
-              size="small"
-              color="info"
-              variant="outlined"
-              sx={{ mr: 0.5 }}
-            />
-          )}
-          {config.collection && (
-            <Chip
-              label={String(config.collection)}
-              size="small"
-              color="info"
-              variant="outlined"
-            />
-          )}
+            {config.topK && (
+              <Chip
+                label={`Top K: ${config.topK}`}
+                size="small"
+                color="info"
+                variant="outlined"
+                sx={{ mr: 0.5 }}
+              />
+            )}
+            {config.collection && (
+              <Chip
+                label={String(config.collection)}
+                size="small"
+                color="info"
+                variant="outlined"
+              />
+            )}
           </>
         </CardContent>
       </Card>

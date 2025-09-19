@@ -220,4 +220,3 @@ class WorkflowExecutionService:
         return capabilities.get(workflow_type, {})
 
     # Legacy node-based execution support (simplified)
-

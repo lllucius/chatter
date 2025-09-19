@@ -313,30 +313,42 @@ const EnhancedMessage: React.FC<EnhancedMessageProps> = ({
                   {message.metadata &&
                     (message.metadata.tokens ||
                       message.metadata.processingTime) && (
-                  <Box
-                    sx={{
-                      display: 'flex',
-                      alignItems: 'center',
-                      gap: 1,
-                      ml: 'auto', // Right align the stats
-                    }}
-                  >
-                    {message.metadata.tokens && (
-                      <Typography variant="caption" color="text.secondary">
-                        {message.metadata.tokens} tokens
-                      </Typography>
-                    )}
-                    {message.metadata.processingTime && (
-                      <Typography variant="caption" color="text.secondary">
-                        {(message.metadata.processingTime / 1000).toFixed(2)}s
-                      </Typography>
-                    )}
-                    {message.metadata.tokens && message.metadata.processingTime && (
-                      <Typography variant="caption" color="text.secondary">
-                        {Math.round((message.metadata.tokens / message.metadata.processingTime) * 1000)} tok/s
-                      </Typography>
-                    )}
-                  </Box>
+                      <Box
+                        sx={{
+                          display: 'flex',
+                          alignItems: 'center',
+                          gap: 1,
+                          ml: 'auto', // Right align the stats
+                        }}
+                      >
+                        {message.metadata.tokens && (
+                          <Typography variant="caption" color="text.secondary">
+                            {message.metadata.tokens} tokens
+                          </Typography>
+                        )}
+                        {message.metadata.processingTime && (
+                          <Typography variant="caption" color="text.secondary">
+                            {(message.metadata.processingTime / 1000).toFixed(
+                              2
+                            )}
+                            s
+                          </Typography>
+                        )}
+                        {message.metadata.tokens &&
+                          message.metadata.processingTime && (
+                            <Typography
+                              variant="caption"
+                              color="text.secondary"
+                            >
+                              {Math.round(
+                                (message.metadata.tokens /
+                                  message.metadata.processingTime) *
+                                  1000
+                              )}{' '}
+                              tok/s
+                            </Typography>
+                          )}
+                      </Box>
                     )}
                 </Box>
               )}

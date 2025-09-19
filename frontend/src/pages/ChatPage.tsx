@@ -72,13 +72,19 @@ const ChatPage: React.FC = () => {
 
   // Load conversation messages if we have a current conversation on mount
   useEffect(() => {
-    if (currentConversation && currentConversation.id && messages.length === 0) {
+    if (
+      currentConversation &&
+      currentConversation.id &&
+      messages.length === 0
+    ) {
       loadMessagesForConversation(currentConversation.id);
     }
   }, [currentConversation, loadMessagesForConversation, messages.length]);
 
   // Create a ref to handle circular dependency between handleStreamingResponse and handleRegenerateMessage
-  const handleRegenerateMessageRef = useRef<((messageId: string) => Promise<void>) | null>(null);
+  const handleRegenerateMessageRef = useRef<
+    ((messageId: string) => Promise<void>) | null
+  >(null);
 
   // Message handlers
   const handleEditMessage = useCallback(
@@ -99,14 +105,11 @@ const ChatPage: React.FC = () => {
     [setMessages]
   );
 
-  const handleRateMessage = useCallback(
-    (messageId: string, rating: number) => {
-      // Implementation for message rating
-      const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
-      toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
-    },
-    []
-  );
+  const handleRateMessage = useCallback((messageId: string, rating: number) => {
+    // Implementation for message rating
+    const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
+    toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
+  }, []);
 
   // Handle streaming response from chat API
   const handleStreamingResponse = useCallback(

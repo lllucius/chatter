@@ -830,24 +830,40 @@ class AnalyticsService:
             for row in rows:
                 timestamp = row.time_bucket.isoformat()
                 # Create TimeSeriesDataPoint compatible objects
-                conversations.append({
-                    "date": timestamp,
-                    "conversations": row.conversation_count or 0,
-                    "tokens": row.token_sum or 0,
-                    "cost": float(row.cost_sum or 0) if row.cost_sum else None,
-                })
-                messages.append({
-                    "date": timestamp,
-                    "conversations": row.message_count or 0,
-                })
-                costs.append({
-                    "date": timestamp,
-                    "cost": float(row.cost_sum or 0) if row.cost_sum else None,
-                })
-                response_times.append({
-                    "date": timestamp,
-                    "conversations": row.conversation_count or 0,
-                })
+                conversations.append(
+                    {
+                        "date": timestamp,
+                        "conversations": row.conversation_count or 0,
+                        "tokens": row.token_sum or 0,
+                        "cost": (
+                            float(row.cost_sum or 0)
+                            if row.cost_sum
+                            else None
+                        ),
+                    }
+                )
+                messages.append(
+                    {
+                        "date": timestamp,
+                        "conversations": row.message_count or 0,
+                    }
+                )
+                costs.append(
+                    {
+                        "date": timestamp,
+                        "cost": (
+                            float(row.cost_sum or 0)
+                            if row.cost_sum
+                            else None
+                        ),
+                    }
+                )
+                response_times.append(
+                    {
+                        "date": timestamp,
+                        "conversations": row.conversation_count or 0,
+                    }
+                )
 
             return {
                 "conversations": conversations,
@@ -1015,7 +1031,8 @@ class AnalyticsService:
                 trends.append(
                     {
                         "date": row.date.isoformat(),
-                        "tokens": row.total_tokens or 0,  # Match TimeSeriesDataPoint field name
+                        "tokens": row.total_tokens
+                        or 0,  # Match TimeSeriesDataPoint field name
                         "conversations": None,  # Optional field for consistency
                         "cost": None,  # Will be populated if available
                     }
@@ -1105,22 +1122,31 @@ class AnalyticsService:
                 performance_metrics.append(
                     {
                         "name": model_key,  # Use 'name' instead of 'model' for ChartDataPoint
-                        "value": float(row.avg_response_time or 0),  # Use 'value' for ChartDataPoint
+                        "value": float(
+                            row.avg_response_time or 0
+                        ),  # Use 'value' for ChartDataPoint
                         "color": None,  # Optional color field
                     }
                 )
 
             # Calculate average response time for providers
-            for provider_name, provider_data in provider_comparison.items():
+            for (
+                provider_name,
+                provider_data,
+            ) in provider_comparison.items():
                 if provider_data["usage_count"] > 0:
                     # This is a simplified calculation - use the average from the metrics
                     matching_metrics = [
-                        metric for metric in performance_metrics
-                        if metric["name"].startswith(provider_name + ":")
+                        metric
+                        for metric in performance_metrics
+                        if metric["name"].startswith(
+                            provider_name + ":"
+                        )
                     ]
                     if matching_metrics:
                         provider_data["avg_response_time"] = sum(
-                            metric["value"] for metric in matching_metrics
+                            metric["value"]
+                            for metric in matching_metrics
                         ) / len(matching_metrics)
                     else:
                         provider_data["avg_response_time"] = 0.0

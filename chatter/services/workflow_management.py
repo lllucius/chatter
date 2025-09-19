@@ -428,7 +428,7 @@ class WorkflowManagementService:
                 owner_id=owner_id,
                 name=name,
                 description=description,
-                workflow_type=workflow_type_enum,
+                workflow_type=workflow_type,
                 category=category_enum,
                 default_params=default_params or {},
                 required_tools=required_tools,

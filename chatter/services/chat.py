@@ -651,7 +651,7 @@ class ChatService:
             message.completion_tokens = usage["output_tokens"]
         if "total_tokens" in usage:
             message.total_tokens = usage["total_tokens"]
-        
+
         # Handle legacy format
         if "tokens" in usage and not message.total_tokens:
             total_tokens = usage["tokens"]
@@ -667,11 +667,11 @@ class ChatService:
         # Apply cost information
         if "cost" in usage:
             message.cost = usage["cost"]
-            
+
         # Apply model information
         if "model_used" in usage:
             message.model_used = usage["model_used"]
-            
+
         # Apply response time
         if "response_time_ms" in usage:
             message.response_time_ms = usage["response_time_ms"]

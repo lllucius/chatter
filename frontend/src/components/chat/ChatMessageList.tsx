@@ -14,7 +14,16 @@ interface ChatMessageListProps {
 }
 
 const ChatMessageList: React.FC<ChatMessageListProps> = memo(
-  ({ messages, messagesEndRef, loading, streamingEnabled = false, onEdit, onRegenerate, onDelete, onRate }) => {
+  ({
+    messages,
+    messagesEndRef,
+    loading,
+    streamingEnabled = false,
+    onEdit,
+    onRegenerate,
+    onDelete,
+    onRate,
+  }) => {
     return (
       <Box sx={{ flexGrow: 1, minHeight: '100%', p: 2 }}>
         {messages.map((msg) => (

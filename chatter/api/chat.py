@@ -44,9 +44,6 @@ async def get_chat_service(
     return ChatService(session, llm_service)
 
 
-
-
-
 # Core Chat Endpoints
 
 
@@ -108,6 +105,7 @@ async def streaming_chat(
     chat_service: ChatService = Depends(get_chat_service),
 ):
     """Streaming chat endpoint supporting all workflow types."""
+
     # Streaming mode
     async def generate_stream():
         try:

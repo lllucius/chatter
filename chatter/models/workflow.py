@@ -32,9 +32,6 @@ if TYPE_CHECKING:
     from chatter.models.user import User
 
 
-
-
-
 class TemplateCategory(str, Enum):
     """Enumeration for template categories."""
 
@@ -106,7 +103,7 @@ class WorkflowTemplate(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
     workflow_type: Mapped[str | None] = mapped_column(
-        String(50), 
+        String(50),
         nullable=True,
         index=True,
         comment="Dynamic workflow type identifier",

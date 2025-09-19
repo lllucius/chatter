@@ -69,30 +69,7 @@ class TestChatWorkflowTemplate(unittest.TestCase):
                             ], 
                         max_tool_calls = 1.0, 
                         parallel_tool_calls = True, 
-                        tool_timeout_ms = 1000.0, ), 
-                    custom_nodes = [
-                        chatter_sdk.models.workflow_node.WorkflowNode(
-                            id = '', 
-                            type = '', 
-                            position = {
-                                'key' : 1.337
-                                }, 
-                            data = chatter_sdk.models.workflow_node_data.WorkflowNodeData(
-                                label = '', 
-                                node_type = '', 
-                                config = { }, ), 
-                            selected = True, 
-                            dragging = True, )
-                        ], 
-                    custom_edges = [
-                        chatter_sdk.models.workflow_edge.WorkflowEdge(
-                            id = '', 
-                            source = '', 
-                            target = '', 
-                            source_handle = '', 
-                            target_handle = '', 
-                            type = '', )
-                        ], ),
+                        tool_timeout_ms = 1000.0, ), ),
                 estimated_tokens = 56,
                 estimated_cost = 1.337,
                 complexity_score = 1.0,
@@ -135,30 +112,7 @@ class TestChatWorkflowTemplate(unittest.TestCase):
                             ], 
                         max_tool_calls = 1.0, 
                         parallel_tool_calls = True, 
-                        tool_timeout_ms = 1000.0, ), 
-                    custom_nodes = [
-                        chatter_sdk.models.workflow_node.WorkflowNode(
-                            id = '', 
-                            type = '', 
-                            position = {
-                                'key' : 1.337
-                                }, 
-                            data = chatter_sdk.models.workflow_node_data.WorkflowNodeData(
-                                label = '', 
-                                node_type = '', 
-                                config = { }, ), 
-                            selected = True, 
-                            dragging = True, )
-                        ], 
-                    custom_edges = [
-                        chatter_sdk.models.workflow_edge.WorkflowEdge(
-                            id = '', 
-                            source = '', 
-                            target = '', 
-                            source_handle = '', 
-                            target_handle = '', 
-                            type = '', )
-                        ], ),
+                        tool_timeout_ms = 1000.0, ), ),
         )
         """
 

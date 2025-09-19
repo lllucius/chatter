@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** | Template name | 
 **description** | **str** | Template description | 
-**config** | [**ChatWorkflowConfigOutput**](ChatWorkflowConfigOutput.md) |  | 
+**config** | [**ChatWorkflowConfig**](ChatWorkflowConfig.md) |  | 
 **estimated_tokens** | **int** |  | [optional] 
 **estimated_cost** | **float** |  | [optional] 
 **complexity_score** | **int** | Complexity score | [optional] [default to 1]

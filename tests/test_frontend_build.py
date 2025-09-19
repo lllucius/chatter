@@ -6,7 +6,7 @@ from pathlib import Path
 
 def test_sdk_build():
     """Test that the TypeScript SDK can be built successfully."""
-    sdk_path = Path(__file__).parent.parent / "sdk-ts" / "typescript"
+    sdk_path = Path(__file__).parent.parent / "sdk" / "typescript"
 
     # Check if SDK directory exists
     assert sdk_path.exists(), f"SDK directory not found at {sdk_path}"

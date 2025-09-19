@@ -21,7 +21,7 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
-from chatter_sdk.models.chat_workflow_config_output import ChatWorkflowConfigOutput
+from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
@@ -31,7 +31,7 @@ class ChatWorkflowTemplate(BaseModel):
     """ # noqa: E501
     name: StrictStr = Field(description="Template name")
     description: StrictStr = Field(description="Template description")
-    config: ChatWorkflowConfigOutput
+    config: ChatWorkflowConfig
     estimated_tokens: Optional[StrictInt] = None
     estimated_cost: Optional[Union[StrictFloat, StrictInt]] = None
     complexity_score: Optional[Annotated[int, Field(le=10, strict=True, ge=1)]] = Field(default=1, description="Complexity score")
@@ -104,7 +104,7 @@ class ChatWorkflowTemplate(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "description": obj.get("description"),
-            "config": ChatWorkflowConfigOutput.from_dict(obj["config"]) if obj.get("config") is not None else None,
+            "config": ChatWorkflowConfig.from_dict(obj["config"]) if obj.get("config") is not None else None,
             "estimated_tokens": obj.get("estimated_tokens"),
             "estimated_cost": obj.get("estimated_cost"),
             "complexity_score": obj.get("complexity_score") if obj.get("complexity_score") is not None else 1,

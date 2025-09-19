@@ -64,8 +64,6 @@ export * from './DataFormat';
 export * from './DefaultProvider';
 export * from './DistanceMetric';
 export * from './DocumentAnalyticsResponse';
-export * from './DocumentChunkResponse';
-export * from './DocumentChunksResponse';
 export * from './DocumentListRequest';
 export * from './DocumentResponse';
 export * from './DocumentSearchRequest';

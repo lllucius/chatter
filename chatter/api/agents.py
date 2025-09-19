@@ -38,7 +38,6 @@ from chatter.utils.unified_rate_limiter import (
 
 logger = get_logger(__name__)
 router = APIRouter(
-    tags=["agents"],
     responses={
         400: {"description": "Bad request"},
         401: {"description": "Unauthorized"},

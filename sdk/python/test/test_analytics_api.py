@@ -34,6 +34,13 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_cleanup_inactive_tasks_api_v1_analytics_real_time_cleanup_post(self) -> None:
+        """Test case for cleanup_inactive_tasks_api_v1_analytics_real_time_cleanup_post
+
+        Cleanup Inactive Tasks
+        """
+        pass
+
     async def test_cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post(self) -> None:
         """Test case for cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post
 
@@ -146,6 +153,13 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_trending_content_api_v1_analytics_search_trending_get(self) -> None:
+        """Test case for get_trending_content_api_v1_analytics_search_trending_get
+
+        Get Trending Content
+        """
+        pass
+
     async def test_get_usage_metrics_api_v1_analytics_usage_get(self) -> None:
         """Test case for get_usage_metrics_api_v1_analytics_usage_get
 
@@ -167,8 +181,22 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_user_behavior_analytics_api_v1_analytics_user_behavior_user_id_get(self) -> None:
+        """Test case for get_user_behavior_analytics_api_v1_analytics_user_behavior_user_id_get
+
+        Get User Behavior Analytics
+        """
+        pass
+
     async def test_intelligent_search_api_v1_analytics_real_time_search_intelligent_get(self) -> None:
         """Test case for intelligent_search_api_v1_analytics_real_time_search_intelligent_get
+
+        Intelligent Search
+        """
+        pass
+
+    async def test_intelligent_search_api_v1_analytics_search_intelligent_get(self) -> None:
+        """Test case for intelligent_search_api_v1_analytics_search_intelligent_get
 
         Intelligent Search
         """
@@ -195,6 +223,13 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_send_system_health_update_api_v1_analytics_real_time_system_health_post(self) -> None:
+        """Test case for send_system_health_update_api_v1_analytics_real_time_system_health_post
+
+        Send System Health Update
+        """
+        pass
+
     async def test_send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(self) -> None:
         """Test case for send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post
 
@@ -202,10 +237,31 @@ class TestAnalyticsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_send_workflow_update_api_v1_analytics_real_time_workflow_workflow_id_update_post(self) -> None:
+        """Test case for send_workflow_update_api_v1_analytics_real_time_workflow_workflow_id_update_post
+
+        Send Workflow Update
+        """
+        pass
+
+    async def test_start_real_time_dashboard_api_v1_analytics_real_time_dashboard_start_post(self) -> None:
+        """Test case for start_real_time_dashboard_api_v1_analytics_real_time_dashboard_start_post
+
+        Start Real Time Dashboard
+        """
+        pass
+
     async def test_start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post(self) -> None:
         """Test case for start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post
 
         Start Real Time Dashboard
+        """
+        pass
+
+    async def test_stop_real_time_dashboard_api_v1_analytics_real_time_dashboard_stop_post(self) -> None:
+        """Test case for stop_real_time_dashboard_api_v1_analytics_real_time_dashboard_stop_post
+
+        Stop Real Time Dashboard
         """
         pass
 

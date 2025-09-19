@@ -3331,7 +3331,6 @@
     "/api/v1/documents/upload": {
       "post": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Upload Document",
@@ -3445,7 +3444,6 @@
     "/api/v1/documents/{document_id}": {
       "get": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Get Document",
@@ -3558,7 +3556,6 @@
       },
       "delete": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Delete Document",
@@ -3677,7 +3674,6 @@
     "/api/v1/documents": {
       "get": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "List Documents Get",
@@ -3805,7 +3801,6 @@
     "/api/v1/documents/list": {
       "post": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "List Documents Post",
@@ -3921,7 +3916,6 @@
     "/api/v1/documents/search": {
       "post": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Search Documents",
@@ -4039,7 +4033,6 @@
     "/api/v1/documents/{document_id}/reprocess": {
       "post": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Reprocess Document",
@@ -4158,7 +4151,6 @@
     "/api/v1/documents/stats/user": {
       "get": {
         "tags": [
-          "Documents",
           "Documents"
         ],
         "summary": "Get User Document Stats",
@@ -9395,6 +9387,825 @@
         }
       }
     },
+    "/api/v1/analytics/real-time/dashboard/start": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Start Real Time Dashboard",
+        "description": "Start real-time dashboard updates for the current user.\n\nThis endpoint initiates a background task that streams analytics data\nto the user via Server-Sent Events (SSE).",
+        "operationId": "start_real_time_dashboard_api_v1_analytics_real_time_dashboard_start_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Start Real Time Dashboard Api V1 Analytics Real Time Dashboard Start Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/analytics/real-time/dashboard/stop": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Stop Real Time Dashboard",
+        "description": "Stop real-time dashboard updates for the current user.",
+        "operationId": "stop_real_time_dashboard_api_v1_analytics_real_time_dashboard_stop_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Stop Real Time Dashboard Api V1 Analytics Real Time Dashboard Stop Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/analytics/user-behavior/{user_id}": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get User Behavior Analytics",
+        "description": "Get personalized behavior analytics for a user.\n\nUsers can only access their own analytics unless they are admin.",
+        "operationId": "get_user_behavior_analytics_api_v1_analytics_user_behavior__user_id__get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "user_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "User Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get User Behavior Analytics Api V1 Analytics User Behavior  User Id  Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/search/intelligent": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Intelligent Search",
+        "description": "Perform intelligent semantic search with personalized results.\n\nArgs:\n    query: Search query string\n    search_type: Type of content to search (\"documents\", \"conversations\", \"prompts\")\n    limit: Maximum number of results to return\n    include_recommendations: Whether to include search recommendations",
+        "operationId": "intelligent_search_api_v1_analytics_search_intelligent_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "query",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Query"
+            }
+          },
+          {
+            "name": "search_type",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "string",
+              "default": "documents",
+              "title": "Search Type"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          },
+          {
+            "name": "include_recommendations",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "boolean",
+              "default": true,
+              "title": "Include Recommendations"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Intelligent Search Api V1 Analytics Search Intelligent Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/search/trending": {
+      "get": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Get Trending Content",
+        "description": "Get trending content personalized for the current user.",
+        "operationId": "get_trending_content_api_v1_analytics_search_trending_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 10,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Get Trending Content Api V1 Analytics Search Trending Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/real-time/workflow/{workflow_id}/update": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Send Workflow Update",
+        "description": "Send a real-time workflow update to the user.",
+        "operationId": "send_workflow_update_api_v1_analytics_real_time_workflow__workflow_id__update_post",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Workflow Id"
+            }
+          },
+          {
+            "name": "update_type",
+            "in": "query",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Update Type"
+            }
+          }
+        ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "additionalProperties": true,
+                "title": "Data"
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response Send Workflow Update Api V1 Analytics Real Time Workflow  Workflow Id  Update Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/analytics/real-time/system-health": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Send System Health Update",
+        "description": "Send system health update to all admin users.\n\nThis endpoint is admin-only and broadcasts health information\nto all connected administrators.",
+        "operationId": "send_system_health_update_api_v1_analytics_real_time_system_health_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "additionalProperties": true,
+                "type": "object",
+                "title": "Health Data"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Send System Health Update Api V1 Analytics Real Time System Health Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
+    "/api/v1/analytics/real-time/cleanup": {
+      "post": {
+        "tags": [
+          "Analytics"
+        ],
+        "summary": "Cleanup Inactive Tasks",
+        "description": "Clean up inactive real-time tasks.\n\nThis endpoint is admin-only and performs maintenance on the\nreal-time analytics service.",
+        "operationId": "cleanup_inactive_tasks_api_v1_analytics_real_time_cleanup_post",
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "additionalProperties": true,
+                  "type": "object",
+                  "title": "Response Cleanup Inactive Tasks Api V1 Analytics Real Time Cleanup Post"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/workflows/definitions": {
       "get": {
         "tags": [
@@ -13875,8 +14686,7 @@
     "/api/v1/agents/": {
       "post": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Create a new agent",
         "description": "Create a new AI agent with specified configuration and capabilities.",
@@ -14203,8 +15013,7 @@
       },
       "get": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "List agents",
         "description": "List all agents with optional filtering and pagination. Users can only see their own agents.",
@@ -14633,8 +15442,7 @@
     "/api/v1/agents/templates": {
       "get": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Get agent templates",
         "description": "Get predefined agent templates for common use cases.",
@@ -14915,8 +15723,7 @@
     "/api/v1/agents/stats/overview": {
       "get": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Get agent statistics",
         "description": "Get comprehensive statistics about all agents for the current user.",
@@ -15192,8 +15999,7 @@
     "/api/v1/agents/{agent_id}": {
       "get": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Get Agent",
         "description": "Get agent by ID.\n\nArgs:\n    agent_id: Agent ID\n    request: Get request parameters\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Agent data",
@@ -15521,8 +16327,7 @@
       },
       "put": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Update Agent",
         "description": "Update an agent.\n\nArgs:\n    agent_id: Agent ID\n    agent_data: Agent update data\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Updated agent data",
@@ -15860,8 +16665,7 @@
       },
       "delete": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Delete Agent",
         "description": "Delete an agent.\n\nArgs:\n    agent_id: Agent ID\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Deletion result",
@@ -16191,8 +16995,7 @@
     "/api/v1/agents/{agent_id}/interact": {
       "post": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Interact with agent",
         "description": "Send a message to an agent and receive a response. Rate limited per user per agent.",
@@ -16532,8 +17335,7 @@
     "/api/v1/agents/{agent_id}/health": {
       "get": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Get Agent Health",
         "description": "Get agent health status.\n\nArgs:\n    agent_id: Agent ID\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Agent health information",
@@ -16863,8 +17665,7 @@
     "/api/v1/agents/bulk": {
       "post": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Bulk Create Agents",
         "description": "Create multiple agents in bulk.\n\nArgs:\n    request: Bulk creation request\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Bulk creation results",
@@ -17191,8 +17992,7 @@
       },
       "delete": {
         "tags": [
-          "Agents",
-          "agents"
+          "Agents"
         ],
         "summary": "Bulk Delete Agents",
         "description": "Delete multiple agents in bulk.\n\nArgs:\n    request: Bulk deletion request\n    current_user: Current authenticated user\n    agent_manager: Agent manager instance\n\nReturns:\n    Bulk deletion results",

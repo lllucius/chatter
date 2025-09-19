@@ -36,7 +36,7 @@ from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-router = APIRouter(prefix="/documents", tags=["Documents"])
+router = APIRouter(prefix="/documents")
 
 
 @router.post("/upload", response_model=DocumentResponse)

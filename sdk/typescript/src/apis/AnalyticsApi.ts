@@ -678,4 +678,155 @@ Returns:
     const response = await this.request(requestContext);
     return response.json() as Promise<Record<string, unknown>>;
   }
+  /**Start Real Time Dashboard
+   * Start real-time dashboard updates for the current user.
+
+This endpoint initiates a background task that streams analytics data
+to the user via Server-Sent Events (SSE).
+   */
+  public async startRealTimeDashboardApiV1AnalyticsRealTimeDashboardStart(): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/real-time/dashboard/start`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Stop Real Time Dashboard
+   * Stop real-time dashboard updates for the current user.
+   */
+  public async stopRealTimeDashboardApiV1AnalyticsRealTimeDashboardStop(): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/real-time/dashboard/stop`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Get User Behavior Analytics
+   * Get personalized behavior analytics for a user.
+
+Users can only access their own analytics unless they are admin.
+   */
+  public async getUserBehaviorAnalyticsApiV1AnalyticsUserBehaviorUserId(userId: string): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/user-behavior/${userId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Intelligent Search
+   * Perform intelligent semantic search with personalized results.
+
+Args:
+    query: Search query string
+    search_type: Type of content to search ("documents", "conversations", "prompts")
+    limit: Maximum number of results to return
+    include_recommendations: Whether to include search recommendations
+   */
+  public async intelligentSearchApiV1AnalyticsSearchIntelligent(options?: { query?: string; searchType?: string; limit?: number; includeRecommendations?: boolean; additionalQuery?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/search/intelligent`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'query': options?.query,
+        'search_type': options?.searchType,
+        'limit': options?.limit,
+        'include_recommendations': options?.includeRecommendations,
+        ...options?.additionalQuery
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Get Trending Content
+   * Get trending content personalized for the current user.
+   */
+  public async getTrendingContentApiV1AnalyticsSearchTrending(options?: { limit?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/search/trending`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'limit': options?.limit,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Send Workflow Update
+   * Send a real-time workflow update to the user.
+   */
+  public async sendWorkflowUpdateApiV1AnalyticsRealTimeWorkflowWorkflowIdUpdate(workflowId: string, data: Record<string, unknown>, options?: { updateType?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/real-time/workflow/${workflowId}/update`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+      query: {
+        'update_type': options?.updateType,
+        ...options?.query
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Send System Health Update
+   * Send system health update to all admin users.
+
+This endpoint is admin-only and broadcasts health information
+to all connected administrators.
+   */
+  public async sendSystemHealthUpdateApiV1AnalyticsRealTimeSystemHealth(data: Record<string, unknown>): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/real-time/system-health`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Cleanup Inactive Tasks
+   * Clean up inactive real-time tasks.
+
+This endpoint is admin-only and performs maintenance on the
+real-time analytics service.
+   */
+  public async cleanupInactiveTasksApiV1AnalyticsRealTimeCleanup(): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/analytics/real-time/cleanup`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
 }

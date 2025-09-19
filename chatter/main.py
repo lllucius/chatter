@@ -530,6 +530,7 @@ def create_app() -> FastAPI:
         plugins,
         profiles,
         prompts,
+        real_time_analytics,
         toolserver,
         workflows,
     )
@@ -572,6 +573,12 @@ def create_app() -> FastAPI:
 
     app.include_router(
         analytics.router,
+        prefix=f"{settings.api_prefix}/analytics",
+        tags=["Analytics"],
+    )
+
+    app.include_router(
+        real_time_analytics.router,
         prefix=f"{settings.api_prefix}/analytics",
         tags=["Analytics"],
     )

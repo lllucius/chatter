@@ -10797,7 +10797,6 @@ paths:
       summary: List agents
       tags:
       - Agents
-      - agents
     post:
       description: Create a new AI agent with specified configuration and capabilities.
       operationId: create_agent_api_v1_agents__post
@@ -10885,7 +10884,6 @@ paths:
       summary: Create a new agent
       tags:
       - Agents
-      - agents
   /api/v1/agents/bulk:
     delete:
       description: "Delete multiple agents in bulk.\n\nArgs:\n    request: Bulk deletion\
@@ -10978,7 +10976,6 @@ paths:
       summary: Bulk Delete Agents
       tags:
       - Agents
-      - agents
     post:
       description: "Create multiple agents in bulk.\n\nArgs:\n    request: Bulk creation\
         \ request\n    current_user: Current authenticated user\n    agent_manager:\
@@ -11068,7 +11065,6 @@ paths:
       summary: Bulk Create Agents
       tags:
       - Agents
-      - agents
   /api/v1/agents/stats/overview:
     get:
       description: Get comprehensive statistics about all agents for the current user.
@@ -11139,7 +11135,6 @@ paths:
       summary: Get agent statistics
       tags:
       - Agents
-      - agents
   /api/v1/agents/templates:
     get:
       description: Get predefined agent templates for common use cases.
@@ -11214,7 +11209,6 @@ paths:
       summary: Get agent templates
       tags:
       - Agents
-      - agents
   /api/v1/agents/{agent_id}:
     delete:
       description: "Delete an agent.\n\nArgs:\n    agent_id: Agent ID\n    current_user:\
@@ -11306,7 +11300,6 @@ paths:
       summary: Delete Agent
       tags:
       - Agents
-      - agents
     get:
       description: "Get agent by ID.\n\nArgs:\n    agent_id: Agent ID\n    request:\
         \ Get request parameters\n    current_user: Current authenticated user\n \
@@ -11397,7 +11390,6 @@ paths:
       summary: Get Agent
       tags:
       - Agents
-      - agents
     put:
       description: "Update an agent.\n\nArgs:\n    agent_id: Agent ID\n    agent_data:\
         \ Agent update data\n    current_user: Current authenticated user\n    agent_manager:\
@@ -11494,7 +11486,6 @@ paths:
       summary: Update Agent
       tags:
       - Agents
-      - agents
   /api/v1/agents/{agent_id}/health:
     get:
       description: "Get agent health status.\n\nArgs:\n    agent_id: Agent ID\n  \
@@ -11586,7 +11577,6 @@ paths:
       summary: Get Agent Health
       tags:
       - Agents
-      - agents
   /api/v1/agents/{agent_id}/interact:
     post:
       description: Send a message to an agent and receive a response. Rate limited
@@ -11683,7 +11673,6 @@ paths:
       summary: Interact with agent
       tags:
       - Agents
-      - agents
   /api/v1/analytics/cache/invalidate:
     post:
       description: "Invalidate stale cache entries to free up memory.\n\nArgs:\n \
@@ -12441,6 +12430,91 @@ paths:
       summary: Get Detailed Performance Metrics
       tags:
       - Analytics
+  /api/v1/analytics/real-time/cleanup:
+    post:
+      description: 'Clean up inactive real-time tasks.
+
+
+        This endpoint is admin-only and performs maintenance on the
+
+        real-time analytics service.'
+      operationId: cleanup_inactive_tasks_api_v1_analytics_real_time_cleanup_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Cleanup Inactive Tasks Api V1 Analytics Real Time
+                  Cleanup Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Cleanup Inactive Tasks
+      tags:
+      - Analytics
+  /api/v1/analytics/real-time/dashboard/start:
+    post:
+      description: 'Start real-time dashboard updates for the current user.
+
+
+        This endpoint initiates a background task that streams analytics data
+
+        to the user via Server-Sent Events (SSE).'
+      operationId: start_real_time_dashboard_api_v1_analytics_real_time_dashboard_start_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Start Real Time Dashboard Api V1 Analytics Real Time
+                  Dashboard Start Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Start Real Time Dashboard
+      tags:
+      - Analytics
+  /api/v1/analytics/real-time/dashboard/stop:
+    post:
+      description: Stop real-time dashboard updates for the current user.
+      operationId: stop_real_time_dashboard_api_v1_analytics_real_time_dashboard_stop_post
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Stop Real Time Dashboard Api V1 Analytics Real Time
+                  Dashboard Stop Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Stop Real Time Dashboard
+      tags:
+      - Analytics
   /api/v1/analytics/real-time/real-time/cleanup:
     post:
       description: 'Clean up inactive real-time tasks.
@@ -12755,6 +12829,56 @@ paths:
       tags:
       - Analytics
       - real-time-analytics
+  /api/v1/analytics/real-time/system-health:
+    post:
+      description: 'Send system health update to all admin users.
+
+
+        This endpoint is admin-only and broadcasts health information
+
+        to all connected administrators.'
+      operationId: send_system_health_update_api_v1_analytics_real_time_system_health_post
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              title: Health Data
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Send System Health Update Api V1 Analytics Real Time
+                  System Health Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Send System Health Update
+      tags:
+      - Analytics
   /api/v1/analytics/real-time/user-behavior/{user_id}:
     get:
       description: 'Get personalized behavior analytics for a user.
@@ -12803,6 +12927,178 @@ paths:
       tags:
       - Analytics
       - real-time-analytics
+  /api/v1/analytics/real-time/workflow/{workflow_id}/update:
+    post:
+      description: Send a real-time workflow update to the user.
+      operationId: send_workflow_update_api_v1_analytics_real_time_workflow__workflow_id__update_post
+      parameters:
+      - in: path
+        name: workflow_id
+        required: true
+        schema:
+          title: Workflow Id
+          type: string
+      - in: query
+        name: update_type
+        required: true
+        schema:
+          title: Update Type
+          type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              additionalProperties: true
+              title: Data
+              type: object
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Send Workflow Update Api V1 Analytics Real Time Workflow  Workflow
+                  Id  Update Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Send Workflow Update
+      tags:
+      - Analytics
+  /api/v1/analytics/search/intelligent:
+    get:
+      description: "Perform intelligent semantic search with personalized results.\n\
+        \nArgs:\n    query: Search query string\n    search_type: Type of content\
+        \ to search (\"documents\", \"conversations\", \"prompts\")\n    limit: Maximum\
+        \ number of results to return\n    include_recommendations: Whether to include\
+        \ search recommendations"
+      operationId: intelligent_search_api_v1_analytics_search_intelligent_get
+      parameters:
+      - in: query
+        name: query
+        required: true
+        schema:
+          title: Query
+          type: string
+      - in: query
+        name: search_type
+        required: false
+        schema:
+          default: documents
+          title: Search Type
+          type: string
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          title: Limit
+          type: integer
+      - in: query
+        name: include_recommendations
+        required: false
+        schema:
+          default: true
+          title: Include Recommendations
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Intelligent Search Api V1 Analytics Search Intelligent
+                  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Intelligent Search
+      tags:
+      - Analytics
+  /api/v1/analytics/search/trending:
+    get:
+      description: Get trending content personalized for the current user.
+      operationId: get_trending_content_api_v1_analytics_search_trending_get
+      parameters:
+      - in: query
+        name: limit
+        required: false
+        schema:
+          default: 10
+          title: Limit
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Trending Content Api V1 Analytics Search Trending
+                  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Trending Content
+      tags:
+      - Analytics
   /api/v1/analytics/system:
     get:
       description: "Get system analytics.\n\nArgs:\n    request: System analytics\
@@ -12966,6 +13262,53 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Get Usage Metrics
+      tags:
+      - Analytics
+  /api/v1/analytics/user-behavior/{user_id}:
+    get:
+      description: 'Get personalized behavior analytics for a user.
+
+
+        Users can only access their own analytics unless they are admin.'
+      operationId: get_user_behavior_analytics_api_v1_analytics_user_behavior__user_id__get
+      parameters:
+      - in: path
+        name: user_id
+        required: true
+        schema:
+          title: User Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get User Behavior Analytics Api V1 Analytics User
+                  Behavior  User Id  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get User Behavior Analytics
       tags:
       - Analytics
   /api/v1/analytics/users/{user_id}:
@@ -14790,7 +15133,6 @@ paths:
       summary: List Documents Get
       tags:
       - Documents
-      - Documents
   /api/v1/documents/list:
     post:
       description: List documents with filtering and pagination (POST endpoint for
@@ -14833,7 +15175,6 @@ paths:
       - CustomHTTPBearer: []
       summary: List Documents Post
       tags:
-      - Documents
       - Documents
   /api/v1/documents/search:
     post:
@@ -14878,7 +15219,6 @@ paths:
       summary: Search Documents
       tags:
       - Documents
-      - Documents
   /api/v1/documents/stats/user:
     get:
       description: Get document statistics for the current user.
@@ -14900,7 +15240,6 @@ paths:
       - CustomHTTPBearer: []
       summary: Get User Document Stats
       tags:
-      - Documents
       - Documents
   /api/v1/documents/upload:
     post:
@@ -14947,7 +15286,6 @@ paths:
       summary: Upload Document
       tags:
       - Documents
-      - Documents
   /api/v1/documents/{document_id}:
     delete:
       description: Delete a document.
@@ -14992,7 +15330,6 @@ paths:
       summary: Delete Document
       tags:
       - Documents
-      - Documents
     get:
       description: Get a document by ID.
       operationId: get_document_api_v1_documents__document_id__get
@@ -15032,7 +15369,6 @@ paths:
       - CustomHTTPBearer: []
       summary: Get Document
       tags:
-      - Documents
       - Documents
   /api/v1/documents/{document_id}/reprocess:
     post:
@@ -15078,7 +15414,6 @@ paths:
       - CustomHTTPBearer: []
       summary: Reprocess Document
       tags:
-      - Documents
       - Documents
   /api/v1/events/admin/stream:
     get:

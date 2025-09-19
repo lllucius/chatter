@@ -48,6 +48,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_delete_workflow_template_api_v1_workflows_templates_template_id_delete(self) -> None:
+        """Test case for delete_workflow_template_api_v1_workflows_templates_template_id_delete
+
+        Delete Workflow Template
+        """
+        pass
+
     async def test_execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post(self) -> None:
         """Test case for execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post
 

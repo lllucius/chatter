@@ -19542,6 +19542,50 @@ paths:
       tags:
       - Workflows
   /api/v1/workflows/templates/{template_id}:
+    delete:
+      description: Delete a workflow template.
+      operationId: delete_workflow_template_api_v1_workflows_templates__template_id__delete
+      parameters:
+      - in: path
+        name: template_id
+        required: true
+        schema:
+          title: Template Id
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties:
+                  type: string
+                title: Response Delete Workflow Template Api V1 Workflows Templates  Template
+                  Id  Delete
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Delete Workflow Template
+      tags:
+      - Workflows
     put:
       description: Update a workflow template.
       operationId: update_workflow_template_api_v1_workflows_templates__template_id__put

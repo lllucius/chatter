@@ -16,7 +16,7 @@ describe('AuthService and ChatterSDK', () => {
     expect(sdk.agents).toBeDefined();
     expect(sdk.modelRegistry).toBeDefined();
     expect(sdk.toolServers).toBeDefined();
-    expect(sdk.chat).toBeDefined();
+    expect(sdk.workflows).toBeDefined();
   });
 
   it('should handle authentication state correctly', () => {
@@ -27,7 +27,7 @@ describe('AuthService and ChatterSDK', () => {
   it('should provide SDK instances', () => {
     const sdk = getSDK();
     expect(sdk).toBeDefined();
-    expect(sdk.chat).toBeDefined();
+    expect(sdk.workflows).toBeDefined();
     expect(sdk.auth).toBeDefined();
   });
 

@@ -17,7 +17,6 @@ describe('SDK Method Integration', () => {
 
   it('should have all expected API groups', () => {
     expect(sdk.conversations).toBeDefined();
-    expect(sdk.chat).toBeDefined();
     expect(sdk.workflows).toBeDefined();
     expect(sdk.auth).toBeDefined();
     expect(sdk.agents).toBeDefined();
@@ -37,12 +36,6 @@ describe('SDK Method Integration', () => {
     expect(typeof sdk.workflows.executeChatWorkflowApiV1WorkflowsExecuteChat).toBe('function');
     expect(typeof sdk.workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming).toBe('function');
     expect(typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat).toBe('function');
-  });
-
-  it('should have chat API methods', () => {
-    expect(typeof sdk.chat.chatChat).toBe('function');
-    expect(typeof sdk.chat.streamingChatApiV1ChatStreaming).toBe('function');
-    expect(typeof sdk.chat.getWorkflowTemplatesApiV1ChatTemplates).toBe('function');
   });
 
   it('should have auth API methods', () => {

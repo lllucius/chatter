@@ -51,8 +51,9 @@ const PasswordResetPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        // TODO: Implement password reset when endpoint is available
-        // await getSDK().requestPasswordReset(values.email);
+        await getSDK().auth.requestPasswordResetApiV1AuthPasswordResetRequest({
+          email: values.email,
+        });
         setEmail(values.email);
         setStep('confirm');
         toastService.success('Password reset instructions sent to your email');

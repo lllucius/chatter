@@ -1,516 +1,32 @@
-workflows:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
-    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
-workflows:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-useWorkflowData.ts:44 Available tools API not implemented
-overrideMethod @ hook.js:608
-(anonymous) @ useWorkflowData.ts:44
-(anonymous) @ useWorkflowData.ts:136
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9965
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9940
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9890
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9899
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11302
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-useWorkflowData.ts:59 Workflow executions require specific workflow ID
-overrideMethod @ hook.js:608
-(anonymous) @ useWorkflowData.ts:59
-(anonymous) @ useWorkflowData.ts:137
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9965
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9940
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9890
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9899
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11302
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-useWorkflowData.ts:44 Available tools API not implemented
-overrideMethod @ hook.js:600
-(anonymous) @ useWorkflowData.ts:44
-(anonymous) @ useWorkflowData.ts:136
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10031
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10009
-doubleInvokeEffectsOnFiber @ react-dom_client.js?v=536d68a9:11461
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11432
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11469
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11309
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-useWorkflowData.ts:59 Workflow executions require specific workflow ID
-overrideMethod @ hook.js:600
-(anonymous) @ useWorkflowData.ts:59
-(anonymous) @ useWorkflowData.ts:137
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10031
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10009
-doubleInvokeEffectsOnFiber @ react-dom_client.js?v=536d68a9:11461
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11432
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11469
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11309
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-runtime.js:86  GET http://localhost:8000/api/v1/workflows/workflows/templates 404 (Not Found)
-(anonymous) @ runtime.js:86
-(anonymous) @ runtime.js:20
-__awaiter @ runtime.js:16
-BaseAPI.fetchApi @ runtime.js:77
-(anonymous) @ runtime.js:155
-fulfilled @ runtime.js:17
-Promise.then
-step @ runtime.js:19
-(anonymous) @ runtime.js:20
-__awaiter @ runtime.js:16
-request @ runtime.js:153
-(anonymous) @ WorkflowsApi.js:101
-(anonymous) @ WorkflowsApi.js:7
-__awaiter @ WorkflowsApi.js:3
-listWorkflowTemplatesApiV1WorkflowsWorkflowsTemplates @ WorkflowsApi.js:95
-(anonymous) @ useWorkflowData.ts:27
-(anonymous) @ useWorkflowData.ts:135
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9965
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9940
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9890
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9899
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11302
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-error-handler.ts:197 [Error Handler] useWorkflowData.loadTemplates: ResponseError: Response returned an error code
-    at WorkflowsApi.<anonymous> (runtime.js:159:19)
-    at Generator.next (<anonymous>)
-    at fulfilled (runtime.js:17:58)
+error-handler.ts:197 [Error Handler] useWorkflowChat.loadWorkflowTemplates: Error: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
+    at useWorkflowChat.ts:35:15
+    at useWorkflowChat.ts:50:5
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=536d68a9:17486:20)
+    at runWithFiberInDEV (react-dom_client.js?v=536d68a9:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=536d68a9:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=536d68a9:8518:60)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=536d68a9:9887:29)
+    at recursivelyTraversePassiveMountEffects (react-dom_client.js?v=536d68a9:9868:13)
+    at commitPassiveMountOnFiber (react-dom_client.js?v=536d68a9:9960:85)
+    at recursivelyTraversePassiveMountEffects (react-dom_client.js?v=536d68a9:9868:13)
 overrideMethod @ hook.js:608
 handleError @ error-handler.ts:197
 handleError @ error-handler.ts:304
-(anonymous) @ useWorkflowData.ts:30
-await in (anonymous)
-(anonymous) @ useWorkflowData.ts:135
+(anonymous) @ useWorkflowChat.ts:41
+(anonymous) @ useWorkflowChat.ts:50
 react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
 commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9965
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9960
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9940
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9890
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
@@ -608,33 +124,41 @@ performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
 performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
 performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
 error-handler.ts:198 Full Error Details:
- Source: useWorkflowData.loadTemplates
+ Source: useWorkflowChat.loadWorkflowTemplates
 Operation: load workflow templates
-Timestamp: 2025-09-19T02:29:21.970Z
-Error Type: ResponseError
-Message: Response returned an error code
+Timestamp: 2025-09-19T15:57:51.352Z
+Error Type: Error
+Message: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
 Stack Trace:
-ResponseError: Response returned an error code
-    at WorkflowsApi.<anonymous> (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:159:19)
-    at Generator.next (<anonymous>)
-    at fulfilled (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:17:58)
+Error: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
+    at http://localhost:3000/src/hooks/useWorkflowChat.ts:19:15
+    at http://localhost:3000/src/hooks/useWorkflowChat.ts:31:5
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:17486:20)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:1485:72)
+    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:8460:122)
+    at commitHookPassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:8518:60)
+    at commitPassiveMountOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:9887:29)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:9868:13)
+    at commitPassiveMountOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:9960:85)
+    at recursivelyTraversePassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:9868:13)
 overrideMethod @ hook.js:608
 handleError @ error-handler.ts:198
 handleError @ error-handler.ts:304
-(anonymous) @ useWorkflowData.ts:30
-await in (anonymous)
-(anonymous) @ useWorkflowData.ts:135
+(anonymous) @ useWorkflowChat.ts:41
+(anonymous) @ useWorkflowChat.ts:50
 react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
 commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9965
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9887
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9960
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9940
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9890
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
 commitPassiveMountOnFiber @ react-dom_client.js?v=536d68a9:9984
 recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=536d68a9:9868
@@ -731,115 +255,35 @@ commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
 performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
 performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
 performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-runtime.js:86  GET http://localhost:8000/api/v1/workflows/workflows/templates 404 (Not Found)
-(anonymous) @ runtime.js:86
-(anonymous) @ runtime.js:20
-__awaiter @ runtime.js:16
-BaseAPI.fetchApi @ runtime.js:77
-(anonymous) @ runtime.js:155
-fulfilled @ runtime.js:17
-Promise.then
-step @ runtime.js:19
-(anonymous) @ runtime.js:20
-__awaiter @ runtime.js:16
-request @ runtime.js:153
-(anonymous) @ WorkflowsApi.js:101
-(anonymous) @ WorkflowsApi.js:7
-__awaiter @ WorkflowsApi.js:3
-listWorkflowTemplatesApiV1WorkflowsWorkflowsTemplates @ WorkflowsApi.js:95
-(anonymous) @ useWorkflowData.ts:27
-(anonymous) @ useWorkflowData.ts:135
-react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10031
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10009
-doubleInvokeEffectsOnFiber @ react-dom_client.js?v=536d68a9:11461
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11432
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
-commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11469
-flushPassiveEffects @ react-dom_client.js?v=536d68a9:11309
-flushPendingEffects @ react-dom_client.js?v=536d68a9:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=536d68a9:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=536d68a9:11536
-flushSpawnedWork @ react-dom_client.js?v=536d68a9:11254
-commitRoot @ react-dom_client.js?v=536d68a9:11081
-commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
-performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
-performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-error-handler.ts:197 [Error Handler] useWorkflowData.loadTemplates: ResponseError: Response returned an error code
-    at WorkflowsApi.<anonymous> (runtime.js:159:19)
-    at Generator.next (<anonymous>)
-    at fulfilled (runtime.js:17:58)
-overrideMethod @ hook.js:608
+error-handler.ts:197 [Error Handler] useWorkflowChat.loadWorkflowTemplates: Error: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
+    at useWorkflowChat.ts:35:15
+    at useWorkflowChat.ts:50:5
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=536d68a9:17486:20)
+    at runWithFiberInDEV (react-dom_client.js?v=536d68a9:1485:72)
+    at commitHookEffectListMount (react-dom_client.js?v=536d68a9:8460:122)
+    at commitHookPassiveMountEffects (react-dom_client.js?v=536d68a9:8518:60)
+    at reconnectPassiveEffects (react-dom_client.js?v=536d68a9:10016:13)
+    at doubleInvokeEffectsOnFiber (react-dom_client.js?v=536d68a9:11461:207)
+    at runWithFiberInDEV (react-dom_client.js?v=536d68a9:1485:72)
+    at recursivelyTraverseAndDoubleInvokeEffectsInDEV (react-dom_client.js?v=536d68a9:11432:78)
+overrideMethod @ hook.js:600
 handleError @ error-handler.ts:197
 handleError @ error-handler.ts:304
-(anonymous) @ useWorkflowData.ts:30
-await in (anonymous)
-(anonymous) @ useWorkflowData.ts:135
+(anonymous) @ useWorkflowChat.ts:41
+(anonymous) @ useWorkflowChat.ts:50
 react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
 commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
 reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10031
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10009
 doubleInvokeEffectsOnFiber @ react-dom_client.js?v=536d68a9:11461
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11432
+runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1487
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11447
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
@@ -893,37 +337,41 @@ commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
 performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
 performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
 performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
-error-handler.ts:198 Full Error Details:
- Source: useWorkflowData.loadTemplates
+error-handler.ts:198 Full Error Details: Source: useWorkflowChat.loadWorkflowTemplates
 Operation: load workflow templates
-Timestamp: 2025-09-19T02:29:21.990Z
-Error Type: ResponseError
-Message: Response returned an error code
+Timestamp: 2025-09-19T15:57:51.359Z
+Error Type: Error
+Message: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
 Stack Trace:
-ResponseError: Response returned an error code
-    at WorkflowsApi.<anonymous> (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:159:19)
-    at Generator.next (<anonymous>)
-    at fulfilled (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:17:58)
-overrideMethod @ hook.js:608
+Error: getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat method not available
+    at http://localhost:3000/src/hooks/useWorkflowChat.ts:19:15
+    at http://localhost:3000/src/hooks/useWorkflowChat.ts:31:5
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:17486:20)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:1485:72)
+    at commitHookEffectListMount (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:8460:122)
+    at commitHookPassiveMountEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:8518:60)
+    at reconnectPassiveEffects (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:10016:13)
+    at doubleInvokeEffectsOnFiber (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:11461:207)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:1485:72)
+    at recursivelyTraverseAndDoubleInvokeEffectsInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=536d68a9:11432:78)
+overrideMethod @ hook.js:600
 handleError @ error-handler.ts:198
 handleError @ error-handler.ts:304
-(anonymous) @ useWorkflowData.ts:30
-await in (anonymous)
-(anonymous) @ useWorkflowData.ts:135
+(anonymous) @ useWorkflowChat.ts:41
+(anonymous) @ useWorkflowChat.ts:50
 react_stack_bottom_frame @ react-dom_client.js?v=536d68a9:17486
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 commitHookEffectListMount @ react-dom_client.js?v=536d68a9:8460
 commitHookPassiveMountEffects @ react-dom_client.js?v=536d68a9:8518
 reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10031
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=536d68a9:9995
-reconnectPassiveEffects @ react-dom_client.js?v=536d68a9:10009
 doubleInvokeEffectsOnFiber @ react-dom_client.js?v=536d68a9:11461
 runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11432
+runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1487
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11447
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
 recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=536d68a9:11438
@@ -977,3 +425,4 @@ commitRootWhenReady @ react-dom_client.js?v=536d68a9:10512
 performWorkOnRoot @ react-dom_client.js?v=536d68a9:10457
 performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=536d68a9:11623
 performWorkUntilDeadline @ react-dom_client.js?v=536d68a9:36
+

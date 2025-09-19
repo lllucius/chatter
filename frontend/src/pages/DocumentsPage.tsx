@@ -33,7 +33,7 @@ import {
 import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
-import { DocumentResponse, DocumentSearchRequest } from 'chatter-sdk';
+import { DocumentResponse, DocumentSearchRequest, DocumentChunksResponse } from 'chatter-sdk';
 import { ThemeContext } from '../App';
 import { useSSE } from '../services/sse-context';
 import { formatFileSize } from '../utils/common';
@@ -199,37 +199,25 @@ const DocumentsPage: React.FC = () => {
       let contentPreview = '';
 
       try {
-        // Fetch document chunks using direct API call since SDK doesn't include this endpoint yet
-        const token = authService.getToken();
-        if (!token) {
-          throw new Error('No authentication token available');
-        }
-        
-        const response = await fetch(`/api/v1/documents/${document.id}/chunks?limit=3&offset=0`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${token}`,
-            'Content-Type': 'application/json',
-          },
+        // Use SDK to fetch document chunks instead of direct API call
+        const chunksResponse: DocumentChunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(document.id, {
+          limit: 3,
+          offset: 0,
         });
         
-        if (response.ok) {
-          const chunksResponse = await response.json();
-          const chunks = chunksResponse.chunks || [];
-          if (chunks.length > 0) {
-            contentPreview = chunks
-              .slice(0, 3)
-              .map((chunk: any, index: number) => 
-                `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`
-              )
-              .join('\n\n');
-          } else {
-            contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. No chunk content available for preview.`;
-          }
+        const chunks = chunksResponse.chunks || [];
+        if (chunks.length > 0) {
+          contentPreview = chunks
+            .slice(0, 3)
+            .map((chunk, index: number) => 
+              `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`
+            )
+            .join('\n\n');
         } else {
-          contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
+          contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. No chunk content available for preview.`;
         }
-      } catch {
+      } catch (error) {
+        console.error('Failed to fetch document chunks:', error);
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       }
 

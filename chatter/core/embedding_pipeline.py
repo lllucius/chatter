@@ -554,6 +554,10 @@ class SimpleVectorStore:
                 logger.debug(
                     "Falling back to computed_embedding for raw_embedding search"
                 )
+                # Re-prepare query vector for computed_embedding (1536 dimensions)
+                prepared_query = search_helper.prepare_query_vector(
+                    query_embedding, 'computed_embedding'
+                )
                 query = query.where(
                     DocumentChunk.computed_embedding.is_not(None)
                 )

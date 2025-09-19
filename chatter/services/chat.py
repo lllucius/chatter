@@ -644,8 +644,18 @@ class ChatService:
         self, message: Message, usage: dict[str, Any]
     ) -> None:
         """Apply usage information to a message."""
-        if "tokens" in usage:
+        # Handle new usage format with specific token counts
+        if "input_tokens" in usage:
+            message.prompt_tokens = usage["input_tokens"]
+        if "output_tokens" in usage:
+            message.completion_tokens = usage["output_tokens"]
+        if "total_tokens" in usage:
+            message.total_tokens = usage["total_tokens"]
+        
+        # Handle legacy format
+        if "tokens" in usage and not message.total_tokens:
             total_tokens = usage["tokens"]
+            message.total_tokens = total_tokens
             if (
                 not message.prompt_tokens
                 and not message.completion_tokens
@@ -654,8 +664,17 @@ class ChatService:
                 message.prompt_tokens = int(total_tokens * 0.2)
                 message.completion_tokens = int(total_tokens * 0.8)
 
+        # Apply cost information
         if "cost" in usage:
             message.cost = usage["cost"]
+            
+        # Apply model information
+        if "model_used" in usage:
+            message.model_used = usage["model_used"]
+            
+        # Apply response time
+        if "response_time_ms" in usage:
+            message.response_time_ms = usage["response_time_ms"]
 
     def _record_request_metrics(
         self,

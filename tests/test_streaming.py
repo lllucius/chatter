@@ -48,7 +48,7 @@ class TestStreamingEvent:
             timestamp=1234567890.0,
         )
 
-        assert event_data.type == StreamingEventType.TOKEN
+        assert event_data.event_type == StreamingEventType.TOKEN
         assert event_data.content == "Hello"
         assert event_data.metadata == {"token_id": 123}
         assert event_data.timestamp == 1234567890.0
@@ -287,7 +287,7 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, "type") and e.type == "token"
+            if hasattr(e, "event_type") and e.event_type == StreamingEventType.TOKEN
         ]
         assert len(token_events) > 0
 

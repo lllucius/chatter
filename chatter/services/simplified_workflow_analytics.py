@@ -225,8 +225,4 @@ class SimplifiedWorkflowAnalyticsService:
         }
 
 
-# For backwards compatibility with existing code
-class WorkflowAnalyticsService(SimplifiedWorkflowAnalyticsService):
-    """Alias for backwards compatibility."""
 
-    pass

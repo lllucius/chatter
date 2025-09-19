@@ -27,7 +27,7 @@ from chatter.schemas.workflows import (
     WorkflowValidationResponse,
 )
 from chatter.services.simplified_workflow_analytics import (
-    WorkflowAnalyticsService,
+    SimplifiedWorkflowAnalyticsService,
 )
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.services.workflow_management import (
@@ -52,9 +52,9 @@ async def get_workflow_management_service(
 
 async def get_workflow_analytics_service(
     session: AsyncSession = Depends(get_session_generator),
-) -> WorkflowAnalyticsService:
+) -> SimplifiedWorkflowAnalyticsService:
     """Get workflow analytics service."""
-    return WorkflowAnalyticsService(session)
+    return SimplifiedWorkflowAnalyticsService(session)
 
 
 async def get_workflow_execution_service(
@@ -311,7 +311,7 @@ async def get_workflow_analytics(
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
-    analytics_service: WorkflowAnalyticsService = Depends(
+    analytics_service: SimplifiedWorkflowAnalyticsService = Depends(
         get_workflow_analytics_service
     ),
 ) -> WorkflowAnalyticsResponse:

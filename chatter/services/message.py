@@ -16,7 +16,7 @@ from chatter.core.exceptions import (
 from chatter.models.conversation import Message, MessageRole
 from chatter.utils.performance import (
     QueryOptimizer,
-    get_performance_monitor,
+    get_performance_metrics,
 )
 from chatter.utils.security_enhanced import get_secure_logger
 
@@ -29,7 +29,7 @@ class MessageService:
     def __init__(self, session: AsyncSession):
         """Initialize message service with performance monitoring."""
         self.session = session
-        self.performance_monitor = get_performance_monitor()
+        self.performance_monitor = get_performance_metrics()
 
     async def get_conversation_messages(
         self,

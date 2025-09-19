@@ -46,11 +46,6 @@ class StreamingEvent:
         if self.timestamp is None:
             self.timestamp = time.time()
 
-    @property
-    def type(self) -> StreamingEventType:
-        """Alias for event_type for backwards compatibility."""
-        return self.event_type
-
 
 class StreamingError(Exception):
     """Exception raised during streaming operations."""

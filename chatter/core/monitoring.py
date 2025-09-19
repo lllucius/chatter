@@ -576,7 +576,6 @@ class MonitoringService:
     def track_performance_metric(self, metric_name: str, value: float):
         """Track a performance metric value by delegating to performance monitor."""
         # Use the shared performance monitor instead of duplicating tracking
-        # This method is kept for backward compatibility
         pass  # The performance monitor tracks metrics automatically via decorators
 
     def get_performance_summary(self) -> dict[str, Any]:
@@ -1061,7 +1060,7 @@ async def get_monitoring_service(
     return _monitoring_service
 
 
-# Convenience functions for backward compatibility during transition
+# Convenience functions for monitoring operations
 def record_request_metrics(
     method: str,
     path: str,
@@ -1116,7 +1115,7 @@ def record_workflow_metrics(
     correlation_id: str,
 ) -> None:
     """Record workflow execution metrics."""
-    # For compatibility - map to new workflow tracking
+    # Map to new workflow tracking
     try:
         service = asyncio.get_running_loop()
         if service:

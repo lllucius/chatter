@@ -917,7 +917,7 @@ def get_settings() -> Settings:
 
 # Module-level settings that will be lazily initialized
 class _SettingsProxy:
-    """Proxy to provide backward compatibility for module-level settings access."""
+    """Proxy to provide convenient module-level settings access."""
 
     def __getattr__(self, name: str) -> Any:
         return getattr(get_settings(), name)

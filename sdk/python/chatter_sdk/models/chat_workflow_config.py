@@ -23,12 +23,10 @@ from typing import Any, ClassVar, Dict, List, Optional
 from chatter_sdk.models.model_config import ModelConfig
 from chatter_sdk.models.retrieval_config import RetrievalConfig
 from chatter_sdk.models.tool_config import ToolConfig
-from chatter_sdk.models.workflow_edge import WorkflowEdge
-from chatter_sdk.models.workflow_node import WorkflowNode
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ChatWorkflowConfigInput(BaseModel):
+class ChatWorkflowConfig(BaseModel):
     """
     Configuration for building chat workflows dynamically.
     """ # noqa: E501
@@ -39,9 +37,7 @@ class ChatWorkflowConfigInput(BaseModel):
     llm_config: Optional[ModelConfig] = None
     retrieval_config: Optional[RetrievalConfig] = None
     tool_config: Optional[ToolConfig] = None
-    custom_nodes: Optional[List[WorkflowNode]] = None
-    custom_edges: Optional[List[WorkflowEdge]] = None
-    __properties: ClassVar[List[str]] = ["enable_retrieval", "enable_tools", "enable_memory", "enable_web_search", "llm_config", "retrieval_config", "tool_config", "custom_nodes", "custom_edges"]
+    __properties: ClassVar[List[str]] = ["enable_retrieval", "enable_tools", "enable_memory", "enable_web_search", "llm_config", "retrieval_config", "tool_config"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -61,7 +57,7 @@ class ChatWorkflowConfigInput(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ChatWorkflowConfigInput from a JSON string"""
+        """Create an instance of ChatWorkflowConfig from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -91,20 +87,6 @@ class ChatWorkflowConfigInput(BaseModel):
         # override the default output from pydantic by calling `to_dict()` of tool_config
         if self.tool_config:
             _dict['tool_config'] = self.tool_config.to_dict()
-        # override the default output from pydantic by calling `to_dict()` of each item in custom_nodes (list)
-        _items = []
-        if self.custom_nodes:
-            for _item_custom_nodes in self.custom_nodes:
-                if _item_custom_nodes:
-                    _items.append(_item_custom_nodes.to_dict())
-            _dict['custom_nodes'] = _items
-        # override the default output from pydantic by calling `to_dict()` of each item in custom_edges (list)
-        _items = []
-        if self.custom_edges:
-            for _item_custom_edges in self.custom_edges:
-                if _item_custom_edges:
-                    _items.append(_item_custom_edges.to_dict())
-            _dict['custom_edges'] = _items
         # set to None if llm_config (nullable) is None
         # and model_fields_set contains the field
         if self.llm_config is None and "llm_config" in self.model_fields_set:
@@ -120,21 +102,11 @@ class ChatWorkflowConfigInput(BaseModel):
         if self.tool_config is None and "tool_config" in self.model_fields_set:
             _dict['tool_config'] = None
 
-        # set to None if custom_nodes (nullable) is None
-        # and model_fields_set contains the field
-        if self.custom_nodes is None and "custom_nodes" in self.model_fields_set:
-            _dict['custom_nodes'] = None
-
-        # set to None if custom_edges (nullable) is None
-        # and model_fields_set contains the field
-        if self.custom_edges is None and "custom_edges" in self.model_fields_set:
-            _dict['custom_edges'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ChatWorkflowConfigInput from a dict"""
+        """Create an instance of ChatWorkflowConfig from a dict"""
         if obj is None:
             return None
 
@@ -148,9 +120,7 @@ class ChatWorkflowConfigInput(BaseModel):
             "enable_web_search": obj.get("enable_web_search") if obj.get("enable_web_search") is not None else False,
             "llm_config": ModelConfig.from_dict(obj["llm_config"]) if obj.get("llm_config") is not None else None,
             "retrieval_config": RetrievalConfig.from_dict(obj["retrieval_config"]) if obj.get("retrieval_config") is not None else None,
-            "tool_config": ToolConfig.from_dict(obj["tool_config"]) if obj.get("tool_config") is not None else None,
-            "custom_nodes": [WorkflowNode.from_dict(_item) for _item in obj["custom_nodes"]] if obj.get("custom_nodes") is not None else None,
-            "custom_edges": [WorkflowEdge.from_dict(_item) for _item in obj["custom_edges"]] if obj.get("custom_edges") is not None else None
+            "tool_config": ToolConfig.from_dict(obj["tool_config"]) if obj.get("tool_config") is not None else None
         })
         return _obj
 

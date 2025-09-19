@@ -61,8 +61,7 @@ from chatter_sdk.models.chart_data_point import ChartDataPoint
 from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics
 from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
-from chatter_sdk.models.chat_workflow_config_input import ChatWorkflowConfigInput
-from chatter_sdk.models.chat_workflow_config_output import ChatWorkflowConfigOutput
+from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 from chatter_sdk.models.chat_workflow_template import ChatWorkflowTemplate
 from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse

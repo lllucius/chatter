@@ -1,4 +1,4 @@
-# ChatWorkflowConfigOutput
+# ChatWorkflowConfig
 
 Configuration for building chat workflows dynamically.
 
@@ -13,25 +13,23 @@ Name | Type | Description | Notes
 **llm_config** | [**ModelConfig**](ModelConfig.md) |  | [optional] 
 **retrieval_config** | [**RetrievalConfig**](RetrievalConfig.md) |  | [optional] 
 **tool_config** | [**ToolConfig**](ToolConfig.md) |  | [optional] 
-**custom_nodes** | [**List[WorkflowNode]**](WorkflowNode.md) |  | [optional] 
-**custom_edges** | [**List[WorkflowEdge]**](WorkflowEdge.md) |  | [optional] 
 
 ## Example
 
 ```python
-from chatter_sdk.models.chat_workflow_config_output import ChatWorkflowConfigOutput
+from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 
 # TODO update the JSON string below
 json = "{}"
-# create an instance of ChatWorkflowConfigOutput from a JSON string
-chat_workflow_config_output_instance = ChatWorkflowConfigOutput.from_json(json)
+# create an instance of ChatWorkflowConfig from a JSON string
+chat_workflow_config_instance = ChatWorkflowConfig.from_json(json)
 # print the JSON string representation of the object
-print(ChatWorkflowConfigOutput.to_json())
+print(ChatWorkflowConfig.to_json())
 
 # convert the object into a dict
-chat_workflow_config_output_dict = chat_workflow_config_output_instance.to_dict()
-# create an instance of ChatWorkflowConfigOutput from a dict
-chat_workflow_config_output_from_dict = ChatWorkflowConfigOutput.from_dict(chat_workflow_config_output_dict)
+chat_workflow_config_dict = chat_workflow_config_instance.to_dict()
+# create an instance of ChatWorkflowConfig from a dict
+chat_workflow_config_from_dict = ChatWorkflowConfig.from_dict(chat_workflow_config_dict)
 ```
 [[Back to Model list]](../README.md#documentation-for-models) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to README]](../README.md)
 

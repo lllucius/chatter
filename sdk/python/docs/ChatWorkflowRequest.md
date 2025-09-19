@@ -8,7 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **message** | **str** | User message | 
 **conversation_id** | **str** |  | [optional] 
-**workflow_config** | [**ChatWorkflowConfigInput**](ChatWorkflowConfigInput.md) |  | [optional] 
+**workflow_config** | [**ChatWorkflowConfig**](ChatWorkflowConfig.md) |  | [optional] 
 **workflow_definition_id** | **str** |  | [optional] 
 **workflow_template_name** | **str** |  | [optional] 
 **profile_id** | **str** |  | [optional] 

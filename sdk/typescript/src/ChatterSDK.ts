@@ -9,7 +9,6 @@ import {
   AgentsApi,
   AnalyticsApi,
   AuthenticationApi,
-  ChatApi,
   ConversationsApi,
   DataManagementApi,
   DefaultApi,
@@ -32,7 +31,6 @@ export class ChatterSDK {
   public readonly agents: AgentsApi;
   public readonly analytics: AnalyticsApi;
   public readonly auth: AuthenticationApi;
-  public readonly chat: ChatApi;
   public readonly conversations: ConversationsApi;
   public readonly dataManagement: DataManagementApi;
   public readonly default: DefaultApi;
@@ -54,7 +52,6 @@ export class ChatterSDK {
     this.agents = new AgentsApi(this.configuration);
     this.analytics = new AnalyticsApi(this.configuration);
     this.auth = new AuthenticationApi(this.configuration);
-    this.chat = new ChatApi(this.configuration);
     this.conversations = new ConversationsApi(this.configuration);
     this.dataManagement = new DataManagementApi(this.configuration);
     this.default = new DefaultApi(this.configuration);

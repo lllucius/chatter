@@ -5,7 +5,7 @@ from __future__ import annotations
 from collections.abc import Sequence
 from typing import Any
 
-from sqlalchemy import and_, select
+from sqlalchemy import and_, func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import NotFoundError, ValidationError
@@ -178,7 +178,7 @@ class ConversationService:
         llm_model: str | None = None,
         tags: list[str] | None = None,
         enable_retrieval: bool | None = None,
-    ) -> Sequence[Conversation]:
+    ) -> tuple[Sequence[Conversation], int]:
         """List conversations for a user with filtering.
 
         Args:
@@ -194,64 +194,75 @@ class ConversationService:
             enable_retrieval: Filter by retrieval enabled status
 
         Returns:
-            List of conversations
+            Tuple of (list of conversations, total count)
         """
         try:
-            # Build query with filters
-            query = select(Conversation).where(
+            # Build base query with filters for both count and data queries
+            base_query = select(Conversation).where(
                 Conversation.user_id == user_id
             )
 
             # Apply status filter (default: exclude deleted)
             if status is not None:
-                query = query.where(Conversation.status == status)
+                base_query = base_query.where(Conversation.status == status)
             else:
-                query = query.where(
+                base_query = base_query.where(
                     Conversation.status != ConversationStatus.DELETED
                 )
 
             # Apply additional filters
             if llm_provider is not None:
-                query = query.where(
+                base_query = base_query.where(
                     Conversation.llm_provider == llm_provider
                 )
 
             if llm_model is not None:
-                query = query.where(Conversation.llm_model == llm_model)
+                base_query = base_query.where(Conversation.llm_model == llm_model)
 
             if enable_retrieval is not None:
-                query = query.where(
+                base_query = base_query.where(
                     Conversation.enable_retrieval == enable_retrieval
                 )
 
             # Tags filter - check if all specified tags are present
             if tags is not None and len(tags) > 0:
                 for tag in tags:
-                    query = query.where(
+                    base_query = base_query.where(
                         Conversation.tags.contains([tag])
                     )
 
+            # Count query - get total number of conversations matching filters
+            count_query = select(func.count()).select_from(
+                base_query.subquery()
+            )
+            count_result = await self.session.execute(count_query)
+            total_count = count_result.scalar() or 0
+
+            # Data query - add sorting and pagination
+            data_query = base_query
+
             # Apply sorting
             if sort_order.lower() == "desc":
-                query = query.order_by(
+                data_query = data_query.order_by(
                     getattr(Conversation, sort_field).desc()
                 )
             else:
-                query = query.order_by(
+                data_query = data_query.order_by(
                     getattr(Conversation, sort_field).asc()
                 )
 
             # Apply pagination
-            query = query.offset(offset).limit(limit)
+            data_query = data_query.offset(offset).limit(limit)
 
-            # Execute query
-            result = await self.session.execute(query)
+            # Execute data query
+            result = await self.session.execute(data_query)
             conversations = result.scalars().all()
 
             logger.debug(
                 "Listed conversations with filters",
                 user_id=user_id,
                 count=len(conversations),
+                total_count=total_count,
                 limit=limit,
                 offset=offset,
                 sort_field=sort_field,
@@ -263,7 +274,7 @@ class ConversationService:
                 enable_retrieval=enable_retrieval,
             )
 
-            return conversations
+            return conversations, total_count
 
         except Exception as e:
             logger.error(
@@ -775,7 +786,7 @@ class ConversationService:
             List of recent conversations
         """
         try:
-            conversations = await self.list_conversations(
+            conversations, _ = await self.list_conversations(
                 user_id, limit=limit
             )
             return list(conversations)

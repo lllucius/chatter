@@ -638,15 +638,13 @@ def create_error_response(error: Exception) -> dict[str, Any]:
         Dictionary suitable for JSON response
     """
     if isinstance(error, ChatterBaseException):
-        return error.to_problem_detail().model_dump(exclude_none=True)
+        return error.to_problem_detail()
     else:
         # Handle non-ChatterBaseException exceptions
         chatter_error = handle_service_error(
             func_name="unknown", service_name="system", error=error
         )
-        return chatter_error.to_problem_detail().model_dump(
-            exclude_none=True
-        )
+        return chatter_error.to_problem_detail()
 
 
 

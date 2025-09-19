@@ -185,8 +185,17 @@ async def lifespan(app: FastAPI) -> AsyncGenerator[None, None]:
             )
 
     # Initialize database
-    await init_database()
-    logger.info("Database initialized")
+    try:
+        await init_database()
+        logger.info("Database initialized")
+    except Exception as e:
+        logger.error("Failed to initialize database", error=str(e))
+        if settings.is_production:
+            raise
+        else:
+            logger.warning(
+                "Continuing startup despite database issues (development mode)"
+            )
 
     # Initialize built-in tool servers
     try:
@@ -424,6 +433,33 @@ def create_app() -> FastAPI:
     # Add custom middleware
     app.add_middleware(LoggingMiddleware)
 
+    # Add CORS error handling middleware before CORS middleware
+    @app.middleware("http")
+    async def cors_error_handler(request: Request, call_next):
+        """Handle CORS-related errors with better debugging info."""
+        # Log CORS preflight requests for debugging
+        if request.method == "OPTIONS":
+            origin = request.headers.get("origin")
+            logger.debug(
+                "CORS preflight request",
+                origin=origin,
+                url=str(request.url),
+                allowed_origins=settings.cors_origins,
+            )
+            
+        response = await call_next(request)
+        
+        # Add debug info for CORS issues
+        if request.method == "OPTIONS" and response.status_code >= 400:
+            logger.warning(
+                "CORS preflight failed",
+                status_code=response.status_code,
+                origin=request.headers.get("origin"),
+                url=str(request.url),
+            )
+            
+        return response
+
     # Add CORS middleware LAST so it processes requests FIRST
     # This ensures CORS headers are added to all responses and OPTIONS requests are handled properly
     app.add_middleware(
@@ -432,6 +468,8 @@ def create_app() -> FastAPI:
         allow_credentials=settings.cors_allow_credentials,
         allow_methods=settings.cors_allow_methods,
         allow_headers=settings.cors_allow_headers,
+        expose_headers=["x-correlation-id", "x-request-id"],  # Expose additional headers
+        max_age=86400,  # Cache preflight requests for 24 hours
     )
 
     # Add exception handlers
@@ -494,18 +532,29 @@ def create_app() -> FastAPI:
         request: Request, exc: Exception
     ) -> JSONResponse:
         """Global exception handler."""
+        # Capture additional debug info for better error tracking
+        import traceback
+        
+        error_details = {
+            "url": str(request.url),
+            "method": request.method,
+            "exception": str(exc),
+            "exception_type": type(exc).__name__,
+        }
+        
+        if settings.debug:
+            error_details["traceback"] = traceback.format_exc()
+            
         logger.exception(
             "Unhandled exception",
-            url=str(request.url),
-            method=request.method,
-            exception=str(exc),
+            **error_details
         )
 
         if settings.is_development:
             problem = InternalServerProblem(
                 detail=f"An internal server error occurred: {str(exc)}",
                 error_type=type(exc).__name__,
-                error_traceback=str(exc) if settings.debug else None,
+                error_traceback=traceback.format_exc() if settings.debug else None,
             )
         else:
             problem = InternalServerProblem()

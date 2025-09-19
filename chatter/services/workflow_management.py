@@ -16,7 +16,6 @@ from chatter.models.workflow import (
     WorkflowDefinition,
     WorkflowExecution,
     WorkflowTemplate,
-    # WorkflowType deprecated - using dynamic workflow_type string
 )
 from chatter.utils.logging import get_logger
 

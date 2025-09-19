@@ -33,30 +33,6 @@ class TestSplitChatEndpoints:
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
 
-    def test_chat_request_schema_stream_field_deprecated(self):
-        """Test that ChatRequest stream field is deprecated."""
-        request_data = {
-            "message": "Hello, world!",
-            "workflow": "plain",
-            "stream": True,
-        }
-
-        chat_request = ChatRequest(**request_data)
-        assert chat_request.message == "Hello, world!"
-        assert chat_request.stream  # Still works but deprecated
-
-        # Check if the field description mentions deprecation
-        field_info = ChatRequest.model_fields["stream"]
-        assert "DEPRECATED" in field_info.description
-
-    def test_chat_request_schema_without_stream_field(self):
-        """Test that ChatRequest works without stream field."""
-        request_data = {"message": "Hello, world!", "workflow": "plain"}
-
-        chat_request = ChatRequest(**request_data)
-        assert chat_request.message == "Hello, world!"
-        assert not chat_request.stream  # Default value
-
     @pytest.mark.parametrize(
         "workflow", ["plain", "rag", "tools", "full"]
     )

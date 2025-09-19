@@ -35,7 +35,7 @@ from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.utils.correlation import get_correlation_id
 from chatter.utils.performance import (
     get_conversation_optimized,
-    get_performance_monitor,
+    get_performance_metrics,
 )
 from chatter.utils.security_enhanced import get_secure_logger
 
@@ -147,7 +147,7 @@ class ChatService:
         """Initialize chat service with dependencies and performance monitoring."""
         self.session = session
         self.llm_service = llm_service
-        self.performance_monitor = get_performance_monitor()
+        self.performance_monitor = get_performance_metrics()
 
         # Initialize specialized services
         self.conversation_service = ConversationService(session)

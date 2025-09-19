@@ -260,26 +260,6 @@ class Settings(BaseSettings):
     )
 
     # Cache TTL settings
-    # Backwards compatibility for existing code
-    @property
-    def cache_enabled(self) -> bool:
-        """Backwards compatibility - inverse of cache_disabled."""
-        return not self.cache_disabled
-
-    @property
-    def cache_disable_all(self) -> bool:
-        """Backwards compatibility - same as cache_disabled."""
-        return self.cache_disabled
-
-    @property
-    def cache_ttl(self) -> int:
-        """Backwards compatibility - same as cache_ttl_default."""
-        return self.cache_ttl_default
-
-    @property
-    def cache_max_memory_size(self) -> int:
-        """Backwards compatibility - same as cache_max_size."""
-        return self.cache_max_size
 
     # =============================================================================
     # UNIFIED RATE LIMITING SETTINGS
@@ -937,7 +917,7 @@ def get_settings() -> Settings:
 
 # Module-level settings that will be lazily initialized
 class _SettingsProxy:
-    """Proxy to provide backward compatibility for module-level settings access."""
+    """Proxy to provide convenient module-level settings access."""
 
     def __getattr__(self, name: str) -> Any:
         return getattr(get_settings(), name)

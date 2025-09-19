@@ -203,12 +203,10 @@ class ChatterBaseException(Exception):
         return re.sub(r"([a-z])([A-Z])", r"\1 \2", class_name)
 
 
-# Alias for backward compatibility
-ChatterError = ChatterBaseException
-ChatterException = ChatterBaseException  # Additional alias for tests
 
 
-class ServiceError(ChatterError):
+
+class ServiceError(ChatterBaseException):
     """Generic service layer errors."""
 
     def __init__(self, service_name: str, message: str, **kwargs):
@@ -374,7 +372,7 @@ class WorkflowError(ChatterBaseException):
         super().__init__(message=message, status_code=500, **kwargs)
 
 
-class ConflictError(ChatterError):
+class ConflictError(ChatterBaseException):
     """Resource conflict errors."""
 
     def __init__(
@@ -542,7 +540,7 @@ def handle_service_error(
     service_name: str,
     error: Exception,
     message: str | None = None,
-) -> ChatterError:
+) -> ChatterBaseException:
     """Convert generic exceptions to standardized service errors.
 
     Args:
@@ -552,11 +550,11 @@ def handle_service_error(
         message: Custom error message
 
     Returns:
-        Standardized ChatterError
+        Standardized ChatterBaseException
     """
     error_message = message or f"Error in {func_name}: {str(error)}"
 
-    # Map known exception types to appropriate ChatterError subclasses
+    # Map known exception types to appropriate ChatterBaseException subclasses
     if isinstance(error, FileNotFoundError):
         return NotFoundError(error_message, cause=error)
     elif isinstance(error, PermissionError | OSError):
@@ -576,10 +574,10 @@ def create_error_response(error: Exception) -> dict[str, Any]:
     Returns:
         Dictionary suitable for JSON response
     """
-    if isinstance(error, ChatterError):
+    if isinstance(error, ChatterBaseException):
         return error.to_problem_detail().model_dump(exclude_none=True)
     else:
-        # Handle non-ChatterError exceptions
+        # Handle non-ChatterBaseException exceptions
         chatter_error = handle_service_error(
             func_name="unknown", service_name="system", error=error
         )
@@ -588,8 +586,7 @@ def create_error_response(error: Exception) -> dict[str, Any]:
         )
 
 
-# Alias for backward compatibility with tests
-ChatterBaseException = ChatterError
+
 
 
 class AgentError(ChatterBaseException):

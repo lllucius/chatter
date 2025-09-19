@@ -1674,11 +1674,4 @@ def get_performance_metrics() -> PerformanceMonitor:
     return _performance_monitor
 
 
-# Keep backward compatibility alias
-def get_performance_monitor() -> PerformanceMonitor:
-    """Get the global performance monitor instance.
 
-    Returns:
-        PerformanceMonitor instance
-    """
-    return _performance_monitor

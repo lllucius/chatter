@@ -41,7 +41,6 @@ class VectorSearchResult:
         self.score = score
         self.document = document
         self.vector = vector
-        self.similarity = score  # Alias for backward compatibility
 
 
 class VectorStoreError(Exception):
@@ -513,6 +512,3 @@ class VectorStoreManager:
 
 # Global vector store manager instance
 vector_store_manager = VectorStoreManager()
-
-# Alias for backward compatibility
-VectorStore = AbstractVectorStore

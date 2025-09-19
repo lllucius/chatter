@@ -16,7 +16,7 @@ from chatter.models.workflow import (
     WorkflowDefinition,
     WorkflowExecution,
     WorkflowTemplate,
-    WorkflowType,
+    # WorkflowType deprecated - using dynamic workflow_type string
 )
 from chatter.utils.logging import get_logger
 
@@ -413,8 +413,10 @@ class WorkflowManagementService:
     ) -> WorkflowTemplate:
         """Create a new workflow template."""
         try:
-            # Map workflow type
-            workflow_type_enum = WorkflowType(workflow_type)
+            # Validate workflow type is a valid string (no longer enum-based)
+            if not workflow_type or not isinstance(workflow_type, str):
+                raise ValueError("workflow_type must be a non-empty string")
+            
             category_enum = TemplateCategory(category)
 
             # Generate config hash
@@ -430,13 +432,15 @@ class WorkflowManagementService:
                 owner_id=owner_id,
                 name=name,
                 description=description,
-                workflow_type=workflow_type_enum,
+                workflow_type=workflow_type,  # Now using string directly
                 category=category_enum,
                 default_params=default_params or {},
                 required_tools=required_tools,
                 required_retrievers=required_retrievers,
                 base_template_id=base_template_id,
                 is_public=is_public,
+                is_dynamic=True,  # Mark new templates as dynamic
+                execution_pattern="chat" if "chat" in workflow_type.lower() else None,
                 tags=tags,
                 config_hash=config_hash,
             )

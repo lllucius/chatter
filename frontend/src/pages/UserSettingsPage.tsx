@@ -44,15 +44,18 @@ interface UserProfile {
   id: string;
   username: string;
   email: string;
-  full_name: string | null;
+  full_name?: string | null | undefined;
   created_at: string;
   updated_at: string;
+  bio?: string | null;
+  is_active?: boolean;
 }
 
 interface APIKey {
   id: string;
-  name: string;
-  created_at: string;
+  api_key_name: string;
+  api_key?: string;
+  created_at?: string;
   expires_at?: string;
   last_used?: string;
 }
@@ -157,10 +160,11 @@ const UserSettingsPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        // TODO: Implement API key creation when endpoint is available
-        // const newKey = await getSDK().createApiKey(values);
-        // setApiKeys([...apiKeys, newKey]);
-        toastService.success('API key creation not yet implemented');
+        const newKey = await getSDK().auth.createApiKeyApiV1AuthApiKey({
+          name: values.name,
+        });
+        setApiKeys([...apiKeys, newKey]);
+        toastService.success('API key created successfully');
         setApiKeyDialogOpen(false);
         apiKeyForm.resetForm();
       } catch (error: unknown) {
@@ -176,12 +180,11 @@ const UserSettingsPage: React.FC = () => {
 
   const loadUserProfile = async () => {
     try {
-      // TODO: Implement user profile loading when endpoint is available
-      // const profile = await getSDK().getCurrentUser();
-      // setUserProfile(profile);
-      // Set default values for now
-      profileForm.setFieldValue('full_name', '');
-      profileForm.setFieldValue('email', '');
+      const profile = await getSDK().auth.getCurrentUserInfoApiV1AuthMe();
+      setUserProfile(profile);
+      // Set form values from loaded profile
+      profileForm.setFieldValue('full_name', profile.full_name || '');
+      profileForm.setFieldValue('email', profile.email || '');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadUserProfile',
@@ -193,10 +196,8 @@ const UserSettingsPage: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setApiKeysLoading(true);
-      // TODO: Implement API key listing when endpoint is available
-      // const keys = await getSDK().listApiKeys();
-      // setApiKeys(keys);
-      setApiKeys([]); // Placeholder until API is available
+      const keys = await getSDK().auth.listApiKeysApiV1AuthApiKeys();
+      setApiKeys(keys);
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadApiKeys',
@@ -209,8 +210,7 @@ const UserSettingsPage: React.FC = () => {
 
   const handleRevokeApiKey = async (keyId: string) => {
     try {
-      // TODO: Implement API key revocation when endpoint is available
-      // await getSDK().revokeApiKey(keyId);
+      await getSDK().auth.revokeApiKeyApiV1AuthApiKey();
       setApiKeys(apiKeys.filter((key) => key.id !== keyId));
       toastService.success('API key revoked successfully');
     } catch (error: unknown) {
@@ -224,9 +224,8 @@ const UserSettingsPage: React.FC = () => {
 
   const handleDeactivateAccount = async () => {
     try {
-      // TODO: Implement account deactivation when endpoint is available
-      // await getSDK().deactivateAccount();
-      toastService.success('Account deactivation not yet implemented');
+      await getSDK().auth.deactivateAccountApiV1AuthAccount();
+      toastService.success('Account deactivated successfully');
       // The SDK will handle logout and redirect
     } catch (error: unknown) {
       handleError(error, {
@@ -436,7 +435,7 @@ const UserSettingsPage: React.FC = () => {
                     ) : (
                       apiKeys.map((key) => (
                         <TableRow key={key.id}>
-                          <TableCell>{key.name}</TableCell>
+                          <TableCell>{key.api_key_name}</TableCell>
                           <TableCell>
                             {key.created_at
                               ? format(new Date(key.created_at), 'PP')

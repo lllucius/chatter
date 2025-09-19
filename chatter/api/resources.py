@@ -63,7 +63,7 @@ class ConversationResourceHandler:
                 llm_model=llm_model,
                 tags=tags,
                 enable_retrieval=enable_retrieval,
-                sort_by=sort_by,
+                sort_field=sort_by,
                 sort_order=sort_order,
             )
         )

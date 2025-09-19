@@ -18,7 +18,9 @@ not create an overlapping system.
 
 ALWAYS, I repeat, ALWAYS look for existing classes, interfaces, systems, etc. For example, if you need to add monitoring to an API, look for an established monitoring system.  You may modify it if needed, but DO NOT create another.  The intent here is to keep duplication out of the code and checking before making updates will reduce the amount of rewriting leter.
 
-Fir "id" type fields, this project uses ULIDs, NOT UUIDs!
+Always use ULIDs instead of UUIDs wherever this type of "id" is needed.
+
+Always run "npm run type-check" after making changes to the frontend and fix any errors.
 
 The project will be using:
  python 3.12+

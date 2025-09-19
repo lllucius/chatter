@@ -1,5 +1,5 @@
 import { useState, useEffect, useCallback } from 'react';
-import { getSDK } from '../services/auth-service';
+import { getSDK, authService } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 import { 
   WorkflowTemplateResponse, 
@@ -38,11 +38,8 @@ export const useWorkflowData = () => {
 
   const loadAvailableTools = useCallback(async () => {
     try {
-      // TODO: Implement when tools API is available
-      // const response = await getSDK().workflows.getAvailableToolsApiV1WorkflowsTools();
-      // setAvailableTools(response);
-      console.warn('Available tools API not implemented');
-      setAvailableTools(null);
+      const response = await getSDK().chat.getAvailableToolsApiV1ChatToolsAvailable();
+      setAvailableTools(response);
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.loadAvailableTools',
@@ -119,12 +116,26 @@ export const useWorkflowData = () => {
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      // TODO: Implement delete functionality when API is available
-      // await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
-      //   templateId
-      // );
-      console.warn('Delete workflow template not implemented in API');
-      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      // Implement delete functionality using direct API call since SDK doesn't include this endpoint yet
+      const token = authService.getToken();
+      if (!token) {
+        throw new Error('No authentication token available');
+      }
+      
+      const response = await fetch(`/api/v1/workflows/templates/${templateId}`, {
+        method: 'DELETE',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'Content-Type': 'application/json',
+        },
+      });
+      
+      if (response.ok) {
+        setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+        console.log('Workflow template deleted successfully');
+      } else {
+        throw new Error(`Delete failed: ${response.status} ${response.statusText}`);
+      }
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.deleteTemplate',

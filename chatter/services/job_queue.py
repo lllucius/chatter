@@ -1011,40 +1011,35 @@ async def document_processing_job(
     )
 
     try:
-        # Read file content from the file path
+        # Verify file exists
         file_path_obj = Path(file_path)
         if not file_path_obj.exists():
             raise FileNotFoundError(
                 f"Document file not found: {file_path}"
             )
 
-        with open(file_path_obj, "rb") as f:
-            file_content = f.read()
-
         # Get a database session for background processing
         async_session = get_session_maker()
         async with async_session() as session:
-            from chatter.services.document_processing import (
-                DocumentProcessingService,
+            from chatter.services.new_document_service import (
+                NewDocumentService,
             )
 
             # Create processing service instance
-            processing_service = DocumentProcessingService(session)
+            processing_service = NewDocumentService(session)
 
-            # Process the document (chunking + embeddings)
-            # If process_document does any blocking work, ensure it offloads with asyncio.to_thread
-            success = await processing_service.process_document(
-                document_id, file_content
+            # Process the document directly with file path
+            await processing_service._process_document_async(
+                document_id, file_path_obj
             )
 
-            if success:
-                logger.info(
-                    f"Document {document_id} processed successfully in background"
-                )
-                return {
-                    "document_id": document_id,
-                    "status": "processed",
-                    "success": True,
+            logger.info(
+                f"Document {document_id} processed successfully in background"
+            )
+            return {
+                "document_id": document_id,
+                "status": "processed",
+                "success": True,
                 }
             else:
                 logger.error(

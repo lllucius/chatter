@@ -443,8 +443,8 @@ class DataManager:
     async def bulk_delete_documents(
         self, document_ids: list[str], user_id: str
     ) -> dict[str, Any]:
-        """Bulk delete documents using DocumentService."""
-        from chatter.core.documents import DocumentService
+        """Bulk delete documents using NewDocumentService."""
+        from chatter.services.new_document_service import NewDocumentService
         from chatter.utils.database import get_session_maker
 
         success_count = 0
@@ -453,17 +453,16 @@ class DataManager:
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
-            document_service = DocumentService(session)
+            document_service = NewDocumentService(session)
 
             for document_id in document_ids:
                 try:
-                    success = await document_service.delete_document(
+                    await document_service.delete_document(
                         document_id, user_id
                     )
-                    if success:
-                        success_count += 1
-                    else:
-                        error_count += 1
+                    success_count += 1
+                except Exception as e:
+                    error_count += 1
                         errors.append(
                             f"Document {document_id} not found or not owned by user"
                         )

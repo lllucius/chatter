@@ -3,7 +3,7 @@ import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 import { 
   WorkflowTemplateResponse, 
-  AvailableToolsResponse, 
+  ServerToolsResponse, 
   WorkflowExecutionResponse,
   WorkflowExecutionRequest 
 } from 'chatter-sdk';
@@ -16,7 +16,7 @@ export const useWorkflowData = () => {
   const [loading, setLoading] = useState(false);
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [availableTools, setAvailableTools] =
-    useState<AvailableToolsResponse | null>(null);
+    useState<ServerToolsResponse | null>(null);
   const [executions, setExecutions] = useState<WorkflowExecution[]>([]);
   const [selectedTemplate, setSelectedTemplate] = useState<string | null>(null);
 

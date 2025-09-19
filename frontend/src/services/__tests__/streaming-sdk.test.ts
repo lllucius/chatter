@@ -2,16 +2,16 @@
  * Simple test to verify the streaming method can be called
  */
 
-import { ChatterSDK, ChatRequest, Configuration } from 'chatter-sdk';
+import { ChatterSDK, ChatWorkflowRequest, Configuration } from 'chatter-sdk';
 
 describe('Streaming SDK Method', () => {
-  it('should have streamingChatApiV1ChatStreaming method', () => {
+  it('should have executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming method', () => {
     const sdk = new ChatterSDK();
-    expect(typeof sdk.chat.streamingChatApiV1ChatStreaming).toBe('function');
+    expect(typeof sdk.workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming).toBe('function');
   });
 
   it('should be able to create a streaming request', async () => {
-    const chatRequest: ChatRequest = {
+    const chatRequest: ChatWorkflowRequest = {
       message: 'Test message',
       conversation_id: 'test-id',
     };
@@ -22,7 +22,7 @@ describe('Streaming SDK Method', () => {
 
     // This will fail without a real server, but we can at least verify the method signature
     try {
-      await sdk.chat.streamingChatApiV1ChatStreaming(chatRequest);
+      await sdk.workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(chatRequest);
     } catch (error) {
       // Expected to fail since we don't have a server, but the method should exist
       expect(error).toBeDefined();

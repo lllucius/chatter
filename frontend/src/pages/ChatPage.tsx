@@ -18,7 +18,7 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
-import type { ConversationResponse, ChatRequest, ChatResponse } from 'chatter-sdk';
+import type { ConversationResponse, ChatWorkflowRequest, ChatResponse } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
@@ -124,11 +124,11 @@ const ChatPage: React.FC = () => {
 
   // Handle streaming response from chat API
   const handleStreamingResponse = useCallback(
-    async (chatRequest: ChatRequest, isRegeneration: boolean) => {
+    async (chatRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
         // Get the streaming response
         const stream =
-          await getSDK().chat.streamingChatApiV1ChatStreaming(chatRequest);
+          await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(chatRequest) as unknown as ReadableStream;
 
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();

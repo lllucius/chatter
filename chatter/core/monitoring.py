@@ -23,7 +23,7 @@ from typing import Any
 
 from chatter.models.base import generate_ulid
 from chatter.utils.logging import get_logger
-from chatter.utils.performance import get_performance_monitor
+from chatter.utils.performance import get_performance_metrics
 
 logger = get_logger(__name__)
 
@@ -282,7 +282,7 @@ class MonitoringService:
         self.cache = cache_service
 
         # Use shared performance monitor instead of duplicating tracking
-        self.performance_monitor = get_performance_monitor()
+        self.performance_monitor = get_performance_metrics()
 
         # Metric storage
         self.requests: deque[RequestMetrics] = deque(maxlen=max_history)

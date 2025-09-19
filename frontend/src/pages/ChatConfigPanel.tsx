@@ -15,6 +15,7 @@ import {
   Chip,
   Tooltip,
   IconButton,
+  TextField,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -22,6 +23,7 @@ import {
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
   RestartAlt as ResetIcon,
+  Build as ToolIcon,
 } from '@mui/icons-material';
 import {
   ProfileResponse,
@@ -55,6 +57,12 @@ interface Props {
   enableRetrieval: boolean;
   setEnableRetrieval: (v: boolean) => void;
 
+  enableTools: boolean;
+  setEnableTools: (v: boolean) => void;
+
+  customPromptText: string;
+  setCustomPromptText: (text: string) => void;
+
   onSelectConversation: (conversation: ConversationResponse) => void;
 }
 
@@ -75,6 +83,10 @@ const ChatConfigPanel: React.FC<Props> = ({
   setMaxTokens,
   enableRetrieval,
   setEnableRetrieval,
+  enableTools,
+  setEnableTools,
+  customPromptText,
+  setCustomPromptText,
   onSelectConversation: _onSelectConversation,
 }) => {
   const { collapsed, setCollapsed } = useRightSidebar();
@@ -108,6 +120,39 @@ const ChatConfigPanel: React.FC<Props> = ({
 
   const resetPromptSettings = () => {
     setSelectedPrompt('');
+    setCustomPromptText('');
+  };
+
+  const resetToolSettings = () => {
+    setEnableTools(false);
+  };
+
+  // Handle profile selection and populate settings from profile
+  const handleProfileChange = (profileId: string) => {
+    setSelectedProfile(profileId);
+    
+    // Find the selected profile and populate settings
+    const profile = profiles.find(p => p.id === profileId);
+    if (profile) {
+      setTemperature(profile.temperature || 0.7);
+      setMaxTokens(profile.max_tokens || 1000);
+      setEnableRetrieval(profile.enable_retrieval || false);
+      setEnableTools(profile.enable_tools || false);
+    }
+  };
+
+  // Handle prompt selection and populate custom prompt text
+  const handlePromptChange = (promptId: string) => {
+    setSelectedPrompt(promptId);
+    
+    // Find the selected prompt and populate custom text
+    const prompt = prompts.find(p => p.id === promptId);
+    if (prompt && prompt.content) {
+      setCustomPromptText(prompt.content);
+    } else if (!promptId) {
+      // Clear custom text when no prompt is selected
+      setCustomPromptText('');
+    }
   };
 
   const resetKnowledgeSettings = () => {
@@ -152,6 +197,18 @@ const ChatConfigPanel: React.FC<Props> = ({
             sx={{ borderRadius: 1 }}
           >
             <DocumentIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Tool Settings" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('tools');
+              localStorage.setItem('chatter_expandedPanel', 'tools');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <ToolIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -203,7 +260,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             <Select
               value={selectedProfile}
               label="AI Profile"
-              onChange={(e) => setSelectedProfile(e.target.value)}
+              onChange={(e) => handleProfileChange(e.target.value)}
             >
               {profiles.map((profile) => (
                 <MenuItem key={profile.id} value={profile.id}>
@@ -287,7 +344,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             <Select
               value={selectedPrompt}
               label="Prompt Template"
-              onChange={(e) => setSelectedPrompt(e.target.value)}
+              onChange={(e) => handlePromptChange(e.target.value)}
             >
               <MenuItem value="">None</MenuItem>
               {prompts.map((prompt) => (
@@ -297,6 +354,20 @@ const ChatConfigPanel: React.FC<Props> = ({
               ))}
             </Select>
           </FormControl>
+          
+          {/* Custom Prompt Text Editor */}
+          <TextField
+            label="Custom Prompt Text"
+            value={customPromptText}
+            onChange={(e) => setCustomPromptText(e.target.value)}
+            fullWidth
+            multiline
+            rows={4}
+            placeholder="Enter custom prompt text or select a template above..."
+            sx={{ mb: 2 }}
+            helperText="Edit the prompt text or select a predefined template above"
+          />
+          
           {selectedPrompt && (
             <Box>
               <Typography variant="body2" color="text.secondary">
@@ -392,6 +463,61 @@ const ChatConfigPanel: React.FC<Props> = ({
 
           <Typography variant="body2" color="text.secondary">
             {selectedDocuments.length} document(s) selected for context
+          </Typography>
+        </AccordionDetails>
+      </Accordion>
+
+      {/* Tools */}
+      <Accordion
+        expanded={expandedPanel === 'tools'}
+        onChange={handlePanelChange('tools')}
+        sx={{ position: 'relative' }}
+      >
+        <AccordionSummary
+          expandIcon={<ExpandMoreIcon />}
+          sx={{
+            '& .MuiAccordionSummary-content': {
+              alignItems: 'center',
+            },
+          }}
+        >
+          <ToolIcon sx={{ mr: 1 }} />
+          <Typography sx={{ flexGrow: 1 }}>Tool Execution</Typography>
+        </AccordionSummary>
+        <Box
+          sx={{
+            position: 'absolute',
+            top: 8,
+            right: 48, // Position to the left of the expand icon
+            zIndex: 1,
+          }}
+        >
+          <Tooltip title="Reset to defaults">
+            <IconButton
+              size="small"
+              onClick={(e) => {
+                e.stopPropagation();
+                resetToolSettings();
+              }}
+            >
+              <ResetIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        </Box>
+        <AccordionDetails>
+          <FormControlLabel
+            control={
+              <Switch
+                checked={enableTools}
+                onChange={(e) => setEnableTools(e.target.checked)}
+              />
+            }
+            label="Enable Tool Execution"
+            sx={{ mb: 2 }}
+          />
+
+          <Typography variant="body2" color="text.secondary">
+            Enable AI assistant to execute tools and functions during conversation
           </Typography>
         </AccordionDetails>
       </Accordion>

@@ -133,7 +133,6 @@ class ErrorHandler {
       }
 
       // Try to extract problem detail information
-      const errorResponse = error as ErrorResponse;
       const problemDetail = errorResponse?.response?.data as ProblemDetail;
 
       if (problemDetail && typeof problemDetail === 'object') {

@@ -443,8 +443,8 @@ class DataManager:
     async def bulk_delete_documents(
         self, document_ids: list[str], user_id: str
     ) -> dict[str, Any]:
-        """Bulk delete documents using DocumentService."""
-        from chatter.core.documents import DocumentService
+        """Bulk delete documents using NewDocumentService."""
+        from chatter.services.new_document_service import NewDocumentService
         from chatter.utils.database import get_session_maker
 
         success_count = 0
@@ -453,17 +453,16 @@ class DataManager:
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
-            document_service = DocumentService(session)
+            document_service = NewDocumentService(session)
 
             for document_id in document_ids:
                 try:
-                    success = await document_service.delete_document(
+                    await document_service.delete_document(
                         document_id, user_id
                     )
-                    if success:
-                        success_count += 1
-                    else:
-                        error_count += 1
+                    success_count += 1
+                except Exception as e:
+                    error_count += 1
                         errors.append(
                             f"Document {document_id} not found or not owned by user"
                         )
@@ -493,9 +492,8 @@ class DataManager:
     async def bulk_delete_conversations(
         self, conversation_ids: list[str], user_id: str
     ) -> dict[str, Any]:
-        """Bulk delete conversations using ChatService."""
-        from chatter.services.chat import ChatService
-        from chatter.services.llm import LLMService
+        """Bulk delete conversations using ConversationService."""
+        from chatter.services.conversation import ConversationService
         from chatter.utils.database import get_session_maker
 
         success_count = 0
@@ -504,12 +502,11 @@ class DataManager:
 
         async_session_factory = get_session_maker()
         async with async_session_factory() as session:
-            llm_service = LLMService()
-            chat_service = ChatService(session, llm_service)
+            conversation_service = ConversationService(session)
 
             for conversation_id in conversation_ids:
                 try:
-                    await chat_service.delete_conversation(
+                    await conversation_service.delete_conversation(
                         conversation_id, user_id
                     )
                     success_count += 1

@@ -7,11 +7,6 @@ except ImportError:
     ab_test_manager = None
 
 try:
-    from .chat import ChatService
-except ImportError:
-    ChatService = None
-
-try:
     from .conversation import ConversationService
 except ImportError:
     ConversationService = None
@@ -62,7 +57,6 @@ __all__ = [
     "mcp_service",
     "MessageService",
     "plugin_manager",
-    "ChatService",
     "sse_service",
     "WorkflowExecutionService",
 ]

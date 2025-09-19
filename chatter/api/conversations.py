@@ -28,34 +28,42 @@ from chatter.schemas.chat import (
     MessageRatingUpdate,
     MessageResponse,
 )
-from chatter.services.chat import ChatService
-from chatter.services.llm import LLMService
+from chatter.services.conversation import ConversationService
+from chatter.services.message import MessageService
 from chatter.utils.database import get_session_generator
 from chatter.utils.unified_rate_limiter import rate_limit
 
 router = APIRouter()
 
 
-async def get_chat_service(
+async def get_conversation_service(
     session: AsyncSession = Depends(get_session_generator),
-) -> ChatService:
-    """Get chat service instance."""
-    llm_service = LLMService()
-    return ChatService(session, llm_service)
+) -> ConversationService:
+    """Get conversation service instance."""
+    return ConversationService(session)
+
+
+async def get_message_service(
+    session: AsyncSession = Depends(get_session_generator),
+) -> MessageService:
+    """Get message service instance."""
+    return MessageService(session)
 
 
 async def get_conversation_handler(
-    chat_service: ChatService = Depends(get_chat_service),
+    conversation_service: ConversationService = Depends(get_conversation_service),
+    message_service: MessageService = Depends(get_message_service),
 ) -> ConversationResourceHandler:
     """Get conversation resource handler."""
-    return ConversationResourceHandler(chat_service)
+    return ConversationResourceHandler(conversation_service, message_service)
 
 
 async def get_message_handler(
-    chat_service: ChatService = Depends(get_chat_service),
+    conversation_service: ConversationService = Depends(get_conversation_service),
+    message_service: MessageService = Depends(get_message_service),
 ) -> MessageResourceHandler:
     """Get message resource handler."""
-    return MessageResourceHandler(chat_service)
+    return MessageResourceHandler(conversation_service, message_service)
 
 
 # Conversation Resource Endpoints

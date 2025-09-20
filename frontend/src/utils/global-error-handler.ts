@@ -4,6 +4,7 @@
  */
 
 import { errorHandler } from './error-handler';
+import { errorConfig } from './error-config';
 
 class GlobalErrorHandler {
   private initialized = false;
@@ -58,9 +59,9 @@ class GlobalErrorHandler {
     const { error, message, filename, lineno, colno } = event;
 
     // Filter out benign ResizeObserver errors that don't require user attention
-    if (this.isResizeObserverError(message, error)) {
+    if (errorConfig.shouldFilterExtensionErrors() && this.isResizeObserverError(message, error)) {
       // Only log in development mode for debugging purposes
-      if (process.env.NODE_ENV === 'development') {
+      if (errorConfig.shouldLogToConsole()) {
         // eslint-disable-next-line no-console
         console.debug(
           '[Global Error Handler] ResizeObserver loop error (benign):',
@@ -71,9 +72,9 @@ class GlobalErrorHandler {
     }
 
     // Filter out Chrome extension errors that don't affect the app
-    if (this.isChromeExtensionError(message, error, filename)) {
+    if (errorConfig.shouldFilterExtensionErrors() && this.isChromeExtensionError(message, error, filename)) {
       // Only log in development mode for debugging purposes
-      if (process.env.NODE_ENV === 'development') {
+      if (errorConfig.shouldLogToConsole()) {
         // eslint-disable-next-line no-console
         console.debug(
           '[Global Error Handler] Chrome extension error (filtered):',
@@ -99,8 +100,8 @@ class GlobalErrorHandler {
         },
       },
       {
-        showToast: true,
-        logToConsole: true,
+        showToast: errorConfig.shouldShowToasts(),
+        logToConsole: errorConfig.shouldLogToConsole(),
         fallbackMessage: 'An unexpected error occurred',
       }
     );
@@ -123,8 +124,8 @@ class GlobalErrorHandler {
         },
       },
       {
-        showToast: true,
-        logToConsole: true,
+        showToast: errorConfig.shouldShowToasts(),
+        logToConsole: errorConfig.shouldLogToConsole(),
         fallbackMessage:
           'An unexpected error occurred while processing a request',
       }
@@ -210,15 +211,42 @@ class GlobalErrorHandler {
     // Check for chrome-extension URLs or typical extension error patterns
     const chromeExtensionPatterns = [
       /chrome-extension:\/\//i,
+      /moz-extension:\/\//i, // Firefox extensions
+      /safari-extension:\/\//i, // Safari extensions
+      /edge-extension:\/\//i, // Edge extensions
       /Cannot read properties of undefined \(reading 'isCheckout'\)/i,
+      /Cannot read properties of undefined \(reading '[^']*'\).*chrome-extension/i,
       /Unchecked runtime\.lastError/i,
+      /A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received/i,
       /message channel closed before a response was received/i,
       /extension.*content.*script/i,
+      /content-script\.js/i,
+      /background\.js.*extension/i,
+      /Error handling response.*chrome-extension/i,
+      /Script error.*chrome-extension/i,
+      /Loading chunk \d+ failed.*chrome-extension/i,
+      /Non-Error promise rejection captured.*chrome-extension/i,
     ];
 
-    // Check filename for extension scripts
-    if (filename && filename.includes('chrome-extension://')) {
+    // Check filename for extension scripts - more comprehensive check
+    if (filename && (
+      filename.includes('chrome-extension://') ||
+      filename.includes('moz-extension://') ||
+      filename.includes('safari-extension://') ||
+      filename.includes('edge-extension://') ||
+      filename.includes('content-script.js') ||
+      filename.includes('background.js')
+    )) {
       return true;
+    }
+
+    // Check stack trace for extension patterns
+    if (error && error.stack) {
+      for (const pattern of chromeExtensionPatterns) {
+        if (pattern.test(error.stack)) {
+          return true;
+        }
+      }
     }
 
     // Check message against patterns

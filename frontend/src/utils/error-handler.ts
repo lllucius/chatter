@@ -4,6 +4,8 @@
  */
 
 import { toastService } from '../services/toast-service';
+import { errorConfig } from './error-config';
+import { errorBatcher } from './error-batching';
 
 // Error response structure from backend
 interface ErrorResponse {
@@ -96,6 +98,26 @@ class ErrorHandler {
   }
 
   /**
+   * Check if error is an authentication error (401)
+   */
+  private isAuthenticationError(error: unknown): boolean {
+    const status =
+      (error as ErrorResponse)?.response?.status ||
+      (error as { status?: number })?.status;
+    return status === 401;
+  }
+
+  /**
+   * Check if error is an authorization error (403)
+   */
+  private isAuthorizationError(error: unknown): boolean {
+    const status =
+      (error as ErrorResponse)?.response?.status ||
+      (error as { status?: number })?.status;
+    return status === 403;
+  }
+
+  /**
    * Extract a meaningful error message from various error types
    */
   private extractErrorMessage(
@@ -119,6 +141,16 @@ class ErrorHandler {
       // Handle rate limiting errors specifically
       if (this.isRateLimitError(error)) {
         return 'Too many requests. Please wait a moment before trying again.';
+      }
+
+      // Handle authentication errors specifically
+      if (this.isAuthenticationError(error)) {
+        return 'Authentication required. Please check your credentials and try again.';
+      }
+
+      // Handle authorization errors specifically  
+      if (this.isAuthorizationError(error)) {
+        return 'Access denied. You do not have permission to perform this action.';
       }
 
       // Handle specific error types
@@ -239,6 +271,31 @@ class ErrorHandler {
     const userMessage = this.extractErrorMessage(error, fallbackMessage);
     const isDev = this.isDevelopment();
 
+    // Check if error should be batched to reduce noise
+    if (errorBatcher.shouldBatchError(error)) {
+      errorBatcher.addError(error, context.source);
+      
+      // In batching mode, only log the first occurrence of each error type
+      if (logToConsole && isDev) {
+        // eslint-disable-next-line no-console
+        console.debug(`[Error Handler] Batching error from ${context.source}:`, error);
+      }
+      
+      // Don't show individual toasts for batched errors unless it's critical
+      const isAuth = this.isAuthenticationError(error);
+      const isAuthz = this.isAuthorizationError(error);
+      
+      if (showToast && (isAuth || isAuthz)) {
+        // Always show authentication/authorization errors even when batching
+        toastService.error(userMessage, { autoClose: errorConfig.getToastAutoCloseMs() });
+      }
+      
+      if (rethrow) {
+        throw error;
+      }
+      return;
+    }
+
     // Log to console if requested
     if (logToConsole) {
       if (isDev) {
@@ -257,10 +314,12 @@ class ErrorHandler {
 
     // Show toast notification if requested
     if (showToast) {
-      // Don't show toast for rate limit errors or repeated network errors in production to reduce noise
+      // Don't show toast for certain error types to reduce noise
       const isRateLimit = this.isRateLimitError(error);
       const isCors = this.isCorsError(error);
       const isNetwork = this.isNetworkError(error);
+      const isAuth = this.isAuthenticationError(error);
+      const isAuthz = this.isAuthorizationError(error);
 
       if (isDev) {
         // In development, show detailed error in toast
@@ -268,6 +327,9 @@ class ErrorHandler {
           context.operation ? `\nOperation: ${context.operation}` : ''
         }`;
         toastService.error(devMessage, { autoClose: false });
+      } else if (isAuth || isAuthz) {
+        // Always show authentication/authorization errors in production
+        toastService.error(userMessage, { autoClose: 8000 });
       } else if (!isRateLimit && !isCors && !isNetwork) {
         // In production, show user-friendly message (but skip common network errors)
         const prodMessage = this.generateProductionMessage(

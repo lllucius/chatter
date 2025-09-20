@@ -228,3 +228,5 @@ data/
 *.log
 /tmp/
 
+/test_analytics_tracing_changes.py
+/ui_preview.html

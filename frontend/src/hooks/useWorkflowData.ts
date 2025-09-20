@@ -1,11 +1,11 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
-import { 
-  WorkflowTemplateResponse, 
-  ServerToolsResponse, 
+import {
+  WorkflowTemplateResponse,
+  ServerToolsResponse,
   WorkflowExecutionResponse,
-  WorkflowExecutionRequest 
+  WorkflowExecutionRequest,
 } from 'chatter-sdk';
 
 // Use the SDK types directly
@@ -57,8 +57,11 @@ export const useWorkflowData = () => {
         setExecutions([]);
         return;
       }
-      
-      const response = await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsDefinitionsWorkflowIdExecutions(workflowId);
+
+      const response =
+        await getSDK().workflows.listWorkflowExecutionsApiV1WorkflowsDefinitionsWorkflowIdExecutions(
+          workflowId
+        );
       setExecutions(response || []);
     } catch (error) {
       handleError(error, {
@@ -94,7 +97,7 @@ export const useWorkflowData = () => {
         setLoading(true);
         const requestData: WorkflowExecutionRequest = {
           definition_id: workflowId,
-          input_data: input
+          input_data: input,
         };
         const execution =
           await getSDK().workflows.executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(

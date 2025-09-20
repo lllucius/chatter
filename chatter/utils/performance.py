@@ -1672,6 +1672,3 @@ def get_performance_metrics() -> PerformanceMonitor:
         PerformanceMonitor instance
     """
     return _performance_monitor
-
-
-

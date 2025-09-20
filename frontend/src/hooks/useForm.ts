@@ -56,30 +56,29 @@ export function useForm<T extends Record<string, unknown>>(
   );
 
   const handleBlur = useCallback(
-    (name: keyof T) =>
-      () => {
-        setTouched((prev) => ({
-          ...prev,
-          [name]: true,
-        }));
+    (name: keyof T) => () => {
+      setTouched((prev) => ({
+        ...prev,
+        [name]: true,
+      }));
 
-        // Only run validation on blur if the field has content or form was previously submitted
-        if (validate) {
-          const fieldValue = values[name];
-          const hasContent = fieldValue && String(fieldValue).trim().length > 0;
+      // Only run validation on blur if the field has content or form was previously submitted
+      if (validate) {
+        const fieldValue = values[name];
+        const hasContent = fieldValue && String(fieldValue).trim().length > 0;
 
-          // Only validate on blur if field has content - avoid showing errors for empty fields during navigation
-          if (hasContent) {
-            const validationErrors = validate(values);
-            if (validationErrors[name]) {
-              setErrors((prev) => ({
-                ...prev,
-                [name]: validationErrors[name],
-              }));
-            }
+        // Only validate on blur if field has content - avoid showing errors for empty fields during navigation
+        if (hasContent) {
+          const validationErrors = validate(values);
+          if (validationErrors[name]) {
+            setErrors((prev) => ({
+              ...prev,
+              [name]: validationErrors[name],
+            }));
           }
         }
-      },
+      }
+    },
     [values, validate]
   );
 

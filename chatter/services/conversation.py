@@ -204,7 +204,9 @@ class ConversationService:
 
             # Apply status filter (default: exclude deleted)
             if status is not None:
-                base_query = base_query.where(Conversation.status == status)
+                base_query = base_query.where(
+                    Conversation.status == status
+                )
             else:
                 base_query = base_query.where(
                     Conversation.status != ConversationStatus.DELETED
@@ -217,7 +219,9 @@ class ConversationService:
                 )
 
             if llm_model is not None:
-                base_query = base_query.where(Conversation.llm_model == llm_model)
+                base_query = base_query.where(
+                    Conversation.llm_model == llm_model
+                )
 
             if enable_retrieval is not None:
                 base_query = base_query.where(

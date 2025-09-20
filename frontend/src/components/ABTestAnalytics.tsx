@@ -37,7 +37,10 @@ import {
   Cell,
 } from 'recharts';
 import { ABTestMetricsResponse, ABTestResultsResponse } from 'chatter-sdk';
-import { TestRecommendations, TestPerformance } from '../hooks/useABTestingData';
+import {
+  TestRecommendations,
+  TestPerformance,
+} from '../hooks/useABTestingData';
 
 interface ABTestAnalyticsProps {
   testId: string;
@@ -68,12 +71,15 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
     };
   }, [metrics]);
 
-  const sampleStatistics = React.useMemo(() => ({
-    confidence_level: 0.95,
-    effect_size: 0.12,
-    power: 0.8,
-    p_value: 0.0234,
-  }), []);
+  const sampleStatistics = React.useMemo(
+    () => ({
+      confidence_level: 0.95,
+      effect_size: 0.12,
+      power: 0.8,
+      p_value: 0.0234,
+    }),
+    []
+  );
 
   const mockVariants = [
     {
@@ -113,7 +119,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
       test_name: 'Sample Test',
       status: 'running' as const,
       metrics: [],
-      statistical_significance: { 'conversion_rate': true },
+      statistical_significance: { conversion_rate: true },
       confidence_intervals: {},
       winning_variant: 'variant_a',
       recommendation: 'Continue test for more data',
@@ -197,9 +203,15 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               </Typography>
               <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
                 <Typography variant="h4">
-                  {(results && Object.keys(results.statistical_significance).length > 0 && Object.values(results.statistical_significance)[0]) ? 'Yes' : 'No'}
+                  {results &&
+                  Object.keys(results.statistical_significance).length > 0 &&
+                  Object.values(results.statistical_significance)[0]
+                    ? 'Yes'
+                    : 'No'}
                 </Typography>
-                {(results && Object.keys(results.statistical_significance).length > 0 && Object.values(results.statistical_significance)[0]) ? (
+                {results &&
+                Object.keys(results.statistical_significance).length > 0 &&
+                Object.values(results.statistical_significance)[0] ? (
                   <CheckCircle color="success" sx={{ ml: 1 }} />
                 ) : (
                   <Warning color="warning" sx={{ ml: 1 }} />
@@ -219,11 +231,12 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Best Performer
               </Typography>
               <Typography variant="h5">
-                {sampleResults.winning_variant?.replace('_', ' ').toUpperCase() || 'TBD'}
+                {sampleResults.winning_variant
+                  ?.replace('_', ' ')
+                  .toUpperCase() || 'TBD'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
-                +20.8%
-                improvement
+                +20.8% improvement
               </Typography>
             </CardContent>
           </Card>
@@ -236,16 +249,11 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Test Progress
               </Typography>
               <Typography variant="h5">
-                {Math.round(
-                  ((14 - 3) / 14) * 100
-                )}
-                %
+                {Math.round(((14 - 3) / 14) * 100)}%
               </Typography>
               <LinearProgress
                 variant="determinate"
-                value={
-                  ((14 - 3) / 14) * 100
-                }
+                value={((14 - 3) / 14) * 100}
                 sx={{ mt: 1 }}
               />
               <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
@@ -386,7 +394,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                     cx="50%"
                     cy="50%"
                     labelLine={false}
-                    label={(props: any) =>
+                    label={(props: { name?: string; value?: string | number }) =>
                       `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
                     }
                     outerRadius={80}

@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Schedule as DelayIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const DelayNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const DelayNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -59,16 +56,16 @@ const DelayNode: React.FC<NodeProps> = ({
               />
             )}
             {config.type === 'dynamic' && (
-            <Chip
-              label="Dynamic"
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}
-            />
-          )}
+              <Chip
+                label="Dynamic"
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                }}
+              />
+            )}
           </>
         </CardContent>
       </Card>

@@ -446,9 +446,9 @@ def create_app() -> FastAPI:
                 url=str(request.url),
                 allowed_origins=settings.cors_origins,
             )
-            
+
         response = await call_next(request)
-        
+
         # Add debug info for CORS issues
         if request.method == "OPTIONS" and response.status_code >= 400:
             logger.warning(
@@ -457,7 +457,7 @@ def create_app() -> FastAPI:
                 origin=request.headers.get("origin"),
                 url=str(request.url),
             )
-            
+
         return response
 
     # Add CORS middleware LAST so it processes requests FIRST
@@ -468,7 +468,10 @@ def create_app() -> FastAPI:
         allow_credentials=settings.cors_allow_credentials,
         allow_methods=settings.cors_allow_methods,
         allow_headers=settings.cors_allow_headers,
-        expose_headers=["x-correlation-id", "x-request-id"],  # Expose additional headers
+        expose_headers=[
+            "x-correlation-id",
+            "x-request-id",
+        ],  # Expose additional headers
         max_age=86400,  # Cache preflight requests for 24 hours
     )
 
@@ -534,27 +537,26 @@ def create_app() -> FastAPI:
         """Global exception handler."""
         # Capture additional debug info for better error tracking
         import traceback
-        
+
         error_details = {
             "url": str(request.url),
             "method": request.method,
             "exception": str(exc),
             "exception_type": type(exc).__name__,
         }
-        
+
         if settings.debug:
             error_details["traceback"] = traceback.format_exc()
-            
-        logger.exception(
-            "Unhandled exception",
-            **error_details
-        )
+
+        logger.exception("Unhandled exception", **error_details)
 
         if settings.is_development:
             problem = InternalServerProblem(
                 detail=f"An internal server error occurred: {str(exc)}",
                 error_type=type(exc).__name__,
-                error_traceback=traceback.format_exc() if settings.debug else None,
+                error_traceback=(
+                    traceback.format_exc() if settings.debug else None
+                ),
             )
         else:
             problem = InternalServerProblem()

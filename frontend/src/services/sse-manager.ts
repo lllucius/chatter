@@ -4,13 +4,14 @@
  * Manages Server-Sent Events connection and provides EventEmitter pattern
  * for components to subscribe to specific events.
  */
+/* eslint-disable no-console */
 
 import { AnySSEEvent, SSEEventListener, SSEEventListeners } from './sse-types';
 import { authService } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 
 export class SSEEventManager {
-  private listeners: SSEEventListeners = {};
+  private listeners: SSEEventListeners & Record<string, SSEEventListener[]> = {};
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectDelay = 1000; // Start with 1 second
@@ -571,7 +572,9 @@ export class SSEEventManager {
    */
   private emitToCategoryListeners(event: AnySSEEvent, category: string): void {
     const categoryKey = `category:${category}`;
-    const listeners = (this.listeners as any)[categoryKey] as SSEEventListener[] | undefined;
+    const listeners = this.listeners[categoryKey] as
+      | SSEEventListener[]
+      | undefined;
     if (listeners) {
       listeners.forEach((listener: SSEEventListener) => {
         try {
@@ -599,7 +602,7 @@ export class SSEEventManager {
    */
   public onCategory(category: string, listener: SSEEventListener): () => void {
     const categoryKey = `category:${category}`;
-    const listenersMap = this.listeners as any;
+    const listenersMap = this.listeners;
     if (!listenersMap[categoryKey]) {
       listenersMap[categoryKey] = [];
     }
@@ -616,7 +619,7 @@ export class SSEEventManager {
    */
   public offCategory(category: string, listener: SSEEventListener): void {
     const categoryKey = `category:${category}`;
-    const listenersMap = this.listeners as any;
+    const listenersMap = this.listeners;
     if (listenersMap[categoryKey]) {
       listenersMap[categoryKey] = listenersMap[categoryKey].filter(
         (l: SSEEventListener) => l !== listener

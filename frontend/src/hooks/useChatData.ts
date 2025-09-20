@@ -124,10 +124,7 @@ export const useChatData = () => {
   }, [enableRetrieval]);
 
   useEffect(() => {
-    localStorage.setItem(
-      'chatter_enableTools',
-      JSON.stringify(enableTools)
-    );
+    localStorage.setItem('chatter_enableTools', JSON.stringify(enableTools));
   }, [enableTools]);
 
   useEffect(() => {
@@ -137,7 +134,10 @@ export const useChatData = () => {
   // Persist current conversation
   useEffect(() => {
     if (currentConversation) {
-      localStorage.setItem('chatter_currentConversation', JSON.stringify(currentConversation));
+      localStorage.setItem(
+        'chatter_currentConversation',
+        JSON.stringify(currentConversation)
+      );
     } else {
       localStorage.removeItem('chatter_currentConversation');
     }

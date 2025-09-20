@@ -60,6 +60,37 @@ interface HourlyPerformanceItem {
   [key: string]: unknown;
 }
 
+// Interface for dashboard stats
+interface DashboardStats {
+  workflows?: {
+    active?: number;
+    total?: number;
+    completedToday?: number;
+    avgExecutionTime?: number;
+    failureRate?: number;
+  };
+  agents?: {
+    active?: number;
+    total?: number;
+    conversationsToday?: number;
+    avgResponseTime?: number;
+  };
+  ab_testing?: {
+    activeTests?: number;
+    totalImprovement?: number;
+  };
+  system?: {
+    cost?: number;
+    tokensUsed?: number;
+  };
+}
+
+interface IntegrationDataEntry {
+  name?: string;
+  value?: number;
+  color?: string | null;
+}
+
 interface IntegratedDashboardProps {
   onNavigate?: (path: string) => void;
 }
@@ -76,7 +107,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       try {
         // Try the new endpoint, fall back if not available
         if (
-          getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated
+          getSDK().analytics
+            .getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated
         ) {
           return getSDK().analytics.getIntegratedDashboardStatsApiV1AnalyticsDashboardIntegrated();
         }
@@ -94,7 +126,10 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData) {
+        if (
+          getSDK().analytics
+            .getDashboardChartDataApiV1AnalyticsDashboardChartData
+        ) {
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
@@ -237,10 +272,10 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     Active Workflows
                   </Typography>
                   <Typography variant="h4" color="primary">
-                    {(stats as any)?.workflows?.active || 0}
+                    {(stats as DashboardStats)?.workflows?.active || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    of {(stats as any)?.workflows?.total || 0} total
+                    of {(stats as DashboardStats)?.workflows?.total || 0} total
                   </Typography>
                 </div>
                 <WorkflowIcon color="primary" sx={{ fontSize: 40 }} />
@@ -249,7 +284,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <SuccessIcon color="success" sx={{ fontSize: 16, mr: 0.5 }} />
                   <Typography variant="body2" color="success.main">
-                    {(stats as any)?.workflows?.completedToday || 0} completed today
+                    {(stats as DashboardStats)?.workflows?.completedToday || 0} completed
+                    today
                   </Typography>
                 </Box>
               </Box>
@@ -275,10 +311,10 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     Active Agents
                   </Typography>
                   <Typography variant="h4" color="success">
-                    {(stats as any)?.agents?.active || 0}
+                    {(stats as DashboardStats)?.agents?.active || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    of {(stats as any)?.agents?.total || 0} total
+                    of {(stats as DashboardStats)?.agents?.total || 0} total
                   </Typography>
                 </div>
                 <AgentIcon color="success" sx={{ fontSize: 40 }} />
@@ -287,7 +323,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
                   <GroupIcon color="info" sx={{ fontSize: 16, mr: 0.5 }} />
                   <Typography variant="body2" color="info.main">
-                    {(stats as any)?.agents?.conversationsToday || 0} conversations today
+                    {(stats as DashboardStats)?.agents?.conversationsToday || 0}{' '}
+                    conversations today
                   </Typography>
                 </Box>
               </Box>
@@ -313,7 +350,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     A/B Tests
                   </Typography>
                   <Typography variant="h4" color="warning">
-                    {(stats as any)?.ab_testing?.activeTests || 0}
+                    {(stats as DashboardStats)?.ab_testing?.activeTests || 0}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
                     active experiments
@@ -328,8 +365,11 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     sx={{ fontSize: 16, mr: 0.5 }}
                   />
                   <Typography variant="body2" color="success.main">
-                    +{(((stats as any)?.ab_testing?.totalImprovement || 0) * 100).toFixed(1)}% avg
-                    improvement
+                    +
+                    {(
+                      ((stats as DashboardStats)?.ab_testing?.totalImprovement || 0) * 100
+                    ).toFixed(1)}
+                    % avg improvement
                   </Typography>
                 </Box>
               </Box>
@@ -352,10 +392,12 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     Today&apos;s Cost
                   </Typography>
                   <Typography variant="h4" color="error">
-                    ${(stats as any)?.system?.cost?.toFixed(2) || "0.00"}
+                    ${(stats as DashboardStats)?.system?.cost?.toFixed(2) || '0.00'}
                   </Typography>
                   <Typography variant="body2" color="text.secondary">
-                    {(stats as any)?.system?.tokensUsed?.toLocaleString() || "0"} tokens
+                    {(stats as DashboardStats)?.system?.tokensUsed?.toLocaleString() ||
+                      '0'}{' '}
+                    tokens
                   </Typography>
                 </div>
                 <SpeedIcon color="error" sx={{ fontSize: 40 }} />
@@ -363,12 +405,14 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Box sx={{ mt: 2 }}>
                 <LinearProgress
                   variant="determinate"
-                  value={(((stats as any)?.system?.cost || 0) / 200) * 100}
+                  value={(((stats as DashboardStats)?.system?.cost || 0) / 200) * 100}
                   sx={{ height: 6, borderRadius: 3 }}
                 />
                 <Typography variant="caption" color="text.secondary">
-                  {((((stats as any)?.system?.cost || 0) / 200) * 100).toFixed(1)}% of daily
-                  budget
+                  {((((stats as DashboardStats)?.system?.cost || 0) / 200) * 100).toFixed(
+                    1
+                  )}
+                  % of daily budget
                 </Typography>
               </Box>
             </CardContent>
@@ -509,15 +553,22 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                       cx="50%"
                       cy="50%"
                       labelLine={false}
-                      label={({ name, percent }: { name?: string; percent?: number }) =>
-                        `${name}: ${((percent || 0) * 100).toFixed(0)}%`
-                      }
+                      label={({
+                        name,
+                        percent,
+                      }: {
+                        name?: string;
+                        percent?: number;
+                      }) => `${name}: ${((percent || 0) * 100).toFixed(0)}%`}
                       outerRadius={80}
                       fill="#8884d8"
                       dataKey="value"
                     >
-                      {integrationData.map((entry: any, index: number) => (
-                        <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
+                      {integrationData.map((entry: IntegrationDataEntry, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color || '#8884d8'}
+                        />
                       ))}
                     </Pie>
                     <RechartsTooltip />
@@ -606,7 +657,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="primary">
-                    {(stats as any)?.workflows?.avgExecutionTime || 0}s
+                    {(stats as DashboardStats)?.workflows?.avgExecutionTime || 0}s
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Avg Workflow Time
@@ -616,7 +667,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="success">
-                    {(stats as any)?.agents?.avgResponseTime || 0}s
+                    {(stats as DashboardStats)?.agents?.avgResponseTime || 0}s
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Avg Agent Response
@@ -626,7 +677,11 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Typography variant="h6" color="warning">
-                    {((1 - ((stats as any)?.workflows?.failureRate || 0)) * 100).toFixed(1)}%
+                    {(
+                      (1 - ((stats as DashboardStats)?.workflows?.failureRate || 0)) *
+                      100
+                    ).toFixed(1)}
+                    %
                   </Typography>
                   <Typography variant="caption" color="text.secondary">
                     Success Rate
@@ -636,8 +691,13 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
               <Grid size={{ xs: 6, sm: 3 }}>
                 <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                   <Stack spacing={0.5} alignItems="center">
-                    <Typography variant="h6" color="info">{`${stats.system.uptime}%`}</Typography>
-                    <Typography variant="caption" color="text.secondary">System Uptime</Typography>
+                    <Typography
+                      variant="h6"
+                      color="info"
+                    >{`${stats.system.uptime}%`}</Typography>
+                    <Typography variant="caption" color="text.secondary">
+                      System Uptime
+                    </Typography>
                   </Stack>
                 </Paper>
               </Grid>

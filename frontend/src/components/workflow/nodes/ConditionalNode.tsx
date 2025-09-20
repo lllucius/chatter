@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { CallSplit as ConditionalIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ConditionalNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const ConditionalNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 

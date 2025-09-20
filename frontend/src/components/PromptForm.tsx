@@ -14,7 +14,12 @@ import {
   Chip,
   Typography,
 } from '@mui/material';
-import { PromptCreate, PromptUpdate, PromptType, PromptCategory } from 'chatter-sdk';
+import {
+  PromptCreate,
+  PromptUpdate,
+  PromptType,
+  PromptCategory,
+} from 'chatter-sdk';
 import { CrudFormProps } from './CrudDataTable';
 
 interface PromptFormProps extends CrudFormProps<PromptCreate, PromptUpdate> {}
@@ -49,7 +54,7 @@ const PromptForm: React.FC<PromptFormProps> = ({
           description: initialData.description || '',
           content: initialData.content || '',
           category: initialData.category || PromptCategory.general,
-          prompt_type: (initialData as any)?.prompt_type || PromptType.template,
+          prompt_type: (initialData as PromptUpdate & { prompt_type?: PromptType })?.prompt_type || PromptType.template,
           variables: initialData.variables || [],
         });
       } else {

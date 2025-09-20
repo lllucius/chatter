@@ -366,10 +366,7 @@ describe('ToastService', () => {
         '🎉 Success! ✨ Operation completed with 100% accuracy 📊';
       toastService.success(specialMessage);
 
-      expect(toast).toHaveBeenCalledWith(
-        specialMessage,
-        expect.any(Object)
-      );
+      expect(toast).toHaveBeenCalledWith(specialMessage, expect.any(Object));
     });
   });
 

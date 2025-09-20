@@ -20,7 +20,8 @@ export const createStatusChipRenderer = <T,>(colorMapping?: {
 }): CrudColumn<T>['render'] => {
   const StatusChipRenderer = (value: unknown, _item: T) => {
     const valueStr = String(value || '');
-    const color = colorMapping?.[valueStr?.toLowerCase()] || getStatusColor(valueStr);
+    const color =
+      colorMapping?.[valueStr?.toLowerCase()] || getStatusColor(valueStr);
 
     return <Chip label={valueStr} color={color} size="small" />;
   };
@@ -40,7 +41,12 @@ export const createCategoryChipRenderer = <T,>(
   variant: 'filled' | 'outlined' = 'outlined'
 ): CrudColumn<T>['render'] => {
   const CategoryChipRenderer = (value: unknown, _item: T) => (
-    <Chip label={String(value || '')} size="small" color={color} variant={variant} />
+    <Chip
+      label={String(value || '')}
+      size="small"
+      color={color}
+      variant={variant}
+    />
   );
   CategoryChipRenderer.displayName = 'CategoryChipRenderer';
   return CategoryChipRenderer;
@@ -78,7 +84,12 @@ export const createDateRenderer = <T,>(
   return (value: unknown, _item: T) => {
     if (!value) return '';
     try {
-      const date = typeof value === 'string' ? new Date(value) : value instanceof Date ? value : new Date(String(value));
+      const date =
+        typeof value === 'string'
+          ? new Date(value)
+          : value instanceof Date
+            ? value
+            : new Date(String(value));
       return format(date, dateFormat);
     } catch {
       return '';
@@ -128,7 +139,12 @@ export const createCountRenderer = <T,>(
   unknownText: string = 'Unknown'
 ): CrudColumn<T>['render'] => {
   return (value: unknown, _item: T): React.ReactElement => {
-    const numValue = typeof value === 'number' ? value : value !== undefined && value !== null ? Number(value) : undefined;
+    const numValue =
+      typeof value === 'number'
+        ? value
+        : value !== undefined && value !== null
+          ? Number(value)
+          : undefined;
     return (
       <Typography variant="body2">
         {numValue !== undefined && !isNaN(numValue)
@@ -144,7 +160,12 @@ export const createPerformanceRenderer = <T,>(
   precision: number = 0
 ): CrudColumn<T>['render'] => {
   return (value: unknown, _item: T): React.ReactElement => {
-    const numValue = typeof value === 'number' ? value : value !== undefined && value !== null ? Number(value) : NaN;
+    const numValue =
+      typeof value === 'number'
+        ? value
+        : value !== undefined && value !== null
+          ? Number(value)
+          : NaN;
     return (
       <Typography variant="body2">
         {!isNaN(numValue) ? `${numValue.toFixed(precision)}${unit}` : 'N/A'}
@@ -157,10 +178,17 @@ export const createUsageStatsRenderer = <
   T extends { total_errors?: number },
 >(): CrudColumn<T>['render'] => {
   return (value: unknown, item: T): React.ReactElement => {
-    const numValue = typeof value === 'number' ? value : value !== undefined && value !== null ? Number(value) : 0;
+    const numValue =
+      typeof value === 'number'
+        ? value
+        : value !== undefined && value !== null
+          ? Number(value)
+          : 0;
     return (
       <Box>
-        <Typography variant="body2">Calls: {!isNaN(numValue) ? numValue : 0}</Typography>
+        <Typography variant="body2">
+          Calls: {!isNaN(numValue) ? numValue : 0}
+        </Typography>
         <Typography variant="body2" color="text.secondary">
           Errors: {item.total_errors || 0}
         </Typography>

@@ -28,7 +28,13 @@ import { useABTestingData, TestStatus } from '../hooks/useABTestingData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
 import { format } from 'date-fns';
-import { ABTestCreateRequest, MetricType, TestType, TestVariant, VariantAllocation } from 'chatter-sdk';
+import {
+  ABTestCreateRequest,
+  MetricType,
+  TestType,
+  TestVariant,
+  VariantAllocation,
+} from 'chatter-sdk';
 
 // Extend ABTestCreateRequest for form data
 interface ABTestFormData extends ABTestCreateRequest {
@@ -177,7 +183,9 @@ const ABTestingPage: React.FC = () => {
     }
   };
 
-  const getStatusIcon = (status: TestStatus): React.ReactElement | undefined => {
+  const getStatusIcon = (
+    status: TestStatus
+  ): React.ReactElement | undefined => {
     switch (status) {
       case 'running':
         return <TrendingUpIcon />;

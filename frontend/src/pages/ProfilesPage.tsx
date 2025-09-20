@@ -59,7 +59,9 @@ const ProfilesPage: React.FC = () => {
       width: '120px',
       render: (value: unknown): React.ReactNode =>
         (value as number) ? (
-          <Typography variant="body2">{(value as number).toLocaleString()}</Typography>
+          <Typography variant="body2">
+            {(value as number).toLocaleString()}
+          </Typography>
         ) : (
           <Typography variant="body2" color="text.secondary">
             Unlimited
@@ -70,7 +72,8 @@ const ProfilesPage: React.FC = () => {
       id: 'created_at',
       label: 'Created',
       width: '140px',
-      render: (value: unknown) => ((value as Date) ? format((value as Date), 'MMM dd, yyyy') : ''),
+      render: (value: unknown) =>
+        (value as Date) ? format(value as Date, 'MMM dd, yyyy') : '',
     },
   ];
 

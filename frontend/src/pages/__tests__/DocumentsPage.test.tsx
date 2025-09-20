@@ -76,9 +76,7 @@ const mockDocuments = [
 ];
 
 // Wrapper component
-const TestWrapper: React.FC<{ children: React.ReactNode }> = ({
-  children,
-}) => (
+const TestWrapper: React.FC<{ children: React.ReactNode }> = ({ children }) => (
   <BrowserRouter>
     <ThemeProvider theme={theme}>{children}</ThemeProvider>
   </BrowserRouter>
@@ -89,11 +87,11 @@ describe('DocumentsPage', () => {
     vi.clearAllMocks();
 
     // Setup default API responses
-    vi.mocked(getSDK().documents.listDocumentsGetApiV1Documents).mockResolvedValue(
-      {
-        documents: mockDocuments,
-      } as any
-    );
+    vi.mocked(
+      getSDK().documents.listDocumentsGetApiV1Documents
+    ).mockResolvedValue({
+      documents: mockDocuments,
+    } as any);
   });
 
   it('loads and displays documents', async () => {

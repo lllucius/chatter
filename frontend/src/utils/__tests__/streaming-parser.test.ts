@@ -15,7 +15,7 @@ function parseStreamingChunk(line: string): Record<string, unknown> | null {
 
     try {
       return JSON.parse(raw);
-    } catch (_error) {
+    } catch {
       // console.warn('Failed to parse streaming data:', raw, error);
       return null;
     }

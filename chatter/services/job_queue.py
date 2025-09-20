@@ -1040,7 +1040,7 @@ async def document_processing_job(
                 "document_id": document_id,
                 "status": "processed",
                 "success": True,
-                }
+            }
 
     except Exception as e:
         logger.error(

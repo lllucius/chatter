@@ -16,14 +16,21 @@ from sqlalchemy import select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
+from chatter.core.exceptions import ValidationError
 from chatter.core.simplified_workflow_validation import (
     simplified_workflow_validation_service as workflow_validation_service,
 )
-from chatter.core.exceptions import ValidationError
 
 # Use the centralized validation result from the workflow validation service
 from chatter.core.validation.results import ValidationResult
 from chatter.models.workflow import TemplateCategory
+from chatter.schemas.workflows import (
+    ChatWorkflowConfig,
+    ChatWorkflowTemplate,
+    ModelConfig,
+    RetrievalConfig,
+    ToolConfig,
+)
 
 
 class WorkflowConfigurationError(Exception):
@@ -858,16 +865,11 @@ class UnifiedTemplateManager:
         }
 
     # Chat Workflow Template Methods
-    async def get_chat_templates(self) -> dict[str, "ChatWorkflowTemplate"]:
+    async def get_chat_templates(
+        self,
+    ) -> dict[str, ChatWorkflowTemplate]:
         """Get all available chat workflow templates."""
-        from chatter.schemas.workflows import (
-            ChatWorkflowTemplate,
-            ChatWorkflowConfig,
-            ModelConfig,
-            RetrievalConfig,
-            ToolConfig,
-        )
-        
+
         # Built-in chat templates
         chat_templates = {
             "simple_chat": ChatWorkflowTemplate(
@@ -877,13 +879,18 @@ class UnifiedTemplateManager:
                     enable_retrieval=False,
                     enable_tools=False,
                     enable_memory=True,
-                    model_config=ModelConfig(temperature=0.7, max_tokens=1000)
+                    model_config=ModelConfig(
+                        temperature=0.7, max_tokens=1000
+                    ),
                 ),
-                use_cases=["General conversation", "Quick questions", "Creative writing"],
+                use_cases=[
+                    "General conversation",
+                    "Quick questions",
+                    "Creative writing",
+                ],
                 complexity_score=1,
-                estimated_tokens=500
+                estimated_tokens=500,
             ),
-            
             "rag_chat": ChatWorkflowTemplate(
                 name="Knowledge Base Chat",
                 description="Chat with document retrieval for knowledge questions",
@@ -891,37 +898,47 @@ class UnifiedTemplateManager:
                     enable_retrieval=True,
                     enable_tools=False,
                     enable_memory=True,
-                    model_config=ModelConfig(temperature=0.3, max_tokens=1500),
+                    model_config=ModelConfig(
+                        temperature=0.3, max_tokens=1500
+                    ),
                     retrieval_config=RetrievalConfig(
                         max_documents=5,
                         similarity_threshold=0.7,
-                        rerank=True
-                    )
+                        rerank=True,
+                    ),
                 ),
-                use_cases=["Knowledge base queries", "Document Q&A", "Research assistance"],
+                use_cases=[
+                    "Knowledge base queries",
+                    "Document Q&A",
+                    "Research assistance",
+                ],
                 complexity_score=3,
-                estimated_tokens=1200
+                estimated_tokens=1200,
             ),
-            
             "function_chat": ChatWorkflowTemplate(
-                name="Tool-Enabled Chat", 
+                name="Tool-Enabled Chat",
                 description="Chat with function calling capabilities",
                 config=ChatWorkflowConfig(
                     enable_retrieval=False,
                     enable_tools=True,
                     enable_memory=True,
-                    model_config=ModelConfig(temperature=0.5, max_tokens=1000),
+                    model_config=ModelConfig(
+                        temperature=0.5, max_tokens=1000
+                    ),
                     tool_config=ToolConfig(
                         max_tool_calls=3,
                         parallel_tool_calls=False,
-                        tool_timeout_ms=15000
-                    )
+                        tool_timeout_ms=15000,
+                    ),
                 ),
-                use_cases=["API interactions", "Data processing", "Automated tasks"],
+                use_cases=[
+                    "API interactions",
+                    "Data processing",
+                    "Automated tasks",
+                ],
                 complexity_score=4,
-                estimated_tokens=800
+                estimated_tokens=800,
             ),
-            
             "advanced_chat": ChatWorkflowTemplate(
                 name="Full-Featured Chat",
                 description="Chat with both retrieval and function calling",
@@ -930,27 +947,35 @@ class UnifiedTemplateManager:
                     enable_tools=True,
                     enable_memory=True,
                     enable_web_search=True,
-                    model_config=ModelConfig(temperature=0.4, max_tokens=2000),
+                    model_config=ModelConfig(
+                        temperature=0.4, max_tokens=2000
+                    ),
                     retrieval_config=RetrievalConfig(
                         max_documents=7,
                         similarity_threshold=0.6,
-                        rerank=True
+                        rerank=True,
                     ),
                     tool_config=ToolConfig(
                         max_tool_calls=5,
                         parallel_tool_calls=True,
-                        tool_timeout_ms=30000
-                    )
+                        tool_timeout_ms=30000,
+                    ),
                 ),
-                use_cases=["Complex research", "Multi-step analysis", "Professional assistance"],
+                use_cases=[
+                    "Complex research",
+                    "Multi-step analysis",
+                    "Professional assistance",
+                ],
                 complexity_score=8,
-                estimated_tokens=2500
-            )
+                estimated_tokens=2500,
+            ),
         }
-        
+
         return chat_templates
 
-    async def get_chat_template(self, name: str) -> "ChatWorkflowTemplate | None":
+    async def get_chat_template(
+        self, name: str
+    ) -> ChatWorkflowTemplate | None:
         """Get specific chat workflow template."""
         templates = await self.get_chat_templates()
         return templates.get(name)

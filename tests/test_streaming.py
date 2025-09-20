@@ -287,7 +287,8 @@ class TestStreamingService:
         token_events = [
             e
             for e in events
-            if hasattr(e, "event_type") and e.event_type == StreamingEventType.TOKEN
+            if hasattr(e, "event_type")
+            and e.event_type == StreamingEventType.TOKEN
         ]
         assert len(token_events) > 0
 

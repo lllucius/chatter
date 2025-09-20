@@ -202,7 +202,11 @@ class GlobalErrorHandler {
   /**
    * Check if an error is from a Chrome extension that should be filtered out
    */
-  private isChromeExtensionError(message: string, error?: Error, filename?: string): boolean {
+  private isChromeExtensionError(
+    message: string,
+    error?: Error,
+    filename?: string
+  ): boolean {
     // Check for chrome-extension URLs or typical extension error patterns
     const chromeExtensionPatterns = [
       /chrome-extension:\/\//i,

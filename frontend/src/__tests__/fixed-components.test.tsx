@@ -49,9 +49,7 @@ vi.mock('../components/PageLayout', () => ({
 
 // Mock WorkflowEditor
 vi.mock('../components/workflow/WorkflowEditor', () => ({
-  default: () => (
-    <div data-testid="workflow-editor">WorkflowEditor Mock</div>
-  ),
+  default: () => <div data-testid="workflow-editor">WorkflowEditor Mock</div>,
 }));
 
 // Mock RightSidebarContext

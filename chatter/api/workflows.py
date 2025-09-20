@@ -724,10 +724,9 @@ async def execute_chat_workflow_streaming(
     
     async def generate_stream():
         try:
-            async for chunk in workflow_service.execute_chat_workflow(
+            async for chunk in workflow_service.execute_chat_workflow_streaming(
                 user_id=current_user.id,
-                request=request,
-                streaming=True
+                request=request
             ):
                 if await chat_request.is_disconnected():
                     logger.info("Client disconnected during streaming")

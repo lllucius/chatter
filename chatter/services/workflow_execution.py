@@ -226,8 +226,11 @@ class WorkflowExecutionService:
         user_id: str,
         request: "ChatWorkflowRequest",
         streaming: bool = False,
-    ) -> tuple[Conversation, Message] | AsyncGenerator[StreamingChatChunk, None]:
-        """Execute chat using workflow system."""
+    ) -> tuple[Conversation, Message]:
+        """Execute chat using workflow system (non-streaming)."""
+        if streaming:
+            raise ValueError("Use execute_chat_workflow_streaming for streaming requests")
+            
         from chatter.schemas.chat import ChatRequest
         
         # Convert ChatWorkflowRequest to ChatRequest and get conversation
@@ -239,30 +242,48 @@ class WorkflowExecutionService:
         from chatter.utils.correlation import get_correlation_id
         correlation_id = get_correlation_id()
         
-        if streaming:
-            return self.execute_workflow_streaming(
-                conversation, chat_request, correlation_id, user_id
-            )
-        else:
-            # Execute workflow and return (conversation, message) tuple as expected by API
-            message, usage_info = await self.execute_workflow(
-                conversation, chat_request, correlation_id, user_id
-            )
-            
-            # Save the message to database so it has all required fields for MessageResponse
-            saved_message = await self.message_service.add_message_to_conversation(
-                conversation_id=message.conversation_id,
-                user_id=user_id,
-                role=message.role,
-                content=message.content,
-                metadata=message.extra_metadata,
-                input_tokens=usage_info.get("prompt_tokens"),
-                output_tokens=usage_info.get("completion_tokens"),
-                cost=usage_info.get("cost"),
-                provider=usage_info.get("provider_used"),
-            )
-            
-            return conversation, saved_message
+        # Execute workflow and return (conversation, message) tuple as expected by API
+        message, usage_info = await self.execute_workflow(
+            conversation, chat_request, correlation_id, user_id
+        )
+        
+        # Save the message to database so it has all required fields for MessageResponse
+        saved_message = await self.message_service.add_message_to_conversation(
+            conversation_id=message.conversation_id,
+            user_id=user_id,
+            role=message.role,
+            content=message.content,
+            metadata=message.extra_metadata,
+            input_tokens=usage_info.get("prompt_tokens"),
+            output_tokens=usage_info.get("completion_tokens"),
+            cost=usage_info.get("cost"),
+            provider=usage_info.get("provider_used"),
+        )
+        
+        return conversation, saved_message
+
+    async def execute_chat_workflow_streaming(
+        self,
+        user_id: str,
+        request: "ChatWorkflowRequest",
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute chat using workflow system (streaming)."""
+        from chatter.schemas.chat import ChatRequest
+        
+        # Convert ChatWorkflowRequest to ChatRequest and get conversation
+        chat_request, conversation = await self._convert_chat_workflow_request(
+            user_id, request
+        )
+        
+        # Generate correlation ID
+        from chatter.utils.correlation import get_correlation_id
+        correlation_id = get_correlation_id()
+        
+        # For streaming, we iterate and yield from the async generator
+        async for chunk in self.execute_workflow_streaming(
+            conversation, chat_request, correlation_id, user_id
+        ):
+            yield chunk
 
     async def _convert_chat_workflow_request(
         self, user_id: str, request: "ChatWorkflowRequest"

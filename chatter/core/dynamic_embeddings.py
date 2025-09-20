@@ -400,10 +400,11 @@ class EmbeddingModelManager:
                 vector_available = False
                 if PGVECTOR_AVAILABLE:
                     try:
+                        # Execute extension creation in a separate transaction to avoid 
+                        # conflicts with other SQL statements like advisory locks
+                        await self.session.commit()  # Commit any pending changes first
                         await self.session.execute(
-                            text(
-                                "CREATE EXTENSION IF NOT EXISTS vector;"
-                            )
+                            text("CREATE EXTENSION IF NOT EXISTS vector")
                         )
                         await self.session.commit()
                         vector_available = True

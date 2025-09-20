@@ -234,19 +234,22 @@ async def db_engine():
     )
 
     # Ensure tables exist (create once, reuse)
-    async with engine.begin() as conn:
+    async with engine.connect() as conn:
         try:
             # Try to enable pgvector extension if available (graceful fallback)
+            # Execute in separate transaction to avoid conflicts with advisory locks
             try:
-                await conn.execute(
-                    text("CREATE EXTENSION IF NOT EXISTS vector;")
-                )
+                async with conn.begin():
+                    await conn.execute(
+                        text("CREATE EXTENSION IF NOT EXISTS vector")
+                    )
             except Exception:
                 # Ignore if pgvector is not available
                 pass
 
             # Create all tables if they don't exist (idempotent)
-            await conn.run_sync(Base.metadata.create_all)
+            async with conn.begin():
+                await conn.run_sync(Base.metadata.create_all)
 
         except Exception as e:
             print(

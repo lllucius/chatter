@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import {
   Box,
   Typography,
@@ -23,12 +23,10 @@ import {
   IconButton,
   Chip,
   CircularProgress,
-  Divider,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
 import {
   Save as SaveIcon,
-  Key as KeyIcon,
   Delete as DeleteIcon,
   Add as AddIcon,
   Warning as WarningIcon,
@@ -155,7 +153,7 @@ const UserSettingsPage: React.FC = () => {
       name: '',
       expires_in_days: 90,
     },
-    onSubmit: async (values) => {
+    onSubmit: async (_values) => {
       try {
         // TODO: Implement API key creation when endpoint is available
         // const newKey = await getSDK().createApiKey(values);
@@ -174,7 +172,7 @@ const UserSettingsPage: React.FC = () => {
     },
   });
 
-  const loadUserProfile = async () => {
+  const loadUserProfile = useCallback(async () => {
     try {
       // TODO: Implement user profile loading when endpoint is available
       // const profile = await getSDK().getCurrentUser();
@@ -188,7 +186,7 @@ const UserSettingsPage: React.FC = () => {
         operation: 'load user profile',
       });
     }
-  };
+  }, [profileForm]);
 
   const loadApiKeys = async () => {
     try {
@@ -246,7 +244,7 @@ const UserSettingsPage: React.FC = () => {
     };
 
     loadData();
-  }, []);
+  }, [loadUserProfile]);
 
   const handleTabChange = (event: React.SyntheticEvent, newValue: number) => {
     setTabValue(newValue);

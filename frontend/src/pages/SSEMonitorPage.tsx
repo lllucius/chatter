@@ -8,7 +8,6 @@ import {
   Switch,
   FormControlLabel,
   TextField,
-  MenuItem,
   Chip,
   List,
   ListItem,
@@ -18,10 +17,6 @@ import {
   IconButton,
   Tooltip,
   Alert,
-  FormControl,
-  InputLabel,
-  Select,
-  OutlinedInput,
   Autocomplete,
   Collapse,
   Grid,
@@ -41,7 +36,6 @@ import { format } from 'date-fns';
 import { useSSE } from '../services/sse-context';
 import {
   AnySSEEvent,
-  SSEEventType,
   STATIC_EVENT_TYPES,
   STATIC_CATEGORIES,
   STATIC_PRIORITIES,
@@ -103,8 +97,8 @@ const SSEMonitorPage: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         return { ...defaultSettings, ...parsed };
-      } catch (error) {
-        console.warn('Failed to parse saved SSE monitor settings:', error);
+      } catch (_error) {
+        // console.warn('Failed to parse saved SSE monitor settings:', error);
       }
     }
     return defaultSettings;
@@ -225,7 +219,7 @@ const SSEMonitorPage: React.FC = () => {
 
       return true;
     });
-  }, [messages, settings.filters]);
+  }, [messages, settings]);
 
   // SSE event handler
   const handleSSEEvent = useCallback(
@@ -263,7 +257,7 @@ const SSEMonitorPage: React.FC = () => {
   const startMonitoring = useCallback(() => {
     if (!manager) return;
 
-    console.log('Starting SSE monitoring...');
+    // console.log('Starting SSE monitoring...');
     setIsMonitoring(true);
     // Listen to all events using wildcard
     manager.addEventListener('*', handleSSEEvent);
@@ -278,7 +272,7 @@ const SSEMonitorPage: React.FC = () => {
   const stopMonitoring = useCallback(() => {
     if (!manager) return;
 
-    console.log('Stopping SSE monitoring...');
+    // console.log('Stopping SSE monitoring...');
     setIsMonitoring(false);
     manager.removeEventListener('*', handleSSEEvent);
     // Note: We don't disconnect here to allow other parts of the app to use SSE
@@ -319,19 +313,19 @@ const SSEMonitorPage: React.FC = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [filteredMessages]);
+  }, [filteredMessages, settings]);
 
   // Auto-restore monitoring state when SSE manager becomes available
   useEffect(() => {
     if (isMonitoring && manager) {
       if (!isConnected) {
         // If monitoring was active but we're not connected, try to reconnect
-        console.log('Restoring SSE monitoring state and connecting...');
+        // console.log('Restoring SSE monitoring state and connecting...');
         manager.connect();
         manager.addEventListener('*', handleSSEEvent);
       } else {
         // If monitoring was active and we're connected, just add the listener
-        console.log('Restoring SSE monitoring state...');
+        // console.log('Restoring SSE monitoring state...');
         manager.addEventListener('*', handleSSEEvent);
       }
     }
@@ -755,8 +749,8 @@ const SSEMonitorPage: React.FC = () => {
 
           {!isMonitoring && messages.length === 0 && (
             <Alert severity="info" sx={{ my: 2 }}>
-              Click "Start Monitoring" to begin capturing SSE messages. Make
-              sure you're connected to the SSE stream.
+              Click &quot;Start Monitoring&quot; to begin capturing SSE messages. Make
+              sure you&apos;re connected to the SSE stream.
             </Alert>
           )}
 

@@ -93,7 +93,7 @@ const NotificationDemo: React.FC = () => {
 
   const demoErrorWithResult = () => {
     const error = new Error('Service temporarily unavailable');
-    const result = handleErrorWithResult(
+    const _result = handleErrorWithResult(
       error,
       {
         source: 'NotificationDemo.demoErrorWithResult',

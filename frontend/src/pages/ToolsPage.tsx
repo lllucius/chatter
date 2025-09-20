@@ -212,11 +212,11 @@ const ToolsPage: React.FC = () => {
     RemoteServerCreate,
     RemoteServerUpdate
   > = {
-    list: async (page: number, pageSize: number) => {
+    list: async (_page: number, _pageSize: number) => {
       const response =
         await getSDK().toolServers.listToolServersApiV1ToolserversServers({});
       return {
-        items: (response || []) as any[],
+        items: (response || []) as RemoteServer[],
         total: response?.length || 0,
       };
     },
@@ -226,7 +226,7 @@ const ToolsPage: React.FC = () => {
         await getSDK().toolServers.createToolServerApiV1ToolserversServers(
           data
         );
-      return response as any;
+      return response as RemoteServer;
     },
 
     update: async (id: string, data: RemoteServerUpdate) => {
@@ -235,7 +235,7 @@ const ToolsPage: React.FC = () => {
           id,
           data
         );
-      return response as any;
+      return response as RemoteServer;
     },
 
     delete: async (id: string) => {
@@ -323,7 +323,7 @@ const ToolsPage: React.FC = () => {
   };
 
   const toolService: CrudService<Tool, never, never> = {
-    list: async (page: number, pageSize: number) => {
+    list: async (_page: number, _pageSize: number) => {
       const response =
         await getSDK().toolServers.listAllToolsApiV1ToolserversToolsAll();
       return {

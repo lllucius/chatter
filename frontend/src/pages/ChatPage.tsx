@@ -354,82 +354,19 @@ const ChatPage: React.FC = () => {
     async (workflowRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
         // Get the streaming response from workflow API
-        // Note: Current SDK doesn't properly support streaming, this needs to be fixed
-        const streamResponse = await sendWorkflowMessage(workflowRequest, true);
+        const stream = (await sendWorkflowMessage(
+          workflowRequest,
+          true
+        )) as unknown as ReadableStream;
 
-        // For now, handle as a regular response until streaming is properly implemented
-        if (
-          streamResponse &&
-          typeof streamResponse === 'object' &&
-          'message' in streamResponse
-        ) {
-          const response = streamResponse as ChatResponse;
-
-          // Create assistant message from response
-          const assistantMessage: ChatMessage = {
-            id: `assistant-${Date.now()}`,
-            role: 'assistant',
-            content: response.message.content,
-            timestamp: new Date(),
-            metadata: {
-              model: response.message.model_used || undefined,
-              tokens: response.message.total_tokens || undefined,
-              processingTime: response.message.response_time_ms || undefined,
-              workflow: {
-                stage: 'Complete',
-                currentStep: 1,
-                totalSteps: 1,
-                stepDescriptions: ['Message generated'],
-              },
-            },
-          };
-
-          if (isRegeneration) {
-            // For regeneration, replace the last assistant message
-            setMessages((prev) => {
-              const newMessages = [...prev];
-              let lastAssistantIndex = -1;
-              for (let i = newMessages.length - 1; i >= 0; i--) {
-                if (newMessages[i].role === 'assistant') {
-                  lastAssistantIndex = i;
-                  break;
-                }
-              }
-              if (lastAssistantIndex !== -1) {
-                newMessages[lastAssistantIndex] = {
-                  ...newMessages[lastAssistantIndex],
-                  content: assistantMessage.content,
-                  metadata: assistantMessage.metadata,
-                };
-              }
-              return newMessages;
-            });
-          } else {
-            // Add new assistant message
-            setMessages((prev) => [...prev, assistantMessage]);
-          }
-
-          return;
-        }
-
-        // Legacy streaming code (commented out until SDK supports streaming properly)
-        /*
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();
         const reader = stream.getReader();
 
-        
-        // Legacy streaming code (commented out until SDK supports streaming properly)
-        // This would need to be rewritten to use proper streaming API when available
-        /*
-        // Create initial assistant message for streaming
-        const assistantMessageId = `assistant-${Date.now()}`;
         let streamedContent = '';
-        let totalTokens = 0;
-        let model = '';
-        let processingTime = 0;
-        let buffer = '';
+        let assistantMessageId = `assistant-${Date.now()}`;
 
+        // Create initial assistant message with empty content
         const initialAssistantMessage: ChatMessage = {
           id: assistantMessageId,
           role: 'assistant',
@@ -437,18 +374,19 @@ const ChatPage: React.FC = () => {
           timestamp: new Date(),
           metadata: {
             workflow: {
-              stage: 'Starting',
+              stage: 'Streaming',
               currentStep: 0,
               totalSteps: 1,
-              stepDescriptions: ['Initializing workflow...'],
+              stepDescriptions: ['Receiving response...'],
             },
           },
         };
 
+        // Add the initial message to the chat
         if (isRegeneration) {
-          // For regeneration, replace the last assistant message
           setMessages((prev) => {
             const newMessages = [...prev];
+            // Find last index by iterating backwards
             let lastAssistantIndex = -1;
             for (let i = newMessages.length - 1; i >= 0; i--) {
               if (newMessages[i].role === 'assistant') {
@@ -465,6 +403,11 @@ const ChatPage: React.FC = () => {
           setMessages((prev) => [...prev, initialAssistantMessage]);
         }
 
+        let buffer = '';
+        let totalTokens: number | undefined;
+        let model: string | undefined;
+        let processingTime: number | undefined;
+
         // Process the stream
         while (true) {
           const { done, value } = await reader.read();
@@ -479,20 +422,24 @@ const ChatPage: React.FC = () => {
           buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
 
           // Process each complete line
-
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const data = line.slice(6).trim();
+              const raw = line.slice(6).trim();
 
-              if (data === '[DONE]') {
-                // Stream is complete
-                break;
+              // Handle special cases
+              if (raw === '[DONE]') {
+                // End of stream
+                continue;
               }
 
               try {
-                const eventData = JSON.parse(data);
+                const eventData = JSON.parse(raw);
 
                 switch (eventData.type) {
+                  case 'start':
+                    // Stream started
+                    break;
+
                   case 'token':
                     // Add the token to our streamed content
                     streamedContent += eventData.content || '';
@@ -558,9 +505,10 @@ const ChatPage: React.FC = () => {
 
                   default:
                     // Handle other event types if needed
+                    // console.log('Unknown streaming event type:', eventData.type);
                     break;
                 }
-              } catch (parseError) {
+              } catch {
                 // Skip malformed data
               }
             }
@@ -571,10 +519,6 @@ const ChatPage: React.FC = () => {
         reader.releaseLock();
 
         // Focus input after streaming is complete
-        focusInput();
-        */
-
-        // For now, focus input after non-streaming completion
         focusInput();
       } catch (error) {
         // Handle errors by showing an error message

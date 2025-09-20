@@ -69,6 +69,10 @@ interface Props {
   updateWorkflowConfig: (updates: Partial<ChatWorkflowConfig>) => void;
   resetToTemplate: (templateName: string) => void;
 
+  // Tracing configuration
+  enableTracing: boolean;
+  setEnableTracing: (enabled: boolean) => void;
+
   onSelectConversation: (conversation: ConversationResponse) => void;
 }
 
@@ -91,6 +95,8 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   workflowConfig,
   updateWorkflowConfig,
   resetToTemplate,
+  enableTracing,
+  setEnableTracing,
   onSelectConversation: _onSelectConversation,
 }) => {
   const { collapsed, setCollapsed: _setCollapsed } = useRightSidebar();
@@ -420,6 +426,26 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         />
                       </Box>
                     )}
+
+                    {/* Tracing Configuration */}
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Debug Configuration
+                      </Typography>
+
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={enableTracing}
+                            onChange={(e) => setEnableTracing(e.target.checked)}
+                          />
+                        }
+                        label="Enable Backend Workflow Tracing"
+                      />
+                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                        Shows detailed workflow execution steps in the response
+                      </Typography>
+                    </Box>
                   </Box>
                 )}
               </Box>

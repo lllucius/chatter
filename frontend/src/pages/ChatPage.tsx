@@ -89,6 +89,9 @@ const ChatPage: React.FC = () => {
   const [historyDialogOpen, setHistoryDialogOpen] = useState(false);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
 
+  // Tracing state
+  const [enableTracing, setEnableTracing] = useState(false);
+
   // Load conversation messages if we have a current conversation on mount
   useEffect(() => {
     if (
@@ -401,6 +404,7 @@ const ChatPage: React.FC = () => {
                 system_prompt_override: customPromptText.trim() || undefined,
                 document_ids:
                   selectedDocuments.length > 0 ? selectedDocuments : undefined,
+                enable_tracing: enableTracing,
                 workflow_config: {
                   ...getEffectiveConfig(),
                   llm_config: {
@@ -509,6 +513,7 @@ const ChatPage: React.FC = () => {
       handleWorkflowStreamingResponse,
       maxTokens,
       temperature,
+      enableTracing,
     ]
   );
 
@@ -558,6 +563,8 @@ const ChatPage: React.FC = () => {
         workflowConfig={customWorkflowConfig}
         updateWorkflowConfig={updateWorkflowConfig}
         resetToTemplate={resetToTemplate}
+        enableTracing={enableTracing}
+        setEnableTracing={setEnableTracing}
         onSelectConversation={handleSelectConversation}
       />
     );
@@ -620,6 +627,7 @@ const ChatPage: React.FC = () => {
             system_prompt_override: customPromptText.trim() || undefined,
             document_ids:
               selectedDocuments.length > 0 ? selectedDocuments : undefined,
+            enable_tracing: enableTracing,
             // Merge with effective workflow configuration
             workflow_config: {
               ...getEffectiveConfig(),
@@ -739,6 +747,7 @@ const ChatPage: React.FC = () => {
       focusInput,
       maxTokens,
       temperature,
+      enableTracing,
     ]
   );
 

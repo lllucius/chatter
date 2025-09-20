@@ -27,7 +27,6 @@ import ABTestAnalytics from '../components/ABTestAnalytics';
 import { useABTestingData, TestStatus } from '../hooks/useABTestingData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
-import { format } from 'date-fns';
 import {
   ABTestCreateRequest,
   MetricType,
@@ -65,10 +64,10 @@ const ABTestingPage: React.FC = () => {
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [detailDialogOpen, setDetailDialogOpen] = useState(false);
-  const [editingTest, setEditingTest] = useState<any>(null);
+  const [editingTest, setEditingTest] = useState<ABTestResponse | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedTestForMenu, setSelectedTestForMenu] = useState<any>(null);
+  const [selectedTestForMenu, setSelectedTestForMenu] = useState<ABTestResponse | null>(null);
 
   // Form management
   const form = useFormGeneric<ABTestFormData>({
@@ -95,7 +94,7 @@ const ABTestingPage: React.FC = () => {
           toastService.success('Test created successfully');
         }
         handleCloseDialog();
-      } catch (error) {
+      } catch {
         // Error handling is done in the hook
       }
     },
@@ -113,13 +112,13 @@ const ABTestingPage: React.FC = () => {
     setPage(0);
   };
 
-  const handleTestSelect = (test: any) => {
+  const handleTestSelect = (test: ABTestResponse) => {
     setSelectedTest(test);
     setDetailDialogOpen(true);
     setActiveTab(0);
   };
 
-  const handleTestEdit = (test: any) => {
+  const handleTestEdit = (test: ABTestResponse) => {
     setEditingTest(test);
     form.setValues({
       name: test.name || '',
@@ -144,7 +143,7 @@ const ABTestingPage: React.FC = () => {
     }
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, test: any) => {
+  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, test: ABTestResponse) => {
     setMenuAnchorEl(event.currentTarget);
     setSelectedTestForMenu(test);
   };

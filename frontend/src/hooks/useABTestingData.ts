@@ -7,7 +7,6 @@ import {
   ABTestCreateRequest,
   ABTestMetricsResponse,
   ABTestResultsResponse,
-  ABTestActionResponse,
 } from 'chatter-sdk';
 
 export type TestStatus =

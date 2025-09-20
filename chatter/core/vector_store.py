@@ -176,12 +176,17 @@ class PGVectorStore(AbstractVectorStore):
     def _initialize_store(self) -> None:
         """Initialize the PGVector store."""
         try:
+            # Set create_extension=False to prevent langchain-postgres from
+            # concatenating advisory lock and CREATE EXTENSION statements,
+            # which causes PostgreSQL syntax errors. The extension should be
+            # created separately during database initialization.
             self._store = PGVector(
                 embeddings=self.embeddings,
                 collection_name=self.collection_name,
                 connection=self.connection_string,
                 use_jsonb=True,
                 async_mode=True,
+                create_extension=False,  # Prevent SQL concatenation issues
             )
             logger.info(
                 "PGVector store initialized",

@@ -1,81 +1,19 @@
-error-handler.ts:246 [Error Handler] useWorkflowChat.sendWorkflowMessage: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-(anonymous) @ useWorkflowChat.ts:108
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:358
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:248 Full Error Details:
- Source: useWorkflowChat.sendWorkflowMessage
-Operation: send workflow message
-Timestamp: 2025-09-20T02:14:43.812Z
-Error Type: SyntaxError
-Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
-Stack Trace:
-SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-(anonymous) @ useWorkflowChat.ts:108
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:358
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:246 [Error Handler] ChatPage.handleWorkflowStreamingResponse: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-(anonymous) @ ChatPage.tsx:614
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:248 Full Error Details:
- Source: ChatPage.handleWorkflowStreamingResponse
-Operation: process workflow chat response
-Timestamp: 2025-09-20T02:14:43.815Z
-Error Type: SyntaxError
-Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
-Stack Trace:
-SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-(anonymous) @ ChatPage.tsx:614
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
+# SSE JSON Parsing Errors - RESOLVED
 
+The JSON parsing errors in Server-Sent Events (SSE) handling have been fixed.
+
+## Original Issues:
+- SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+- Occurred in useWorkflowChat.sendWorkflowMessage and ChatPage.handleWorkflowStreamingResponse
+
+## Root Causes Fixed:
+1. **Inconsistent data trimming**: One SSE parser used `.trim()`, the other didn't
+2. **Missing buffering**: Incomplete SSE lines split across chunks caused "data: data: {" patterns
+
+## Changes Applied:
+1. Added `.trim()` to ensure consistent SSE data extraction
+2. Added proper buffering to prevent line corruption in workflow streaming
+3. Both streaming functions now use identical, robust SSE parsing pattern
+
+## Status: ✅ RESOLVED
+These errors should no longer occur with the implemented fixes.

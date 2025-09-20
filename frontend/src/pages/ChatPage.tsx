@@ -428,6 +428,7 @@ const ChatPage: React.FC = () => {
         let totalTokens = 0;
         let model = '';
         let processingTime = 0;
+        let buffer = '';
 
         const initialAssistantMessage: ChatMessage = {
           id: assistantMessageId,
@@ -472,15 +473,16 @@ const ChatPage: React.FC = () => {
             break;
           }
 
-          // Decode the chunk
-          const chunk = decoder.decode(value, { stream: true });
+          // Decode the chunk and add to buffer
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
 
-          // Split by lines and process each event
-          const lines = chunk.split('\n');
+          // Process each complete line
 
           for (const line of lines) {
             if (line.startsWith('data: ')) {
-              const data = line.slice(6);
+              const data = line.slice(6).trim();
 
               if (data === '[DONE]') {
                 // Stream is complete

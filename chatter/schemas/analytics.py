@@ -569,6 +569,73 @@ class CustomMetricResponse(BaseModel):
     created_at: datetime = Field(..., description="Creation time")
 
 
+class ToolServerAnalyticsResponse(BaseModel):
+    """Schema for tool server analytics response."""
+
+    total_requests: int = Field(..., description="Total requests processed")
+    successful_requests: int = Field(..., description="Successful requests")
+    failed_requests: int = Field(..., description="Failed requests")
+    average_response_time_ms: float = Field(..., description="Average response time in milliseconds")
+    tool_usage_stats: dict[str, int] = Field(..., description="Tool usage statistics")
+    server_uptime_stats: dict[str, Any] = Field(..., description="Server uptime statistics")
+    error_distribution: dict[str, int] = Field(..., description="Error distribution by type")
+
+
+class AnalyticsHealthResponse(BaseModel):
+    """Schema for analytics health check response."""
+
+    status: str = Field(..., description="Health status")
+    database_connected: bool = Field(..., description="Database connection status")
+    cache_connected: bool = Field(..., description="Cache connection status")
+    last_check: datetime = Field(..., description="Last health check timestamp")
+    services: dict[str, str] = Field(..., description="Service status details")
+
+
+class MetricsSummaryResponse(BaseModel):
+    """Schema for metrics summary response."""
+
+    total_metrics: int = Field(..., description="Total number of metrics")
+    active_metrics: int = Field(..., description="Number of active metrics")
+    data_points_last_hour: int = Field(..., description="Data points collected in last hour")
+    storage_size_mb: float = Field(..., description="Storage size in MB")
+    oldest_data_point: datetime | None = Field(None, description="Oldest data point timestamp")
+    latest_data_point: datetime | None = Field(None, description="Latest data point timestamp")
+
+
+class CacheStatusResponse(BaseModel):
+    """Schema for cache status response."""
+
+    cache_enabled: bool = Field(..., description="Cache enabled status")
+    cache_hits: int = Field(..., description="Cache hits")
+    cache_misses: int = Field(..., description="Cache misses")
+    cache_hit_rate: float = Field(..., description="Cache hit rate")
+    cached_items_count: int = Field(..., description="Number of cached items")
+    cache_size_mb: float = Field(..., description="Cache size in MB")
+    last_cleared: datetime | None = Field(None, description="Last cache clear timestamp")
+
+
+class DatabaseHealthResponse(BaseModel):
+    """Schema for database health response."""
+
+    connected: bool = Field(..., description="Database connection status")
+    response_time_ms: float = Field(..., description="Database response time in milliseconds")
+    active_connections: int = Field(..., description="Active database connections")
+    query_performance: dict[str, float] = Field(..., description="Query performance metrics")
+    disk_usage_mb: float = Field(..., description="Database disk usage in MB")
+    last_backup: datetime | None = Field(None, description="Last backup timestamp")
+
+
+class QueryAnalysisResponse(BaseModel):
+    """Schema for database query analysis response."""
+
+    total_queries_analyzed: int = Field(..., description="Total queries analyzed")
+    slow_queries_count: int = Field(..., description="Number of slow queries")
+    optimization_suggestions: list[str] = Field(..., description="Optimization suggestions")
+    average_execution_time_ms: float = Field(..., description="Average execution time in milliseconds")
+    most_expensive_queries: list[dict[str, Any]] = Field(..., description="Most expensive queries")
+    index_recommendations: list[str] = Field(..., description="Index recommendations")
+
+
 # Chart-ready data schemas for Phase 2 dashboard enhancement
 class ChartDataPoint(BaseModel):
     """Schema for a single chart data point."""

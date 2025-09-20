@@ -160,10 +160,12 @@ class PGVectorStore(AbstractVectorStore):
         # (This should be made configurable per workflow.)
         self.connection_string += "?options=-c%20hnsw.ef_search%3D60"
 
-        # Remove async driver from connection string for pgvector
-        if "+asyncpg" in self.connection_string:
+        # Keep async driver for async mode, remove it only for sync mode
+        # Since we're now using async_mode=True, we need the async driver
+        if "+asyncpg" not in self.connection_string:
+            # Ensure we have the async driver for async mode
             self.connection_string = self.connection_string.replace(
-                "+asyncpg", ""
+                "postgresql://", "postgresql+asyncpg://"
             )
 
         self._store: PGVector | None = None
@@ -177,6 +179,7 @@ class PGVectorStore(AbstractVectorStore):
                 collection_name=self.collection_name,
                 connection=self.connection_string,
                 use_jsonb=True,
+                async_mode=True,
             )
             logger.info(
                 "PGVector store initialized",

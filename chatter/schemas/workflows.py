@@ -646,3 +646,10 @@ class ChatWorkflowTemplatesResponse(BaseModel):
         ..., description="Available templates"
     )
     total_count: int = Field(..., description="Total template count")
+
+
+class WorkflowDeleteResponse(BaseModel):
+    """Response schema for workflow deletion."""
+
+    message: str = Field(..., description="Deletion confirmation message")
+    workflow_id: str = Field(..., description="ID of the deleted workflow")

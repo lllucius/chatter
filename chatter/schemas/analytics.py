@@ -636,6 +636,73 @@ class QueryAnalysisResponse(BaseModel):
     index_recommendations: list[str] = Field(..., description="Index recommendations")
 
 
+class DashboardControlResponse(BaseModel):
+    """Schema for dashboard control responses."""
+
+    status: str = Field(..., description="Status of the operation")
+    user_id: str = Field(..., description="User ID")
+    message: str = Field(..., description="Operation message")
+
+
+class UserBehaviorAnalyticsResponse(BaseModel):
+    """Schema for user behavior analytics response."""
+
+    user_id: str = Field(..., description="User ID")
+    session_count: int = Field(..., description="Number of sessions")
+    page_views: int = Field(..., description="Total page views")
+    time_spent_minutes: float = Field(..., description="Total time spent in minutes")
+    most_visited_pages: list[str] = Field(..., description="Most visited pages")
+    user_journey: list[dict[str, Any]] = Field(..., description="User journey data")
+    conversion_events: list[dict[str, Any]] = Field(..., description="Conversion events")
+
+
+class IntelligentSearchResponse(BaseModel):
+    """Schema for intelligent search response."""
+
+    query: str = Field(..., description="Search query")
+    results: list[dict[str, Any]] = Field(..., description="Search results")
+    suggestions: list[str] = Field(..., description="Search suggestions")
+    analytics: dict[str, Any] = Field(..., description="Search analytics")
+    response_time_ms: float = Field(..., description="Response time in milliseconds")
+
+
+class TrendingSearchResponse(BaseModel):
+    """Schema for trending search response."""
+
+    trending_queries: list[str] = Field(..., description="Trending search queries")
+    search_volume: dict[str, int] = Field(..., description="Search volume by query")
+    time_period: str = Field(..., description="Time period for trending data")
+    categories: dict[str, int] = Field(..., description="Search categories")
+
+
+class WorkflowUpdateResponse(BaseModel):
+    """Schema for workflow update response."""
+
+    workflow_id: str = Field(..., description="Workflow ID")
+    status: str = Field(..., description="Update status")
+    message: str = Field(..., description="Update message")
+    updated_fields: list[str] = Field(..., description="Fields that were updated")
+
+
+class SystemHealthResponse(BaseModel):
+    """Schema for system health response."""
+
+    status: str = Field(..., description="Overall system status")
+    services: dict[str, str] = Field(..., description="Individual service statuses")
+    metrics: dict[str, Any] = Field(..., description="System metrics")
+    timestamp: datetime = Field(..., description="Health check timestamp")
+
+
+class CleanupResponse(BaseModel):
+    """Schema for cleanup operation response."""
+
+    operation: str = Field(..., description="Cleanup operation type")
+    items_cleaned: int = Field(..., description="Number of items cleaned")
+    storage_freed_mb: float = Field(..., description="Storage freed in MB")
+    duration_seconds: float = Field(..., description="Operation duration in seconds")
+    message: str = Field(..., description="Operation result message")
+
+
 # Chart-ready data schemas for Phase 2 dashboard enhancement
 class ChartDataPoint(BaseModel):
     """Schema for a single chart data point."""

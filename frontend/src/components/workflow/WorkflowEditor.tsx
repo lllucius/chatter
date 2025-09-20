@@ -368,7 +368,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
     document.addEventListener('keydown', handleKeyDown);
     return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode]);
+  }, [selectedNode, handleCopy, handleDeleteSelected, handlePaste, handleRedo, handleSave, handleUndo]);
 
   // Undo functionality
   const handleUndo = useCallback(() => {

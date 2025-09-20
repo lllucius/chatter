@@ -18,7 +18,7 @@ from typing import Any, Dict, List, Optional, Tuple, Union
 from typing_extensions import Annotated
 
 from pydantic import Field, StrictStr
-from typing import Any, Dict, List
+from typing import Any, List
 from typing_extensions import Annotated
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
@@ -29,6 +29,7 @@ from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCrea
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse
 from chatter_sdk.models.workflow_definition_update import WorkflowDefinitionUpdate
 from chatter_sdk.models.workflow_definitions_response import WorkflowDefinitionsResponse
+from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse
 from chatter_sdk.models.workflow_execution_request import WorkflowExecutionRequest
 from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResponse
 from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate
@@ -625,7 +626,7 @@ class WorkflowsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, str]:
+    ) -> WorkflowDeleteResponse:
         """Delete Workflow Definition
 
         Delete a workflow definition.
@@ -663,7 +664,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "WorkflowDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -693,7 +694,7 @@ class WorkflowsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, str]]:
+    ) -> ApiResponse[WorkflowDeleteResponse]:
         """Delete Workflow Definition
 
         Delete a workflow definition.
@@ -731,7 +732,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "WorkflowDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -799,7 +800,7 @@ class WorkflowsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "WorkflowDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1386,7 +1387,8 @@ class WorkflowsApi:
         if 'Accept' not in _header_params:
             _header_params['Accept'] = self.api_client.select_header_accept(
                 [
-                    'application/json'
+                    'application/json', 
+                    'text/event-stream'
                 ]
             )
 

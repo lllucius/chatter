@@ -19,7 +19,10 @@ from typing_extensions import Annotated
 
 from pydantic import StrictBool, StrictBytes, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional, Tuple, Union
+from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest
+from chatter_sdk.models.document_list_response import DocumentListResponse
+from chatter_sdk.models.document_processing_response import DocumentProcessingResponse
 from chatter_sdk.models.document_response import DocumentResponse
 from chatter_sdk.models.document_search_request import DocumentSearchRequest
 from chatter_sdk.models.document_stats_response import DocumentStatsResponse
@@ -59,7 +62,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, str]:
+    ) -> DocumentDeleteResponse:
         """Delete Document
 
         Delete a document.
@@ -97,7 +100,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -127,7 +130,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, str]]:
+    ) -> ApiResponse[DocumentDeleteResponse]:
         """Delete Document
 
         Delete a document.
@@ -165,7 +168,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -233,7 +236,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -323,7 +326,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, str]:
+    ) -> DocumentDeleteResponse:
         """Delete Document
 
         Delete a document.
@@ -361,7 +364,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -391,7 +394,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, str]]:
+    ) -> ApiResponse[DocumentDeleteResponse]:
         """Delete Document
 
         Delete a document.
@@ -429,7 +432,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -497,7 +500,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentDeleteResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2173,7 +2176,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DocumentListResponse:
         """List Documents Post
 
         List documents with filtering and pagination (POST endpoint for advanced filtering).
@@ -2211,7 +2214,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2241,7 +2244,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DocumentListResponse]:
         """List Documents Post
 
         List documents with filtering and pagination (POST endpoint for advanced filtering).
@@ -2279,7 +2282,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2347,7 +2350,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2450,7 +2453,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DocumentListResponse:
         """List Documents Post
 
         List documents with filtering and pagination (POST endpoint for advanced filtering).
@@ -2488,7 +2491,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2518,7 +2521,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DocumentListResponse]:
         """List Documents Post
 
         List documents with filtering and pagination (POST endpoint for advanced filtering).
@@ -2556,7 +2559,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2624,7 +2627,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DocumentListResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2727,7 +2730,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, str]:
+    ) -> DocumentProcessingResponse:
         """Reprocess Document
 
         Reprocess a document through the embedding pipeline.
@@ -2765,7 +2768,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2795,7 +2798,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, str]]:
+    ) -> ApiResponse[DocumentProcessingResponse]:
         """Reprocess Document
 
         Reprocess a document through the embedding pipeline.
@@ -2833,7 +2836,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2901,7 +2904,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -2991,7 +2994,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, str]:
+    ) -> DocumentProcessingResponse:
         """Reprocess Document
 
         Reprocess a document through the embedding pipeline.
@@ -3029,7 +3032,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -3059,7 +3062,7 @@ class DocumentsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, str]]:
+    ) -> ApiResponse[DocumentProcessingResponse]:
         """Reprocess Document
 
         Reprocess a document through the embedding pipeline.
@@ -3097,7 +3100,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -3165,7 +3168,7 @@ class DocumentsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, str]",
+            '200': "DocumentProcessingResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(

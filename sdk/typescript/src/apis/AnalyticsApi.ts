@@ -1,7 +1,7 @@
 /**
  * Generated API client for Analytics
  */
-import { ChartReadyAnalytics, ConversationStatsResponse, DashboardResponse, DocumentAnalyticsResponse, IntegratedDashboardStats, PerformanceMetricsResponse, SystemAnalyticsResponse, UsageMetricsResponse } from '../models/index';
+import { AnalyticsExportResponse, AnalyticsHealthResponse, CacheStatusResponse, ChartReadyAnalytics, CleanupResponse, ConversationStatsResponse, DashboardControlResponse, DashboardResponse, DatabaseHealthResponse, DocumentAnalyticsResponse, IntegratedDashboardStats, IntelligentSearchResponse, MetricsSummaryResponse, PerformanceMetricsResponse, QueryAnalysisResponse, SuccessResponse, SystemAnalyticsResponse, SystemHealthResponse, ToolServerAnalyticsResponse, TrendingSearchResponse, UsageMetricsResponse, UserBehaviorAnalyticsResponse, WorkflowUpdateResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class AnalyticsApi extends BaseAPI {
@@ -15,7 +15,7 @@ export class AnalyticsApi extends BaseAPI {
 This endpoint initiates a background task that streams analytics data
 to the user via Server-Sent Events (SSE).
    */
-  public async startRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStart(): Promise<Record<string, unknown>> {
+  public async startRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStart(): Promise<DashboardControlResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/real-time/dashboard/start`,
       method: 'POST' as HTTPMethod,
@@ -24,12 +24,12 @@ to the user via Server-Sent Events (SSE).
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DashboardControlResponse>;
   }
   /**Stop Real Time Dashboard
    * Stop real-time dashboard updates for the current user.
    */
-  public async stopRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStop(): Promise<Record<string, unknown>> {
+  public async stopRealTimeDashboardApiV1AnalyticsRealTimeRealTimeDashboardStop(): Promise<DashboardControlResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/real-time/dashboard/stop`,
       method: 'POST' as HTTPMethod,
@@ -38,14 +38,14 @@ to the user via Server-Sent Events (SSE).
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DashboardControlResponse>;
   }
   /**Get User Behavior Analytics
    * Get personalized behavior analytics for a user.
 
 Users can only access their own analytics unless they are admin.
    */
-  public async getUserBehaviorAnalyticsApiV1AnalyticsRealTimeUserBehaviorUserId(userId: string): Promise<Record<string, unknown>> {
+  public async getUserBehaviorAnalyticsApiV1AnalyticsRealTimeUserBehaviorUserId(userId: string): Promise<UserBehaviorAnalyticsResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/user-behavior/${userId}`,
       method: 'GET' as HTTPMethod,
@@ -54,7 +54,7 @@ Users can only access their own analytics unless they are admin.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<UserBehaviorAnalyticsResponse>;
   }
   /**Intelligent Search
    * Perform intelligent semantic search with personalized results.
@@ -65,7 +65,7 @@ Args:
     limit: Maximum number of results to return
     include_recommendations: Whether to include search recommendations
    */
-  public async intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent(options?: { query?: string; searchType?: string; limit?: number; includeRecommendations?: boolean; additionalQuery?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async intelligentSearchApiV1AnalyticsRealTimeSearchIntelligent(options?: { query?: string; searchType?: string; limit?: number; includeRecommendations?: boolean; additionalQuery?: HTTPQuery; headers?: HTTPHeaders; }): Promise<IntelligentSearchResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/search/intelligent`,
       method: 'GET' as HTTPMethod,
@@ -82,12 +82,12 @@ Args:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<IntelligentSearchResponse>;
   }
   /**Get Trending Content
    * Get trending content personalized for the current user.
    */
-  public async getTrendingContentApiV1AnalyticsRealTimeSearchTrending(options?: { limit?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async getTrendingContentApiV1AnalyticsRealTimeSearchTrending(options?: { limit?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<TrendingSearchResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/search/trending`,
       method: 'GET' as HTTPMethod,
@@ -101,12 +101,12 @@ Args:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<TrendingSearchResponse>;
   }
   /**Send Workflow Update
    * Send a real-time workflow update to the user.
    */
-  public async sendWorkflowUpdateApiV1AnalyticsRealTimeRealTimeWorkflowWorkflowIdUpdate(workflowId: string, data: Record<string, unknown>, options?: { updateType?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async sendWorkflowUpdateApiV1AnalyticsRealTimeRealTimeWorkflowWorkflowIdUpdate(workflowId: string, data: Record<string, unknown>, options?: { updateType?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<WorkflowUpdateResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/real-time/workflow/${workflowId}/update`,
       method: 'POST' as HTTPMethod,
@@ -122,7 +122,7 @@ Args:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<WorkflowUpdateResponse>;
   }
   /**Send System Health Update
    * Send system health update to all admin users.
@@ -130,7 +130,7 @@ Args:
 This endpoint is admin-only and broadcasts health information
 to all connected administrators.
    */
-  public async sendSystemHealthUpdateApiV1AnalyticsRealTimeRealTimeSystemHealth(data: Record<string, unknown>): Promise<Record<string, unknown>> {
+  public async sendSystemHealthUpdateApiV1AnalyticsRealTimeRealTimeSystemHealth(data: Record<string, unknown>): Promise<SystemHealthResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/real-time/system-health`,
       method: 'POST' as HTTPMethod,
@@ -141,7 +141,7 @@ to all connected administrators.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<SystemHealthResponse>;
   }
   /**Cleanup Inactive Tasks
    * Clean up inactive real-time tasks.
@@ -149,7 +149,7 @@ to all connected administrators.
 This endpoint is admin-only and performs maintenance on the
 real-time analytics service.
    */
-  public async cleanupInactiveTasksApiV1AnalyticsRealTimeRealTimeCleanup(): Promise<Record<string, unknown>> {
+  public async cleanupInactiveTasksApiV1AnalyticsRealTimeRealTimeCleanup(): Promise<CleanupResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/real-time/real-time/cleanup`,
       method: 'POST' as HTTPMethod,
@@ -158,7 +158,7 @@ real-time analytics service.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<CleanupResponse>;
   }
   /**Get Conversation Stats
    * Get conversation statistics.
@@ -394,7 +394,7 @@ Args:
 Returns:
     Tool server analytics data
    */
-  public async getToolServerAnalyticsApiV1AnalyticsToolservers(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async getToolServerAnalyticsApiV1AnalyticsToolservers(options?: { startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<ToolServerAnalyticsResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/toolservers`,
       method: 'GET' as HTTPMethod,
@@ -410,7 +410,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<ToolServerAnalyticsResponse>;
   }
   /**Get User Analytics
    * Get per-user analytics.
@@ -459,7 +459,7 @@ Args:
 Returns:
     Exported analytics report
    */
-  public async exportAnalyticsApiV1AnalyticsExport(options?: { format?: string; metrics?: string[]; startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async exportAnalyticsApiV1AnalyticsExport(options?: { format?: string; metrics?: string[]; startDate?: string | null; endDate?: string | null; period?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<AnalyticsExportResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/export`,
       method: 'POST' as HTTPMethod,
@@ -477,7 +477,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<AnalyticsExportResponse>;
   }
   /**Get Analytics Health
    * Get analytics system health status.
@@ -485,7 +485,7 @@ Returns:
 Returns:
     Health check results for analytics system
    */
-  public async getAnalyticsHealthApiV1AnalyticsHealth(): Promise<Record<string, unknown>> {
+  public async getAnalyticsHealthApiV1AnalyticsHealth(): Promise<AnalyticsHealthResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/health`,
       method: 'GET' as HTTPMethod,
@@ -494,7 +494,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<AnalyticsHealthResponse>;
   }
   /**Get Analytics Metrics Summary
    * Get summary of key analytics metrics for monitoring.
@@ -502,7 +502,7 @@ Returns:
 Returns:
     Summary of analytics metrics
    */
-  public async getAnalyticsMetricsSummaryApiV1AnalyticsMetricsSummary(): Promise<Record<string, unknown>> {
+  public async getAnalyticsMetricsSummaryApiV1AnalyticsMetricsSummary(): Promise<MetricsSummaryResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/metrics/summary`,
       method: 'GET' as HTTPMethod,
@@ -511,7 +511,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<MetricsSummaryResponse>;
   }
   /**Warm Analytics Cache
    * Warm analytics cache to improve performance.
@@ -524,7 +524,7 @@ Args:
 Returns:
     Cache warming results
    */
-  public async warmAnalyticsCacheApiV1AnalyticsCacheWarm(options?: { forceRefresh?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async warmAnalyticsCacheApiV1AnalyticsCacheWarm(options?: { forceRefresh?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<SuccessResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/cache/warm`,
       method: 'POST' as HTTPMethod,
@@ -538,7 +538,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<SuccessResponse>;
   }
   /**Get Cache Warming Status
    * Get cache warming status and performance metrics.
@@ -550,7 +550,7 @@ Args:
 Returns:
     Cache warming status and metrics
    */
-  public async getCacheWarmingStatusApiV1AnalyticsCacheStatus(): Promise<Record<string, unknown>> {
+  public async getCacheWarmingStatusApiV1AnalyticsCacheStatus(): Promise<CacheStatusResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/cache/status`,
       method: 'GET' as HTTPMethod,
@@ -559,7 +559,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<CacheStatusResponse>;
   }
   /**Optimize Cache Performance
    * Analyze and optimize cache performance automatically.
@@ -571,7 +571,7 @@ Args:
 Returns:
     Optimization results and recommendations
    */
-  public async optimizeCachePerformanceApiV1AnalyticsCacheOptimize(): Promise<Record<string, unknown>> {
+  public async optimizeCachePerformanceApiV1AnalyticsCacheOptimize(): Promise<SuccessResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/cache/optimize`,
       method: 'POST' as HTTPMethod,
@@ -580,7 +580,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<SuccessResponse>;
   }
   /**Invalidate Stale Cache
    * Invalidate stale cache entries to free up memory.
@@ -593,7 +593,7 @@ Args:
 Returns:
     Cache invalidation results
    */
-  public async invalidateStaleCacheApiV1AnalyticsCacheInvalidate(options?: { maxAgeHours?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async invalidateStaleCacheApiV1AnalyticsCacheInvalidate(options?: { maxAgeHours?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<SuccessResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/cache/invalidate`,
       method: 'POST' as HTTPMethod,
@@ -607,7 +607,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<SuccessResponse>;
   }
   /**Get Detailed Performance Metrics
    * Get detailed performance metrics for analytics service.
@@ -619,7 +619,7 @@ Args:
 Returns:
     Detailed performance metrics
    */
-  public async getDetailedPerformanceMetricsApiV1AnalyticsPerformanceDetailed(): Promise<Record<string, unknown>> {
+  public async getDetailedPerformanceMetricsApiV1AnalyticsPerformanceDetailed(): Promise<PerformanceMetricsResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/performance/detailed`,
       method: 'GET' as HTTPMethod,
@@ -628,7 +628,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<PerformanceMetricsResponse>;
   }
   /**Get Database Health Metrics
    * Get comprehensive database health metrics for analytics.
@@ -640,7 +640,7 @@ Args:
 Returns:
     Database health metrics and recommendations
    */
-  public async getDatabaseHealthMetricsApiV1AnalyticsDatabaseHealth(): Promise<Record<string, unknown>> {
+  public async getDatabaseHealthMetricsApiV1AnalyticsDatabaseHealth(): Promise<DatabaseHealthResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/database/health`,
       method: 'GET' as HTTPMethod,
@@ -649,7 +649,7 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DatabaseHealthResponse>;
   }
   /**Analyze Query Performance
    * Analyze performance of analytics database queries.
@@ -662,7 +662,7 @@ Args:
 Returns:
     Query performance analysis and optimization recommendations
    */
-  public async analyzeQueryPerformanceApiV1AnalyticsDatabaseAnalyzeQueries(options?: { queryType?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+  public async analyzeQueryPerformanceApiV1AnalyticsDatabaseAnalyzeQueries(options?: { queryType?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<QueryAnalysisResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/analytics/database/analyze-queries`,
       method: 'POST' as HTTPMethod,
@@ -676,6 +676,6 @@ Returns:
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<QueryAnalysisResponse>;
   }
 }

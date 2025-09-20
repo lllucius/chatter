@@ -2947,11 +2947,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Delete Document Api V1 Documents  Document Id  Delete"
+                  "$ref": "#/components/schemas/DocumentDeleteResponse"
                 }
               }
             },
@@ -3188,9 +3184,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response List Documents Post Api V1 Documents List Post"
+                  "$ref": "#/components/schemas/DocumentListResponse"
                 }
               }
             },
@@ -3428,11 +3422,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Reprocess Document Api V1 Documents  Document Id  Reprocess Post"
+                  "$ref": "#/components/schemas/DocumentProcessingResponse"
                 }
               }
             },
@@ -5670,9 +5660,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Start Real Time Dashboard Api V1 Analytics Real Time Real Time Dashboard Start Post"
+                  "$ref": "#/components/schemas/DashboardControlResponse"
                 }
               }
             },
@@ -5733,9 +5721,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Stop Real Time Dashboard Api V1 Analytics Real Time Real Time Dashboard Stop Post"
+                  "$ref": "#/components/schemas/DashboardControlResponse"
                 }
               }
             },
@@ -5812,9 +5798,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get User Behavior Analytics Api V1 Analytics Real Time User Behavior  User Id  Get"
+                  "$ref": "#/components/schemas/UserBehaviorAnalyticsResponse"
                 }
               }
             },
@@ -5959,9 +5943,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Intelligent Search Api V1 Analytics Real Time Search Intelligent Get"
+                  "$ref": "#/components/schemas/IntelligentSearchResponse"
                 }
               }
             },
@@ -6077,9 +6059,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get Trending Content Api V1 Analytics Real Time Search Trending Get"
+                  "$ref": "#/components/schemas/TrendingSearchResponse"
                 }
               }
             },
@@ -6215,9 +6195,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Send Workflow Update Api V1 Analytics Real Time Real Time Workflow  Workflow Id  Update Post"
+                  "$ref": "#/components/schemas/WorkflowUpdateResponse"
                 }
               }
             },
@@ -6328,9 +6306,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Send System Health Update Api V1 Analytics Real Time Real Time System Health Post"
+                  "$ref": "#/components/schemas/SystemHealthResponse"
                 }
               }
             },
@@ -6434,9 +6410,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Cleanup Inactive Tasks Api V1 Analytics Real Time Real Time Cleanup Post"
+                  "$ref": "#/components/schemas/CleanupResponse"
                 }
               }
             },
@@ -7603,9 +7577,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Get Tool Server Analytics Api V1 Analytics Toolservers Get"
+                  "$ref": "#/components/schemas/ToolServerAnalyticsResponse"
                 }
               }
             },
@@ -7951,7 +7923,9 @@
             "description": "Successful Response",
             "content": {
               "application/json": {
-                "schema": {}
+                "schema": {
+                  "$ref": "#/components/schemas/AnalyticsExportResponse"
+                }
               }
             },
             "headers": {
@@ -8048,9 +8022,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Analytics Health Api V1 Analytics Health Get"
+                  "$ref": "#/components/schemas/AnalyticsHealthResponse"
                 }
               }
             },
@@ -8110,9 +8082,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Analytics Metrics Summary Api V1 Analytics Metrics Summary Get"
+                  "$ref": "#/components/schemas/MetricsSummaryResponse"
                 }
               }
             },
@@ -8189,9 +8159,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Warm Analytics Cache Api V1 Analytics Cache Warm Post"
+                  "$ref": "#/components/schemas/SuccessResponse"
                 }
               }
             },
@@ -8289,9 +8257,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Cache Warming Status Api V1 Analytics Cache Status Get"
+                  "$ref": "#/components/schemas/CacheStatusResponse"
                 }
               }
             },
@@ -8351,9 +8317,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Optimize Cache Performance Api V1 Analytics Cache Optimize Post"
+                  "$ref": "#/components/schemas/SuccessResponse"
                 }
               }
             },
@@ -8430,9 +8394,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Invalidate Stale Cache Api V1 Analytics Cache Invalidate Post"
+                  "$ref": "#/components/schemas/SuccessResponse"
                 }
               }
             },
@@ -8530,9 +8492,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Detailed Performance Metrics Api V1 Analytics Performance Detailed Get"
+                  "$ref": "#/components/schemas/PerformanceMetricsResponse"
                 }
               }
             },
@@ -8592,9 +8552,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "additionalProperties": true,
-                  "type": "object",
-                  "title": "Response Get Database Health Metrics Api V1 Analytics Database Health Get"
+                  "$ref": "#/components/schemas/DatabaseHealthResponse"
                 }
               }
             },
@@ -8670,9 +8628,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": true,
-                  "title": "Response Analyze Query Performance Api V1 Analytics Database Analyze Queries Post"
+                  "$ref": "#/components/schemas/QueryAnalysisResponse"
                 }
               }
             },
@@ -9200,11 +9156,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "additionalProperties": {
-                    "type": "string"
-                  },
-                  "title": "Response Delete Workflow Definition Api V1 Workflows Definitions  Workflow Id  Delete"
+                  "$ref": "#/components/schemas/WorkflowDeleteResponse"
                 }
               }
             },
@@ -26723,6 +26675,102 @@
         "title": "AgentUpdateRequest",
         "description": "Request schema for updating an agent."
       },
+      "AnalyticsExportResponse": {
+        "properties": {
+          "export_id": {
+            "type": "string",
+            "title": "Export Id",
+            "description": "Export job ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Export status"
+          },
+          "download_url": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Download Url",
+            "description": "Download URL when ready"
+          },
+          "created_at": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Created At",
+            "description": "Export creation time"
+          },
+          "expires_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Expires At",
+            "description": "Download expiration time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "export_id",
+          "status",
+          "created_at"
+        ],
+        "title": "AnalyticsExportResponse",
+        "description": "Schema for analytics export response."
+      },
+      "AnalyticsHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Health status"
+          },
+          "database_connected": {
+            "type": "boolean",
+            "title": "Database Connected",
+            "description": "Database connection status"
+          },
+          "cache_connected": {
+            "type": "boolean",
+            "title": "Cache Connected",
+            "description": "Cache connection status"
+          },
+          "last_check": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Last Check",
+            "description": "Last health check timestamp"
+          },
+          "services": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Services",
+            "description": "Service status details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "database_connected",
+          "cache_connected",
+          "last_check",
+          "services"
+        ],
+        "title": "AnalyticsHealthResponse",
+        "description": "Schema for analytics health check response."
+      },
       "AvailableProvidersResponse": {
         "properties": {
           "providers": {
@@ -27341,6 +27389,64 @@
         "title": "BulkToolServerOperation",
         "description": "Schema for bulk operations on tool servers."
       },
+      "CacheStatusResponse": {
+        "properties": {
+          "cache_enabled": {
+            "type": "boolean",
+            "title": "Cache Enabled",
+            "description": "Cache enabled status"
+          },
+          "cache_hits": {
+            "type": "integer",
+            "title": "Cache Hits",
+            "description": "Cache hits"
+          },
+          "cache_misses": {
+            "type": "integer",
+            "title": "Cache Misses",
+            "description": "Cache misses"
+          },
+          "cache_hit_rate": {
+            "type": "number",
+            "title": "Cache Hit Rate",
+            "description": "Cache hit rate"
+          },
+          "cached_items_count": {
+            "type": "integer",
+            "title": "Cached Items Count",
+            "description": "Number of cached items"
+          },
+          "cache_size_mb": {
+            "type": "number",
+            "title": "Cache Size Mb",
+            "description": "Cache size in MB"
+          },
+          "last_cleared": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Cleared",
+            "description": "Last cache clear timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "cache_enabled",
+          "cache_hits",
+          "cache_misses",
+          "cache_hit_rate",
+          "cached_items_count",
+          "cache_size_mb"
+        ],
+        "title": "CacheStatusResponse",
+        "description": "Schema for cache status response."
+      },
       "ChartDataPoint": {
         "properties": {
           "name": {
@@ -27771,6 +27877,45 @@
         ],
         "title": "ChatWorkflowTemplatesResponse",
         "description": "Response for chat workflow templates."
+      },
+      "CleanupResponse": {
+        "properties": {
+          "operation": {
+            "type": "string",
+            "title": "Operation",
+            "description": "Cleanup operation type"
+          },
+          "items_cleaned": {
+            "type": "integer",
+            "title": "Items Cleaned",
+            "description": "Number of items cleaned"
+          },
+          "storage_freed_mb": {
+            "type": "number",
+            "title": "Storage Freed Mb",
+            "description": "Storage freed in MB"
+          },
+          "duration_seconds": {
+            "type": "number",
+            "title": "Duration Seconds",
+            "description": "Operation duration in seconds"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Operation result message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "operation",
+          "items_cleaned",
+          "storage_freed_mb",
+          "duration_seconds",
+          "message"
+        ],
+        "title": "CleanupResponse",
+        "description": "Schema for cleanup operation response."
       },
       "ComplexityMetrics": {
         "properties": {
@@ -28741,6 +28886,33 @@
         "title": "CorrelationTraceResponse",
         "description": "Schema for correlation trace response."
       },
+      "DashboardControlResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Status of the operation"
+          },
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "User ID"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Operation message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "user_id",
+          "message"
+        ],
+        "title": "DashboardControlResponse",
+        "description": "Schema for dashboard control responses."
+      },
       "DashboardResponse": {
         "properties": {
           "conversation_stats": {
@@ -28808,6 +28980,61 @@
         ],
         "title": "DataFormat",
         "description": "Supported data formats."
+      },
+      "DatabaseHealthResponse": {
+        "properties": {
+          "connected": {
+            "type": "boolean",
+            "title": "Connected",
+            "description": "Database connection status"
+          },
+          "response_time_ms": {
+            "type": "number",
+            "title": "Response Time Ms",
+            "description": "Database response time in milliseconds"
+          },
+          "active_connections": {
+            "type": "integer",
+            "title": "Active Connections",
+            "description": "Active database connections"
+          },
+          "query_performance": {
+            "additionalProperties": {
+              "type": "number"
+            },
+            "type": "object",
+            "title": "Query Performance",
+            "description": "Query performance metrics"
+          },
+          "disk_usage_mb": {
+            "type": "number",
+            "title": "Disk Usage Mb",
+            "description": "Database disk usage in MB"
+          },
+          "last_backup": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Backup",
+            "description": "Last backup timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "connected",
+          "response_time_ms",
+          "active_connections",
+          "query_performance",
+          "disk_usage_mb"
+        ],
+        "title": "DatabaseHealthResponse",
+        "description": "Schema for database health response."
       },
       "DefaultProvider": {
         "properties": {
@@ -28956,6 +29183,21 @@
         "title": "DocumentAnalyticsResponse",
         "description": "Schema for document analytics response."
       },
+      "DocumentDeleteResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Deletion result message"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "DocumentDeleteResponse",
+        "description": "Response schema for document deletion."
+      },
       "DocumentListRequest": {
         "properties": {
           "status": {
@@ -29038,6 +29280,81 @@
         "type": "object",
         "title": "DocumentListRequest",
         "description": "Schema for document list request."
+      },
+      "DocumentListResponse": {
+        "properties": {
+          "documents": {
+            "items": {
+              "$ref": "#/components/schemas/DocumentResponse"
+            },
+            "type": "array",
+            "title": "Documents",
+            "description": "List of documents"
+          },
+          "total_count": {
+            "type": "integer",
+            "title": "Total Count",
+            "description": "Total number of documents"
+          },
+          "limit": {
+            "type": "integer",
+            "title": "Limit",
+            "description": "Applied limit"
+          },
+          "offset": {
+            "type": "integer",
+            "title": "Offset",
+            "description": "Applied offset"
+          }
+        },
+        "type": "object",
+        "required": [
+          "documents",
+          "total_count",
+          "limit",
+          "offset"
+        ],
+        "title": "DocumentListResponse",
+        "description": "Schema for document list response."
+      },
+      "DocumentProcessingResponse": {
+        "properties": {
+          "document_id": {
+            "type": "string",
+            "title": "Document Id",
+            "description": "Document ID"
+          },
+          "status": {
+            "$ref": "#/components/schemas/DocumentStatus",
+            "description": "Processing status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Status message"
+          },
+          "processing_started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Processing Started At",
+            "description": "Processing start time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "document_id",
+          "status",
+          "message"
+        ],
+        "title": "DocumentProcessingResponse",
+        "description": "Schema for document processing response."
       },
       "DocumentResponse": {
         "properties": {
@@ -30210,6 +30527,53 @@
         "title": "IntegratedDashboardStats",
         "description": "Schema for integrated dashboard statistics."
       },
+      "IntelligentSearchResponse": {
+        "properties": {
+          "query": {
+            "type": "string",
+            "title": "Query",
+            "description": "Search query"
+          },
+          "results": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Results",
+            "description": "Search results"
+          },
+          "suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Suggestions",
+            "description": "Search suggestions"
+          },
+          "analytics": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Analytics",
+            "description": "Search analytics"
+          },
+          "response_time_ms": {
+            "type": "number",
+            "title": "Response Time Ms",
+            "description": "Response time in milliseconds"
+          }
+        },
+        "type": "object",
+        "required": [
+          "query",
+          "results",
+          "suggestions",
+          "analytics",
+          "response_time_ms"
+        ],
+        "title": "IntelligentSearchResponse",
+        "description": "Schema for intelligent search response."
+      },
       "JobActionResponse": {
         "properties": {
           "success": {
@@ -30865,6 +31229,65 @@
         ],
         "title": "MetricsResponse",
         "description": "Schema for application metrics response."
+      },
+      "MetricsSummaryResponse": {
+        "properties": {
+          "total_metrics": {
+            "type": "integer",
+            "title": "Total Metrics",
+            "description": "Total number of metrics"
+          },
+          "active_metrics": {
+            "type": "integer",
+            "title": "Active Metrics",
+            "description": "Number of active metrics"
+          },
+          "data_points_last_hour": {
+            "type": "integer",
+            "title": "Data Points Last Hour",
+            "description": "Data points collected in last hour"
+          },
+          "storage_size_mb": {
+            "type": "number",
+            "title": "Storage Size Mb",
+            "description": "Storage size in MB"
+          },
+          "oldest_data_point": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Oldest Data Point",
+            "description": "Oldest data point timestamp"
+          },
+          "latest_data_point": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Latest Data Point",
+            "description": "Latest data point timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_metrics",
+          "active_metrics",
+          "data_points_last_hour",
+          "storage_size_mb"
+        ],
+        "title": "MetricsSummaryResponse",
+        "description": "Schema for metrics summary response."
       },
       "ModelConfig": {
         "properties": {
@@ -35405,6 +35828,61 @@
         "title": "ProviderUpdate",
         "description": "Schema for updating a provider."
       },
+      "QueryAnalysisResponse": {
+        "properties": {
+          "total_queries_analyzed": {
+            "type": "integer",
+            "title": "Total Queries Analyzed",
+            "description": "Total queries analyzed"
+          },
+          "slow_queries_count": {
+            "type": "integer",
+            "title": "Slow Queries Count",
+            "description": "Number of slow queries"
+          },
+          "optimization_suggestions": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Optimization Suggestions",
+            "description": "Optimization suggestions"
+          },
+          "average_execution_time_ms": {
+            "type": "number",
+            "title": "Average Execution Time Ms",
+            "description": "Average execution time in milliseconds"
+          },
+          "most_expensive_queries": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Most Expensive Queries",
+            "description": "Most expensive queries"
+          },
+          "index_recommendations": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Index Recommendations",
+            "description": "Index recommendations"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_queries_analyzed",
+          "slow_queries_count",
+          "optimization_suggestions",
+          "average_execution_time_ms",
+          "most_expensive_queries",
+          "index_recommendations"
+        ],
+        "title": "QueryAnalysisResponse",
+        "description": "Schema for database query analysis response."
+      },
       "ReadinessCheckResponse": {
         "properties": {
           "status": {
@@ -36256,6 +36734,40 @@
         "title": "StorageStatsResponse",
         "description": "Response schema for storage statistics."
       },
+      "SuccessResponse": {
+        "properties": {
+          "success": {
+            "type": "boolean",
+            "title": "Success",
+            "description": "Success indicator",
+            "default": true
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Success message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Response data"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message"
+        ],
+        "title": "SuccessResponse",
+        "description": "Standard success response schema."
+      },
       "SystemAnalyticsResponse": {
         "properties": {
           "total_users": {
@@ -36357,6 +36869,44 @@
         ],
         "title": "SystemAnalyticsResponse",
         "description": "Schema for system analytics response."
+      },
+      "SystemHealthResponse": {
+        "properties": {
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Overall system status"
+          },
+          "services": {
+            "additionalProperties": {
+              "type": "string"
+            },
+            "type": "object",
+            "title": "Services",
+            "description": "Individual service statuses"
+          },
+          "metrics": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Metrics",
+            "description": "System metrics"
+          },
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "Health check timestamp"
+          }
+        },
+        "type": "object",
+        "required": [
+          "status",
+          "services",
+          "metrics",
+          "timestamp"
+        ],
+        "title": "SystemHealthResponse",
+        "description": "Schema for system health response."
       },
       "TestEventResponse": {
         "properties": {
@@ -37149,6 +37699,64 @@
         "title": "ToolPermissionUpdate",
         "description": "Schema for updating tool permissions."
       },
+      "ToolServerAnalyticsResponse": {
+        "properties": {
+          "total_requests": {
+            "type": "integer",
+            "title": "Total Requests",
+            "description": "Total requests processed"
+          },
+          "successful_requests": {
+            "type": "integer",
+            "title": "Successful Requests",
+            "description": "Successful requests"
+          },
+          "failed_requests": {
+            "type": "integer",
+            "title": "Failed Requests",
+            "description": "Failed requests"
+          },
+          "average_response_time_ms": {
+            "type": "number",
+            "title": "Average Response Time Ms",
+            "description": "Average response time in milliseconds"
+          },
+          "tool_usage_stats": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Tool Usage Stats",
+            "description": "Tool usage statistics"
+          },
+          "server_uptime_stats": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Server Uptime Stats",
+            "description": "Server uptime statistics"
+          },
+          "error_distribution": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Error Distribution",
+            "description": "Error distribution by type"
+          }
+        },
+        "type": "object",
+        "required": [
+          "total_requests",
+          "successful_requests",
+          "failed_requests",
+          "average_response_time_ms",
+          "tool_usage_stats",
+          "server_uptime_stats",
+          "error_distribution"
+        ],
+        "title": "ToolServerAnalyticsResponse",
+        "description": "Schema for tool server analytics response."
+      },
       "ToolServerCreate": {
         "properties": {
           "name": {
@@ -37806,6 +38414,48 @@
         "title": "ToolStatus",
         "description": "Enumeration for tool status."
       },
+      "TrendingSearchResponse": {
+        "properties": {
+          "trending_queries": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Trending Queries",
+            "description": "Trending search queries"
+          },
+          "search_volume": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Search Volume",
+            "description": "Search volume by query"
+          },
+          "time_period": {
+            "type": "string",
+            "title": "Time Period",
+            "description": "Time period for trending data"
+          },
+          "categories": {
+            "additionalProperties": {
+              "type": "integer"
+            },
+            "type": "object",
+            "title": "Categories",
+            "description": "Search categories"
+          }
+        },
+        "type": "object",
+        "required": [
+          "trending_queries",
+          "search_volume",
+          "time_period",
+          "categories"
+        ],
+        "title": "TrendingSearchResponse",
+        "description": "Schema for trending search response."
+      },
       "UsageMetricsResponse": {
         "properties": {
           "total_prompt_tokens": {
@@ -37925,6 +38575,68 @@
         ],
         "title": "UsageMetricsResponse",
         "description": "Schema for usage metrics response."
+      },
+      "UserBehaviorAnalyticsResponse": {
+        "properties": {
+          "user_id": {
+            "type": "string",
+            "title": "User Id",
+            "description": "User ID"
+          },
+          "session_count": {
+            "type": "integer",
+            "title": "Session Count",
+            "description": "Number of sessions"
+          },
+          "page_views": {
+            "type": "integer",
+            "title": "Page Views",
+            "description": "Total page views"
+          },
+          "time_spent_minutes": {
+            "type": "number",
+            "title": "Time Spent Minutes",
+            "description": "Total time spent in minutes"
+          },
+          "most_visited_pages": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Most Visited Pages",
+            "description": "Most visited pages"
+          },
+          "user_journey": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "User Journey",
+            "description": "User journey data"
+          },
+          "conversion_events": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Conversion Events",
+            "description": "Conversion events"
+          }
+        },
+        "type": "object",
+        "required": [
+          "user_id",
+          "session_count",
+          "page_views",
+          "time_spent_minutes",
+          "most_visited_pages",
+          "user_journey",
+          "conversion_events"
+        ],
+        "title": "UserBehaviorAnalyticsResponse",
+        "description": "Schema for user behavior analytics response."
       },
       "UserCreate": {
         "properties": {
@@ -38893,6 +39605,27 @@
         "title": "WorkflowDefinitionsResponse",
         "description": "Schema for workflow definitions list response."
       },
+      "WorkflowDeleteResponse": {
+        "properties": {
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Deletion confirmation message"
+          },
+          "workflow_id": {
+            "type": "string",
+            "title": "Workflow Id",
+            "description": "ID of the deleted workflow"
+          }
+        },
+        "type": "object",
+        "required": [
+          "message",
+          "workflow_id"
+        ],
+        "title": "WorkflowDeleteResponse",
+        "description": "Response schema for workflow deletion."
+      },
       "WorkflowEdge": {
         "properties": {
           "id": {
@@ -39711,6 +40444,42 @@
         ],
         "title": "WorkflowTemplatesResponse",
         "description": "Schema for workflow templates list response."
+      },
+      "WorkflowUpdateResponse": {
+        "properties": {
+          "workflow_id": {
+            "type": "string",
+            "title": "Workflow Id",
+            "description": "Workflow ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Update status"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Update message"
+          },
+          "updated_fields": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Updated Fields",
+            "description": "Fields that were updated"
+          }
+        },
+        "type": "object",
+        "required": [
+          "workflow_id",
+          "status",
+          "message",
+          "updated_fields"
+        ],
+        "title": "WorkflowUpdateResponse",
+        "description": "Schema for workflow update response."
       },
       "WorkflowValidationResponse": {
         "properties": {

@@ -19,6 +19,13 @@ from typing_extensions import Annotated
 
 from pydantic import StrictBool, StrictInt, StrictStr
 from typing import Any, Dict, Optional
+from chatter_sdk.models.cleanup_response import CleanupResponse
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
+from chatter_sdk.models.intelligent_search_response import IntelligentSearchResponse
+from chatter_sdk.models.system_health_response import SystemHealthResponse
+from chatter_sdk.models.trending_search_response import TrendingSearchResponse
+from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse
+from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
@@ -53,7 +60,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> CleanupResponse:
         """Cleanup Inactive Tasks
 
         Clean up inactive real-time tasks.  This endpoint is admin-only and performs maintenance on the real-time analytics service.
@@ -88,7 +95,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -116,7 +123,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[CleanupResponse]:
         """Cleanup Inactive Tasks
 
         Clean up inactive real-time tasks.  This endpoint is admin-only and performs maintenance on the real-time analytics service.
@@ -151,7 +158,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -214,7 +221,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -300,7 +307,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> TrendingSearchResponse:
         """Get Trending Content
 
         Get trending content personalized for the current user.
@@ -338,7 +345,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -368,7 +375,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[TrendingSearchResponse]:
         """Get Trending Content
 
         Get trending content personalized for the current user.
@@ -406,7 +413,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -474,7 +481,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -566,7 +573,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> UserBehaviorAnalyticsResponse:
         """Get User Behavior Analytics
 
         Get personalized behavior analytics for a user.  Users can only access their own analytics unless they are admin.
@@ -604,7 +611,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -634,7 +641,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[UserBehaviorAnalyticsResponse]:
         """Get User Behavior Analytics
 
         Get personalized behavior analytics for a user.  Users can only access their own analytics unless they are admin.
@@ -672,7 +679,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -740,7 +747,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -833,7 +840,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> IntelligentSearchResponse:
         """Intelligent Search
 
         Perform intelligent semantic search with personalized results.  Args:     query: Search query string     search_type: Type of content to search (\"documents\", \"conversations\", \"prompts\")     limit: Maximum number of results to return     include_recommendations: Whether to include search recommendations
@@ -880,7 +887,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -913,7 +920,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[IntelligentSearchResponse]:
         """Intelligent Search
 
         Perform intelligent semantic search with personalized results.  Args:     query: Search query string     search_type: Type of content to search (\"documents\", \"conversations\", \"prompts\")     limit: Maximum number of results to return     include_recommendations: Whether to include search recommendations
@@ -960,7 +967,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1040,7 +1047,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1147,7 +1154,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> SystemHealthResponse:
         """Send System Health Update
 
         Send system health update to all admin users.  This endpoint is admin-only and broadcasts health information to all connected administrators.
@@ -1185,7 +1192,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1215,7 +1222,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[SystemHealthResponse]:
         """Send System Health Update
 
         Send system health update to all admin users.  This endpoint is admin-only and broadcasts health information to all connected administrators.
@@ -1253,7 +1260,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1321,7 +1328,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1426,7 +1433,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> WorkflowUpdateResponse:
         """Send Workflow Update
 
         Send a real-time workflow update to the user.
@@ -1470,7 +1477,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1502,7 +1509,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[WorkflowUpdateResponse]:
         """Send Workflow Update
 
         Send a real-time workflow update to the user.
@@ -1546,7 +1553,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1622,7 +1629,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -1732,7 +1739,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DashboardControlResponse:
         """Start Real Time Dashboard
 
         Start real-time dashboard updates for the current user.  This endpoint initiates a background task that streams analytics data to the user via Server-Sent Events (SSE).
@@ -1767,7 +1774,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1795,7 +1802,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DashboardControlResponse]:
         """Start Real Time Dashboard
 
         Start real-time dashboard updates for the current user.  This endpoint initiates a background task that streams analytics data to the user via Server-Sent Events (SSE).
@@ -1830,7 +1837,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1893,7 +1900,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1978,7 +1985,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DashboardControlResponse:
         """Stop Real Time Dashboard
 
         Stop real-time dashboard updates for the current user.
@@ -2013,7 +2020,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2041,7 +2048,7 @@ class RealTimeAnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DashboardControlResponse]:
         """Stop Real Time Dashboard
 
         Stop real-time dashboard updates for the current user.
@@ -2076,7 +2083,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2139,7 +2146,7 @@ class RealTimeAnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,

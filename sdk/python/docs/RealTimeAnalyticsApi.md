@@ -15,7 +15,7 @@ Method | HTTP request | Description
 
 
 # **cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post**
-> Dict[str, object] cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post()
+> CleanupResponse cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post()
 
 Cleanup Inactive Tasks
 
@@ -30,6 +30,7 @@ real-time analytics service.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.cleanup_response import CleanupResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -71,7 +72,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**CleanupResponse**](CleanupResponse.md)
 
 ### Authorization
 
@@ -91,7 +92,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_trending_content_api_v1_analytics_real_time_search_trending_get**
-> Dict[str, object] get_trending_content_api_v1_analytics_real_time_search_trending_get(limit=limit)
+> TrendingSearchResponse get_trending_content_api_v1_analytics_real_time_search_trending_get(limit=limit)
 
 Get Trending Content
 
@@ -103,6 +104,7 @@ Get trending content personalized for the current user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.trending_search_response import TrendingSearchResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -148,7 +150,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**TrendingSearchResponse**](TrendingSearchResponse.md)
 
 ### Authorization
 
@@ -169,7 +171,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get**
-> Dict[str, object] get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get(user_id)
+> UserBehaviorAnalyticsResponse get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get(user_id)
 
 Get User Behavior Analytics
 
@@ -183,6 +185,7 @@ Users can only access their own analytics unless they are admin.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -228,7 +231,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**UserBehaviorAnalyticsResponse**](UserBehaviorAnalyticsResponse.md)
 
 ### Authorization
 
@@ -249,7 +252,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **intelligent_search_api_v1_analytics_real_time_search_intelligent_get**
-> Dict[str, object] intelligent_search_api_v1_analytics_real_time_search_intelligent_get(query, search_type=search_type, limit=limit, include_recommendations=include_recommendations)
+> IntelligentSearchResponse intelligent_search_api_v1_analytics_real_time_search_intelligent_get(query, search_type=search_type, limit=limit, include_recommendations=include_recommendations)
 
 Intelligent Search
 
@@ -267,6 +270,7 @@ Args:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.intelligent_search_response import IntelligentSearchResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -318,7 +322,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**IntelligentSearchResponse**](IntelligentSearchResponse.md)
 
 ### Authorization
 
@@ -339,7 +343,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post**
-> Dict[str, object] send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post(request_body)
+> SystemHealthResponse send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post(request_body)
 
 Send System Health Update
 
@@ -354,6 +358,7 @@ to all connected administrators.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.system_health_response import SystemHealthResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -399,7 +404,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**SystemHealthResponse**](SystemHealthResponse.md)
 
 ### Authorization
 
@@ -420,7 +425,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post**
-> Dict[str, object] send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(workflow_id, update_type, request_body)
+> WorkflowUpdateResponse send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(workflow_id, update_type, request_body)
 
 Send Workflow Update
 
@@ -432,6 +437,7 @@ Send a real-time workflow update to the user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -481,7 +487,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**WorkflowUpdateResponse**](WorkflowUpdateResponse.md)
 
 ### Authorization
 
@@ -502,7 +508,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post**
-> Dict[str, object] start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post()
+> DashboardControlResponse start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post()
 
 Start Real Time Dashboard
 
@@ -517,6 +523,7 @@ to the user via Server-Sent Events (SSE).
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -558,7 +565,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**DashboardControlResponse**](DashboardControlResponse.md)
 
 ### Authorization
 
@@ -578,7 +585,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post**
-> Dict[str, object] stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post()
+> DashboardControlResponse stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post()
 
 Stop Real Time Dashboard
 
@@ -590,6 +597,7 @@ Stop real-time dashboard updates for the current user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -631,7 +639,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**DashboardControlResponse**](DashboardControlResponse.md)
 
 ### Authorization
 

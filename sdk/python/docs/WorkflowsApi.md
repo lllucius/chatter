@@ -183,7 +183,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**
-> Dict[str, str] delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete(workflow_id)
+> WorkflowDeleteResponse delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete(workflow_id)
 
 Delete Workflow Definition
 
@@ -195,6 +195,7 @@ Delete a workflow definition.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -240,7 +241,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, str]**
+[**WorkflowDeleteResponse**](WorkflowDeleteResponse.md)
 
 ### Authorization
 
@@ -564,13 +565,13 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: application/json
- - **Accept**: application/json
+ - **Accept**: application/json, text/event-stream
 
 ### HTTP response details
 
 | Status code | Description | Response headers |
 |-------------|-------------|------------------|
-**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**200** | Streaming chat response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
 **422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)

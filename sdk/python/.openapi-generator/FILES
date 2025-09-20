@@ -55,6 +55,8 @@ chatter_sdk/models/agent_stats_response.py
 chatter_sdk/models/agent_status.py
 chatter_sdk/models/agent_type.py
 chatter_sdk/models/agent_update_request.py
+chatter_sdk/models/analytics_export_response.py
+chatter_sdk/models/analytics_health_response.py
 chatter_sdk/models/api_key_create.py
 chatter_sdk/models/api_key_response.py
 chatter_sdk/models/api_key_revoke_response.py
@@ -70,6 +72,7 @@ chatter_sdk/models/bulk_delete_response.py
 chatter_sdk/models/bulk_operation_filters.py
 chatter_sdk/models/bulk_operation_result.py
 chatter_sdk/models/bulk_tool_server_operation.py
+chatter_sdk/models/cache_status_response.py
 chatter_sdk/models/chart_data_point.py
 chatter_sdk/models/chart_ready_analytics.py
 chatter_sdk/models/chat_response.py
@@ -77,6 +80,7 @@ chatter_sdk/models/chat_workflow_config.py
 chatter_sdk/models/chat_workflow_request.py
 chatter_sdk/models/chat_workflow_template.py
 chatter_sdk/models/chat_workflow_templates_response.py
+chatter_sdk/models/cleanup_response.py
 chatter_sdk/models/complexity_metrics.py
 chatter_sdk/models/conversation_create.py
 chatter_sdk/models/conversation_delete_response.py
@@ -87,12 +91,17 @@ chatter_sdk/models/conversation_status.py
 chatter_sdk/models/conversation_update.py
 chatter_sdk/models/conversation_with_messages.py
 chatter_sdk/models/correlation_trace_response.py
+chatter_sdk/models/dashboard_control_response.py
 chatter_sdk/models/dashboard_response.py
 chatter_sdk/models/data_format.py
+chatter_sdk/models/database_health_response.py
 chatter_sdk/models/default_provider.py
 chatter_sdk/models/distance_metric.py
 chatter_sdk/models/document_analytics_response.py
+chatter_sdk/models/document_delete_response.py
 chatter_sdk/models/document_list_request.py
+chatter_sdk/models/document_list_response.py
+chatter_sdk/models/document_processing_response.py
 chatter_sdk/models/document_response.py
 chatter_sdk/models/document_search_request.py
 chatter_sdk/models/document_stats_response.py
@@ -112,6 +121,7 @@ chatter_sdk/models/health_check_response.py
 chatter_sdk/models/health_status.py
 chatter_sdk/models/http_validation_error.py
 chatter_sdk/models/integrated_dashboard_stats.py
+chatter_sdk/models/intelligent_search_response.py
 chatter_sdk/models/job_action_response.py
 chatter_sdk/models/job_create_request.py
 chatter_sdk/models/job_list_response.py
@@ -129,6 +139,7 @@ chatter_sdk/models/message_response.py
 chatter_sdk/models/message_role.py
 chatter_sdk/models/metric_type.py
 chatter_sdk/models/metrics_response.py
+chatter_sdk/models/metrics_summary_response.py
 chatter_sdk/models/min_value.py
 chatter_sdk/models/model_config.py
 chatter_sdk/models/model_def_create.py
@@ -185,6 +196,7 @@ chatter_sdk/models/provider_delete_response.py
 chatter_sdk/models/provider_list.py
 chatter_sdk/models/provider_type.py
 chatter_sdk/models/provider_update.py
+chatter_sdk/models/query_analysis_response.py
 chatter_sdk/models/readiness_check_response.py
 chatter_sdk/models/readiness_status.py
 chatter_sdk/models/reduction_strategy.py
@@ -200,7 +212,9 @@ chatter_sdk/models/server_tools_response.py
 chatter_sdk/models/sse_stats_response.py
 chatter_sdk/models/statistical_analysis.py
 chatter_sdk/models/storage_stats_response.py
+chatter_sdk/models/success_response.py
 chatter_sdk/models/system_analytics_response.py
+chatter_sdk/models/system_health_response.py
 chatter_sdk/models/test_event_response.py
 chatter_sdk/models/test_metric.py
 chatter_sdk/models/test_status.py
@@ -216,6 +230,7 @@ chatter_sdk/models/tool_operation_response.py
 chatter_sdk/models/tool_permission_create.py
 chatter_sdk/models/tool_permission_response.py
 chatter_sdk/models/tool_permission_update.py
+chatter_sdk/models/tool_server_analytics_response.py
 chatter_sdk/models/tool_server_create.py
 chatter_sdk/models/tool_server_delete_response.py
 chatter_sdk/models/tool_server_health_check.py
@@ -224,7 +239,9 @@ chatter_sdk/models/tool_server_operation_response.py
 chatter_sdk/models/tool_server_response.py
 chatter_sdk/models/tool_server_update.py
 chatter_sdk/models/tool_status.py
+chatter_sdk/models/trending_search_response.py
 chatter_sdk/models/usage_metrics_response.py
+chatter_sdk/models/user_behavior_analytics_response.py
 chatter_sdk/models/user_create.py
 chatter_sdk/models/user_login.py
 chatter_sdk/models/user_response.py
@@ -239,6 +256,7 @@ chatter_sdk/models/workflow_definition_create.py
 chatter_sdk/models/workflow_definition_response.py
 chatter_sdk/models/workflow_definition_update.py
 chatter_sdk/models/workflow_definitions_response.py
+chatter_sdk/models/workflow_delete_response.py
 chatter_sdk/models/workflow_edge.py
 chatter_sdk/models/workflow_edge_data.py
 chatter_sdk/models/workflow_execution_request.py
@@ -249,6 +267,7 @@ chatter_sdk/models/workflow_template_create.py
 chatter_sdk/models/workflow_template_response.py
 chatter_sdk/models/workflow_template_update.py
 chatter_sdk/models/workflow_templates_response.py
+chatter_sdk/models/workflow_update_response.py
 chatter_sdk/models/workflow_validation_response.py
 chatter_sdk/py.typed
 chatter_sdk/rest.py
@@ -284,6 +303,8 @@ docs/AgentUpdateRequest.md
 docs/Agents0Api.md
 docs/AgentsApi.md
 docs/AnalyticsApi.md
+docs/AnalyticsExportResponse.md
+docs/AnalyticsHealthResponse.md
 docs/AuthenticationApi.md
 docs/AvailableProvidersResponse.md
 docs/BackupListResponse.md
@@ -297,6 +318,7 @@ docs/BulkDeleteResponse.md
 docs/BulkOperationFilters.md
 docs/BulkOperationResult.md
 docs/BulkToolServerOperation.md
+docs/CacheStatusResponse.md
 docs/ChartDataPoint.md
 docs/ChartReadyAnalytics.md
 docs/ChatResponse.md
@@ -304,6 +326,7 @@ docs/ChatWorkflowConfig.md
 docs/ChatWorkflowRequest.md
 docs/ChatWorkflowTemplate.md
 docs/ChatWorkflowTemplatesResponse.md
+docs/CleanupResponse.md
 docs/ComplexityMetrics.md
 docs/ConversationCreate.md
 docs/ConversationDeleteResponse.md
@@ -315,14 +338,19 @@ docs/ConversationUpdate.md
 docs/ConversationWithMessages.md
 docs/ConversationsApi.md
 docs/CorrelationTraceResponse.md
+docs/DashboardControlResponse.md
 docs/DashboardResponse.md
 docs/DataFormat.md
 docs/DataManagementApi.md
+docs/DatabaseHealthResponse.md
 docs/DefaultApi.md
 docs/DefaultProvider.md
 docs/DistanceMetric.md
 docs/DocumentAnalyticsResponse.md
+docs/DocumentDeleteResponse.md
 docs/DocumentListRequest.md
+docs/DocumentListResponse.md
+docs/DocumentProcessingResponse.md
 docs/DocumentResponse.md
 docs/DocumentSearchRequest.md
 docs/DocumentStatsResponse.md
@@ -345,6 +373,7 @@ docs/HealthApi.md
 docs/HealthCheckResponse.md
 docs/HealthStatus.md
 docs/IntegratedDashboardStats.md
+docs/IntelligentSearchResponse.md
 docs/JobActionResponse.md
 docs/JobCreateRequest.md
 docs/JobListResponse.md
@@ -363,6 +392,7 @@ docs/MessageResponse.md
 docs/MessageRole.md
 docs/MetricType.md
 docs/MetricsResponse.md
+docs/MetricsSummaryResponse.md
 docs/MinValue.md
 docs/ModelConfig.md
 docs/ModelDefCreate.md
@@ -423,6 +453,7 @@ docs/ProviderDeleteResponse.md
 docs/ProviderList.md
 docs/ProviderType.md
 docs/ProviderUpdate.md
+docs/QueryAnalysisResponse.md
 docs/ReadinessCheckResponse.md
 docs/ReadinessStatus.md
 docs/RealTimeAnalyticsApi.md
@@ -439,7 +470,9 @@ docs/ServerToolResponse.md
 docs/ServerToolsResponse.md
 docs/StatisticalAnalysis.md
 docs/StorageStatsResponse.md
+docs/SuccessResponse.md
 docs/SystemAnalyticsResponse.md
+docs/SystemHealthResponse.md
 docs/TestEventResponse.md
 docs/TestMetric.md
 docs/TestStatus.md
@@ -455,6 +488,7 @@ docs/ToolOperationResponse.md
 docs/ToolPermissionCreate.md
 docs/ToolPermissionResponse.md
 docs/ToolPermissionUpdate.md
+docs/ToolServerAnalyticsResponse.md
 docs/ToolServerCreate.md
 docs/ToolServerDeleteResponse.md
 docs/ToolServerHealthCheck.md
@@ -464,7 +498,9 @@ docs/ToolServerResponse.md
 docs/ToolServerUpdate.md
 docs/ToolServersApi.md
 docs/ToolStatus.md
+docs/TrendingSearchResponse.md
 docs/UsageMetricsResponse.md
+docs/UserBehaviorAnalyticsResponse.md
 docs/UserCreate.md
 docs/UserLogin.md
 docs/UserResponse.md
@@ -479,6 +515,7 @@ docs/WorkflowDefinitionCreate.md
 docs/WorkflowDefinitionResponse.md
 docs/WorkflowDefinitionUpdate.md
 docs/WorkflowDefinitionsResponse.md
+docs/WorkflowDeleteResponse.md
 docs/WorkflowEdge.md
 docs/WorkflowEdgeData.md
 docs/WorkflowExecutionRequest.md
@@ -489,6 +526,7 @@ docs/WorkflowTemplateCreate.md
 docs/WorkflowTemplateResponse.md
 docs/WorkflowTemplateUpdate.md
 docs/WorkflowTemplatesResponse.md
+docs/WorkflowUpdateResponse.md
 docs/WorkflowValidationResponse.md
 docs/WorkflowsApi.md
 git_push.sh
@@ -527,6 +565,8 @@ test/test_agent_update_request.py
 test/test_agents0_api.py
 test/test_agents_api.py
 test/test_analytics_api.py
+test/test_analytics_export_response.py
+test/test_analytics_health_response.py
 test/test_api_key_create.py
 test/test_api_key_response.py
 test/test_api_key_revoke_response.py
@@ -543,6 +583,7 @@ test/test_bulk_delete_response.py
 test/test_bulk_operation_filters.py
 test/test_bulk_operation_result.py
 test/test_bulk_tool_server_operation.py
+test/test_cache_status_response.py
 test/test_chart_data_point.py
 test/test_chart_ready_analytics.py
 test/test_chat_response.py
@@ -550,6 +591,7 @@ test/test_chat_workflow_config.py
 test/test_chat_workflow_request.py
 test/test_chat_workflow_template.py
 test/test_chat_workflow_templates_response.py
+test/test_cleanup_response.py
 test/test_complexity_metrics.py
 test/test_conversation_create.py
 test/test_conversation_delete_response.py
@@ -561,14 +603,19 @@ test/test_conversation_update.py
 test/test_conversation_with_messages.py
 test/test_conversations_api.py
 test/test_correlation_trace_response.py
+test/test_dashboard_control_response.py
 test/test_dashboard_response.py
 test/test_data_format.py
 test/test_data_management_api.py
+test/test_database_health_response.py
 test/test_default_api.py
 test/test_default_provider.py
 test/test_distance_metric.py
 test/test_document_analytics_response.py
+test/test_document_delete_response.py
 test/test_document_list_request.py
+test/test_document_list_response.py
+test/test_document_processing_response.py
 test/test_document_response.py
 test/test_document_search_request.py
 test/test_document_stats_response.py
@@ -591,6 +638,7 @@ test/test_health_check_response.py
 test/test_health_status.py
 test/test_http_validation_error.py
 test/test_integrated_dashboard_stats.py
+test/test_intelligent_search_response.py
 test/test_job_action_response.py
 test/test_job_create_request.py
 test/test_job_list_response.py
@@ -609,6 +657,7 @@ test/test_message_response.py
 test/test_message_role.py
 test/test_metric_type.py
 test/test_metrics_response.py
+test/test_metrics_summary_response.py
 test/test_min_value.py
 test/test_model_config.py
 test/test_model_def_create.py
@@ -669,6 +718,7 @@ test/test_provider_delete_response.py
 test/test_provider_list.py
 test/test_provider_type.py
 test/test_provider_update.py
+test/test_query_analysis_response.py
 test/test_readiness_check_response.py
 test/test_readiness_status.py
 test/test_real_time_analytics_api.py
@@ -685,7 +735,9 @@ test/test_server_tools_response.py
 test/test_sse_stats_response.py
 test/test_statistical_analysis.py
 test/test_storage_stats_response.py
+test/test_success_response.py
 test/test_system_analytics_response.py
+test/test_system_health_response.py
 test/test_test_event_response.py
 test/test_test_metric.py
 test/test_test_status.py
@@ -701,6 +753,7 @@ test/test_tool_operation_response.py
 test/test_tool_permission_create.py
 test/test_tool_permission_response.py
 test/test_tool_permission_update.py
+test/test_tool_server_analytics_response.py
 test/test_tool_server_create.py
 test/test_tool_server_delete_response.py
 test/test_tool_server_health_check.py
@@ -710,7 +763,9 @@ test/test_tool_server_response.py
 test/test_tool_server_update.py
 test/test_tool_servers_api.py
 test/test_tool_status.py
+test/test_trending_search_response.py
 test/test_usage_metrics_response.py
+test/test_user_behavior_analytics_response.py
 test/test_user_create.py
 test/test_user_login.py
 test/test_user_response.py
@@ -725,6 +780,7 @@ test/test_workflow_definition_create.py
 test/test_workflow_definition_response.py
 test/test_workflow_definition_update.py
 test/test_workflow_definitions_response.py
+test/test_workflow_delete_response.py
 test/test_workflow_edge.py
 test/test_workflow_edge_data.py
 test/test_workflow_execution_request.py
@@ -735,6 +791,7 @@ test/test_workflow_template_create.py
 test/test_workflow_template_response.py
 test/test_workflow_template_update.py
 test/test_workflow_templates_response.py
+test/test_workflow_update_response.py
 test/test_workflow_validation_response.py
 test/test_workflows_api.py
 tox.ini

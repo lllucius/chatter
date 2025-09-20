@@ -35,7 +35,7 @@ Method | HTTP request | Description
 
 
 # **analyze_query_performance_api_v1_analytics_database_analyze_queries_post**
-> Dict[str, object] analyze_query_performance_api_v1_analytics_database_analyze_queries_post(query_type=query_type)
+> QueryAnalysisResponse analyze_query_performance_api_v1_analytics_database_analyze_queries_post(query_type=query_type)
 
 Analyze Query Performance
 
@@ -55,6 +55,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.query_analysis_response import QueryAnalysisResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -100,7 +101,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**QueryAnalysisResponse**](QueryAnalysisResponse.md)
 
 ### Authorization
 
@@ -121,7 +122,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post**
-> Dict[str, object] cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post()
+> CleanupResponse cleanup_inactive_tasks_api_v1_analytics_real_time_real_time_cleanup_post()
 
 Cleanup Inactive Tasks
 
@@ -136,6 +137,7 @@ real-time analytics service.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.cleanup_response import CleanupResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -177,7 +179,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**CleanupResponse**](CleanupResponse.md)
 
 ### Authorization
 
@@ -197,7 +199,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **export_analytics_api_v1_analytics_export_post**
-> object export_analytics_api_v1_analytics_export_post(metrics, format=format, start_date=start_date, end_date=end_date, period=period)
+> AnalyticsExportResponse export_analytics_api_v1_analytics_export_post(metrics, format=format, start_date=start_date, end_date=end_date, period=period)
 
 Export Analytics
 
@@ -221,6 +223,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.analytics_export_response import AnalyticsExportResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -274,7 +277,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**object**
+[**AnalyticsExportResponse**](AnalyticsExportResponse.md)
 
 ### Authorization
 
@@ -295,7 +298,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_analytics_health_api_v1_analytics_health_get**
-> Dict[str, object] get_analytics_health_api_v1_analytics_health_get()
+> AnalyticsHealthResponse get_analytics_health_api_v1_analytics_health_get()
 
 Get Analytics Health
 
@@ -310,6 +313,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.analytics_health_response import AnalyticsHealthResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -351,7 +355,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**AnalyticsHealthResponse**](AnalyticsHealthResponse.md)
 
 ### Authorization
 
@@ -371,7 +375,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get**
-> Dict[str, object] get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get()
+> MetricsSummaryResponse get_analytics_metrics_summary_api_v1_analytics_metrics_summary_get()
 
 Get Analytics Metrics Summary
 
@@ -386,6 +390,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.metrics_summary_response import MetricsSummaryResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -427,7 +432,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**MetricsSummaryResponse**](MetricsSummaryResponse.md)
 
 ### Authorization
 
@@ -447,7 +452,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_cache_warming_status_api_v1_analytics_cache_status_get**
-> Dict[str, object] get_cache_warming_status_api_v1_analytics_cache_status_get()
+> CacheStatusResponse get_cache_warming_status_api_v1_analytics_cache_status_get()
 
 Get Cache Warming Status
 
@@ -466,6 +471,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.cache_status_response import CacheStatusResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -507,7 +513,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**CacheStatusResponse**](CacheStatusResponse.md)
 
 ### Authorization
 
@@ -804,7 +810,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_database_health_metrics_api_v1_analytics_database_health_get**
-> Dict[str, object] get_database_health_metrics_api_v1_analytics_database_health_get()
+> DatabaseHealthResponse get_database_health_metrics_api_v1_analytics_database_health_get()
 
 Get Database Health Metrics
 
@@ -823,6 +829,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.database_health_response import DatabaseHealthResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -864,7 +871,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**DatabaseHealthResponse**](DatabaseHealthResponse.md)
 
 ### Authorization
 
@@ -884,7 +891,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get**
-> Dict[str, object] get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get()
+> PerformanceMetricsResponse get_detailed_performance_metrics_api_v1_analytics_performance_detailed_get()
 
 Get Detailed Performance Metrics
 
@@ -903,6 +910,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -944,7 +952,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**PerformanceMetricsResponse**](PerformanceMetricsResponse.md)
 
 ### Authorization
 
@@ -1309,7 +1317,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_tool_server_analytics_api_v1_analytics_toolservers_get**
-> Dict[str, object] get_tool_server_analytics_api_v1_analytics_toolservers_get(start_date=start_date, end_date=end_date, period=period)
+> ToolServerAnalyticsResponse get_tool_server_analytics_api_v1_analytics_toolservers_get(start_date=start_date, end_date=end_date, period=period)
 
 Get Tool Server Analytics
 
@@ -1329,6 +1337,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.tool_server_analytics_response import ToolServerAnalyticsResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1378,7 +1387,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**ToolServerAnalyticsResponse**](ToolServerAnalyticsResponse.md)
 
 ### Authorization
 
@@ -1399,7 +1408,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_trending_content_api_v1_analytics_real_time_search_trending_get**
-> Dict[str, object] get_trending_content_api_v1_analytics_real_time_search_trending_get(limit=limit)
+> TrendingSearchResponse get_trending_content_api_v1_analytics_real_time_search_trending_get(limit=limit)
 
 Get Trending Content
 
@@ -1411,6 +1420,7 @@ Get trending content personalized for the current user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.trending_search_response import TrendingSearchResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1456,7 +1466,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**TrendingSearchResponse**](TrendingSearchResponse.md)
 
 ### Authorization
 
@@ -1665,7 +1675,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get**
-> Dict[str, object] get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get(user_id)
+> UserBehaviorAnalyticsResponse get_user_behavior_analytics_api_v1_analytics_real_time_user_behavior_user_id_get(user_id)
 
 Get User Behavior Analytics
 
@@ -1679,6 +1689,7 @@ Users can only access their own analytics unless they are admin.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1724,7 +1735,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**UserBehaviorAnalyticsResponse**](UserBehaviorAnalyticsResponse.md)
 
 ### Authorization
 
@@ -1745,7 +1756,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **intelligent_search_api_v1_analytics_real_time_search_intelligent_get**
-> Dict[str, object] intelligent_search_api_v1_analytics_real_time_search_intelligent_get(query, search_type=search_type, limit=limit, include_recommendations=include_recommendations)
+> IntelligentSearchResponse intelligent_search_api_v1_analytics_real_time_search_intelligent_get(query, search_type=search_type, limit=limit, include_recommendations=include_recommendations)
 
 Intelligent Search
 
@@ -1763,6 +1774,7 @@ Args:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.intelligent_search_response import IntelligentSearchResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1814,7 +1826,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**IntelligentSearchResponse**](IntelligentSearchResponse.md)
 
 ### Authorization
 
@@ -1835,7 +1847,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **invalidate_stale_cache_api_v1_analytics_cache_invalidate_post**
-> Dict[str, object] invalidate_stale_cache_api_v1_analytics_cache_invalidate_post(max_age_hours=max_age_hours)
+> SuccessResponse invalidate_stale_cache_api_v1_analytics_cache_invalidate_post(max_age_hours=max_age_hours)
 
 Invalidate Stale Cache
 
@@ -1855,6 +1867,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.success_response import SuccessResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1900,7 +1913,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**SuccessResponse**](SuccessResponse.md)
 
 ### Authorization
 
@@ -1921,7 +1934,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **optimize_cache_performance_api_v1_analytics_cache_optimize_post**
-> Dict[str, object] optimize_cache_performance_api_v1_analytics_cache_optimize_post()
+> SuccessResponse optimize_cache_performance_api_v1_analytics_cache_optimize_post()
 
 Optimize Cache Performance
 
@@ -1940,6 +1953,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.success_response import SuccessResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -1981,7 +1995,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**SuccessResponse**](SuccessResponse.md)
 
 ### Authorization
 
@@ -2001,7 +2015,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post**
-> Dict[str, object] send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post(request_body)
+> SystemHealthResponse send_system_health_update_api_v1_analytics_real_time_real_time_system_health_post(request_body)
 
 Send System Health Update
 
@@ -2016,6 +2030,7 @@ to all connected administrators.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.system_health_response import SystemHealthResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -2061,7 +2076,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**SystemHealthResponse**](SystemHealthResponse.md)
 
 ### Authorization
 
@@ -2082,7 +2097,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post**
-> Dict[str, object] send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(workflow_id, update_type, request_body)
+> WorkflowUpdateResponse send_workflow_update_api_v1_analytics_real_time_real_time_workflow_workflow_id_update_post(workflow_id, update_type, request_body)
 
 Send Workflow Update
 
@@ -2094,6 +2109,7 @@ Send a real-time workflow update to the user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -2143,7 +2159,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**WorkflowUpdateResponse**](WorkflowUpdateResponse.md)
 
 ### Authorization
 
@@ -2164,7 +2180,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post**
-> Dict[str, object] start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post()
+> DashboardControlResponse start_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_start_post()
 
 Start Real Time Dashboard
 
@@ -2179,6 +2195,7 @@ to the user via Server-Sent Events (SSE).
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -2220,7 +2237,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**DashboardControlResponse**](DashboardControlResponse.md)
 
 ### Authorization
 
@@ -2240,7 +2257,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post**
-> Dict[str, object] stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post()
+> DashboardControlResponse stop_real_time_dashboard_api_v1_analytics_real_time_real_time_dashboard_stop_post()
 
 Stop Real Time Dashboard
 
@@ -2252,6 +2269,7 @@ Stop real-time dashboard updates for the current user.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -2293,7 +2311,7 @@ This endpoint does not need any parameter.
 
 ### Return type
 
-**Dict[str, object]**
+[**DashboardControlResponse**](DashboardControlResponse.md)
 
 ### Authorization
 
@@ -2313,7 +2331,7 @@ This endpoint does not need any parameter.
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **warm_analytics_cache_api_v1_analytics_cache_warm_post**
-> Dict[str, object] warm_analytics_cache_api_v1_analytics_cache_warm_post(force_refresh=force_refresh)
+> SuccessResponse warm_analytics_cache_api_v1_analytics_cache_warm_post(force_refresh=force_refresh)
 
 Warm Analytics Cache
 
@@ -2333,6 +2351,7 @@ Returns:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.success_response import SuccessResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -2378,7 +2397,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**SuccessResponse**](SuccessResponse.md)
 
 ### Authorization
 

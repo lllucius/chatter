@@ -21,14 +21,29 @@ from datetime import datetime
 from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
+from chatter_sdk.models.analytics_export_response import AnalyticsExportResponse
+from chatter_sdk.models.analytics_health_response import AnalyticsHealthResponse
+from chatter_sdk.models.cache_status_response import CacheStatusResponse
 from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics
+from chatter_sdk.models.cleanup_response import CleanupResponse
 from chatter_sdk.models.conversation_stats_response import ConversationStatsResponse
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse
 from chatter_sdk.models.dashboard_response import DashboardResponse
+from chatter_sdk.models.database_health_response import DatabaseHealthResponse
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
 from chatter_sdk.models.integrated_dashboard_stats import IntegratedDashboardStats
+from chatter_sdk.models.intelligent_search_response import IntelligentSearchResponse
+from chatter_sdk.models.metrics_summary_response import MetricsSummaryResponse
 from chatter_sdk.models.performance_metrics_response import PerformanceMetricsResponse
+from chatter_sdk.models.query_analysis_response import QueryAnalysisResponse
+from chatter_sdk.models.success_response import SuccessResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse
+from chatter_sdk.models.system_health_response import SystemHealthResponse
+from chatter_sdk.models.tool_server_analytics_response import ToolServerAnalyticsResponse
+from chatter_sdk.models.trending_search_response import TrendingSearchResponse
 from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse
+from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse
+from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse
 
 from chatter_sdk.api_client import ApiClient, RequestSerialized
 from chatter_sdk.api_response import ApiResponse
@@ -64,7 +79,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> QueryAnalysisResponse:
         """Analyze Query Performance
 
         Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Query performance analysis and optimization recommendations
@@ -102,7 +117,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "QueryAnalysisResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -132,7 +147,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[QueryAnalysisResponse]:
         """Analyze Query Performance
 
         Analyze performance of analytics database queries.  Args:     query_type: Specific query type to analyze (optional)     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Query performance analysis and optimization recommendations
@@ -170,7 +185,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "QueryAnalysisResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -238,7 +253,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "QueryAnalysisResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -329,7 +344,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> CleanupResponse:
         """Cleanup Inactive Tasks
 
         Clean up inactive real-time tasks.  This endpoint is admin-only and performs maintenance on the real-time analytics service.
@@ -364,7 +379,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -392,7 +407,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[CleanupResponse]:
         """Cleanup Inactive Tasks
 
         Clean up inactive real-time tasks.  This endpoint is admin-only and performs maintenance on the real-time analytics service.
@@ -427,7 +442,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -490,7 +505,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CleanupResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -580,7 +595,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> object:
+    ) -> AnalyticsExportResponse:
         """Export Analytics
 
         Export analytics reports.  Args:     format: Export format     metrics: List of metrics to export     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Exported analytics report
@@ -630,7 +645,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "AnalyticsExportResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -664,7 +679,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[object]:
+    ) -> ApiResponse[AnalyticsExportResponse]:
         """Export Analytics
 
         Export analytics reports.  Args:     format: Export format     metrics: List of metrics to export     start_date: Start date for analytics     end_date: End date for analytics     period: Predefined period     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Exported analytics report
@@ -714,7 +729,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "AnalyticsExportResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -798,7 +813,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "object",
+            '200': "AnalyticsExportResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -928,7 +943,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> AnalyticsHealthResponse:
         """Get Analytics Health
 
         Get analytics system health status.  Returns:     Health check results for analytics system
@@ -963,7 +978,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "AnalyticsHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -991,7 +1006,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[AnalyticsHealthResponse]:
         """Get Analytics Health
 
         Get analytics system health status.  Returns:     Health check results for analytics system
@@ -1026,7 +1041,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "AnalyticsHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1089,7 +1104,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "AnalyticsHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1174,7 +1189,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> MetricsSummaryResponse:
         """Get Analytics Metrics Summary
 
         Get summary of key analytics metrics for monitoring.  Returns:     Summary of analytics metrics
@@ -1209,7 +1224,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "MetricsSummaryResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1237,7 +1252,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[MetricsSummaryResponse]:
         """Get Analytics Metrics Summary
 
         Get summary of key analytics metrics for monitoring.  Returns:     Summary of analytics metrics
@@ -1272,7 +1287,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "MetricsSummaryResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1335,7 +1350,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "MetricsSummaryResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1420,7 +1435,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> CacheStatusResponse:
         """Get Cache Warming Status
 
         Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming status and metrics
@@ -1455,7 +1470,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CacheStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1483,7 +1498,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[CacheStatusResponse]:
         """Get Cache Warming Status
 
         Get cache warming status and performance metrics.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming status and metrics
@@ -1518,7 +1533,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CacheStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -1581,7 +1596,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "CacheStatusResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2620,7 +2635,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DatabaseHealthResponse:
         """Get Database Health Metrics
 
         Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Database health metrics and recommendations
@@ -2655,7 +2670,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DatabaseHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2683,7 +2698,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DatabaseHealthResponse]:
         """Get Database Health Metrics
 
         Get comprehensive database health metrics for analytics.  Args:     current_user: Current authenticated user     db_optimization_service: Database optimization service  Returns:     Database health metrics and recommendations
@@ -2718,7 +2733,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DatabaseHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2781,7 +2796,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DatabaseHealthResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2866,7 +2881,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> PerformanceMetricsResponse:
         """Get Detailed Performance Metrics
 
         Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Detailed performance metrics
@@ -2901,7 +2916,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "PerformanceMetricsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -2929,7 +2944,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[PerformanceMetricsResponse]:
         """Get Detailed Performance Metrics
 
         Get detailed performance metrics for analytics service.  Args:     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Detailed performance metrics
@@ -2964,7 +2979,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "PerformanceMetricsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -3027,7 +3042,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "PerformanceMetricsResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -4243,7 +4258,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> ToolServerAnalyticsResponse:
         """Get Tool Server Analytics
 
         Get tool server analytics.  Args:     request: Tool server analytics request parameters     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Tool server analytics data
@@ -4287,7 +4302,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "ToolServerAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -4319,7 +4334,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[ToolServerAnalyticsResponse]:
         """Get Tool Server Analytics
 
         Get tool server analytics.  Args:     request: Tool server analytics request parameters     current_user: Current authenticated user     analytics_service: Analytics service  Returns:     Tool server analytics data
@@ -4363,7 +4378,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "ToolServerAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -4439,7 +4454,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "ToolServerAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -4559,7 +4574,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> TrendingSearchResponse:
         """Get Trending Content
 
         Get trending content personalized for the current user.
@@ -4597,7 +4612,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -4627,7 +4642,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[TrendingSearchResponse]:
         """Get Trending Content
 
         Get trending content personalized for the current user.
@@ -4665,7 +4680,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -4733,7 +4748,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "TrendingSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5476,7 +5491,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> UserBehaviorAnalyticsResponse:
         """Get User Behavior Analytics
 
         Get personalized behavior analytics for a user.  Users can only access their own analytics unless they are admin.
@@ -5514,7 +5529,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5544,7 +5559,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[UserBehaviorAnalyticsResponse]:
         """Get User Behavior Analytics
 
         Get personalized behavior analytics for a user.  Users can only access their own analytics unless they are admin.
@@ -5582,7 +5597,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5650,7 +5665,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "UserBehaviorAnalyticsResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5743,7 +5758,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> IntelligentSearchResponse:
         """Intelligent Search
 
         Perform intelligent semantic search with personalized results.  Args:     query: Search query string     search_type: Type of content to search (\"documents\", \"conversations\", \"prompts\")     limit: Maximum number of results to return     include_recommendations: Whether to include search recommendations
@@ -5790,7 +5805,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5823,7 +5838,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[IntelligentSearchResponse]:
         """Intelligent Search
 
         Perform intelligent semantic search with personalized results.  Args:     query: Search query string     search_type: Type of content to search (\"documents\", \"conversations\", \"prompts\")     limit: Maximum number of results to return     include_recommendations: Whether to include search recommendations
@@ -5870,7 +5885,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -5950,7 +5965,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "IntelligentSearchResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6057,7 +6072,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> SuccessResponse:
         """Invalidate Stale Cache
 
         Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache invalidation results
@@ -6095,7 +6110,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6125,7 +6140,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[SuccessResponse]:
         """Invalidate Stale Cache
 
         Invalidate stale cache entries to free up memory.  Args:     max_age_hours: Maximum age in hours for cache entries to keep     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache invalidation results
@@ -6163,7 +6178,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6231,7 +6246,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6322,7 +6337,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> SuccessResponse:
         """Optimize Cache Performance
 
         Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Optimization results and recommendations
@@ -6357,7 +6372,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6385,7 +6400,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[SuccessResponse]:
         """Optimize Cache Performance
 
         Analyze and optimize cache performance automatically.  Args:     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Optimization results and recommendations
@@ -6420,7 +6435,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6483,7 +6498,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -6569,7 +6584,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> SystemHealthResponse:
         """Send System Health Update
 
         Send system health update to all admin users.  This endpoint is admin-only and broadcasts health information to all connected administrators.
@@ -6607,7 +6622,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6637,7 +6652,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[SystemHealthResponse]:
         """Send System Health Update
 
         Send system health update to all admin users.  This endpoint is admin-only and broadcasts health information to all connected administrators.
@@ -6675,7 +6690,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6743,7 +6758,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SystemHealthResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6848,7 +6863,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> WorkflowUpdateResponse:
         """Send Workflow Update
 
         Send a real-time workflow update to the user.
@@ -6892,7 +6907,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -6924,7 +6939,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[WorkflowUpdateResponse]:
         """Send Workflow Update
 
         Send a real-time workflow update to the user.
@@ -6968,7 +6983,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -7044,7 +7059,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "WorkflowUpdateResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -7154,7 +7169,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DashboardControlResponse:
         """Start Real Time Dashboard
 
         Start real-time dashboard updates for the current user.  This endpoint initiates a background task that streams analytics data to the user via Server-Sent Events (SSE).
@@ -7189,7 +7204,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7217,7 +7232,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DashboardControlResponse]:
         """Start Real Time Dashboard
 
         Start real-time dashboard updates for the current user.  This endpoint initiates a background task that streams analytics data to the user via Server-Sent Events (SSE).
@@ -7252,7 +7267,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7315,7 +7330,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7400,7 +7415,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> DashboardControlResponse:
         """Stop Real Time Dashboard
 
         Stop real-time dashboard updates for the current user.
@@ -7435,7 +7450,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7463,7 +7478,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[DashboardControlResponse]:
         """Stop Real Time Dashboard
 
         Stop real-time dashboard updates for the current user.
@@ -7498,7 +7513,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7561,7 +7576,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "DashboardControlResponse",
         }
         response_data = await self.api_client.call_api(
             *_param,
@@ -7647,7 +7662,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> Dict[str, object]:
+    ) -> SuccessResponse:
         """Warm Analytics Cache
 
         Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming results
@@ -7685,7 +7700,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -7715,7 +7730,7 @@ class AnalyticsApi:
         _content_type: Optional[StrictStr] = None,
         _headers: Optional[Dict[StrictStr, Any]] = None,
         _host_index: Annotated[StrictInt, Field(ge=0, le=0)] = 0,
-    ) -> ApiResponse[Dict[str, object]]:
+    ) -> ApiResponse[SuccessResponse]:
         """Warm Analytics Cache
 
         Warm analytics cache to improve performance.  Args:     force_refresh: Force refresh of existing cache entries     current_user: Current authenticated user     cache_warming_service: Cache warming service  Returns:     Cache warming results
@@ -7753,7 +7768,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(
@@ -7821,7 +7836,7 @@ class AnalyticsApi:
         )
 
         _response_types_map: Dict[str, Optional[str]] = {
-            '200': "Dict[str, object]",
+            '200': "SuccessResponse",
             '422': "HTTPValidationError",
         }
         response_data = await self.api_client.call_api(

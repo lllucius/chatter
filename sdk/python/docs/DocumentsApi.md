@@ -23,7 +23,7 @@ Method | HTTP request | Description
 
 
 # **delete_document_api_v1_documents_document_id_delete**
-> Dict[str, str] delete_document_api_v1_documents_document_id_delete(document_id)
+> DocumentDeleteResponse delete_document_api_v1_documents_document_id_delete(document_id)
 
 Delete Document
 
@@ -35,6 +35,7 @@ Delete a document.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -80,7 +81,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, str]**
+[**DocumentDeleteResponse**](DocumentDeleteResponse.md)
 
 ### Authorization
 
@@ -101,7 +102,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **delete_document_api_v1_documents_document_id_delete_0**
-> Dict[str, str] delete_document_api_v1_documents_document_id_delete_0(document_id)
+> DocumentDeleteResponse delete_document_api_v1_documents_document_id_delete_0(document_id)
 
 Delete Document
 
@@ -113,6 +114,7 @@ Delete a document.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -158,7 +160,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, str]**
+[**DocumentDeleteResponse**](DocumentDeleteResponse.md)
 
 ### Authorization
 
@@ -645,7 +647,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_documents_post_api_v1_documents_list_post**
-> Dict[str, object] list_documents_post_api_v1_documents_list_post(document_list_request)
+> DocumentListResponse list_documents_post_api_v1_documents_list_post(document_list_request)
 
 List Documents Post
 
@@ -658,6 +660,7 @@ List documents with filtering and pagination (POST endpoint for advanced filteri
 ```python
 import chatter_sdk
 from chatter_sdk.models.document_list_request import DocumentListRequest
+from chatter_sdk.models.document_list_response import DocumentListResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -703,7 +706,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**DocumentListResponse**](DocumentListResponse.md)
 
 ### Authorization
 
@@ -724,7 +727,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **list_documents_post_api_v1_documents_list_post_0**
-> Dict[str, object] list_documents_post_api_v1_documents_list_post_0(document_list_request)
+> DocumentListResponse list_documents_post_api_v1_documents_list_post_0(document_list_request)
 
 List Documents Post
 
@@ -737,6 +740,7 @@ List documents with filtering and pagination (POST endpoint for advanced filteri
 ```python
 import chatter_sdk
 from chatter_sdk.models.document_list_request import DocumentListRequest
+from chatter_sdk.models.document_list_response import DocumentListResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -782,7 +786,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, object]**
+[**DocumentListResponse**](DocumentListResponse.md)
 
 ### Authorization
 
@@ -803,7 +807,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **reprocess_document_api_v1_documents_document_id_reprocess_post**
-> Dict[str, str] reprocess_document_api_v1_documents_document_id_reprocess_post(document_id)
+> DocumentProcessingResponse reprocess_document_api_v1_documents_document_id_reprocess_post(document_id)
 
 Reprocess Document
 
@@ -815,6 +819,7 @@ Reprocess a document through the embedding pipeline.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.document_processing_response import DocumentProcessingResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -860,7 +865,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, str]**
+[**DocumentProcessingResponse**](DocumentProcessingResponse.md)
 
 ### Authorization
 
@@ -881,7 +886,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **reprocess_document_api_v1_documents_document_id_reprocess_post_0**
-> Dict[str, str] reprocess_document_api_v1_documents_document_id_reprocess_post_0(document_id)
+> DocumentProcessingResponse reprocess_document_api_v1_documents_document_id_reprocess_post_0(document_id)
 
 Reprocess Document
 
@@ -893,6 +898,7 @@ Reprocess a document through the embedding pipeline.
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.document_processing_response import DocumentProcessingResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -938,7 +944,7 @@ Name | Type | Description  | Notes
 
 ### Return type
 
-**Dict[str, str]**
+[**DocumentProcessingResponse**](DocumentProcessingResponse.md)
 
 ### Authorization
 

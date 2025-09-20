@@ -1283,6 +1283,75 @@ components:
           title: Temperature
       title: AgentUpdateRequest
       type: object
+    AnalyticsExportResponse:
+      description: Schema for analytics export response.
+      properties:
+        created_at:
+          description: Export creation time
+          format: date-time
+          title: Created At
+          type: string
+        download_url:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: Download URL when ready
+          title: Download Url
+        expires_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Download expiration time
+          title: Expires At
+        export_id:
+          description: Export job ID
+          title: Export Id
+          type: string
+        status:
+          description: Export status
+          title: Status
+          type: string
+      required:
+      - export_id
+      - status
+      - created_at
+      title: AnalyticsExportResponse
+      type: object
+    AnalyticsHealthResponse:
+      description: Schema for analytics health check response.
+      properties:
+        cache_connected:
+          description: Cache connection status
+          title: Cache Connected
+          type: boolean
+        database_connected:
+          description: Database connection status
+          title: Database Connected
+          type: boolean
+        last_check:
+          description: Last health check timestamp
+          format: date-time
+          title: Last Check
+          type: string
+        services:
+          additionalProperties:
+            type: string
+          description: Service status details
+          title: Services
+          type: object
+        status:
+          description: Health status
+          title: Status
+          type: string
+      required:
+      - status
+      - database_connected
+      - cache_connected
+      - last_check
+      - services
+      title: AnalyticsHealthResponse
+      type: object
     AvailableProvidersResponse:
       description: Schema for available providers response.
       properties:
@@ -1712,6 +1781,49 @@ components:
       - operation
       title: BulkToolServerOperation
       type: object
+    CacheStatusResponse:
+      description: Schema for cache status response.
+      properties:
+        cache_enabled:
+          description: Cache enabled status
+          title: Cache Enabled
+          type: boolean
+        cache_hit_rate:
+          description: Cache hit rate
+          title: Cache Hit Rate
+          type: number
+        cache_hits:
+          description: Cache hits
+          title: Cache Hits
+          type: integer
+        cache_misses:
+          description: Cache misses
+          title: Cache Misses
+          type: integer
+        cache_size_mb:
+          description: Cache size in MB
+          title: Cache Size Mb
+          type: number
+        cached_items_count:
+          description: Number of cached items
+          title: Cached Items Count
+          type: integer
+        last_cleared:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Last cache clear timestamp
+          title: Last Cleared
+      required:
+      - cache_enabled
+      - cache_hits
+      - cache_misses
+      - cache_hit_rate
+      - cached_items_count
+      - cache_size_mb
+      title: CacheStatusResponse
+      type: object
     ChartDataPoint:
       description: Schema for a single chart data point.
       properties:
@@ -1988,6 +2100,37 @@ components:
       - templates
       - total_count
       title: ChatWorkflowTemplatesResponse
+      type: object
+    CleanupResponse:
+      description: Schema for cleanup operation response.
+      properties:
+        duration_seconds:
+          description: Operation duration in seconds
+          title: Duration Seconds
+          type: number
+        items_cleaned:
+          description: Number of items cleaned
+          title: Items Cleaned
+          type: integer
+        message:
+          description: Operation result message
+          title: Message
+          type: string
+        operation:
+          description: Cleanup operation type
+          title: Operation
+          type: string
+        storage_freed_mb:
+          description: Storage freed in MB
+          title: Storage Freed Mb
+          type: number
+      required:
+      - operation
+      - items_cleaned
+      - storage_freed_mb
+      - duration_seconds
+      - message
+      title: CleanupResponse
       type: object
     ComplexityMetrics:
       description: Schema for workflow complexity metrics.
@@ -2628,6 +2771,27 @@ components:
       - requests
       title: CorrelationTraceResponse
       type: object
+    DashboardControlResponse:
+      description: Schema for dashboard control responses.
+      properties:
+        message:
+          description: Operation message
+          title: Message
+          type: string
+        status:
+          description: Status of the operation
+          title: Status
+          type: string
+        user_id:
+          description: User ID
+          title: User Id
+          type: string
+      required:
+      - status
+      - user_id
+      - message
+      title: DashboardControlResponse
+      type: object
     DashboardResponse:
       description: Schema for analytics dashboard response.
       properties:
@@ -2682,6 +2846,46 @@ components:
       - sql
       title: DataFormat
       type: string
+    DatabaseHealthResponse:
+      description: Schema for database health response.
+      properties:
+        active_connections:
+          description: Active database connections
+          title: Active Connections
+          type: integer
+        connected:
+          description: Database connection status
+          title: Connected
+          type: boolean
+        disk_usage_mb:
+          description: Database disk usage in MB
+          title: Disk Usage Mb
+          type: number
+        last_backup:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Last backup timestamp
+          title: Last Backup
+        query_performance:
+          additionalProperties:
+            type: number
+          description: Query performance metrics
+          title: Query Performance
+          type: object
+        response_time_ms:
+          description: Database response time in milliseconds
+          title: Response Time Ms
+          type: number
+      required:
+      - connected
+      - response_time_ms
+      - active_connections
+      - query_performance
+      - disk_usage_mb
+      title: DatabaseHealthResponse
+      type: object
     DefaultProvider:
       description: Schema for setting default provider.
       properties:
@@ -2798,6 +3002,17 @@ components:
       - documents_by_access_level
       title: DocumentAnalyticsResponse
       type: object
+    DocumentDeleteResponse:
+      description: Response schema for document deletion.
+      properties:
+        message:
+          description: Deletion result message
+          title: Message
+          type: string
+      required:
+      - message
+      title: DocumentDeleteResponse
+      type: object
     DocumentListRequest:
       description: Schema for document list request.
       properties:
@@ -2849,6 +3064,61 @@ components:
           description: Filter by tags
           title: Tags
       title: DocumentListRequest
+      type: object
+    DocumentListResponse:
+      description: Schema for document list response.
+      properties:
+        documents:
+          description: List of documents
+          items:
+            $ref: '#/components/schemas/DocumentResponse'
+          title: Documents
+          type: array
+        limit:
+          description: Applied limit
+          title: Limit
+          type: integer
+        offset:
+          description: Applied offset
+          title: Offset
+          type: integer
+        total_count:
+          description: Total number of documents
+          title: Total Count
+          type: integer
+      required:
+      - documents
+      - total_count
+      - limit
+      - offset
+      title: DocumentListResponse
+      type: object
+    DocumentProcessingResponse:
+      description: Schema for document processing response.
+      properties:
+        document_id:
+          description: Document ID
+          title: Document Id
+          type: string
+        message:
+          description: Status message
+          title: Message
+          type: string
+        processing_started_at:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Processing start time
+          title: Processing Started At
+        status:
+          $ref: '#/components/schemas/DocumentStatus'
+          description: Processing status
+      required:
+      - document_id
+      - status
+      - message
+      title: DocumentProcessingResponse
       type: object
     DocumentResponse:
       description: Schema for document response.
@@ -3655,6 +3925,43 @@ components:
       - system
       title: IntegratedDashboardStats
       type: object
+    IntelligentSearchResponse:
+      description: Schema for intelligent search response.
+      properties:
+        analytics:
+          additionalProperties: true
+          description: Search analytics
+          title: Analytics
+          type: object
+        query:
+          description: Search query
+          title: Query
+          type: string
+        response_time_ms:
+          description: Response time in milliseconds
+          title: Response Time Ms
+          type: number
+        results:
+          description: Search results
+          items:
+            additionalProperties: true
+            type: object
+          title: Results
+          type: array
+        suggestions:
+          description: Search suggestions
+          items:
+            type: string
+          title: Suggestions
+          type: array
+      required:
+      - query
+      - results
+      - suggestions
+      - analytics
+      - response_time_ms
+      title: IntelligentSearchResponse
+      type: object
     JobActionResponse:
       description: Response schema for job actions.
       properties:
@@ -4124,6 +4431,46 @@ components:
       - performance
       - endpoints
       title: MetricsResponse
+      type: object
+    MetricsSummaryResponse:
+      description: Schema for metrics summary response.
+      properties:
+        active_metrics:
+          description: Number of active metrics
+          title: Active Metrics
+          type: integer
+        data_points_last_hour:
+          description: Data points collected in last hour
+          title: Data Points Last Hour
+          type: integer
+        latest_data_point:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Latest data point timestamp
+          title: Latest Data Point
+        oldest_data_point:
+          anyOf:
+          - format: date-time
+            type: string
+          - type: 'null'
+          description: Oldest data point timestamp
+          title: Oldest Data Point
+        storage_size_mb:
+          description: Storage size in MB
+          title: Storage Size Mb
+          type: number
+        total_metrics:
+          description: Total number of metrics
+          title: Total Metrics
+          type: integer
+      required:
+      - total_metrics
+      - active_metrics
+      - data_points_last_hour
+      - storage_size_mb
+      title: MetricsSummaryResponse
       type: object
     ModelConfig:
       description: Model configuration for chat workflows.
@@ -7061,6 +7408,49 @@ components:
           title: Is Default
       title: ProviderUpdate
       type: object
+    QueryAnalysisResponse:
+      description: Schema for database query analysis response.
+      properties:
+        average_execution_time_ms:
+          description: Average execution time in milliseconds
+          title: Average Execution Time Ms
+          type: number
+        index_recommendations:
+          description: Index recommendations
+          items:
+            type: string
+          title: Index Recommendations
+          type: array
+        most_expensive_queries:
+          description: Most expensive queries
+          items:
+            additionalProperties: true
+            type: object
+          title: Most Expensive Queries
+          type: array
+        optimization_suggestions:
+          description: Optimization suggestions
+          items:
+            type: string
+          title: Optimization Suggestions
+          type: array
+        slow_queries_count:
+          description: Number of slow queries
+          title: Slow Queries Count
+          type: integer
+        total_queries_analyzed:
+          description: Total queries analyzed
+          title: Total Queries Analyzed
+          type: integer
+      required:
+      - total_queries_analyzed
+      - slow_queries_count
+      - optimization_suggestions
+      - average_execution_time_ms
+      - most_expensive_queries
+      - index_recommendations
+      title: QueryAnalysisResponse
+      type: object
     ReadinessCheckResponse:
       description: Schema for readiness check response.
       properties:
@@ -7660,6 +8050,29 @@ components:
       - last_updated
       title: StorageStatsResponse
       type: object
+    SuccessResponse:
+      description: Standard success response schema.
+      properties:
+        data:
+          anyOf:
+          - additionalProperties: true
+            type: object
+          - type: 'null'
+          description: Response data
+          title: Data
+        message:
+          description: Success message
+          title: Message
+          type: string
+        success:
+          default: true
+          description: Success indicator
+          title: Success
+          type: boolean
+      required:
+      - message
+      title: SuccessResponse
+      type: object
     SystemAnalyticsResponse:
       description: Schema for system analytics response.
       properties:
@@ -7742,6 +8155,36 @@ components:
       - vector_database_size_bytes
       - cache_hit_rate
       title: SystemAnalyticsResponse
+      type: object
+    SystemHealthResponse:
+      description: Schema for system health response.
+      properties:
+        metrics:
+          additionalProperties: true
+          description: System metrics
+          title: Metrics
+          type: object
+        services:
+          additionalProperties:
+            type: string
+          description: Individual service statuses
+          title: Services
+          type: object
+        status:
+          description: Overall system status
+          title: Status
+          type: string
+        timestamp:
+          description: Health check timestamp
+          format: date-time
+          title: Timestamp
+          type: string
+      required:
+      - status
+      - services
+      - metrics
+      - timestamp
+      title: SystemHealthResponse
       type: object
     TestEventResponse:
       description: Response schema for test event.
@@ -8242,6 +8685,52 @@ components:
           title: Rate Limit Per Hour
       title: ToolPermissionUpdate
       type: object
+    ToolServerAnalyticsResponse:
+      description: Schema for tool server analytics response.
+      properties:
+        average_response_time_ms:
+          description: Average response time in milliseconds
+          title: Average Response Time Ms
+          type: number
+        error_distribution:
+          additionalProperties:
+            type: integer
+          description: Error distribution by type
+          title: Error Distribution
+          type: object
+        failed_requests:
+          description: Failed requests
+          title: Failed Requests
+          type: integer
+        server_uptime_stats:
+          additionalProperties: true
+          description: Server uptime statistics
+          title: Server Uptime Stats
+          type: object
+        successful_requests:
+          description: Successful requests
+          title: Successful Requests
+          type: integer
+        tool_usage_stats:
+          additionalProperties:
+            type: integer
+          description: Tool usage statistics
+          title: Tool Usage Stats
+          type: object
+        total_requests:
+          description: Total requests processed
+          title: Total Requests
+          type: integer
+      required:
+      - total_requests
+      - successful_requests
+      - failed_requests
+      - average_response_time_ms
+      - tool_usage_stats
+      - server_uptime_stats
+      - error_distribution
+      title: ToolServerAnalyticsResponse
+      type: object
     ToolServerCreate:
       description: Schema for creating a tool server.
       properties:
@@ -8678,6 +9167,38 @@ components:
       - error
       title: ToolStatus
       type: string
+    TrendingSearchResponse:
+      description: Schema for trending search response.
+      properties:
+        categories:
+          additionalProperties:
+            type: integer
+          description: Search categories
+          title: Categories
+          type: object
+        search_volume:
+          additionalProperties:
+            type: integer
+          description: Search volume by query
+          title: Search Volume
+          type: object
+        time_period:
+          description: Time period for trending data
+          title: Time Period
+          type: string
+        trending_queries:
+          description: Trending search queries
+          items:
+            type: string
+          title: Trending Queries
+          type: array
+      required:
+      - trending_queries
+      - search_volume
+      - time_period
+      - categories
+      title: TrendingSearchResponse
+      type: object
     UsageMetricsResponse:
       description: Schema for usage metrics response.
       properties:
@@ -8772,6 +9293,55 @@ components:
       - peak_usage_hour
       - conversations_per_day
       title: UsageMetricsResponse
+      type: object
+    UserBehaviorAnalyticsResponse:
+      description: Schema for user behavior analytics response.
+      properties:
+        conversion_events:
+          description: Conversion events
+          items:
+            additionalProperties: true
+            type: object
+          title: Conversion Events
+          type: array
+        most_visited_pages:
+          description: Most visited pages
+          items:
+            type: string
+          title: Most Visited Pages
+          type: array
+        page_views:
+          description: Total page views
+          title: Page Views
+          type: integer
+        session_count:
+          description: Number of sessions
+          title: Session Count
+          type: integer
+        time_spent_minutes:
+          description: Total time spent in minutes
+          title: Time Spent Minutes
+          type: number
+        user_id:
+          description: User ID
+          title: User Id
+          type: string
+        user_journey:
+          description: User journey data
+          items:
+            additionalProperties: true
+            type: object
+          title: User Journey
+          type: array
+      required:
+      - user_id
+      - session_count
+      - page_views
+      - time_spent_minutes
+      - most_visited_pages
+      - user_journey
+      - conversion_events
+      title: UserBehaviorAnalyticsResponse
       type: object
     UserCreate:
       description: Schema for user creation (alias for UserRegistration).
@@ -9393,6 +9963,22 @@ components:
       - total_count
       title: WorkflowDefinitionsResponse
       type: object
+    WorkflowDeleteResponse:
+      description: Response schema for workflow deletion.
+      properties:
+        message:
+          description: Deletion confirmation message
+          title: Message
+          type: string
+        workflow_id:
+          description: ID of the deleted workflow
+          title: Workflow Id
+          type: string
+      required:
+      - message
+      - workflow_id
+      title: WorkflowDeleteResponse
+      type: object
     WorkflowEdge:
       description: Schema for a workflow edge.
       properties:
@@ -9906,6 +10492,34 @@ components:
       - templates
       - total_count
       title: WorkflowTemplatesResponse
+      type: object
+    WorkflowUpdateResponse:
+      description: Schema for workflow update response.
+      properties:
+        message:
+          description: Update message
+          title: Message
+          type: string
+        status:
+          description: Update status
+          title: Status
+          type: string
+        updated_fields:
+          description: Fields that were updated
+          items:
+            type: string
+          title: Updated Fields
+          type: array
+        workflow_id:
+          description: Workflow ID
+          title: Workflow Id
+          type: string
+      required:
+      - workflow_id
+      - status
+      - message
+      - updated_fields
+      title: WorkflowUpdateResponse
       type: object
     WorkflowValidationResponse:
       description: Schema for workflow validation response.
@@ -11736,10 +12350,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Invalidate Stale Cache Api V1 Analytics Cache Invalidate
-                  Post
-                type: object
+                $ref: '#/components/schemas/SuccessResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -11775,10 +12386,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Optimize Cache Performance Api V1 Analytics Cache
-                  Optimize Post
-                type: object
+                $ref: '#/components/schemas/SuccessResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -11802,10 +12410,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Cache Warming Status Api V1 Analytics Cache Status
-                  Get
-                type: object
+                $ref: '#/components/schemas/CacheStatusResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -11838,9 +12443,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Warm Analytics Cache Api V1 Analytics Cache Warm Post
-                type: object
+                $ref: '#/components/schemas/SuccessResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12115,10 +12718,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Analyze Query Performance Api V1 Analytics Database
-                  Analyze Queries Post
-                type: object
+                $ref: '#/components/schemas/QueryAnalysisResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12155,10 +12755,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Database Health Metrics Api V1 Analytics Database
-                  Health Get
-                type: object
+                $ref: '#/components/schemas/DatabaseHealthResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12302,7 +12899,8 @@ paths:
         '200':
           content:
             application/json:
-              schema: {}
+              schema:
+                $ref: '#/components/schemas/AnalyticsExportResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12337,9 +12935,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Analytics Health Api V1 Analytics Health Get
-                type: object
+                $ref: '#/components/schemas/AnalyticsHealthResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12362,10 +12958,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Analytics Metrics Summary Api V1 Analytics Metrics
-                  Summary Get
-                type: object
+                $ref: '#/components/schemas/MetricsSummaryResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12457,10 +13050,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Detailed Performance Metrics Api V1 Analytics
-                  Performance Detailed Get
-                type: object
+                $ref: '#/components/schemas/PerformanceMetricsResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12487,10 +13077,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Cleanup Inactive Tasks Api V1 Analytics Real Time
-                  Real Time Cleanup Post
-                type: object
+                $ref: '#/components/schemas/CleanupResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12518,10 +13105,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Start Real Time Dashboard Api V1 Analytics Real Time
-                  Real Time Dashboard Start Post
-                type: object
+                $ref: '#/components/schemas/DashboardControlResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12544,10 +13128,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Stop Real Time Dashboard Api V1 Analytics Real Time
-                  Real Time Dashboard Stop Post
-                type: object
+                $ref: '#/components/schemas/DashboardControlResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12583,10 +13164,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Send System Health Update Api V1 Analytics Real Time
-                  Real Time System Health Post
-                type: object
+                $ref: '#/components/schemas/SystemHealthResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12642,10 +13220,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Send Workflow Update Api V1 Analytics Real Time Real
-                  Time Workflow  Workflow Id  Update Post
-                type: object
+                $ref: '#/components/schemas/WorkflowUpdateResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12712,10 +13287,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Intelligent Search Api V1 Analytics Real Time Search
-                  Intelligent Get
-                type: object
+                $ref: '#/components/schemas/IntelligentSearchResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12758,10 +13330,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Trending Content Api V1 Analytics Real Time Search
-                  Trending Get
-                type: object
+                $ref: '#/components/schemas/TrendingSearchResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12806,10 +13375,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get User Behavior Analytics Api V1 Analytics Real
-                  Time User Behavior  User Id  Get
-                type: object
+                $ref: '#/components/schemas/UserBehaviorAnalyticsResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -12903,10 +13469,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response Get Tool Server Analytics Api V1 Analytics Toolservers
-                  Get
-                type: object
+                $ref: '#/components/schemas/ToolServerAnalyticsResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -14515,9 +15078,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties: true
-                title: Response List Documents Post Api V1 Documents List Post
-                type: object
+                $ref: '#/components/schemas/DocumentListResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -14672,10 +15233,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
-                title: Response Delete Document Api V1 Documents  Document Id  Delete
-                type: object
+                $ref: '#/components/schemas/DocumentDeleteResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -14758,11 +15316,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
-                title: Response Reprocess Document Api V1 Documents  Document Id  Reprocess
-                  Post
-                type: object
+                $ref: '#/components/schemas/DocumentProcessingResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001
@@ -18899,11 +19453,7 @@ paths:
           content:
             application/json:
               schema:
-                additionalProperties:
-                  type: string
-                title: Response Delete Workflow Definition Api V1 Workflows Definitions  Workflow
-                  Id  Delete
-                type: object
+                $ref: '#/components/schemas/WorkflowDeleteResponse'
           description: Successful Response
           headers:
             X-RateLimit-Limit-Hour: *id001

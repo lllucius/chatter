@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -72,7 +72,7 @@ export class WorkflowsApi extends BaseAPI {
   /**Delete Workflow Definition
    * Delete a workflow definition.
    */
-  public async deleteWorkflowDefinitionApiV1WorkflowsDefinitionsWorkflowId(workflowId: string): Promise<Record<string, unknown>> {
+  public async deleteWorkflowDefinitionApiV1WorkflowsDefinitionsWorkflowId(workflowId: string): Promise<WorkflowDeleteResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions/${workflowId}`,
       method: 'DELETE' as HTTPMethod,
@@ -81,7 +81,7 @@ export class WorkflowsApi extends BaseAPI {
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<WorkflowDeleteResponse>;
   }
   /**List Workflow Templates
    * List all workflow templates accessible to the current user.

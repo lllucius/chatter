@@ -75,6 +75,8 @@ __all__ = [
     "AgentStatus",
     "AgentType",
     "AgentUpdateRequest",
+    "AnalyticsExportResponse",
+    "AnalyticsHealthResponse",
     "AvailableProvidersResponse",
     "BackupListResponse",
     "BackupRequest",
@@ -87,6 +89,7 @@ __all__ = [
     "BulkOperationFilters",
     "BulkOperationResult",
     "BulkToolServerOperation",
+    "CacheStatusResponse",
     "ChartDataPoint",
     "ChartReadyAnalytics",
     "ChatResponse",
@@ -94,6 +97,7 @@ __all__ = [
     "ChatWorkflowRequest",
     "ChatWorkflowTemplate",
     "ChatWorkflowTemplatesResponse",
+    "CleanupResponse",
     "ComplexityMetrics",
     "ConversationCreate",
     "ConversationDeleteResponse",
@@ -104,12 +108,17 @@ __all__ = [
     "ConversationUpdate",
     "ConversationWithMessages",
     "CorrelationTraceResponse",
+    "DashboardControlResponse",
     "DashboardResponse",
     "DataFormat",
+    "DatabaseHealthResponse",
     "DefaultProvider",
     "DistanceMetric",
     "DocumentAnalyticsResponse",
+    "DocumentDeleteResponse",
     "DocumentListRequest",
+    "DocumentListResponse",
+    "DocumentProcessingResponse",
     "DocumentResponse",
     "DocumentSearchRequest",
     "DocumentStatsResponse",
@@ -129,6 +138,7 @@ __all__ = [
     "HealthCheckResponse",
     "HealthStatus",
     "IntegratedDashboardStats",
+    "IntelligentSearchResponse",
     "JobActionResponse",
     "JobCreateRequest",
     "JobListResponse",
@@ -146,6 +156,7 @@ __all__ = [
     "MessageRole",
     "MetricType",
     "MetricsResponse",
+    "MetricsSummaryResponse",
     "MinValue",
     "ModelConfig",
     "ModelDefCreate",
@@ -202,6 +213,7 @@ __all__ = [
     "ProviderList",
     "ProviderType",
     "ProviderUpdate",
+    "QueryAnalysisResponse",
     "ReadinessCheckResponse",
     "ReadinessStatus",
     "ReductionStrategy",
@@ -217,7 +229,9 @@ __all__ = [
     "ServerToolsResponse",
     "StatisticalAnalysis",
     "StorageStatsResponse",
+    "SuccessResponse",
     "SystemAnalyticsResponse",
+    "SystemHealthResponse",
     "TestEventResponse",
     "TestMetric",
     "TestStatus",
@@ -233,6 +247,7 @@ __all__ = [
     "ToolPermissionCreate",
     "ToolPermissionResponse",
     "ToolPermissionUpdate",
+    "ToolServerAnalyticsResponse",
     "ToolServerCreate",
     "ToolServerDeleteResponse",
     "ToolServerHealthCheck",
@@ -241,7 +256,9 @@ __all__ = [
     "ToolServerResponse",
     "ToolServerUpdate",
     "ToolStatus",
+    "TrendingSearchResponse",
     "UsageMetricsResponse",
+    "UserBehaviorAnalyticsResponse",
     "UserCreate",
     "UserLogin",
     "UserResponse",
@@ -256,6 +273,7 @@ __all__ = [
     "WorkflowDefinitionResponse",
     "WorkflowDefinitionUpdate",
     "WorkflowDefinitionsResponse",
+    "WorkflowDeleteResponse",
     "WorkflowEdge",
     "WorkflowEdgeData",
     "WorkflowExecutionRequest",
@@ -266,6 +284,7 @@ __all__ = [
     "WorkflowTemplateResponse",
     "WorkflowTemplateUpdate",
     "WorkflowTemplatesResponse",
+    "WorkflowUpdateResponse",
     "WorkflowValidationResponse",
 ]
 
@@ -330,6 +349,8 @@ from chatter_sdk.models.agent_stats_response import AgentStatsResponse as AgentS
 from chatter_sdk.models.agent_status import AgentStatus as AgentStatus
 from chatter_sdk.models.agent_type import AgentType as AgentType
 from chatter_sdk.models.agent_update_request import AgentUpdateRequest as AgentUpdateRequest
+from chatter_sdk.models.analytics_export_response import AnalyticsExportResponse as AnalyticsExportResponse
+from chatter_sdk.models.analytics_health_response import AnalyticsHealthResponse as AnalyticsHealthResponse
 from chatter_sdk.models.available_providers_response import AvailableProvidersResponse as AvailableProvidersResponse
 from chatter_sdk.models.backup_list_response import BackupListResponse as BackupListResponse
 from chatter_sdk.models.backup_request import BackupRequest as BackupRequest
@@ -342,6 +363,7 @@ from chatter_sdk.models.bulk_delete_response import BulkDeleteResponse as BulkDe
 from chatter_sdk.models.bulk_operation_filters import BulkOperationFilters as BulkOperationFilters
 from chatter_sdk.models.bulk_operation_result import BulkOperationResult as BulkOperationResult
 from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperation as BulkToolServerOperation
+from chatter_sdk.models.cache_status_response import CacheStatusResponse as CacheStatusResponse
 from chatter_sdk.models.chart_data_point import ChartDataPoint as ChartDataPoint
 from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics as ChartReadyAnalytics
 from chatter_sdk.models.chat_response import ChatResponse as ChatResponse
@@ -349,6 +371,7 @@ from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig as ChatWo
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest as ChatWorkflowRequest
 from chatter_sdk.models.chat_workflow_template import ChatWorkflowTemplate as ChatWorkflowTemplate
 from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse as ChatWorkflowTemplatesResponse
+from chatter_sdk.models.cleanup_response import CleanupResponse as CleanupResponse
 from chatter_sdk.models.complexity_metrics import ComplexityMetrics as ComplexityMetrics
 from chatter_sdk.models.conversation_create import ConversationCreate as ConversationCreate
 from chatter_sdk.models.conversation_delete_response import ConversationDeleteResponse as ConversationDeleteResponse
@@ -359,12 +382,17 @@ from chatter_sdk.models.conversation_status import ConversationStatus as Convers
 from chatter_sdk.models.conversation_update import ConversationUpdate as ConversationUpdate
 from chatter_sdk.models.conversation_with_messages import ConversationWithMessages as ConversationWithMessages
 from chatter_sdk.models.correlation_trace_response import CorrelationTraceResponse as CorrelationTraceResponse
+from chatter_sdk.models.dashboard_control_response import DashboardControlResponse as DashboardControlResponse
 from chatter_sdk.models.dashboard_response import DashboardResponse as DashboardResponse
 from chatter_sdk.models.data_format import DataFormat as DataFormat
+from chatter_sdk.models.database_health_response import DatabaseHealthResponse as DatabaseHealthResponse
 from chatter_sdk.models.default_provider import DefaultProvider as DefaultProvider
 from chatter_sdk.models.distance_metric import DistanceMetric as DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse as DocumentAnalyticsResponse
+from chatter_sdk.models.document_delete_response import DocumentDeleteResponse as DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest as DocumentListRequest
+from chatter_sdk.models.document_list_response import DocumentListResponse as DocumentListResponse
+from chatter_sdk.models.document_processing_response import DocumentProcessingResponse as DocumentProcessingResponse
 from chatter_sdk.models.document_response import DocumentResponse as DocumentResponse
 from chatter_sdk.models.document_search_request import DocumentSearchRequest as DocumentSearchRequest
 from chatter_sdk.models.document_stats_response import DocumentStatsResponse as DocumentStatsResponse
@@ -384,6 +412,7 @@ from chatter_sdk.models.http_validation_error import HTTPValidationError as HTTP
 from chatter_sdk.models.health_check_response import HealthCheckResponse as HealthCheckResponse
 from chatter_sdk.models.health_status import HealthStatus as HealthStatus
 from chatter_sdk.models.integrated_dashboard_stats import IntegratedDashboardStats as IntegratedDashboardStats
+from chatter_sdk.models.intelligent_search_response import IntelligentSearchResponse as IntelligentSearchResponse
 from chatter_sdk.models.job_action_response import JobActionResponse as JobActionResponse
 from chatter_sdk.models.job_create_request import JobCreateRequest as JobCreateRequest
 from chatter_sdk.models.job_list_response import JobListResponse as JobListResponse
@@ -401,6 +430,7 @@ from chatter_sdk.models.message_response import MessageResponse as MessageRespon
 from chatter_sdk.models.message_role import MessageRole as MessageRole
 from chatter_sdk.models.metric_type import MetricType as MetricType
 from chatter_sdk.models.metrics_response import MetricsResponse as MetricsResponse
+from chatter_sdk.models.metrics_summary_response import MetricsSummaryResponse as MetricsSummaryResponse
 from chatter_sdk.models.min_value import MinValue as MinValue
 from chatter_sdk.models.model_config import ModelConfig as ModelConfig
 from chatter_sdk.models.model_def_create import ModelDefCreate as ModelDefCreate
@@ -457,6 +487,7 @@ from chatter_sdk.models.provider_delete_response import ProviderDeleteResponse a
 from chatter_sdk.models.provider_list import ProviderList as ProviderList
 from chatter_sdk.models.provider_type import ProviderType as ProviderType
 from chatter_sdk.models.provider_update import ProviderUpdate as ProviderUpdate
+from chatter_sdk.models.query_analysis_response import QueryAnalysisResponse as QueryAnalysisResponse
 from chatter_sdk.models.readiness_check_response import ReadinessCheckResponse as ReadinessCheckResponse
 from chatter_sdk.models.readiness_status import ReadinessStatus as ReadinessStatus
 from chatter_sdk.models.reduction_strategy import ReductionStrategy as ReductionStrategy
@@ -472,7 +503,9 @@ from chatter_sdk.models.server_tool_response import ServerToolResponse as Server
 from chatter_sdk.models.server_tools_response import ServerToolsResponse as ServerToolsResponse
 from chatter_sdk.models.statistical_analysis import StatisticalAnalysis as StatisticalAnalysis
 from chatter_sdk.models.storage_stats_response import StorageStatsResponse as StorageStatsResponse
+from chatter_sdk.models.success_response import SuccessResponse as SuccessResponse
 from chatter_sdk.models.system_analytics_response import SystemAnalyticsResponse as SystemAnalyticsResponse
+from chatter_sdk.models.system_health_response import SystemHealthResponse as SystemHealthResponse
 from chatter_sdk.models.test_event_response import TestEventResponse as TestEventResponse
 from chatter_sdk.models.test_metric import TestMetric as TestMetric
 from chatter_sdk.models.test_status import TestStatus as TestStatus
@@ -488,6 +521,7 @@ from chatter_sdk.models.tool_operation_response import ToolOperationResponse as 
 from chatter_sdk.models.tool_permission_create import ToolPermissionCreate as ToolPermissionCreate
 from chatter_sdk.models.tool_permission_response import ToolPermissionResponse as ToolPermissionResponse
 from chatter_sdk.models.tool_permission_update import ToolPermissionUpdate as ToolPermissionUpdate
+from chatter_sdk.models.tool_server_analytics_response import ToolServerAnalyticsResponse as ToolServerAnalyticsResponse
 from chatter_sdk.models.tool_server_create import ToolServerCreate as ToolServerCreate
 from chatter_sdk.models.tool_server_delete_response import ToolServerDeleteResponse as ToolServerDeleteResponse
 from chatter_sdk.models.tool_server_health_check import ToolServerHealthCheck as ToolServerHealthCheck
@@ -496,7 +530,9 @@ from chatter_sdk.models.tool_server_operation_response import ToolServerOperatio
 from chatter_sdk.models.tool_server_response import ToolServerResponse as ToolServerResponse
 from chatter_sdk.models.tool_server_update import ToolServerUpdate as ToolServerUpdate
 from chatter_sdk.models.tool_status import ToolStatus as ToolStatus
+from chatter_sdk.models.trending_search_response import TrendingSearchResponse as TrendingSearchResponse
 from chatter_sdk.models.usage_metrics_response import UsageMetricsResponse as UsageMetricsResponse
+from chatter_sdk.models.user_behavior_analytics_response import UserBehaviorAnalyticsResponse as UserBehaviorAnalyticsResponse
 from chatter_sdk.models.user_create import UserCreate as UserCreate
 from chatter_sdk.models.user_login import UserLogin as UserLogin
 from chatter_sdk.models.user_response import UserResponse as UserResponse
@@ -511,6 +547,7 @@ from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCrea
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse as WorkflowDefinitionResponse
 from chatter_sdk.models.workflow_definition_update import WorkflowDefinitionUpdate as WorkflowDefinitionUpdate
 from chatter_sdk.models.workflow_definitions_response import WorkflowDefinitionsResponse as WorkflowDefinitionsResponse
+from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse as WorkflowDeleteResponse
 from chatter_sdk.models.workflow_edge import WorkflowEdge as WorkflowEdge
 from chatter_sdk.models.workflow_edge_data import WorkflowEdgeData as WorkflowEdgeData
 from chatter_sdk.models.workflow_execution_request import WorkflowExecutionRequest as WorkflowExecutionRequest
@@ -521,4 +558,5 @@ from chatter_sdk.models.workflow_template_create import WorkflowTemplateCreate a
 from chatter_sdk.models.workflow_template_response import WorkflowTemplateResponse as WorkflowTemplateResponse
 from chatter_sdk.models.workflow_template_update import WorkflowTemplateUpdate as WorkflowTemplateUpdate
 from chatter_sdk.models.workflow_templates_response import WorkflowTemplatesResponse as WorkflowTemplatesResponse
+from chatter_sdk.models.workflow_update_response import WorkflowUpdateResponse as WorkflowUpdateResponse
 from chatter_sdk.models.workflow_validation_response import WorkflowValidationResponse as WorkflowValidationResponse

@@ -1,7 +1,7 @@
 /**
  * Generated API client for Documents
  */
-import { DocumentListRequest, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
+import { DocumentDeleteResponse, DocumentListRequest, DocumentListResponse, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
@@ -44,7 +44,7 @@ the embedding processing pipeline asynchronously.
   /**Delete Document
    * Delete a document.
    */
-  public async deleteDocumentApiV1DocumentsDocumentId(documentId: string): Promise<Record<string, unknown>> {
+  public async deleteDocumentApiV1DocumentsDocumentId(documentId: string): Promise<DocumentDeleteResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/documents/${documentId}`,
       method: 'DELETE' as HTTPMethod,
@@ -53,7 +53,7 @@ the embedding processing pipeline asynchronously.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DocumentDeleteResponse>;
   }
   /**List Documents Get
    * List documents with pagination (GET endpoint for frontend compatibility).
@@ -78,7 +78,7 @@ the embedding processing pipeline asynchronously.
   /**List Documents Post
    * List documents with filtering and pagination (POST endpoint for advanced filtering).
    */
-  public async listDocumentsPostApiV1DocumentsList(data: DocumentListRequest): Promise<Record<string, unknown>> {
+  public async listDocumentsPostApiV1DocumentsList(data: DocumentListRequest): Promise<DocumentListResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/documents/list`,
       method: 'POST' as HTTPMethod,
@@ -89,7 +89,7 @@ the embedding processing pipeline asynchronously.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DocumentListResponse>;
   }
   /**Search Documents
    * Search documents using semantic similarity.
@@ -110,7 +110,7 @@ the embedding processing pipeline asynchronously.
   /**Reprocess Document
    * Reprocess a document through the embedding pipeline.
    */
-  public async reprocessDocumentApiV1DocumentsDocumentIdReprocess(documentId: string): Promise<Record<string, unknown>> {
+  public async reprocessDocumentApiV1DocumentsDocumentIdReprocess(documentId: string): Promise<DocumentProcessingResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/documents/${documentId}/reprocess`,
       method: 'POST' as HTTPMethod,
@@ -119,7 +119,7 @@ the embedding processing pipeline asynchronously.
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    return response.json() as Promise<DocumentProcessingResponse>;
   }
   /**Get User Document Stats
    * Get document statistics for the current user.

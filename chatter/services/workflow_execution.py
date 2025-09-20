@@ -278,11 +278,18 @@ class WorkflowExecutionService:
         from chatter.utils.correlation import get_correlation_id
         correlation_id = get_correlation_id()
         
-        # For streaming, we iterate and yield from the async generator
-        async for chunk in self.execute_workflow_streaming(
-            conversation, chat_request, correlation_id, user_id
-        ):
-            yield chunk
+        # Use tracing-enabled executor if tracing is requested
+        if request.enable_tracing:
+            async for chunk in self.executor.execute_streaming_with_tracing(
+                conversation, chat_request, correlation_id, user_id
+            ):
+                yield chunk
+        else:
+            # For non-tracing, use regular streaming executor
+            async for chunk in self.execute_workflow_streaming(
+                conversation, chat_request, correlation_id, user_id
+            ):
+                yield chunk
 
     async def execute_workflow_definition(
         self,

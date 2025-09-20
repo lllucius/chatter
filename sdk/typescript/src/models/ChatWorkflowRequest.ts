@@ -28,4 +28,6 @@ export interface ChatWorkflowRequest {
   document_ids?: string[] | null;
   /** System prompt override */
   system_prompt_override?: string | null;
+  /** Enable backend workflow tracing */
+  enable_tracing?: boolean;
 }

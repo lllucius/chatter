@@ -616,6 +616,11 @@ class ChatWorkflowRequest(BaseModel):
         None, description="System prompt override"
     )
 
+    # Debug configuration
+    enable_tracing: bool = Field(
+        False, description="Enable backend workflow tracing"
+    )
+
 
 class ChatWorkflowTemplate(BaseModel):
     """Chat-optimized workflow template."""

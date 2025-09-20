@@ -458,73 +458,53 @@ class AnalyticsService:
                 IntegratedDashboardStats,
             )
 
-            # Build the integrated stats with required structure
+            # Build the integrated stats with real data only
             stats = IntegratedDashboardStats(
                 workflows={
-                    "total": max(
-                        today_stats["conversation_count"] * 2, 15
-                    ),
-                    "active": max(today_stats["conversation_count"], 3),
-                    "completed_today": today_stats[
-                        "conversation_count"
-                    ],
+                    "total": today_stats["conversation_count"],
+                    "active": min(today_stats["conversation_count"], today_stats["conversation_count"]),
+                    "completed_today": today_stats["conversation_count"],
                     "avg_execution_time": (
                         today_stats["avg_response_time"] / 1000
                         if today_stats["avg_response_time"] > 0
-                        else 2.5
+                        else 0
                     ),
-                    "success_rate": 95.2,
+                    "success_rate": self._calculate_success_rate(today_stats),
                 },
                 agents={
-                    "total": 8,
-                    "active": min(today_stats["conversation_count"], 5),
-                    "conversations_today": today_stats[
-                        "conversation_count"
-                    ],
-                    "avg_response_time": today_stats[
-                        "avg_response_time"
-                    ],
-                    "satisfaction_score": 4.7,
+                    "total": today_stats["conversation_count"],
+                    "active": min(today_stats["conversation_count"], 10),
+                    "conversations_today": today_stats["conversation_count"],
+                    "avg_response_time": today_stats["avg_response_time"],
+                    "satisfaction_score": 0,  # TODO: Implement real satisfaction scoring
                 },
                 ab_testing={
-                    "active_tests": 2,
-                    "completed_tests": 15,
-                    "conversion_rate": 12.3,
-                    "confidence_level": 95.0,
+                    "active_tests": 0,  # TODO: Implement real A/B testing
+                    "completed_tests": 0,
+                    "conversion_rate": 0,
+                    "confidence_level": 0,
                 },
                 system={
                     "health_score": system_stats["health_score"],
-                    "uptime": 99.8,
-                    "cpu_usage": 45.2,
-                    "memory_usage": 62.1,
+                    "uptime": 0,  # TODO: Calculate real uptime
+                    "cpu_usage": system_stats.get("cpu_usage", 0),
+                    "memory_usage": system_stats.get("memory_usage", 0),
                     "cache_hit_rate": self._calculate_cache_hit_rate(),
-                    "active_connections": system_stats[
-                        "active_conversations"
-                    ],
-                    "conversations_today": today_stats[
-                        "conversation_count"
-                    ],
+                    "active_connections": system_stats["active_conversations"],
+                    "conversations_today": today_stats["conversation_count"],
                     "messages_today": today_stats["message_count"],
                     "tokens_today": today_stats["token_count"],
                     "cost_today": today_stats["total_cost"],
-                    "conversations_this_week": week_stats[
-                        "conversation_count"
-                    ],
+                    "conversations_this_week": week_stats["conversation_count"],
                     "messages_this_week": week_stats["message_count"],
                     "tokens_this_week": week_stats["token_count"],
                     "cost_this_week": week_stats["total_cost"],
-                    "conversations_this_month": month_stats[
-                        "conversation_count"
-                    ],
+                    "conversations_this_month": month_stats["conversation_count"],
                     "messages_this_month": month_stats["message_count"],
                     "tokens_this_month": month_stats["token_count"],
                     "cost_this_month": month_stats["total_cost"],
-                    "avg_response_time_today": today_stats[
-                        "avg_response_time"
-                    ],
-                    "avg_response_time_week": week_stats[
-                        "avg_response_time"
-                    ],
+                    "avg_response_time_today": today_stats["avg_response_time"],
+                    "avg_response_time_week": week_stats["avg_response_time"],
                     "recent_activity_trend": self._calculate_activity_trend(
                         today_stats, week_stats
                     ),
@@ -631,6 +611,12 @@ class AnalyticsService:
             return min(
                 efficiency / 1000, 100
             )  # Normalize to 0-100 scale
+        return 0.0
+
+    def _calculate_success_rate(self, stats: dict[str, Any]) -> float:
+        """Calculate success rate based on message/conversation statistics."""
+        # TODO: Implement proper success rate calculation based on error messages
+        # For now, return 0 indicating we need real implementation
         return 0.0
 
     # Empty data fallbacks
@@ -4479,57 +4465,68 @@ class UserBehaviorAnalyzer:
                 IntegratedDashboardStats,
             )
 
-            # Get base statistics - these could be enhanced with real queries
+            # Get real statistics from database
             conversation_stats = await self.get_conversation_stats(
                 user_id
             )
             usage_metrics = await self.get_usage_metrics(user_id)
-            await self.get_system_analytics()
+            system_analytics = await self.get_system_analytics()
 
-            # Build integrated stats based on real data
+            # Extract real data values
             total_conversations = conversation_stats.get(
                 'total_conversations', 0
+            )
+            total_messages = conversation_stats.get(
+                'total_messages', 0
+            )
+            avg_response_time = conversation_stats.get(
+                'avg_response_time_ms', 0
             )
             total_tokens = usage_metrics.get('total_tokens', 0)
             total_cost = usage_metrics.get('total_cost', 0)
 
+            # Calculate real success rate based on error messages
+            error_messages = 0
+            if total_messages > 0:
+                # Get error rate from conversation stats if available
+                error_rate = conversation_stats.get('error_rate', 0)
+                success_rate = max(0, 100 - error_rate)
+            else:
+                success_rate = 0
+
+            # Calculate real workflow metrics based on conversations
+            # Each conversation represents a workflow execution
+            workflows_total = total_conversations
+            workflows_active = min(total_conversations, 10)  # Conservative estimate
+            workflows_completed_today = total_conversations  # All completed conversations
+
             return IntegratedDashboardStats(
                 workflows={
-                    "total": max(
-                        total_conversations // 3, 42
-                    ),  # Derive from conversations
-                    "active": max(total_conversations // 10, 8),
-                    "completedToday": max(
-                        total_conversations // 20, 15
+                    "total": workflows_total,
+                    "active": workflows_active,
+                    "completedToday": workflows_completed_today,
+                    "avgExecutionTime": (
+                        avg_response_time / 1000 if avg_response_time > 0 else 0
                     ),
-                    "avgExecutionTime": 2.5,
                 },
                 agents={
-                    "total": max(
-                        total_conversations // 2, 200
-                    ),  # Derive from conversations
-                    "active": max(total_conversations // 5, 8),
-                    "conversationsToday": max(
-                        total_conversations // 4, 234
-                    ),
-                    "avgResponseTime": 1.2,
-                    "satisfactionScore": 4.6,
+                    "total": workflows_total,  # Each workflow uses an agent
+                    "active": workflows_active,
+                    "conversationsToday": total_conversations,
+                    "avgResponseTime": avg_response_time / 1000 if avg_response_time > 0 else 0,
+                    "satisfactionScore": 0,  # TODO: Implement real satisfaction scoring
                 },
                 ab_testing={
-                    "activeTests": 5,
-                    "significantResults": 3,
-                    "totalImprovement": 0.18,
-                    "testsThisMonth": 12,
+                    "activeTests": 0,  # TODO: Implement real A/B testing metrics
+                    "significantResults": 0,
+                    "totalImprovement": 0,
+                    "testsThisMonth": 0,
                 },
                 system={
-                    "tokensUsed": (
-                        total_tokens if total_tokens > 0 else 1250000
-                    ),
-                    "apiCalls": max(
-                        total_conversations * 3, 8520
-                    ),  # Derive from conversations
-                    "cost": total_cost if total_cost > 0 else 125.50,
-                    "uptime": 99.8,
+                    "tokensUsed": total_tokens,
+                    "apiCalls": total_messages,  # Each message is an API call
+                    "cost": total_cost,
+                    "uptime": system_analytics.get('uptime', 0) if system_analytics else 0,
                 },
             )
 
@@ -4537,35 +4534,35 @@ class UserBehaviorAnalyzer:
             logger.error(
                 f"Failed to get integrated dashboard stats: {e}"
             )
-            # Return default stats
+            # Return empty stats rather than fake data
             from chatter.schemas.analytics import (
                 IntegratedDashboardStats,
             )
 
             return IntegratedDashboardStats(
                 workflows={
-                    "total": 42,
-                    "active": 8,
-                    "completedToday": 15,
-                    "avgExecutionTime": 2.5,
+                    "total": 0,
+                    "active": 0,
+                    "completedToday": 0,
+                    "avgExecutionTime": 0,
                 },
                 agents={
-                    "total": 200,
-                    "active": 8,
-                    "conversationsToday": 234,
-                    "avgResponseTime": 1.2,
-                    "satisfactionScore": 4.6,
+                    "total": 0,
+                    "active": 0,
+                    "conversationsToday": 0,
+                    "avgResponseTime": 0,
+                    "satisfactionScore": 0,
                 },
                 ab_testing={
-                    "activeTests": 5,
-                    "significantResults": 3,
-                    "totalImprovement": 0.18,
-                    "testsThisMonth": 12,
+                    "activeTests": 0,
+                    "significantResults": 0,
+                    "totalImprovement": 0,
+                    "testsThisMonth": 0,
                 },
                 system={
-                    "tokensUsed": 1250000,
-                    "apiCalls": 8520,
-                    "cost": 125.50,
-                    "uptime": 99.8,
+                    "tokensUsed": 0,
+                    "apiCalls": 0,
+                    "cost": 0,
+                    "uptime": 0,
                 },
             )

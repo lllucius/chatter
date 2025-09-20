@@ -159,7 +159,7 @@ class WorkflowManagementService:
                         WorkflowDefinition.id == workflow_id,
                         or_(
                             WorkflowDefinition.owner_id == owner_id,
-                            WorkflowDefinition.is_public,
+                            WorkflowDefinition.is_public == True,
                         ),
                     )
                 )
@@ -182,7 +182,7 @@ class WorkflowManagementService:
         try:
             conditions = [WorkflowDefinition.owner_id == owner_id]
             if include_public:
-                conditions.append(WorkflowDefinition.is_public)
+                conditions.append(WorkflowDefinition.is_public == True)
 
             result = await self.session.execute(
                 select(WorkflowDefinition)
@@ -473,8 +473,8 @@ class WorkflowManagementService:
                 .where(
                     or_(
                         WorkflowTemplate.owner_id == owner_id,
-                        WorkflowTemplate.is_public,
-                        WorkflowTemplate.is_builtin,
+                        WorkflowTemplate.is_public == True,
+                        WorkflowTemplate.is_builtin == True,
                     )
                 )
                 .options(selectinload(WorkflowTemplate.owner))
@@ -512,8 +512,8 @@ class WorkflowManagementService:
                 query = query.where(
                     or_(
                         WorkflowTemplate.owner_id == owner_id,
-                        WorkflowTemplate.is_public,
-                        WorkflowTemplate.is_builtin,
+                        WorkflowTemplate.is_public == True,
+                        WorkflowTemplate.is_builtin == True,
                     )
                 )
 

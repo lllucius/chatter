@@ -23,7 +23,8 @@ import type {
   ChatWorkflowRequest,
   ChatResponse,
 } from 'chatter-sdk';
-import { useRightSidebar } from '../components/RightSidebarContext';
+import { parseSSELine } from '../utils/sse-parser';
+import type { ChatMessage } from '../types/chat';
 
 const ChatPage: React.FC = () => {
   // Use right sidebar context
@@ -128,6 +129,142 @@ const ChatPage: React.FC = () => {
     const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
     toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
   }, []);
+
+  // Shared streaming processing logic to avoid duplication
+  const processStreamingResponse = useCallback(
+    async (
+      stream: ReadableStream<Uint8Array>,
+      isRegeneration: boolean,
+      assistantMessageId: string,
+      setStreamedContent: (updater: (prev: string) => string) => void,
+      setTotalTokens: (tokens: number | undefined) => void,
+      setModel: (model: string | undefined) => void,
+      setProcessingTime: (time: number | undefined) => void
+    ) => {
+      const decoder = new TextDecoder();
+      const reader = stream.getReader();
+
+      let buffer = '';
+
+      try {
+        // Process the stream
+        while (true) {
+          const { done, value } = await reader.read();
+
+          if (done) {
+            break;
+          }
+
+          // Decode the chunk and add to buffer
+          buffer += decoder.decode(value, { stream: true });
+          const lines = buffer.split('\n');
+          buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
+
+          // Process each complete line
+          for (const line of lines) {
+            const eventData = parseSSELine(line);
+            if (!eventData) {
+              continue; // Skip invalid or non-data lines
+            }
+
+            // Handle special end-of-stream marker
+            if (eventData.type === 'done') {
+              continue;
+            }
+
+            switch (eventData.type) {
+              case 'start':
+                // Stream started
+                break;
+
+              case 'token':
+                // Add the token to our streamed content
+                const tokenContent = eventData.content as string || '';
+                setStreamedContent((prev) => prev + tokenContent);
+
+                // Update the message with the new content
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessageId
+                      ? {
+                          ...msg,
+                          content: msg.content + tokenContent,
+                          metadata: {
+                            ...msg.metadata,
+                            workflow: {
+                              stage: 'Streaming',
+                              currentStep: 0,
+                              totalSteps: 1,
+                              stepDescriptions: ['Receiving response...'],
+                            },
+                          },
+                        }
+                      : msg
+                  )
+                );
+                break;
+
+              case 'complete':
+                // Extract final metadata
+                if (eventData.metadata && typeof eventData.metadata === 'object') {
+                  const metadata = eventData.metadata as Record<string, unknown>;
+                  setTotalTokens(metadata.total_tokens as number | undefined);
+                  setModel(metadata.model_used as string | undefined);
+                  setProcessingTime(metadata.response_time_ms as number | undefined);
+                }
+
+                // Update the message with final metadata
+                setMessages((prev) =>
+                  prev.map((msg) =>
+                    msg.id === assistantMessageId
+                      ? {
+                          ...msg,
+                          metadata: {
+                            model: eventData.metadata?.model_used as string | undefined,
+                            tokens: eventData.metadata?.total_tokens as number | undefined,
+                            processingTime: eventData.metadata?.response_time_ms as number | undefined,
+                            workflow: {
+                              stage: 'Complete',
+                              currentStep: 1,
+                              totalSteps: 1,
+                              stepDescriptions: ['Response completed'],
+                            },
+                          },
+                        }
+                      : msg
+                  )
+                );
+                break;
+
+              case 'error':
+                throw new Error(
+                  (eventData.message as string) || 'Workflow streaming error occurred'
+                );
+
+              default:
+                // Handle other event types if needed
+                // console.log('Unknown streaming event type:', eventData.type);
+                break;
+            }
+          }
+        }
+
+        // Clean up
+        reader.releaseLock();
+      } catch (error) {
+        // Clean up on error
+        if (reader) {
+          try {
+            reader.releaseLock();
+          } catch (releaseError) {
+            // Ignore release errors
+          }
+        }
+        throw error; // Re-throw for caller to handle
+      }
+    },
+    [setMessages]
+  );
 
   // Handle streaming response from chat API
   const _handleStreamingResponse = useCallback(

@@ -467,6 +467,15 @@ class UnifiedWorkflowExecutor:
                     trace_type = trace_data.get("type", "")
 
                     if trace_type == "node_start":
+                        logger.info(
+                            "Workflow node started",
+                            workflow_id=workflow_id,
+                            correlation_id=correlation_id,
+                            node_name=trace_data.get("node"),
+                            run_id=trace_data.get("run_id"),
+                            parent_ids=trace_data.get("parent_ids", []),
+                            input=trace_data.get("input"),
+                        )
                         yield StreamingChatChunk(
                             type="node_start",
                             content=f"Starting node: {trace_data.get('node', 'unknown')}",
@@ -483,6 +492,15 @@ class UnifiedWorkflowExecutor:
                             },
                         )
                     elif trace_type == "node_end":
+                        logger.info(
+                            "Workflow node completed",
+                            workflow_id=workflow_id,
+                            correlation_id=correlation_id,
+                            node_name=trace_data.get("node"),
+                            run_id=trace_data.get("run_id"),
+                            parent_ids=trace_data.get("parent_ids", []),
+                            output=trace_data.get("output"),
+                        )
                         yield StreamingChatChunk(
                             type="node_end",
                             content=f"Completed node: {trace_data.get('node', 'unknown')}",
@@ -499,6 +517,15 @@ class UnifiedWorkflowExecutor:
                             },
                         )
                     elif trace_type == "tool_start":
+                        logger.info(
+                            "Workflow tool started",
+                            workflow_id=workflow_id,
+                            correlation_id=correlation_id,
+                            tool_name=trace_data.get("tool"),
+                            run_id=trace_data.get("run_id"),
+                            parent_ids=trace_data.get("parent_ids", []),
+                            input=trace_data.get("input"),
+                        )
                         yield StreamingChatChunk(
                             type="tool_call_start",
                             content=f"Calling tool: {trace_data.get('tool', 'unknown')}",
@@ -515,6 +542,15 @@ class UnifiedWorkflowExecutor:
                             },
                         )
                     elif trace_type == "tool_end":
+                        logger.info(
+                            "Workflow tool completed",
+                            workflow_id=workflow_id,
+                            correlation_id=correlation_id,
+                            tool_name=trace_data.get("tool"),
+                            run_id=trace_data.get("run_id"),
+                            parent_ids=trace_data.get("parent_ids", []),
+                            output=trace_data.get("output"),
+                        )
                         yield StreamingChatChunk(
                             type="tool_call_end",
                             content=f"Tool completed: {trace_data.get('tool', 'unknown')}",

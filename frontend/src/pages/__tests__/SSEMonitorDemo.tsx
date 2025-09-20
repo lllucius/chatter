@@ -28,11 +28,11 @@ class MockSSEManager {
   }
 
   connect(): void {
-    console.log('Mock SSE Manager: Connected');
+    // console.log('Mock SSE Manager: Connected');
   }
 
   disconnect(): void {
-    console.log('Mock SSE Manager: Disconnected');
+    // console.log('Mock SSE Manager: Disconnected');
   }
 
   // Method to simulate receiving events for testing
@@ -61,10 +61,10 @@ React.createContext = () =>
       $$typeof: Symbol.for('react.consumer'),
     }),
     displayName: 'MockContext',
-  }) as any;
+  }) as React.Context<unknown>;
 
 // Mock the useSSE hook
-const useSSE = () => mockSSEContext;
+const _useSSE = () => mockSSEContext;
 
 const SSEMonitorDemo: React.FC = () => {
   const [eventCount, setEventCount] = useState(0);

@@ -69,7 +69,7 @@ describe('AgentsPage', () => {
       agents: {
         listAgentsApiV1Agents: mockListAgents,
       },
-    } as any);
+    } as { agents: { listAgentsApiV1Agents: unknown } });
 
     renderAgentsPage();
 

@@ -16,7 +16,9 @@ vi.mock('../../services/toast-service', () => ({
 // Mock console methods
 const mockConsoleError = vi
   .spyOn(console, 'error')
-  .mockImplementation(() => {});
+  .mockImplementation(() => {
+    // Mock implementation for testing
+  });
 
 describe('ErrorHandler', () => {
   beforeEach(() => {

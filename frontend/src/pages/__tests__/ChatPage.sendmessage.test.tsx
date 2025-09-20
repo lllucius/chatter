@@ -69,7 +69,7 @@ describe('ChatPage sendMessage Fix', () => {
     vi.clearAllMocks();
 
     // Get the mock SDK
-    const { getSDK } = require('../../services/auth-service');
+    const { getSDK } = await import('../../services/auth-service');
     const mockSDK = getSDK();
     mockChatChat = mockSDK.chat.chatChat;
   });

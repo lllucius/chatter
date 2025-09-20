@@ -110,7 +110,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'display_name',
       label: 'Name',
-      render: (value: unknown, item: any): JSX.Element => (
+      render: (value: unknown, item: Provider): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
@@ -173,8 +173,8 @@ const ModelManagementPage: React.FC = () => {
         if (!provider.is_default) {
           try {
             const defaultProviderBody: DefaultProvider = {
-              provider_id: provider.id as any,
-              model_type: 'embedding' as any,
+              provider_id: provider.id as string,
+              model_type: 'embedding' as const,
             } as DefaultProvider;
 
             await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault(
@@ -251,7 +251,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'display_name',
       label: 'Name',
-      render: (value: unknown, item: any): JSX.Element => (
+      render: (value: unknown, item: ModelDefWithProvider): JSX.Element => (
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <Box>
             <Typography variant="body1" sx={{ fontWeight: 'medium' }}>
@@ -270,7 +270,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'provider',
       label: 'Provider',
-      render: (value: any): JSX.Element => (
+      render: (value: { displayName?: string }): JSX.Element => (
         <Typography variant="body2">{value?.displayName || '—'}</Typography>
       ),
     },
@@ -314,7 +314,7 @@ const ModelManagementPage: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (model) => {
-        if (!(model as any).is_default) {
+        if (!(model as ModelDefWithProvider & { is_default?: boolean }).is_default) {
           try {
             await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(
               model.id
@@ -387,7 +387,7 @@ const ModelManagementPage: React.FC = () => {
   const getModelId = (item: ModelDefWithProvider) => item.id || '';
 
   // Enhanced ModelForm component that receives providers
-  const EnhancedModelForm: React.FC<any> = (props): JSX.Element => (
+  const EnhancedModelForm: React.FC<{ providers: Provider[] }> = (props): JSX.Element => (
     <ModelForm {...props} providers={providers} />
   );
 

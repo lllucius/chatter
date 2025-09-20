@@ -8,12 +8,10 @@ import {
   Grid,
   Alert,
   Paper,
-  Divider,
   Switch,
   FormControlLabel,
 } from '@mui/material';
 import {
-  Error as ErrorIcon,
   NetworkCheck as NetworkIcon,
   BugReport as BugIcon,
   Refresh as RefreshIcon,
@@ -160,7 +158,7 @@ const NetworkStatusComponent: React.FC = () => {
 const ErrorTestPage: React.FC = () => {
   const [throwJSError, setThrowJSError] = useState(false);
   const [throwAsyncError, setThrowAsyncError] = useState(false);
-  const [throwNetworkError, setThrowNetworkError] = useState(false);
+  const [_throwNetworkError, _setThrowNetworkError] = useState(false);
 
   const triggerGlobalJSError = () => {
     // This will trigger the global error handler

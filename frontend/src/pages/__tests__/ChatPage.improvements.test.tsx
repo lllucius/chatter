@@ -9,7 +9,6 @@ import React from 'react';
 import { render, screen, fireEvent, waitFor } from '@testing-library/react';
 import { describe, it, expect, beforeEach, vi } from 'vitest';
 import ChatPage from '../ChatPage';
-import { useRightSidebar } from '../../components/RightSidebarContext';
 
 // Mock the dependencies
 vi.mock('../../services/auth-service', () => ({
@@ -326,10 +325,12 @@ describe('ChatPage Improvements', () => {
       });
 
       const { getSDK } = await import('../../services/auth-service');
-      (getSDK as any).mockReturnValue({
-        ...(getSDK as any)(),
+      const mockSDK = getSDK as unknown as { mockReturnValue: (value: unknown) => void };
+      const currentSDK = getSDK as unknown as () => { conversations: Record<string, unknown> };
+      mockSDK.mockReturnValue({
+        ...currentSDK(),
         conversations: {
-          ...(getSDK as any)().conversations,
+          ...currentSDK().conversations,
           getConversationApiV1ConversationsConversationId: mockGetConversation,
         },
       });

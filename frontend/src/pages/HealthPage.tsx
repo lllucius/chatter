@@ -34,13 +34,21 @@ import {
 } from '@mui/icons-material';
 import { format } from 'date-fns';
 import { getSDK } from '../services/auth-service';
-import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ToolServerResponse } from 'chatter-sdk';
 import PageLayout from '../components/PageLayout';
 
 const HealthPage: React.FC = () => {
-  const [health, setHealth] = useState<any>(null);
+  interface HealthData {
+    status?: string;
+    version?: string;
+    uptime?: number;
+    timestamp?: string;
+    database?: { status?: string };
+    redis?: { status?: string };
+  }
+  
+  const [health, setHealth] = useState<HealthData | null>(null);
   const [toolServers, setToolServers] = useState<ToolServerResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
@@ -404,13 +412,13 @@ const HealthPage: React.FC = () => {
                         variant="body2"
                         sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                       >
-                        {(server as any).command || 'N/A'}
+                        {(server as ToolServerResponse & { command?: string }).command || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
                         label={server.status}
-                        color={getStatusColor(server.status) as any}
+                        color={getStatusColor(server.status) as 'error' | 'warning' | 'success'}
                         size="small"
                       />
                     </TableCell>

@@ -75,7 +75,7 @@ describe('ChatPage Streaming Functionality', () => {
     vi.clearAllMocks();
 
     // Get the streaming method mock from the auth service
-    const { getSDK } = require('../../services/auth-service');
+    const { getSDK } = await import('../../services/auth-service');
     mockStreamingMethod = getSDK().chat.streamingChatApiV1ChatStreaming;
   });
 

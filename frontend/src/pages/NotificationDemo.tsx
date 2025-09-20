@@ -93,7 +93,7 @@ const NotificationDemo: React.FC = () => {
 
   const demoErrorWithResult = () => {
     const error = new Error('Service temporarily unavailable');
-    const result = handleErrorWithResult(
+    const _result = handleErrorWithResult(
       error,
       {
         source: 'NotificationDemo.demoErrorWithResult',
@@ -106,7 +106,8 @@ const NotificationDemo: React.FC = () => {
       }
     );
 
-    console.log('Error result:', result);
+    // TODO: Remove console.log in production
+    // console.log('Error result:', result);
   };
 
   const demoNotifications = [
@@ -300,7 +301,7 @@ const NotificationDemo: React.FC = () => {
         <Typography variant="body2">
           The error handling demos below show how errors are processed
           differently in development vs production modes. In{' '}
-          <strong>development</strong>, you'll see full error details, stack
+          <strong>development</strong>, you&apos;ll see full error details, stack
           traces, and context in both console and toasts. In{' '}
           <strong>production</strong>, only user-friendly messages are shown
           with minimal technical details.

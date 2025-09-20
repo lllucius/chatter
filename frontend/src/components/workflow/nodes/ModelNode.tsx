@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { SmartToy as ModelIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ModelNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const ModelNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -31,32 +28,32 @@ const ModelNode: React.FC<NodeProps> = ({
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <ModelIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Model Call
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <ModelIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Model Call
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              LLM interaction
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            LLM interaction
-          </Typography>
-          {config.temperature !== undefined && (
-            <Chip
-              label={`T: ${config.temperature}`}
-              size="small"
-              color="primary"
-              variant="outlined"
-              sx={{ mr: 0.5, mb: 0.5 }}
-            />
-          )}
-          {config.maxTokens && (
-            <Chip
-              label={`Max: ${config.maxTokens}`}
-              size="small"
-              color="primary"
-              variant="outlined"
-            />
-          )}
+            {config.temperature !== undefined && (
+              <Chip
+                label={`T: ${config.temperature}`}
+                size="small"
+                color="primary"
+                variant="outlined"
+                sx={{ mr: 0.5, mb: 0.5 }}
+              />
+            )}
+            {config.maxTokens && (
+              <Chip
+                label={`Max: ${config.maxTokens}`}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            )}
           </>
         </CardContent>
       </Card>

@@ -77,7 +77,9 @@ describe('SDK Initialization Fix', () => {
 
     const sdk = getSDK();
     expect(sdk.workflows).toBeDefined();
-    expect(sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat).toBeDefined();
+    expect(
+      sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat
+    ).toBeDefined();
   });
 
   it('should check initialization status correctly', async () => {

@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Storage as VariableIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const VariableNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const VariableNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -31,41 +28,41 @@ const VariableNode: React.FC<NodeProps> = ({
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <VariableIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Variable
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <VariableIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Variable
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Store & retrieve data
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Store & retrieve data
-          </Typography>
-          {config.operation && (
-            <Chip
-              label={String(config.operation)}
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-                mr: 0.5,
-              }}
-            />
-          )}
-          {config.variableName && (
-            <Chip
-              label={
-                String(config.variableName).slice(0, 8) +
-                (String(config.variableName).length > 8 ? '...' : '')
-              }
-              size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}
-            />
-          )}
+            {config.operation && (
+              <Chip
+                label={String(config.operation)}
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                  mr: 0.5,
+                }}
+              />
+            )}
+            {config.variableName && (
+              <Chip
+                label={
+                  String(config.variableName).slice(0, 8) +
+                  (String(config.variableName).length > 8 ? '...' : '')
+                }
+                size="small"
+                sx={{
+                  bgcolor: 'rgba(255,255,255,0.2)',
+                  color: 'white',
+                  border: '1px solid rgba(255,255,255,0.3)',
+                }}
+              />
+            )}
           </>
         </CardContent>
       </Card>

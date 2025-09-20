@@ -1,7 +1,7 @@
 """Chat schemas for request/response models."""
 
 from datetime import datetime
-from typing import Any, Literal
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -208,9 +208,6 @@ class ConversationWithMessages(ConversationResponse):
     )
 
 
-
-
-
 class WorkflowTemplateInfo(BaseModel):
     """Schema for workflow template information."""
 
@@ -314,8 +311,6 @@ class ChatRequest(BaseModel):
     workflow_config: dict[str, Any] | None = Field(
         None, description="Workflow configuration"
     )
-
-
 
 
 class ChatResponse(BaseModel):

@@ -203,9 +203,6 @@ class ChatterBaseException(Exception):
         return re.sub(r"([a-z])([A-Z])", r"\1 \2", class_name)
 
 
-
-
-
 class ServiceError(ChatterBaseException):
     """Generic service layer errors."""
 
@@ -645,9 +642,6 @@ def create_error_response(error: Exception) -> dict[str, Any]:
             func_name="unknown", service_name="system", error=error
         )
         return chatter_error.to_problem_detail()
-
-
-
 
 
 class AgentError(ChatterBaseException):

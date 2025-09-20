@@ -209,7 +209,10 @@ const DashboardPage: React.FC = () => {
     async () => {
       try {
         // Try the new endpoint, fall back if not available
-        if (getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData) {
+        if (
+          getSDK().analytics
+            .getDashboardChartDataApiV1AnalyticsDashboardChartData
+        ) {
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
@@ -242,31 +245,41 @@ const DashboardPage: React.FC = () => {
     }
 
     // Fallback to real data if chart API isn't available
-    const conversationStats = (data?.conversation_stats || {}) as Record<string, unknown>;
-    const usageMetrics = (usageData || data?.usage_metrics || {}) as Record<string, unknown>;
-    const realPerformanceData =
-      (performanceData || data?.performance_metrics || {}) as Record<string, unknown>;
+    const conversationStats = (data?.conversation_stats || {}) as Record<
+      string,
+      unknown
+    >;
+    const usageMetrics = (usageData || data?.usage_metrics || {}) as Record<
+      string,
+      unknown
+    >;
+    const realPerformanceData = (performanceData ||
+      data?.performance_metrics ||
+      {}) as Record<string, unknown>;
 
     // Provide fallback data when APIs fail
     const conversationChartData = [
       {
         name: 'Mon',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 0.8,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ??
+            0) * 0.8,
           5
         ),
       },
       {
         name: 'Tue',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 1.2,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ??
+            0) * 1.2,
           8
         ),
       },
       {
         name: 'Wed',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ?? 0) * 0.9,
+          ((((conversationStats as any)?.total_conversations || 0) as number) ??
+            0) * 0.9,
           6
         ),
       },
@@ -293,22 +306,34 @@ const DashboardPage: React.FC = () => {
       },
       {
         name: 'Sun',
-        conversations: Math.max(((conversationStats as any)?.total_conversations || 0) ?? 0, 5),
+        conversations: Math.max(
+          ((conversationStats as any)?.total_conversations || 0) ?? 0,
+          5
+        ),
       },
     ];
 
     const tokenUsageData = [
       {
         name: 'Week 1',
-        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.6, 1000),
+        tokens: Math.max(
+          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.6,
+          1000
+        ),
       },
       {
         name: 'Week 2',
-        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.8, 1500),
+        tokens: Math.max(
+          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.8,
+          1500
+        ),
       },
       {
         name: 'Week 3',
-        tokens: Math.max((((usageMetrics as any)?.total_tokens || 0) ?? 0) * 1.1, 2000),
+        tokens: Math.max(
+          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 1.1,
+          2000
+        ),
       },
       {
         name: 'Week 4',
@@ -320,15 +345,24 @@ const DashboardPage: React.FC = () => {
     const performanceChartData = [
       {
         name: 'API Latency',
-        value: Math.max((realPerformanceData.avg_response_time_ms as number) ?? 250, 100),
+        value: Math.max(
+          (realPerformanceData.avg_response_time_ms as number) ?? 250,
+          100
+        ),
       },
       {
         name: 'P95 Latency',
-        value: Math.max((realPerformanceData.p95_response_time_ms as number) ?? 500, 200),
+        value: Math.max(
+          (realPerformanceData.p95_response_time_ms as number) ?? 500,
+          200
+        ),
       },
       {
         name: 'P99 Latency',
-        value: Math.max((realPerformanceData.p99_response_time_ms as number) ?? 800, 400),
+        value: Math.max(
+          (realPerformanceData.p99_response_time_ms as number) ?? 800,
+          400
+        ),
       },
     ];
 
@@ -540,8 +574,10 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Total Conversations"
-                value={safeLocaleString(((conversationStats as any)?.total_conversations || 0))}
-                change={`+${safeLocaleString(((conversationStats as any)?.total_conversations || 0))} today`}
+                value={safeLocaleString(
+                  (conversationStats as any)?.total_conversations || 0
+                )}
+                change={`+${safeLocaleString((conversationStats as any)?.total_conversations || 0)} today`}
                 changeType="positive"
                 icon={<Message />}
                 color="primary"
@@ -556,8 +592,10 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Total Messages"
-                value={safeLocaleString(((conversationStats as any)?.total_messages || 0))}
-                change={`Avg ${safeToFixed(((conversationStats as any)?.avg_messages_per_conversation || 0), 1)} per conversation`}
+                value={safeLocaleString(
+                  (conversationStats as any)?.total_messages || 0
+                )}
+                change={`Avg ${safeToFixed((conversationStats as any)?.avg_messages_per_conversation || 0, 1)} per conversation`}
                 changeType="neutral"
                 icon={<TrendingUp />}
                 color="secondary"
@@ -572,8 +610,10 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Token Usage"
-                value={safeLocaleString(((usageMetrics as any)?.total_tokens || 0))}
-                change={`${safeLocaleString(((usageMetrics as any)?.total_prompt_tokens || 0))} prompts`}
+                value={safeLocaleString(
+                  (usageMetrics as any)?.total_tokens || 0
+                )}
+                change={`${safeLocaleString((usageMetrics as any)?.total_prompt_tokens || 0)} prompts`}
                 changeType="positive"
                 icon={<Assessment />}
                 color="info"
@@ -588,7 +628,10 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Documents"
-                value={safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents as number | undefined | null)}
+                value={safeLocaleString(
+                  (documentAnalytics as Record<string, unknown>)
+                    ?.total_documents as number | undefined | null
+                )}
                 change={`${safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks as number | undefined | null)} chunks`}
                 changeType="neutral"
                 icon={<Storage />}
@@ -693,12 +736,20 @@ const DashboardPage: React.FC = () => {
                 <Box sx={{ mb: 2 }}>
                   <Typography variant="body2" gutterBottom>
                     Average:{' '}
-                    {safeToFixed((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null, 2)}ms
+                    {safeToFixed(
+                      (performanceMetrics as Record<string, unknown>)
+                        ?.avg_response_time_ms as number | undefined | null,
+                      2
+                    )}
+                    ms
                   </Typography>
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0) / 10,
+                      (Number(
+                        (performanceMetrics as Record<string, unknown>)
+                          ?.avg_response_time_ms as number | undefined | null
+                      ) ?? 0) / 10,
                       100
                     )}
                     sx={{ mb: 1 }}
@@ -708,7 +759,10 @@ const DashboardPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     P95:{' '}
                     {safeToFixed(
-                      Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms as number | undefined | null) ?? 0,
+                      Number(
+                        (performanceMetrics as Record<string, unknown>)
+                          ?.p95_response_time_ms as number | undefined | null
+                      ) ?? 0,
                       1
                     )}
                     ms
@@ -716,7 +770,10 @@ const DashboardPage: React.FC = () => {
                   <LinearProgress
                     variant="determinate"
                     value={Math.min(
-                      (Number((performanceMetrics as Record<string, unknown>)?.p95_response_time_ms as number | undefined | null) ?? 0) / 20,
+                      (Number(
+                        (performanceMetrics as Record<string, unknown>)
+                          ?.p95_response_time_ms as number | undefined | null
+                      ) ?? 0) / 20,
                       100
                     )}
                     color="warning"
@@ -743,7 +800,10 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Active Users</Typography>
                         <Typography variant="h6">
-                          {safeLocaleString((systemHealth as Record<string, unknown>)?.active_users_today as number | undefined | null)}
+                          {safeLocaleString(
+                            (systemHealth as Record<string, unknown>)
+                              ?.active_users_today as number | undefined | null
+                          )}
                         </Typography>
                       </Box>
                     </Box>
@@ -754,7 +814,10 @@ const DashboardPage: React.FC = () => {
                       <Box sx={{ flexGrow: 1 }}>
                         <Typography variant="body2">Storage</Typography>
                         <Typography variant="h6">
-                          {formatBytes((systemHealth as Record<string, unknown>)?.storage_usage_bytes as number | undefined | null)}
+                          {formatBytes(
+                            (systemHealth as Record<string, unknown>)
+                              ?.storage_usage_bytes as number | undefined | null
+                          )}
                         </Typography>
                       </Box>
                     </Box>
@@ -780,7 +843,10 @@ const DashboardPage: React.FC = () => {
                       dataKey="value"
                     >
                       {chartData.systemHealthData.map((entry, index) => (
-                        <Cell key={`cell-${index}`} fill={entry.color || '#8884d8'} />
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={entry.color || '#8884d8'}
+                        />
                       ))}
                     </Pie>
                     <Tooltip />
@@ -807,7 +873,10 @@ const DashboardPage: React.FC = () => {
                         Total Documents
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_documents as number | undefined | null)}
+                        {safeLocaleString(
+                          (documentAnalytics as Record<string, unknown>)
+                            ?.total_documents as number | undefined | null
+                        )}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -815,7 +884,10 @@ const DashboardPage: React.FC = () => {
                         Total Chunks
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString((documentAnalytics as Record<string, unknown>)?.total_chunks as number | undefined | null)}
+                        {safeLocaleString(
+                          (documentAnalytics as Record<string, unknown>)
+                            ?.total_chunks as number | undefined | null
+                        )}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -823,7 +895,11 @@ const DashboardPage: React.FC = () => {
                         Storage Size
                       </Typography>
                       <Typography variant="h5">
-                        {formatBytes((documentAnalytics as Record<string, unknown>)?.total_size_bytes as number | undefined | null ?? 0)}
+                        {formatBytes(
+                          ((documentAnalytics as Record<string, unknown>)
+                            ?.total_size_bytes as number | undefined | null) ??
+                            0
+                        )}
                       </Typography>
                     </Grid>
                   </Grid>
@@ -851,7 +927,12 @@ const DashboardPage: React.FC = () => {
                         Active Servers
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(toolServerData.active_servers as number | undefined | null ?? 0)}
+                        {safeLocaleString(
+                          (toolServerData.active_servers as
+                            | number
+                            | undefined
+                            | null) ?? 0
+                        )}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -859,7 +940,12 @@ const DashboardPage: React.FC = () => {
                         Total Requests
                       </Typography>
                       <Typography variant="h5">
-                        {safeLocaleString(toolServerData.total_requests as number | undefined | null ?? 0)}
+                        {safeLocaleString(
+                          (toolServerData.total_requests as
+                            | number
+                            | undefined
+                            | null) ?? 0
+                        )}
                       </Typography>
                     </Grid>
                     <Grid size={4}>
@@ -868,7 +954,10 @@ const DashboardPage: React.FC = () => {
                       </Typography>
                       <Typography variant="h5">
                         {safeToFixed(
-                          toolServerData.avg_response_time_ms as number | undefined | null ?? 0,
+                          (toolServerData.avg_response_time_ms as
+                            | number
+                            | undefined
+                            | null) ?? 0,
                           1
                         )}
                         ms
@@ -914,7 +1003,10 @@ const DashboardPage: React.FC = () => {
             <Chip
               label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0, 0)}ms`}
               color={
-                (Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0) < 1000
+                (Number(
+                  (performanceMetrics as Record<string, unknown>)
+                    ?.avg_response_time_ms as number | undefined | null
+                ) ?? 0) < 1000
                   ? 'success'
                   : 'warning'
               }

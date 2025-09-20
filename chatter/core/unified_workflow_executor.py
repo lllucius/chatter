@@ -118,18 +118,20 @@ class UnifiedWorkflowExecutor:
 
             # Execute workflow
             state = ConversationState(messages=messages)
-            
+
             # Track response time for non-streaming
             llm_start_time = time.time()
             result = await workflow.ainvoke(
                 state, {"configurable": {"thread_id": conversation.id}}
             )
-            llm_response_time_ms = int((time.time() - llm_start_time) * 1000)
+            llm_response_time_ms = int(
+                (time.time() - llm_start_time) * 1000
+            )
 
             # Extract response and usage metadata
             response_content = self._extract_response_content(result)
             usage_info = self._extract_usage_from_result(result)
-            
+
             # Add response time to usage info
             usage_info["response_time_ms"] = llm_response_time_ms
 
@@ -253,7 +255,7 @@ class UnifiedWorkflowExecutor:
             model_used = None
             llm_start_time = None
             llm_response_time_ms = None
-            
+
             async for event in workflow_manager.stream_workflow(
                 workflow,
                 state,
@@ -265,7 +267,7 @@ class UnifiedWorkflowExecutor:
                 if "_token_stream" in event:
                     token_data = event["_token_stream"]
                     token_content = token_data.get("content", "")
-                    
+
                     # Track LLM start time on first token
                     if token_content and llm_start_time is None:
                         llm_start_time = time.time()
@@ -293,15 +295,25 @@ class UnifiedWorkflowExecutor:
                             and "messages" in node_output
                         ):
                             messages_found = node_output["messages"]
-                            node_metadata = node_output.get("metadata", {})
-                            
+                            node_metadata = node_output.get(
+                                "metadata", {}
+                            )
+
                             # Capture usage metadata and model info from call_model node
-                            if node_name == "call_model" and node_metadata:
-                                usage_metadata = node_metadata.get("usage", {})
+                            if (
+                                node_name == "call_model"
+                                and node_metadata
+                            ):
+                                usage_metadata = node_metadata.get(
+                                    "usage", {}
+                                )
                                 model_used = node_metadata.get("model")
                                 # Calculate response time if we have start time
                                 if llm_start_time is not None:
-                                    llm_response_time_ms = int((time.time() - llm_start_time) * 1000)
+                                    llm_response_time_ms = int(
+                                        (time.time() - llm_start_time)
+                                        * 1000
+                                    )
                             break
 
                     if messages_found:
@@ -523,7 +535,7 @@ class UnifiedWorkflowExecutor:
                 elif "_token_stream" in event:
                     token_data = event["_token_stream"]
                     token_content = token_data.get("content", "")
-                    
+
                     # Track LLM start time on first token
                     if token_content and llm_start_time is None:
                         llm_start_time = time.time()
@@ -550,15 +562,25 @@ class UnifiedWorkflowExecutor:
                             and "messages" in node_output
                         ):
                             messages_found = node_output["messages"]
-                            node_metadata = node_output.get("metadata", {})
-                            
+                            node_metadata = node_output.get(
+                                "metadata", {}
+                            )
+
                             # Capture usage metadata and model info from call_model node
-                            if node_name == "call_model" and node_metadata:
-                                usage_metadata = node_metadata.get("usage", {})
+                            if (
+                                node_name == "call_model"
+                                and node_metadata
+                            ):
+                                usage_metadata = node_metadata.get(
+                                    "usage", {}
+                                )
                                 model_used = node_metadata.get("model")
                                 # Calculate response time if we have start time
                                 if llm_start_time is not None:
-                                    llm_response_time_ms = int((time.time() - llm_start_time) * 1000)
+                                    llm_response_time_ms = int(
+                                        (time.time() - llm_start_time)
+                                        * 1000
+                                    )
                             break
 
                     if messages_found:
@@ -844,16 +866,22 @@ class UnifiedWorkflowExecutor:
         if usage_metadata or model_used or response_time_ms:
             # Update token information
             if usage_metadata:
-                message.prompt_tokens = usage_metadata.get("input_tokens")
-                message.completion_tokens = usage_metadata.get("output_tokens") 
-                message.total_tokens = usage_metadata.get("total_tokens")
-            
+                message.prompt_tokens = usage_metadata.get(
+                    "input_tokens"
+                )
+                message.completion_tokens = usage_metadata.get(
+                    "output_tokens"
+                )
+                message.total_tokens = usage_metadata.get(
+                    "total_tokens"
+                )
+
             # Update model and timing information
             if model_used:
                 message.model_used = model_used
             if response_time_ms:
                 message.response_time_ms = response_time_ms
-                
+
             # Save the updated message
             await self.message_service.session.flush()
             await self.message_service.session.refresh(message)
@@ -876,18 +904,22 @@ class UnifiedWorkflowExecutor:
             "final_content": final_content,
             "message_complete": True,
         }
-        
+
         # Add usage metadata to completion chunk for frontend
         if usage_metadata:
-            completion_metadata.update({
-                "total_tokens": usage_metadata.get("total_tokens"),
-                "input_tokens": usage_metadata.get("input_tokens"),
-                "output_tokens": usage_metadata.get("output_tokens"),
-            })
-        
+            completion_metadata.update(
+                {
+                    "total_tokens": usage_metadata.get("total_tokens"),
+                    "input_tokens": usage_metadata.get("input_tokens"),
+                    "output_tokens": usage_metadata.get(
+                        "output_tokens"
+                    ),
+                }
+            )
+
         if model_used:
             completion_metadata["model_used"] = model_used
-            
+
         if response_time_ms:
             completion_metadata["response_time_ms"] = response_time_ms
 
@@ -899,27 +931,38 @@ class UnifiedWorkflowExecutor:
             correlation_id=correlation_id,
             metadata=completion_metadata,
         )
-        
+
     def _extract_usage_from_result(self, result: dict) -> dict:
         """Extract usage metadata from workflow execution result."""
         usage_info = {}
-        
+
         # Look for usage data in the result
         if "usage" in result:
             usage_info.update(result["usage"])
-        
+
         # Look for messages with usage metadata
         if "messages" in result:
             messages = result["messages"]
             if messages:
                 last_message = messages[-1]
-                if hasattr(last_message, "usage_metadata") and last_message.usage_metadata:
-                    usage_info.update({
-                        "input_tokens": last_message.usage_metadata.get("input_tokens", 0),
-                        "output_tokens": last_message.usage_metadata.get("output_tokens", 0), 
-                        "total_tokens": last_message.usage_metadata.get("total_tokens", 0),
-                    })
-        
+                if (
+                    hasattr(last_message, "usage_metadata")
+                    and last_message.usage_metadata
+                ):
+                    usage_info.update(
+                        {
+                            "input_tokens": last_message.usage_metadata.get(
+                                "input_tokens", 0
+                            ),
+                            "output_tokens": last_message.usage_metadata.get(
+                                "output_tokens", 0
+                            ),
+                            "total_tokens": last_message.usage_metadata.get(
+                                "total_tokens", 0
+                            ),
+                        }
+                    )
+
         # Look for call_model node results
         if "call_model" in result:
             call_model_result = result["call_model"]
@@ -930,19 +973,30 @@ class UnifiedWorkflowExecutor:
                         usage_info.update(metadata["usage"])
                     if "model" in metadata:
                         usage_info["model_used"] = metadata["model"]
-                        
+
                 # Also check messages in call_model result
                 if "messages" in call_model_result:
                     messages = call_model_result["messages"]
                     if messages:
                         last_message = messages[-1]
-                        if hasattr(last_message, "usage_metadata") and last_message.usage_metadata:
-                            usage_info.update({
-                                "input_tokens": last_message.usage_metadata.get("input_tokens", 0),
-                                "output_tokens": last_message.usage_metadata.get("output_tokens", 0),
-                                "total_tokens": last_message.usage_metadata.get("total_tokens", 0),
-                            })
-        
+                        if (
+                            hasattr(last_message, "usage_metadata")
+                            and last_message.usage_metadata
+                        ):
+                            usage_info.update(
+                                {
+                                    "input_tokens": last_message.usage_metadata.get(
+                                        "input_tokens", 0
+                                    ),
+                                    "output_tokens": last_message.usage_metadata.get(
+                                        "output_tokens", 0
+                                    ),
+                                    "total_tokens": last_message.usage_metadata.get(
+                                        "total_tokens", 0
+                                    ),
+                                }
+                            )
+
         return usage_info
 
     async def _record_metrics(

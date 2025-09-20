@@ -39,7 +39,10 @@ import {
   ConversationResponse,
 } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import { ChatWorkflowConfig, ChatWorkflowTemplate } from '../hooks/useWorkflowChat';
+import {
+  ChatWorkflowConfig,
+  ChatWorkflowTemplate,
+} from '../hooks/useWorkflowChat';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -116,14 +119,14 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   };
 
   const renderTemplateCard = (name: string, template: ChatWorkflowTemplate) => (
-    <Card 
+    <Card
       key={name}
-      variant={selectedTemplate === name ? "outlined" : "elevation"}
-      sx={{ 
-        mb: 1, 
+      variant={selectedTemplate === name ? 'outlined' : 'elevation'}
+      sx={{
+        mb: 1,
         cursor: 'pointer',
         border: selectedTemplate === name ? 2 : 0,
-        borderColor: selectedTemplate === name ? 'primary.main' : 'transparent'
+        borderColor: selectedTemplate === name ? 'primary.main' : 'transparent',
       }}
       onClick={() => handleTemplateChange(name)}
     >
@@ -144,10 +147,16 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
           {template.config.enable_memory && (
             <Chip size="small" icon={<MemoryIcon />} label="Memory" />
           )}
-          <Chip 
-            size="small" 
+          <Chip
+            size="small"
             label={`Score: ${template.complexity_score ?? 'N/A'}`}
-            color={(template.complexity_score ?? 5) <= 3 ? 'success' : (template.complexity_score ?? 5) <= 6 ? 'warning' : 'error'}
+            color={
+              (template.complexity_score ?? 5) <= 3
+                ? 'success'
+                : (template.complexity_score ?? 5) <= 6
+                  ? 'warning'
+                  : 'error'
+            }
           />
         </Box>
       </CardContent>
@@ -172,19 +181,21 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
             <Typography variant="body2" color="text.secondary" gutterBottom>
               Choose a pre-built template or configure a custom workflow
             </Typography>
-            
+
             {/* Template Selection */}
             <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
               Templates
             </Typography>
             <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
-              <Card 
-                variant={!selectedTemplate ? "outlined" : "elevation"}
-                sx={{ 
-                  mb: 1, 
+              <Card
+                variant={!selectedTemplate ? 'outlined' : 'elevation'}
+                sx={{
+                  mb: 1,
                   cursor: 'pointer',
                   border: !selectedTemplate ? 2 : 0,
-                  borderColor: !selectedTemplate ? 'primary.main' : 'transparent'
+                  borderColor: !selectedTemplate
+                    ? 'primary.main'
+                    : 'transparent',
                 }}
                 onClick={() => setSelectedTemplate('')}
               >
@@ -197,7 +208,7 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                   </Typography>
                 </CardContent>
               </Card>
-              
+
               {Object.entries(workflowTemplates).map(([name, template]) =>
                 renderTemplateCard(name, template)
               )}
@@ -209,32 +220,42 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 <Typography variant="subtitle2" sx={{ mb: 1 }}>
                   Custom Configuration
                 </Typography>
-                
+
                 <FormControlLabel
                   control={
                     <Switch
                       checked={workflowConfig.enable_retrieval}
-                      onChange={(e) => updateWorkflowConfig({ enable_retrieval: e.target.checked })}
+                      onChange={(e) =>
+                        updateWorkflowConfig({
+                          enable_retrieval: e.target.checked,
+                        })
+                      }
                     />
                   }
                   label="Document Retrieval (RAG)"
                 />
-                
+
                 <FormControlLabel
                   control={
                     <Switch
                       checked={workflowConfig.enable_tools}
-                      onChange={(e) => updateWorkflowConfig({ enable_tools: e.target.checked })}
+                      onChange={(e) =>
+                        updateWorkflowConfig({ enable_tools: e.target.checked })
+                      }
                     />
                   }
                   label="Function Calling (Tools)"
                 />
-                
+
                 <FormControlLabel
                   control={
                     <Switch
                       checked={workflowConfig.enable_memory}
-                      onChange={(e) => updateWorkflowConfig({ enable_memory: e.target.checked })}
+                      onChange={(e) =>
+                        updateWorkflowConfig({
+                          enable_memory: e.target.checked,
+                        })
+                      }
                     />
                   }
                   label="Conversation Memory"
@@ -251,22 +272,27 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 </Button>
 
                 {showAdvancedConfig && (
-                  <Box sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}>
+                  <Box
+                    sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
+                  >
                     <Typography variant="subtitle2" gutterBottom>
                       Model Configuration
                     </Typography>
-                    
+
                     <Typography gutterBottom>
-                      Temperature: {workflowConfig.llm_config?.temperature || 0.7}
+                      Temperature:{' '}
+                      {workflowConfig.llm_config?.temperature || 0.7}
                     </Typography>
                     <Slider
                       value={workflowConfig.llm_config?.temperature || 0.7}
-                      onChange={(_, value) => updateWorkflowConfig({
-                        llm_config: {
-                          ...workflowConfig.llm_config,
-                          temperature: value as number
-                        }
-                      })}
+                      onChange={(_, value) =>
+                        updateWorkflowConfig({
+                          llm_config: {
+                            ...workflowConfig.llm_config,
+                            temperature: value as number,
+                          },
+                        })
+                      }
                       min={0}
                       max={2}
                       step={0.1}
@@ -274,16 +300,19 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                     />
 
                     <Typography gutterBottom>
-                      Max Tokens: {workflowConfig.llm_config?.max_tokens || 1000}
+                      Max Tokens:{' '}
+                      {workflowConfig.llm_config?.max_tokens || 1000}
                     </Typography>
                     <Slider
                       value={workflowConfig.llm_config?.max_tokens || 1000}
-                      onChange={(_, value) => updateWorkflowConfig({
-                        llm_config: {
-                          ...workflowConfig.llm_config,
-                          max_tokens: value as number
-                        }
-                      })}
+                      onChange={(_, value) =>
+                        updateWorkflowConfig({
+                          llm_config: {
+                            ...workflowConfig.llm_config,
+                            max_tokens: value as number,
+                          },
+                        })
+                      }
                       min={100}
                       max={4000}
                       step={100}
@@ -295,19 +324,24 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         <Typography variant="subtitle2" gutterBottom>
                           Retrieval Configuration
                         </Typography>
-                        
+
                         <Typography gutterBottom>
-                          Max Documents: {workflowConfig.retrieval_config?.max_documents || 5}
+                          Max Documents:{' '}
+                          {workflowConfig.retrieval_config?.max_documents || 5}
                         </Typography>
                         <Slider
-                          value={workflowConfig.retrieval_config?.max_documents || 5}
-                          onChange={(_, value) => updateWorkflowConfig({
-                            retrieval_config: {
-                              ...workflowConfig.retrieval_config,
-                              enabled: true,
-                              max_documents: value as number
-                            }
-                          })}
+                          value={
+                            workflowConfig.retrieval_config?.max_documents || 5
+                          }
+                          onChange={(_, value) =>
+                            updateWorkflowConfig({
+                              retrieval_config: {
+                                ...workflowConfig.retrieval_config,
+                                enabled: true,
+                                max_documents: value as number,
+                              },
+                            })
+                          }
                           min={1}
                           max={20}
                           step={1}
@@ -317,14 +351,18 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         <FormControlLabel
                           control={
                             <Switch
-                              checked={workflowConfig.retrieval_config?.rerank || false}
-                              onChange={(e) => updateWorkflowConfig({
-                                retrieval_config: {
-                                  ...workflowConfig.retrieval_config,
-                                  enabled: true,
-                                  rerank: e.target.checked
-                                }
-                              })}
+                              checked={
+                                workflowConfig.retrieval_config?.rerank || false
+                              }
+                              onChange={(e) =>
+                                updateWorkflowConfig({
+                                  retrieval_config: {
+                                    ...workflowConfig.retrieval_config,
+                                    enabled: true,
+                                    rerank: e.target.checked,
+                                  },
+                                })
+                              }
                             />
                           }
                           label="Enable Reranking"
@@ -337,19 +375,24 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         <Typography variant="subtitle2" gutterBottom>
                           Tool Configuration
                         </Typography>
-                        
+
                         <Typography gutterBottom>
-                          Max Tool Calls: {workflowConfig.tool_config?.max_tool_calls || 3}
+                          Max Tool Calls:{' '}
+                          {workflowConfig.tool_config?.max_tool_calls || 3}
                         </Typography>
                         <Slider
-                          value={workflowConfig.tool_config?.max_tool_calls || 3}
-                          onChange={(_, value) => updateWorkflowConfig({
-                            tool_config: {
-                              ...workflowConfig.tool_config,
-                              enabled: true,
-                              max_tool_calls: value as number
-                            }
-                          })}
+                          value={
+                            workflowConfig.tool_config?.max_tool_calls || 3
+                          }
+                          onChange={(_, value) =>
+                            updateWorkflowConfig({
+                              tool_config: {
+                                ...workflowConfig.tool_config,
+                                enabled: true,
+                                max_tool_calls: value as number,
+                              },
+                            })
+                          }
                           min={1}
                           max={10}
                           step={1}
@@ -359,14 +402,19 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         <FormControlLabel
                           control={
                             <Switch
-                              checked={workflowConfig.tool_config?.parallel_tool_calls || false}
-                              onChange={(e) => updateWorkflowConfig({
-                                tool_config: {
-                                  ...workflowConfig.tool_config,
-                                  enabled: true,
-                                  parallel_tool_calls: e.target.checked
-                                }
-                              })}
+                              checked={
+                                workflowConfig.tool_config
+                                  ?.parallel_tool_calls || false
+                              }
+                              onChange={(e) =>
+                                updateWorkflowConfig({
+                                  tool_config: {
+                                    ...workflowConfig.tool_config,
+                                    enabled: true,
+                                    parallel_tool_calls: e.target.checked,
+                                  },
+                                })
+                              }
                             />
                           }
                           label="Parallel Tool Calls"

@@ -844,13 +844,22 @@ class LangGraphWorkflowManager:
             if output and hasattr(output, "content"):
                 # Extract usage metadata if available
                 usage_metadata = {}
-                if hasattr(output, "usage_metadata") and output.usage_metadata:
+                if (
+                    hasattr(output, "usage_metadata")
+                    and output.usage_metadata
+                ):
                     usage_metadata = {
-                        "input_tokens": output.usage_metadata.get("input_tokens", 0),
-                        "output_tokens": output.usage_metadata.get("output_tokens", 0),
-                        "total_tokens": output.usage_metadata.get("total_tokens", 0),
+                        "input_tokens": output.usage_metadata.get(
+                            "input_tokens", 0
+                        ),
+                        "output_tokens": output.usage_metadata.get(
+                            "output_tokens", 0
+                        ),
+                        "total_tokens": output.usage_metadata.get(
+                            "total_tokens", 0
+                        ),
                     }
-                
+
                 # Create standard workflow event format for final model output
                 return {
                     "call_model": {

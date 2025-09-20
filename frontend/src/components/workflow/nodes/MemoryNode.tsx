@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Memory as MemoryIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const MemoryNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const MemoryNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -31,30 +28,30 @@ const MemoryNode: React.FC<NodeProps> = ({
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <MemoryIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Memory
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <MemoryIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Memory
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Manage context
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Manage context
-          </Typography>
-          {config.window && (
+            {config.window && (
+              <Chip
+                label={`Window: ${config.window}`}
+                size="small"
+                color="secondary"
+                variant="outlined"
+                sx={{ mr: 0.5 }}
+              />
+            )}
             <Chip
-              label={`Window: ${config.window}`}
+              label={config.enabled ? 'Enabled' : 'Disabled'}
               size="small"
-              color="secondary"
+              color={config.enabled ? 'success' : 'error'}
               variant="outlined"
-              sx={{ mr: 0.5 }}
             />
-          )}
-          <Chip
-            label={config.enabled ? 'Enabled' : 'Disabled'}
-            size="small"
-            color={config.enabled ? 'success' : 'error'}
-            variant="outlined"
-          />
           </>
         </CardContent>
       </Card>

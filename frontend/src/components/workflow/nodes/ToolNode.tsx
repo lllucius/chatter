@@ -4,10 +4,7 @@ import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Build as ToolIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const ToolNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
+const ToolNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -31,32 +28,32 @@ const ToolNode: React.FC<NodeProps> = ({
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <ToolIcon sx={{ mr: 1, fontSize: 20 }} />
-            <Typography variant="body1" fontWeight="bold">
-              Tool Execution
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+              <ToolIcon sx={{ mr: 1, fontSize: 20 }} />
+              <Typography variant="body1" fontWeight="bold">
+                Tool Execution
+              </Typography>
+            </Box>
+            <Typography variant="body2" sx={{ mb: 1 }}>
+              Execute tools
             </Typography>
-          </Box>
-          <Typography variant="body2" sx={{ mb: 1 }}>
-            Execute tools
-          </Typography>
-          {config.parallel && (
-            <Chip
-              label="Parallel"
-              size="small"
-              color="warning"
-              variant="outlined"
-              sx={{ mr: 0.5 }}
-            />
-          )}
-          {Array.isArray(config.tools) && config.tools.length > 0 && (
-            <Chip
-              label={`${config.tools.length} tools`}
-              size="small"
-              color="warning"
-              variant="outlined"
-            />
-          )}
+            {config.parallel && (
+              <Chip
+                label="Parallel"
+                size="small"
+                color="warning"
+                variant="outlined"
+                sx={{ mr: 0.5 }}
+              />
+            )}
+            {Array.isArray(config.tools) && config.tools.length > 0 && (
+              <Chip
+                label={`${config.tools.length} tools`}
+                size="small"
+                color="warning"
+                variant="outlined"
+              />
+            )}
           </>
         </CardContent>
       </Card>

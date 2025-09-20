@@ -1,14 +1,10 @@
 import React from 'react';
-import { Handle, Position, NodeProps, Node } from '@xyflow/react';
+import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { PlayArrow as StartIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../WorkflowEditor';
 
-const StartNode: React.FC<NodeProps> = ({
-  data,
-  selected,
-}) => {
-  const nodeData = data as WorkflowNodeData;
+const StartNode: React.FC<NodeProps> = ({ data, selected }) => {
   return (
     <>
       <Card

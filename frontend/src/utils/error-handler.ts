@@ -67,7 +67,7 @@ class ErrorHandler {
       errorMessage.includes('CORS') ||
       errorMessage.includes('blocked by CORS policy') ||
       errorMessage.includes('Access to fetch') ||
-      errorMessage.includes('No \'Access-Control-Allow-Origin\'')
+      errorMessage.includes("No 'Access-Control-Allow-Origin'")
     );
   }
 
@@ -89,7 +89,9 @@ class ErrorHandler {
    * Check if error is a server error (5xx)
    */
   private isServerError(error: unknown): boolean {
-    const status = (error as ErrorResponse)?.response?.status || (error as { status?: number })?.status;
+    const status =
+      (error as ErrorResponse)?.response?.status ||
+      (error as { status?: number })?.status;
     return status !== undefined && status >= 500 && status < 600;
   }
 
@@ -259,7 +261,7 @@ class ErrorHandler {
       const isRateLimit = this.isRateLimitError(error);
       const isCors = this.isCorsError(error);
       const isNetwork = this.isNetworkError(error);
-      
+
       if (isDev) {
         // In development, show detailed error in toast
         const devMessage = `${userMessage}\n\nSource: ${context.source}${

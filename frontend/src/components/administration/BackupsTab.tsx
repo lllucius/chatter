@@ -66,7 +66,11 @@ const BackupsTab: React.FC<BackupsTabProps> = memo(
                             : 'default'
                       }
                     />
-                    <Typography component="span" variant="caption" color="text.secondary">
+                    <Typography
+                      component="span"
+                      variant="caption"
+                      color="text.secondary"
+                    >
                       {new Date(backup.created_at).toLocaleString()}
                     </Typography>
                   </Box>

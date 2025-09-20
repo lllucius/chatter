@@ -10,9 +10,11 @@ describe('SDK Method Integration', () => {
 
   beforeEach(() => {
     vi.clearAllMocks();
-    sdk = new ChatterSDK(new Configuration({
-      basePath: 'http://localhost:8000',
-    }));
+    sdk = new ChatterSDK(
+      new Configuration({
+        basePath: 'http://localhost:8000',
+      })
+    );
   });
 
   it('should have all expected API groups', () => {
@@ -27,15 +29,28 @@ describe('SDK Method Integration', () => {
   });
 
   it('should have conversations API methods', () => {
-    expect(typeof sdk.conversations.listConversationsApiV1Conversations).toBe('function');
-    expect(typeof sdk.conversations.createConversationApiV1Conversations).toBe('function');
-    expect(typeof sdk.conversations.getConversationApiV1ConversationsConversationId).toBe('function');
+    expect(typeof sdk.conversations.listConversationsApiV1Conversations).toBe(
+      'function'
+    );
+    expect(typeof sdk.conversations.createConversationApiV1Conversations).toBe(
+      'function'
+    );
+    expect(
+      typeof sdk.conversations.getConversationApiV1ConversationsConversationId
+    ).toBe('function');
   });
 
   it('should have workflow API methods', () => {
-    expect(typeof sdk.workflows.executeChatWorkflowApiV1WorkflowsExecuteChat).toBe('function');
-    expect(typeof sdk.workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming).toBe('function');
-    expect(typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat).toBe('function');
+    expect(
+      typeof sdk.workflows.executeChatWorkflowApiV1WorkflowsExecuteChat
+    ).toBe('function');
+    expect(
+      typeof sdk.workflows
+        .executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming
+    ).toBe('function');
+    expect(
+      typeof sdk.workflows.getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat
+    ).toBe('function');
   });
 
   it('should have auth API methods', () => {

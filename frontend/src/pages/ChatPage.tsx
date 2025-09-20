@@ -18,7 +18,11 @@ import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { ChatMessage } from '../components/EnhancedMessage';
-import type { ConversationResponse, ChatWorkflowRequest, ChatResponse } from 'chatter-sdk';
+import type {
+  ConversationResponse,
+  ChatWorkflowRequest,
+  ChatResponse,
+} from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
@@ -86,13 +90,19 @@ const ChatPage: React.FC = () => {
 
   // Load conversation messages if we have a current conversation on mount
   useEffect(() => {
-    if (currentConversation && currentConversation.id && messages.length === 0) {
+    if (
+      currentConversation &&
+      currentConversation.id &&
+      messages.length === 0
+    ) {
       loadMessagesForConversation(currentConversation.id);
     }
   }, [currentConversation, loadMessagesForConversation, messages.length]);
 
   // Create a ref to handle circular dependency between handleStreamingResponse and handleRegenerateMessage
-  const handleRegenerateMessageRef = useRef<((messageId: string) => Promise<void>) | null>(null);
+  const handleRegenerateMessageRef = useRef<
+    ((messageId: string) => Promise<void>) | null
+  >(null);
 
   // Message handlers
   const handleEditMessage = useCallback(
@@ -113,14 +123,11 @@ const ChatPage: React.FC = () => {
     [setMessages]
   );
 
-  const handleRateMessage = useCallback(
-    (messageId: string, rating: number) => {
-      // Implementation for message rating
-      const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
-      toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
-    },
-    []
-  );
+  const handleRateMessage = useCallback((messageId: string, rating: number) => {
+    // Implementation for message rating
+    const ratingText = rating >= 4 ? 'good' : rating >= 3 ? 'neutral' : 'bad';
+    toastService.info(`Message rated as ${ratingText} (${rating} stars)`);
+  }, []);
 
   // Handle streaming response from chat API
   const handleStreamingResponse = useCallback(
@@ -128,7 +135,9 @@ const ChatPage: React.FC = () => {
       try {
         // Get the streaming response
         const stream =
-          await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(chatRequest) as unknown as ReadableStream;
+          (await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(
+            chatRequest
+          )) as unknown as ReadableStream;
 
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();
@@ -350,11 +359,15 @@ const ChatPage: React.FC = () => {
         // Get the streaming response from workflow API
         // Note: Current SDK doesn't properly support streaming, this needs to be fixed
         const streamResponse = await sendWorkflowMessage(workflowRequest, true);
-        
+
         // For now, handle as a regular response until streaming is properly implemented
-        if (streamResponse && typeof streamResponse === 'object' && 'message' in streamResponse) {
+        if (
+          streamResponse &&
+          typeof streamResponse === 'object' &&
+          'message' in streamResponse
+        ) {
           const response = streamResponse as ChatResponse;
-          
+
           // Create assistant message from response
           const assistantMessage: ChatMessage = {
             id: `assistant-${Date.now()}`,
@@ -389,7 +402,7 @@ const ChatPage: React.FC = () => {
                 newMessages[lastAssistantIndex] = {
                   ...newMessages[lastAssistantIndex],
                   content: assistantMessage.content,
-                  metadata: assistantMessage.metadata
+                  metadata: assistantMessage.metadata,
                 };
               }
               return newMessages;
@@ -398,10 +411,10 @@ const ChatPage: React.FC = () => {
             // Add new assistant message
             setMessages((prev) => [...prev, assistantMessage]);
           }
-          
+
           return;
         }
-        
+
         // Legacy streaming code (commented out until SDK supports streaming properly)
         /*
         // Create a text decoder to handle the stream
@@ -561,8 +574,8 @@ const ChatPage: React.FC = () => {
         // Focus input after streaming is complete
         focusInput();
         */
-        
-        // For now, focus input after non-streaming completion  
+
+        // For now, focus input after non-streaming completion
         focusInput();
       } catch (error) {
         // Handle errors by showing an error message
@@ -607,11 +620,7 @@ const ChatPage: React.FC = () => {
         });
       }
     },
-    [
-      setMessages,
-      sendWorkflowMessage,
-      focusInput,
-    ]
+    [setMessages, sendWorkflowMessage, focusInput]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -634,7 +643,8 @@ const ChatPage: React.FC = () => {
               {
                 profile_id: selectedProfile || undefined,
                 system_prompt_override: customPromptText.trim() || undefined,
-                document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+                document_ids:
+                  selectedDocuments.length > 0 ? selectedDocuments : undefined,
                 workflow_config: {
                   ...getEffectiveConfig(),
                   llm_config: {
@@ -642,13 +652,18 @@ const ChatPage: React.FC = () => {
                     temperature,
                     max_tokens: maxTokens,
                   },
-                  retrieval_config: enableRetrieval ? {
-                    enabled: true,
-                    max_documents: 5,
-                    similarity_threshold: 0.7,
-                    document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-                    rerank: false,
-                  } : undefined,
+                  retrieval_config: enableRetrieval
+                    ? {
+                        enabled: true,
+                        max_documents: 5,
+                        similarity_threshold: 0.7,
+                        document_ids:
+                          selectedDocuments.length > 0
+                            ? selectedDocuments
+                            : undefined,
+                        rerank: false,
+                      }
+                    : undefined,
                 },
               }
             );
@@ -661,7 +676,10 @@ const ChatPage: React.FC = () => {
               return; // Streaming handling is complete
             } else {
               // Use non-streaming workflow endpoint
-              response = await sendWorkflowMessage(workflowRequest, false) as ChatResponse;
+              response = (await sendWorkflowMessage(
+                workflowRequest,
+                false
+              )) as ChatResponse;
             }
 
             // Validate response structure
@@ -836,7 +854,8 @@ const ChatPage: React.FC = () => {
           {
             profile_id: selectedProfile || undefined,
             system_prompt_override: customPromptText.trim() || undefined,
-            document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
+            document_ids:
+              selectedDocuments.length > 0 ? selectedDocuments : undefined,
             // Merge with effective workflow configuration
             workflow_config: {
               ...getEffectiveConfig(),
@@ -845,13 +864,18 @@ const ChatPage: React.FC = () => {
                 temperature,
                 max_tokens: maxTokens,
               },
-              retrieval_config: enableRetrieval ? {
-                enabled: true,
-                max_documents: 5,
-                similarity_threshold: 0.7,
-                document_ids: selectedDocuments.length > 0 ? selectedDocuments : undefined,
-                rerank: false,
-              } : undefined,
+              retrieval_config: enableRetrieval
+                ? {
+                    enabled: true,
+                    max_documents: 5,
+                    similarity_threshold: 0.7,
+                    document_ids:
+                      selectedDocuments.length > 0
+                        ? selectedDocuments
+                        : undefined,
+                    rerank: false,
+                  }
+                : undefined,
             },
           }
         );
@@ -860,11 +884,17 @@ const ChatPage: React.FC = () => {
         let response: ChatResponse;
         if (streamingEnabled) {
           // Use streaming workflow endpoint
-          await handleWorkflowStreamingResponse(workflowRequest, isRegeneration);
+          await handleWorkflowStreamingResponse(
+            workflowRequest,
+            isRegeneration
+          );
           return; // Streaming handling is complete
         } else {
           // Use non-streaming workflow endpoint
-          response = await sendWorkflowMessage(workflowRequest, false) as ChatResponse;
+          response = (await sendWorkflowMessage(
+            workflowRequest,
+            false
+          )) as ChatResponse;
         }
 
         // Validate response structure

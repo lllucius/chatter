@@ -112,7 +112,9 @@ export const useABTestingData = () => {
 
       // Handle recommendations
       if (recommendationsResp.status === 'fulfilled') {
-        setTestRecommendations(recommendationsResp.value as unknown as TestRecommendations);
+        setTestRecommendations(
+          recommendationsResp.value as unknown as TestRecommendations
+        );
       } else {
         setTestRecommendations(null);
       }

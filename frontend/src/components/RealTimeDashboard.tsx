@@ -49,7 +49,8 @@ interface AlertData {
 const RealTimeDashboard: React.FC = () => {
   const [realTimeEnabled, setRealTimeEnabled] = useState(false);
   const [isConnecting, setIsConnecting] = useState(false);
-  const [dashboardData, setDashboardData] = useState<IntegratedDashboardStats | null>(null);
+  const [dashboardData, setDashboardData] =
+    useState<IntegratedDashboardStats | null>(null);
   const [chartData, setChartData] = useState<ChartReadyAnalytics | null>(null);
   const [alerts, setAlerts] = useState<AlertData[]>([]);
   const [connectionStatus, setConnectionStatus] = useState<
@@ -67,10 +68,18 @@ const RealTimeDashboard: React.FC = () => {
 
     switch (event.type) {
       case 'analytics':
-        if (event.data.dashboard_stats && typeof event.data.dashboard_stats === 'object') {
-          setDashboardData(event.data.dashboard_stats as IntegratedDashboardStats);
+        if (
+          event.data.dashboard_stats &&
+          typeof event.data.dashboard_stats === 'object'
+        ) {
+          setDashboardData(
+            event.data.dashboard_stats as IntegratedDashboardStats
+          );
         }
-        if (event.data.chart_data && typeof event.data.chart_data === 'object') {
+        if (
+          event.data.chart_data &&
+          typeof event.data.chart_data === 'object'
+        ) {
           setChartData(event.data.chart_data as ChartReadyAnalytics);
         }
         break;
@@ -83,8 +92,12 @@ const RealTimeDashboard: React.FC = () => {
             severity: (alertData.severity as AlertData['severity']) || 'info',
             title: String(alertData.title || 'Notification'),
             message: String(alertData.message || 'No message'),
-            threshold: alertData.threshold ? Number(alertData.threshold) : undefined,
-            recommendation: alertData.recommendation ? String(alertData.recommendation) : undefined
+            threshold: alertData.threshold
+              ? Number(alertData.threshold)
+              : undefined,
+            recommendation: alertData.recommendation
+              ? String(alertData.recommendation)
+              : undefined,
           };
           setAlerts((prev) => [alert, ...prev.slice(0, 9)]); // Keep only last 10 alerts
 
@@ -106,6 +119,7 @@ const RealTimeDashboard: React.FC = () => {
 
       default:
         // Handle unknown event types
+        // eslint-disable-next-line no-console
         console.debug('Unknown real-time event type:', event.type);
     }
   }, []);
@@ -212,7 +226,9 @@ const RealTimeDashboard: React.FC = () => {
 
         toastService.success('Real-time updates started');
       } catch (error) {
-        handleError(error, { source: 'RealTimeDashboard.toggleRealTime.start' });
+        handleError(error, {
+          source: 'RealTimeDashboard.toggleRealTime.start',
+        });
         setRealTimeEnabled(false);
       } finally {
         setIsConnecting(false);

@@ -26,25 +26,32 @@ describe('Rate Limit Error Handling', () => {
         status: 429,
         data: {
           title: 'Too Many Requests',
-          detail: 'Rate limit exceeded'
-        }
-      }
+          detail: 'Rate limit exceeded',
+        },
+      },
     };
 
     const mockToastError = vi.mocked(toastService.error);
 
     // Call handleError with rate limit error
-    handleError(rateLimitError, {
-      source: 'test',
-      operation: 'test operation'
-    }, {
-      showToast: true,
-      logToConsole: false
-    });
+    handleError(
+      rateLimitError,
+      {
+        source: 'test',
+        operation: 'test operation',
+      },
+      {
+        showToast: true,
+        logToConsole: false,
+      }
+    );
 
     // In development mode, should show detailed error
-    const expectedMessage = 'Too many requests. Please wait a moment before trying again.\n\nSource: test\nOperation: test operation';
-    expect(mockToastError).toHaveBeenCalledWith(expectedMessage, { autoClose: false });
+    const expectedMessage =
+      'Too many requests. Please wait a moment before trying again.\n\nSource: test\nOperation: test operation';
+    expect(mockToastError).toHaveBeenCalledWith(expectedMessage, {
+      autoClose: false,
+    });
 
     process.env.NODE_ENV = originalEnv;
   });
@@ -58,13 +65,17 @@ describe('Rate Limit Error Handling', () => {
     const mockToastError = vi.mocked(toastService.error);
 
     // Call handleError with normal error
-    handleError(normalError, {
-      source: 'test',
-      operation: 'test operation'
-    }, {
-      showToast: true,
-      logToConsole: false
-    });
+    handleError(
+      normalError,
+      {
+        source: 'test',
+        operation: 'test operation',
+      },
+      {
+        showToast: true,
+        logToConsole: false,
+      }
+    );
 
     // Should show production-style message
     const expectedMessage = 'Regular error message (Error in test)';
@@ -82,21 +93,25 @@ describe('Rate Limit Error Handling', () => {
         status: 429,
         data: {
           title: 'Too Many Requests',
-          detail: 'Rate limit exceeded'
-        }
-      }
+          detail: 'Rate limit exceeded',
+        },
+      },
     };
 
     const mockToastError = vi.mocked(toastService.error);
 
     // Call handleError with rate limit error in production
-    handleError(rateLimitError, {
-      source: 'test',
-      operation: 'test operation'
-    }, {
-      showToast: true,
-      logToConsole: false
-    });
+    handleError(
+      rateLimitError,
+      {
+        source: 'test',
+        operation: 'test operation',
+      },
+      {
+        showToast: true,
+        logToConsole: false,
+      }
+    );
 
     // Should NOT show toast for rate limit errors in production
     expect(mockToastError).not.toHaveBeenCalled();

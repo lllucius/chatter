@@ -24,7 +24,7 @@ import type {
   ChatResponse,
 } from 'chatter-sdk';
 import { parseSSELine } from '../utils/sse-parser';
-import type { ChatMessage } from '../types/chat';
+import { useRightSidebar } from '../components/RightSidebarContext';
 
 const ChatPage: React.FC = () => {
   // Use right sidebar context
@@ -350,7 +350,10 @@ const ChatPage: React.FC = () => {
               }
 
               try {
-                const eventData = JSON.parse(raw);
+                // Use safe SSE parsing to prevent malformed data errors
+                const sseData = parseSSELine(`data: ${raw}`);
+                if (!sseData) continue;
+                const eventData = sseData;
 
                 switch (eventData.type) {
                   case 'start':
@@ -570,7 +573,10 @@ const ChatPage: React.FC = () => {
               }
 
               try {
-                const eventData = JSON.parse(raw);
+                // Use safe SSE parsing to prevent malformed data errors
+                const sseData = parseSSELine(`data: ${raw}`);
+                if (!sseData) continue;
+                const eventData = sseData;
 
                 switch (eventData.type) {
                   case 'start':

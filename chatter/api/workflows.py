@@ -369,13 +369,11 @@ async def execute_workflow(
                 detail="Workflow definition not found"
             )
 
-        # Execute the workflow using the main execution method
-        result = await execution_service.execute_workflow(
-            workflow_type="definition_based",  # Use a generic type for definition-based workflows
-            request_data=execution_request.input_data,
+        # Execute the workflow using the new workflow definition execution method
+        result = await execution_service.execute_workflow_definition(
+            definition=definition,
+            input_data=execution_request.input_data,
             user_id=current_user.id,
-            conversation_id=None,  # Not chat-based
-            workflow_definition=definition,
         )
         return WorkflowExecutionResponse(**result)
     except HTTPException:

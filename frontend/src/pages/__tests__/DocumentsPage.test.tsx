@@ -4,7 +4,7 @@ import { describe, it, expect, beforeEach } from 'vitest';
 import { BrowserRouter } from 'react-router-dom';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import DocumentsPage from '../DocumentsPage';
-import { getSDK, authService } from '../../services/auth-service';
+import { getSDK } from '../../services/auth-service';
 
 // Mock dependencies
 vi.mock('../../services/auth-service', () => ({
@@ -91,7 +91,7 @@ describe('DocumentsPage', () => {
       getSDK().documents.listDocumentsGetApiV1Documents
     ).mockResolvedValue({
       documents: mockDocuments,
-    } as any);
+    } as { documents: unknown[] });
   });
 
   it('loads and displays documents', async () => {
@@ -135,7 +135,9 @@ describe('DocumentsPage', () => {
   it('displays error message when API call fails', async () => {
     const consoleErrorSpy = vi
       .spyOn(console, 'error')
-      .mockImplementation(() => {});
+      .mockImplementation(() => {
+        // Mock implementation for testing
+      });
 
     // Override the default mock to simulate API failure for this specific test
     vi.mocked(

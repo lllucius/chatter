@@ -97,7 +97,7 @@ const SSEMonitorPage: React.FC = () => {
       try {
         const parsed = JSON.parse(saved);
         return { ...defaultSettings, ...parsed };
-      } catch (_error) {
+      } catch {
         // console.warn('Failed to parse saved SSE monitor settings:', error);
       }
     }
@@ -239,14 +239,20 @@ const SSEMonitorPage: React.FC = () => {
 
       // Console logging if enabled
       if (settings.consoleLogging) {
+        // eslint-disable-next-line no-console
         console.group(`🔴 SSE Event: ${event.type}`);
+        // eslint-disable-next-line no-console
         console.log(
           '📅 Timestamp:',
           format(messageEntry.timestamp, 'HH:mm:ss.SSS')
         );
+        // eslint-disable-next-line no-console
         console.log('📋 Event:', event);
+        // eslint-disable-next-line no-console
         console.log('🔗 Event ID:', event.id);
+        // eslint-disable-next-line no-console
         console.log('👤 User ID:', event.user_id || 'N/A');
+        // eslint-disable-next-line no-console
         console.groupEnd();
       }
     },
@@ -299,7 +305,7 @@ const SSEMonitorPage: React.FC = () => {
       filters.userIds.length +
       filters.sourceSystems.length
     );
-  }, [settings.filters]);
+  }, [settings]);
 
   // Export messages to JSON
   const exportMessages = useCallback(() => {
@@ -313,7 +319,7 @@ const SSEMonitorPage: React.FC = () => {
     link.click();
     document.body.removeChild(link);
     URL.revokeObjectURL(url);
-  }, [filteredMessages, settings]);
+  }, [filteredMessages]);
 
   // Auto-restore monitoring state when SSE manager becomes available
   useEffect(() => {

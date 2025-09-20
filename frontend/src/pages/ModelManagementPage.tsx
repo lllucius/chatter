@@ -174,7 +174,7 @@ const ModelManagementPage: React.FC = () => {
           try {
             const defaultProviderBody: DefaultProvider = {
               provider_id: provider.id as string,
-              model_type: 'embedding' as 'embedding',
+              model_type: 'embedding' as const,
             } as DefaultProvider;
 
             await getSDK().modelRegistry.setDefaultProviderApiV1ModelsProvidersProviderIdSetDefault(

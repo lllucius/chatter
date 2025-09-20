@@ -1,9 +1,8 @@
 import { describe, it, expect, beforeEach } from 'vitest';
-import { render, screen, fireEvent, waitFor } from '@testing-library/react';
+import { render, screen, fireEvent } from '@testing-library/react';
 import { ThemeProvider, createTheme } from '@mui/material/styles';
 import SSEMonitorPage from '../SSEMonitorPage';
 import { useSSE } from '../../services/sse-context';
-import { AnySSEEvent } from '../../services/sse-types';
 
 // Mock the SSE context
 vi.mock('../../services/sse-context', () => ({

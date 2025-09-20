@@ -1,14 +1,22 @@
 import { describe, it, expect } from 'vitest';
 
+interface MockMessage {
+  id: string;
+  content: string;
+  metadata?: {
+    tokens?: number;
+  };
+}
+
 // Test the core streaming logic from ChatPage
 describe('ChatPage Streaming Logic', () => {
   it('should parse SSE data chunks correctly', () => {
     // Mock the decoder and streaming logic from ChatPage
-    const mockMessages: any[] = [];
+    const mockMessages: MockMessage[] = [];
     const messageId = 'test-message-id';
 
     // Simulate the setMessages function
-    const setMessages = (updateFn: (prev: any[]) => any[]) => {
+    const setMessages = (updateFn: (prev: MockMessage[]) => MockMessage[]) => {
       const updated = updateFn(mockMessages);
       mockMessages.splice(0, mockMessages.length, ...updated);
     };
@@ -69,8 +77,8 @@ describe('ChatPage Streaming Logic', () => {
                 );
               }
             }
-          } catch (parseError) {
-            console.warn('Failed to parse streaming chunk:', parseError);
+          } catch {
+            // console.warn('Failed to parse streaming chunk:', parseError);
           }
         }
       }
@@ -83,10 +91,10 @@ describe('ChatPage Streaming Logic', () => {
   });
 
   it('should handle streaming errors gracefully', () => {
-    const mockMessages: any[] = [];
+    const mockMessages: MockMessage[] = [];
     const messageId = 'test-message-id';
 
-    const setMessages = (updateFn: (prev: any[]) => any[]) => {
+    const _setMessages = (_updateFn: (prev: MockMessage[]) => MockMessage[]) => {
       const updated = updateFn(mockMessages);
       mockMessages.splice(0, mockMessages.length, ...updated);
     };
@@ -120,7 +128,7 @@ describe('ChatPage Streaming Logic', () => {
   });
 
   it('should handle malformed SSE data gracefully', () => {
-    const mockMessages: any[] = [];
+    const _mockMessages: MockMessage[] = [];
 
     // Test with malformed JSON
     const malformedLine = 'data: {invalid json}';
@@ -132,7 +140,7 @@ describe('ChatPage Streaming Logic', () => {
       if (dataStr) {
         try {
           JSON.parse(dataStr);
-        } catch (error) {
+        } catch {
           parseError = true;
           // In the real implementation, this would be logged but not throw
         }

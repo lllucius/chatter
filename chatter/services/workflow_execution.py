@@ -226,12 +226,8 @@ class WorkflowExecutionService:
         self,
         user_id: str,
         request: "ChatWorkflowRequest",
-        streaming: bool = False,
     ) -> tuple[Conversation, Message]:
         """Execute chat using workflow system (non-streaming)."""
-        if streaming:
-            raise ValueError("Use execute_chat_workflow_streaming for streaming requests")
-            
         from chatter.schemas.chat import ChatRequest
         
         # Convert ChatWorkflowRequest to ChatRequest and get conversation

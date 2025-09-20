@@ -692,8 +692,7 @@ async def execute_chat_workflow(
     try:
         conversation, message = await workflow_service.execute_chat_workflow(
             user_id=current_user.id,
-            request=request,
-            streaming=False
+            request=request
         )
         
         from chatter.schemas.chat import ConversationResponse, MessageResponse

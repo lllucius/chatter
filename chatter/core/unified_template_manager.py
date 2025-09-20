@@ -879,7 +879,7 @@ class UnifiedTemplateManager:
                     enable_retrieval=False,
                     enable_tools=False,
                     enable_memory=True,
-                    model_config=ModelConfig(
+                    llm_config=ModelConfig(
                         temperature=0.7, max_tokens=1000
                     ),
                 ),
@@ -898,7 +898,7 @@ class UnifiedTemplateManager:
                     enable_retrieval=True,
                     enable_tools=False,
                     enable_memory=True,
-                    model_config=ModelConfig(
+                    llm_config=ModelConfig(
                         temperature=0.3, max_tokens=1500
                     ),
                     retrieval_config=RetrievalConfig(
@@ -922,7 +922,7 @@ class UnifiedTemplateManager:
                     enable_retrieval=False,
                     enable_tools=True,
                     enable_memory=True,
-                    model_config=ModelConfig(
+                    llm_config=ModelConfig(
                         temperature=0.5, max_tokens=1000
                     ),
                     tool_config=ToolConfig(
@@ -947,7 +947,7 @@ class UnifiedTemplateManager:
                     enable_tools=True,
                     enable_memory=True,
                     enable_web_search=True,
-                    model_config=ModelConfig(
+                    llm_config=ModelConfig(
                         temperature=0.4, max_tokens=2000
                     ),
                     retrieval_config=RetrievalConfig(

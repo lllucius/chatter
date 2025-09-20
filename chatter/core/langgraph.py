@@ -12,7 +12,12 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langgraph.checkpoint.memory import MemorySaver
-# from langgraph.checkpoint.redis import RedisSaver  # Commented out for testing
+try:
+    from langgraph.checkpoint.redis import RedisSaver
+    REDIS_AVAILABLE = True
+except ImportError:
+    RedisSaver = None
+    REDIS_AVAILABLE = False
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.pregel import Pregel
@@ -77,30 +82,23 @@ class LangGraphWorkflowManager:
         # Initialize checkpointer
         self.checkpointer = None
         try:
-            if settings.langgraph_checkpoint_store == "redis":
+            if settings.langgraph_checkpoint_store == "redis" and REDIS_AVAILABLE:
                 # Use Redis checkpointer for production
                 try:
-                    # TEMPORARILY DISABLED FOR TESTING - Redis import not available
                     # Use Redis URL from settings for checkpoint store
-                    # redis_url = settings.redis_url_for_env
+                    redis_url = settings.redis_url_for_env
 
                     # Use RedisSaver with proper context manager handling
                     # RedisSaver.from_conn_string() returns a context manager
-                    # self._redis_context_manager = (
-                    #     RedisSaver.from_conn_string(redis_url)
-                    # )
-                    # self.checkpointer = (
-                    #     self._redis_context_manager.__enter__()
-                    # )
-                    # self.checkpointer.setup()
-                    # logger.info(
-                    #     "LangGraph Redis checkpointer initialized"
-                    # )
-                    
-                    # Fallback to memory for testing
-                    self.checkpointer = MemorySaver()
+                    self._redis_context_manager = (
+                        RedisSaver.from_conn_string(redis_url)
+                    )
+                    self.checkpointer = (
+                        self._redis_context_manager.__enter__()
+                    )
+                    self.checkpointer.setup()
                     logger.info(
-                        "LangGraph Memory checkpointer initialized (redis disabled for testing)"
+                        "LangGraph Redis checkpointer initialized"
                     )
 
                 except Exception as redis_error:
@@ -122,9 +120,12 @@ class LangGraphWorkflowManager:
                         "LangGraph Memory checkpointer initialized (redis fallback)"
                     )
             else:
-                # Fallback to in-memory checkpointer for development
+                # Fallback to in-memory checkpointer for development or when Redis unavailable
                 self.checkpointer = MemorySaver()
-                logger.info("LangGraph Memory checkpointer initialized")
+                if not REDIS_AVAILABLE:
+                    logger.info("LangGraph Memory checkpointer initialized (redis not available)")
+                else:
+                    logger.info("LangGraph Memory checkpointer initialized")
         except Exception as e:
             logger.warning(
                 "Failed to initialize checkpointer, falling back to memory",

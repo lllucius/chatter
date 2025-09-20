@@ -1159,12 +1159,31 @@ class LangGraphWorkflowManager:
         try:
             from chatter.core.vector_store import vector_store_manager
             from chatter.services.embeddings import EmbeddingService
+            import asyncio
 
             # Create embedding service
             embedding_service = EmbeddingService()
 
             # Get default embeddings for the user's workspace
-            embeddings = embedding_service.get_default_embeddings()
+            # Since this method is called synchronously but embedding service is async,
+            # we need to run the async method in a way that works
+            try:
+                # Try to get the current event loop
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # If loop is running, we can't use run_until_complete
+                    # This is a limitation - in this case, return None and log warning
+                    logger.warning(
+                        "Cannot get embeddings synchronously while event loop is running",
+                        workspace_id=workspace_id
+                    )
+                    return None
+                else:
+                    embeddings = loop.run_until_complete(embedding_service.get_default_provider())
+            except RuntimeError:
+                # No event loop, create a new one
+                embeddings = asyncio.run(embedding_service.get_default_provider())
+                
             if embeddings is None:
                 logger.warning(
                     f"No embeddings available for workspace: {workspace_id}"

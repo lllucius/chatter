@@ -278,7 +278,12 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
 
                 {showAdvancedConfig && (
                   <Box
-                    sx={{ mt: 2, p: 2, bgcolor: 'grey.50', borderRadius: 1 }}
+                    sx={{ 
+                      mt: 2, 
+                      p: 2, 
+                      bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50', 
+                      borderRadius: 1 
+                    }}
                   >
                     <Typography variant="subtitle2" gutterBottom>
                       Model Configuration

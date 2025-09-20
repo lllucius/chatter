@@ -100,7 +100,7 @@ const ChatPage: React.FC = () => {
     }
   }, [currentConversation, loadMessagesForConversation, messages.length]);
 
-  // Create a ref to handle circular dependency between _handleStreamingResponse and handleRegenerateMessage
+  // Create a ref to handle circular dependency for handleRegenerateMessage
   const handleRegenerateMessageRef = useRef<
     ((messageId: string) => Promise<void>) | null
   >(null);
@@ -266,230 +266,6 @@ const ChatPage: React.FC = () => {
     [setMessages]
   );
 
-  // Handle streaming response from chat API
-  const _handleStreamingResponse = useCallback(
-    async (chatRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
-      try {
-        // Get the streaming response
-        const stream =
-          await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(
-            chatRequest
-          );
-
-        // Create a text decoder to handle the stream
-        const decoder = new TextDecoder();
-        const reader = stream.getReader();
-
-        let streamedContent = '';
-        let assistantMessageId = `assistant-${Date.now()}`;
-
-        // Create initial assistant message with empty content
-        const initialAssistantMessage: ChatMessage = {
-          id: assistantMessageId,
-          role: 'assistant',
-          content: '',
-          timestamp: new Date(),
-          metadata: {
-            workflow: {
-              stage: 'Streaming',
-              currentStep: 0,
-              totalSteps: 1,
-              stepDescriptions: ['Receiving response...'],
-            },
-          },
-        };
-
-        // Add the initial message to the chat
-        if (isRegeneration) {
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            // Find last index by iterating backwards
-            let lastAssistantIndex = -1;
-            for (let i = newMessages.length - 1; i >= 0; i--) {
-              if (newMessages[i].role === 'assistant') {
-                lastAssistantIndex = i;
-                break;
-              }
-            }
-            if (lastAssistantIndex !== -1) {
-              newMessages[lastAssistantIndex] = initialAssistantMessage;
-            }
-            return newMessages;
-          });
-        } else {
-          setMessages((prev) => [...prev, initialAssistantMessage]);
-        }
-
-        let buffer = '';
-        let totalTokens: number | undefined;
-        let model: string | undefined;
-        let processingTime: number | undefined;
-
-        // Process the stream
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          // Decode the chunk and add to buffer
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
-
-          // Process each complete line
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const raw = line.slice(6).trim();
-
-              // Handle special cases
-              if (raw === '[DONE]') {
-                // End of stream
-                continue;
-              }
-
-              try {
-                // Use safe SSE parsing to prevent malformed data errors
-                const sseData = parseSSELine(`data: ${raw}`);
-                if (!sseData) continue;
-                const eventData = sseData;
-
-                switch (eventData.type) {
-                  case 'start':
-                    // Stream started
-                    break;
-
-                  case 'token':
-                    // Add the token to our streamed content
-                    streamedContent += eventData.content || '';
-
-                    // Update the message with the new content
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === assistantMessageId
-                          ? {
-                              ...msg,
-                              content: streamedContent,
-                              metadata: {
-                                ...msg.metadata,
-                                workflow: {
-                                  stage: 'Streaming',
-                                  currentStep: 0,
-                                  totalSteps: 1,
-                                  stepDescriptions: ['Receiving response...'],
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                    break;
-
-                  case 'complete':
-                    // Extract final metadata
-                    if (eventData.metadata) {
-                      totalTokens = eventData.metadata.total_tokens;
-                      model = eventData.metadata.model_used;
-                      processingTime = eventData.metadata.response_time_ms;
-                    }
-
-                    // Update the message with final metadata
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === assistantMessageId
-                          ? {
-                              ...msg,
-                              content: streamedContent,
-                              metadata: {
-                                model,
-                                tokens: totalTokens,
-                                processingTime,
-                                workflow: {
-                                  stage: 'Complete',
-                                  currentStep: 1,
-                                  totalSteps: 1,
-                                  stepDescriptions: ['Response completed'],
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                    break;
-
-                  case 'error':
-                    throw new Error(
-                      eventData.message || 'Streaming error occurred'
-                    );
-
-                  default:
-                    // Handle other event types if needed
-                    // console.log('Unknown streaming event type:', eventData.type);
-                    break;
-                }
-              } catch {
-                // Skip malformed data
-              }
-            }
-          }
-        }
-
-        // Clean up
-        reader.releaseLock();
-
-        // Focus input after streaming is complete
-        focusInput();
-      } catch (error) {
-        // Handle streaming errors by showing an error message
-        const errorMessage: ChatMessage = {
-          id: `assistant-error-${Date.now()}`,
-          role: 'assistant',
-          content:
-            'Sorry, I encountered an error while processing your request. Please try again.',
-          timestamp: new Date(),
-          metadata: {
-            workflow: {
-              stage: 'Error',
-              currentStep: 0,
-              totalSteps: 1,
-              stepDescriptions: ['Error occurred during streaming'],
-            },
-          },
-        };
-
-        if (isRegeneration) {
-          setMessages((prev) => {
-            const newMessages = [...prev];
-            // Find last index by iterating backwards
-            let lastAssistantIndex = -1;
-            for (let i = newMessages.length - 1; i >= 0; i--) {
-              if (newMessages[i].role === 'assistant') {
-                lastAssistantIndex = i;
-                break;
-              }
-            }
-            if (lastAssistantIndex !== -1) {
-              newMessages[lastAssistantIndex] = errorMessage;
-            }
-            return newMessages;
-          });
-        } else {
-          setMessages((prev) => [...prev, errorMessage]);
-        }
-
-        handleError(error, {
-          source: 'ChatPage._handleStreamingResponse',
-          operation: 'stream chat response',
-        });
-      }
-    },
-    [
-      setMessages,
-      focusInput,
-    ]
-  );
-
   const handleWorkflowStreamingResponse = useCallback(
     async (workflowRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
@@ -499,11 +275,6 @@ const ChatPage: React.FC = () => {
           true
         )) as ReadableStream<Uint8Array>;
 
-        // Create a text decoder to handle the stream
-        const decoder = new TextDecoder();
-        const reader = stream.getReader();
-
-        let streamedContent = '';
         let assistantMessageId = `assistant-${Date.now()}`;
 
         // Create initial assistant message with empty content
@@ -543,123 +314,22 @@ const ChatPage: React.FC = () => {
           setMessages((prev) => [...prev, initialAssistantMessage]);
         }
 
-        let buffer = '';
+        // Local state for the callback functions (though they may not be used in this design)
+        let streamedContent = '';
         let totalTokens: number | undefined;
         let model: string | undefined;
         let processingTime: number | undefined;
 
-        // Process the stream
-        while (true) {
-          const { done, value } = await reader.read();
-
-          if (done) {
-            break;
-          }
-
-          // Decode the chunk and add to buffer
-          buffer += decoder.decode(value, { stream: true });
-          const lines = buffer.split('\n');
-          buffer = lines.pop() || ''; // Keep the last incomplete line in buffer
-
-          // Process each complete line
-          for (const line of lines) {
-            if (line.startsWith('data: ')) {
-              const raw = line.slice(6).trim();
-
-              // Handle special cases
-              if (raw === '[DONE]') {
-                // End of stream
-                continue;
-              }
-
-              try {
-                // Use safe SSE parsing to prevent malformed data errors
-                const sseData = parseSSELine(`data: ${raw}`);
-                if (!sseData) continue;
-                const eventData = sseData;
-
-                switch (eventData.type) {
-                  case 'start':
-                    // Stream started
-                    break;
-
-                  case 'token':
-                    // Add the token to our streamed content
-                    streamedContent += eventData.content || '';
-
-                    // Update the message with the new content
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === assistantMessageId
-                          ? {
-                              ...msg,
-                              content: streamedContent,
-                              metadata: {
-                                ...msg.metadata,
-                                workflow: {
-                                  stage: 'Streaming',
-                                  currentStep: 0,
-                                  totalSteps: 1,
-                                  stepDescriptions: ['Receiving response...'],
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                    break;
-
-                  case 'complete':
-                    // Extract final metadata
-                    if (eventData.metadata) {
-                      totalTokens = eventData.metadata.total_tokens;
-                      model = eventData.metadata.model_used;
-                      processingTime = eventData.metadata.response_time_ms;
-                    }
-
-                    // Update the message with final metadata
-                    setMessages((prev) =>
-                      prev.map((msg) =>
-                        msg.id === assistantMessageId
-                          ? {
-                              ...msg,
-                              content: streamedContent,
-                              metadata: {
-                                model,
-                                tokens: totalTokens,
-                                processingTime,
-                                workflow: {
-                                  stage: 'Complete',
-                                  currentStep: 1,
-                                  totalSteps: 1,
-                                  stepDescriptions: ['Response completed'],
-                                },
-                              },
-                            }
-                          : msg
-                      )
-                    );
-                    break;
-
-                  case 'error':
-                    throw new Error(
-                      eventData.message || 'Workflow streaming error occurred'
-                    );
-
-                  default:
-                    // Handle other event types if needed
-                    // console.log('Unknown streaming event type:', eventData.type);
-                    break;
-                }
-              } catch {
-                // Skip malformed data
-              }
-            }
-          }
-        }
-
-        // Clean up
-        reader.releaseLock();
+        // Use the shared streaming processing logic
+        await processStreamingResponse(
+          stream,
+          isRegeneration,
+          assistantMessageId,
+          (updater) => { streamedContent = updater(streamedContent); },
+          (tokens) => { totalTokens = tokens; },
+          (modelName) => { model = modelName; },
+          (time) => { processingTime = time; }
+        );
 
         // Focus input after streaming is complete
         focusInput();
@@ -706,7 +376,7 @@ const ChatPage: React.FC = () => {
         });
       }
     },
-    [setMessages, sendWorkflowMessage, focusInput]
+    [setMessages, sendWorkflowMessage, focusInput, processStreamingResponse]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -842,7 +512,7 @@ const ChatPage: React.FC = () => {
     ]
   );
 
-  // Update the ref with the current function so it can be called from _handleStreamingResponse
+  // Update the ref with the current function
   handleRegenerateMessageRef.current = handleRegenerateMessage;
 
   const handleSelectConversation = useCallback(

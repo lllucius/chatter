@@ -1978,6 +1978,11 @@ components:
           - type: 'null'
           description: Document IDs
           title: Document Ids
+        enable_tracing:
+          default: false
+          description: Enable backend workflow tracing
+          title: Enable Tracing
+          type: boolean
         max_tokens:
           anyOf:
           - maximum: 8192.0

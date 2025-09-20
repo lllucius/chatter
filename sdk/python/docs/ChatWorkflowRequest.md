@@ -18,6 +18,7 @@ Name | Type | Description | Notes
 **context_limit** | **int** |  | [optional] 
 **document_ids** | **List[str]** |  | [optional] 
 **system_prompt_override** | **str** |  | [optional] 
+**enable_tracing** | **bool** | Enable backend workflow tracing | [optional] [default to False]
 
 ## Example
 

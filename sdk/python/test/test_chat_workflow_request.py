@@ -80,7 +80,8 @@ class TestChatWorkflowRequest(unittest.TestCase):
                 document_ids = [
                     ''
                     ],
-                system_prompt_override = ''
+                system_prompt_override = '',
+                enable_tracing = True
             )
         else:
             return ChatWorkflowRequest(

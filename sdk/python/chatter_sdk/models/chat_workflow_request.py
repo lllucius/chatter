@@ -18,7 +18,7 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
 from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
@@ -41,7 +41,8 @@ class ChatWorkflowRequest(BaseModel):
     context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     document_ids: Optional[List[StrictStr]] = None
     system_prompt_override: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "profile_id", "provider", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override"]
+    enable_tracing: Optional[StrictBool] = Field(default=False, description="Enable backend workflow tracing")
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "profile_id", "provider", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -163,7 +164,8 @@ class ChatWorkflowRequest(BaseModel):
             "max_tokens": obj.get("max_tokens"),
             "context_limit": obj.get("context_limit"),
             "document_ids": obj.get("document_ids"),
-            "system_prompt_override": obj.get("system_prompt_override")
+            "system_prompt_override": obj.get("system_prompt_override"),
+            "enable_tracing": obj.get("enable_tracing") if obj.get("enable_tracing") is not None else False
         })
         return _obj
 

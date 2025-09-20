@@ -27779,6 +27779,12 @@
             ],
             "title": "System Prompt Override",
             "description": "System prompt override"
+          },
+          "enable_tracing": {
+            "type": "boolean",
+            "title": "Enable Tracing",
+            "description": "Enable backend workflow tracing",
+            "default": false
           }
         },
         "type": "object",

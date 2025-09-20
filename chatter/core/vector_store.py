@@ -156,10 +156,6 @@ class PGVectorStore(AbstractVectorStore):
             connection_string or settings.database_url
         )
 
-        # Set query-time accuracy/speed. Higher = more accurate, slower.
-        # (This should be made configurable per workflow.)
-        self.connection_string += "?options=-c%20hnsw.ef_search%3D60"
-
         # Keep async driver for async mode, remove it only for sync mode
         # Since we're now using async_mode=True, we need the async driver
         if "+asyncpg" not in self.connection_string:
@@ -167,6 +163,12 @@ class PGVectorStore(AbstractVectorStore):
             self.connection_string = self.connection_string.replace(
                 "postgresql://", "postgresql+asyncpg://"
             )
+
+        # Set query-time accuracy/speed. Higher = more accurate, slower.
+        # (This should be made configurable per workflow.)
+        # Note: asyncpg doesn't support options in connection string, so skip for async mode
+        if "+asyncpg" not in self.connection_string:
+            self.connection_string += "?options=-c%20hnsw.ef_search%3D60"
 
         self._store: PGVector | None = None
         self._initialize_store()

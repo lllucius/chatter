@@ -1,81 +1,47 @@
-error-handler.ts:246 [Error Handler] useWorkflowChat.sendWorkflowMessage: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+sse-context.tsx:87 Auto-connecting SSE...
+sse-manager.ts:148 SSE: Connecting to http://localhost:8000/api/v1/events/stream
+chat:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+hook.js:608 [Error Handler] useWorkflowChat.sendWorkflowMessage: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
 overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-(anonymous) @ useWorkflowChat.ts:108
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:358
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:248 Full Error Details:
+hook.js:608 Full Error Details:
  Source: useWorkflowChat.sendWorkflowMessage
 Operation: send workflow message
-Timestamp: 2025-09-20T02:14:43.812Z
+Timestamp: 2025-09-20T02:23:56.409Z
 Error Type: SyntaxError
 Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
 Stack Trace:
 SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
 overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-(anonymous) @ useWorkflowChat.ts:108
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:358
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:246 [Error Handler] ChatPage.handleWorkflowStreamingResponse: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+hook.js:608 [Error Handler] ChatPage.handleWorkflowStreamingResponse: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
 overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-(anonymous) @ ChatPage.tsx:614
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-error-handler.ts:248 Full Error Details:
+hook.js:608 Full Error Details:
  Source: ChatPage.handleWorkflowStreamingResponse
 Operation: process workflow chat response
-Timestamp: 2025-09-20T02:14:43.815Z
+Timestamp: 2025-09-20T02:23:56.416Z
 Error Type: SyntaxError
 Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
 Stack Trace:
 SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
 overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-(anonymous) @ ChatPage.tsx:614
-await in (anonymous)
-(anonymous) @ ChatPage.tsx:892
-(anonymous) @ ChatPage.tsx:995
-executeDispatch @ react-dom_client.js?v=536d68a9:11736
-runWithFiberInDEV @ react-dom_client.js?v=536d68a9:1485
-processDispatchQueue @ react-dom_client.js?v=536d68a9:11772
-(anonymous) @ react-dom_client.js?v=536d68a9:12182
-batchedUpdates$1 @ react-dom_client.js?v=536d68a9:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=536d68a9:11877
-dispatchEvent @ react-dom_client.js?v=536d68a9:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=536d68a9:14773
-
+hook.js:608 [Error Handler] useWorkflowChat.sendWorkflowMessage: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+overrideMethod @ hook.js:608
+hook.js:608 Full Error Details:
+ Source: useWorkflowChat.sendWorkflowMessage
+Operation: send workflow message
+Timestamp: 2025-09-20T02:25:15.511Z
+Error Type: SyntaxError
+Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
+Stack Trace:
+SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+overrideMethod @ hook.js:608
+hook.js:608 [Error Handler] ChatPage.handleWorkflowStreamingResponse: SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+overrideMethod @ hook.js:608
+hook.js:608 Full Error Details:
+ Source: ChatPage.handleWorkflowStreamingResponse
+Operation: process workflow chat response
+Timestamp: 2025-09-20T02:25:15.516Z
+Error Type: SyntaxError
+Message: Unexpected token 'd', "data: {"ty"... is not valid JSON
+Stack Trace:
+SyntaxError: Unexpected token 'd', "data: {"ty"... is not valid JSON
+overrideMethod @ hook.js:608

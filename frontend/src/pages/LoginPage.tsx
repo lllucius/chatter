@@ -7,7 +7,6 @@ import {
   Button,
   Typography,
   Box,
-  Alert,
   CircularProgress,
 } from '@mui/material';
 import { authService } from '../services/auth-service';

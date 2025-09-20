@@ -16,7 +16,7 @@ import {
 } from '@mui/material';
 import { Email, VpnKey, CheckCircle } from '@mui/icons-material';
 import { useForm } from '../hooks/useForm';
-import { getSDK, authService } from '../services/auth-service';
+import { getSDK } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 

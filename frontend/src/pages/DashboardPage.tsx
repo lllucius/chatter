@@ -383,7 +383,7 @@ const DashboardPage: React.FC = () => {
       performanceChartData,
       systemHealthData,
     };
-  }, [data, performanceData, systemData, usageData, chartDataApi.data]);
+  }, [data, performanceData, usageData, chartDataApi.data]);
 
   // Helper function for opening export dialog
   const openExportDialog = (format: 'json' | 'csv' | 'xlsx') => {

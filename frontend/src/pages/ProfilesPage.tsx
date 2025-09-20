@@ -1,7 +1,6 @@
 import React, { useRef } from 'react';
 import { CrudPageHeader } from '../components/PageHeader';
 import { Typography } from '../utils/mui';
-import { RefreshIcon, AddIcon } from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, {
@@ -27,7 +26,7 @@ const ProfilesPage: React.FC = () => {
       id: 'name',
       label: 'Name',
       width: '200px',
-      render: createNameWithDescriptionRenderer<any>(),
+      render: createNameWithDescriptionRenderer<ProfileResponse>(),
     },
     {
       id: 'llm_provider',

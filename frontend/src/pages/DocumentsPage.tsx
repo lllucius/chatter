@@ -54,7 +54,7 @@ const DocumentsPage: React.FC = () => {
   // Search dialog state
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<any[]>([]);
+  const [searchResults, setSearchResults] = useState<Record<string, unknown>[]>([]);
   const [searching, setSearching] = useState(false);
 
   // Upload dialog state
@@ -203,7 +203,8 @@ const DocumentsPage: React.FC = () => {
         //   document.id,
         //   { limit: 3, offset: 0 }
         // );
-        console.warn('Document chunks API not yet implemented');
+        // TODO: Document chunks API not yet implemented
+        // console.warn('Document chunks API not yet implemented');
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
       } catch {
         contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
@@ -318,7 +319,8 @@ const DocumentsPage: React.FC = () => {
       // a.click();
       // window.URL.revokeObjectURL(url);
       // window.document.body.removeChild(a);
-      console.warn('Document download API not yet implemented');
+      // TODO: Document download API not yet implemented
+      // console.warn('Document download API not yet implemented');
       toastService.error('Document download not yet implemented');
     } catch (err: unknown) {
       handleError(err, {
@@ -346,7 +348,7 @@ const DocumentsPage: React.FC = () => {
         await getSDK().documents.searchDocumentsApiV1DocumentsSearch(
           searchRequest
         );
-      setSearchResults((response as any)?.results || []);
+      setSearchResults((response as { results?: Record<string, unknown>[] })?.results || []);
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleSearch',

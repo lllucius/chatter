@@ -152,6 +152,12 @@ class WorkflowManagementService:
     ) -> WorkflowDefinition | None:
         """Get a workflow definition by ID."""
         try:
+            logger.debug(
+                f"Searching for workflow definition",
+                workflow_id=workflow_id,
+                owner_id=owner_id,
+            )
+            
             result = await self.session.execute(
                 select(WorkflowDefinition)
                 .where(
@@ -165,7 +171,48 @@ class WorkflowManagementService:
                 )
                 .options(selectinload(WorkflowDefinition.template))
             )
-            return result.scalar_one_or_none()
+            definition = result.scalar_one_or_none()
+            
+            if definition:
+                logger.debug(
+                    f"Found workflow definition",
+                    workflow_id=workflow_id,
+                    owner_id=definition.owner_id,
+                    is_public=definition.is_public,
+                    requested_by=owner_id,
+                )
+                return definition
+            
+            # If not found, check if it exists with different access permissions
+            logger.info(
+                f"Workflow definition not found with access permissions, checking existence",
+                workflow_id=workflow_id,
+                requested_by=owner_id,
+            )
+            
+            # Check if workflow exists at all (without access control)
+            existence_result = await self.session.execute(
+                select(WorkflowDefinition)
+                .where(WorkflowDefinition.id == workflow_id)
+            )
+            existing_workflow = existence_result.scalar_one_or_none()
+            
+            if existing_workflow:
+                logger.warning(
+                    f"Workflow definition exists but access denied",
+                    workflow_id=workflow_id,
+                    actual_owner=existing_workflow.owner_id,
+                    requested_by=owner_id,
+                    is_public=existing_workflow.is_public,
+                )
+            else:
+                logger.info(
+                    f"Workflow definition does not exist in database",
+                    workflow_id=workflow_id,
+                    requested_by=owner_id,
+                )
+            
+            return None
 
         except Exception as e:
             logger.error(

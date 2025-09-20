@@ -5,7 +5,16 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_admin_user, get_current_user
 from chatter.models.user import User
-from chatter.schemas.analytics import SystemAnalyticsResponse
+from chatter.schemas.analytics import (
+    CleanupResponse,
+    DashboardControlResponse,
+    IntelligentSearchResponse,
+    SystemAnalyticsResponse,
+    SystemHealthResponse,
+    TrendingSearchResponse,
+    UserBehaviorAnalyticsResponse,
+    WorkflowUpdateResponse,
+)
 from chatter.services.intelligent_search import (
     get_intelligent_search_service,
 )
@@ -23,7 +32,7 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.post("/real-time/dashboard/start")
+@router.post("/real-time/dashboard/start", response_model=DashboardControlResponse)
 async def start_real_time_dashboard(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
@@ -61,7 +70,7 @@ async def start_real_time_dashboard(
     }
 
 
-@router.post("/real-time/dashboard/stop")
+@router.post("/real-time/dashboard/stop", response_model=DashboardControlResponse)
 async def stop_real_time_dashboard(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
@@ -81,7 +90,7 @@ async def stop_real_time_dashboard(
     }
 
 
-@router.get("/user-behavior/{user_id}")
+@router.get("/user-behavior/{user_id}", response_model=UserBehaviorAnalyticsResponse)
 async def get_user_behavior_analytics(
     user_id: str,
     current_user: User = Depends(get_current_user),
@@ -118,7 +127,7 @@ async def get_user_behavior_analytics(
     return analytics
 
 
-@router.get("/search/intelligent")
+@router.get("/search/intelligent", response_model=IntelligentSearchResponse)
 async def intelligent_search(
     query: str,
     search_type: str = "documents",
@@ -188,7 +197,7 @@ async def intelligent_search(
         ) from e
 
 
-@router.get("/search/trending")
+@router.get("/search/trending", response_model=TrendingSearchResponse)
 async def get_trending_content(
     limit: int = 10,
     current_user: User = Depends(get_current_user),
@@ -229,7 +238,7 @@ async def get_trending_content(
     }
 
 
-@router.post("/real-time/workflow/{workflow_id}/update")
+@router.post("/real-time/workflow/{workflow_id}/update", response_model=WorkflowUpdateResponse)
 async def send_workflow_update(
     workflow_id: str,
     update_type: str,
@@ -280,7 +289,7 @@ async def send_workflow_update(
     }
 
 
-@router.post("/real-time/system-health")
+@router.post("/real-time/system-health", response_model=SystemHealthResponse)
 async def send_system_health_update(
     health_data: dict,
     current_user: User = Depends(get_current_admin_user),
@@ -319,7 +328,7 @@ async def send_system_health_update(
     }
 
 
-@router.post("/real-time/cleanup")
+@router.post("/real-time/cleanup", response_model=CleanupResponse)
 async def cleanup_inactive_tasks(
     current_user: User = Depends(get_current_admin_user),
     session: AsyncSession = Depends(get_session_generator),

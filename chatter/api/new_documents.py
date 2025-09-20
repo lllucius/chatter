@@ -21,7 +21,10 @@ from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.document import (
     DocumentCreate,
+    DocumentDeleteResponse,
     DocumentListRequest,
+    DocumentListResponse,
+    DocumentProcessingResponse,
     DocumentResponse,
     DocumentSearchRequest,
     DocumentStatsResponse,
@@ -184,12 +187,12 @@ async def list_documents_get(
         ) from e
 
 
-@router.post("/list")
+@router.post("/list", response_model=DocumentListResponse)
 async def list_documents_post(
     list_request: DocumentListRequest,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
-) -> dict[str, Any]:
+) -> DocumentListResponse:
     """List documents with filtering and pagination (POST endpoint for advanced filtering)."""
     try:
         service = NewDocumentService(session)
@@ -197,15 +200,15 @@ async def list_documents_post(
             current_user.id, list_request
         )
 
-        return {
-            "documents": [
+        return DocumentListResponse(
+            documents=[
                 DocumentResponse.model_validate(doc)
                 for doc in documents
             ],
-            "total_count": total_count,
-            "offset": list_request.offset,
-            "limit": list_request.limit,
-        }
+            total_count=total_count,
+            offset=list_request.offset,
+            limit=list_request.limit,
+        )
 
     except Exception as e:
         logger.error("Error listing documents", error=str(e))
@@ -249,12 +252,12 @@ async def search_documents(
         ) from e
 
 
-@router.delete("/{document_id}")
+@router.delete("/{document_id}", response_model=DocumentDeleteResponse)
 async def delete_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
-) -> dict[str, str]:
+) -> DocumentDeleteResponse:
     """Delete a document."""
     try:
         service = NewDocumentService(session)
@@ -268,7 +271,7 @@ async def delete_document(
                 detail="Document not found",
             )
 
-        return {"message": "Document deleted successfully"}
+        return DocumentDeleteResponse(message="Document deleted successfully")
 
     except HTTPException:
         raise
@@ -284,12 +287,12 @@ async def delete_document(
         ) from e
 
 
-@router.post("/{document_id}/reprocess")
+@router.post("/{document_id}/reprocess", response_model=DocumentProcessingResponse)
 async def reprocess_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
-) -> dict[str, str]:
+) -> DocumentProcessingResponse:
     """Reprocess a document through the embedding pipeline."""
     try:
         service = NewDocumentService(session)
@@ -303,7 +306,11 @@ async def reprocess_document(
                 detail="Document not found or cannot be reprocessed",
             )
 
-        return {"message": "Document reprocessing started"}
+        return DocumentProcessingResponse(
+            document_id=document_id,
+            status="processing",
+            message="Document reprocessing started"
+        )
 
     except HTTPException:
         raise

@@ -11,15 +11,23 @@ from chatter.api.real_time_analytics import router as real_time_router
 from chatter.core.analytics import AnalyticsService
 from chatter.models.user import User
 from chatter.schemas.analytics import (
+    AnalyticsExportResponse,
+    AnalyticsHealthResponse,
+    CacheStatusResponse,
     ChartReadyAnalytics,
     ConversationStatsResponse,
     DashboardResponse,
+    DatabaseHealthResponse,
     DocumentAnalyticsResponse,
     IntegratedDashboardStats,
+    MetricsSummaryResponse,
     PerformanceMetricsResponse,
+    QueryAnalysisResponse,
     SystemAnalyticsResponse,
+    ToolServerAnalyticsResponse,
     UsageMetricsResponse,
 )
+from chatter.schemas.common import SuccessResponse
 from chatter.services.cache_warming import CacheWarmingService
 from chatter.services.database_optimization import (
     DatabaseOptimizationService,
@@ -618,7 +626,7 @@ async def get_dashboard(
         ) from e
 
 
-@router.get("/toolservers")
+@router.get("/toolservers", response_model=ToolServerAnalyticsResponse)
 async def get_tool_server_analytics(
     start_date: datetime | None = Query(
         None, description="Start date for analytics"
@@ -735,7 +743,7 @@ async def get_user_analytics(
         ) from e
 
 
-@router.post("/export")
+@router.post("/export", response_model=AnalyticsExportResponse)
 @rate_limit(
     max_requests=5, window_seconds=300
 )  # 5 exports per 5 minutes
@@ -843,7 +851,7 @@ async def export_analytics(
         ) from e
 
 
-@router.get("/health")
+@router.get("/health", response_model=AnalyticsHealthResponse)
 async def get_analytics_health(
     current_user: User = Depends(get_current_user),
     analytics_service: AnalyticsService = Depends(
@@ -866,7 +874,7 @@ async def get_analytics_health(
         }
 
 
-@router.get("/metrics/summary")
+@router.get("/metrics/summary", response_model=MetricsSummaryResponse)
 @rate_limit(
     max_requests=30, window_seconds=60
 )  # 30 requests per minute
@@ -892,7 +900,7 @@ async def get_analytics_metrics_summary(
         ) from e
 
 
-@router.post("/cache/warm")
+@router.post("/cache/warm", response_model=SuccessResponse)
 @rate_limit(
     max_requests=2, window_seconds=300
 )  # 2 warming requests per 5 minutes
@@ -945,7 +953,7 @@ async def warm_analytics_cache(
         ) from e
 
 
-@router.get("/cache/status")
+@router.get("/cache/status", response_model=CacheStatusResponse)
 @rate_limit(
     max_requests=10, window_seconds=60
 )  # 10 requests per minute
@@ -975,7 +983,7 @@ async def get_cache_warming_status(
         ) from e
 
 
-@router.post("/cache/optimize")
+@router.post("/cache/optimize", response_model=SuccessResponse)
 @rate_limit(
     max_requests=3, window_seconds=600
 )  # 3 optimization requests per 10 minutes
@@ -1024,7 +1032,7 @@ async def optimize_cache_performance(
         ) from e
 
 
-@router.post("/cache/invalidate")
+@router.post("/cache/invalidate", response_model=SuccessResponse)
 @rate_limit(
     max_requests=5, window_seconds=300
 )  # 5 invalidation requests per 5 minutes
@@ -1086,7 +1094,7 @@ async def invalidate_stale_cache(
         ) from e
 
 
-@router.get("/performance/detailed")
+@router.get("/performance/detailed", response_model=PerformanceMetricsResponse)
 @rate_limit(
     max_requests=20, window_seconds=60
 )  # 20 requests per minute
@@ -1124,7 +1132,7 @@ async def get_detailed_performance_metrics(
         ) from e
 
 
-@router.get("/database/health")
+@router.get("/database/health", response_model=DatabaseHealthResponse)
 @rate_limit(
     max_requests=10, window_seconds=60
 )  # 10 requests per minute
@@ -1162,7 +1170,7 @@ async def get_database_health_metrics(
         ) from e
 
 
-@router.post("/database/analyze-queries")
+@router.post("/database/analyze-queries", response_model=QueryAnalysisResponse)
 @rate_limit(
     max_requests=5, window_seconds=300
 )  # 5 analysis requests per 5 minutes

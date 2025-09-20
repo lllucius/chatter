@@ -19,6 +19,7 @@ from chatter.schemas.workflows import (
     WorkflowDefinitionResponse,
     WorkflowDefinitionsResponse,
     WorkflowDefinitionUpdate,
+    WorkflowDeleteResponse,
     WorkflowExecutionRequest,
     WorkflowExecutionResponse,
     WorkflowTemplateCreate,
@@ -192,7 +193,7 @@ async def update_workflow_definition(
         ) from e
 
 
-@router.delete("/definitions/{workflow_id}")
+@router.delete("/definitions/{workflow_id}", response_model=WorkflowDeleteResponse)
 async def delete_workflow_definition(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),

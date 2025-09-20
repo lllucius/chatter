@@ -216,7 +216,7 @@ const DashboardPage: React.FC = () => {
           return getSDK().analytics.getDashboardChartDataApiV1AnalyticsDashboardChartData();
         }
         return null;
-      } catch (_error) {
+      } catch {
         // Chart data API not available yet - silently fail
         return null;
       }
@@ -245,14 +245,21 @@ const DashboardPage: React.FC = () => {
     }
 
     // Fallback to real data if chart API isn't available
-    const conversationStats = (data?.conversation_stats || {}) as Record<
-      string,
-      unknown
-    >;
-    const usageMetrics = (usageData || data?.usage_metrics || {}) as Record<
-      string,
-      unknown
-    >;
+    interface ConversationStats {
+      total_conversations?: number;
+      total_messages?: number;
+      avg_messages_per_conversation?: number;
+    }
+    
+    interface UsageMetrics {
+      total_tokens?: number;
+      input_tokens?: number;
+      output_tokens?: number;
+      total_prompt_tokens?: number;
+    }
+    
+    const conversationStats = (data?.conversation_stats || {}) as ConversationStats;
+    const usageMetrics = (usageData || data?.usage_metrics || {}) as UsageMetrics;
     const realPerformanceData = (performanceData ||
       data?.performance_metrics ||
       {}) as Record<string, unknown>;
@@ -262,52 +269,49 @@ const DashboardPage: React.FC = () => {
       {
         name: 'Mon',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ??
-            0) * 0.8,
+          (conversationStats.total_conversations || 0) * 0.8,
           5
         ),
       },
       {
         name: 'Tue',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ??
-            0) * 1.2,
+          (conversationStats.total_conversations || 0) * 1.2,
           8
         ),
       },
       {
         name: 'Wed',
         conversations: Math.max(
-          ((((conversationStats as any)?.total_conversations || 0) as number) ??
-            0) * 0.9,
+          (conversationStats.total_conversations || 0) * 0.9,
           6
         ),
       },
       {
         name: 'Thu',
         conversations: Math.max(
-          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 1.1,
+          (conversationStats.total_conversations || 0) * 1.1,
           7
         ),
       },
       {
         name: 'Fri',
         conversations: Math.max(
-          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 1.3,
+          (conversationStats.total_conversations || 0) * 1.3,
           9
         ),
       },
       {
         name: 'Sat',
         conversations: Math.max(
-          (((conversationStats as any)?.total_conversations || 0) ?? 0) * 0.7,
+          (conversationStats.total_conversations || 0) * 0.7,
           4
         ),
       },
       {
         name: 'Sun',
         conversations: Math.max(
-          ((conversationStats as any)?.total_conversations || 0) ?? 0,
+          conversationStats.total_conversations || 0,
           5
         ),
       },
@@ -317,27 +321,27 @@ const DashboardPage: React.FC = () => {
       {
         name: 'Week 1',
         tokens: Math.max(
-          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.6,
+          (usageMetrics.total_tokens || 0) * 0.6,
           1000
         ),
       },
       {
         name: 'Week 2',
         tokens: Math.max(
-          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 0.8,
+          (usageMetrics.total_tokens || 0) * 0.8,
           1500
         ),
       },
       {
         name: 'Week 3',
         tokens: Math.max(
-          (((usageMetrics as any)?.total_tokens || 0) ?? 0) * 1.1,
+          (usageMetrics.total_tokens || 0) * 1.1,
           2000
         ),
       },
       {
         name: 'Week 4',
-        tokens: Math.max(((usageMetrics as any)?.total_tokens || 0) ?? 0, 2500),
+        tokens: Math.max(usageMetrics.total_tokens || 0, 2500),
       },
     ];
 
@@ -379,7 +383,7 @@ const DashboardPage: React.FC = () => {
       performanceChartData,
       systemHealthData,
     };
-  }, [data, performanceData, systemData, usageData]);
+  }, [data, performanceData, systemData, usageData, chartDataApi.data]);
 
   // Helper function for opening export dialog
   const openExportDialog = (format: 'json' | 'csv' | 'xlsx') => {
@@ -446,7 +450,7 @@ const DashboardPage: React.FC = () => {
 
       setExportDialogOpen(false);
       toastService.success(`Analytics exported as ${fileName}.${exportFormat}`);
-    } catch (error) {
+    } catch {
       handleError(new Error('Analytics export failed'), {
         source: 'DashboardPage.handleExportAnalytics',
         operation: 'export analytics data',
@@ -575,9 +579,9 @@ const DashboardPage: React.FC = () => {
               <MetricCard
                 title="Total Conversations"
                 value={safeLocaleString(
-                  (conversationStats as any)?.total_conversations || 0
+                  conversationStats.total_conversations || 0
                 )}
-                change={`+${safeLocaleString((conversationStats as any)?.total_conversations || 0)} today`}
+                change={`+${safeLocaleString(conversationStats.total_conversations || 0)} today`}
                 changeType="positive"
                 icon={<Message />}
                 color="primary"
@@ -593,9 +597,9 @@ const DashboardPage: React.FC = () => {
               <MetricCard
                 title="Total Messages"
                 value={safeLocaleString(
-                  (conversationStats as any)?.total_messages || 0
+                  conversationStats.total_messages || 0
                 )}
-                change={`Avg ${safeToFixed((conversationStats as any)?.avg_messages_per_conversation || 0, 1)} per conversation`}
+                change={`Avg ${safeToFixed(conversationStats.avg_messages_per_conversation || 0, 1)} per conversation`}
                 changeType="neutral"
                 icon={<TrendingUp />}
                 color="secondary"
@@ -611,9 +615,9 @@ const DashboardPage: React.FC = () => {
               <MetricCard
                 title="Token Usage"
                 value={safeLocaleString(
-                  (usageMetrics as any)?.total_tokens || 0
+                  usageMetrics.total_tokens || 0
                 )}
-                change={`${safeLocaleString((usageMetrics as any)?.total_prompt_tokens || 0)} prompts`}
+                change={`${safeLocaleString(usageMetrics.total_prompt_tokens || 0)} prompts`}
                 changeType="positive"
                 icon={<Assessment />}
                 color="info"
@@ -749,7 +753,7 @@ const DashboardPage: React.FC = () => {
                       (Number(
                         (performanceMetrics as Record<string, unknown>)
                           ?.avg_response_time_ms as number | undefined | null
-                      ) ?? 0) / 10,
+                      ) || 0) / 10,
                       100
                     )}
                     sx={{ mb: 1 }}
@@ -759,10 +763,10 @@ const DashboardPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     P95:{' '}
                     {safeToFixed(
-                      Number(
+                      (Number(
                         (performanceMetrics as Record<string, unknown>)
                           ?.p95_response_time_ms as number | undefined | null
-                      ) ?? 0,
+                      ) || 0),
                       1
                     )}
                     ms
@@ -773,7 +777,7 @@ const DashboardPage: React.FC = () => {
                       (Number(
                         (performanceMetrics as Record<string, unknown>)
                           ?.p95_response_time_ms as number | undefined | null
-                      ) ?? 0) / 20,
+                      ) || 0) / 20,
                       100
                     )}
                     color="warning"
@@ -1001,12 +1005,12 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) ?? 0, 0)}ms`}
+              label={`Avg Response: ${safeToFixed((Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) || 0), 0)}ms`}
               color={
                 (Number(
                   (performanceMetrics as Record<string, unknown>)
                     ?.avg_response_time_ms as number | undefined | null
-                ) ?? 0) < 1000
+                ) || 0) < 1000
                   ? 'success'
                   : 'warning'
               }

@@ -116,7 +116,9 @@ describe('GlobalErrorHandler', () => {
 
       const consoleDebugSpy = vi
         .spyOn(console, 'debug')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation for testing
+        });
 
       // Clear any previous calls
       vi.clearAllMocks();
@@ -177,7 +179,9 @@ describe('GlobalErrorHandler', () => {
 
       const consoleDebugSpy = vi
         .spyOn(console, 'debug')
-        .mockImplementation(() => {});
+        .mockImplementation(() => {
+          // Mock implementation for testing
+        });
 
       // Clear any previous calls
       vi.clearAllMocks();

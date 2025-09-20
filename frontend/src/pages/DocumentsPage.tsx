@@ -17,7 +17,6 @@ import {
 import { SearchIcon, ViewIcon, DownloadIcon, AddIcon } from '../utils/icons';
 import { format } from 'date-fns';
 import PageLayout from '../components/PageLayout';
-import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, {
   CrudConfig,
   CrudService,

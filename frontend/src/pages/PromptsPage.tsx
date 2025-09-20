@@ -70,8 +70,8 @@ const PromptsPage: React.FC = () => {
       label: 'Variables',
       width: '150px',
       render: (variables: unknown) =>
-        (variables as any[])?.length > 0
-          ? `${(variables as any[]).length} variables`
+        (variables as unknown[])?.length > 0
+          ? `${(variables as unknown[]).length} variables`
           : 'None',
     },
     {

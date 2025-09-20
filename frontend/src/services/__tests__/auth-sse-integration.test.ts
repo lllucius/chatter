@@ -9,7 +9,7 @@ import { sseEventManager } from '../sse-manager';
 
 // Mock the actual auth service methods that would make network calls
 vi.mock('../auth-service', async () => {
-  const actual = (await vi.importActual('../auth-service')) as any;
+  const actual = (await vi.importActual('../auth-service')) as Record<string, unknown>;
 
   return {
     ...actual,
@@ -67,7 +67,7 @@ describe('Auth Service and SSE Manager Integration', () => {
           read: vi.fn().mockResolvedValue({ done: true }),
         }),
       },
-    } as any;
+    } as Response;
 
     (global.fetch as Mock).mockResolvedValue(mockResponse);
 
@@ -84,7 +84,9 @@ describe('Auth Service and SSE Manager Integration', () => {
     // Ensure we start unauthenticated
     (authService.isAuthenticated as Mock).mockReturnValue(false);
 
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Mock implementation for testing
+    });
 
     sseEventManager.connect();
 
@@ -102,7 +104,9 @@ describe('Auth Service and SSE Manager Integration', () => {
     (authService.getToken as Mock).mockReturnValue(null);
 
     // Try to connect - should fail
-    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {});
+    const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+      // Mock implementation for testing
+    });
     sseEventManager.connect();
     expect(consoleSpy).toHaveBeenCalled();
     consoleSpy.mockRestore();
@@ -122,7 +126,7 @@ describe('Auth Service and SSE Manager Integration', () => {
 
     // Verify SDK method was called instead of direct fetch
     expect(authService.executeWithAuth).toHaveBeenCalled();
-    const mockSDK = (authService.getSDK as Mock)();
+    const _mockSDK = (authService.getSDK as Mock)();
     // We can't easily verify the specific SDK method call in this integration test
     // but the fact that the connection doesn't error out means it's working
   });

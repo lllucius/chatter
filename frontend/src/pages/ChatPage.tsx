@@ -346,9 +346,6 @@ const ChatPage: React.FC = () => {
     },
     [
       setMessages,
-      handleEditMessage,
-      handleDeleteMessage,
-      handleRateMessage,
       focusInput,
     ]
   );
@@ -752,6 +749,8 @@ const ChatPage: React.FC = () => {
       getEffectiveConfig,
       sendWorkflowMessage,
       handleWorkflowStreamingResponse,
+      maxTokens,
+      temperature,
     ]
   );
 
@@ -821,6 +820,13 @@ const ChatPage: React.FC = () => {
     selectedTemplate,
     customWorkflowConfig,
     handleSelectConversation,
+    setSelectedProfile,
+    setSelectedPrompt,
+    setSelectedDocuments,
+    setCustomPromptText,
+    setSelectedTemplate,
+    updateWorkflowConfig,
+    resetToTemplate,
   ]);
 
   const sendMessage = useCallback(
@@ -974,6 +980,8 @@ const ChatPage: React.FC = () => {
       sendWorkflowMessage,
       handleWorkflowStreamingResponse,
       focusInput,
+      maxTokens,
+      temperature,
     ]
   );
 

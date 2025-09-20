@@ -13,20 +13,19 @@ import {
   FormControlLabel,
   Switch,
   Chip,
-  Tooltip,
-  IconButton,
+
   TextField,
   Button,
   Card,
   CardContent,
-  Grid,
+
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-  RestartAlt as ResetIcon,
+
   Build as ToolIcon,
   Storage as RetrievalIcon,
   Memory as MemoryIcon,
@@ -94,7 +93,7 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   resetToTemplate,
   onSelectConversation: _onSelectConversation,
 }) => {
-  const { collapsed, setCollapsed } = useRightSidebar();
+  const { collapsed, setCollapsed: _setCollapsed } = useRightSidebar();
   const [expandedPanel, setExpandedPanel] = useState<string>(() => {
     const saved = localStorage.getItem('chatter_expandedPanel');
     return saved ? saved : 'workflow';

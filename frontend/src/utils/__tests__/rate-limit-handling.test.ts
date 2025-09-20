@@ -10,7 +10,9 @@ vi.mock('../../services/toast-service', () => ({
 }));
 
 // Mock console.error to avoid noise in tests
-vi.spyOn(console, 'error').mockImplementation(() => {});
+vi.spyOn(console, 'error').mockImplementation(() => {
+  // Mock implementation for testing
+});
 
 describe('Rate Limit Error Handling', () => {
   beforeEach(() => {

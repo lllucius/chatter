@@ -2,7 +2,7 @@
  * Tests for Toast Service
  */
 
-import { describe, beforeEach, expect, test } from 'vitest';
+import { describe, beforeEach, expect, test, vi, type Mock } from 'vitest';
 import { toast } from 'react-toastify';
 import { toastService } from '../toast-service';
 
@@ -25,7 +25,7 @@ describe('ToastService', () => {
   beforeEach(() => {
     vi.clearAllMocks();
     // Reset toast count
-    (toastService as any).toastCount = 0;
+    (toastService as { toastCount: number }).toastCount = 0;
   });
 
   describe('Basic Toast Operations', () => {
@@ -111,7 +111,7 @@ describe('ToastService', () => {
 
     test('should accept autoClose false for persistent toasts', () => {
       const message = 'Persistent message';
-      const options = { autoClose: false } as any;
+      const options = { autoClose: false } as { autoClose: boolean };
 
       toastService.info(message, options);
 
@@ -158,7 +158,7 @@ describe('ToastService', () => {
       toastService.success('Test 1');
 
       // Get the onOpen callback and call it to simulate toast opening
-      const callArgs = (toast as any).mock.calls[0];
+      const callArgs = (toast as Mock).mock.calls[0];
       const options = callArgs[1];
       options.onOpen();
 
@@ -169,7 +169,7 @@ describe('ToastService', () => {
       // Set up service at max capacity
       for (let i = 0; i < 4; i++) {
         toastService.success(`Message ${i}`);
-        const callArgs = (toast as any).mock.calls[i];
+        const callArgs = (toast as Mock).mock.calls[i];
         const options = callArgs[1];
         options.onOpen(); // Simulate toast opening
       }
@@ -181,7 +181,7 @@ describe('ToastService', () => {
     test('should decrement count when toast closes', () => {
       toastService.success('Test message');
 
-      const callArgs = (toast as any).mock.calls[0];
+      const callArgs = (toast as Mock).mock.calls[0];
       const options = callArgs[1];
 
       // Simulate toast opening and closing
@@ -235,7 +235,7 @@ describe('ToastService', () => {
     });
 
     test('should handle null/undefined messages', () => {
-      toastService.info(null as any);
+      toastService.info(null as string | null);
       expect(toast).toHaveBeenCalledWith(null, expect.any(Object));
     });
 
@@ -282,7 +282,7 @@ describe('ToastService', () => {
       const customId = 'unique-toast-id';
 
       // If the service supported custom IDs
-      toastService.info(message, { toastId: customId } as any);
+      toastService.info(message, { toastId: customId } as { toastId: string });
 
       expect(toast).toHaveBeenCalledWith(
         message,
@@ -299,12 +299,12 @@ describe('ToastService', () => {
       // Would update the toast if supported
       if (toastService.update) {
         toastService.update(
-          toastId as any,
+          toastId as string,
           {
             type: 'success',
             message: 'Completed!',
             autoClose: 3000,
-          } as any
+          } as { type: string; message: string; autoClose: number }
         );
       }
 
@@ -315,7 +315,7 @@ describe('ToastService', () => {
       const toastId = toastService.info('Dismissible toast');
 
       if (toastService.dismiss) {
-        toastService.dismiss(toastId as any);
+        toastService.dismiss(toastId as string);
       } else {
         // Call global dismiss
         toast.dismiss();
@@ -335,7 +335,7 @@ describe('ToastService', () => {
       messages.forEach((message, index) => {
         toastService.info(message);
         // Simulate toast opening to trigger count increment
-        const callArgs = (toast as any).mock.calls[index];
+        const callArgs = (toast as Mock).mock.calls[index];
         const options = callArgs[1];
         options.onOpen();
       });
@@ -377,7 +377,7 @@ describe('ToastService', () => {
         toastService.info(`Toast ${i}`);
 
         // Simulate opening and closing
-        const callArgs = (toast as any).mock.calls[i];
+        const callArgs = (toast as Mock).mock.calls[i];
         const options = callArgs[1];
         options.onOpen();
         options.onClose();

@@ -20,7 +20,7 @@ class AuthService {
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
-    } as any); // ChatterSDK configuration type mismatch with our needs
+    } as { basePath: string; credentials: string }); // ChatterSDK configuration type mismatch with our needs
     // Don't call initialize() in constructor anymore - it's async now
   }
 

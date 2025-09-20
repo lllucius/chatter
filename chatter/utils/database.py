@@ -194,18 +194,22 @@ async def init_database() -> None:
     logger.info("Creating database tables")
 
     # For PostgreSQL, ensure pgvector extension is installed
-    async with engine.begin() as conn:
+    # Execute this in a separate connection to avoid statement concatenation issues
+    async with engine.connect() as conn:
         try:
-            await conn.execute(
-                text("CREATE EXTENSION IF NOT EXISTS vector;")
-            )
+            # Use a separate transaction for extension creation to prevent
+            # conflicts with any advisory locks or other statements
+            async with conn.begin():
+                await conn.execute(
+                    text("CREATE EXTENSION IF NOT EXISTS vector")
+                )
             logger.info("Ensured pgvector extension is installed")
         except Exception as e:
             logger.warning(
                 "Could not install pgvector extension", error=str(e)
             )
 
-    # Create all tables
+    # Create all tables in a separate transaction
     async with engine.begin() as conn:
         await conn.run_sync(Base.metadata.create_all)
 

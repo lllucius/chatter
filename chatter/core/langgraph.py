@@ -12,7 +12,12 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langgraph.checkpoint.memory import MemorySaver
-from langgraph.checkpoint.redis import RedisSaver
+try:
+    from langgraph.checkpoint.redis import RedisSaver
+    REDIS_AVAILABLE = True
+except ImportError:
+    RedisSaver = None
+    REDIS_AVAILABLE = False
 from langgraph.graph import END, StateGraph
 from langgraph.graph.message import add_messages
 from langgraph.pregel import Pregel
@@ -77,7 +82,7 @@ class LangGraphWorkflowManager:
         # Initialize checkpointer
         self.checkpointer = None
         try:
-            if settings.langgraph_checkpoint_store == "redis":
+            if settings.langgraph_checkpoint_store == "redis" and REDIS_AVAILABLE:
                 # Use Redis checkpointer for production
                 try:
                     # Use Redis URL from settings for checkpoint store
@@ -115,9 +120,12 @@ class LangGraphWorkflowManager:
                         "LangGraph Memory checkpointer initialized (redis fallback)"
                     )
             else:
-                # Fallback to in-memory checkpointer for development
+                # Fallback to in-memory checkpointer for development or when Redis unavailable
                 self.checkpointer = MemorySaver()
-                logger.info("LangGraph Memory checkpointer initialized")
+                if not REDIS_AVAILABLE:
+                    logger.info("LangGraph Memory checkpointer initialized (redis not available)")
+                else:
+                    logger.info("LangGraph Memory checkpointer initialized")
         except Exception as e:
             logger.warning(
                 "Failed to initialize checkpointer, falling back to memory",
@@ -1144,7 +1152,7 @@ class LangGraphWorkflowManager:
             )
             return ""
 
-    def get_retriever(
+    async def get_retriever(
         self, workspace_id: str, document_ids: list[str] | None = None
     ) -> Any | None:
         """Get retriever for a workspace based on user documents.
@@ -1159,30 +1167,12 @@ class LangGraphWorkflowManager:
         try:
             from chatter.core.vector_store import vector_store_manager
             from chatter.services.embeddings import EmbeddingService
-            import asyncio
 
             # Create embedding service
             embedding_service = EmbeddingService()
 
             # Get default embeddings for the user's workspace
-            # Since this method is called synchronously but embedding service is async,
-            # we need to run the async method in a way that works
-            try:
-                # Try to get the current event loop
-                loop = asyncio.get_event_loop()
-                if loop.is_running():
-                    # If loop is running, we can't use run_until_complete
-                    # This is a limitation - in this case, return None and log warning
-                    logger.warning(
-                        "Cannot get embeddings synchronously while event loop is running",
-                        workspace_id=workspace_id
-                    )
-                    return None
-                else:
-                    embeddings = loop.run_until_complete(embedding_service.get_default_provider())
-            except RuntimeError:
-                # No event loop, create a new one
-                embeddings = asyncio.run(embedding_service.get_default_provider())
+            embeddings = await embedding_service.get_default_provider()
                 
             if embeddings is None:
                 logger.warning(
@@ -1235,7 +1225,7 @@ class LangGraphWorkflowManager:
             )
             return None
 
-    def get_tools(self, workspace_id: str | None = None) -> list[Any]:
+    async def get_tools(self, workspace_id: str | None = None) -> list[Any]:
         """Get available tools for a workspace.
 
         Args:

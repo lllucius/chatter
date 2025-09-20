@@ -88,7 +88,7 @@ class UnifiedWorkflowExecutor:
             )
 
             # Get workflow configuration based on type
-            workflow_config = self._get_workflow_config(
+            workflow_config = await self._get_workflow_config(
                 workflow_type, conversation, chat_request
             )
 
@@ -211,7 +211,7 @@ class UnifiedWorkflowExecutor:
             )
 
             # Get workflow configuration based on type
-            workflow_config = self._get_workflow_config(
+            workflow_config = await self._get_workflow_config(
                 workflow_type, conversation, chat_request
             )
 
@@ -410,7 +410,7 @@ class UnifiedWorkflowExecutor:
             )
 
             # Get workflow configuration based on type
-            workflow_config = self._get_workflow_config(
+            workflow_config = await self._get_workflow_config(
                 workflow_type, conversation, chat_request
             )
 
@@ -646,7 +646,7 @@ class UnifiedWorkflowExecutor:
                     workflow_id, user_id
                 )
 
-    def _get_workflow_config(
+    async def _get_workflow_config(
         self,
         workflow_type: str,
         conversation: Conversation,
@@ -681,7 +681,7 @@ class UnifiedWorkflowExecutor:
             )
             # Only get retriever if retrieval is enabled
             if chat_request.enable_retrieval is not False:
-                config["retriever"] = workflow_manager.get_retriever(
+                config["retriever"] = await workflow_manager.get_retriever(
                     workspace_id, document_ids=chat_request.document_ids
                 )
         elif workflow_type == "tools":
@@ -689,7 +689,7 @@ class UnifiedWorkflowExecutor:
                 {
                     "memory_window": 100,
                     "max_tool_calls": 10,
-                    "tools": workflow_manager.get_tools(workspace_id),
+                    "tools": await workflow_manager.get_tools(workspace_id),
                 }
             )
         elif workflow_type == "full":
@@ -698,12 +698,12 @@ class UnifiedWorkflowExecutor:
                     "memory_window": 50,
                     "max_tool_calls": 5,
                     "max_documents": 10,
-                    "tools": workflow_manager.get_tools(workspace_id),
+                    "tools": await workflow_manager.get_tools(workspace_id),
                 }
             )
             # Only get retriever if retrieval is enabled
             if chat_request.enable_retrieval is not False:
-                config["retriever"] = workflow_manager.get_retriever(
+                config["retriever"] = await workflow_manager.get_retriever(
                     workspace_id, document_ids=chat_request.document_ids
                 )
         else:

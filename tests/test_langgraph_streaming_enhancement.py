@@ -11,7 +11,8 @@ from chatter.core.langgraph import LangGraphWorkflowManager
 class TestLangGraphStreamingEnhancement:
     """Test LangGraph streaming enhancements."""
 
-    def test_langgraph_workflow_manager_has_get_tools_method(self):
+    @pytest.mark.asyncio
+    async def test_langgraph_workflow_manager_has_get_tools_method(self):
         """Test that LangGraphWorkflowManager has the get_tools method."""
         manager = LangGraphWorkflowManager()
         assert hasattr(
@@ -19,10 +20,11 @@ class TestLangGraphStreamingEnhancement:
         ), "LangGraphWorkflowManager should have get_tools method"
 
         # Test the method is callable
-        tools = manager.get_tools("test_workspace")
+        tools = await manager.get_tools("test_workspace")
         assert isinstance(tools, list), "get_tools should return a list"
 
-    def test_langgraph_workflow_manager_has_get_retriever_method(self):
+    @pytest.mark.asyncio
+    async def test_langgraph_workflow_manager_has_get_retriever_method(self):
         """Test that LangGraphWorkflowManager has the get_retriever method."""
         manager = LangGraphWorkflowManager()
         assert hasattr(
@@ -30,7 +32,7 @@ class TestLangGraphStreamingEnhancement:
         ), "LangGraphWorkflowManager should have get_retriever method"
 
         # Test the method is callable (will return None if no embeddings available)
-        retriever = manager.get_retriever("test_workspace")
+        retriever = await manager.get_retriever("test_workspace")
         # This can be None if no embeddings service is available, which is fine for this test
         assert retriever is None or hasattr(
             retriever, 'invoke'
@@ -157,7 +159,8 @@ class TestLangGraphStreamingEnhancement:
             assert call_args[1]['enable_memory']
             assert call_args[1]['memory_window'] == 10
 
-    def test_workflow_manager_get_tools_returns_builtin_tools(self):
+    @pytest.mark.asyncio
+    async def test_workflow_manager_get_tools_returns_builtin_tools(self):
         """Test that get_tools properly returns builtin tools."""
         with mock.patch(
             'chatter.core.dependencies.get_builtin_tools'
@@ -165,14 +168,15 @@ class TestLangGraphStreamingEnhancement:
             mock_builtin.return_value = ['tool1', 'tool2', 'tool3']
 
             manager = LangGraphWorkflowManager()
-            tools = manager.get_tools("test_workspace")
+            tools = await manager.get_tools("test_workspace")
 
             # Should have returned the mocked builtin tools
             assert len(tools) == 3
             assert tools == ['tool1', 'tool2', 'tool3']
             mock_builtin.assert_called_once()
 
-    def test_workflow_manager_get_tools_handles_errors_gracefully(self):
+    @pytest.mark.asyncio
+    async def test_workflow_manager_get_tools_handles_errors_gracefully(self):
         """Test that get_tools handles errors gracefully."""
         with mock.patch(
             'chatter.core.dependencies.get_builtin_tools'
@@ -180,19 +184,20 @@ class TestLangGraphStreamingEnhancement:
             mock_builtin.side_effect = Exception("Test error")
 
             manager = LangGraphWorkflowManager()
-            tools = manager.get_tools("test_workspace")
+            tools = await manager.get_tools("test_workspace")
 
             # Should return empty list on error
             assert tools == []
 
-    def test_workflow_manager_get_retriever_handles_missing_dependencies(
+    @pytest.mark.asyncio
+    async def test_workflow_manager_get_retriever_handles_missing_dependencies(
         self,
     ):
         """Test that get_retriever handles missing dependencies gracefully."""
         manager = LangGraphWorkflowManager()
 
         # Should return None if embeddings service is not available or configured
-        retriever = manager.get_retriever("test_workspace")
+        retriever = await manager.get_retriever("test_workspace")
         assert (
             retriever is None
         ), "Should return None when embeddings service is not available"

@@ -776,12 +776,23 @@ class LangGraphWorkflowManager:
             include_types = ["chain"]
 
         try:
+            # Build parameters defensively to avoid passing None or problematic values
+            stream_params = {
+                "config": config,
+                "version": "v2",
+            }
+            
+            # Only add include_types if it has valid entries
+            if include_types:
+                stream_params["include_types"] = include_types
+            
+            # Only add include_names if it has valid entries  
+            if include_names:
+                stream_params["include_names"] = include_names
+            
             async for event in workflow.astream_events(
                 initial_state,
-                config=config,
-                version="v2",
-                include_types=include_types,
-                include_names=include_names if include_names else None,
+                **stream_params
             ):
                 # Convert astream_events to the expected workflow event format
                 converted_event = await self._convert_astream_event(
@@ -800,10 +811,18 @@ class LangGraphWorkflowManager:
             )
             # Fallback to regular astream if astream_events fails
             logger.info("Falling back to regular astream")
-            async for event in workflow.astream(
-                initial_state, config=config
-            ):
-                yield event
+            try:
+                async for event in workflow.astream(
+                    initial_state, config=config
+                ):
+                    yield event
+            except Exception as fallback_error:
+                logger.error(
+                    "Fallback astream also failed",
+                    error=str(fallback_error),
+                )
+                # Re-raise the original error for better debugging
+                raise e from fallback_error
 
     async def _convert_astream_event(
         self,

@@ -135,9 +135,9 @@ const ChatPage: React.FC = () => {
       try {
         // Get the streaming response
         const stream =
-          (await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(
+          await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(
             chatRequest
-          )) as unknown as ReadableStream;
+          );
 
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();
@@ -357,7 +357,7 @@ const ChatPage: React.FC = () => {
         const stream = (await sendWorkflowMessage(
           workflowRequest,
           true
-        )) as unknown as ReadableStream;
+        )) as ReadableStream<Uint8Array>;
 
         // Create a text decoder to handle the stream
         const decoder = new TextDecoder();

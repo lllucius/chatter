@@ -378,7 +378,7 @@ Available templates:
 - `data_analyst`: Data analysis with computation tools
 
    */
-  public async executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(data: ChatWorkflowRequest): Promise<Record<string, unknown>> {
+  public async executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(data: ChatWorkflowRequest): Promise<ReadableStream<Uint8Array>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/execute/chat/streaming`,
       method: 'POST' as HTTPMethod,
@@ -388,8 +388,8 @@ Available templates:
       body: data,
     };
 
-    const response = await this.request(requestContext);
-    return response.json() as Promise<Record<string, unknown>>;
+    const response = await this.requestStream(requestContext);
+    return response;
   }
   /**Get Chat Workflow Templates
    * Get pre-built workflow templates optimized for chat.

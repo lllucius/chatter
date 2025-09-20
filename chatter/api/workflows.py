@@ -718,7 +718,15 @@ async def execute_chat_workflow(
         ) from e
 
 
-@router.post("/execute/chat/streaming")
+@router.post(
+    "/execute/chat/streaming",
+    responses={
+        200: {
+            "description": "Streaming chat response",
+            "content": {"text/event-stream": {"schema": {"type": "string"}}},
+        }
+    },
+)
 @rate_limit(max_requests=20, window_seconds=60)
 async def execute_chat_workflow_streaming(
     request: ChatWorkflowRequest,

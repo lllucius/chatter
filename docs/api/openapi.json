@@ -10258,10 +10258,15 @@
         },
         "responses": {
           "200": {
-            "description": "Successful Response",
+            "description": "Streaming chat response",
             "content": {
               "application/json": {
                 "schema": {}
+              },
+              "text/event-stream": {
+                "schema": {
+                  "type": "string"
+                }
               }
             },
             "headers": {

@@ -19267,7 +19267,10 @@ paths:
           content:
             application/json:
               schema: {}
-          description: Successful Response
+            text/event-stream:
+              schema:
+                type: string
+          description: Streaming chat response
           headers:
             X-RateLimit-Limit-Hour: *id001
             X-RateLimit-Limit-Minute: *id002

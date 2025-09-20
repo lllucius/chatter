@@ -27,6 +27,7 @@ import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import { useWorkflowData } from '../hooks/useWorkflowData';
 import { useFormGeneric } from '../hooks/useFormGeneric';
 import { toastService } from '../services/toast-service';
+import { WorkflowTemplateResponse } from 'chatter-sdk';
 
 interface WorkflowFormData extends Record<string, unknown> {
   name: string;
@@ -35,7 +36,7 @@ interface WorkflowFormData extends Record<string, unknown> {
 }
 
 // Helper function to derive workflow_type from template name or category
-const deriveWorkflowType = (name: string, category: string): string => {
+const deriveWorkflowType = (name: string, _category: string): string => {
   // Check template name for specific workflow type hints
   const nameLower = name.toLowerCase();
   if (nameLower.includes('tool')) return 'tools';
@@ -52,7 +53,7 @@ const WorkflowManagementPage: React.FC = () => {
   const {
     loading,
     templates,
-    availableTools,
+    _availableTools,
     executions,
     selectedTemplate,
     setSelectedTemplate,
@@ -68,7 +69,7 @@ const WorkflowManagementPage: React.FC = () => {
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
-  const [editingTemplate, setEditingTemplate] = useState<any>(null);
+  const [editingTemplate, setEditingTemplate] = useState<WorkflowTemplateResponse | null>(null);
 
   // Form for template creation
   const templateForm = useFormGeneric<WorkflowFormData>({
@@ -91,7 +92,7 @@ const WorkflowManagementPage: React.FC = () => {
         await createTemplate(templateData);
         toastService.success('Template created successfully');
         setBuilderDialogOpen(false);
-      } catch (error) {
+      } catch {
         // Error handling is done in the hook
       }
     },
@@ -104,7 +105,7 @@ const WorkflowManagementPage: React.FC = () => {
     setExecutionInput('');
   };
 
-  const handleEditTemplate = (template: any) => {
+  const handleEditTemplate = (template: WorkflowTemplateResponse) => {
     setEditingTemplate(template);
     templateForm.setValues({
       name: template.name || '',
@@ -137,7 +138,7 @@ const WorkflowManagementPage: React.FC = () => {
       toastService.success('Workflow execution started');
       setExecuteDialogOpen(false);
       setTabValue(2); // Switch to executions tab
-    } catch (error) {
+    } catch {
       // Error handling is done in the hook
     }
   };
@@ -194,7 +195,7 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={0} idPrefix="workflow">
           <WorkflowTemplatesTab
-            templates={templates as any}
+            templates={templates}
             loading={loading}
             onExecuteTemplate={handleExecuteTemplate}
             onEditTemplate={handleEditTemplate}
@@ -204,14 +205,14 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={1} idPrefix="workflow">
           <Alert severity="info" sx={{ mb: 2 }}>
-            Use the "Create Template" button to open the workflow builder in a
+            Use the &quot;Create Template&quot; button to open the workflow builder in a
             dialog.
           </Alert>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
           <WorkflowExecutionsTab
-            executions={executions as any}
+            executions={executions}
             loading={loading}
           />
         </TabPanel>

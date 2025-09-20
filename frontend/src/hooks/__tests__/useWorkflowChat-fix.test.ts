@@ -11,7 +11,7 @@ describe('useWorkflowChat Fix', () => {
     });
 
     // This is the validation logic I added to useWorkflowChat
-    const validateAndCallWorkflowMethod = (getSDK: () => any) => {
+    const validateAndCallWorkflowMethod = (getSDK: () => unknown) => {
       const sdk = getSDK();
 
       // Check if SDK and workflows are properly initialized
@@ -51,7 +51,7 @@ describe('useWorkflowChat Fix', () => {
       },
     });
 
-    const validateAndCallWorkflowMethod = (getSDK: () => any) => {
+    const validateAndCallWorkflowMethod = (getSDK: () => unknown) => {
       const sdk = getSDK();
 
       if (!sdk || !sdk.workflows) {
@@ -81,7 +81,7 @@ describe('useWorkflowChat Fix', () => {
       conversations: {}, // Has other APIs but missing workflows
     });
 
-    const validateAndCallWorkflowMethod = (getSDK: () => any) => {
+    const validateAndCallWorkflowMethod = (getSDK: () => unknown) => {
       const sdk = getSDK();
 
       if (!sdk || !sdk.workflows) {

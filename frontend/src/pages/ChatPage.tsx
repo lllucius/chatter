@@ -42,17 +42,17 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
-    enableTools,
+    _enableTools,
     customPromptText,
     setSelectedProfile,
     setSelectedPrompt,
     setSelectedDocuments,
     setCurrentConversation,
     setStreamingEnabled,
-    setTemperature,
-    setMaxTokens,
-    setEnableRetrieval,
-    setEnableTools,
+    _setTemperature,
+    _setMaxTokens,
+    _setEnableRetrieval,
+    _setEnableTools,
     setCustomPromptText,
     loadData,
   } = useChatData();
@@ -99,7 +99,7 @@ const ChatPage: React.FC = () => {
     }
   }, [currentConversation, loadMessagesForConversation, messages.length]);
 
-  // Create a ref to handle circular dependency between handleStreamingResponse and handleRegenerateMessage
+  // Create a ref to handle circular dependency between _handleStreamingResponse and handleRegenerateMessage
   const handleRegenerateMessageRef = useRef<
     ((messageId: string) => Promise<void>) | null
   >(null);
@@ -130,7 +130,7 @@ const ChatPage: React.FC = () => {
   }, []);
 
   // Handle streaming response from chat API
-  const handleStreamingResponse = useCallback(
+  const _handleStreamingResponse = useCallback(
     async (chatRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
         // Get the streaming response
@@ -288,7 +288,7 @@ const ChatPage: React.FC = () => {
                     // console.log('Unknown streaming event type:', eventData.type);
                     break;
                 }
-              } catch (parseError) {
+              } catch {
                 // Skip malformed data
               }
             }
@@ -339,7 +339,7 @@ const ChatPage: React.FC = () => {
         }
 
         handleError(error, {
-          source: 'ChatPage.handleStreamingResponse',
+          source: 'ChatPage._handleStreamingResponse',
           operation: 'stream chat response',
         });
       }
@@ -354,7 +354,7 @@ const ChatPage: React.FC = () => {
   );
 
   const handleWorkflowStreamingResponse = useCallback(
-    async (workflowRequest: any, isRegeneration: boolean) => {
+    async (workflowRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
         // Get the streaming response from workflow API
         // Note: Current SDK doesn't properly support streaming, this needs to be fixed
@@ -755,7 +755,7 @@ const ChatPage: React.FC = () => {
     ]
   );
 
-  // Update the ref with the current function so it can be called from handleStreamingResponse
+  // Update the ref with the current function so it can be called from _handleStreamingResponse
   handleRegenerateMessageRef.current = handleRegenerateMessage;
 
   const handleSelectConversation = useCallback(

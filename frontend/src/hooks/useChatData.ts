@@ -80,7 +80,7 @@ export const useChatData = () => {
       profilesResponse = profilesResp.profiles || [];
       setProfiles(profilesResponse);
       setPrompts(promptsResponse.prompts || []);
-      setDocuments((documentsResponse as any)?.documents || []);
+      setDocuments(documentsResponse?.documents || []);
 
       // Auto-select first profile if none selected and profiles exist
       if (!selectedProfile && profilesResponse.length > 0) {
@@ -220,7 +220,7 @@ export const useChatMessages = () => {
           );
 
         const chatMessages: ExtendedChatMessage[] =
-          response?.map((msg, index) => ({
+          response?.map((msg, _index) => ({
             id: msg.id,
             role: msg.role as 'user' | 'assistant',
             content: msg.content,
@@ -247,9 +247,9 @@ export const useChatMessages = () => {
             onDelete: () => {
               // Placeholder for delete functionality
             },
-            onRate: (rating: 'good' | 'bad') => {
+            onRate: (_rating: 'good' | 'bad') => {
               // Placeholder for rating functionality
-              console.log('Rate message', index, rating);
+              // TODO: Implement message rating
             },
           })) || [];
 

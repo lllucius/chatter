@@ -24,7 +24,9 @@ vi.mock('../../services/auth-service', () => ({
 vi.mock('../../services/sse-context', () => ({
   useSSE: () => ({
     isConnected: false,
-    on: vi.fn(() => () => {}),
+    on: vi.fn(() => () => {
+      // Mock cleanup function
+    }),
   }),
 }));
 

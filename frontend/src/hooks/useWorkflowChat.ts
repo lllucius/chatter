@@ -5,7 +5,6 @@ import {
   ChatWorkflowConfig,
   ChatWorkflowRequest,
   ChatWorkflowTemplate,
-  ChatWorkflowTemplatesResponse,
 } from 'chatter-sdk';
 
 // Re-export types for components

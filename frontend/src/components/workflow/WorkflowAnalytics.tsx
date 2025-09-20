@@ -144,6 +144,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     workflow.id,
     workflow.nodes,
     workflow.edges,
+    workflow.metadata.name,
     calculateSimpleMetrics,
     calculateNodeTypeDistribution,
   ]);

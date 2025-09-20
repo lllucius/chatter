@@ -44,7 +44,7 @@ export const useForm = <T extends Record<string, unknown>>(
         }
       }
     },
-    [values, options.validate]
+    [values, options]
   );
 
   const handleSubmit = useCallback(

@@ -50,7 +50,7 @@ const ModelManagementPage: React.FC = () => {
           activeOnly: true, // Only load active providers for model creation
         });
       setProviders(response.providers || []);
-    } catch (error) {
+    } catch {
       // Failed to load providers - set empty array and continue
       setProviders([]);
     }
@@ -134,7 +134,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'is_active',
       label: 'Status',
-      render: (value: unknown, item: any): JSX.Element => (
+      render: (value: unknown, _item: unknown): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Active' : 'Inactive'}
@@ -145,7 +145,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'api_key_required',
       label: 'API Key',
-      render: (value: unknown, item: any): JSX.Element => (
+      render: (value: unknown, _item: unknown): JSX.Element => (
         <Chip
           size="small"
           label={value ? 'Required' : 'Optional'}

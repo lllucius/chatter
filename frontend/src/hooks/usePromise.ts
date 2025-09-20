@@ -31,6 +31,7 @@ export function useConcurrentData<T>(
 
   const promise = useMemo(() => {
     return fetcher();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [fetcher, ...deps]);
 
   // Return promise for Suspense integration
@@ -47,5 +48,6 @@ export function useConcurrentMemo<T>(
   return useMemo(() => {
     // In React 19, this computation can be interrupted and resumed
     return factory();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [factory, ...deps]);
 }

@@ -53,7 +53,7 @@ export const useWorkflowData = () => {
   const loadExecutions = useCallback(async (workflowId?: string) => {
     try {
       if (!workflowId) {
-        console.warn('Workflow executions require specific workflow ID');
+        // Workflow executions require specific workflow ID
         setExecutions([]);
         return;
       }
@@ -71,7 +71,7 @@ export const useWorkflowData = () => {
     }
   }, []);
 
-  const createTemplate = useCallback(async (templateData: any) => {
+  const createTemplate = useCallback(async (templateData: WorkflowTemplateResponse) => {
     try {
       setLoading(true);
       const newTemplate =
@@ -92,7 +92,7 @@ export const useWorkflowData = () => {
   }, []);
 
   const executeWorkflow = useCallback(
-    async (workflowId: string, input: any) => {
+    async (workflowId: string, input: Record<string, unknown>) => {
       try {
         setLoading(true);
         const requestData: WorkflowExecutionRequest = {
@@ -125,7 +125,7 @@ export const useWorkflowData = () => {
       // await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
       //   templateId
       // );
-      console.warn('Delete workflow template not implemented in API');
+      // TODO: Delete workflow template not implemented in API
       setTemplates((prev) => prev.filter((t) => t.id !== templateId));
     } catch (error) {
       handleError(error, {

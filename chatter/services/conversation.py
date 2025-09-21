@@ -11,8 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.core.exceptions import NotFoundError, ValidationError
 from chatter.models.conversation import Conversation, ConversationStatus
 from chatter.schemas.chat import (
-    ConversationCreate
-    ConversationUpdate
+    ConversationCreate,
+    ConversationUpdate,
 )
 from chatter.utils.performance import (
     ConversationQueryService,

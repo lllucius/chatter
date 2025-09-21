@@ -814,10 +814,10 @@ class WorkflowValidator(BaseValidator):
         if "workflow_type" in config and len(config) == 1:
             workflow_type = config["workflow_type"]
             valid_types = [
-                "simple_chat",
-                "rag_chat",
-                "function_chat",
-                "advanced_chat",
+                "plain",
+                "rag",
+                "tools",
+                "full",
             ]
             if workflow_type not in valid_types:
                 errors.append(

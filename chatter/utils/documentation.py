@@ -25,7 +25,7 @@ Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "simple_chat"
+    "workflow": "plain"
 }
 ```
 
@@ -34,7 +34,7 @@ Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag_chat",
+    "workflow": "rag",
     "enable_retrieval": true
 }
 ```
@@ -44,7 +44,7 @@ Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "function_chat"
+    "workflow": "tools"
 }
 ```
 
@@ -53,7 +53,7 @@ Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "advanced_chat",
+    "workflow": "full",
     "enable_retrieval": true
 }
 ```
@@ -64,7 +64,7 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "simple_chat",
+    "workflow": "plain",
     "stream": true
 }
 ```
@@ -329,7 +329,7 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "What are the latest customer satisfaction metrics?",
-                "workflow": "rag_chat",
+                "workflow": "rag",
                 "enable_retrieval": True,
                 "stream": False,
             },
@@ -347,7 +347,7 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "Write a Python function to calculate fibonacci numbers",
-                "workflow": "function_chat",
+                "workflow": "tools",
                 "stream": True,
             },
             response_example={
@@ -385,7 +385,7 @@ class APIDocumentationEnhancer:
                 "templates": {
                     "customer_support": {
                         "name": "customer_support",
-                        "workflow_type": "advanced_chat",
+                        "workflow_type": "full",
                         "description": "Customer support with knowledge base and tools",
                         "required_tools": [
                             "search_kb",
@@ -396,7 +396,7 @@ class APIDocumentationEnhancer:
                     },
                     "code_assistant": {
                         "name": "code_assistant",
-                        "workflow_type": "function_chat",
+                        "workflow_type": "tools",
                         "description": "Programming assistant with code tools",
                         "required_tools": [
                             "execute_code",

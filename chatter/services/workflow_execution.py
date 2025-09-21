@@ -340,7 +340,7 @@ class WorkflowExecutionService:
             )
 
             capabilities = WorkflowCapabilities.from_workflow_type(
-                template.workflow_type or "simple_chat"
+                template.workflow_type or "plain"
             )
             spec = WorkflowSpec(
                 capabilities=capabilities,

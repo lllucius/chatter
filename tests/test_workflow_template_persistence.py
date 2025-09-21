@@ -34,7 +34,7 @@ class TestWorkflowTemplatePersistence:
         db_template = MagicMock()
         db_template.to_unified_template.return_value = {
             "name": "test_template",
-            "workflow_type": "simple_chat",
+            "workflow_type": "plain",
             "description": "Test template description",
             "default_params": {"system_message": "Test system message"},
             "required_tools": [],
@@ -90,7 +90,7 @@ class TestWorkflowTemplatePersistence:
         # Test getting a template
         template = await template_manager.get_template("test_template")
         assert template.name == "test_template"
-        assert template.workflow_type == "simple_chat"
+        assert template.workflow_type == "plain"
         assert template.description == "Test template description"
 
     @pytest.mark.asyncio
@@ -134,7 +134,7 @@ class TestWorkflowTemplatePersistence:
         """Test validation of templates."""
         template = WorkflowTemplate(
             name="test_template",
-            workflow_type="simple_chat",
+            workflow_type="plain",
             description="Test template description",
             default_params={"system_message": "Test system message"},
         )
@@ -166,7 +166,7 @@ class TestWorkflowTemplatePersistence:
         spec = TemplateSpec(
             name="custom_test_template",
             description="Custom test template",
-            workflow_type="function_chat",
+            workflow_type="tools",
             default_params={"system_message": "Custom test message"},
             required_tools=["test_tool"],
         )
@@ -177,7 +177,7 @@ class TestWorkflowTemplatePersistence:
 
         # Verify template creation
         assert template.name == "custom_test_template"
-        assert template.workflow_type == "function_chat"
+        assert template.workflow_type == "tools"
         assert template.required_tools == ["test_tool"]
 
         # Verify database interaction
@@ -215,19 +215,19 @@ class TestWorkflowTemplatePersistence:
         """Test template category determination logic."""
         # Test customer support category
         category = template_manager._determine_template_category(
-            "customer_support_template", "advanced_chat"
+            "customer_support_template", "full"
         )
         assert category.value == "customer_support"
 
         # Test programming category
         category = template_manager._determine_template_category(
-            "code_assistant", "function_chat"
+            "code_assistant", "tools"
         )
         assert category.value == "programming"
 
         # Test custom category (default)
         category = template_manager._determine_template_category(
-            "my_template", "simple_chat"
+            "my_template", "plain"
         )
         assert category.value == "custom"
 
@@ -239,7 +239,7 @@ class TestWorkflowTemplatePersistence:
         # Setup mock template with required tools
         mock_db_template.to_unified_template.return_value = {
             "name": "test_template",
-            "workflow_type": "function_chat",
+            "workflow_type": "tools",
             "description": "Test template with tools",
             "default_params": {"system_message": "Test system message"},
             "required_tools": ["required_tool_1", "required_tool_2"],
@@ -313,7 +313,7 @@ class TestWorkflowTemplateIntegration:
         spec = TemplateSpec(
             name="integration_test_template",
             description="Integration test template",
-            workflow_type="rag_chat",
+            workflow_type="rag",
             default_params={
                 "system_message": "Integration test system message",
                 "max_documents": 10,
@@ -335,7 +335,7 @@ class TestWorkflowTemplateIntegration:
         mock_db_template = MagicMock()
         mock_db_template.to_unified_template.return_value = {
             "name": "integration_test_template",
-            "workflow_type": "rag_chat",
+            "workflow_type": "rag",
             "description": "Integration test template",
             "default_params": {
                 "system_message": "Integration test system message",

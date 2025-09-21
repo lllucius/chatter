@@ -34,20 +34,20 @@ class WorkflowCapabilities:
         cls, workflow_type: str
     ) -> WorkflowCapabilities:
         """Create capabilities from workflow type."""
-        # Handle modern workflow types
-        if workflow_type in ["plain", "simple_chat"]:
+        # Handle modern workflow types only
+        if workflow_type == "plain":
             return cls()
-        elif workflow_type in ["rag", "rag_chat"]:
+        elif workflow_type == "rag":
             return cls(
                 enable_retrieval=True,
                 max_documents=10,
                 memory_window=30,
             )
-        elif workflow_type in ["tools", "function_chat"]:
+        elif workflow_type == "tools":
             return cls(
                 enable_tools=True, max_tool_calls=10, memory_window=100
             )
-        elif workflow_type in ["full", "advanced_chat"]:
+        elif workflow_type == "full":
             return cls(
                 enable_retrieval=True,
                 enable_tools=True,
@@ -62,13 +62,13 @@ class WorkflowCapabilities:
     def get_workflow_type(self) -> str:
         """Get the appropriate workflow type for these capabilities."""
         if self.enable_retrieval and self.enable_tools:
-            return "advanced_chat"
+            return "full"
         elif self.enable_tools:
-            return "function_chat"
+            return "tools"
         elif self.enable_retrieval:
-            return "rag_chat"
+            return "rag"
         else:
-            return "simple_chat"
+            return "plain"
 
     def requires_tools(self) -> bool:
         """Check if workflow requires tools."""
@@ -145,7 +145,7 @@ class WorkflowSpec:
         # Determine capabilities from workflow type
         workflow_type = getattr(
             chat_request, 'workflow_type', None
-        ) or getattr(chat_request, 'workflow', 'simple_chat')
+        ) or getattr(chat_request, 'workflow', 'plain')
         capabilities = WorkflowCapabilities.from_workflow_type(
             workflow_type
         )

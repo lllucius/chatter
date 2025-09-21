@@ -1009,7 +1009,7 @@ class LLMService:
     async def create_langgraph_workflow(
         self,
         provider_name: str | None,
-        workflow_type: str = "simple_chat",  # "simple_chat" | "rag_chat" | "function_chat" | "advanced_chat"
+        workflow_type: str = "plain",  # "plain" | "rag" | "tools" | "full"
         system_message: str | None = None,
         retriever=None,
         tools: list[Any] | None = None,
@@ -1049,7 +1049,7 @@ class LLMService:
 
         # Get default tools if needed
         if (
-            workflow_type in ("function_chat", "advanced_chat")
+            workflow_type in ("tools", "full")
             and not tools
         ):
             tools = await get_mcp_service().get_tools()
@@ -1060,12 +1060,12 @@ class LLMService:
             workflow_type
             if workflow_type
             in (
-                "simple_chat",
-                "rag_chat",
-                "function_chat",
-                "advanced_chat",
+                "plain",
+                "rag",
+                "tools",
+                "full",
             )
-            else "simple_chat"
+            else "plain"
         )
 
         # Use the unified create_workflow method
@@ -1074,10 +1074,10 @@ class LLMService:
             mode=mode,
             system_message=system_message,
             retriever=retriever
-            if mode in ("rag_chat", "advanced_chat")
+            if mode in ("rag", "full")
             else None,
             tools=tools
-            if mode in ("function_chat", "advanced_chat")
+            if mode in ("tools", "full")
             else None,
             enable_memory=enable_memory,
             memory_window=memory_window,

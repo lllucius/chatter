@@ -40,7 +40,7 @@ async def test_memory_summary_filtering():
 
     # Create workflow with memory enabled and small window to trigger memory management
     workflow = await manager.create_workflow(
-        llm=mock_llm, mode="plain", enable_memory=True, memory_window=2
+        llm=mock_llm, mode="simple_chat", enable_memory=True, memory_window=2
     )
 
     # Create a conversation state that will trigger memory management
@@ -125,7 +125,7 @@ async def test_summary_context_formatting():
     mock_llm.ainvoke = AsyncMock(return_value=mock_response)
 
     workflow = await manager.create_workflow(
-        llm=mock_llm, mode="plain", enable_memory=True
+        llm=mock_llm, mode="simple_chat", enable_memory=True
     )
 
     _result = await manager.run_workflow(workflow, state, "test_thread")

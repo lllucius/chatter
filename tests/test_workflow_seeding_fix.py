@@ -14,23 +14,23 @@ class TestWorkflowSeedingFix:
     """Test that seeded workflow types are compatible with the unified execution engine."""
 
     def test_seeded_workflow_types_are_supported(self):
-        """Test that all seeded workflow types are supported by the unified execution engine."""
-        # These are the types used in our seeded templates
-        seeded_types = ["plain", "rag", "tools", "full"]
+        """Test that all workflow types (after migration) are supported by the unified execution engine."""
+        # These are the types after migration from seed data
+        migrated_types = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
 
         # Get supported types from the unified execution engine
         supported_types = UnifiedWorkflowExecutor.get_supported_types()
 
-        # Verify all seeded types are supported
-        for seeded_type in seeded_types:
-            assert seeded_type in supported_types, (
-                f"Seeded workflow type '{seeded_type}' is not supported by unified execution engine. "
+        # Verify all migrated types are supported
+        for migrated_type in migrated_types:
+            assert migrated_type in supported_types, (
+                f"Migrated workflow type '{migrated_type}' is not supported by unified execution engine. "
                 f"Supported types: {supported_types}"
             )
 
     def test_default_workflow_type_is_supported(self):
         """Test that the default workflow type is supported."""
-        default_type = "plain"  # From chat.py schema default
+        default_type = "simple_chat"  # Default after migration
         supported_types = UnifiedWorkflowExecutor.get_supported_types()
 
         assert default_type in supported_types, (
@@ -38,46 +38,46 @@ class TestWorkflowSeedingFix:
             f"Supported types: {supported_types}"
         )
 
-    def test_legacy_workflow_type_mapping_exists(self):
-        """Test that legacy workflow type mapping is preserved for backward compatibility."""
-        # These mappings should exist in the unified system for backward compatibility
-        expected_mappings = {
-            "simple_chat": "plain",
-            "rag_chat": "rag",
-            "function_chat": "tools",
-            "advanced_chat": "full",
-        }
+    def test_modern_workflow_type_support(self):
+        """Test that modern workflow types are supported by the unified system."""
+        # These are the modern workflow types used after migration
+        modern_types = [
+            "simple_chat",
+            "rag_chat", 
+            "function_chat",
+            "advanced_chat",
+        ]
 
         supported_types = UnifiedWorkflowExecutor.get_supported_types()
 
-        # Verify all mapped types are supported by the unified system
-        for legacy_type, modern_type in expected_mappings.items():
+        # Verify all modern types are supported by the unified system
+        for modern_type in modern_types:
             assert modern_type in supported_types, (
-                f"Legacy type '{legacy_type}' maps to '{modern_type}' which is not supported. "
+                f"Modern workflow type '{modern_type}' is not supported. "
                 f"Supported types: {supported_types}"
             )
 
     def test_workflow_types_have_good_coverage(self):
         """Test that we have workflow types covering the main capability combinations."""
-        seeded_types = ["plain", "rag", "tools", "full"]
+        modern_types = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
 
         # We should have at least one workflow type for each major capability combination
         assert (
-            "plain" in seeded_types
-        ), "Should have plain workflow type (no additional capabilities)"
+            "simple_chat" in modern_types
+        ), "Should have simple_chat workflow type (no additional capabilities)"
         assert (
-            "rag" in seeded_types
-        ), "Should have RAG workflow type (retrieval capability)"
+            "rag_chat" in modern_types
+        ), "Should have rag_chat workflow type (retrieval capability)"
         assert (
-            "tools" in seeded_types
-        ), "Should have tools workflow type (tool calling capability)"
+            "function_chat" in modern_types
+        ), "Should have function_chat workflow type (tool calling capability)"
         assert (
-            "full" in seeded_types
-        ), "Should have full workflow type (all capabilities)"
+            "advanced_chat" in modern_types
+        ), "Should have advanced_chat workflow type (all capabilities)"
 
         # Should have good variety covering all capability combinations
         assert (
-            len(set(seeded_types)) >= 3
+            len(set(modern_types)) >= 3
         ), "Should have at least 3 different workflow types"
 
     def test_unified_system_replaces_legacy_executors(self):

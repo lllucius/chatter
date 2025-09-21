@@ -108,7 +108,7 @@ class WorkflowTemplate(Base):
         String(50),
         nullable=True,
         index=True,
-        comment="Dynamic workflow type identifier (e.g., plain, rag, tools, full)",
+        comment="Dynamic workflow type identifier (e.g., simple_chat, rag_chat, function_chat, advanced_chat)",
     )
 
     # Enhanced dynamic workflow fields

@@ -27,7 +27,7 @@ async def send_message(
         None, help="Conversation ID (creates new if not provided)"
     ),
     workflow: str = typer.Option(
-        "plain", help="Workflow type: plain, rag, tools, full"
+        "simple_chat", help="Workflow type: simple_chat, rag_chat, function_chat, advanced_chat"
     ),
     template: str = typer.Option(None, help="Use workflow template"),
     stream: bool = typer.Option(

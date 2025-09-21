@@ -708,7 +708,7 @@ workflow_templates:
   # Basic templates (included in minimal mode)
   basic:
     - name: "general_chat"
-      workflow_type: "plain"
+      workflow_type: "simple_chat"
       category: "general"
       description: "General conversation assistant"
       default_params:
@@ -717,7 +717,7 @@ workflow_templates:
         system_message: "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive."
 
     - name: "document_qa"
-      workflow_type: "rag"
+      workflow_type: "rag_chat"
       category: "research"
       description: "Document question answering with retrieval"
       default_params:
@@ -728,7 +728,7 @@ workflow_templates:
       required_retrievers: ["document_store"]
 
     - name: "code_assistant"
-      workflow_type: "tools"
+      workflow_type: "function_chat"
       category: "programming"
       description: "Programming assistant with code tools"
       default_params:
@@ -741,7 +741,7 @@ workflow_templates:
   # Extended templates (included in demo mode)
   extended:
     - name: "customer_support"
-      workflow_type: "full"
+      workflow_type: "advanced_chat"
       category: "customer_support"
       description: "Customer support with knowledge base and tools"
       default_params:
@@ -753,7 +753,7 @@ workflow_templates:
       required_retrievers: ["support_docs"]
 
     - name: "research_assistant"
-      workflow_type: "rag"
+      workflow_type: "rag_chat"
       category: "research"
       description: "Research assistant with document retrieval"
       default_params:
@@ -764,7 +764,7 @@ workflow_templates:
       required_retrievers: ["research_docs"]
 
     - name: "data_analyst"
-      workflow_type: "tools"
+      workflow_type: "function_chat"
       category: "data_analysis"
       description: "Data analysis assistant with computation tools"
       default_params:
@@ -775,7 +775,7 @@ workflow_templates:
       required_tools: ["execute_python", "create_chart", "analyze_data"]
 
     - name: "blog_writing_assistant"
-      workflow_type: "tools"
+      workflow_type: "function_chat"
       category: "creative"
       description: "Blog writing assistant with research and editing tools"
       default_params:
@@ -786,7 +786,7 @@ workflow_templates:
       required_tools: ["web_search", "grammar_check", "seo_analyzer"]
 
     - name: "meeting_summarizer"
-      workflow_type: "rag"
+      workflow_type: "rag_chat"
       category: "business"
       description: "Meeting transcript summarizer and action item extractor"
       default_params:
@@ -796,7 +796,7 @@ workflow_templates:
       required_retrievers: ["meeting_transcripts"]
 
     - name: "learning_tutor"
-      workflow_type: "full"
+      workflow_type: "advanced_chat"
       category: "educational"
       description: "Personalized learning tutor with assessment tools"
       default_params:
@@ -1087,7 +1087,7 @@ production_data:
   # Core workflow templates for production deployment
   workflow_templates:
     - name: "general_chat"
-      workflow_type: "plain"
+      workflow_type: "simple_chat"
       category: "general"
       description: "General conversation assistant"
       default_params:
@@ -1096,7 +1096,7 @@ production_data:
         system_message: "You are a helpful, harmless, and honest AI assistant. Engage in natural conversation while being informative and supportive."
 
     - name: "document_qa"
-      workflow_type: "rag"
+      workflow_type: "rag_chat"
       category: "research"
       description: "Document question answering with retrieval"
       default_params:
@@ -1107,7 +1107,7 @@ production_data:
       required_retrievers: ["document_store"]
 
     - name: "code_assistant"
-      workflow_type: "tools"
+      workflow_type: "function_chat"
       category: "programming"
       description: "Programming assistant with code tools"
       default_params:

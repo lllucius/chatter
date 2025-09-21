@@ -67,7 +67,7 @@ def chat_request():
     """Create test chat request."""
     return ChatRequest(
         message="Hello test",
-        workflow="plain",
+        workflow="simple_chat",
     )
 
 

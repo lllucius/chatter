@@ -387,7 +387,7 @@ class DocumentChunk(Base):
         DateTime(timezone=True), nullable=True
     )
 
-    # Legacy embedding metadata - kept for backwards compatibility during transition
+    # Embedding metadata for content chunks
     embedding_models: Mapped[list[str] | None] = mapped_column(
         "embedding_models",
         JSON,

@@ -787,9 +787,9 @@ class WorkflowManagementService:
             WorkflowCapabilities,
         )
 
-        # Convert legacy workflow type to capabilities
-        workflow_type = template.workflow_type or "plain"
-        capabilities = WorkflowCapabilities.from_legacy_type(
+        # Convert workflow type to capabilities
+        workflow_type = template.workflow_type or "simple_chat"
+        capabilities = WorkflowCapabilities.from_workflow_type(
             workflow_type
         )
 

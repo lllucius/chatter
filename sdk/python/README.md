@@ -287,6 +287,7 @@ Class | Method | HTTP request | Description
 *ToolServersApi* | [**update_tool_permission_api_v1_toolservers_permissions_permission_id_put**](docs/ToolServersApi.md#update_tool_permission_api_v1_toolservers_permissions_permission_id_put) | **PUT** /api/v1/toolservers/permissions/{permission_id} | Update Tool Permission
 *ToolServersApi* | [**update_tool_server_api_v1_toolservers_servers_server_id_put**](docs/ToolServersApi.md#update_tool_server_api_v1_toolservers_servers_server_id_put) | **PUT** /api/v1/toolservers/servers/{server_id} | Update Tool Server
 *WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_definitions_post) | **POST** /api/v1/workflows/definitions | Create Workflow Definition
+*WorkflowsApi* | [**create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**](docs/WorkflowsApi.md#create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post) | **POST** /api/v1/workflows/definitions/from-template | Create Workflow Definition From Template
 *WorkflowsApi* | [**create_workflow_template_api_v1_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 *WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
 *WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
@@ -549,6 +550,7 @@ Class | Method | HTTP request | Description
  - [VariantPerformance](docs/VariantPerformance.md)
  - [WorkflowAnalyticsResponse](docs/WorkflowAnalyticsResponse.md)
  - [WorkflowDefinitionCreate](docs/WorkflowDefinitionCreate.md)
+ - [WorkflowDefinitionFromTemplateRequest](docs/WorkflowDefinitionFromTemplateRequest.md)
  - [WorkflowDefinitionResponse](docs/WorkflowDefinitionResponse.md)
  - [WorkflowDefinitionUpdate](docs/WorkflowDefinitionUpdate.md)
  - [WorkflowDefinitionsResponse](docs/WorkflowDefinitionsResponse.md)

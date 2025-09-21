@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -29,6 +29,22 @@ export class WorkflowsApi extends BaseAPI {
   public async createWorkflowDefinitionApiV1WorkflowsDefinitions(data: WorkflowDefinitionCreate): Promise<WorkflowDefinitionResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowDefinitionResponse>;
+  }
+  /**Create Workflow Definition From Template
+   * Create a workflow definition from a template.
+   */
+  public async createWorkflowDefinitionFromTemplateApiV1WorkflowsDefinitionsFromTemplate(data: WorkflowDefinitionFromTemplateRequest): Promise<WorkflowDefinitionResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/definitions/from-template`,
       method: 'POST' as HTTPMethod,
       headers: {
         'Content-Type': 'application/json',

@@ -5,6 +5,7 @@ All URIs are relative to *http://localhost:8000*
 Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**create_workflow_definition_api_v1_workflows_definitions_post**](WorkflowsApi.md#create_workflow_definition_api_v1_workflows_definitions_post) | **POST** /api/v1/workflows/definitions | Create Workflow Definition
+[**create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**](WorkflowsApi.md#create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post) | **POST** /api/v1/workflows/definitions/from-template | Create Workflow Definition From Template
 [**create_workflow_template_api_v1_workflows_templates_post**](WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
 [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
@@ -79,6 +80,86 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **workflow_definition_create** | [**WorkflowDefinitionCreate**](WorkflowDefinitionCreate.md)|  | 
+
+### Return type
+
+[**WorkflowDefinitionResponse**](WorkflowDefinitionResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: application/json
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**
+> WorkflowDefinitionResponse create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post(workflow_definition_from_template_request)
+
+Create Workflow Definition From Template
+
+Create a workflow definition from a template.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_definition_from_template_request import WorkflowDefinitionFromTemplateRequest
+from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_definition_from_template_request = chatter_sdk.WorkflowDefinitionFromTemplateRequest() # WorkflowDefinitionFromTemplateRequest | 
+
+    try:
+        # Create Workflow Definition From Template
+        api_response = await api_instance.create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post(workflow_definition_from_template_request)
+        print("The response of WorkflowsApi->create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_definition_from_template_request** | [**WorkflowDefinitionFromTemplateRequest**](WorkflowDefinitionFromTemplateRequest.md)|  | 
 
 ### Return type
 

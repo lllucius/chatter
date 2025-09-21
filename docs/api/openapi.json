@@ -8883,6 +8883,119 @@
         ]
       }
     },
+    "/api/v1/workflows/definitions/from-template": {
+      "post": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Create Workflow Definition From Template",
+        "description": "Create a workflow definition from a template.",
+        "operationId": "create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post",
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/WorkflowDefinitionFromTemplateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/WorkflowDefinitionResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        },
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ]
+      }
+    },
     "/api/v1/workflows/definitions/{workflow_id}": {
       "get": {
         "tags": [
@@ -39399,6 +39512,52 @@
         ],
         "title": "WorkflowDefinitionCreate",
         "description": "Schema for creating a workflow definition."
+      },
+      "WorkflowDefinitionFromTemplateRequest": {
+        "properties": {
+          "template_id": {
+            "type": "string",
+            "title": "Template Id",
+            "description": "Template ID to instantiate"
+          },
+          "name_suffix": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name Suffix",
+            "description": "Optional suffix for the definition name"
+          },
+          "user_input": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "User Input",
+            "description": "User input to merge with template default params"
+          },
+          "is_temporary": {
+            "type": "boolean",
+            "title": "Is Temporary",
+            "description": "Whether this is a temporary definition for execution",
+            "default": true
+          }
+        },
+        "type": "object",
+        "required": [
+          "template_id"
+        ],
+        "title": "WorkflowDefinitionFromTemplateRequest",
+        "description": "Schema for creating a workflow definition from a template."
       },
       "WorkflowDefinitionResponse": {
         "properties": {

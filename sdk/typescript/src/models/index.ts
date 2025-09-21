@@ -223,6 +223,7 @@ export * from './VariantAllocation';
 export * from './VariantPerformance';
 export * from './WorkflowAnalyticsResponse';
 export * from './WorkflowDefinitionCreate';
+export * from './WorkflowDefinitionFromTemplateRequest';
 export * from './WorkflowDefinitionResponse';
 export * from './WorkflowDefinitionUpdate';
 export * from './WorkflowDefinitionsResponse';

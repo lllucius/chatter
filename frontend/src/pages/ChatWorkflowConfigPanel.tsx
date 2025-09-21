@@ -37,7 +37,6 @@ import {
 import { useRightSidebar } from '../components/RightSidebarContext';
 import {
   ChatWorkflowConfig,
-  ChatWorkflowTemplate,
 } from '../hooks/useWorkflowChat';
 
 interface Props {
@@ -59,12 +58,8 @@ interface Props {
   setCustomPromptText: (text: string) => void;
 
   // New workflow-based configuration
-  workflowTemplates: Record<string, ChatWorkflowTemplate>;
-  selectedTemplate: string;
-  setSelectedTemplate: (name: string) => void;
   workflowConfig: ChatWorkflowConfig;
   updateWorkflowConfig: (updates: Partial<ChatWorkflowConfig>) => void;
-  resetToTemplate: (templateName: string) => void;
 
   // Tracing configuration
   enableTracing: boolean;
@@ -86,12 +81,8 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   setSelectedDocuments,
   customPromptText,
   setCustomPromptText,
-  workflowTemplates,
-  selectedTemplate,
-  setSelectedTemplate,
   workflowConfig,
   updateWorkflowConfig,
-  resetToTemplate,
   enableTracing,
   setEnableTracing,
   onSelectConversation: _onSelectConversation,
@@ -112,59 +103,6 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
     setExpandedPanel(expandedPanel === panel ? '' : panel);
   };
 
-  const handleTemplateChange = (templateName: string) => {
-    if (templateName) {
-      resetToTemplate(templateName);
-    } else {
-      setSelectedTemplate('');
-    }
-  };
-
-  const renderTemplateCard = (name: string, template: ChatWorkflowTemplate) => (
-    <Card
-      key={name}
-      variant={selectedTemplate === name ? 'outlined' : 'elevation'}
-      sx={{
-        mb: 1,
-        cursor: 'pointer',
-        border: selectedTemplate === name ? 2 : 0,
-        borderColor: selectedTemplate === name ? 'primary.main' : 'transparent',
-      }}
-      onClick={() => handleTemplateChange(name)}
-    >
-      <CardContent sx={{ py: 1 }}>
-        <Typography variant="subtitle2" fontWeight="bold">
-          {template.name}
-        </Typography>
-        <Typography variant="caption" color="text.secondary" display="block">
-          {template.description}
-        </Typography>
-        <Box sx={{ mt: 1, display: 'flex', gap: 0.5, flexWrap: 'wrap' }}>
-          {template.config.enable_retrieval && (
-            <Chip size="small" icon={<RetrievalIcon />} label="RAG" />
-          )}
-          {template.config.enable_tools && (
-            <Chip size="small" icon={<ToolIcon />} label="Tools" />
-          )}
-          {template.config.enable_memory && (
-            <Chip size="small" icon={<MemoryIcon />} label="Memory" />
-          )}
-          <Chip
-            size="small"
-            label={`Score: ${template.complexity_score ?? 'N/A'}`}
-            color={
-              (template.complexity_score ?? 5) <= 3
-                ? 'success'
-                : (template.complexity_score ?? 5) <= 6
-                  ? 'warning'
-                  : 'error'
-            }
-          />
-        </Box>
-      </CardContent>
-    </Card>
-  );
-
   return (
     <Box sx={{ width: '100%', p: collapsed ? 0 : 1 }}>
       {/* Workflow Configuration */}
@@ -181,47 +119,14 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
         <AccordionDetails>
           <Box sx={{ mb: 2 }}>
             <Typography variant="body2" color="text.secondary" gutterBottom>
-              Choose a pre-built template or configure a custom workflow
+              Configure your custom workflow settings
             </Typography>
 
-            {/* Template Selection */}
-            <Typography variant="subtitle2" sx={{ mt: 2, mb: 1 }}>
-              Templates
-            </Typography>
-            <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
-              <Card
-                variant={!selectedTemplate ? 'outlined' : 'elevation'}
-                sx={{
-                  mb: 1,
-                  cursor: 'pointer',
-                  border: !selectedTemplate ? 2 : 0,
-                  borderColor: !selectedTemplate
-                    ? 'primary.main'
-                    : 'transparent',
-                }}
-                onClick={() => setSelectedTemplate('')}
-              >
-                <CardContent sx={{ py: 1 }}>
-                  <Typography variant="subtitle2" fontWeight="bold">
-                    Custom Configuration
-                  </Typography>
-                  <Typography variant="caption" color="text.secondary">
-                    Build your own workflow configuration
-                  </Typography>
-                </CardContent>
-              </Card>
-
-              {Object.entries(workflowTemplates).map(([name, template]) =>
-                renderTemplateCard(name, template)
-              )}
-            </Box>
-
-            {/* Custom Configuration */}
-            {!selectedTemplate && (
-              <Box sx={{ mt: 2 }}>
-                <Typography variant="subtitle2" sx={{ mb: 1 }}>
-                  Custom Configuration
-                </Typography>
+            {/* Workflow Configuration */}
+            <Box sx={{ mt: 2 }}>
+              <Typography variant="subtitle2" sx={{ mb: 1 }}>
+                Workflow Configuration
+              </Typography>
 
                 <FormControlLabel
                   control={
@@ -455,8 +360,7 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                     </Box>
                   </Box>
                 )}
-              </Box>
-            )}
+            </Box>
           </Box>
         </AccordionDetails>
       </Accordion>

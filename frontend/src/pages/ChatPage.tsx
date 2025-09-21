@@ -69,12 +69,8 @@ const ChatPage: React.FC = () => {
 
   // Use workflow-based chat hook
   const {
-    workflowTemplates,
-    selectedTemplate,
     customWorkflowConfig,
-    setSelectedTemplate,
     updateWorkflowConfig,
-    resetToTemplate,
     buildWorkflowRequest,
     sendWorkflowMessage,
     getEffectiveConfig,
@@ -582,12 +578,8 @@ const ChatPage: React.FC = () => {
         setSelectedDocuments={setSelectedDocuments}
         customPromptText={customPromptText}
         setCustomPromptText={setCustomPromptText}
-        workflowTemplates={workflowTemplates}
-        selectedTemplate={selectedTemplate}
-        setSelectedTemplate={setSelectedTemplate}
         workflowConfig={customWorkflowConfig}
         updateWorkflowConfig={updateWorkflowConfig}
-        resetToTemplate={resetToTemplate}
         enableTracing={enableTracing}
         setEnableTracing={setEnableTracing}
         onSelectConversation={handleSelectConversation}
@@ -606,17 +598,13 @@ const ChatPage: React.FC = () => {
     selectedPrompt,
     selectedDocuments,
     customPromptText,
-    workflowTemplates,
-    selectedTemplate,
     customWorkflowConfig,
     handleSelectConversation,
     setSelectedProfile,
     setSelectedPrompt,
     setSelectedDocuments,
     setCustomPromptText,
-    setSelectedTemplate,
     updateWorkflowConfig,
-    resetToTemplate,
     enableTracing,
   ]);
 

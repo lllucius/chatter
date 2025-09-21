@@ -215,37 +215,10 @@ class UnifiedTemplateManager:
                 f"Error retrieving template from database: {e}"
             )
 
-        # If database lookup failed, check chat templates
-        try:
-            chat_templates = await self.get_chat_templates()
-            if name in chat_templates:
-                chat_template = chat_templates[name]
-                logger.debug(f"Retrieved chat template: {name}")
-                
-                # Convert ChatWorkflowTemplate to WorkflowTemplate
-                return WorkflowTemplate(
-                    name=chat_template.name,
-                    workflow_type=name,  # Use the template key as workflow_type
-                    description=chat_template.description,
-                    default_params=chat_template.config.model_dump(),
-                    required_tools=None,  # Chat templates don't specify this
-                    required_retrievers=None,  # Chat templates don't specify this
-                )
-        except Exception as e:
-            logger.warning(f"Error retrieving chat templates: {e}")
-
-        # Template not found in either database or chat templates
+        # Template not found
         available = await self.list_templates(owner_id=owner_id)
-        # Also include chat template names in available templates
-        try:
-            chat_templates = await self.get_chat_templates()
-            chat_template_names = list(chat_templates.keys())
-            all_available = sorted(set(available + chat_template_names))
-        except Exception:
-            all_available = available
-            
         raise WorkflowConfigurationError(
-            f"Template '{name}' not found. Available templates: {', '.join(all_available)}"
+            f"Template '{name}' not found. Available templates: {', '.join(available)}"
         )
 
     async def list_templates(
@@ -260,23 +233,12 @@ class UnifiedTemplateManager:
         Returns:
             List of template names
         """
-        template_names = []
-        
-        # Get templates from database
         try:
             templates = await self._get_templates_from_db(owner_id)
-            template_names.extend(templates.keys())
+            return sorted(templates.keys())
         except Exception as e:
             logger.warning(f"Error loading templates: {e}")
-            
-        # Add chat templates
-        try:
-            chat_templates = await self.get_chat_templates()
-            template_names.extend(chat_templates.keys())
-        except Exception as e:
-            logger.warning(f"Error loading chat templates: {e}")
-            
-        return sorted(set(template_names))
+            return []
 
     async def get_template_info(
         self, owner_id: str | None = None
@@ -906,110 +868,13 @@ class UnifiedTemplateManager:
     async def get_chat_templates(
         self,
     ) -> dict[str, ChatWorkflowTemplate]:
-        """Get all available chat workflow templates."""
-
-        # Built-in chat templates
-        chat_templates = {
-            "plain": ChatWorkflowTemplate(
-                name="Plain Chat",
-                description="Basic conversation without additional features",
-                config=ChatWorkflowConfig(
-                    enable_retrieval=False,
-                    enable_tools=False,
-                    enable_memory=True,
-                    llm_config=ModelConfig(
-                        temperature=0.7, max_tokens=1000
-                    ),
-                ),
-                use_cases=[
-                    "General conversation",
-                    "Quick questions",
-                    "Creative writing",
-                ],
-                complexity_score=1,
-                estimated_tokens=500,
-            ),
-            "rag": ChatWorkflowTemplate(
-                name="Knowledge Base Chat",
-                description="Chat with document retrieval for knowledge questions",
-                config=ChatWorkflowConfig(
-                    enable_retrieval=True,
-                    enable_tools=False,
-                    enable_memory=True,
-                    llm_config=ModelConfig(
-                        temperature=0.3, max_tokens=1500
-                    ),
-                    retrieval_config=RetrievalConfig(
-                        max_documents=5,
-                        similarity_threshold=0.7,
-                        rerank=True,
-                    ),
-                ),
-                use_cases=[
-                    "Knowledge base queries",
-                    "Document Q&A",
-                    "Research assistance",
-                ],
-                complexity_score=3,
-                estimated_tokens=1200,
-            ),
-            "tools": ChatWorkflowTemplate(
-                name="Tool-Enabled Chat",
-                description="Chat with function calling capabilities",
-                config=ChatWorkflowConfig(
-                    enable_retrieval=False,
-                    enable_tools=True,
-                    enable_memory=True,
-                    llm_config=ModelConfig(
-                        temperature=0.5, max_tokens=1000
-                    ),
-                    tool_config=ToolConfig(
-                        max_tool_calls=3,
-                        parallel_tool_calls=False,
-                        tool_timeout_ms=15000,
-                    ),
-                ),
-                use_cases=[
-                    "API interactions",
-                    "Data processing",
-                    "Automated tasks",
-                ],
-                complexity_score=4,
-                estimated_tokens=800,
-            ),
-            "full": ChatWorkflowTemplate(
-                name="Full-Featured Chat",
-                description="Chat with both retrieval and function calling",
-                config=ChatWorkflowConfig(
-                    enable_retrieval=True,
-                    enable_tools=True,
-                    enable_memory=True,
-                    enable_web_search=True,
-                    llm_config=ModelConfig(
-                        temperature=0.4, max_tokens=2000
-                    ),
-                    retrieval_config=RetrievalConfig(
-                        max_documents=7,
-                        similarity_threshold=0.6,
-                        rerank=True,
-                    ),
-                    tool_config=ToolConfig(
-                        max_tool_calls=5,
-                        parallel_tool_calls=True,
-                        tool_timeout_ms=30000,
-                    ),
-                ),
-                use_cases=[
-                    "Complex research",
-                    "Multi-step analysis",
-                    "Professional assistance",
-                ],
-                complexity_score=8,
-                estimated_tokens=2500,
-            ),
-        }
-
-        return chat_templates
+        """Get all available chat workflow templates.
+        
+        Note: Hardcoded chat templates have been removed. The chat interface
+        should use dynamic workflow_config instead of predefined templates.
+        """
+        # Return empty dict - no more hardcoded chat templates
+        return {}
 
     async def get_chat_template(
         self, name: str

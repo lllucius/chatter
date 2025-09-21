@@ -329,28 +329,6 @@ class WorkflowExecutionService:
                 request.workflow_definition_id, user_id
             )
             spec = WorkflowSpec.from_workflow_definition(definition)
-        elif request.workflow_template_name:
-            # Get template and create spec from it
-            template = await self.template_manager.get_template(
-                request.workflow_template_name, user_id
-            )
-            # Convert template to spec (simplified for now)
-            from chatter.core.workflow_capabilities import (
-                WorkflowCapabilities,
-            )
-
-            capabilities = WorkflowCapabilities.from_workflow_type(
-                template.workflow_type or "plain"
-            )
-            spec = WorkflowSpec(
-                capabilities=capabilities,
-                provider=request.provider or "openai",
-                temperature=request.temperature or 0.7,
-                max_tokens=request.max_tokens or 1000,
-                system_prompt=request.system_prompt_override,
-                name=template.name,
-                description=template.description,
-            )
         elif request.workflow_config:
             # Create spec from chat workflow config
             spec = WorkflowSpec.from_chat_workflow_config(
@@ -366,17 +344,10 @@ class WorkflowExecutionService:
             if request.system_prompt_override:
                 spec.system_prompt = request.system_prompt_override
         else:
-            # Default to plain workflow
-            from chatter.core.workflow_capabilities import (
-                WorkflowCapabilities,
-            )
-
-            spec = WorkflowSpec(
-                capabilities=WorkflowCapabilities(),
-                provider=request.provider or "openai",
-                temperature=request.temperature or 0.7,
-                max_tokens=request.max_tokens or 1000,
-                system_prompt=request.system_prompt_override,
+            # Either workflow_definition_id or workflow_config must be provided
+            raise ValueError(
+                "Either workflow_definition_id or workflow_config must be provided. "
+                "Hardcoded workflow templates have been removed."
             )
 
         return spec, conversation

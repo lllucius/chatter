@@ -215,10 +215,37 @@ class UnifiedTemplateManager:
                 f"Error retrieving template from database: {e}"
             )
 
-        # Template not found
+        # If database lookup failed, check chat templates
+        try:
+            chat_templates = await self.get_chat_templates()
+            if name in chat_templates:
+                chat_template = chat_templates[name]
+                logger.debug(f"Retrieved chat template: {name}")
+                
+                # Convert ChatWorkflowTemplate to WorkflowTemplate
+                return WorkflowTemplate(
+                    name=chat_template.name,
+                    workflow_type=name,  # Use the template key as workflow_type
+                    description=chat_template.description,
+                    default_params=chat_template.config.model_dump(),
+                    required_tools=None,  # Chat templates don't specify this
+                    required_retrievers=None,  # Chat templates don't specify this
+                )
+        except Exception as e:
+            logger.warning(f"Error retrieving chat templates: {e}")
+
+        # Template not found in either database or chat templates
         available = await self.list_templates(owner_id=owner_id)
+        # Also include chat template names in available templates
+        try:
+            chat_templates = await self.get_chat_templates()
+            chat_template_names = list(chat_templates.keys())
+            all_available = sorted(set(available + chat_template_names))
+        except Exception:
+            all_available = available
+            
         raise WorkflowConfigurationError(
-            f"Template '{name}' not found. Available templates: {', '.join(available)}"
+            f"Template '{name}' not found. Available templates: {', '.join(all_available)}"
         )
 
     async def list_templates(
@@ -233,12 +260,23 @@ class UnifiedTemplateManager:
         Returns:
             List of template names
         """
+        template_names = []
+        
+        # Get templates from database
         try:
             templates = await self._get_templates_from_db(owner_id)
-            return sorted(templates.keys())
+            template_names.extend(templates.keys())
         except Exception as e:
             logger.warning(f"Error loading templates: {e}")
-            return []
+            
+        # Add chat templates
+        try:
+            chat_templates = await self.get_chat_templates()
+            template_names.extend(chat_templates.keys())
+        except Exception as e:
+            logger.warning(f"Error loading chat templates: {e}")
+            
+        return sorted(set(template_names))
 
     async def get_template_info(
         self, owner_id: str | None = None

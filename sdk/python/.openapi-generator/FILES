@@ -253,6 +253,7 @@ chatter_sdk/models/variant_allocation.py
 chatter_sdk/models/variant_performance.py
 chatter_sdk/models/workflow_analytics_response.py
 chatter_sdk/models/workflow_definition_create.py
+chatter_sdk/models/workflow_definition_from_template_request.py
 chatter_sdk/models/workflow_definition_response.py
 chatter_sdk/models/workflow_definition_update.py
 chatter_sdk/models/workflow_definitions_response.py
@@ -512,6 +513,7 @@ docs/VariantAllocation.md
 docs/VariantPerformance.md
 docs/WorkflowAnalyticsResponse.md
 docs/WorkflowDefinitionCreate.md
+docs/WorkflowDefinitionFromTemplateRequest.md
 docs/WorkflowDefinitionResponse.md
 docs/WorkflowDefinitionUpdate.md
 docs/WorkflowDefinitionsResponse.md
@@ -777,6 +779,7 @@ test/test_variant_allocation.py
 test/test_variant_performance.py
 test/test_workflow_analytics_response.py
 test/test_workflow_definition_create.py
+test/test_workflow_definition_from_template_request.py
 test/test_workflow_definition_response.py
 test/test_workflow_definition_update.py
 test/test_workflow_definitions_response.py

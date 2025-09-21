@@ -682,3 +682,414 @@ class WorkflowManagementService:
         except Exception as e:
             logger.error(f"Failed to validate workflow definition: {e}")
             raise
+
+    async def create_workflow_definition_from_template(
+        self,
+        template_id: str,
+        owner_id: str,
+        name_suffix: str = "",
+        user_input: dict[str, Any] | None = None,
+        is_temporary: bool = True,
+    ) -> WorkflowDefinition:
+        """Create a workflow definition from a template.
+        
+        Args:
+            template_id: ID of the template to instantiate
+            owner_id: ID of the user creating the definition
+            name_suffix: Optional suffix for the definition name
+            user_input: Optional user input to merge with template params
+            is_temporary: Whether this is a temporary definition for execution
+            
+        Returns:
+            Created workflow definition
+            
+        Raises:
+            BadRequestProblem: If template not found or invalid
+        """
+        try:
+            # Get the template
+            template = await self.get_workflow_template(template_id, owner_id)
+            if not template:
+                from chatter.utils.problem import BadRequestProblem
+                raise BadRequestProblem(
+                    detail=f"Workflow template not found: {template_id}"
+                )
+
+            # Create name for the definition
+            definition_name = f"{template.name}"
+            if name_suffix:
+                definition_name += f" {name_suffix}"
+            elif is_temporary:
+                definition_name += " (Execution)"
+
+            # Merge template default params with user input
+            merged_input = {**(template.default_params or {})}
+            if user_input:
+                merged_input.update(user_input)
+
+            # Generate basic workflow structure based on template type
+            nodes, edges = self._generate_workflow_from_template(template, merged_input)
+
+            # Create the workflow definition
+            definition = await self.create_workflow_definition(
+                owner_id=owner_id,
+                name=definition_name,
+                description=f"Generated from template: {template.name}",
+                nodes=nodes,
+                edges=edges,
+                metadata={
+                    "generated_from_template": template_id,
+                    "template_name": template.name,
+                    "template_type": template.workflow_type,
+                    "user_input": user_input,
+                    "is_temporary": is_temporary,
+                },
+                template_id=template_id,
+            )
+
+            logger.info(
+                f"Created workflow definition {definition.id} from template {template_id}"
+            )
+            
+            return definition
+
+        except Exception as e:
+            logger.error(
+                f"Failed to create workflow definition from template {template_id}: {e}"
+            )
+            raise
+
+    def _generate_workflow_from_template(
+        self,
+        template: "WorkflowTemplate",
+        input_params: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Generate workflow nodes and edges from a template.
+        
+        This creates a basic workflow structure based on the template's workflow_type.
+        In a real implementation, this would be more sophisticated and potentially
+        load from a template definition repository.
+        
+        Args:
+            template: The workflow template
+            input_params: Merged input parameters
+            
+        Returns:
+            Tuple of (nodes, edges) for the workflow
+        """
+        workflow_type = template.workflow_type or "plain"
+        
+        # Generate basic workflow structure based on type
+        if workflow_type == "rag":
+            return self._generate_rag_workflow(template, input_params)
+        elif workflow_type == "tools":
+            return self._generate_tools_workflow(template, input_params)
+        elif workflow_type == "full":
+            return self._generate_full_workflow(template, input_params)
+        else:
+            # Default "plain" workflow
+            return self._generate_plain_workflow(template, input_params)
+
+    def _generate_plain_workflow(
+        self,
+        template: "WorkflowTemplate",
+        input_params: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Generate a plain chat workflow."""
+        nodes = [
+            {
+                "id": "start",
+                "type": "start",
+                "position": {"x": 100, "y": 100},
+                "data": {
+                    "label": "Start",
+                    "nodeType": "start",
+                    "config": {}
+                }
+            },
+            {
+                "id": "llm",
+                "type": "llm",
+                "position": {"x": 300, "y": 100},
+                "data": {
+                    "label": "LLM Response",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get("provider", "openai"),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get("temperature", 0.7),
+                        "max_tokens": input_params.get("max_tokens", 1000),
+                        "system_prompt": input_params.get("system_prompt", "You are a helpful assistant."),
+                    }
+                }
+            },
+            {
+                "id": "end",
+                "type": "end",
+                "position": {"x": 500, "y": 100},
+                "data": {
+                    "label": "End",
+                    "nodeType": "end",
+                    "config": {}
+                }
+            }
+        ]
+        
+        edges = [
+            {
+                "id": "start-llm",
+                "source": "start",
+                "target": "llm",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "llm-end",
+                "source": "llm",
+                "target": "end",
+                "type": "default",
+                "data": {}
+            }
+        ]
+        
+        return nodes, edges
+
+    def _generate_rag_workflow(
+        self,
+        template: "WorkflowTemplate",
+        input_params: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Generate a RAG workflow with retrieval."""
+        nodes = [
+            {
+                "id": "start",
+                "type": "start",
+                "position": {"x": 100, "y": 100},
+                "data": {
+                    "label": "Start",
+                    "nodeType": "start",
+                    "config": {}
+                }
+            },
+            {
+                "id": "retrieval",
+                "type": "retrieval",
+                "position": {"x": 300, "y": 100},
+                "data": {
+                    "label": "Document Retrieval",
+                    "nodeType": "retrieval",
+                    "config": {
+                        "retriever": input_params.get("retriever", "default"),
+                        "k": input_params.get("k", 5),
+                        "score_threshold": input_params.get("score_threshold", 0.5),
+                    }
+                }
+            },
+            {
+                "id": "llm",
+                "type": "llm",
+                "position": {"x": 500, "y": 100},
+                "data": {
+                    "label": "LLM with Context",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get("provider", "openai"),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get("temperature", 0.7),
+                        "max_tokens": input_params.get("max_tokens", 1000),
+                        "system_prompt": input_params.get("system_prompt", "Answer based on the provided context."),
+                        "use_context": True,
+                    }
+                }
+            },
+            {
+                "id": "end",
+                "type": "end",
+                "position": {"x": 700, "y": 100},
+                "data": {
+                    "label": "End",
+                    "nodeType": "end",
+                    "config": {}
+                }
+            }
+        ]
+        
+        edges = [
+            {
+                "id": "start-retrieval",
+                "source": "start",
+                "target": "retrieval",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "retrieval-llm",
+                "source": "retrieval",
+                "target": "llm",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "llm-end",
+                "source": "llm",
+                "target": "end",
+                "type": "default",
+                "data": {}
+            }
+        ]
+        
+        return nodes, edges
+
+    def _generate_tools_workflow(
+        self,
+        template: "WorkflowTemplate",
+        input_params: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Generate a tools workflow with tool usage."""
+        nodes = [
+            {
+                "id": "start",
+                "type": "start",
+                "position": {"x": 100, "y": 100},
+                "data": {
+                    "label": "Start",
+                    "nodeType": "start",
+                    "config": {}
+                }
+            },
+            {
+                "id": "llm-with-tools",
+                "type": "llm",
+                "position": {"x": 300, "y": 100},
+                "data": {
+                    "label": "LLM with Tools",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get("provider", "openai"),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get("temperature", 0.7),
+                        "max_tokens": input_params.get("max_tokens", 1000),
+                        "system_prompt": input_params.get("system_prompt", "You are a helpful assistant with access to tools."),
+                        "available_tools": template.required_tools or [],
+                        "enable_tools": True,
+                    }
+                }
+            },
+            {
+                "id": "end",
+                "type": "end",
+                "position": {"x": 500, "y": 100},
+                "data": {
+                    "label": "End",
+                    "nodeType": "end",
+                    "config": {}
+                }
+            }
+        ]
+        
+        edges = [
+            {
+                "id": "start-llm",
+                "source": "start",
+                "target": "llm-with-tools",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "llm-end",
+                "source": "llm-with-tools",
+                "target": "end",
+                "type": "default",
+                "data": {}
+            }
+        ]
+        
+        return nodes, edges
+
+    def _generate_full_workflow(
+        self,
+        template: "WorkflowTemplate",
+        input_params: dict[str, Any],
+    ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
+        """Generate a full workflow with retrieval and tools."""
+        nodes = [
+            {
+                "id": "start",
+                "type": "start",
+                "position": {"x": 100, "y": 100},
+                "data": {
+                    "label": "Start",
+                    "nodeType": "start",
+                    "config": {}
+                }
+            },
+            {
+                "id": "retrieval",
+                "type": "retrieval",
+                "position": {"x": 300, "y": 100},
+                "data": {
+                    "label": "Document Retrieval",
+                    "nodeType": "retrieval",
+                    "config": {
+                        "retriever": input_params.get("retriever", "default"),
+                        "k": input_params.get("k", 5),
+                        "score_threshold": input_params.get("score_threshold", 0.5),
+                    }
+                }
+            },
+            {
+                "id": "llm-with-tools",
+                "type": "llm",
+                "position": {"x": 500, "y": 100},
+                "data": {
+                    "label": "LLM with Context & Tools",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get("provider", "openai"),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get("temperature", 0.7),
+                        "max_tokens": input_params.get("max_tokens", 1000),
+                        "system_prompt": input_params.get("system_prompt", "Answer based on context and use tools as needed."),
+                        "available_tools": template.required_tools or [],
+                        "enable_tools": True,
+                        "use_context": True,
+                    }
+                }
+            },
+            {
+                "id": "end",
+                "type": "end",
+                "position": {"x": 700, "y": 100},
+                "data": {
+                    "label": "End",
+                    "nodeType": "end",
+                    "config": {}
+                }
+            }
+        ]
+        
+        edges = [
+            {
+                "id": "start-retrieval",
+                "source": "start",
+                "target": "retrieval",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "retrieval-llm",
+                "source": "retrieval",
+                "target": "llm-with-tools",
+                "type": "default",
+                "data": {}
+            },
+            {
+                "id": "llm-end",
+                "source": "llm-with-tools",
+                "target": "end",
+                "type": "default",
+                "data": {}
+            }
+        ]
+        
+        return nodes, edges

@@ -61,6 +61,7 @@ const WorkflowManagementPage: React.FC = () => {
     loadExecutions,
     createTemplate,
     executeWorkflow,
+    executeTemplate,
     deleteTemplate,
   } = useWorkflowData();
 
@@ -134,7 +135,7 @@ const WorkflowManagementPage: React.FC = () => {
         return;
       }
 
-      await executeWorkflow(selectedTemplate, input);
+      await executeTemplate(selectedTemplate, input);
       toastService.success('Workflow execution started');
       setExecuteDialogOpen(false);
       setTabValue(2); // Switch to executions tab

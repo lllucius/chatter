@@ -16,6 +16,7 @@ from chatter.schemas.workflows import (
     NodeTypeResponse,
     WorkflowAnalyticsResponse,
     WorkflowDefinitionCreate,
+    WorkflowDefinitionFromTemplateRequest,
     WorkflowDefinitionResponse,
     WorkflowDefinitionsResponse,
     WorkflowDefinitionUpdate,
@@ -98,6 +99,31 @@ async def create_workflow_definition(
         logger.error(f"Failed to create workflow definition: {e}")
         raise InternalServerProblem(
             detail=f"Failed to create workflow definition: {str(e)}"
+        ) from e
+
+
+@router.post("/definitions/from-template", response_model=WorkflowDefinitionResponse)
+async def create_workflow_definition_from_template(
+    request: WorkflowDefinitionFromTemplateRequest,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowDefinitionResponse:
+    """Create a workflow definition from a template."""
+    try:
+        definition = await workflow_service.create_workflow_definition_from_template(
+            template_id=request.template_id,
+            owner_id=current_user.id,
+            name_suffix=request.name_suffix or "",
+            user_input=request.user_input,
+            is_temporary=request.is_temporary,
+        )
+        return WorkflowDefinitionResponse.model_validate(definition)
+    except Exception as e:
+        logger.error(f"Failed to create workflow definition from template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to create workflow definition from template: {str(e)}"
         ) from e
 
 

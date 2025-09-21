@@ -34,6 +34,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post(self) -> None:
+        """Test case for create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post
+
+        Create Workflow Definition From Template
+        """
+        pass
+
     async def test_create_workflow_template_api_v1_workflows_templates_post(self) -> None:
         """Test case for create_workflow_template_api_v1_workflows_templates_post
 

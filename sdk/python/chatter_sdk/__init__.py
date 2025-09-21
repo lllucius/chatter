@@ -270,6 +270,7 @@ __all__ = [
     "VariantPerformance",
     "WorkflowAnalyticsResponse",
     "WorkflowDefinitionCreate",
+    "WorkflowDefinitionFromTemplateRequest",
     "WorkflowDefinitionResponse",
     "WorkflowDefinitionUpdate",
     "WorkflowDefinitionsResponse",
@@ -544,6 +545,7 @@ from chatter_sdk.models.variant_allocation import VariantAllocation as VariantAl
 from chatter_sdk.models.variant_performance import VariantPerformance as VariantPerformance
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse as WorkflowAnalyticsResponse
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate as WorkflowDefinitionCreate
+from chatter_sdk.models.workflow_definition_from_template_request import WorkflowDefinitionFromTemplateRequest as WorkflowDefinitionFromTemplateRequest
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse as WorkflowDefinitionResponse
 from chatter_sdk.models.workflow_definition_update import WorkflowDefinitionUpdate as WorkflowDefinitionUpdate
 from chatter_sdk.models.workflow_definitions_response import WorkflowDefinitionsResponse as WorkflowDefinitionsResponse

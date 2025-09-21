@@ -407,16 +407,8 @@ class WorkflowExecutionService:
     ) -> str:
         """Determine workflow type from ChatWorkflowRequest."""
         if request.workflow_template_name:
-            # Map template names to workflow types
-            template_mapping = {
-                "simple_chat": "plain",
-                "rag_chat": "rag",
-                "function_chat": "tools",
-                "advanced_chat": "full",
-            }
-            return template_mapping.get(
-                request.workflow_template_name, "plain"
-            )
+            # Use template name directly as workflow type
+            return request.workflow_template_name
 
         elif request.workflow_config:
             config = request.workflow_config

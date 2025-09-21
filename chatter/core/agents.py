@@ -651,10 +651,27 @@ class AgentManager:
             if provider == "openai":
                 from langchain_openai import ChatOpenAI
 
+                # Try to get base_url from any configured OpenAI provider
+                base_url = None
+                try:
+                    session = await self._get_session()
+                    from chatter.core.dependencies import get_model_registry
+                    from chatter.models.registry import ProviderType
+                    
+                    registry = get_model_registry()(session)
+                    providers, _ = await registry.list_providers()
+                    for provider_config in providers:
+                        if provider_config.provider_type == ProviderType.OPENAI and provider_config.base_url:
+                            base_url = provider_config.base_url
+                            break
+                except Exception:
+                    pass  # If we can't get providers, use default base_url
+
                 return ChatOpenAI(
                     model="gpt-3.5-turbo",
                     temperature=0.7,
                     max_completion_tokens=4096,
+                    base_url=base_url,
                 )
             elif provider == "anthropic":
                 from langchain_anthropic import ChatAnthropic

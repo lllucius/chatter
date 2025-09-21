@@ -314,7 +314,7 @@ class UnifiedWorkflowEngine:
                     role=MessageRole.ASSISTANT,
                     content=result_context['llm_response'],
                     extra_metadata={
-                        'workflow_spec': spec.__dict__,
+                        'workflow_spec': spec.to_dict(),
                         'execution_context': {
                             k: v
                             for k, v in result_context.items()
@@ -329,7 +329,7 @@ class UnifiedWorkflowEngine:
                     conversation_id=conversation.id,
                     role=MessageRole.ASSISTANT,
                     content="Workflow completed successfully.",
-                    extra_metadata={'workflow_spec': spec.__dict__},
+                    extra_metadata={'workflow_spec': spec.to_dict()},
                 )
 
             # Prepare usage info

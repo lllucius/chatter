@@ -641,36 +641,6 @@ class ChatWorkflowRequest(BaseModel):
     )
 
 
-class ChatWorkflowTemplate(BaseModel):
-    """Chat-optimized workflow template."""
-
-    name: str = Field(..., description="Template name")
-    description: str = Field(..., description="Template description")
-    config: ChatWorkflowConfig = Field(
-        ..., description="Workflow configuration"
-    )
-    estimated_tokens: int | None = Field(
-        None, description="Estimated token usage"
-    )
-    estimated_cost: float | None = Field(
-        None, description="Estimated cost"
-    )
-    complexity_score: int = Field(
-        1, ge=1, le=10, description="Complexity score"
-    )
-    use_cases: list[str] = Field(
-        default_factory=list, description="Use cases"
-    )
-
-
-class ChatWorkflowTemplatesResponse(BaseModel):
-    """Response for chat workflow templates."""
-
-    templates: dict[str, ChatWorkflowTemplate] = Field(
-        ..., description="Available templates"
-    )
-    total_count: int = Field(..., description="Total template count")
-
 
 class WorkflowDeleteResponse(BaseModel):
     """Response schema for workflow deletion."""

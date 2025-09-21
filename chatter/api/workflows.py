@@ -12,7 +12,6 @@ from chatter.models.user import User
 from chatter.schemas.chat import ChatResponse
 from chatter.schemas.workflows import (
     ChatWorkflowRequest,
-    ChatWorkflowTemplatesResponse,
     NodeTypeResponse,
     WorkflowAnalyticsResponse,
     WorkflowDefinitionCreate,
@@ -889,28 +888,4 @@ async def execute_chat_workflow_streaming(
     )
 
 
-@router.get(
-    "/templates/chat", response_model=ChatWorkflowTemplatesResponse
-)
-async def get_chat_workflow_templates(
-    current_user: User = Depends(get_current_user),
-) -> ChatWorkflowTemplatesResponse:
-    """Get pre-built workflow templates optimized for chat."""
-    try:
-        from chatter.core.unified_template_manager import (
-            get_template_manager_with_session,
-        )
-        from chatter.utils.database import get_session_generator
 
-        session = await anext(get_session_generator())
-        template_manager = get_template_manager_with_session(session)
-        templates = await template_manager.get_chat_templates()
-
-        return ChatWorkflowTemplatesResponse(
-            templates=templates, total_count=len(templates)
-        )
-    except Exception as e:
-        logger.error(f"Failed to get chat workflow templates: {e}")
-        raise InternalServerProblem(
-            detail=f"Failed to get chat workflow templates: {str(e)}"
-        ) from e

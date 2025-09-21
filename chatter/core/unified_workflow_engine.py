@@ -261,11 +261,10 @@ class UnifiedWorkflowEngine:
     """Unified execution engine for all workflow types."""
 
     def __init__(
-        self, llm_service, message_service, template_manager=None
+        self, llm_service, message_service
     ):
         self.llm_service = llm_service
         self.message_service = message_service
-        self.template_manager = template_manager
         self.node_executor = WorkflowNodeExecutor(
             llm_service, message_service
         )

@@ -120,7 +120,7 @@ class WorkflowNodeExecutor:
             temperature=temperature,
             max_tokens=max_tokens,
             system_prompt_override=system_prompt,
-            workflow_type=spec.capabilities.to_legacy_type(),
+            workflow_type=spec.capabilities.get_workflow_type(),
         )
 
         # Use the unified executor to process
@@ -380,7 +380,7 @@ class UnifiedWorkflowEngine:
         conversation: Conversation,
         context: dict[str, Any],
     ) -> dict[str, Any]:
-        """Execute a capability-based workflow (legacy chat workflow style)."""
+        """Execute a capability-based workflow."""
         # Create a simple linear workflow based on capabilities
         nodes_executed = 0
 

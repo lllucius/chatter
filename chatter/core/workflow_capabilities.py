@@ -30,23 +30,24 @@ class WorkflowCapabilities:
     custom_capabilities: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_legacy_type(
+    def from_workflow_type(
         cls, workflow_type: str
     ) -> WorkflowCapabilities:
-        """Create capabilities from legacy workflow type for migration."""
-        if workflow_type == "plain":
+        """Create capabilities from workflow type."""
+        # Handle modern workflow types
+        if workflow_type in ["plain", "simple_chat"]:
             return cls()
-        elif workflow_type == "rag":
+        elif workflow_type in ["rag", "rag_chat"]:
             return cls(
                 enable_retrieval=True,
                 max_documents=10,
                 memory_window=30,
             )
-        elif workflow_type == "tools":
+        elif workflow_type in ["tools", "function_chat"]:
             return cls(
                 enable_tools=True, max_tool_calls=10, memory_window=100
             )
-        elif workflow_type == "full":
+        elif workflow_type in ["full", "advanced_chat"]:
             return cls(
                 enable_retrieval=True,
                 enable_tools=True,
@@ -58,16 +59,16 @@ class WorkflowCapabilities:
             # Custom or unknown type - default to plain capabilities
             return cls()
 
-    def to_legacy_type(self) -> str:
-        """Convert to legacy type for backwards compatibility during transition."""
+    def get_workflow_type(self) -> str:
+        """Get the appropriate workflow type for these capabilities."""
         if self.enable_retrieval and self.enable_tools:
-            return "full"
+            return "advanced_chat"
         elif self.enable_tools:
-            return "tools"
+            return "function_chat"
         elif self.enable_retrieval:
-            return "rag"
+            return "rag_chat"
         else:
-            return "plain"
+            return "simple_chat"
 
     def requires_tools(self) -> bool:
         """Check if workflow requires tools."""
@@ -141,11 +142,11 @@ class WorkflowSpec:
     @classmethod
     def from_chat_request(cls, chat_request) -> WorkflowSpec:
         """Create workflow spec from ChatRequest."""
-        # Determine capabilities from legacy workflow type
+        # Determine capabilities from workflow type
         workflow_type = getattr(
             chat_request, 'workflow_type', None
-        ) or getattr(chat_request, 'workflow', 'plain')
-        capabilities = WorkflowCapabilities.from_legacy_type(
+        ) or getattr(chat_request, 'workflow', 'simple_chat')
+        capabilities = WorkflowCapabilities.from_workflow_type(
             workflow_type
         )
 

@@ -1070,4 +1070,4 @@ class UnifiedWorkflowExecutor:
     @classmethod
     def get_supported_types(cls) -> list[str]:
         """Get list of supported workflow types."""
-        return ["plain", "basic", "rag", "tools", "full"]
+        return ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]

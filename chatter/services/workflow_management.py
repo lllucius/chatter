@@ -11,6 +11,7 @@ from sqlalchemy.orm import selectinload
 from chatter.core.simplified_workflow_validation import (
     simplified_workflow_validation_service,
 )
+from chatter.core.workflow_capabilities import WorkflowCapabilities
 from chatter.models.workflow import (
     TemplateCategory,
     WorkflowDefinition,
@@ -165,7 +166,7 @@ class WorkflowManagementService:
                         WorkflowDefinition.id == workflow_id,
                         or_(
                             WorkflowDefinition.owner_id == owner_id,
-                            WorkflowDefinition.is_public == True,
+                            WorkflowDefinition.is_public,
                         ),
                     )
                 )
@@ -230,7 +231,7 @@ class WorkflowManagementService:
         try:
             conditions = [WorkflowDefinition.owner_id == owner_id]
             if include_public:
-                conditions.append(WorkflowDefinition.is_public == True)
+                conditions.append(WorkflowDefinition.is_public)
 
             result = await self.session.execute(
                 select(WorkflowDefinition)
@@ -521,8 +522,8 @@ class WorkflowManagementService:
                 .where(
                     or_(
                         WorkflowTemplate.owner_id == owner_id,
-                        WorkflowTemplate.is_public == True,
-                        WorkflowTemplate.is_builtin == True,
+                        WorkflowTemplate.is_public,
+                        WorkflowTemplate.is_builtin,
                     )
                 )
                 .options(selectinload(WorkflowTemplate.owner))
@@ -560,8 +561,8 @@ class WorkflowManagementService:
                 query = query.where(
                     or_(
                         WorkflowTemplate.owner_id == owner_id,
-                        WorkflowTemplate.is_public == True,
-                        WorkflowTemplate.is_builtin == True,
+                        WorkflowTemplate.is_public,
+                        WorkflowTemplate.is_builtin,
                     )
                 )
 

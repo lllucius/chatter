@@ -43,17 +43,12 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
-    _enableTools,
     customPromptText,
     setSelectedProfile,
     setSelectedPrompt,
     setSelectedDocuments,
     setCurrentConversation,
     setStreamingEnabled,
-    _setTemperature,
-    _setMaxTokens,
-    _setEnableRetrieval,
-    _setEnableTools,
     setCustomPromptText,
     loadData,
   } = useChatData();
@@ -180,7 +175,7 @@ const ChatPage: React.FC = () => {
                 // Stream started
                 break;
 
-              case 'token':
+              case 'token': {
                 // Add the token to our streamed content
                 const tokenContent = (eventData.content as string) || '';
                 setStreamedContent((prev) => prev + tokenContent);
@@ -206,6 +201,7 @@ const ChatPage: React.FC = () => {
                   )
                 );
                 break;
+              }
 
               case 'complete':
                 // Extract final metadata
@@ -273,7 +269,7 @@ const ChatPage: React.FC = () => {
         if (reader) {
           try {
             reader.releaseLock();
-          } catch (releaseError) {
+          } catch {
             // Ignore release errors
           }
         }
@@ -333,9 +329,9 @@ const ChatPage: React.FC = () => {
 
         // Local state for the callback functions (though they may not be used in this design)
         let streamedContent = '';
-        let totalTokens: number | undefined;
-        let model: string | undefined;
-        let processingTime: number | undefined;
+        // let totalTokens: number | undefined;
+        // let model: string | undefined;
+        // let processingTime: number | undefined;
 
         // Use the shared streaming processing logic
         await processStreamingResponse(
@@ -345,14 +341,14 @@ const ChatPage: React.FC = () => {
           (updater) => {
             streamedContent = updater(streamedContent);
           },
-          (tokens) => {
-            totalTokens = tokens;
+          (_tokens) => {
+            // totalTokens = tokens;
           },
-          (modelName) => {
-            model = modelName;
+          (_modelName) => {
+            // model = modelName;
           },
-          (time) => {
-            processingTime = time;
+          (_time) => {
+            // processingTime = time;
           }
         );
 
@@ -614,6 +610,7 @@ const ChatPage: React.FC = () => {
     setSelectedTemplate,
     updateWorkflowConfig,
     resetToTemplate,
+    enableTracing,
   ]);
 
   const sendMessage = useCallback(

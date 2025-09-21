@@ -25,6 +25,7 @@ export function parseSSELine(line: string): Record<string, unknown> | null {
   try {
     // Additional validation to prevent parsing malformed SSE lines
     if (raw.startsWith('data:')) {
+      // eslint-disable-next-line no-console
       console.warn(
         'SSE Parser: Detected nested data: prefix, skipping line:',
         raw
@@ -34,6 +35,7 @@ export function parseSSELine(line: string): Record<string, unknown> | null {
 
     // Ensure we have JSON-like content before attempting to parse
     if (!raw.startsWith('{') && !raw.startsWith('[')) {
+      // eslint-disable-next-line no-console
       console.warn(
         'SSE Parser: Line does not appear to contain JSON, skipping:',
         raw
@@ -43,6 +45,7 @@ export function parseSSELine(line: string): Record<string, unknown> | null {
 
     return JSON.parse(raw);
   } catch (error) {
+    // eslint-disable-next-line no-console
     console.warn('SSE Parser: Failed to parse JSON:', {
       raw,
       error: (error as Error).message,

@@ -107,7 +107,7 @@ def test_workflow_generation_methods():
 
     # Verify LLM node has tools enabled
     llm_node = next(node for node in nodes if 'llm' in node['id'])
-    assert llm_node['data']['config'].get('enable_tools') == True
+    assert llm_node['data']['config'].get('enable_tools')
 
     print("✅ Tools workflow generation test passed")
 
@@ -128,8 +128,8 @@ def test_workflow_generation_methods():
     # Verify LLM node has both context and tools
     llm_node = next(node for node in nodes if 'llm' in node['id'])
     llm_config = llm_node['data']['config']
-    assert llm_config.get('enable_tools') == True
-    assert llm_config.get('use_context') == True
+    assert llm_config.get('enable_tools')
+    assert llm_config.get('use_context')
 
     print("✅ Full workflow generation test passed")
 

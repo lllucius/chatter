@@ -60,7 +60,7 @@ const WorkflowManagementPage: React.FC = () => {
     loadTemplates,
     loadExecutions,
     createTemplate,
-    executeWorkflow,
+    // executeWorkflow,  // Not used
     executeTemplate,
     deleteTemplate,
   } = useWorkflowData();

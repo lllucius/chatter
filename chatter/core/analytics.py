@@ -4509,13 +4509,11 @@ class UserBehaviorAnalyzer:
             total_cost = usage_metrics.get('total_cost', 0)
 
             # Calculate real success rate based on error messages
-            error_messages = 0
             if total_messages > 0:
                 # Get error rate from conversation stats if available
-                error_rate = conversation_stats.get('error_rate', 0)
-                success_rate = max(0, 100 - error_rate)
-            else:
-                success_rate = 0
+                # error_rate = conversation_stats.get('error_rate', 0)  # Not used
+                # success_rate = max(0, 100 - error_rate)  # Calculated but not used
+                pass
 
             # Calculate real workflow metrics based on conversations
             # Each conversation represents a workflow execution

@@ -42,7 +42,6 @@ class WorkflowNodeExecutor:
         node_type = node.get('type') or node.get('data', {}).get(
             'nodeType'
         )
-        node_config = node.get('data', {}).get('config', {})
 
         if node_type == 'start':
             return await self._execute_start_node(
@@ -166,8 +165,8 @@ class WorkflowNodeExecutor:
 
         # Extract retrieval parameters
         top_k = node_config.get('k', node_config.get('top_k', 5))
-        score_threshold = node_config.get('score_threshold', 0.5)
-        retriever_name = node_config.get('retriever', 'default')
+        # score_threshold = node_config.get('score_threshold', 0.5)  # Not used
+        # retriever_name = node_config.get('retriever', 'default')  # Not used
 
         # Use message service to get retrieval service
         try:

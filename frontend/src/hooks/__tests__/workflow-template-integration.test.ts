@@ -1,5 +1,5 @@
 // Test to verify useWorkflowChat works with the corrected template structure
-import { describe, it, expect, vi, beforeEach } from 'vitest';
+import { describe, it, expect } from 'vitest';
 import type {
   ChatWorkflowConfig,
   ChatWorkflowRequest,
@@ -100,6 +100,7 @@ describe('Workflow Template Structure Integration', () => {
     expect(ragTemplate.config.retrieval_config).toBeDefined();
     expect(ragTemplate.config.retrieval_config?.max_documents).toBe(5);
 
+    // eslint-disable-next-line no-console
     console.log('✓ Template structure validation passed');
   });
 
@@ -141,6 +142,7 @@ describe('Workflow Template Structure Integration', () => {
       workflowRequest.workflow_config?.retrieval_config?.max_documents
     ).toBe(5);
 
+    // eslint-disable-next-line no-console
     console.log('✓ Workflow request creation passed');
   });
 
@@ -185,6 +187,7 @@ describe('Workflow Template Structure Integration', () => {
 
     expect(request.workflow_template_name).toBe('simple_chat');
 
+    // eslint-disable-next-line no-console
     console.log('✓ Template selection handling passed');
   });
 
@@ -210,8 +213,9 @@ describe('Workflow Template Structure Integration', () => {
     expect(config.llm_config?.temperature).toBe(0.7);
 
     // Verify incorrect field does not exist
-    expect((config as any).model_config).toBeUndefined();
+    expect((config as any).model_config).toBeUndefined(); // eslint-disable-line @typescript-eslint/no-explicit-any
 
+    // eslint-disable-next-line no-console
     console.log('✓ Field name validation passed - using llm_config correctly');
   });
 });

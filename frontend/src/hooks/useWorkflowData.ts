@@ -6,7 +6,6 @@ import {
   ServerToolsResponse,
   WorkflowExecutionResponse,
   WorkflowExecutionRequest,
-  WorkflowDefinitionFromTemplateRequest,
 } from 'chatter-sdk';
 
 // Use the SDK types directly

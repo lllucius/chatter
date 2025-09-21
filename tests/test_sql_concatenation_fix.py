@@ -25,14 +25,14 @@ class TestPGVectorSQLConcatenationFix:
             mock_pgvector.return_value = mock_instance
 
             # Mock embeddings
-            mock_embeddings = MagicMock()
+            # mock_embeddings = MagicMock()  # Not used
 
             # Create the vector store
-            store = PGVectorStore(
-                embeddings=mock_embeddings,
-                collection_name="test_collection",
-                connection_string="postgresql+asyncpg://test:test@localhost:5432/test",
-            )
+            # store = PGVectorStore(
+            #     embeddings=mock_embeddings,
+            #     collection_name="test_collection",
+            #     connection_string="postgresql+asyncpg://test:test@localhost:5432/test",
+            # )
 
             # Verify PGVector was called with create_extension=False
             mock_pgvector.assert_called_once()

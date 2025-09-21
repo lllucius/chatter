@@ -249,10 +249,17 @@ const ChatPage: React.FC = () => {
                 break;
 
               case 'error':
-                throw new Error(
+                // Handle error events gracefully
+                // Server sends error in 'error' field, but fallback to 'message' for compatibility
+                const errorMessage = (eventData.error as string) || 
                   (eventData.message as string) ||
-                    'Workflow streaming error occurred'
-                );
+                  'Workflow streaming error occurred';
+                
+                // Log the error for debugging
+                console.error('Workflow streaming error:', errorMessage);
+                
+                // Throw the error to be caught by handleWorkflowStreamingResponse
+                throw new Error(errorMessage);
 
               default:
                 // Handle other event types if needed

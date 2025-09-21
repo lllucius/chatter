@@ -95,7 +95,7 @@ describe('ChatPage Streaming Logic', () => {
     const messageId = 'test-message-id';
 
     const _setMessages = (
-      _updateFn: (prev: MockMessage[]) => MockMessage[]
+      updateFn: (prev: MockMessage[]) => MockMessage[]
     ) => {
       const updated = updateFn(mockMessages);
       mockMessages.splice(0, mockMessages.length, ...updated);

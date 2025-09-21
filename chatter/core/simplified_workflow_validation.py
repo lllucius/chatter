@@ -118,7 +118,9 @@ class SimplifiedWorkflowValidationService:
         valid_node_types = {
             "start",
             "model",
+            "llm",  # LLM node type used by capability-based workflows
             "tool",
+            "tools",  # Tools node type used by capability-based workflows
             "memory",
             "retrieval",
             "conditional",
@@ -126,6 +128,7 @@ class SimplifiedWorkflowValidationService:
             "variable",
             "errorHandler",
             "delay",
+            "end",  # End node type used by capability-based workflows
         }
 
         for i, node in enumerate(nodes):

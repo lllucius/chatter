@@ -6,12 +6,8 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage
 
-from chatter.core.workflow_executors import (
-    FullWorkflowExecutor,
-    PlainWorkflowExecutor,
-    RAGWorkflowExecutor,
-    ToolsWorkflowExecutor,
-)
+from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
+from chatter.core.workflow_capabilities import WorkflowCapabilities, WorkflowSpec
 from chatter.models.conversation import Conversation
 from chatter.schemas.chat import ChatRequest
 
@@ -82,7 +78,7 @@ class TestWorkflowStreamingFix:
     async def test_plain_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test PlainWorkflowExecutor processes both manage_memory and call_model events."""
+        """Test UnifiedWorkflowEngine processes both manage_memory and call_model events for plain workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -90,15 +86,24 @@ class TestWorkflowStreamingFix:
             return_value=MockWorkflow("Test response")
         )
 
-        # Create executor
-        executor = PlainWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
 
+        # Create workflow spec from chat request (plain workflow by default)
+        spec = WorkflowSpec.from_chat_request(chat_request)
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
+
         # Execute streaming
         chunks = []
-        async for chunk in executor.execute_streaming(
-            conversation, chat_request, "corr_123", "user_123"
+        async for chunk in engine.execute_workflow_streaming(
+            spec, conversation, input_data, 'user_123'
         ):
             chunks.append(chunk)
 
@@ -127,7 +132,7 @@ class TestWorkflowStreamingFix:
     async def test_rag_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test RAGWorkflowExecutor processes events correctly."""
+        """Test UnifiedWorkflowEngine processes events correctly for RAG workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -135,10 +140,29 @@ class TestWorkflowStreamingFix:
             return_value=MockWorkflow("RAG response")
         )
 
-        # Create executor
-        executor = RAGWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
+
+        # Create RAG workflow spec
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_retrieval=True,
+                max_documents=10,
+                memory_window=30,
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+        )
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
 
         # Mock the workflow manager dependency
         with mock.patch(
@@ -152,8 +176,8 @@ class TestWorkflowStreamingFix:
 
             # Execute streaming
             chunks = []
-            async for chunk in executor.execute_streaming(
-                conversation, chat_request, "corr_123", "user_123"
+            async for chunk in engine.execute_workflow_streaming(
+                spec, conversation, input_data, 'user_123'
             ):
                 chunks.append(chunk)
 
@@ -161,7 +185,7 @@ class TestWorkflowStreamingFix:
             token_chunks = [c for c in chunks if c.type == "token"]
             assert (
                 len(token_chunks) >= 1
-            ), "RAG executor should produce token chunks"
+            ), "RAG workflow should produce token chunks"
 
             # Verify content
             all_content = ''.join(c.content for c in token_chunks)
@@ -173,7 +197,7 @@ class TestWorkflowStreamingFix:
     async def test_tools_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test ToolsWorkflowExecutor processes events correctly."""
+        """Test UnifiedWorkflowEngine processes events correctly for tools workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -181,10 +205,27 @@ class TestWorkflowStreamingFix:
             return_value=MockWorkflow("Tools response")
         )
 
-        # Create executor
-        executor = ToolsWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
+
+        # Create tools workflow spec
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_tools=True, max_tool_calls=10, memory_window=100
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+        )
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
 
         # Mock the workflow manager dependency
         with mock.patch(
@@ -198,8 +239,8 @@ class TestWorkflowStreamingFix:
 
             # Execute streaming
             chunks = []
-            async for chunk in executor.execute_streaming(
-                conversation, chat_request, "corr_123", "user_123"
+            async for chunk in engine.execute_workflow_streaming(
+                spec, conversation, input_data, 'user_123'
             ):
                 chunks.append(chunk)
 
@@ -207,7 +248,7 @@ class TestWorkflowStreamingFix:
             token_chunks = [c for c in chunks if c.type == "token"]
             assert (
                 len(token_chunks) >= 1
-            ), "Tools executor should produce token chunks"
+            ), "Tools workflow should produce token chunks"
 
             # Verify content
             all_content = ''.join(c.content for c in token_chunks)
@@ -219,7 +260,7 @@ class TestWorkflowStreamingFix:
     async def test_full_workflow_streaming_processes_all_events(
         self, mock_services, conversation, chat_request
     ):
-        """Test FullWorkflowExecutor processes events correctly."""
+        """Test UnifiedWorkflowEngine processes events correctly for full workflow."""
         llm_service, message_service, template_manager = mock_services
 
         # Mock workflow creation
@@ -227,10 +268,31 @@ class TestWorkflowStreamingFix:
             return_value=MockWorkflow("Full response")
         )
 
-        # Create executor
-        executor = FullWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
+
+        # Create full workflow spec
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_retrieval=True,
+                enable_tools=True,
+                max_tool_calls=5,
+                max_documents=10,
+                memory_window=50,
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+        )
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
 
         # Mock the workflow manager dependency
         with mock.patch(
@@ -247,8 +309,8 @@ class TestWorkflowStreamingFix:
 
             # Execute streaming
             chunks = []
-            async for chunk in executor.execute_streaming(
-                conversation, chat_request, "corr_123", "user_123"
+            async for chunk in engine.execute_workflow_streaming(
+                spec, conversation, input_data, 'user_123'
             ):
                 chunks.append(chunk)
 
@@ -256,7 +318,7 @@ class TestWorkflowStreamingFix:
             token_chunks = [c for c in chunks if c.type == "token"]
             assert (
                 len(token_chunks) >= 1
-            ), "Full executor should produce token chunks"
+            ), "Full workflow should produce token chunks"
 
             # Verify content
             all_content = ''.join(c.content for c in token_chunks)
@@ -300,15 +362,30 @@ class TestWorkflowStreamingFix:
             return_value=MultiMessageWorkflow()
         )
 
-        # Create executor
-        executor = PlainWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
 
+        # Create plain workflow spec
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+        )
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
+
         # Execute streaming
         chunks = []
-        async for chunk in executor.execute_streaming(
-            conversation, chat_request, "corr_123", "user_123"
+        async for chunk in engine.execute_workflow_streaming(
+            spec, conversation, input_data, 'user_123'
         ):
             chunks.append(chunk)
 
@@ -349,15 +426,30 @@ class TestWorkflowStreamingFix:
             return_value=MixedEventWorkflow()
         )
 
-        # Create executor
-        executor = PlainWorkflowExecutor(
+        # Create unified engine
+        engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
 
+        # Create plain workflow spec
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+        )
+
+        input_data = {
+            'message': chat_request.message,
+            'user_id': 'user_123',
+            'correlation_id': 'corr_123',
+        }
+
         # Execute streaming
         chunks = []
-        async for chunk in executor.execute_streaming(
-            conversation, chat_request, "corr_123", "user_123"
+        async for chunk in engine.execute_workflow_streaming(
+            spec, conversation, input_data, 'user_123'
         ):
             chunks.append(chunk)
 

@@ -372,7 +372,7 @@ class TestWorkflowExecutionService:
         ] = 1
 
         # Second concurrent workflow should fail
-        from chatter.core.workflow_executors import (
+        from chatter.core.exceptions import (
             WorkflowExecutionError,
         )
 

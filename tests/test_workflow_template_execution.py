@@ -22,7 +22,7 @@ def test_workflow_generation_methods():
     # Create a mock template
     mock_template = MagicMock()
     mock_template.name = "Test Template"
-    mock_template.workflow_type = "simple_chat"
+    mock_template.workflow_type = "plain"
     mock_template.default_params = {
         "model": "gpt-4",
         "temperature": 0.7,
@@ -76,7 +76,7 @@ def test_workflow_generation_methods():
     print("✅ Plain workflow generation test passed")
 
     # Test RAG workflow generation
-    mock_template.workflow_type = "rag_chat"
+    mock_template.workflow_type = "rag"
     nodes, edges = service._generate_rag_workflow(
         mock_template, merged_input
     )
@@ -96,7 +96,7 @@ def test_workflow_generation_methods():
     print("✅ RAG workflow generation test passed")
 
     # Test tools workflow generation
-    mock_template.workflow_type = "function_chat"
+    mock_template.workflow_type = "tools"
     nodes, edges = service._generate_tools_workflow(
         mock_template, merged_input
     )
@@ -112,7 +112,7 @@ def test_workflow_generation_methods():
     print("✅ Tools workflow generation test passed")
 
     # Test full workflow generation
-    mock_template.workflow_type = "advanced_chat"
+    mock_template.workflow_type = "full"
     nodes, edges = service._generate_full_workflow(
         mock_template, merged_input
     )

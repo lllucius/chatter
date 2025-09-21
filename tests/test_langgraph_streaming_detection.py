@@ -53,7 +53,7 @@ class TestLangGraphStreamingDetection:
         # Test workflow creation with streaming enabled
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="simple_chat",
+            mode="plain",
             system_message="Test streaming detection",
             enable_streaming=True,
         )
@@ -65,7 +65,7 @@ class TestLangGraphStreamingDetection:
         # Test workflow creation with streaming disabled (default)
         workflow_no_streaming = await manager.create_workflow(
             llm=mock_llm,
-            mode="simple_chat",
+            mode="plain",
             system_message="Test no streaming",
             enable_streaming=False,
         )

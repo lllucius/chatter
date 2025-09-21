@@ -1,7 +1,8 @@
-"""Individual workflow executor classes for backward compatibility.
+"""Unified workflow executor classes.
 
-This module provides the individual executor classes that tests expect,
-while delegating to the UnifiedWorkflowExecutor internally.
+This module provides executor classes that use the new capability-based 
+workflow system while maintaining compatibility with existing code and tests.
+All executors now use the UnifiedWorkflowEngine internally.
 """
 
 from __future__ import annotations
@@ -9,9 +10,8 @@ from __future__ import annotations
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from chatter.core.unified_workflow_executor import (
-    UnifiedWorkflowExecutor,
-)
+from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
+from chatter.core.workflow_capabilities import WorkflowCapabilities, WorkflowSpec
 from chatter.models.conversation import Conversation, Message
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
@@ -19,7 +19,7 @@ from chatter.services.message import MessageService
 
 
 class BaseWorkflowExecutor:
-    """Base class for workflow executors."""
+    """Base class for workflow executors using unified engine."""
 
     def __init__(
         self,
@@ -28,7 +28,7 @@ class BaseWorkflowExecutor:
         template_manager,
     ):
         """Initialize base workflow executor."""
-        self._unified_executor = UnifiedWorkflowExecutor(
+        self._engine = UnifiedWorkflowEngine(
             llm_service, message_service, template_manager
         )
 
@@ -40,9 +40,19 @@ class BaseWorkflowExecutor:
         user_id: str | None = None,
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute workflow."""
-        return await self._unified_executor.execute(
-            conversation, chat_request, correlation_id, user_id, limits
+        """Execute workflow using unified engine."""
+        # Convert ChatRequest to WorkflowSpec
+        spec = WorkflowSpec.from_chat_request(chat_request)
+        
+        # Prepare input data
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        return await self._engine.execute_workflow(
+            spec, conversation, input_data, user_id
         )
 
     async def execute_streaming(
@@ -53,15 +63,25 @@ class BaseWorkflowExecutor:
         user_id: str | None = None,
         limits=None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute workflow with streaming."""
-        async for chunk in self._unified_executor.execute_streaming(
-            conversation, chat_request, correlation_id, user_id, limits
+        """Execute workflow with streaming using unified engine."""
+        # Convert ChatRequest to WorkflowSpec
+        spec = WorkflowSpec.from_chat_request(chat_request)
+        
+        # Prepare input data
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        async for chunk in self._engine.execute_workflow_streaming(
+            spec, conversation, input_data, user_id
         ):
             yield chunk
 
 
 class PlainWorkflowExecutor(BaseWorkflowExecutor):
-    """Plain workflow executor for simple chat without tools or retrieval."""
+    """Plain workflow executor - simple chat without tools or retrieval."""
 
     async def execute(
         self,
@@ -71,40 +91,30 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
         user_id: str | None = None,
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute plain workflow."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "plain"
-        request_copy.workflow_type = "plain"
-        return await super().execute(
-            conversation, request_copy, correlation_id, user_id, limits
+        """Execute plain workflow with basic capabilities."""
+        # Override capabilities to ensure plain workflow
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(),  # Plain capabilities
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+            system_prompt=getattr(chat_request, 'system_prompt_override', None)
         )
-
-    async def execute_streaming(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits=None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute plain workflow with streaming."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "plain"
-        request_copy.workflow_type = "plain"
-        async for chunk in super().execute_streaming(
-            conversation, request_copy, correlation_id, user_id, limits
-        ):
-            yield chunk
+        
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        return await self._engine.execute_workflow(
+            spec, conversation, input_data, user_id
+        )
 
 
 class RAGWorkflowExecutor(BaseWorkflowExecutor):
-    """RAG workflow executor for retrieval-augmented generation."""
+    """RAG workflow executor - retrieval-augmented generation."""
 
     async def execute(
         self,
@@ -114,40 +124,34 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
         user_id: str | None = None,
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute RAG workflow."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "rag"
-        request_copy.workflow_type = "rag"
-        return await super().execute(
-            conversation, request_copy, correlation_id, user_id, limits
+        """Execute RAG workflow with retrieval capabilities."""
+        # Override capabilities to ensure RAG workflow
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_retrieval=True,
+                max_documents=10,
+                memory_window=30
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+            system_prompt=getattr(chat_request, 'system_prompt_override', None)
         )
-
-    async def execute_streaming(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits=None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute RAG workflow with streaming."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "rag"
-        request_copy.workflow_type = "rag"
-        async for chunk in super().execute_streaming(
-            conversation, request_copy, correlation_id, user_id, limits
-        ):
-            yield chunk
+        
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        return await self._engine.execute_workflow(
+            spec, conversation, input_data, user_id
+        )
 
 
 class ToolsWorkflowExecutor(BaseWorkflowExecutor):
-    """Tools workflow executor for function calling."""
+    """Tools workflow executor - function calling."""
 
     async def execute(
         self,
@@ -157,40 +161,34 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         user_id: str | None = None,
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute tools workflow."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "tools"
-        request_copy.workflow_type = "tools"
-        return await super().execute(
-            conversation, request_copy, correlation_id, user_id, limits
+        """Execute tools workflow with tool capabilities."""
+        # Override capabilities to ensure tools workflow
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_tools=True,
+                max_tool_calls=10,
+                memory_window=100
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+            system_prompt=getattr(chat_request, 'system_prompt_override', None)
         )
-
-    async def execute_streaming(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits=None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute tools workflow with streaming."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "tools"
-        request_copy.workflow_type = "tools"
-        async for chunk in super().execute_streaming(
-            conversation, request_copy, correlation_id, user_id, limits
-        ):
-            yield chunk
+        
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        return await self._engine.execute_workflow(
+            spec, conversation, input_data, user_id
+        )
 
 
 class FullWorkflowExecutor(BaseWorkflowExecutor):
-    """Full workflow executor with both tools and retrieval."""
+    """Full workflow executor - both tools and retrieval."""
 
     async def execute(
         self,
@@ -200,33 +198,29 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
         user_id: str | None = None,
         limits=None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute full workflow."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "full"
-        request_copy.workflow_type = "full"
-        return await super().execute(
-            conversation, request_copy, correlation_id, user_id, limits
+        """Execute full workflow with all capabilities."""
+        # Override capabilities to ensure full workflow
+        spec = WorkflowSpec(
+            capabilities=WorkflowCapabilities(
+                enable_retrieval=True,
+                enable_tools=True,
+                max_tool_calls=5,
+                max_documents=10,
+                memory_window=50
+            ),
+            provider=getattr(chat_request, 'provider', 'openai'),
+            model=getattr(chat_request, 'model', 'gpt-4'),
+            temperature=getattr(chat_request, 'temperature', 0.7),
+            max_tokens=getattr(chat_request, 'max_tokens', 1000),
+            system_prompt=getattr(chat_request, 'system_prompt_override', None)
         )
-
-    async def execute_streaming(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits=None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute full workflow with streaming."""
-        # Create a copy of the request to avoid mutating the original
-        from copy import copy
-
-        request_copy = copy(chat_request)
-        request_copy.workflow = "full"
-        request_copy.workflow_type = "full"
-        async for chunk in super().execute_streaming(
-            conversation, request_copy, correlation_id, user_id, limits
-        ):
-            yield chunk
+        
+        input_data = {
+            'message': chat_request.message,
+            'user_id': user_id,
+            'correlation_id': correlation_id
+        }
+        
+        return await self._engine.execute_workflow(
+            spec, conversation, input_data, user_id
+        )

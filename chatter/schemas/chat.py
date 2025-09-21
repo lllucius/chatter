@@ -277,7 +277,7 @@ class ChatRequest(BaseModel):
 
     # Workflow selection - dynamic workflow type
     workflow_type: str = Field(
-        default="simple_chat",
+        default="plain",
         description="Dynamic workflow type identifier",
     )
 

@@ -872,8 +872,8 @@ class UnifiedTemplateManager:
 
         # Built-in chat templates
         chat_templates = {
-            "simple_chat": ChatWorkflowTemplate(
-                name="Simple Chat",
+            "plain": ChatWorkflowTemplate(
+                name="Plain Chat",
                 description="Basic conversation without additional features",
                 config=ChatWorkflowConfig(
                     enable_retrieval=False,
@@ -891,7 +891,7 @@ class UnifiedTemplateManager:
                 complexity_score=1,
                 estimated_tokens=500,
             ),
-            "rag_chat": ChatWorkflowTemplate(
+            "rag": ChatWorkflowTemplate(
                 name="Knowledge Base Chat",
                 description="Chat with document retrieval for knowledge questions",
                 config=ChatWorkflowConfig(
@@ -915,7 +915,7 @@ class UnifiedTemplateManager:
                 complexity_score=3,
                 estimated_tokens=1200,
             ),
-            "function_chat": ChatWorkflowTemplate(
+            "tools": ChatWorkflowTemplate(
                 name="Tool-Enabled Chat",
                 description="Chat with function calling capabilities",
                 config=ChatWorkflowConfig(
@@ -939,7 +939,7 @@ class UnifiedTemplateManager:
                 complexity_score=4,
                 estimated_tokens=800,
             ),
-            "advanced_chat": ChatWorkflowTemplate(
+            "full": ChatWorkflowTemplate(
                 name="Full-Featured Chat",
                 description="Chat with both retrieval and function calling",
                 config=ChatWorkflowConfig(

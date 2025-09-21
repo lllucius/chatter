@@ -117,7 +117,21 @@ class UnifiedWorkflowExecutor:
             )
 
             # Execute workflow
-            state = ConversationState(messages=messages)
+            state = ConversationState(
+                messages=messages,
+                user_id=user_id,
+                conversation_id=conversation.id,
+                retrieval_context=None,
+                tool_calls=[],
+                metadata={},
+                conversation_summary=None,
+                parent_conversation_id=None,
+                branch_id=None,
+                memory_context={},
+                workflow_template=None,
+                a_b_test_group=None,
+                tool_call_count=0
+            )
 
             # Track response time for non-streaming
             llm_start_time = time.time()

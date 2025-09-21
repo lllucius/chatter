@@ -58,6 +58,8 @@ class ConversationState(TypedDict):
     memory_context: dict[str, Any]  # For conversation memory
     workflow_template: str | None  # For conversation templates
     a_b_test_group: str | None  # For A/B testing
+    # Tool call tracking for recursion prevention
+    tool_call_count: int
 
 
 WorkflowMode = Literal["plain", "rag", "tools", "full"]
@@ -512,6 +514,7 @@ class LangGraphWorkflowManager:
                 return {}
 
             tool_messages: list[ToolMessage] = []
+            current_tool_count = state.get("tool_call_count", 0)
 
             for tool_call in (
                 getattr(last_message, "tool_calls", []) or []
@@ -579,6 +582,9 @@ class LangGraphWorkflowManager:
                             tool_call_id=tool_id or "",
                         )
                     )
+                    
+                    # Increment tool call count
+                    current_tool_count += 1
 
                     # Update metrics (defer to avoid async issues in nested function)
                     if METRICS_ENABLED and workflow_tracking_config:
@@ -618,21 +624,42 @@ class LangGraphWorkflowManager:
                             )
 
             # Returning ToolMessage(s) appends to state["messages"] via add_messages
-            return {"messages": tool_messages}
+            return {"messages": tool_messages, "tool_call_count": current_tool_count}
 
         def should_continue(state: ConversationState) -> str:
-            """If there are tool calls, execute them; otherwise end."""
+            """If there are tool calls, execute them; otherwise end.
+            Also checks tool call limits to prevent infinite recursion.
+            """
             last_message = (
                 state["messages"][-1] if state["messages"] else None
             )
-            if (
+            
+            # Check if we have tool calls to execute
+            has_tool_calls = (
                 use_tools
                 and last_message
                 and hasattr(last_message, "tool_calls")
                 and last_message.tool_calls
-            ):
-                return "execute_tools"
-            return str(END)
+            )
+            
+            if not has_tool_calls:
+                return str(END)
+            
+            # Check tool call limit to prevent infinite recursion
+            current_tool_count = state.get("tool_call_count", 0)
+            max_allowed = max_tool_calls or 10  # Default to 10 if not specified
+            
+            if current_tool_count >= max_allowed:
+                logger.warning(
+                    "Tool call limit reached, ending workflow",
+                    current_count=current_tool_count,
+                    max_allowed=max_allowed,
+                    user_id=user_id,
+                    conversation_id=conversation_id
+                )
+                return str(END)
+            
+            return "execute_tools"
 
         # Build graph dynamically
         workflow = StateGraph(ConversationState)
@@ -681,6 +708,21 @@ class LangGraphWorkflowManager:
             interrupt_before=[],
             interrupt_after=[],
         )
+        
+        # Configure recursion limit based on max_tool_calls
+        # Set recursion limit to be 3x max_tool_calls to account for:
+        # - Each tool call involves: call_model -> execute_tools -> call_model 
+        # - Plus some buffer for memory management and other nodes
+        recursion_limit = max((max_tool_calls or 10) * 3 + 10, 25)
+        app.recursion_limit = recursion_limit
+        
+        logger.debug(
+            "Configured workflow recursion limit",
+            max_tool_calls=max_tool_calls,
+            recursion_limit=recursion_limit,
+            mode=mode
+        )
+        
         return app
 
     async def run_workflow(

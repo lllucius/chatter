@@ -692,6 +692,71 @@ async def get_supported_node_types(
                     },
                 ],
             },
+            {
+                "type": "llm",
+                "name": "LLM",
+                "description": "Language model processing node (capability-based)",
+                "category": "processing",
+                "properties": [
+                    {
+                        "name": "provider",
+                        "type": "string",
+                        "required": False,
+                        "description": "Model provider (openai, anthropic, etc.)",
+                    },
+                    {
+                        "name": "model",
+                        "type": "string",
+                        "required": False,
+                        "description": "Model name",
+                    },
+                    {
+                        "name": "temperature",
+                        "type": "number",
+                        "required": False,
+                        "description": "Temperature (0-2)",
+                    },
+                    {
+                        "name": "max_tokens",
+                        "type": "number",
+                        "required": False,
+                        "description": "Maximum tokens",
+                    },
+                    {
+                        "name": "system_prompt",
+                        "type": "text",
+                        "required": False,
+                        "description": "System prompt",
+                    },
+                ],
+            },
+            {
+                "type": "tools",
+                "name": "Tools",
+                "description": "Multi-tool execution node",
+                "category": "processing",
+                "properties": [
+                    {
+                        "name": "available_tools",
+                        "type": "array",
+                        "required": False,
+                        "description": "List of available tools",
+                    },
+                    {
+                        "name": "tool_timeout_ms",
+                        "type": "number",
+                        "required": False,
+                        "description": "Tool execution timeout",
+                    },
+                ],
+            },
+            {
+                "type": "end",
+                "name": "End",
+                "description": "End point of the workflow",
+                "category": "control",
+                "properties": [],
+            },
         ]
 
         return [

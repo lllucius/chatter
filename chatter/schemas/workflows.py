@@ -150,7 +150,7 @@ class WorkflowTemplateBase(BaseModel):
     name: str = Field(
         ..., min_length=1, max_length=255, description="Template name"
     )
-    description: str = Field(..., description="Template description")
+    description: str = Field(..., min_length=1, description="Template description")
     workflow_type: str = Field(..., description="Workflow type")
     category: str = Field(
         default="custom", description="Template category"
@@ -190,7 +190,7 @@ class WorkflowTemplateUpdate(BaseModel):
         None, min_length=1, max_length=255, description="Template name"
     )
     description: str | None = Field(
-        None, description="Template description"
+        None, min_length=1, description="Template description"
     )
     category: str | None = Field(
         default=None, description="Template category"

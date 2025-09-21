@@ -95,7 +95,9 @@ describe('WorkflowManagementPage', () => {
   });
 
   test('Copy Template button copies template to clipboard', async () => {
-    const mockWriteText = navigator.clipboard.writeText as (text: string) => Promise<void>;
+    const mockWriteText = navigator.clipboard.writeText as (
+      text: string
+    ) => Promise<void>;
 
     render(<WorkflowManagementPage />);
 

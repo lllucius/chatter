@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-09-21T03:30:27Z",
+  "generated_at": "2025-09-21T03:36:06Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 22,
@@ -11,7 +11,7 @@
       "SEVERITY.LOW": 36,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 67954,
+      "loc": 68389,
       "nosec": 0,
       "skipped_tests": 3
     },
@@ -89,7 +89,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1030,
+      "loc": 1034,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -206,7 +206,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 294,
+      "loc": 299,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -258,7 +258,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 296,
+      "loc": 311,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -297,7 +297,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 750,
+      "loc": 777,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -544,7 +544,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 3872,
+      "loc": 3909,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -622,7 +622,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 393,
+      "loc": 395,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -713,7 +713,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1035,
+      "loc": 1043,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -869,7 +869,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 338,
+      "loc": 454,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -882,7 +882,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 900,
+      "loc": 910,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -960,7 +960,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 432,
+      "loc": 434,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -973,7 +973,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 145,
+      "loc": 181,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -986,7 +986,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 185,
+      "loc": 194,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1285,7 +1285,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 625,
+      "loc": 721,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1480,7 +1480,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 545,
+      "loc": 553,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1766,7 +1766,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 286,
+      "loc": 312,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1779,7 +1779,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 767,
+      "loc": 801,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2027,7 +2027,7 @@
       "test_name": "hardcoded_password_string"
     },
     {
-      "code": "1269                     total_errors += stats.errors\n1270                 except Exception:\n1271                     continue\n1272 \n",
+      "code": "1294                     total_errors += stats.errors\n1295                 except Exception:\n1296                     continue\n1297 \n",
       "col_offset": 16,
       "end_col_offset": 28,
       "filename": "chatter/core/analytics.py",
@@ -2038,10 +2038,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Continue detected.",
-      "line_number": 1270,
+      "line_number": 1295,
       "line_range": [
-        1270,
-        1271
+        1295,
+        1296
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b112_try_except_continue.html",
       "test_id": "B112",
@@ -2097,7 +2097,7 @@
       "test_name": "blacklist"
     },
     {
-      "code": "114                             )\n115                         except Exception:\n116                             pass  # Ignore cleanup errors\n117                         self._redis_context_manager = None\n",
+      "code": "119                             )\n120                         except Exception:\n121                             pass  # Ignore cleanup errors\n122                         self._redis_context_manager = None\n",
       "col_offset": 24,
       "end_col_offset": 32,
       "filename": "chatter/core/langgraph.py",
@@ -2108,17 +2108,17 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 115,
+      "line_number": 120,
       "line_range": [
-        115,
-        116
+        120,
+        121
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
     },
     {
-      "code": "163                 self._redis_context_manager.__exit__(None, None, None)\n164             except Exception:\n165                 pass  # Ignore cleanup errors in destructor\n166 \n",
+      "code": "172                 self._redis_context_manager.__exit__(None, None, None)\n173             except Exception:\n174                 pass  # Ignore cleanup errors in destructor\n175 \n",
       "col_offset": 12,
       "end_col_offset": 20,
       "filename": "chatter/core/langgraph.py",
@@ -2129,10 +2129,10 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Try, Except, Pass detected.",
-      "line_number": 164,
+      "line_number": 173,
       "line_range": [
-        164,
-        165
+        173,
+        174
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
@@ -2360,7 +2360,7 @@
       "test_name": "try_except_continue"
     },
     {
-      "code": "211         try:\n212             assert (\n213                 self._store is not None\n214             ), \"PGVector store not initialized\"\n215             if embeddings:\n",
+      "code": "213         try:\n214             assert (\n215                 self._store is not None\n216             ), \"PGVector store not initialized\"\n217             if embeddings:\n",
       "col_offset": 12,
       "end_col_offset": 47,
       "filename": "chatter/core/vector_store.py",
@@ -2371,18 +2371,18 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 212,
+      "line_number": 214,
       "line_range": [
-        212,
-        213,
-        214
+        214,
+        215,
+        216
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
       "test_id": "B101",
       "test_name": "assert_used"
     },
     {
-      "code": "228             else:\n229                 assert (\n230                     self._store is not None\n231                 ), \"PGVector store not initialized\"\n232                 return await asyncio.to_thread(\n",
+      "code": "230             else:\n231                 assert (\n232                     self._store is not None\n233                 ), \"PGVector store not initialized\"\n234                 return await asyncio.to_thread(\n",
       "col_offset": 16,
       "end_col_offset": 51,
       "filename": "chatter/core/vector_store.py",
@@ -2393,11 +2393,11 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Use of assert detected. The enclosed code will be removed when compiling to optimised byte code.",
-      "line_number": 229,
+      "line_number": 231,
       "line_range": [
-        229,
-        230,
-        231
+        231,
+        232,
+        233
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b101_assert_used.html",
       "test_id": "B101",

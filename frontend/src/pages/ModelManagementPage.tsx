@@ -314,7 +314,9 @@ const ModelManagementPage: React.FC = () => {
       icon: <DefaultIcon />,
       label: 'Set as Default',
       onClick: async (model) => {
-        if (!(model as ModelDefWithProvider & { is_default?: boolean }).is_default) {
+        if (
+          !(model as ModelDefWithProvider & { is_default?: boolean }).is_default
+        ) {
           try {
             await getSDK().modelRegistry.setDefaultModelApiV1ModelsModelsModelIdSetDefault(
               model.id
@@ -387,9 +389,9 @@ const ModelManagementPage: React.FC = () => {
   const getModelId = (item: ModelDefWithProvider) => item.id || '';
 
   // Enhanced ModelForm component that receives providers
-  const EnhancedModelForm: React.FC<{ providers: Provider[] }> = (props): JSX.Element => (
-    <ModelForm {...props} providers={providers} />
-  );
+  const EnhancedModelForm: React.FC<{ providers: Provider[] }> = (
+    props
+  ): JSX.Element => <ModelForm {...props} providers={providers} />;
 
   return (
     <PageLayout title="Model Management" toolbar={toolbar}>

@@ -70,7 +70,8 @@ const WorkflowManagementPage: React.FC = () => {
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [builderDialogOpen, setBuilderDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
-  const [editingTemplate, setEditingTemplate] = useState<WorkflowTemplateResponse | null>(null);
+  const [editingTemplate, setEditingTemplate] =
+    useState<WorkflowTemplateResponse | null>(null);
 
   // Form for template creation
   const templateForm = useFormGeneric<WorkflowFormData>({
@@ -206,16 +207,13 @@ const WorkflowManagementPage: React.FC = () => {
 
         <TabPanel value={tabValue} index={1} idPrefix="workflow">
           <Alert severity="info" sx={{ mb: 2 }}>
-            Use the &quot;Create Template&quot; button to open the workflow builder in a
-            dialog.
+            Use the &quot;Create Template&quot; button to open the workflow
+            builder in a dialog.
           </Alert>
         </TabPanel>
 
         <TabPanel value={tabValue} index={2} idPrefix="workflow">
-          <WorkflowExecutionsTab
-            executions={executions}
-            loading={loading}
-          />
+          <WorkflowExecutionsTab executions={executions} loading={loading} />
         </TabPanel>
       </Box>
 

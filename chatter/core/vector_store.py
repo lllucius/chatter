@@ -168,7 +168,9 @@ class PGVectorStore(AbstractVectorStore):
         # (This should be made configurable per workflow.)
         # Note: asyncpg doesn't support options in connection string, so skip for async mode
         if "+asyncpg" not in self.connection_string:
-            self.connection_string += "?options=-c%20hnsw.ef_search%3D60"
+            self.connection_string += (
+                "?options=-c%20hnsw.ef_search%3D60"
+            )
 
         self._store: PGVector | None = None
         self._initialize_store()

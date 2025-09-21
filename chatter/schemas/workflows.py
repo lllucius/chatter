@@ -214,16 +214,20 @@ class WorkflowTemplateUpdate(BaseModel):
 
 class WorkflowDefinitionFromTemplateRequest(BaseModel):
     """Schema for creating a workflow definition from a template."""
-    
-    template_id: str = Field(..., description="Template ID to instantiate")
+
+    template_id: str = Field(
+        ..., description="Template ID to instantiate"
+    )
     name_suffix: str | None = Field(
         None, description="Optional suffix for the definition name"
     )
     user_input: dict[str, Any] | None = Field(
-        None, description="User input to merge with template default params"
+        None,
+        description="User input to merge with template default params",
     )
     is_temporary: bool = Field(
-        True, description="Whether this is a temporary definition for execution"
+        True,
+        description="Whether this is a temporary definition for execution",
     )
 
 
@@ -671,5 +675,9 @@ class ChatWorkflowTemplatesResponse(BaseModel):
 class WorkflowDeleteResponse(BaseModel):
     """Response schema for workflow deletion."""
 
-    message: str = Field(..., description="Deletion confirmation message")
-    workflow_id: str = Field(..., description="ID of the deleted workflow")
+    message: str = Field(
+        ..., description="Deletion confirmation message"
+    )
+    workflow_id: str = Field(
+        ..., description="ID of the deleted workflow"
+    )

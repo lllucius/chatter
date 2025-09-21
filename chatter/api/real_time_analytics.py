@@ -32,7 +32,10 @@ logger = get_logger(__name__)
 router = APIRouter()
 
 
-@router.post("/real-time/dashboard/start", response_model=DashboardControlResponse)
+@router.post(
+    "/real-time/dashboard/start",
+    response_model=DashboardControlResponse,
+)
 async def start_real_time_dashboard(
     background_tasks: BackgroundTasks,
     current_user: User = Depends(get_current_user),
@@ -70,7 +73,9 @@ async def start_real_time_dashboard(
     }
 
 
-@router.post("/real-time/dashboard/stop", response_model=DashboardControlResponse)
+@router.post(
+    "/real-time/dashboard/stop", response_model=DashboardControlResponse
+)
 async def stop_real_time_dashboard(
     current_user: User = Depends(get_current_user),
     session: AsyncSession = Depends(get_session_generator),
@@ -90,7 +95,10 @@ async def stop_real_time_dashboard(
     }
 
 
-@router.get("/user-behavior/{user_id}", response_model=UserBehaviorAnalyticsResponse)
+@router.get(
+    "/user-behavior/{user_id}",
+    response_model=UserBehaviorAnalyticsResponse,
+)
 async def get_user_behavior_analytics(
     user_id: str,
     current_user: User = Depends(get_current_user),
@@ -127,7 +135,9 @@ async def get_user_behavior_analytics(
     return analytics
 
 
-@router.get("/search/intelligent", response_model=IntelligentSearchResponse)
+@router.get(
+    "/search/intelligent", response_model=IntelligentSearchResponse
+)
 async def intelligent_search(
     query: str,
     search_type: str = "documents",
@@ -238,7 +248,10 @@ async def get_trending_content(
     }
 
 
-@router.post("/real-time/workflow/{workflow_id}/update", response_model=WorkflowUpdateResponse)
+@router.post(
+    "/real-time/workflow/{workflow_id}/update",
+    response_model=WorkflowUpdateResponse,
+)
 async def send_workflow_update(
     workflow_id: str,
     update_type: str,
@@ -289,7 +302,9 @@ async def send_workflow_update(
     }
 
 
-@router.post("/real-time/system-health", response_model=SystemHealthResponse)
+@router.post(
+    "/real-time/system-health", response_model=SystemHealthResponse
+)
 async def send_system_health_update(
     health_data: dict,
     current_user: User = Depends(get_current_admin_user),

@@ -271,7 +271,9 @@ async def delete_document(
                 detail="Document not found",
             )
 
-        return DocumentDeleteResponse(message="Document deleted successfully")
+        return DocumentDeleteResponse(
+            message="Document deleted successfully"
+        )
 
     except HTTPException:
         raise
@@ -287,7 +289,10 @@ async def delete_document(
         ) from e
 
 
-@router.post("/{document_id}/reprocess", response_model=DocumentProcessingResponse)
+@router.post(
+    "/{document_id}/reprocess",
+    response_model=DocumentProcessingResponse,
+)
 async def reprocess_document(
     document_id: str,
     current_user: User = Depends(get_current_user),
@@ -309,7 +314,7 @@ async def reprocess_document(
         return DocumentProcessingResponse(
             document_id=document_id,
             status="processing",
-            message="Document reprocessing started"
+            message="Document reprocessing started",
         )
 
     except HTTPException:

@@ -153,11 +153,11 @@ class WorkflowManagementService:
         """Get a workflow definition by ID."""
         try:
             logger.debug(
-                f"Searching for workflow definition",
+                "Searching for workflow definition",
                 workflow_id=workflow_id,
                 owner_id=owner_id,
             )
-            
+
             result = await self.session.execute(
                 select(WorkflowDefinition)
                 .where(
@@ -172,34 +172,35 @@ class WorkflowManagementService:
                 .options(selectinload(WorkflowDefinition.template))
             )
             definition = result.scalar_one_or_none()
-            
+
             if definition:
                 logger.debug(
-                    f"Found workflow definition",
+                    "Found workflow definition",
                     workflow_id=workflow_id,
                     owner_id=definition.owner_id,
                     is_public=definition.is_public,
                     requested_by=owner_id,
                 )
                 return definition
-            
+
             # If not found, check if it exists with different access permissions
             logger.info(
-                f"Workflow definition not found with access permissions, checking existence",
+                "Workflow definition not found with access permissions, checking existence",
                 workflow_id=workflow_id,
                 requested_by=owner_id,
             )
-            
+
             # Check if workflow exists at all (without access control)
             existence_result = await self.session.execute(
-                select(WorkflowDefinition)
-                .where(WorkflowDefinition.id == workflow_id)
+                select(WorkflowDefinition).where(
+                    WorkflowDefinition.id == workflow_id
+                )
             )
             existing_workflow = existence_result.scalar_one_or_none()
-            
+
             if existing_workflow:
                 logger.warning(
-                    f"Workflow definition exists but access denied",
+                    "Workflow definition exists but access denied",
                     workflow_id=workflow_id,
                     actual_owner=existing_workflow.owner_id,
                     requested_by=owner_id,
@@ -207,11 +208,11 @@ class WorkflowManagementService:
                 )
             else:
                 logger.info(
-                    f"Workflow definition does not exist in database",
+                    "Workflow definition does not exist in database",
                     workflow_id=workflow_id,
                     requested_by=owner_id,
                 )
-            
+
             return None
 
         except Exception as e:
@@ -692,25 +693,28 @@ class WorkflowManagementService:
         is_temporary: bool = True,
     ) -> WorkflowDefinition:
         """Create a workflow definition from a template.
-        
+
         Args:
             template_id: ID of the template to instantiate
             owner_id: ID of the user creating the definition
             name_suffix: Optional suffix for the definition name
             user_input: Optional user input to merge with template params
             is_temporary: Whether this is a temporary definition for execution
-            
+
         Returns:
             Created workflow definition
-            
+
         Raises:
             BadRequestProblem: If template not found or invalid
         """
         try:
             # Get the template
-            template = await self.get_workflow_template(template_id, owner_id)
+            template = await self.get_workflow_template(
+                template_id, owner_id
+            )
             if not template:
                 from chatter.utils.problem import BadRequestProblem
+
                 raise BadRequestProblem(
                     detail=f"Workflow template not found: {template_id}"
                 )
@@ -728,7 +732,9 @@ class WorkflowManagementService:
                 merged_input.update(user_input)
 
             # Generate basic workflow structure based on template type
-            nodes, edges = self._generate_workflow_from_template(template, merged_input)
+            nodes, edges = self._generate_workflow_from_template(
+                template, merged_input
+            )
 
             # Create the workflow definition
             definition = await self.create_workflow_definition(
@@ -750,7 +756,7 @@ class WorkflowManagementService:
             logger.info(
                 f"Created workflow definition {definition.id} from template {template_id}"
             )
-            
+
             return definition
 
         except Exception as e:
@@ -765,36 +771,42 @@ class WorkflowManagementService:
         input_params: dict[str, Any],
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Generate workflow nodes and edges from a template using capability-based approach.
-        
+
         This creates a workflow structure based on the template's capabilities
         rather than hardcoded workflow types.
-        
+
         Args:
             template: The workflow template
             input_params: Merged input parameters
-            
+
         Returns:
             Tuple of (nodes, edges) for the workflow
         """
-        from chatter.core.workflow_capabilities import WorkflowCapabilities
-        
+        from chatter.core.workflow_capabilities import (
+            WorkflowCapabilities,
+        )
+
         # Convert legacy workflow type to capabilities
         workflow_type = template.workflow_type or "plain"
-        capabilities = WorkflowCapabilities.from_legacy_type(workflow_type)
-        
+        capabilities = WorkflowCapabilities.from_legacy_type(
+            workflow_type
+        )
+
         # Generate workflow based on capabilities
-        return self._generate_capability_based_workflow(template, input_params, capabilities)
+        return self._generate_capability_based_workflow(
+            template, input_params, capabilities
+        )
 
     def _generate_capability_based_workflow(
         self,
         template: "WorkflowTemplate",
         input_params: dict[str, Any],
-        capabilities: "WorkflowCapabilities"
+        capabilities: "WorkflowCapabilities",
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Generate workflow based on capabilities rather than hardcoded types."""
         nodes = []
         edges = []
-        
+
         # Always start with start node
         start_node = {
             "id": "start",
@@ -803,14 +815,14 @@ class WorkflowManagementService:
             "data": {
                 "label": "Start",
                 "nodeType": "start",
-                "config": {}
-            }
+                "config": {},
+            },
         }
         nodes.append(start_node)
-        
+
         current_x = 300
         previous_node_id = "start"
-        
+
         # Add retrieval node if enabled
         if capabilities.enable_retrieval:
             retrieval_node = {
@@ -821,26 +833,32 @@ class WorkflowManagementService:
                     "label": "Document Retrieval",
                     "nodeType": "retrieval",
                     "config": {
-                        "retriever": input_params.get("retriever", "default"),
+                        "retriever": input_params.get(
+                            "retriever", "default"
+                        ),
                         "top_k": capabilities.max_documents,
-                        "score_threshold": input_params.get("score_threshold", 0.5),
-                    }
-                }
+                        "score_threshold": input_params.get(
+                            "score_threshold", 0.5
+                        ),
+                    },
+                },
             }
             nodes.append(retrieval_node)
-            
+
             # Connect previous node to retrieval
-            edges.append({
-                "id": f"{previous_node_id}-retrieval",
-                "source": previous_node_id,
-                "target": "retrieval",
-                "type": "default",
-                "data": {}
-            })
-            
+            edges.append(
+                {
+                    "id": f"{previous_node_id}-retrieval",
+                    "source": previous_node_id,
+                    "target": "retrieval",
+                    "type": "default",
+                    "data": {},
+                }
+            )
+
             previous_node_id = "retrieval"
             current_x += 200
-        
+
         # Add LLM node (always present)
         llm_label = "LLM Response"
         if capabilities.enable_tools:
@@ -849,7 +867,7 @@ class WorkflowManagementService:
             llm_label = "LLM with Context"
         if capabilities.enable_tools and capabilities.enable_retrieval:
             llm_label = "LLM with Tools & Context"
-        
+
         llm_node = {
             "id": "llm",
             "type": "llm",
@@ -862,82 +880,99 @@ class WorkflowManagementService:
                     "model": input_params.get("model", "gpt-4"),
                     "temperature": input_params.get("temperature", 0.7),
                     "max_tokens": input_params.get("max_tokens", 1000),
-                    "system_prompt": input_params.get("system_prompt", "You are a helpful assistant."),
+                    "system_prompt": input_params.get(
+                        "system_prompt", "You are a helpful assistant."
+                    ),
                     "use_context": capabilities.enable_retrieval,
                     "enable_tools": capabilities.enable_tools,
-                    "max_tool_calls": capabilities.max_tool_calls if capabilities.enable_tools else 0
-                }
-            }
+                    "max_tool_calls": (
+                        capabilities.max_tool_calls
+                        if capabilities.enable_tools
+                        else 0
+                    ),
+                },
+            },
         }
         nodes.append(llm_node)
-        
+
         # Connect previous node to LLM
-        edges.append({
-            "id": f"{previous_node_id}-llm",
-            "source": previous_node_id,
-            "target": "llm",
-            "type": "default",
-            "data": {}
-        })
-        
+        edges.append(
+            {
+                "id": f"{previous_node_id}-llm",
+                "source": previous_node_id,
+                "target": "llm",
+                "type": "default",
+                "data": {},
+            }
+        )
+
         previous_node_id = "llm"
         current_x += 200
-        
+
         # Add tool node if enabled (optional parallel processing)
         if capabilities.enable_tools:
             tool_node = {
                 "id": "tools",
                 "type": "tool",
-                "position": {"x": current_x, "y": 200},  # Offset vertically
+                "position": {
+                    "x": current_x,
+                    "y": 200,
+                },  # Offset vertically
                 "data": {
                     "label": "Tool Execution",
                     "nodeType": "tool",
                     "config": {
                         "max_tool_calls": capabilities.max_tool_calls,
-                        "parallel_calls": input_params.get("parallel_tool_calls", False),
-                        "timeout_ms": input_params.get("tool_timeout_ms", 30000)
-                    }
-                }
+                        "parallel_calls": input_params.get(
+                            "parallel_tool_calls", False
+                        ),
+                        "timeout_ms": input_params.get(
+                            "tool_timeout_ms", 30000
+                        ),
+                    },
+                },
             }
             nodes.append(tool_node)
-            
+
             # Tools can be called from LLM (bidirectional flow)
-            edges.append({
-                "id": "llm-tools",
-                "source": "llm",
-                "target": "tools",
-                "type": "default",
-                "data": {"label": "tool_call"}
-            })
-            
-            edges.append({
-                "id": "tools-llm",
-                "source": "tools",
-                "target": "llm",
-                "type": "default",
-                "data": {"label": "tool_result"}
-            })
-        
+            edges.append(
+                {
+                    "id": "llm-tools",
+                    "source": "llm",
+                    "target": "tools",
+                    "type": "default",
+                    "data": {"label": "tool_call"},
+                }
+            )
+
+            edges.append(
+                {
+                    "id": "tools-llm",
+                    "source": "tools",
+                    "target": "llm",
+                    "type": "default",
+                    "data": {"label": "tool_result"},
+                }
+            )
+
         # Add end node
         end_node = {
             "id": "end",
             "type": "end",
             "position": {"x": current_x + 200, "y": 100},
-            "data": {
-                "label": "End",
-                "nodeType": "end",
-                "config": {}
-            }
+            "data": {"label": "End", "nodeType": "end", "config": {}},
         }
         nodes.append(end_node)
-        
+
         # Connect LLM to end
-        edges.append({
-            "id": "llm-end",
-            "source": "llm",
-            "target": "end",
-            "type": "default",
-            "data": {}
-        })
-        
+        edges.append(
+            {
+                "id": "llm-end",
+                "source": "llm",
+                "target": "end",
+                "type": "default",
+                "data": {},
+            }
+        )
+
         return nodes, edges

@@ -12,8 +12,10 @@ from langchain_core.messages import (
     ToolMessage,
 )
 from langgraph.checkpoint.memory import MemorySaver
+
 try:
     from langgraph.checkpoint.redis import RedisSaver
+
     REDIS_AVAILABLE = True
 except ImportError:
     RedisSaver = None
@@ -82,7 +84,10 @@ class LangGraphWorkflowManager:
         # Initialize checkpointer
         self.checkpointer = None
         try:
-            if settings.langgraph_checkpoint_store == "redis" and REDIS_AVAILABLE:
+            if (
+                settings.langgraph_checkpoint_store == "redis"
+                and REDIS_AVAILABLE
+            ):
                 # Use Redis checkpointer for production
                 try:
                     # Use Redis URL from settings for checkpoint store
@@ -123,9 +128,13 @@ class LangGraphWorkflowManager:
                 # Fallback to in-memory checkpointer for development or when Redis unavailable
                 self.checkpointer = MemorySaver()
                 if not REDIS_AVAILABLE:
-                    logger.info("LangGraph Memory checkpointer initialized (redis not available)")
+                    logger.info(
+                        "LangGraph Memory checkpointer initialized (redis not available)"
+                    )
                 else:
-                    logger.info("LangGraph Memory checkpointer initialized")
+                    logger.info(
+                        "LangGraph Memory checkpointer initialized"
+                    )
         except Exception as e:
             logger.warning(
                 "Failed to initialize checkpointer, falling back to memory",
@@ -781,18 +790,17 @@ class LangGraphWorkflowManager:
                 "config": config,
                 "version": "v2",
             }
-            
+
             # Only add include_types if it has valid entries
             if include_types:
                 stream_params["include_types"] = include_types
-            
-            # Only add include_names if it has valid entries  
+
+            # Only add include_names if it has valid entries
             if include_names:
                 stream_params["include_names"] = include_names
-            
+
             async for event in workflow.astream_events(
-                initial_state,
-                **stream_params
+                initial_state, **stream_params
             ):
                 # Convert astream_events to the expected workflow event format
                 converted_event = await self._convert_astream_event(
@@ -1192,7 +1200,7 @@ class LangGraphWorkflowManager:
 
             # Get default embeddings for the user's workspace
             embeddings = await embedding_service.get_default_provider()
-                
+
             if embeddings is None:
                 logger.warning(
                     f"No embeddings available for workspace: {workspace_id}"
@@ -1244,7 +1252,9 @@ class LangGraphWorkflowManager:
             )
             return None
 
-    async def get_tools(self, workspace_id: str | None = None) -> list[Any]:
+    async def get_tools(
+        self, workspace_id: str | None = None
+    ) -> list[Any]:
         """Get available tools for a workspace.
 
         Args:

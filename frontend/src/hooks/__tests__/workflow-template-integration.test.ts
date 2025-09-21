@@ -31,7 +31,11 @@ describe('Workflow Template Structure Integration', () => {
             retrieval_config: null,
             tool_config: null,
           },
-          use_cases: ['General conversation', 'Quick questions', 'Creative writing'],
+          use_cases: [
+            'General conversation',
+            'Quick questions',
+            'Creative writing',
+          ],
           complexity_score: 1,
           estimated_tokens: 500,
           estimated_cost: null,
@@ -62,7 +66,11 @@ describe('Workflow Template Structure Integration', () => {
             },
             tool_config: null,
           },
-          use_cases: ['Knowledge base queries', 'Document Q&A', 'Research assistance'],
+          use_cases: [
+            'Knowledge base queries',
+            'Document Q&A',
+            'Research assistance',
+          ],
           complexity_score: 3,
           estimated_tokens: 1200,
           estimated_cost: null,
@@ -83,7 +91,7 @@ describe('Workflow Template Structure Integration', () => {
     expect(simpleTemplate.config.enable_memory).toBe(true);
     expect(simpleTemplate.config.enable_retrieval).toBe(false);
 
-    // Check rag_chat template  
+    // Check rag_chat template
     const ragTemplate = mockTemplateResponse.templates.rag_chat;
     expect(ragTemplate.config.llm_config).toBeDefined();
     expect(ragTemplate.config.llm_config?.temperature).toBe(0.3);
@@ -129,7 +137,9 @@ describe('Workflow Template Structure Integration', () => {
     expect(workflowRequest.message).toBe('Hello, world!');
     expect(workflowRequest.conversation_id).toBe('test-123');
     expect(workflowRequest.workflow_config?.llm_config?.temperature).toBe(0.7);
-    expect(workflowRequest.workflow_config?.retrieval_config?.max_documents).toBe(5);
+    expect(
+      workflowRequest.workflow_config?.retrieval_config?.max_documents
+    ).toBe(5);
 
     console.log('✓ Workflow request creation passed');
   });

@@ -325,8 +325,12 @@ describe('ChatPage Improvements', () => {
       });
 
       const { getSDK } = await import('../../services/auth-service');
-      const mockSDK = getSDK as unknown as { mockReturnValue: (value: unknown) => void };
-      const currentSDK = getSDK as unknown as () => { conversations: Record<string, unknown> };
+      const mockSDK = getSDK as unknown as {
+        mockReturnValue: (value: unknown) => void;
+      };
+      const currentSDK = getSDK as unknown as () => {
+        conversations: Record<string, unknown>;
+      };
       mockSDK.mockReturnValue({
         ...currentSDK(),
         conversations: {

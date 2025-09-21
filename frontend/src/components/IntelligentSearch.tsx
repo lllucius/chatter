@@ -113,7 +113,7 @@ const IntelligentSearch: React.FC = () => {
           }
         );
 
-      const searchResponse = response as SearchResponse;
+      const searchResponse = response as unknown as SearchResponse;
       setSearchResults(searchResponse?.results || []);
       setRecommendations(searchResponse?.recommendations || []);
       setUserContext(searchResponse?.user_context || null);

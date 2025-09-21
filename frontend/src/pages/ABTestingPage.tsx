@@ -67,7 +67,8 @@ const ABTestingPage: React.FC = () => {
   const [editingTest, setEditingTest] = useState<ABTestResponse | null>(null);
   const [activeTab, setActiveTab] = useState(0);
   const [menuAnchorEl, setMenuAnchorEl] = useState<HTMLElement | null>(null);
-  const [selectedTestForMenu, setSelectedTestForMenu] = useState<ABTestResponse | null>(null);
+  const [selectedTestForMenu, setSelectedTestForMenu] =
+    useState<ABTestResponse | null>(null);
 
   // Form management
   const form = useFormGeneric<ABTestFormData>({
@@ -143,7 +144,10 @@ const ABTestingPage: React.FC = () => {
     }
   };
 
-  const handleMenuOpen = (event: React.MouseEvent<HTMLElement>, test: ABTestResponse) => {
+  const handleMenuOpen = (
+    event: React.MouseEvent<HTMLElement>,
+    test: ABTestResponse
+  ) => {
     setMenuAnchorEl(event.currentTarget);
     setSelectedTestForMenu(test);
   };

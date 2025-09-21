@@ -462,20 +462,33 @@ class AnalyticsService:
             stats = IntegratedDashboardStats(
                 workflows={
                     "total": today_stats["conversation_count"],
-                    "active": min(today_stats["conversation_count"], today_stats["conversation_count"]),
-                    "completed_today": today_stats["conversation_count"],
+                    "active": min(
+                        today_stats["conversation_count"],
+                        today_stats["conversation_count"],
+                    ),
+                    "completed_today": today_stats[
+                        "conversation_count"
+                    ],
                     "avg_execution_time": (
                         today_stats["avg_response_time"] / 1000
                         if today_stats["avg_response_time"] > 0
                         else 0
                     ),
-                    "success_rate": self._calculate_success_rate(today_stats),
+                    "success_rate": self._calculate_success_rate(
+                        today_stats
+                    ),
                 },
                 agents={
                     "total": today_stats["conversation_count"],
-                    "active": min(today_stats["conversation_count"], 10),
-                    "conversations_today": today_stats["conversation_count"],
-                    "avg_response_time": today_stats["avg_response_time"],
+                    "active": min(
+                        today_stats["conversation_count"], 10
+                    ),
+                    "conversations_today": today_stats[
+                        "conversation_count"
+                    ],
+                    "avg_response_time": today_stats[
+                        "avg_response_time"
+                    ],
                     "satisfaction_score": 0,  # TODO: Implement real satisfaction scoring
                 },
                 ab_testing={
@@ -490,21 +503,33 @@ class AnalyticsService:
                     "cpu_usage": system_stats.get("cpu_usage", 0),
                     "memory_usage": system_stats.get("memory_usage", 0),
                     "cache_hit_rate": self._calculate_cache_hit_rate(),
-                    "active_connections": system_stats["active_conversations"],
-                    "conversations_today": today_stats["conversation_count"],
+                    "active_connections": system_stats[
+                        "active_conversations"
+                    ],
+                    "conversations_today": today_stats[
+                        "conversation_count"
+                    ],
                     "messages_today": today_stats["message_count"],
                     "tokens_today": today_stats["token_count"],
                     "cost_today": today_stats["total_cost"],
-                    "conversations_this_week": week_stats["conversation_count"],
+                    "conversations_this_week": week_stats[
+                        "conversation_count"
+                    ],
                     "messages_this_week": week_stats["message_count"],
                     "tokens_this_week": week_stats["token_count"],
                     "cost_this_week": week_stats["total_cost"],
-                    "conversations_this_month": month_stats["conversation_count"],
+                    "conversations_this_month": month_stats[
+                        "conversation_count"
+                    ],
                     "messages_this_month": month_stats["message_count"],
                     "tokens_this_month": month_stats["token_count"],
                     "cost_this_month": month_stats["total_cost"],
-                    "avg_response_time_today": today_stats["avg_response_time"],
-                    "avg_response_time_week": week_stats["avg_response_time"],
+                    "avg_response_time_today": today_stats[
+                        "avg_response_time"
+                    ],
+                    "avg_response_time_week": week_stats[
+                        "avg_response_time"
+                    ],
                     "recent_activity_trend": self._calculate_activity_trend(
                         today_stats, week_stats
                     ),
@@ -4476,9 +4501,7 @@ class UserBehaviorAnalyzer:
             total_conversations = conversation_stats.get(
                 'total_conversations', 0
             )
-            total_messages = conversation_stats.get(
-                'total_messages', 0
-            )
+            total_messages = conversation_stats.get('total_messages', 0)
             avg_response_time = conversation_stats.get(
                 'avg_response_time_ms', 0
             )
@@ -4497,8 +4520,12 @@ class UserBehaviorAnalyzer:
             # Calculate real workflow metrics based on conversations
             # Each conversation represents a workflow execution
             workflows_total = total_conversations
-            workflows_active = min(total_conversations, 10)  # Conservative estimate
-            workflows_completed_today = total_conversations  # All completed conversations
+            workflows_active = min(
+                total_conversations, 10
+            )  # Conservative estimate
+            workflows_completed_today = (
+                total_conversations  # All completed conversations
+            )
 
             return IntegratedDashboardStats(
                 workflows={
@@ -4506,14 +4533,20 @@ class UserBehaviorAnalyzer:
                     "active": workflows_active,
                     "completedToday": workflows_completed_today,
                     "avgExecutionTime": (
-                        avg_response_time / 1000 if avg_response_time > 0 else 0
+                        avg_response_time / 1000
+                        if avg_response_time > 0
+                        else 0
                     ),
                 },
                 agents={
                     "total": workflows_total,  # Each workflow uses an agent
                     "active": workflows_active,
                     "conversationsToday": total_conversations,
-                    "avgResponseTime": avg_response_time / 1000 if avg_response_time > 0 else 0,
+                    "avgResponseTime": (
+                        avg_response_time / 1000
+                        if avg_response_time > 0
+                        else 0
+                    ),
                     "satisfactionScore": 0,  # TODO: Implement real satisfaction scoring
                 },
                 ab_testing={
@@ -4526,7 +4559,11 @@ class UserBehaviorAnalyzer:
                     "tokensUsed": total_tokens,
                     "apiCalls": total_messages,  # Each message is an API call
                     "cost": total_cost,
-                    "uptime": system_analytics.get('uptime', 0) if system_analytics else 0,
+                    "uptime": (
+                        system_analytics.get('uptime', 0)
+                        if system_analytics
+                        else 0
+                    ),
                 },
             )
 

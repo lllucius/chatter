@@ -250,16 +250,19 @@ const DashboardPage: React.FC = () => {
       total_messages?: number;
       avg_messages_per_conversation?: number;
     }
-    
+
     interface UsageMetrics {
       total_tokens?: number;
       input_tokens?: number;
       output_tokens?: number;
       total_prompt_tokens?: number;
     }
-    
-    const conversationStats = (data?.conversation_stats || {}) as ConversationStats;
-    const usageMetrics = (usageData || data?.usage_metrics || {}) as UsageMetrics;
+
+    const conversationStats = (data?.conversation_stats ||
+      {}) as ConversationStats;
+    const usageMetrics = (usageData ||
+      data?.usage_metrics ||
+      {}) as UsageMetrics;
     const realPerformanceData = (performanceData ||
       data?.performance_metrics ||
       {}) as Record<string, unknown>;
@@ -310,34 +313,22 @@ const DashboardPage: React.FC = () => {
       },
       {
         name: 'Sun',
-        conversations: Math.max(
-          conversationStats.total_conversations || 0,
-          5
-        ),
+        conversations: Math.max(conversationStats.total_conversations || 0, 5),
       },
     ];
 
     const tokenUsageData = [
       {
         name: 'Week 1',
-        tokens: Math.max(
-          (usageMetrics.total_tokens || 0) * 0.6,
-          1000
-        ),
+        tokens: Math.max((usageMetrics.total_tokens || 0) * 0.6, 1000),
       },
       {
         name: 'Week 2',
-        tokens: Math.max(
-          (usageMetrics.total_tokens || 0) * 0.8,
-          1500
-        ),
+        tokens: Math.max((usageMetrics.total_tokens || 0) * 0.8, 1500),
       },
       {
         name: 'Week 3',
-        tokens: Math.max(
-          (usageMetrics.total_tokens || 0) * 1.1,
-          2000
-        ),
+        tokens: Math.max((usageMetrics.total_tokens || 0) * 1.1, 2000),
       },
       {
         name: 'Week 4',
@@ -596,9 +587,7 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Total Messages"
-                value={safeLocaleString(
-                  conversationStats.total_messages || 0
-                )}
+                value={safeLocaleString(conversationStats.total_messages || 0)}
                 change={`Avg ${safeToFixed(conversationStats.avg_messages_per_conversation || 0, 1)} per conversation`}
                 changeType="neutral"
                 icon={<TrendingUp />}
@@ -614,9 +603,7 @@ const DashboardPage: React.FC = () => {
             >
               <MetricCard
                 title="Token Usage"
-                value={safeLocaleString(
-                  usageMetrics.total_tokens || 0
-                )}
+                value={safeLocaleString(usageMetrics.total_tokens || 0)}
                 change={`${safeLocaleString(usageMetrics.total_prompt_tokens || 0)} prompts`}
                 changeType="positive"
                 icon={<Assessment />}
@@ -763,10 +750,10 @@ const DashboardPage: React.FC = () => {
                   <Typography variant="body2" gutterBottom>
                     P95:{' '}
                     {safeToFixed(
-                      (Number(
+                      Number(
                         (performanceMetrics as Record<string, unknown>)
                           ?.p95_response_time_ms as number | undefined | null
-                      ) || 0),
+                      ) || 0,
                       1
                     )}
                     ms
@@ -1005,7 +992,7 @@ const DashboardPage: React.FC = () => {
               icon={<SmartToy />}
             />
             <Chip
-              label={`Avg Response: ${safeToFixed((Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) || 0), 0)}ms`}
+              label={`Avg Response: ${safeToFixed(Number((performanceMetrics as Record<string, unknown>)?.avg_response_time_ms as number | undefined | null) || 0, 0)}ms`}
               color={
                 (Number(
                   (performanceMetrics as Record<string, unknown>)

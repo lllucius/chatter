@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { ChatResponse, ChatWorkflowRequest, ChatWorkflowTemplatesResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { ChatResponse, ChatWorkflowRequest, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -230,7 +230,7 @@ Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "simple_chat"
+    "workflow": "plain"
 }
 ```
 
@@ -239,7 +239,7 @@ Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag_chat",
+    "workflow": "rag",
     "enable_retrieval": true
 }
 ```
@@ -249,7 +249,7 @@ Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "function_chat"
+    "workflow": "tools"
 }
 ```
 
@@ -258,7 +258,7 @@ Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "advanced_chat",
+    "workflow": "full",
     "enable_retrieval": true
 }
 ```
@@ -269,7 +269,7 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "simple_chat",
+    "workflow": "plain",
     "stream": true
 }
 ```
@@ -324,7 +324,7 @@ Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "simple_chat"
+    "workflow": "plain"
 }
 ```
 
@@ -333,7 +333,7 @@ Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag_chat",
+    "workflow": "rag",
     "enable_retrieval": true
 }
 ```
@@ -343,7 +343,7 @@ Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "function_chat"
+    "workflow": "tools"
 }
 ```
 
@@ -352,7 +352,7 @@ Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "advanced_chat",
+    "workflow": "full",
     "enable_retrieval": true
 }
 ```
@@ -363,7 +363,7 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "simple_chat",
+    "workflow": "plain",
     "stream": true
 }
 ```
@@ -406,19 +406,5 @@ Available templates:
 
     const response = await this.requestStream(requestContext);
     return response;
-  }
-  /**Get Chat Workflow Templates
-   * Get pre-built workflow templates optimized for chat.
-   */
-  public async getChatWorkflowTemplatesApiV1WorkflowsTemplatesChat(): Promise<ChatWorkflowTemplatesResponse> {
-    const requestContext: RequestOpts = {
-      path: `/api/v1/workflows/templates/chat`,
-      method: 'GET' as HTTPMethod,
-      headers: {
-      },
-    };
-
-    const response = await this.request(requestContext);
-    return response.json() as Promise<ChatWorkflowTemplatesResponse>;
   }
 }

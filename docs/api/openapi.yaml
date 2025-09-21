@@ -2043,69 +2043,6 @@ components:
       - message
       title: ChatWorkflowRequest
       type: object
-    ChatWorkflowTemplate:
-      description: Chat-optimized workflow template.
-      properties:
-        complexity_score:
-          default: 1
-          description: Complexity score
-          maximum: 10.0
-          minimum: 1.0
-          title: Complexity Score
-          type: integer
-        config:
-          $ref: '#/components/schemas/ChatWorkflowConfig'
-          description: Workflow configuration
-        description:
-          description: Template description
-          title: Description
-          type: string
-        estimated_cost:
-          anyOf:
-          - type: number
-          - type: 'null'
-          description: Estimated cost
-          title: Estimated Cost
-        estimated_tokens:
-          anyOf:
-          - type: integer
-          - type: 'null'
-          description: Estimated token usage
-          title: Estimated Tokens
-        name:
-          description: Template name
-          title: Name
-          type: string
-        use_cases:
-          description: Use cases
-          items:
-            type: string
-          title: Use Cases
-          type: array
-      required:
-      - name
-      - description
-      - config
-      title: ChatWorkflowTemplate
-      type: object
-    ChatWorkflowTemplatesResponse:
-      description: Response for chat workflow templates.
-      properties:
-        templates:
-          additionalProperties:
-            $ref: '#/components/schemas/ChatWorkflowTemplate'
-          description: Available templates
-          title: Templates
-          type: object
-        total_count:
-          description: Total template count
-          title: Total Count
-          type: integer
-      required:
-      - templates
-      - total_count
-      title: ChatWorkflowTemplatesResponse
-      type: object
     CleanupResponse:
       description: Schema for cleanup operation response.
       properties:
@@ -10268,6 +10205,7 @@ components:
           type: object
         description:
           description: Template description
+          minLength: 1
           title: Description
           type: string
         is_public:
@@ -10346,6 +10284,7 @@ components:
           type: object
         description:
           description: Template description
+          minLength: 1
           title: Description
           type: string
         estimated_complexity:
@@ -10465,7 +10404,8 @@ components:
           title: Default Params
         description:
           anyOf:
-          - type: string
+          - minLength: 1
+            type: string
           - type: 'null'
           description: Template description
           title: Description
@@ -19792,25 +19732,25 @@ paths:
         \nThis endpoint supports multiple workflow types through the `workflow` parameter:\n\
         \n### Plain Chat (`plain`)\nBasic conversation without tools or retrieval.\n\
         ```json\n{\n    \"message\": \"Hello, how are you?\",\n    \"workflow\": \"\
-        simple_chat\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation\
+        plain\"\n}\n```\n\n### RAG Workflow (`rag`)\nRetrieval-Augmented Generation\
         \ with document search.\n```json\n{\n    \"message\": \"What are the latest\
-        \ sales figures?\",\n    \"workflow\": \"rag_chat\",\n    \"enable_retrieval\"\
+        \ sales figures?\",\n    \"workflow\": \"rag\",\n    \"enable_retrieval\"\
         : true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction calling with available\
         \ tools.\n```json\n{\n    \"message\": \"Calculate the square root of 144\"\
-        ,\n    \"workflow\": \"function_chat\"\n}\n```\n\n### Full Workflow (`full`)\n\
-        Combination of RAG and tools for complex tasks.\n```json\n{\n    \"message\"\
-        : \"Find recent customer feedback and create a summary report\",\n    \"workflow\"\
-        : \"advanced_chat\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\
-        \nSet `stream: true` to receive real-time responses:\n```json\n{\n    \"message\"\
-        : \"Tell me a story\",\n    \"workflow\": \"simple_chat\",\n    \"stream\"\
-        : true\n}\n```\n\nStreaming responses use Server-Sent Events (SSE) format\
-        \ with event types:\n- `token`: Content chunks\n- `node_start`: Workflow node\
-        \ started\n- `node_complete`: Workflow node completed\n- `usage`: Final usage\
-        \ statistics\n- `error`: Error occurred\n\n## Templates\n\nUse pre-configured\
-        \ templates for common scenarios:\n```json\n{\n    \"message\": \"I need help\
-        \ with my order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\
-        \nAvailable templates:\n- `customer_support`: Customer service with knowledge\
-        \ base\n- `code_assistant`: Programming help with code tools\n- `research_assistant`:\
+        ,\n    \"workflow\": \"tools\"\n}\n```\n\n### Full Workflow (`full`)\nCombination\
+        \ of RAG and tools for complex tasks.\n```json\n{\n    \"message\": \"Find\
+        \ recent customer feedback and create a summary report\",\n    \"workflow\"\
+        : \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n## Streaming\n\nSet\
+        \ `stream: true` to receive real-time responses:\n```json\n{\n    \"message\"\
+        : \"Tell me a story\",\n    \"workflow\": \"plain\",\n    \"stream\": true\n\
+        }\n```\n\nStreaming responses use Server-Sent Events (SSE) format with event\
+        \ types:\n- `token`: Content chunks\n- `node_start`: Workflow node started\n\
+        - `node_complete`: Workflow node completed\n- `usage`: Final usage statistics\n\
+        - `error`: Error occurred\n\n## Templates\n\nUse pre-configured templates\
+        \ for common scenarios:\n```json\n{\n    \"message\": \"I need help with my\
+        \ order\",\n    \"workflow_template\": \"customer_support\"\n}\n```\n\nAvailable\
+        \ templates:\n- `customer_support`: Customer service with knowledge base\n\
+        - `code_assistant`: Programming help with code tools\n- `research_assistant`:\
         \ Document research and analysis\n- `general_chat`: General conversation\n\
         - `document_qa`: Document question answering\n- `data_analyst`: Data analysis\
         \ with computation tools\n"
@@ -19857,22 +19797,22 @@ paths:
         ## Workflow Types\n\nThis endpoint supports multiple workflow types through\
         \ the `workflow` parameter:\n\n### Plain Chat (`plain`)\nBasic conversation\
         \ without tools or retrieval.\n```json\n{\n    \"message\": \"Hello, how are\
-        \ you?\",\n    \"workflow\": \"simple_chat\"\n}\n```\n\n### RAG Workflow (`rag`)\n\
+        \ you?\",\n    \"workflow\": \"plain\"\n}\n```\n\n### RAG Workflow (`rag`)\n\
         Retrieval-Augmented Generation with document search.\n```json\n{\n    \"message\"\
-        : \"What are the latest sales figures?\",\n    \"workflow\": \"rag_chat\"\
-        ,\n    \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\n\
-        Function calling with available tools.\n```json\n{\n    \"message\": \"Calculate\
-        \ the square root of 144\",\n    \"workflow\": \"function_chat\"\n}\n```\n\
-        \n### Full Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n\
-        ```json\n{\n    \"message\": \"Find recent customer feedback and create a\
-        \ summary report\",\n    \"workflow\": \"advanced_chat\",\n    \"enable_retrieval\"\
-        : true\n}\n```\n\n## Streaming\n\nSet `stream: true` to receive real-time\
-        \ responses:\n```json\n{\n    \"message\": \"Tell me a story\",\n    \"workflow\"\
-        : \"simple_chat\",\n    \"stream\": true\n}\n```\n\nStreaming responses use\
-        \ Server-Sent Events (SSE) format with event types:\n- `token`: Content chunks\n\
-        - `node_start`: Workflow node started\n- `node_complete`: Workflow node completed\n\
-        - `usage`: Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\
-        \nUse pre-configured templates for common scenarios:\n```json\n{\n    \"message\"\
+        : \"What are the latest sales figures?\",\n    \"workflow\": \"rag\",\n  \
+        \  \"enable_retrieval\": true\n}\n```\n\n### Tools Workflow (`tools`)\nFunction\
+        \ calling with available tools.\n```json\n{\n    \"message\": \"Calculate\
+        \ the square root of 144\",\n    \"workflow\": \"tools\"\n}\n```\n\n### Full\
+        \ Workflow (`full`)\nCombination of RAG and tools for complex tasks.\n```json\n\
+        {\n    \"message\": \"Find recent customer feedback and create a summary report\"\
+        ,\n    \"workflow\": \"full\",\n    \"enable_retrieval\": true\n}\n```\n\n\
+        ## Streaming\n\nSet `stream: true` to receive real-time responses:\n```json\n\
+        {\n    \"message\": \"Tell me a story\",\n    \"workflow\": \"plain\",\n \
+        \   \"stream\": true\n}\n```\n\nStreaming responses use Server-Sent Events\
+        \ (SSE) format with event types:\n- `token`: Content chunks\n- `node_start`:\
+        \ Workflow node started\n- `node_complete`: Workflow node completed\n- `usage`:\
+        \ Final usage statistics\n- `error`: Error occurred\n\n## Templates\n\nUse\
+        \ pre-configured templates for common scenarios:\n```json\n{\n    \"message\"\
         : \"I need help with my order\",\n    \"workflow_template\": \"customer_support\"\
         \n}\n```\n\nAvailable templates:\n- `customer_support`: Customer service with\
         \ knowledge base\n- `code_assistant`: Programming help with code tools\n-\
@@ -20003,28 +19943,6 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Create Workflow Template
-      tags:
-      - Workflows
-  /api/v1/workflows/templates/chat:
-    get:
-      description: Get pre-built workflow templates optimized for chat.
-      operationId: get_chat_workflow_templates_api_v1_workflows_templates_chat_get
-      responses:
-        '200':
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/ChatWorkflowTemplatesResponse'
-          description: Successful Response
-          headers:
-            X-RateLimit-Limit-Hour: *id001
-            X-RateLimit-Limit-Minute: *id002
-            X-RateLimit-Remaining-Hour: *id003
-            X-RateLimit-Remaining-Minute: *id004
-            x-correlation-id: *id005
-      security:
-      - CustomHTTPBearer: []
-      summary: Get Chat Workflow Templates
       tags:
       - Workflows
   /api/v1/workflows/templates/{template_id}:

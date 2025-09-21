@@ -39,7 +39,7 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
                 templates = [
                     chatter_sdk.models.workflow_template_response.WorkflowTemplateResponse(
                         name = '0', 
-                        description = '', 
+                        description = '0', 
                         workflow_type = '', 
                         category = 'custom', 
                         default_params = { }, 
@@ -73,7 +73,7 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
                 templates = [
                     chatter_sdk.models.workflow_template_response.WorkflowTemplateResponse(
                         name = '0', 
-                        description = '', 
+                        description = '0', 
                         workflow_type = '', 
                         category = 'custom', 
                         default_params = { }, 

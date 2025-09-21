@@ -29,7 +29,7 @@ class WorkflowTemplateUpdate(BaseModel):
     Schema for updating a workflow template.
     """ # noqa: E501
     name: Optional[Annotated[str, Field(min_length=1, strict=True, max_length=255)]] = None
-    description: Optional[StrictStr] = None
+    description: Optional[Annotated[str, Field(min_length=1, strict=True)]] = None
     category: Optional[StrictStr] = None
     default_params: Optional[Dict[str, Any]] = None
     required_tools: Optional[List[StrictStr]] = None

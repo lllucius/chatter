@@ -76,13 +76,6 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_get_chat_workflow_templates_api_v1_workflows_templates_chat_get(self) -> None:
-        """Test case for get_chat_workflow_templates_api_v1_workflows_templates_chat_get
-
-        Get Chat Workflow Templates
-        """
-        pass
-
     async def test_get_supported_node_types_api_v1_workflows_node_types_get(self) -> None:
         """Test case for get_supported_node_types_api_v1_workflows_node_types_get
 

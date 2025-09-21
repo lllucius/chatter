@@ -63,8 +63,6 @@ from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
-from chatter_sdk.models.chat_workflow_template import ChatWorkflowTemplate
-from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse
 from chatter_sdk.models.cleanup_response import CleanupResponse
 from chatter_sdk.models.complexity_metrics import ComplexityMetrics
 from chatter_sdk.models.conversation_create import ConversationCreate

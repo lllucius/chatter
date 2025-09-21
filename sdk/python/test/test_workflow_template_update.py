@@ -37,7 +37,7 @@ class TestWorkflowTemplateUpdate(unittest.TestCase):
         if include_optional:
             return WorkflowTemplateUpdate(
                 name = '0',
-                description = '',
+                description = '0',
                 category = '',
                 default_params = { },
                 required_tools = [

@@ -37,7 +37,7 @@ class TestWorkflowTemplateCreate(unittest.TestCase):
         if include_optional:
             return WorkflowTemplateCreate(
                 name = '0',
-                description = '',
+                description = '0',
                 workflow_type = '',
                 category = 'custom',
                 default_params = { },
@@ -57,7 +57,7 @@ class TestWorkflowTemplateCreate(unittest.TestCase):
         else:
             return WorkflowTemplateCreate(
                 name = '0',
-                description = '',
+                description = '0',
                 workflow_type = '',
         )
         """

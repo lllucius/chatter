@@ -95,8 +95,6 @@ __all__ = [
     "ChatResponse",
     "ChatWorkflowConfig",
     "ChatWorkflowRequest",
-    "ChatWorkflowTemplate",
-    "ChatWorkflowTemplatesResponse",
     "CleanupResponse",
     "ComplexityMetrics",
     "ConversationCreate",
@@ -370,8 +368,6 @@ from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics as Char
 from chatter_sdk.models.chat_response import ChatResponse as ChatResponse
 from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig as ChatWorkflowConfig
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest as ChatWorkflowRequest
-from chatter_sdk.models.chat_workflow_template import ChatWorkflowTemplate as ChatWorkflowTemplate
-from chatter_sdk.models.chat_workflow_templates_response import ChatWorkflowTemplatesResponse as ChatWorkflowTemplatesResponse
 from chatter_sdk.models.cleanup_response import CleanupResponse as CleanupResponse
 from chatter_sdk.models.complexity_metrics import ComplexityMetrics as ComplexityMetrics
 from chatter_sdk.models.conversation_create import ConversationCreate as ConversationCreate

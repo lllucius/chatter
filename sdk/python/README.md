@@ -293,7 +293,6 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 *WorkflowsApi* | [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](docs/WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 *WorkflowsApi* | [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
-*WorkflowsApi* | [**get_chat_workflow_templates_api_v1_workflows_templates_chat_get**](docs/WorkflowsApi.md#get_chat_workflow_templates_api_v1_workflows_templates_chat_get) | **GET** /api/v1/workflows/templates/chat | Get Chat Workflow Templates
 *WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 *WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
 *WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
@@ -375,8 +374,6 @@ Class | Method | HTTP request | Description
  - [ChatResponse](docs/ChatResponse.md)
  - [ChatWorkflowConfig](docs/ChatWorkflowConfig.md)
  - [ChatWorkflowRequest](docs/ChatWorkflowRequest.md)
- - [ChatWorkflowTemplate](docs/ChatWorkflowTemplate.md)
- - [ChatWorkflowTemplatesResponse](docs/ChatWorkflowTemplatesResponse.md)
  - [CleanupResponse](docs/CleanupResponse.md)
  - [ComplexityMetrics](docs/ComplexityMetrics.md)
  - [ConversationCreate](docs/ConversationCreate.md)

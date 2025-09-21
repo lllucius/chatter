@@ -29,7 +29,7 @@ class WorkflowTemplateCreate(BaseModel):
     Schema for creating a workflow template.
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Template name")
-    description: StrictStr = Field(description="Template description")
+    description: Annotated[str, Field(min_length=1, strict=True)] = Field(description="Template description")
     workflow_type: StrictStr = Field(description="Workflow type")
     category: Optional[StrictStr] = Field(default='custom', description="Template category")
     default_params: Optional[Dict[str, Any]] = Field(default=None, description="Default parameters")

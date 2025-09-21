@@ -51,8 +51,6 @@ export * from './ChartReadyAnalytics';
 export * from './ChatResponse';
 export * from './ChatWorkflowConfig';
 export * from './ChatWorkflowRequest';
-export * from './ChatWorkflowTemplate';
-export * from './ChatWorkflowTemplatesResponse';
 export * from './CleanupResponse';
 export * from './ComplexityMetrics';
 export * from './ConversationCreate';

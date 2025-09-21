@@ -6,7 +6,6 @@ import {
   ServerToolsResponse,
   WorkflowExecutionResponse,
   WorkflowExecutionRequest,
-  WorkflowDefinitionFromTemplateRequest,
 } from 'chatter-sdk';
 
 // Use the SDK types directly
@@ -72,25 +71,28 @@ export const useWorkflowData = () => {
     }
   }, []);
 
-  const createTemplate = useCallback(async (templateData: WorkflowTemplateResponse) => {
-    try {
-      setLoading(true);
-      const newTemplate =
-        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
-          templateData
-        );
-      setTemplates((prev) => [newTemplate, ...prev]);
-      return newTemplate;
-    } catch (error) {
-      handleError(error, {
-        source: 'useWorkflowData.createTemplate',
-        operation: 'create workflow template',
-      });
-      throw error;
-    } finally {
-      setLoading(false);
-    }
-  }, []);
+  const createTemplate = useCallback(
+    async (templateData: WorkflowTemplateResponse) => {
+      try {
+        setLoading(true);
+        const newTemplate =
+          await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
+            templateData
+          );
+        setTemplates((prev) => [newTemplate, ...prev]);
+        return newTemplate;
+      } catch (error) {
+        handleError(error, {
+          source: 'useWorkflowData.createTemplate',
+          operation: 'create workflow template',
+        });
+        throw error;
+      } finally {
+        setLoading(false);
+      }
+    },
+    []
+  );
 
   const executeWorkflow = useCallback(
     async (workflowId: string, input: Record<string, unknown>) => {
@@ -124,29 +126,31 @@ export const useWorkflowData = () => {
     async (templateId: string, input: Record<string, unknown>) => {
       try {
         setLoading(true);
-        
+
         // Step 1: Create a workflow definition from the template
         const createRequest = {
           template_id: templateId,
           user_input: input,
           is_temporary: true,
         };
-        
-        const definition = await getSDK().workflows.createWorkflowDefinitionFromTemplateApiV1WorkflowsDefinitionsFromTemplate(
-          createRequest
-        );
-        
+
+        const definition =
+          await getSDK().workflows.createWorkflowDefinitionFromTemplateApiV1WorkflowsDefinitionsFromTemplate(
+            createRequest
+          );
+
         // Step 2: Execute the newly created workflow definition
         const executionRequest: WorkflowExecutionRequest = {
           definition_id: definition.id,
           input_data: input,
         };
-        
-        const execution = await getSDK().workflows.executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(
-          definition.id,
-          executionRequest
-        );
-        
+
+        const execution =
+          await getSDK().workflows.executeWorkflowApiV1WorkflowsDefinitionsWorkflowIdExecute(
+            definition.id,
+            executionRequest
+          );
+
         setExecutions((prev) => [execution, ...prev]);
         return execution;
       } catch (error) {

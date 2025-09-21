@@ -12,7 +12,9 @@ class TestLangGraphStreamingEnhancement:
     """Test LangGraph streaming enhancements."""
 
     @pytest.mark.asyncio
-    async def test_langgraph_workflow_manager_has_get_tools_method(self):
+    async def test_langgraph_workflow_manager_has_get_tools_method(
+        self,
+    ):
         """Test that LangGraphWorkflowManager has the get_tools method."""
         manager = LangGraphWorkflowManager()
         assert hasattr(
@@ -24,7 +26,9 @@ class TestLangGraphStreamingEnhancement:
         assert isinstance(tools, list), "get_tools should return a list"
 
     @pytest.mark.asyncio
-    async def test_langgraph_workflow_manager_has_get_retriever_method(self):
+    async def test_langgraph_workflow_manager_has_get_retriever_method(
+        self,
+    ):
         """Test that LangGraphWorkflowManager has the get_retriever method."""
         manager = LangGraphWorkflowManager()
         assert hasattr(
@@ -160,7 +164,9 @@ class TestLangGraphStreamingEnhancement:
             assert call_args[1]['memory_window'] == 10
 
     @pytest.mark.asyncio
-    async def test_workflow_manager_get_tools_returns_builtin_tools(self):
+    async def test_workflow_manager_get_tools_returns_builtin_tools(
+        self,
+    ):
         """Test that get_tools properly returns builtin tools."""
         with mock.patch(
             'chatter.core.dependencies.get_builtin_tools'
@@ -176,7 +182,9 @@ class TestLangGraphStreamingEnhancement:
             mock_builtin.assert_called_once()
 
     @pytest.mark.asyncio
-    async def test_workflow_manager_get_tools_handles_errors_gracefully(self):
+    async def test_workflow_manager_get_tools_handles_errors_gracefully(
+        self,
+    ):
         """Test that get_tools handles errors gracefully."""
         with mock.patch(
             'chatter.core.dependencies.get_builtin_tools'

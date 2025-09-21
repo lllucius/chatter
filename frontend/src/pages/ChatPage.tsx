@@ -43,17 +43,12 @@ const ChatPage: React.FC = () => {
     temperature,
     maxTokens,
     enableRetrieval,
-    _enableTools,
     customPromptText,
     setSelectedProfile,
     setSelectedPrompt,
     setSelectedDocuments,
     setCurrentConversation,
     setStreamingEnabled,
-    _setTemperature,
-    _setMaxTokens,
-    _setEnableRetrieval,
-    _setEnableTools,
     setCustomPromptText,
     loadData,
   } = useChatData();
@@ -180,9 +175,9 @@ const ChatPage: React.FC = () => {
                 // Stream started
                 break;
 
-              case 'token':
+              case 'token': {
                 // Add the token to our streamed content
-                const tokenContent = eventData.content as string || '';
+                const tokenContent = (eventData.content as string) || '';
                 setStreamedContent((prev) => prev + tokenContent);
 
                 // Update the message with the new content
@@ -206,14 +201,23 @@ const ChatPage: React.FC = () => {
                   )
                 );
                 break;
+              }
 
               case 'complete':
                 // Extract final metadata
-                if (eventData.metadata && typeof eventData.metadata === 'object') {
-                  const metadata = eventData.metadata as Record<string, unknown>;
+                if (
+                  eventData.metadata &&
+                  typeof eventData.metadata === 'object'
+                ) {
+                  const metadata = eventData.metadata as Record<
+                    string,
+                    unknown
+                  >;
                   setTotalTokens(metadata.total_tokens as number | undefined);
                   setModel(metadata.model_used as string | undefined);
-                  setProcessingTime(metadata.response_time_ms as number | undefined);
+                  setProcessingTime(
+                    metadata.response_time_ms as number | undefined
+                  );
                 }
 
                 // Update the message with final metadata
@@ -223,9 +227,14 @@ const ChatPage: React.FC = () => {
                       ? {
                           ...msg,
                           metadata: {
-                            model: eventData.metadata?.model_used as string | undefined,
-                            tokens: eventData.metadata?.total_tokens as number | undefined,
-                            processingTime: eventData.metadata?.response_time_ms as number | undefined,
+                            model: eventData.metadata?.model_used as
+                              | string
+                              | undefined,
+                            tokens: eventData.metadata?.total_tokens as
+                              | number
+                              | undefined,
+                            processingTime: eventData.metadata
+                              ?.response_time_ms as number | undefined,
                             workflow: {
                               stage: 'Complete',
                               currentStep: 1,
@@ -241,7 +250,8 @@ const ChatPage: React.FC = () => {
 
               case 'error':
                 throw new Error(
-                  (eventData.message as string) || 'Workflow streaming error occurred'
+                  (eventData.message as string) ||
+                    'Workflow streaming error occurred'
                 );
 
               default:
@@ -259,7 +269,7 @@ const ChatPage: React.FC = () => {
         if (reader) {
           try {
             reader.releaseLock();
-          } catch (releaseError) {
+          } catch {
             // Ignore release errors
           }
         }
@@ -319,19 +329,27 @@ const ChatPage: React.FC = () => {
 
         // Local state for the callback functions (though they may not be used in this design)
         let streamedContent = '';
-        let totalTokens: number | undefined;
-        let model: string | undefined;
-        let processingTime: number | undefined;
+        // let totalTokens: number | undefined;
+        // let model: string | undefined;
+        // let processingTime: number | undefined;
 
         // Use the shared streaming processing logic
         await processStreamingResponse(
           stream,
           isRegeneration,
           assistantMessageId,
-          (updater) => { streamedContent = updater(streamedContent); },
-          (tokens) => { totalTokens = tokens; },
-          (modelName) => { model = modelName; },
-          (time) => { processingTime = time; }
+          (updater) => {
+            streamedContent = updater(streamedContent);
+          },
+          (_tokens) => {
+            // totalTokens = tokens;
+          },
+          (_modelName) => {
+            // model = modelName;
+          },
+          (_time) => {
+            // processingTime = time;
+          }
         );
 
         // Focus input after streaming is complete
@@ -592,6 +610,7 @@ const ChatPage: React.FC = () => {
     setSelectedTemplate,
     updateWorkflowConfig,
     resetToTemplate,
+    enableTracing,
   ]);
 
   const sendMessage = useCallback(

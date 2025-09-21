@@ -171,11 +171,9 @@ describe('SSEEventManager', () => {
     test('should not connect when not authenticated', () => {
       (authService.isAuthenticated as Mock).mockReturnValue(false);
 
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {
-          // Mock console.error for testing
-        });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+        // Mock console.error for testing
+      });
       sseManager.connect();
 
       expect(consoleSpy).toHaveBeenCalledWith(
@@ -288,7 +286,9 @@ describe('SSEEventManager', () => {
 
       // Test the event emitting functionality directly via the emitEvent method
       // This tests the core functionality without complex streaming mocks
-      (sseManager as unknown as { emitEvent: (data: unknown) => void }).emitEvent(eventData);
+      (
+        sseManager as unknown as { emitEvent: (data: unknown) => void }
+      ).emitEvent(eventData);
 
       expect(listener).toHaveBeenCalledWith(eventData);
     });
@@ -310,7 +310,9 @@ describe('SSEEventManager', () => {
       };
 
       // Test the event emitting functionality directly
-      (sseManager as unknown as { emitEvent: (data: unknown) => void }).emitEvent(eventData);
+      (
+        sseManager as unknown as { emitEvent: (data: unknown) => void }
+      ).emitEvent(eventData);
 
       expect(listener).toHaveBeenCalledWith(eventData);
     });
@@ -332,7 +334,9 @@ describe('SSEEventManager', () => {
       };
 
       // Test the event emitting functionality directly
-      (sseManager as unknown as { emitEvent: (data: unknown) => void }).emitEvent(eventData);
+      (
+        sseManager as unknown as { emitEvent: (data: unknown) => void }
+      ).emitEvent(eventData);
 
       expect(listener).toHaveBeenCalledWith(eventData);
     });
@@ -412,11 +416,9 @@ describe('SSEEventManager', () => {
 
   describe('Error Handling', () => {
     test('should handle malformed messages gracefully', () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {
-          // Mock console.error for testing
-        });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+        // Mock console.error for testing
+      });
 
       // Create mock stream with malformed data
       const mockSDK = (authService.getSDK as Mock)();
@@ -440,11 +442,9 @@ describe('SSEEventManager', () => {
     });
 
     test('should handle connection errors', () => {
-      const consoleSpy = vi
-        .spyOn(console, 'error')
-        .mockImplementation(() => {
-          // Mock console.error for testing
-        });
+      const consoleSpy = vi.spyOn(console, 'error').mockImplementation(() => {
+        // Mock console.error for testing
+      });
 
       // Mock SDK to reject the stream request
       const mockSDK = (authService.getSDK as Mock)();

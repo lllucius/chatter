@@ -13,19 +13,16 @@ import {
   FormControlLabel,
   Switch,
   Chip,
-
   TextField,
   Button,
   Card,
   CardContent,
-
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-
   Build as ToolIcon,
   Storage as RetrievalIcon,
   Memory as MemoryIcon,
@@ -278,11 +275,12 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
 
                 {showAdvancedConfig && (
                   <Box
-                    sx={{ 
-                      mt: 2, 
-                      p: 2, 
-                      bgcolor: (theme) => theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50', 
-                      borderRadius: 1 
+                    sx={{
+                      mt: 2,
+                      p: 2,
+                      bgcolor: (theme) =>
+                        theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
+                      borderRadius: 1,
                     }}
                   >
                     <Typography variant="subtitle2" gutterBottom>
@@ -447,7 +445,11 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                         }
                         label="Enable Backend Workflow Tracing"
                       />
-                      <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5 }}>
+                      <Typography
+                        variant="body2"
+                        color="text.secondary"
+                        sx={{ mt: 0.5 }}
+                      >
                         Shows detailed workflow execution steps in the response
                       </Typography>
                     </Box>

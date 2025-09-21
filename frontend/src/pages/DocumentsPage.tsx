@@ -54,7 +54,9 @@ const DocumentsPage: React.FC = () => {
   // Search dialog state
   const [searchDialogOpen, setSearchDialogOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
-  const [searchResults, setSearchResults] = useState<Record<string, unknown>[]>([]);
+  const [searchResults, setSearchResults] = useState<Record<string, unknown>[]>(
+    []
+  );
   const [searching, setSearching] = useState(false);
 
   // Upload dialog state
@@ -348,7 +350,9 @@ const DocumentsPage: React.FC = () => {
         await getSDK().documents.searchDocumentsApiV1DocumentsSearch(
           searchRequest
         );
-      setSearchResults((response as { results?: Record<string, unknown>[] })?.results || []);
+      setSearchResults(
+        (response as { results?: Record<string, unknown>[] })?.results || []
+      );
     } catch (err: unknown) {
       handleError(err, {
         source: 'DocumentsPage.handleSearch',

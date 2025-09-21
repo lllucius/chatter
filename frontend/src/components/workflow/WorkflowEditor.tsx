@@ -333,43 +333,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     [nodes, edges, initialWorkflow]
   );
 
-  // Keyboard shortcuts
-  React.useEffect(() => {
-    const handleKeyDown = (event: KeyboardEvent) => {
-      if (event.ctrlKey || event.metaKey) {
-        switch (event.key) {
-          case 'z':
-            event.preventDefault();
-            if (event.shiftKey) {
-              handleRedo();
-            } else {
-              handleUndo();
-            }
-            break;
-          case 'c':
-            event.preventDefault();
-            handleCopy();
-            break;
-          case 'v':
-            event.preventDefault();
-            handlePaste();
-            break;
-          case 's':
-            event.preventDefault();
-            handleSave();
-            break;
-        }
-      }
-      if (event.key === 'Delete' && selectedNode) {
-        event.preventDefault();
-        handleDeleteSelected();
-      }
-    };
-
-    document.addEventListener('keydown', handleKeyDown);
-    return () => document.removeEventListener('keydown', handleKeyDown);
-  }, [selectedNode, handleCopy, handleDeleteSelected, handlePaste, handleRedo, handleSave, handleUndo]);
-
   // Undo functionality
   const handleUndo = useCallback(() => {
     if (historyIndex > 0) {
@@ -462,12 +425,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       setShowPropertiesPanel(false);
     }
   }, [selectedNode, setNodes, setEdges, saveToHistory]);
-  // Notify parent of changes
-  React.useEffect(() => {
-    if (onWorkflowChange) {
-      onWorkflowChange(currentWorkflow);
-    }
-  }, [currentWorkflow, onWorkflowChange]);
 
   // Handle save
   const handleSave = useCallback(() => {
@@ -475,6 +432,58 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       onSave(currentWorkflow);
     }
   }, [onSave, currentWorkflow]);
+
+  // Keyboard shortcuts
+  React.useEffect(() => {
+    const handleKeyDown = (event: KeyboardEvent) => {
+      if (event.ctrlKey || event.metaKey) {
+        switch (event.key) {
+          case 'z':
+            event.preventDefault();
+            if (event.shiftKey) {
+              handleRedo();
+            } else {
+              handleUndo();
+            }
+            break;
+          case 'c':
+            event.preventDefault();
+            handleCopy();
+            break;
+          case 'v':
+            event.preventDefault();
+            handlePaste();
+            break;
+          case 's':
+            event.preventDefault();
+            handleSave();
+            break;
+        }
+      }
+      if (event.key === 'Delete' && selectedNode) {
+        event.preventDefault();
+        handleDeleteSelected();
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [
+    selectedNode,
+    handleCopy,
+    handleDeleteSelected,
+    handlePaste,
+    handleRedo,
+    handleSave,
+    handleUndo,
+  ]);
+
+  // Notify parent of changes
+  React.useEffect(() => {
+    if (onWorkflowChange) {
+      onWorkflowChange(currentWorkflow);
+    }
+  }, [currentWorkflow, onWorkflowChange]);
 
   // Clear workflow
   const handleClear = useCallback(() => {

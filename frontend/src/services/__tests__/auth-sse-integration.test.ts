@@ -9,7 +9,10 @@ import { sseEventManager } from '../sse-manager';
 
 // Mock the actual auth service methods that would make network calls
 vi.mock('../auth-service', async () => {
-  const actual = (await vi.importActual('../auth-service')) as Record<string, unknown>;
+  const actual = (await vi.importActual('../auth-service')) as Record<
+    string,
+    unknown
+  >;
 
   return {
     ...actual,

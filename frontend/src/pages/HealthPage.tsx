@@ -47,7 +47,7 @@ const HealthPage: React.FC = () => {
     database?: { status?: string };
     redis?: { status?: string };
   }
-  
+
   const [health, setHealth] = useState<HealthData | null>(null);
   const [toolServers, setToolServers] = useState<ToolServerResponse[]>([]);
   const [loading, setLoading] = useState(true);
@@ -412,13 +412,19 @@ const HealthPage: React.FC = () => {
                         variant="body2"
                         sx={{ fontFamily: 'monospace', fontSize: '0.8rem' }}
                       >
-                        {(server as ToolServerResponse & { command?: string }).command || 'N/A'}
+                        {(server as ToolServerResponse & { command?: string })
+                          .command || 'N/A'}
                       </Typography>
                     </TableCell>
                     <TableCell>
                       <Chip
                         label={server.status}
-                        color={getStatusColor(server.status) as 'error' | 'warning' | 'success'}
+                        color={
+                          getStatusColor(server.status) as
+                            | 'error'
+                            | 'warning'
+                            | 'success'
+                        }
                         size="small"
                       />
                     </TableCell>

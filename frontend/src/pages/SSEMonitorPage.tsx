@@ -755,8 +755,8 @@ const SSEMonitorPage: React.FC = () => {
 
           {!isMonitoring && messages.length === 0 && (
             <Alert severity="info" sx={{ my: 2 }}>
-              Click &quot;Start Monitoring&quot; to begin capturing SSE messages. Make
-              sure you&apos;re connected to the SSE stream.
+              Click &quot;Start Monitoring&quot; to begin capturing SSE
+              messages. Make sure you&apos;re connected to the SSE stream.
             </Alert>
           )}
 

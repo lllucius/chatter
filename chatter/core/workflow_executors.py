@@ -1,6 +1,6 @@
 """Unified workflow executor classes.
 
-This module provides executor classes that use the new capability-based 
+This module provides executor classes that use the new capability-based
 workflow system while maintaining compatibility with existing code and tests.
 All executors now use the UnifiedWorkflowEngine internally.
 """
@@ -11,7 +11,10 @@ from collections.abc import AsyncGenerator
 from typing import Any
 
 from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
-from chatter.core.workflow_capabilities import WorkflowCapabilities, WorkflowSpec
+from chatter.core.workflow_capabilities import (
+    WorkflowCapabilities,
+    WorkflowSpec,
+)
 from chatter.models.conversation import Conversation, Message
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
@@ -43,14 +46,14 @@ class BaseWorkflowExecutor:
         """Execute workflow using unified engine."""
         # Convert ChatRequest to WorkflowSpec
         spec = WorkflowSpec.from_chat_request(chat_request)
-        
+
         # Prepare input data
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         return await self._engine.execute_workflow(
             spec, conversation, input_data, user_id
         )
@@ -66,14 +69,14 @@ class BaseWorkflowExecutor:
         """Execute workflow with streaming using unified engine."""
         # Convert ChatRequest to WorkflowSpec
         spec = WorkflowSpec.from_chat_request(chat_request)
-        
+
         # Prepare input data
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         async for chunk in self._engine.execute_workflow_streaming(
             spec, conversation, input_data, user_id
         ):
@@ -99,15 +102,17 @@ class PlainWorkflowExecutor(BaseWorkflowExecutor):
             model=getattr(chat_request, 'model', 'gpt-4'),
             temperature=getattr(chat_request, 'temperature', 0.7),
             max_tokens=getattr(chat_request, 'max_tokens', 1000),
-            system_prompt=getattr(chat_request, 'system_prompt_override', None)
+            system_prompt=getattr(
+                chat_request, 'system_prompt_override', None
+            ),
         )
-        
+
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         return await self._engine.execute_workflow(
             spec, conversation, input_data, user_id
         )
@@ -130,21 +135,23 @@ class RAGWorkflowExecutor(BaseWorkflowExecutor):
             capabilities=WorkflowCapabilities(
                 enable_retrieval=True,
                 max_documents=10,
-                memory_window=30
+                memory_window=30,
             ),
             provider=getattr(chat_request, 'provider', 'openai'),
             model=getattr(chat_request, 'model', 'gpt-4'),
             temperature=getattr(chat_request, 'temperature', 0.7),
             max_tokens=getattr(chat_request, 'max_tokens', 1000),
-            system_prompt=getattr(chat_request, 'system_prompt_override', None)
+            system_prompt=getattr(
+                chat_request, 'system_prompt_override', None
+            ),
         )
-        
+
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         return await self._engine.execute_workflow(
             spec, conversation, input_data, user_id
         )
@@ -165,23 +172,23 @@ class ToolsWorkflowExecutor(BaseWorkflowExecutor):
         # Override capabilities to ensure tools workflow
         spec = WorkflowSpec(
             capabilities=WorkflowCapabilities(
-                enable_tools=True,
-                max_tool_calls=10,
-                memory_window=100
+                enable_tools=True, max_tool_calls=10, memory_window=100
             ),
             provider=getattr(chat_request, 'provider', 'openai'),
             model=getattr(chat_request, 'model', 'gpt-4'),
             temperature=getattr(chat_request, 'temperature', 0.7),
             max_tokens=getattr(chat_request, 'max_tokens', 1000),
-            system_prompt=getattr(chat_request, 'system_prompt_override', None)
+            system_prompt=getattr(
+                chat_request, 'system_prompt_override', None
+            ),
         )
-        
+
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         return await self._engine.execute_workflow(
             spec, conversation, input_data, user_id
         )
@@ -206,21 +213,23 @@ class FullWorkflowExecutor(BaseWorkflowExecutor):
                 enable_tools=True,
                 max_tool_calls=5,
                 max_documents=10,
-                memory_window=50
+                memory_window=50,
             ),
             provider=getattr(chat_request, 'provider', 'openai'),
             model=getattr(chat_request, 'model', 'gpt-4'),
             temperature=getattr(chat_request, 'temperature', 0.7),
             max_tokens=getattr(chat_request, 'max_tokens', 1000),
-            system_prompt=getattr(chat_request, 'system_prompt_override', None)
+            system_prompt=getattr(
+                chat_request, 'system_prompt_override', None
+            ),
         )
-        
+
         input_data = {
             'message': chat_request.message,
             'user_id': user_id,
-            'correlation_id': correlation_id
+            'correlation_id': correlation_id,
         }
-        
+
         return await self._engine.execute_workflow(
             spec, conversation, input_data, user_id
         )

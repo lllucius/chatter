@@ -94,7 +94,9 @@ async def create_workflow_definition(
             edges=workflow_definition.edges,
             metadata=workflow_definition.metadata,
         )
-        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
+        return WorkflowDefinitionResponse.model_validate(
+            definition.to_dict()
+        )
     except Exception as e:
         logger.error(f"Failed to create workflow definition: {e}")
         raise InternalServerProblem(
@@ -102,7 +104,10 @@ async def create_workflow_definition(
         ) from e
 
 
-@router.post("/definitions/from-template", response_model=WorkflowDefinitionResponse)
+@router.post(
+    "/definitions/from-template",
+    response_model=WorkflowDefinitionResponse,
+)
 async def create_workflow_definition_from_template(
     request: WorkflowDefinitionFromTemplateRequest,
     current_user: User = Depends(get_current_user),
@@ -119,9 +124,13 @@ async def create_workflow_definition_from_template(
             user_input=request.user_input,
             is_temporary=request.is_temporary,
         )
-        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
+        return WorkflowDefinitionResponse.model_validate(
+            definition.to_dict()
+        )
     except Exception as e:
-        logger.error(f"Failed to create workflow definition from template: {e}")
+        logger.error(
+            f"Failed to create workflow definition from template: {e}"
+        )
         raise InternalServerProblem(
             detail=f"Failed to create workflow definition from template: {str(e)}"
         ) from e
@@ -141,7 +150,9 @@ async def list_workflow_definitions(
         )
         return WorkflowDefinitionsResponse(
             definitions=[
-                WorkflowDefinitionResponse.model_validate(definition.to_dict())
+                WorkflowDefinitionResponse.model_validate(
+                    definition.to_dict()
+                )
                 for definition in definitions
             ],
             total_count=len(definitions),
@@ -175,7 +186,9 @@ async def get_workflow_definition(
                 detail="Workflow definition not found"
             )
 
-        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
+        return WorkflowDefinitionResponse.model_validate(
+            definition.to_dict()
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -209,7 +222,9 @@ async def update_workflow_definition(
                 detail="Workflow definition not found"
             )
 
-        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
+        return WorkflowDefinitionResponse.model_validate(
+            definition.to_dict()
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -219,7 +234,9 @@ async def update_workflow_definition(
         ) from e
 
 
-@router.delete("/definitions/{workflow_id}", response_model=WorkflowDeleteResponse)
+@router.delete(
+    "/definitions/{workflow_id}", response_model=WorkflowDeleteResponse
+)
 async def delete_workflow_definition(
     workflow_id: WorkflowId,
     current_user: User = Depends(get_current_user),
@@ -263,7 +280,9 @@ async def create_workflow_template(
             owner_id=current_user.id,
             **template.model_dump(),
         )
-        return WorkflowTemplateResponse.model_validate(template_obj.to_dict())
+        return WorkflowTemplateResponse.model_validate(
+            template_obj.to_dict()
+        )
     except Exception as e:
         logger.error(f"Failed to create workflow template: {e}")
         raise InternalServerProblem(
@@ -285,7 +304,9 @@ async def list_workflow_templates(
         )
         return WorkflowTemplatesResponse(
             templates=[
-                WorkflowTemplateResponse.model_validate(template.to_dict())
+                WorkflowTemplateResponse.model_validate(
+                    template.to_dict()
+                )
                 for template in templates
             ],
             total_count=len(templates),
@@ -318,7 +339,9 @@ async def update_workflow_template(
         if not template_obj:
             raise NotFoundProblem(detail="Workflow template not found")
 
-        return WorkflowTemplateResponse.model_validate(template_obj.to_dict())
+        return WorkflowTemplateResponse.model_validate(
+            template_obj.to_dict()
+        )
     except HTTPException:
         raise
     except Exception as e:
@@ -394,7 +417,7 @@ async def execute_workflow(
         )
         if not definition:
             logger.warning(
-                f"Workflow execution denied - definition not found or access denied",
+                "Workflow execution denied - definition not found or access denied",
                 workflow_id=workflow_id,
                 user_id=current_user.id,
             )
@@ -726,9 +749,10 @@ async def execute_chat_workflow(
 ) -> ChatResponse:
     """Execute chat using dynamically built workflow."""
     try:
-        conversation, message = await workflow_service.execute_chat_workflow(
-            user_id=current_user.id,
-            request=request
+        conversation, message = (
+            await workflow_service.execute_chat_workflow(
+                user_id=current_user.id, request=request
+            )
         )
 
         from chatter.schemas.chat import (
@@ -755,7 +779,9 @@ async def execute_chat_workflow(
     responses={
         200: {
             "description": "Streaming chat response",
-            "content": {"text/event-stream": {"schema": {"type": "string"}}},
+            "content": {
+                "text/event-stream": {"schema": {"type": "string"}}
+            },
         }
     },
 )
@@ -772,9 +798,10 @@ async def execute_chat_workflow_streaming(
 
     async def generate_stream():
         try:
-            async for chunk in workflow_service.execute_chat_workflow_streaming(
-                user_id=current_user.id,
-                request=request
+            async for (
+                chunk
+            ) in workflow_service.execute_chat_workflow_streaming(
+                user_id=current_user.id, request=request
             ):
                 if await chat_request.is_disconnected():
                     logger.info("Client disconnected during streaming")

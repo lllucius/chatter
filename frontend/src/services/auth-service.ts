@@ -16,7 +16,7 @@ class AuthService {
   constructor() {
     this.basePath =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
-     
+
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token

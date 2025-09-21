@@ -22,15 +22,16 @@ interface ProviderFormProps
   extends CrudFormProps<ProviderCreate, ProviderUpdate> {}
 
 // Extended type for better type safety with all possible provider fields
-type ProviderFormData = ProviderCreate & Partial<ProviderUpdate> & {
-  name?: string;
-  provider_type?: string;
-  display_name?: string;
-  description?: string;
-  api_key_required?: boolean;
-  base_url?: string;
-  is_active?: boolean;
-};
+type ProviderFormData = ProviderCreate &
+  Partial<ProviderUpdate> & {
+    name?: string;
+    provider_type?: string;
+    display_name?: string;
+    description?: string;
+    api_key_required?: boolean;
+    base_url?: string;
+    is_active?: boolean;
+  };
 
 const ProviderForm: React.FC<ProviderFormProps> = ({
   open,

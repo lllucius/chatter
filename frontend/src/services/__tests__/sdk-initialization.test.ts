@@ -49,7 +49,10 @@ describe('SDK Initialization Fix', () => {
 
   it('should return SDK after initialization', async () => {
     // Mock the refresh token to avoid network calls
-    vi.spyOn(authService as { refreshToken: () => Promise<boolean> }, 'refreshToken').mockResolvedValue(false);
+    vi.spyOn(
+      authService as { refreshToken: () => Promise<boolean> },
+      'refreshToken'
+    ).mockResolvedValue(false);
 
     await authService.initialize();
 
@@ -60,7 +63,10 @@ describe('SDK Initialization Fix', () => {
 
   it('should verify SDK has conversations property', async () => {
     // Mock the refresh token to avoid network calls
-    vi.spyOn(authService as { refreshToken: () => Promise<boolean> }, 'refreshToken').mockResolvedValue(false);
+    vi.spyOn(
+      authService as { refreshToken: () => Promise<boolean> },
+      'refreshToken'
+    ).mockResolvedValue(false);
 
     await authService.initialize();
 
@@ -71,7 +77,10 @@ describe('SDK Initialization Fix', () => {
 
   it('should verify SDK has workflows property', async () => {
     // Mock the refresh token to avoid network calls
-    vi.spyOn(authService as { refreshToken: () => Promise<boolean> }, 'refreshToken').mockResolvedValue(false);
+    vi.spyOn(
+      authService as { refreshToken: () => Promise<boolean> },
+      'refreshToken'
+    ).mockResolvedValue(false);
 
     await authService.initialize();
 
@@ -86,7 +95,10 @@ describe('SDK Initialization Fix', () => {
     expect(isSDKInitialized()).toBe(false);
 
     // Mock the refresh token to avoid network calls
-    vi.spyOn(authService as { refreshToken: () => Promise<boolean> }, 'refreshToken').mockResolvedValue(false);
+    vi.spyOn(
+      authService as { refreshToken: () => Promise<boolean> },
+      'refreshToken'
+    ).mockResolvedValue(false);
 
     await authService.initialize();
 

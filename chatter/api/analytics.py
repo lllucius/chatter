@@ -1094,7 +1094,9 @@ async def invalidate_stale_cache(
         ) from e
 
 
-@router.get("/performance/detailed", response_model=PerformanceMetricsResponse)
+@router.get(
+    "/performance/detailed", response_model=PerformanceMetricsResponse
+)
 @rate_limit(
     max_requests=20, window_seconds=60
 )  # 20 requests per minute
@@ -1170,7 +1172,9 @@ async def get_database_health_metrics(
         ) from e
 
 
-@router.post("/database/analyze-queries", response_model=QueryAnalysisResponse)
+@router.post(
+    "/database/analyze-queries", response_model=QueryAnalysisResponse
+)
 @rate_limit(
     max_requests=5, window_seconds=300
 )  # 5 analysis requests per 5 minutes

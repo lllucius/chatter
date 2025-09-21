@@ -11,7 +11,8 @@ import { authService } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 
 export class SSEEventManager {
-  private listeners: SSEEventListeners & Record<string, SSEEventListener[]> = {};
+  private listeners: SSEEventListeners & Record<string, SSEEventListener[]> =
+    {};
   private reconnectAttempts = 0;
   private maxReconnectAttempts = 10;
   private reconnectDelay = 1000; // Start with 1 second

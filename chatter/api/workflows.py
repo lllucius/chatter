@@ -94,7 +94,7 @@ async def create_workflow_definition(
             edges=workflow_definition.edges,
             metadata=workflow_definition.metadata,
         )
-        return WorkflowDefinitionResponse.model_validate(definition)
+        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
     except Exception as e:
         logger.error(f"Failed to create workflow definition: {e}")
         raise InternalServerProblem(
@@ -119,7 +119,7 @@ async def create_workflow_definition_from_template(
             user_input=request.user_input,
             is_temporary=request.is_temporary,
         )
-        return WorkflowDefinitionResponse.model_validate(definition)
+        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
     except Exception as e:
         logger.error(f"Failed to create workflow definition from template: {e}")
         raise InternalServerProblem(
@@ -141,7 +141,7 @@ async def list_workflow_definitions(
         )
         return WorkflowDefinitionsResponse(
             definitions=[
-                WorkflowDefinitionResponse.model_validate(definition)
+                WorkflowDefinitionResponse.model_validate(definition.to_dict())
                 for definition in definitions
             ],
             total_count=len(definitions),
@@ -175,7 +175,7 @@ async def get_workflow_definition(
                 detail="Workflow definition not found"
             )
 
-        return WorkflowDefinitionResponse.model_validate(definition)
+        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
     except HTTPException:
         raise
     except Exception as e:
@@ -209,7 +209,7 @@ async def update_workflow_definition(
                 detail="Workflow definition not found"
             )
 
-        return WorkflowDefinitionResponse.model_validate(definition)
+        return WorkflowDefinitionResponse.model_validate(definition.to_dict())
     except HTTPException:
         raise
     except Exception as e:
@@ -263,7 +263,7 @@ async def create_workflow_template(
             owner_id=current_user.id,
             **template.model_dump(),
         )
-        return WorkflowTemplateResponse.model_validate(template_obj)
+        return WorkflowTemplateResponse.model_validate(template_obj.to_dict())
     except Exception as e:
         logger.error(f"Failed to create workflow template: {e}")
         raise InternalServerProblem(
@@ -285,7 +285,7 @@ async def list_workflow_templates(
         )
         return WorkflowTemplatesResponse(
             templates=[
-                WorkflowTemplateResponse.model_validate(template)
+                WorkflowTemplateResponse.model_validate(template.to_dict())
                 for template in templates
             ],
             total_count=len(templates),
@@ -318,7 +318,7 @@ async def update_workflow_template(
         if not template_obj:
             raise NotFoundProblem(detail="Workflow template not found")
 
-        return WorkflowTemplateResponse.model_validate(template_obj)
+        return WorkflowTemplateResponse.model_validate(template_obj.to_dict())
     except HTTPException:
         raise
     except Exception as e:
@@ -699,7 +699,7 @@ async def list_workflow_executions(
             owner_id=current_user.id,
         )
         return [
-            WorkflowExecutionResponse.model_validate(exec)
+            WorkflowExecutionResponse.model_validate(exec.to_dict())
             for exec in executions
         ]
 

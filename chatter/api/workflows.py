@@ -367,8 +367,13 @@ async def execute_workflow(
             owner_id=current_user.id,
         )
         if not definition:
+            logger.warning(
+                f"Workflow execution denied - definition not found or access denied",
+                workflow_id=workflow_id,
+                user_id=current_user.id,
+            )
             raise NotFoundProblem(
-                detail="Workflow definition not found"
+                detail=f"Workflow definition not found: {workflow_id}"
             )
 
         # Execute the workflow using the new workflow definition execution method

@@ -99,7 +99,19 @@ class WorkflowNodeExecutor:
         )
 
         # Build prompt from context
-        messages = conversation.get_messages_for_llm()
+        # Get conversation messages using the message service
+        user_id = context.get('user_id')
+        if not user_id:
+            raise WorkflowExecutionError("user_id not found in context")
+        
+        conversation_messages = await self.message_service.get_conversation_messages(
+            conversation.id, user_id, include_system=True
+        )
+        
+        # Convert to LangChain format using the LLM service
+        messages = self.llm_service.convert_conversation_to_messages(
+            conversation, conversation_messages
+        )
 
         # Add context from retrieval if available
         if context.get('retrieval_context'):

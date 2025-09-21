@@ -1,7 +1,11 @@
-"""Simplified workflow execution service.
+"""Unified workflow execution service.
 
-This provides a clean interface for workflow execution using a unified
-executor that handles all workflow types efficiently.
+This provides a unified interface for executing all types of workflows:
+- Chat workflows with dynamic configuration
+- Predefined workflow definitions with node/edge graphs
+- Template-based workflows
+
+Uses the new capability-based system instead of hardcoded workflow types.
 """
 
 from __future__ import annotations
@@ -19,9 +23,10 @@ from chatter.core.streamlined_workflow_performance import (
 from chatter.core.unified_template_manager import (
     get_template_manager_with_session,
 )
-from chatter.core.unified_workflow_executor import (
-    UnifiedWorkflowExecutor,
+from chatter.core.unified_workflow_engine import (
+    UnifiedWorkflowEngine,
 )
+from chatter.core.workflow_capabilities import WorkflowSpec
 from chatter.core.workflow_limits import (
     WorkflowLimits,
     workflow_limit_manager,
@@ -37,7 +42,7 @@ logger = get_logger(__name__)
 
 
 class WorkflowExecutionService:
-    """Simplified service for executing chat workflows."""
+    """Unified service for executing all types of workflows."""
 
     def __init__(
         self,
@@ -45,7 +50,7 @@ class WorkflowExecutionService:
         message_service: MessageService,
         session: AsyncSession,
     ):
-        """Initialize simplified workflow execution service."""
+        """Initialize unified workflow execution service."""
         self.llm_service = llm_service
         self.message_service = message_service
         self.session = session
@@ -53,202 +58,37 @@ class WorkflowExecutionService:
             session
         )
         self.limit_manager = workflow_limit_manager
-        self.executor = UnifiedWorkflowExecutor(
+        self.engine = UnifiedWorkflowEngine(
             llm_service, message_service, self.template_manager
         )
 
-    async def execute_workflow(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits: WorkflowLimits | None = None,
-    ) -> tuple[Message, dict[str, Any]]:
-        """Execute a workflow for a chat request.
-
-        Args:
-            conversation: Conversation context
-            chat_request: Chat request
-            correlation_id: Request correlation ID
-            user_id: User ID for resource tracking
-            limits: Custom workflow limits (uses defaults if None)
-
-        Returns:
-            Tuple of (response_message, usage_info)
-
-        Raises:
-            WorkflowExecutionError: If workflow execution fails
-        """
-        return await self.executor.execute(
-            conversation, chat_request, correlation_id, user_id, limits
-        )
-
-    async def execute_workflow_streaming(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits: WorkflowLimits | None = None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute a workflow with streaming for a chat request.
-
-        Args:
-            conversation: Conversation context
-            chat_request: Chat request
-            correlation_id: Request correlation ID
-            user_id: User ID for resource tracking
-            limits: Custom workflow limits (uses defaults if None)
-
-        Yields:
-            StreamingChatChunk: Streaming response chunks
-
-        Raises:
-            WorkflowExecutionError: If workflow execution fails
-        """
-        async for chunk in self.executor.execute_streaming(
-            conversation, chat_request, correlation_id, user_id, limits
-        ):
-            yield chunk
-
-    async def get_service_stats(self) -> dict[str, Any]:
-        """Get comprehensive service statistics.
-
-        Returns:
-            Dictionary containing service performance and usage stats
-        """
-        return {
-            "supported_workflow_types": self.executor.get_supported_types(),
-            "performance_monitor": performance_monitor.get_performance_stats(),
-            "cache_stats": (
-                await workflow_cache.get_stats()
-                if hasattr(workflow_cache, "get_stats")
-                else {}
-            ),
-            "template_stats": self.template_manager.get_stats(),
-            "limit_manager_stats": (
-                self.limit_manager.get_stats()
-                if hasattr(self.limit_manager, "get_stats")
-                else {}
-            ),
-        }
-
-    async def validate_workflow_request(
-        self, chat_request: ChatRequest
-    ) -> dict[str, Any]:
-        """Validate a workflow request.
-
-        Args:
-            chat_request: Chat request to validate
-
-        Returns:
-            Dictionary with validation results
-        """
-        workflow_type = chat_request.workflow_type or "plain"
-
-        # Check if workflow type is supported
-        supported_types = self.executor.get_supported_types()
-        if workflow_type not in supported_types:
-            return {
-                "valid": False,
-                "errors": [
-                    f"Unsupported workflow type: {workflow_type}"
-                ],
-                "supported_types": supported_types,
-            }
-
-        return {
-            "valid": True,
-            "workflow_type": workflow_type,
-            "supported_types": supported_types,
-        }
-
-    async def get_workflow_capabilities(
-        self, workflow_type: str
-    ) -> dict[str, Any]:
-        """Get capabilities for a specific workflow type.
-
-        Args:
-            workflow_type: Type of workflow to check
-
-        Returns:
-            Dictionary with workflow capabilities
-        """
-        supported_types = self.executor.get_supported_types()
-
-        if workflow_type not in supported_types:
-            return {
-                "error": f"Unsupported workflow type: {workflow_type}"
-            }
-
-        # Basic capabilities mapping
-        capabilities = {
-            "plain": {
-                "requires_tools": False,
-                "requires_retriever": False,
-                "supports_streaming": True,
-                "memory_window": 20,
-            },
-            "basic": {
-                "requires_tools": False,
-                "requires_retriever": False,
-                "supports_streaming": True,
-                "memory_window": 20,
-            },
-            "rag": {
-                "requires_tools": False,
-                "requires_retriever": True,
-                "supports_streaming": True,
-                "memory_window": 30,
-                "max_documents": 10,
-            },
-            "tools": {
-                "requires_tools": True,
-                "requires_retriever": False,
-                "supports_streaming": True,
-                "memory_window": 100,
-                "max_tool_calls": 10,
-            },
-            "full": {
-                "requires_tools": True,
-                "requires_retriever": True,
-                "supports_streaming": True,
-                "memory_window": 50,
-                "max_tool_calls": 5,
-                "max_documents": 10,
-            },
-        }
-
-        return capabilities.get(workflow_type, {})
-
-    # New Chat Workflow Methods
+    # Chat Workflow Methods
     async def execute_chat_workflow(
         self,
         user_id: str,
         request: "ChatWorkflowRequest",
     ) -> tuple[Conversation, Message]:
         """Execute chat using workflow system (non-streaming)."""
-        from chatter.schemas.chat import ChatRequest
-        
-        # Convert ChatWorkflowRequest to ChatRequest and get conversation
-        chat_request, conversation = (
-            await self._convert_chat_workflow_request(user_id, request)
-        )
+        # Convert ChatWorkflowRequest to WorkflowSpec and get conversation
+        spec, conversation = await self._convert_chat_workflow_request(user_id, request)
 
-        # Generate correlation ID
-        from chatter.utils.correlation import get_correlation_id
-
-        correlation_id = get_correlation_id()
+        # Prepare input data
+        input_data = {
+            'message': request.message,
+            'user_id': user_id
+        }
         
-        # Execute workflow and return (conversation, message) tuple as expected by API
-        message, usage_info = await self.execute_workflow(
-            conversation, chat_request, correlation_id, user_id
+        # Execute workflow using unified engine
+        message, usage_info = await self.engine.execute_workflow(
+            spec=spec,
+            conversation=conversation,
+            input_data=input_data,
+            user_id=user_id
         )
         
         # Save the message to database so it has all required fields for MessageResponse
         saved_message = await self.message_service.add_message_to_conversation(
-            conversation_id=message.conversation_id,
+            conversation_id=conversation.id,
             user_id=user_id,
             role=message.role,
             content=message.content,
@@ -267,29 +107,23 @@ class WorkflowExecutionService:
         request: "ChatWorkflowRequest",
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute chat using workflow system (streaming)."""
-        from chatter.schemas.chat import ChatRequest
+        # Convert ChatWorkflowRequest to WorkflowSpec and get conversation
+        spec, conversation = await self._convert_chat_workflow_request(user_id, request)
         
-        # Convert ChatWorkflowRequest to ChatRequest and get conversation
-        chat_request, conversation = await self._convert_chat_workflow_request(
-            user_id, request
-        )
+        # Prepare input data
+        input_data = {
+            'message': request.message,
+            'user_id': user_id
+        }
         
-        # Generate correlation ID
-        from chatter.utils.correlation import get_correlation_id
-        correlation_id = get_correlation_id()
-        
-        # Use tracing-enabled executor if tracing is requested
-        if request.enable_tracing:
-            async for chunk in self.executor.execute_streaming_with_tracing(
-                conversation, chat_request, correlation_id, user_id
-            ):
-                yield chunk
-        else:
-            # For non-tracing, use regular streaming executor
-            async for chunk in self.execute_workflow_streaming(
-                conversation, chat_request, correlation_id, user_id
-            ):
-                yield chunk
+        # Use unified engine for streaming execution
+        async for chunk in self.engine.execute_workflow_streaming(
+            spec=spec,
+            conversation=conversation,
+            input_data=input_data,
+            user_id=user_id
+        ):
+            yield chunk
 
     async def execute_workflow_definition(
         self,
@@ -307,47 +141,131 @@ class WorkflowExecutionService:
         Returns:
             Dictionary containing execution results
         """
-        # For now, this is a placeholder implementation
-        # In a real implementation, this would parse the workflow definition
-        # and execute the defined workflow steps
-        
-        # Generate correlation ID
-        from chatter.utils.correlation import get_correlation_id
-        correlation_id = get_correlation_id()
-        
-        # Create a basic response structure
-        result = {
-            "id": correlation_id,  # Use correlation ID as execution ID
-            "definition_id": definition.id,
-            "owner_id": user_id,
-            "status": "completed",
-            "started_at": datetime.utcnow().isoformat(),
-            "completed_at": datetime.utcnow().isoformat(),
-            "input_data": input_data,
-            "output_data": {
-                "message": "Workflow definition execution not yet fully implemented",
-                "input_received": input_data,
-                "definition_name": definition.name,
-            },
-            "metadata": {
-                "execution_time_ms": 1,  # Placeholder
-                "nodes_executed": len(definition.nodes) if definition.nodes else 0,
+        try:
+            from chatter.services.conversation import ConversationService
+            from chatter.schemas.conversation import ConversationCreateSchema
+            
+            # Setup conversation service
+            conversation_service = ConversationService(self.session)
+            
+            # Create or get conversation for this execution
+            conversation_id = input_data.get('conversation_id')
+            if conversation_id:
+                conversation = await conversation_service.get_conversation(
+                    conversation_id, user_id, include_messages=True
+                )
+            else:
+                # Create new conversation for this workflow execution
+                conv_data = ConversationCreateSchema(
+                    title=f"Workflow: {definition.name}",
+                    description=f"Execution of workflow definition {definition.id}",
+                    workflow_config=None,
+                    extra_metadata={
+                        'workflow_definition_id': definition.id,
+                        'execution_type': 'workflow_definition'
+                    }
+                )
+                conversation = await conversation_service.create_conversation(
+                    user_id, conv_data
+                )
+            
+            # Create workflow specification from definition
+            spec = WorkflowSpec.from_workflow_definition(definition)
+            
+            # Add input data configuration
+            if 'message' in input_data:
+                input_data_with_message = dict(input_data)
+            else:
+                # Use a default message if none provided
+                input_data_with_message = {
+                    **input_data,
+                    'message': input_data.get('prompt', 'Execute this workflow.')
+                }
+            
+            # Execute workflow using unified engine
+            message, usage_info = await self.engine.execute_workflow(
+                spec=spec,
+                conversation=conversation,
+                input_data=input_data_with_message,
+                user_id=user_id
+            )
+            
+            # Save the message to database
+            saved_message = await self.message_service.add_message_to_conversation(
+                conversation_id=conversation.id,
+                user_id=user_id,
+                role=message.role,
+                content=message.content,
+                metadata=message.extra_metadata,
+                input_tokens=usage_info.get("prompt_tokens"),
+                output_tokens=usage_info.get("completion_tokens"),
+                cost=usage_info.get("cost"),
+                provider=usage_info.get("provider_used"),
+            )
+            
+            # Generate correlation ID for tracking
+            from chatter.utils.correlation import get_correlation_id
+            correlation_id = get_correlation_id()
+            
+            # Return execution result
+            result = {
+                "id": correlation_id,
+                "definition_id": definition.id,
+                "owner_id": user_id,
+                "status": "completed",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "input_data": input_data,
+                "output_data": {
+                    "message": message.content,
+                    "conversation_id": conversation.id,
+                    "message_id": saved_message.id,
+                    "capabilities_used": spec.capabilities.__dict__,
+                },
+                "metadata": {
+                    "execution_time_ms": usage_info.get("execution_time_ms", 0),
+                    "nodes_executed": usage_info.get("nodes_executed", 0),
+                    "workflow_spec": spec.__dict__,
+                    "usage_info": usage_info
+                }
             }
-        }
-        
-        return result
+            
+            logger.info(f"Successfully executed workflow definition {definition.id}")
+            return result
+            
+        except Exception as e:
+            logger.error(f"Failed to execute workflow definition {definition.id}: {e}", exc_info=True)
+            
+            # Generate correlation ID for failed execution
+            from chatter.utils.correlation import get_correlation_id
+            correlation_id = get_correlation_id()
+            
+            # Return error result
+            return {
+                "id": correlation_id,
+                "definition_id": definition.id,
+                "owner_id": user_id,
+                "status": "failed",
+                "started_at": datetime.utcnow().isoformat(),
+                "completed_at": datetime.utcnow().isoformat(),
+                "input_data": input_data,
+                "output_data": {
+                    "error": str(e),
+                    "error_type": type(e).__name__
+                },
+                "metadata": {
+                    "execution_time_ms": 0,
+                    "nodes_executed": 0,
+                    "error_details": str(e)
+                }
+            }
 
     async def _convert_chat_workflow_request(
         self, user_id: str, request: ChatWorkflowRequest
-    ):
-        """Convert ChatWorkflowRequest to ChatRequest and setup conversation."""
-        from chatter.schemas.chat import (
-            ChatRequest,
-        )
-        from chatter.schemas.chat import (
-            ConversationCreate as ConversationCreateSchema,
-        )
+    ) -> tuple[WorkflowSpec, Conversation]:
+        """Convert ChatWorkflowRequest to WorkflowSpec and get conversation."""
         from chatter.services.conversation import ConversationService
+        from chatter.schemas.conversation import ConversationCreateSchema
 
         # Setup conversation service
         conversation_service = ConversationService(self.session)
@@ -382,59 +300,55 @@ class WorkflowExecutionService:
                 )
             )
 
-        # Convert to ChatRequest based on workflow configuration
-        workflow_type = self._determine_workflow_type(request)
-
-        chat_request = ChatRequest(
-            message=request.message,
-            conversation_id=conversation.id,
-            profile_id=request.profile_id,
-            workflow=workflow_type,
-            provider=request.provider,
-            temperature=request.temperature,
-            max_tokens=request.max_tokens,
-            context_limit=request.context_limit,
-            enable_retrieval=self._should_enable_retrieval(request),
-            document_ids=request.document_ids,
-            system_prompt_override=request.system_prompt_override,
-            workflow_type=workflow_type,
-        )
-
-        return chat_request, conversation
-
-    def _determine_workflow_type(
-        self, request: ChatWorkflowRequest
-    ) -> str:
-        """Determine workflow type from ChatWorkflowRequest."""
-        if request.workflow_template_name:
-            # Use template name directly as workflow type
-            return request.workflow_template_name
-
+        # Create WorkflowSpec based on request type
+        if request.workflow_definition_id:
+            # Get workflow definition and create spec from it
+            from chatter.services.workflow_management import WorkflowManagementService
+            workflow_service = WorkflowManagementService(self.session)
+            definition = await workflow_service.get_workflow_definition(
+                request.workflow_definition_id, user_id
+            )
+            spec = WorkflowSpec.from_workflow_definition(definition)
+        elif request.workflow_template_name:
+            # Get template and create spec from it
+            template = await self.template_manager.get_template(
+                request.workflow_template_name, user_id
+            )
+            # Convert template to spec (simplified for now)
+            from chatter.core.workflow_capabilities import WorkflowCapabilities
+            capabilities = WorkflowCapabilities.from_legacy_type(
+                template.workflow_type or "plain"
+            )
+            spec = WorkflowSpec(
+                capabilities=capabilities,
+                provider=request.provider or "openai",
+                temperature=request.temperature or 0.7,
+                max_tokens=request.max_tokens or 1000,
+                system_prompt=request.system_prompt_override,
+                name=template.name,
+                description=template.description
+            )
         elif request.workflow_config:
-            config = request.workflow_config
-            # Determine type based on enabled features
-            if config.enable_retrieval and config.enable_tools:
-                return "full"
-            elif config.enable_tools:
-                return "tools"
-            elif config.enable_retrieval:
-                return "rag"
-            else:
-                return "plain"
-
+            # Create spec from chat workflow config
+            spec = WorkflowSpec.from_chat_workflow_config(request.workflow_config)
+            # Apply request overrides
+            if request.provider:
+                spec.provider = request.provider
+            if request.temperature is not None:
+                spec.temperature = request.temperature
+            if request.max_tokens:
+                spec.max_tokens = request.max_tokens
+            if request.system_prompt_override:
+                spec.system_prompt = request.system_prompt_override
         else:
-            return "plain"
+            # Default to plain workflow
+            from chatter.core.workflow_capabilities import WorkflowCapabilities
+            spec = WorkflowSpec(
+                capabilities=WorkflowCapabilities(),
+                provider=request.provider or "openai",
+                temperature=request.temperature or 0.7,
+                max_tokens=request.max_tokens or 1000,
+                system_prompt=request.system_prompt_override
+            )
 
-    def _should_enable_retrieval(
-        self, request: ChatWorkflowRequest
-    ) -> bool:
-        """Determine if retrieval should be enabled."""
-        if request.workflow_config:
-            return request.workflow_config.enable_retrieval
-        elif request.workflow_template_name in [
-            "rag",
-            "full",
-        ]:
-            return True
-        else:
-            return False
+        return spec, conversation

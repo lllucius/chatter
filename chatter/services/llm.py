@@ -1048,10 +1048,7 @@ class LLMService:
                 provider = await self.get_provider(provider_name)
 
         # Get default tools if needed
-        if (
-            workflow_type in ("tools", "full")
-            and not tools
-        ):
+        if workflow_type in ("tools", "full") and not tools:
             tools = await get_mcp_service().get_tools()
             tools.extend(get_builtin_tools())
 
@@ -1073,12 +1070,8 @@ class LLMService:
             llm=provider,
             mode=mode,
             system_message=system_message,
-            retriever=retriever
-            if mode in ("rag", "full")
-            else None,
-            tools=tools
-            if mode in ("tools", "full")
-            else None,
+            retriever=retriever if mode in ("rag", "full") else None,
+            tools=tools if mode in ("tools", "full") else None,
             enable_memory=enable_memory,
             memory_window=memory_window,
             max_tool_calls=max_tool_calls,

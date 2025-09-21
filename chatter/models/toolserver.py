@@ -4,7 +4,12 @@ from datetime import UTC, datetime
 from enum import Enum
 from typing import Any
 
-from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
+from sqlalchemy import (
+    JSON,
+    Boolean,
+    CheckConstraint,
+    DateTime,
+)
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,

@@ -1,6 +1,6 @@
 {
   "errors": [],
-  "generated_at": "2025-09-21T05:27:16Z",
+  "generated_at": "2025-09-21T07:20:49Z",
   "metrics": {
     "_totals": {
       "CONFIDENCE.HIGH": 22,
@@ -11,7 +11,7 @@
       "SEVERITY.LOW": 36,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 68126,
+      "loc": 68176,
       "nosec": 0,
       "skipped_tests": 3
     },
@@ -63,7 +63,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1148,
+      "loc": 1151,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -76,7 +76,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 959,
+      "loc": 961,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -89,7 +89,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1016,
+      "loc": 1034,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -115,7 +115,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 232,
+      "loc": 234,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -128,7 +128,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 329,
+      "loc": 330,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -180,7 +180,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 415,
+      "loc": 414,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -219,7 +219,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 526,
+      "loc": 529,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -232,7 +232,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 440,
+      "loc": 443,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -245,7 +245,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 340,
+      "loc": 344,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -284,7 +284,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 945,
+      "loc": 946,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -466,7 +466,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 107,
+      "loc": 109,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -869,7 +869,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 451,
+      "loc": 461,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1129,7 +1129,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 342,
+      "loc": 347,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1142,7 +1142,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 588,
+      "loc": 593,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1194,7 +1194,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 405,
+      "loc": 410,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1493,7 +1493,7 @@
       "SEVERITY.LOW": 2,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1377,
+      "loc": 1373,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1519,7 +1519,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 653,
+      "loc": 651,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1597,7 +1597,7 @@
       "SEVERITY.LOW": 1,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 988,
+      "loc": 981,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2620,7 +2620,7 @@
       "test_name": "try_except_pass"
     },
     {
-      "code": "1180 \n1181         provider = random.choice(providers)\n1182 \n",
+      "code": "1173 \n1174         provider = random.choice(providers)\n1175 \n",
       "col_offset": 19,
       "end_col_offset": 43,
       "filename": "chatter/services/llm.py",
@@ -2631,9 +2631,9 @@
       },
       "issue_severity": "LOW",
       "issue_text": "Standard pseudo-random generators are not suitable for security/cryptographic purposes.",
-      "line_number": 1181,
+      "line_number": 1174,
       "line_range": [
-        1181
+        1174
       ],
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/blacklists/blacklist_calls.html#b311-random",
       "test_id": "B311",

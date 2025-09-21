@@ -1,6 +1,6 @@
 """Test for workflow seeding compatibility fix.
 
-This test ensures that the unified workflow system supports all the 
+This test ensures that the unified workflow system supports all the
 workflow types that were seeded into the database, maintaining compatibility
 with existing templates and workflows.
 """
@@ -18,7 +18,7 @@ class TestWorkflowSeedingFix:
         # These are the modern workflow types
         modern_types = [
             "plain",
-            "rag", 
+            "rag",
             "tools",
             "full",
         ]
@@ -93,11 +93,15 @@ class TestWorkflowSeedingFix:
     def test_unified_system_replaces_legacy_executors(self):
         """Test that the unified system has completely replaced the legacy executor classes."""
         import importlib.util
-        
+
         # Verify that the legacy workflow_executors module no longer exists
-        module_spec = importlib.util.find_spec("chatter.core.workflow_executors")
-        assert module_spec is None, "Legacy workflow_executors module should have been removed"
-        
+        module_spec = importlib.util.find_spec(
+            "chatter.core.workflow_executors"
+        )
+        assert (
+            module_spec is None
+        ), "Legacy workflow_executors module should have been removed"
+
         # Verify that the unified system is available
         from chatter.core.unified_workflow_engine import (
             UnifiedWorkflowEngine,

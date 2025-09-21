@@ -2,7 +2,7 @@
 
 from __future__ import annotations
 
-from dataclasses import dataclass, field
+from dataclasses import asdict, dataclass, field
 from typing import Any
 
 
@@ -108,6 +108,10 @@ class WorkflowCapabilities:
             },
         )
 
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        return asdict(self)
+
 
 @dataclass
 class WorkflowSpec:
@@ -138,6 +142,13 @@ class WorkflowSpec:
     name: str | None = None
     description: str | None = None
     tags: list[str] | None = None
+
+    def to_dict(self) -> dict[str, Any]:
+        """Convert to dictionary for JSON serialization."""
+        result = asdict(self)
+        # Ensure capabilities are serialized properly
+        result['capabilities'] = self.capabilities.to_dict()
+        return result
 
     @classmethod
     def from_chat_request(cls, chat_request) -> WorkflowSpec:

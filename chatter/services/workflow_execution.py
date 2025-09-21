@@ -234,7 +234,7 @@ class WorkflowExecutionService:
                     "nodes_executed": usage_info.get(
                         "nodes_executed", 0
                     ),
-                    "workflow_spec": spec.__dict__,
+                    "workflow_spec": spec.to_dict(),
                     "usage_info": usage_info,
                 },
             }

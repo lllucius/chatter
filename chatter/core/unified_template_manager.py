@@ -26,7 +26,6 @@ from chatter.core.validation.results import ValidationResult
 from chatter.models.workflow import TemplateCategory
 from chatter.schemas.workflows import (
     ChatWorkflowConfig,
-    ChatWorkflowTemplate,
     ModelConfig,
     RetrievalConfig,
     ToolConfig,
@@ -865,23 +864,7 @@ class UnifiedTemplateManager:
         }
 
     # Chat Workflow Template Methods
-    async def get_chat_templates(
-        self,
-    ) -> dict[str, ChatWorkflowTemplate]:
-        """Get all available chat workflow templates.
-        
-        Note: Hardcoded chat templates have been removed. The chat interface
-        should use dynamic workflow_config instead of predefined templates.
-        """
-        # Return empty dict - no more hardcoded chat templates
-        return {}
 
-    async def get_chat_template(
-        self, name: str
-    ) -> ChatWorkflowTemplate | None:
-        """Get specific chat workflow template."""
-        templates = await self.get_chat_templates()
-        return templates.get(name)
 
 
 def get_template_manager_with_session(

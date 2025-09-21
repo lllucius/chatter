@@ -16,9 +16,6 @@ from typing import Any
 
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.unified_template_manager import (
-    get_template_manager_with_session,
-)
 from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
 from chatter.core.workflow_capabilities import WorkflowSpec
 from chatter.core.workflow_limits import workflow_limit_manager
@@ -46,12 +43,9 @@ class WorkflowExecutionService:
         self.llm_service = llm_service
         self.message_service = message_service
         self.session = session
-        self.template_manager = get_template_manager_with_session(
-            session
-        )
         self.limit_manager = workflow_limit_manager
         self.engine = UnifiedWorkflowEngine(
-            llm_service, message_service, self.template_manager
+            llm_service, message_service
         )
 
     # Chat Workflow Methods

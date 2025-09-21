@@ -104,12 +104,15 @@ async def install_plugin(
 
 @router.get("/", response_model=PluginListResponse)
 async def list_plugins(
-    plugin_type: PluginType
-    | None = Query(None, description="Filter by plugin type"),
-    status: PluginStatus
-    | None = Query(None, description="Filter by status"),
-    enabled: bool
-    | None = Query(None, description="Filter by enabled status"),
+    plugin_type: PluginType | None = Query(
+        None, description="Filter by plugin type"
+    ),
+    status: PluginStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    enabled: bool | None = Query(
+        None, description="Filter by enabled status"
+    ),
     current_user: User = Depends(get_current_user),
     plugin_manager: PluginManager = Depends(get_plugin_manager),
 ) -> PluginListResponse:

@@ -103,11 +103,13 @@ class WorkflowNodeExecutor:
         user_id = context.get('user_id')
         if not user_id:
             raise WorkflowExecutionError("user_id not found in context")
-        
-        conversation_messages = await self.message_service.get_conversation_messages(
-            conversation.id, user_id, include_system=True
+
+        conversation_messages = (
+            await self.message_service.get_conversation_messages(
+                conversation.id, user_id, include_system=True
+            )
         )
-        
+
         # Convert to LangChain format using the LLM service
         messages = self.llm_service.convert_conversation_to_messages(
             conversation, conversation_messages
@@ -192,9 +194,9 @@ class WorkflowNodeExecutor:
                         break
 
             # Mock retrieval for now - in real implementation would use retrieval service
-            context[
-                'retrieval_context'
-            ] = f"Retrieved context for: {user_message[:100]}..."
+            context['retrieval_context'] = (
+                f"Retrieved context for: {user_message[:100]}..."
+            )
             context['retrieved_documents'] = []
 
             logger.info(f"Executed retrieval node with top_k={top_k}")

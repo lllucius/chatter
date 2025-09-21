@@ -909,9 +909,9 @@ class PluginManager:
                         __import__(package_name.replace("-", "_"))
                         dep_result["satisfied"] = True
                     except ImportError:
-                        dep_result[
-                            "error"
-                        ] = f"Package {package_name} not installed"
+                        dep_result["error"] = (
+                            f"Package {package_name} not installed"
+                        )
                         results["all_satisfied"] = False
                 else:
                     dep_result["error"] = "Invalid dependency format"
@@ -1438,9 +1438,9 @@ class ExampleIntegrationPlugin(IntegrationPlugin):
 
 # Register example plugins
 plugin_manager.plugin_registry["example_tool"] = ExampleToolPlugin
-plugin_manager.plugin_registry[
-    "example_integration"
-] = ExampleIntegrationPlugin
+plugin_manager.plugin_registry["example_integration"] = (
+    ExampleIntegrationPlugin
+)
 
 
 # Job handlers for plugin operations

@@ -202,7 +202,9 @@ class DevelopmentAuditor:
         # Check critical files
         critical_issues = self.check_critical_files()
         if critical_issues:
-            print(f"\n❌ CRITICAL FILE ISSUES ({len(critical_issues)}):")
+            print(
+                f"\n❌ CRITICAL FILE ISSUES ({len(critical_issues)}):"
+            )
             for file_path, issue in critical_issues:
                 print(
                     f"  {file_path.relative_to(self.base_path)} - {issue}"

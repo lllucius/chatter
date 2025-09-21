@@ -717,11 +717,11 @@ class UnifiedWorkflowExecutor:
             )
             # Only get retriever if retrieval is enabled
             if chat_request.enable_retrieval is not False:
-                config[
-                    "retriever"
-                ] = await workflow_manager.get_retriever(
-                    workspace_id,
-                    document_ids=chat_request.document_ids,
+                config["retriever"] = (
+                    await workflow_manager.get_retriever(
+                        workspace_id,
+                        document_ids=chat_request.document_ids,
+                    )
                 )
         elif workflow_type == "tools":
             config.update(
@@ -746,11 +746,11 @@ class UnifiedWorkflowExecutor:
             )
             # Only get retriever if retrieval is enabled
             if chat_request.enable_retrieval is not False:
-                config[
-                    "retriever"
-                ] = await workflow_manager.get_retriever(
-                    workspace_id,
-                    document_ids=chat_request.document_ids,
+                config["retriever"] = (
+                    await workflow_manager.get_retriever(
+                        workspace_id,
+                        document_ids=chat_request.document_ids,
+                    )
                 )
         else:
             # Unknown workflow type - use plain config as fallback

@@ -487,9 +487,9 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "test_plugin"
-        ] = plugin_instance
+        self.plugin_manager.plugin_instances["test_plugin"] = (
+            plugin_instance
+        )
 
         result = await self.plugin_manager.unload_plugin("test_plugin")
 
@@ -526,9 +526,9 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "test_plugin"
-        ] = plugin_instance
+        self.plugin_manager.plugin_instances["test_plugin"] = (
+            plugin_instance
+        )
 
         # Should still succeed even if cleanup fails
         result = await self.plugin_manager.unload_plugin("test_plugin")
@@ -596,12 +596,12 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "tool_plugin"
-        ] = tool_plugin
-        self.plugin_manager.plugin_instances[
-            "workflow_plugin"
-        ] = workflow_plugin
+        self.plugin_manager.plugin_instances["tool_plugin"] = (
+            tool_plugin
+        )
+        self.plugin_manager.plugin_instances["workflow_plugin"] = (
+            workflow_plugin
+        )
 
         tool_plugins = self.plugin_manager.list_plugins(
             plugin_type=PluginType.TOOL
@@ -636,12 +636,12 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "active_plugin"
-        ] = active_plugin
-        self.plugin_manager.plugin_instances[
-            "error_plugin"
-        ] = error_plugin
+        self.plugin_manager.plugin_instances["active_plugin"] = (
+            active_plugin
+        )
+        self.plugin_manager.plugin_instances["error_plugin"] = (
+            error_plugin
+        )
 
         active_plugins = self.plugin_manager.list_plugins(
             status=PluginStatus.ACTIVE
@@ -711,12 +711,12 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "tool_plugin"
-        ] = tool_plugin
-        self.plugin_manager.plugin_instances[
-            "workflow_plugin"
-        ] = workflow_plugin
+        self.plugin_manager.plugin_instances["tool_plugin"] = (
+            tool_plugin
+        )
+        self.plugin_manager.plugin_instances["workflow_plugin"] = (
+            workflow_plugin
+        )
 
         tools = self.plugin_manager.get_tools_from_plugins()
 
@@ -745,9 +745,9 @@ class TestFilePlugin(ToolPlugin):
             updated_at="2024-01-01T00:00:00Z",
         )
 
-        self.plugin_manager.plugin_instances[
-            "inactive_plugin"
-        ] = inactive_plugin
+        self.plugin_manager.plugin_instances["inactive_plugin"] = (
+            inactive_plugin
+        )
 
         tools = self.plugin_manager.get_tools_from_plugins()
 

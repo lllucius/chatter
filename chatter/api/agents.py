@@ -242,10 +242,12 @@ async def create_agent(
     description="List all agents with optional filtering and pagination. Users can only see their own agents.",
 )
 async def list_agents(
-    agent_type: AgentType
-    | None = Query(None, description="Filter by agent type"),
-    status: AgentStatus
-    | None = Query(None, description="Filter by status"),
+    agent_type: AgentType | None = Query(
+        None, description="Filter by agent type"
+    ),
+    status: AgentStatus | None = Query(
+        None, description="Filter by status"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
     limit: int = Query(
         50, ge=1, description="Maximum number of results"

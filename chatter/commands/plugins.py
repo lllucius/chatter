@@ -85,7 +85,9 @@ async def enable_plugin(
             plugin_name=plugin_name
         )
 
-        console.print(f"✅ [green]Enabled plugin: {plugin_name}[/green]")
+        console.print(
+            f"✅ [green]Enabled plugin: {plugin_name}[/green]"
+        )
 
 
 @plugins_app.command("disable")

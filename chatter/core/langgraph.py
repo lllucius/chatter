@@ -208,6 +208,7 @@ class LangGraphWorkflowManager:
         max_documents: int | None = None,
         enable_streaming: bool = False,
         focus_mode: bool = False,
+        **kwargs,
     ) -> Pregel:
         """Create a unified conversation workflow.
 
@@ -238,6 +239,7 @@ class LangGraphWorkflowManager:
             max_documents: Maximum number of documents to retrieve for RAG (optional)
             enable_streaming: Whether to use streaming model node for token-by-token output
             focus_mode: If True, only use the last user message for focused responses
+            **kwargs: Additional provider options (e.g., temperature, max_tokens) passed to LLM calls
         """
         # Start metrics tracking if enabled (store config for later async initialization)
         workflow_tracking_config = None
@@ -483,7 +485,7 @@ class LangGraphWorkflowManager:
             messages = apply_system_and_context(state, messages)
 
             try:
-                response = await llm_for_call.ainvoke(messages)
+                response = await llm_for_call.ainvoke(messages, **kwargs)
                 return {"messages": [response]}
             except Exception as e:
                 logger.error("Model call failed", error=str(e))

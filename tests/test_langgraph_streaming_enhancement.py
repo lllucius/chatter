@@ -55,7 +55,7 @@ class TestLangGraphStreamingEnhancement:
         # Create a workflow
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="plain",
+            mode="simple_chat",
             system_message="Test streaming interface",
         )
 
@@ -81,7 +81,7 @@ class TestLangGraphStreamingEnhancement:
         mock_llm.bind_tools = MagicMock(return_value=mock_llm)
 
         # Test all workflow modes support streaming interface
-        modes = ["plain", "rag", "tools", "full"]
+        modes = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
 
         for mode in modes:
             workflow = await manager.create_workflow(
@@ -142,7 +142,7 @@ class TestLangGraphStreamingEnhancement:
             # Test workflow creation through LLM service
             workflow = await llm_service.create_langgraph_workflow(
                 provider_name=None,
-                workflow_type="plain",
+                workflow_type="simple_chat",
                 system_message="Test streaming workflow",
                 enable_memory=True,
                 memory_window=10,

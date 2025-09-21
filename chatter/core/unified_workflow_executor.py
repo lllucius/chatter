@@ -1,7 +1,7 @@
 """Unified workflow executor that consolidates all workflow types.
 
 This replaces the multiple individual executors with a single configurable
-executor that handles all workflow types (plain, rag, tools, full) while
+executor that handles all workflow types (simple_chat, rag_chat, function_chat, advanced_chat) while
 eliminating code duplication.
 """
 

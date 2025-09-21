@@ -17,7 +17,7 @@ class TestSplitChatEndpoints:
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
             "/api/v1/chat/chat",
-            json={"message": "Hello", "workflow": "plain"},
+            json={"message": "Hello", "workflow": "simple_chat"},
         )
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
@@ -27,14 +27,14 @@ class TestSplitChatEndpoints:
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
             "/api/v1/chat/streaming",
-            json={"message": "Hello", "workflow": "plain"},
+            json={"message": "Hello", "workflow": "simple_chat"},
             headers={"Accept": "text/event-stream"},
         )
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
 
     @pytest.mark.parametrize(
-        "workflow", ["plain", "rag", "tools", "full"]
+        "workflow", ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
     )
     def test_chat_request_workflow_types(self, workflow):
         """Test that all workflow types are supported."""

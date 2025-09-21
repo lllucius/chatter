@@ -28,7 +28,7 @@ class TestLangGraphMemoryManagement:
         mock_llm.bind_tools = MagicMock(return_value=mock_llm)
 
         workflow = await manager.create_workflow(
-            llm=mock_llm, mode="plain", enable_memory=True
+            llm=mock_llm, mode="simple_chat", enable_memory=True
         )
 
         # The workflow should be created successfully with default memory_window=4
@@ -97,7 +97,7 @@ class TestLangGraphMemoryManagement:
         # Create workflow with focus_mode=True
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="plain",
+            mode="simple_chat",
             focus_mode=True,
             system_message="You are a helpful assistant.",
         )

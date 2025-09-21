@@ -216,7 +216,7 @@ class TestWorkflowExecutionService:
 
         self.chat_request = ChatRequest(
             message="Test message",
-            workflow="plain",
+            workflow="simple_chat",
         )
 
         self.correlation_id = "corr_123"
@@ -565,7 +565,7 @@ class TestWorkflowExecutionService:
             )
 
             # Test different workflow types
-            for workflow_type in ["rag", "tools", "full"]:
+            for workflow_type in ["rag_chat", "function_chat", "advanced_chat"]:
                 self.chat_request.workflow = workflow_type
 
                 chunks = []

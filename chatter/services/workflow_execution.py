@@ -135,7 +135,7 @@ class WorkflowExecutionService:
         """
         try:
             from chatter.schemas.chat import (
-                ConversationCreate as ConversationCreateSchema,
+                ConversationCreate,
             )
             from chatter.services.conversation import (
                 ConversationService,
@@ -154,7 +154,7 @@ class WorkflowExecutionService:
                 )
             else:
                 # Create new conversation for this workflow execution
-                conv_data = ConversationCreateSchema(
+                conv_data = ConversationCreate(
                     title=f"Workflow: {definition.name}",
                     description=f"Execution of workflow definition {definition.id}",
                     workflow_config=None,
@@ -280,7 +280,7 @@ class WorkflowExecutionService:
     ) -> tuple[WorkflowSpec, Conversation]:
         """Convert ChatWorkflowRequest to WorkflowSpec and get conversation."""
         from chatter.schemas.chat import (
-            ConversationCreate as ConversationCreateSchema,
+            ConversationCreate,
         )
         from chatter.services.conversation import ConversationService
 
@@ -294,7 +294,7 @@ class WorkflowExecutionService:
             )
         else:
             # Create new conversation
-            conv_data = ConversationCreateSchema(
+            conv_data = ConversationCreate(
                 title=(
                     request.message[:50] + "..."
                     if len(request.message) > 50

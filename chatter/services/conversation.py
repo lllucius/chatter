@@ -11,10 +11,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.core.exceptions import NotFoundError, ValidationError
 from chatter.models.conversation import Conversation, ConversationStatus
 from chatter.schemas.chat import (
-    ConversationCreate as ConversationCreateSchema,
-)
-from chatter.schemas.chat import (
-    ConversationUpdate as ConversationUpdateSchema,
+    ConversationCreate
+    ConversationUpdate
 )
 from chatter.utils.performance import (
     ConversationQueryService,
@@ -36,7 +34,7 @@ class ConversationService:
     async def create_conversation(
         self,
         user_id: str,
-        conversation_data: ConversationCreateSchema = None,
+        conversation_data: ConversationCreate = None,
         title: str = None,
         model: str = None,
         **kwargs,
@@ -292,7 +290,7 @@ class ConversationService:
         self,
         conversation_id: str,
         user_id: str,
-        update_data: ConversationUpdateSchema = None,
+        update_data: ConversationUpdate = None,
         title: str = None,
         **kwargs,
     ) -> Conversation:

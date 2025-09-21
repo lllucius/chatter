@@ -614,7 +614,7 @@ class ChatWorkflowRequest(BaseModel):
         None, description="Template name"
     )
 
-    # Legacy compatibility fields
+    # Request configuration fields
     profile_id: str | None = Field(None, description="Profile ID")
     provider: str | None = Field(None, description="LLM provider")
     temperature: float | None = Field(

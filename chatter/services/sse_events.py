@@ -12,15 +12,8 @@ from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
-# Import unified event system for integration (optional)
-try:
-    # EventCategory and EventPriority not needed but importing for future use
-    UNIFIED_EVENTS_AVAILABLE = True
-except ImportError:
-    UNIFIED_EVENTS_AVAILABLE = False
-    logger.debug(
-        "Unified events system not available, using legacy SSE only"
-    )
+# Import unified event system
+from chatter.core.events import EventCategory, EventPriority
 
 
 class SSEConnection:

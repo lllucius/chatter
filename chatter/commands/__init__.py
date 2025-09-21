@@ -27,9 +27,7 @@ from chatter_sdk import (
     PromptsApi,
     ToolServersApi,
 )
-from chatter_sdk.exceptions import (
-    ApiException,
-)
+from chatter_sdk.exceptions import ApiException
 from rich.console import Console
 
 from chatter.config import get_settings

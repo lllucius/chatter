@@ -199,7 +199,6 @@ class StreamingService:
                 if len(
                     token_buffer
                 ) >= chunk_size or self._is_sentence_boundary(token):
-
                     chunk_content = "".join(token_buffer)
                     token_buffer = []
 

@@ -4,10 +4,7 @@ import pytest
 from httpx import AsyncClient
 
 from chatter.main import app
-from chatter.models.conversation import (
-    Message,
-    MessageRole,
-)
+from chatter.models.conversation import Message, MessageRole
 from chatter.models.user import User
 from chatter.utils.database import get_session_generator
 

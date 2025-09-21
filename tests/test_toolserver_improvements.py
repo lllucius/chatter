@@ -33,9 +33,7 @@ def test_crypto_utility():
     """Test basic crypto utility functionality."""
     from cryptography.fernet import Fernet
 
-    from chatter.utils.security_enhanced import (
-        SecretManager,
-    )
+    from chatter.utils.security_enhanced import SecretManager
 
     # Generate a proper Fernet key for testing
     key = Fernet.generate_key().decode()

@@ -724,10 +724,11 @@ class EmbeddingPipeline:
                 await self.session.refresh(chunk)
 
             # Step 4: Generate embeddings
-            embeddings, metadata = (
-                await self.embedding_service.generate_embeddings(
-                    chunk_texts
-                )
+            (
+                embeddings,
+                metadata,
+            ) = await self.embedding_service.generate_embeddings(
+                chunk_texts
             )
 
             # Step 5: Store embeddings (without committing in vector store)
@@ -810,10 +811,11 @@ class EmbeddingPipeline:
         """
         try:
             # Generate query embedding
-            embeddings, metadata = (
-                await self.embedding_service.generate_embeddings(
-                    [query]
-                )
+            (
+                embeddings,
+                metadata,
+            ) = await self.embedding_service.generate_embeddings(
+                [query]
             )
             query_embedding = embeddings[0]
 

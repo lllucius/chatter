@@ -81,7 +81,12 @@ class TestLangGraphStreamingEnhancement:
         mock_llm.bind_tools = MagicMock(return_value=mock_llm)
 
         # Test all workflow modes support streaming interface
-        modes = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
+        modes = [
+            "simple_chat",
+            "rag_chat",
+            "function_chat",
+            "advanced_chat",
+        ]
 
         for mode in modes:
             workflow = await manager.create_workflow(
@@ -115,7 +120,6 @@ class TestLangGraphStreamingEnhancement:
                 'chatter.core.langgraph.workflow_manager'
             ) as mock_manager,
         ):
-
             # Setup mocks
             mock_mcp.return_value.get_tools = AsyncMock(return_value=[])
             mock_tools.return_value = []

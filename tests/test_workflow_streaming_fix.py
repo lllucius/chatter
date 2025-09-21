@@ -7,7 +7,10 @@ import pytest
 from langchain_core.messages import AIMessage
 
 from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
-from chatter.core.workflow_capabilities import WorkflowCapabilities, WorkflowSpec
+from chatter.core.workflow_capabilities import (
+    WorkflowCapabilities,
+    WorkflowSpec,
+)
 from chatter.models.conversation import Conversation
 from chatter.schemas.chat import ChatRequest
 

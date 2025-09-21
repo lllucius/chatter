@@ -11,10 +11,7 @@ from chatter.core.workflow_limits import (
     WorkflowResourceLimitError,
     WorkflowTimeoutError,
 )
-from chatter.models.conversation import (
-    Conversation,
-    MessageRole,
-)
+from chatter.models.conversation import Conversation, MessageRole
 from chatter.schemas.chat import ChatRequest
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
@@ -262,14 +259,15 @@ class TestWorkflowExecutionService:
         )
 
         # Execute workflow
-        result_message, usage_info = (
-            await self.workflow_service.execute_workflow(
-                self.conversation,
-                self.chat_request,
-                self.correlation_id,
-                user_id="user_123",
-                limits=limits,
-            )
+        (
+            result_message,
+            usage_info,
+        ) = await self.workflow_service.execute_workflow(
+            self.conversation,
+            self.chat_request,
+            self.correlation_id,
+            user_id="user_123",
+            limits=limits,
         )
 
         # Verify result
@@ -372,9 +370,7 @@ class TestWorkflowExecutionService:
         ] = 1
 
         # Second concurrent workflow should fail
-        from chatter.core.exceptions import (
-            WorkflowExecutionError,
-        )
+        from chatter.core.exceptions import WorkflowExecutionError
 
         with pytest.raises(WorkflowExecutionError) as exc_info:
             await self.workflow_service.execute_workflow(
@@ -565,7 +561,11 @@ class TestWorkflowExecutionService:
             )
 
             # Test different workflow types
-            for workflow_type in ["rag_chat", "function_chat", "advanced_chat"]:
+            for workflow_type in [
+                "rag_chat",
+                "function_chat",
+                "advanced_chat",
+            ]:
                 self.chat_request.workflow = workflow_type
 
                 chunks = []

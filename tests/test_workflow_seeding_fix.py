@@ -16,7 +16,12 @@ class TestWorkflowSeedingFix:
     def test_seeded_workflow_types_are_supported(self):
         """Test that all workflow types (after migration) are supported by the unified execution engine."""
         # These are the types after migration from seed data
-        migrated_types = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
+        migrated_types = [
+            "simple_chat",
+            "rag_chat",
+            "function_chat",
+            "advanced_chat",
+        ]
 
         # Get supported types from the unified execution engine
         supported_types = UnifiedWorkflowExecutor.get_supported_types()
@@ -43,7 +48,7 @@ class TestWorkflowSeedingFix:
         # These are the modern workflow types used after migration
         modern_types = [
             "simple_chat",
-            "rag_chat", 
+            "rag_chat",
             "function_chat",
             "advanced_chat",
         ]
@@ -59,7 +64,12 @@ class TestWorkflowSeedingFix:
 
     def test_workflow_types_have_good_coverage(self):
         """Test that we have workflow types covering the main capability combinations."""
-        modern_types = ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
+        modern_types = [
+            "simple_chat",
+            "rag_chat",
+            "function_chat",
+            "advanced_chat",
+        ]
 
         # We should have at least one workflow type for each major capability combination
         assert (
@@ -84,33 +94,55 @@ class TestWorkflowSeedingFix:
         """Test that the unified system has completely replaced the legacy executor classes."""
         # Verify that the legacy executor classes no longer exist
         try:
-            from chatter.core.workflow_executors import PlainWorkflowExecutor
-            assert False, "PlainWorkflowExecutor should have been removed"
+            from chatter.core.workflow_executors import (
+                PlainWorkflowExecutor,
+            )
+
+            assert (
+                False
+            ), "PlainWorkflowExecutor should have been removed"
         except ImportError:
             pass  # Expected - the module should not exist
 
         try:
-            from chatter.core.workflow_executors import RAGWorkflowExecutor
+            from chatter.core.workflow_executors import (
+                RAGWorkflowExecutor,
+            )
+
             assert False, "RAGWorkflowExecutor should have been removed"
         except ImportError:
             pass  # Expected - the module should not exist
 
         try:
-            from chatter.core.workflow_executors import ToolsWorkflowExecutor
-            assert False, "ToolsWorkflowExecutor should have been removed"
+            from chatter.core.workflow_executors import (
+                ToolsWorkflowExecutor,
+            )
+
+            assert (
+                False
+            ), "ToolsWorkflowExecutor should have been removed"
         except ImportError:
             pass  # Expected - the module should not exist
 
         try:
-            from chatter.core.workflow_executors import FullWorkflowExecutor
-            assert False, "FullWorkflowExecutor should have been removed"
+            from chatter.core.workflow_executors import (
+                FullWorkflowExecutor,
+            )
+
+            assert (
+                False
+            ), "FullWorkflowExecutor should have been removed"
         except ImportError:
             pass  # Expected - the module should not exist
 
         # Verify that the unified system is available
-        from chatter.core.unified_workflow_executor import UnifiedWorkflowExecutor
-        from chatter.core.unified_workflow_engine import UnifiedWorkflowEngine
-        
+        from chatter.core.unified_workflow_engine import (
+            UnifiedWorkflowEngine,
+        )
+        from chatter.core.unified_workflow_executor import (
+            UnifiedWorkflowExecutor,
+        )
+
         # These should import successfully
         assert UnifiedWorkflowExecutor is not None
         assert UnifiedWorkflowEngine is not None

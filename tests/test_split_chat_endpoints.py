@@ -34,7 +34,8 @@ class TestSplitChatEndpoints:
         assert response.status_code != 404
 
     @pytest.mark.parametrize(
-        "workflow", ["simple_chat", "rag_chat", "function_chat", "advanced_chat"]
+        "workflow",
+        ["simple_chat", "rag_chat", "function_chat", "advanced_chat"],
     )
     def test_chat_request_workflow_types(self, workflow):
         """Test that all workflow types are supported."""

@@ -797,7 +797,6 @@ class ToolServerService:
         # Calculate uptime percentage based on recent health checks and startup time
         uptime_percentage = None
         if server.last_startup_success and server.last_health_check:
-
             # Simple uptime calculation: if health check is recent and server started successfully
             now = datetime.now(UTC)
             startup_time = server.last_startup_success

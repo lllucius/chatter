@@ -230,7 +230,7 @@ Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "plain"
+    "workflow": "simple_chat"
 }
 ```
 
@@ -239,7 +239,7 @@ Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag",
+    "workflow": "rag_chat",
     "enable_retrieval": true
 }
 ```
@@ -249,7 +249,7 @@ Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "tools"
+    "workflow": "function_chat"
 }
 ```
 
@@ -258,7 +258,7 @@ Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
+    "workflow": "advanced_chat",
     "enable_retrieval": true
 }
 ```
@@ -269,7 +269,7 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "plain",
+    "workflow": "simple_chat",
     "stream": true
 }
 ```
@@ -324,7 +324,7 @@ Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "plain"
+    "workflow": "simple_chat"
 }
 ```
 
@@ -333,7 +333,7 @@ Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag",
+    "workflow": "rag_chat",
     "enable_retrieval": true
 }
 ```
@@ -343,7 +343,7 @@ Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "tools"
+    "workflow": "function_chat"
 }
 ```
 
@@ -352,7 +352,7 @@ Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
+    "workflow": "advanced_chat",
     "enable_retrieval": true
 }
 ```
@@ -363,7 +363,7 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "plain",
+    "workflow": "simple_chat",
     "stream": true
 }
 ```

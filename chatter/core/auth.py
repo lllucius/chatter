@@ -322,7 +322,6 @@ class AuthService:
         # Cache the result for future lookups
         if user:
             try:
-
                 from chatter.core.cache_factory import get_general_cache
 
                 cache_service = get_general_cache()

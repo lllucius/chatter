@@ -101,17 +101,15 @@ async def create_conversation(
     max_requests=60, window_seconds=60
 )  # 60 list requests per minute
 async def list_conversations(
-    status: ConversationStatus | None = Query(
-        None, description="Filter by conversation status"
-    ),
-    llm_provider: str | None = Query(
-        None, description="Filter by LLM provider"
-    ),
-    llm_model: str | None = Query(
-        None, description="Filter by LLM model"
-    ),
+    status: ConversationStatus
+    | None = Query(None, description="Filter by conversation status"),
+    llm_provider: str
+    | None = Query(None, description="Filter by LLM provider"),
+    llm_model: str
+    | None = Query(None, description="Filter by LLM model"),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    enable_retrieval: bool | None = Query(
+    enable_retrieval: bool
+    | None = Query(
         None, description="Filter by retrieval enabled status"
     ),
     limit: int = Query(

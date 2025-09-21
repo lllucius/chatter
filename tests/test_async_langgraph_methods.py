@@ -73,7 +73,6 @@ class TestAsyncLangGraphMethods:
                 'chatter.core.dependencies.get_builtin_tools'
             ) as mock_builtin,
         ):
-
             mock_service_instance = AsyncMock()
             mock_embedding_service.return_value = mock_service_instance
             mock_service_instance.get_default_provider = AsyncMock(
@@ -107,7 +106,6 @@ class TestAsyncLangGraphMethods:
                 'chatter.core.vector_store.vector_store_manager'
             ) as mock_vector_store_manager,
         ):
-
             mock_service_instance = AsyncMock()
             mock_embedding_service.return_value = mock_service_instance
             mock_service_instance.get_default_provider = AsyncMock(

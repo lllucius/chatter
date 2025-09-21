@@ -772,9 +772,13 @@ class ConfigurableSeeder(DatabaseSeeder):
                     # Parse cron expression (minute hour day month day_of_week)
                     cron_parts = cron_schedule.split()
                     if len(cron_parts) == 5:
-                        minute, hour, day, month, day_of_week = (
-                            cron_parts
-                        )
+                        (
+                            minute,
+                            hour,
+                            day,
+                            month,
+                            day_of_week,
+                        ) = cron_parts
 
                         # Check if job handler exists
                         function_name = job_data["function_name"]
@@ -786,9 +790,10 @@ class ConfigurableSeeder(DatabaseSeeder):
 
                         # Get handler info to determine correct wrapper and executor
                         info = job_queue.job_handlers[function_name]
-                        job_func, executor_name = (
-                            job_queue._select_wrapper_and_executor(info)
-                        )
+                        (
+                            job_func,
+                            executor_name,
+                        ) = job_queue._select_wrapper_and_executor(info)
 
                         # Add scheduled job
                         job_queue.scheduler.add_job(

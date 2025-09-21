@@ -4,10 +4,7 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from chatter.core.cache_factory import (
-    CacheFactory,
-    CacheType,
-)
+from chatter.core.cache_factory import CacheFactory, CacheType
 from chatter.core.cache_interface import (
     CacheConfig,
     CacheInterface,

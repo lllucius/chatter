@@ -13,7 +13,6 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 # Import unified event system
-from chatter.core.events import EventCategory, EventPriority
 
 
 class SSEConnection:
@@ -102,9 +101,9 @@ class SSEEventService:
 
     def __init__(self):
         self.connections: dict[str, SSEConnection] = {}
-        self.user_connections: dict[str, set[str]] = (
-            {}
-        )  # user_id -> connection_ids
+        self.user_connections: dict[
+            str, set[str]
+        ] = {}  # user_id -> connection_ids
         self._cleanup_task: asyncio.Task | None = None
         # Connection limits from configuration
         self.max_connections_per_user = (

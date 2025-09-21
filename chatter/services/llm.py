@@ -1048,14 +1048,23 @@ class LLMService:
                 provider = await self.get_provider(provider_name)
 
         # Get default tools if needed
-        if workflow_type in ("function_chat", "advanced_chat") and not tools:
+        if (
+            workflow_type in ("function_chat", "advanced_chat")
+            and not tools
+        ):
             tools = await get_mcp_service().get_tools()
             tools.extend(get_builtin_tools())
 
         # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.
         mode = (
             workflow_type
-            if workflow_type in ("simple_chat", "rag_chat", "function_chat", "advanced_chat")
+            if workflow_type
+            in (
+                "simple_chat",
+                "rag_chat",
+                "function_chat",
+                "advanced_chat",
+            )
             else "simple_chat"
         )
 
@@ -1064,8 +1073,12 @@ class LLMService:
             llm=provider,
             mode=mode,
             system_message=system_message,
-            retriever=retriever if mode in ("rag_chat", "advanced_chat") else None,
-            tools=tools if mode in ("function_chat", "advanced_chat") else None,
+            retriever=retriever
+            if mode in ("rag_chat", "advanced_chat")
+            else None,
+            tools=tools
+            if mode in ("function_chat", "advanced_chat")
+            else None,
             enable_memory=enable_memory,
             memory_window=memory_window,
             max_tool_calls=max_tool_calls,

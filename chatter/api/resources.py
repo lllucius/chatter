@@ -59,19 +59,20 @@ class ConversationResourceHandler:
         sort_order: str = "desc",
     ) -> ConversationListResponse:
         """List conversations for current user with filters."""
-        conversations, total = (
-            await self.conversation_service.list_conversations(
-                user_id=current_user.id,
-                limit=limit,
-                offset=offset,
-                status=status,
-                llm_provider=llm_provider,
-                llm_model=llm_model,
-                tags=tags,
-                enable_retrieval=enable_retrieval,
-                sort_field=sort_by,
-                sort_order=sort_order,
-            )
+        (
+            conversations,
+            total,
+        ) = await self.conversation_service.list_conversations(
+            user_id=current_user.id,
+            limit=limit,
+            offset=offset,
+            status=status,
+            llm_provider=llm_provider,
+            llm_model=llm_model,
+            tags=tags,
+            enable_retrieval=enable_retrieval,
+            sort_field=sort_by,
+            sort_order=sort_order,
         )
 
         return ConversationListResponse(

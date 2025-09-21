@@ -292,9 +292,9 @@ class TestContractTesting:
                             )
 
                             if has_sensitive_info:
-                                result["security_issue"] = (
-                                    "Error message contains sensitive information"
-                                )
+                                result[
+                                    "security_issue"
+                                ] = "Error message contains sensitive information"
 
                     except Exception:
                         # Response might not be JSON for some errors

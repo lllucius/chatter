@@ -381,7 +381,6 @@ class TestAnalyticsIntegration:
             and usage_response.status_code == 200
             and summary_response.status_code == 200
         ):
-
             dashboard_data = dashboard_response.json()
             usage_data = usage_response.json()
             summary_data = summary_response.json()

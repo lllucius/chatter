@@ -180,9 +180,7 @@ def clear(
                 raise typer.Exit(1)
 
         except Exception as e:
-            console.print(
-                f"❌ Clear operation failed: {e}", style="red"
-            )
+            console.print(f"❌ Clear operation failed: {e}", style="red")
             raise typer.Exit(1) from e
 
     asyncio.run(_clear())
@@ -194,9 +192,7 @@ def status():
 
     async def _status():
         try:
-            console.print(
-                "📊 Database Status Report", style="bold blue"
-            )
+            console.print("📊 Database Status Report", style="bold blue")
 
             # Check connection
             if await check_database_connection():

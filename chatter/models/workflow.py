@@ -5,20 +5,9 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any, Optional
 
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    CheckConstraint,
-    DateTime,
-)
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
 from sqlalchemy import Enum as SQLEnum
-from sqlalchemy import (
-    Float,
-    ForeignKey,
-    Integer,
-    String,
-    Text,
-)
+from sqlalchemy import Float, ForeignKey, Integer, String, Text
 from sqlalchemy.orm import (
     Mapped,
     mapped_column,
@@ -226,9 +215,9 @@ class WorkflowTemplate(Base):
     derived_templates: Mapped[list["WorkflowTemplate"]] = relationship(
         "WorkflowTemplate", back_populates="base_template"
     )
-    workflow_definitions: Mapped[list["WorkflowDefinition"]] = (
-        relationship("WorkflowDefinition", back_populates="template")
-    )
+    workflow_definitions: Mapped[
+        list["WorkflowDefinition"]
+    ] = relationship("WorkflowDefinition", back_populates="template")
 
     @validates("default_params")
     def _set_config_hash(

@@ -31,10 +31,7 @@ from chatter.models.registry import (
     ReductionStrategy,
 )
 from chatter.models.user import User
-from chatter.models.workflow import (
-    TemplateCategory,
-    WorkflowTemplate,
-)
+from chatter.models.workflow import TemplateCategory, WorkflowTemplate
 from chatter.utils.database import DatabaseManager
 from chatter.utils.logging import get_logger
 from chatter.utils.security_enhanced import hash_password

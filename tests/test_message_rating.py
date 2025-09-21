@@ -7,9 +7,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import ValidationError
 from chatter.models.conversation import Message
-from chatter.schemas.chat import (
-    MessageRatingUpdate,
-)
+from chatter.schemas.chat import MessageRatingUpdate
 from chatter.services.message import MessageService
 
 

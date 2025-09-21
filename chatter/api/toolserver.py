@@ -110,9 +110,8 @@ async def create_tool_server(
 
 @router.get("/servers", response_model=list[ToolServerResponse])
 async def list_tool_servers(
-    status: ServerStatus | None = Query(
-        None, description="Filter by server status"
-    ),
+    status: ServerStatus
+    | None = Query(None, description="Filter by server status"),
     include_builtin: bool = Query(
         True, description="Include built-in servers"
     ),

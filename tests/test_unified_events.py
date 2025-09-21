@@ -6,9 +6,7 @@ from unittest.mock import AsyncMock, Mock
 
 import pytest
 
-from chatter.core.audit_adapter import (
-    setup_audit_integration,
-)
+from chatter.core.audit_adapter import setup_audit_integration
 from chatter.core.events import (
     EventCategory,
     EventManager,
@@ -26,9 +24,7 @@ from chatter.core.events import (
     emit_system_alert,
     get_event_stats,
 )
-from chatter.core.security_adapter import (
-    setup_security_integration,
-)
+from chatter.core.security_adapter import setup_security_integration
 
 
 class TestUnifiedEvent:

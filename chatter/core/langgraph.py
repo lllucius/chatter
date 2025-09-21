@@ -1079,9 +1079,9 @@ class LangGraphWorkflowManager:
         # Create forked state (complete copy)
         fork_state = dict(source_state)
         fork_state["conversation_id"] = fork_id
-        fork_state["parent_conversation_id"] = (
-            None  # Forks are independent
-        )
+        fork_state[
+            "parent_conversation_id"
+        ] = None  # Forks are independent
         fork_state["branch_id"] = fork_id
         fork_state["metadata"] = {
             **source_state.get("metadata", {}),

@@ -749,10 +749,11 @@ async def execute_chat_workflow(
 ) -> ChatResponse:
     """Execute chat using dynamically built workflow."""
     try:
-        conversation, message = (
-            await workflow_service.execute_chat_workflow(
-                user_id=current_user.id, request=request
-            )
+        (
+            conversation,
+            message,
+        ) = await workflow_service.execute_chat_workflow(
+            user_id=current_user.id, request=request
         )
 
         from chatter.schemas.chat import (

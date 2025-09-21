@@ -43,9 +43,9 @@ class BaseAgent(ABC):
         self.profile = profile
         self.llm = llm
         self.tools: dict[str, BaseTool] = {}
-        self.conversation_history: dict[str, list[AgentInteraction]] = (
-            {}
-        )
+        self.conversation_history: dict[
+            str, list[AgentInteraction]
+        ] = {}
         self.performance_metrics: dict[str, Any] = {
             "total_interactions": 0,
             "average_confidence": 0.0,

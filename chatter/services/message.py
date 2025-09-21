@@ -118,7 +118,7 @@ class MessageService:
                     user_id=user_id,
                     error=str(e),
                 )
-            raise
+                raise
 
     async def add_message_to_conversation(
         self,

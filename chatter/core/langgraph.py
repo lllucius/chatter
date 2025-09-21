@@ -267,6 +267,9 @@ class LangGraphWorkflowManager:
         llm_for_call = (
             llm.bind_tools(tools) if (use_tools and tools) else llm
         )
+        
+        # LLM for final response without tools
+        llm_for_final = llm  # Always without tools for final response
 
         async def retrieve_context(
             state: ConversationState,
@@ -499,6 +502,36 @@ class LangGraphWorkflowManager:
                     ]
                 }
 
+        async def finalize_response(
+            state: ConversationState,
+        ) -> dict[str, Any]:
+            """Generate a final response when tool call limit is reached."""
+            try:
+                # Don't call LLM again to avoid potential tool calls
+                # Instead, create a definitive final response based on the tool executions so far
+                tool_count = state.get("tool_call_count", 0)
+                
+                # Create a helpful final message
+                final_content = (
+                    f"I have completed using tools (executed {tool_count} tool calls) to help with your request. "
+                    "Based on the information gathered, I've done my best to address your question."
+                )
+                
+                # Create final AI message without tool calls
+                final_message = AIMessage(content=final_content)
+                
+                return {"messages": [final_message]}
+                
+            except Exception as e:
+                logger.error("Final response generation failed", error=str(e))
+                return {
+                    "messages": [
+                        AIMessage(
+                            content="I've completed my tool usage but encountered an issue generating a final response. Based on the available information, I've done my best to help with your request."
+                        )
+                    ]
+                }
+
         async def execute_tools(
             state: ConversationState,
         ) -> dict[str, Any]:
@@ -657,7 +690,8 @@ class LangGraphWorkflowManager:
                     user_id=user_id,
                     conversation_id=conversation_id
                 )
-                return str(END)
+                # Instead of ending abruptly, generate a final response
+                return "finalize_response"
             
             return "execute_tools"
 
@@ -674,6 +708,7 @@ class LangGraphWorkflowManager:
 
         if use_tools:
             workflow.add_node("execute_tools", execute_tools)
+            workflow.add_node("finalize_response", finalize_response)
 
         # Entry point and edges
         entry = None
@@ -698,6 +733,7 @@ class LangGraphWorkflowManager:
                 "call_model", should_continue
             )
             workflow.add_edge("execute_tools", "call_model")
+            workflow.add_edge("finalize_response", END)
         else:
             workflow.add_edge("call_model", END)
 

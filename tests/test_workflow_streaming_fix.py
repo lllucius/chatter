@@ -91,14 +91,8 @@ class TestWorkflowStreamingFix:
             llm_service, message_service, template_manager
         )
 
-        # Create plain workflow spec
-        spec = WorkflowSpec(
-            capabilities=WorkflowCapabilities(),  # Plain capabilities
-            provider=getattr(chat_request, 'provider', 'openai'),
-            model=getattr(chat_request, 'model', 'gpt-4'),
-            temperature=getattr(chat_request, 'temperature', 0.7),
-            max_tokens=getattr(chat_request, 'max_tokens', 1000),
-        )
+        # Create workflow spec from chat request (plain workflow by default)
+        spec = WorkflowSpec.from_chat_request(chat_request)
 
         input_data = {
             'message': chat_request.message,

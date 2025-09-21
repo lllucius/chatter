@@ -89,8 +89,21 @@ class LLMService:
                     raise LLMProviderError(
                         "No default model available from registry and no OPENAI_API_KEY found for fallback"
                     ) from None
+
+                # Try to get base_url from any configured OpenAI provider
+                base_url = None
+                try:
+                    providers, _ = await registry.list_providers()
+                    for provider in providers:
+                        if provider.provider_type == ProviderType.OPENAI and provider.base_url:
+                            base_url = provider.base_url
+                            break
+                except Exception:
+                    pass  # If we can't get providers, use default base_url
+
                 return ChatOpenAI(
                     api_key=SecretStr(api_key),
+                    base_url=base_url,
                     model=model_name,
                     temperature=(
                         temperature if temperature is not None else 0.7
@@ -132,8 +145,21 @@ class LLMService:
                         raise LLMProviderError(
                             f"Provider {provider_name} not found in registry and no OPENAI_API_KEY found for fallback"
                         ) from None
+
+                    # Try to get base_url from any configured OpenAI provider
+                    base_url = None
+                    try:
+                        providers, _ = await registry.list_providers()
+                        for provider in providers:
+                            if provider.provider_type == ProviderType.OPENAI and provider.base_url:
+                                base_url = provider.base_url
+                                break
+                    except Exception:
+                        pass  # If we can't get providers, use default base_url
+
                     return ChatOpenAI(
                         api_key=SecretStr(api_key),
+                        base_url=base_url,
                         model="gpt-3.5-turbo",
                         temperature=(
                             temperature

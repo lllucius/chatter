@@ -244,11 +244,20 @@ class LangGraphWorkflowManager:
             focus_mode: If True, only use the last user message for focused responses
             **kwargs: Additional provider options (e.g., temperature, max_tokens) passed to LLM calls
         """
+        # Create workflow capabilities from parameters
+        workflow_capabilities = {
+            "enable_retrieval": enable_retrieval,
+            "enable_tools": enable_tools,
+            "enable_memory": enable_memory,
+            "enable_web_search": kwargs.get("enable_web_search", False),
+            "enable_streaming": enable_streaming,
+        }
+
         # Start metrics tracking if enabled (store config for later async initialization)
         workflow_tracking_config = None
         if METRICS_ENABLED and user_id and conversation_id:
             workflow_tracking_config = {
-                "workflow_mode": mode,
+                "workflow_capabilities": workflow_capabilities,
                 "user_id": user_id,
                 "conversation_id": conversation_id,
                 "provider_name": provider_name or "",
@@ -585,7 +594,7 @@ class LangGraphWorkflowManager:
                         authorized = workflow_security_manager.authorize_tool_execution(
                             user_id=user_id,
                             workflow_id="",
-                            workflow_mode=mode,
+                            workflow_capabilities=workflow_capabilities,
                             tool_name=tool_name,
                             method=None,
                             parameters=tool_args,

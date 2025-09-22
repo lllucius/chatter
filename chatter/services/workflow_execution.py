@@ -18,12 +18,12 @@ from chatter.core.langgraph import workflow_manager
 from chatter.core.workflow_graph_builder import create_simple_workflow_definition
 from chatter.core.workflow_node_factory import WorkflowNodeContext
 from chatter.models.base import generate_ulid
-from chatter.models.conversation import Conversation, Message, MessageRole
+from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
-from datetime import UTC
+from datetime import UTC, datetime
 
 logger = get_logger(__name__)
 
@@ -480,12 +480,23 @@ class WorkflowExecutionService:
             # conversation = await self.conversation_service.get_conversation(conversation_id)
             pass
 
-        # Create new conversation
+        # Create new conversation with all required fields
+        now = datetime.now(UTC)
         conversation = Conversation(
             id=generate_ulid(),
             user_id=user_id,
             title=getattr(request, 'title', 'New Conversation'),
-            metadata={},
+            status=ConversationStatus.ACTIVE,
+            enable_retrieval=False,
+            message_count=0,
+            total_tokens=0,
+            total_cost=0.0,
+            context_window=4096,
+            memory_enabled=True,
+            retrieval_limit=5,
+            retrieval_score_threshold=0.7,
+            created_at=now,
+            updated_at=now,
         )
 
         # TODO: Save to database

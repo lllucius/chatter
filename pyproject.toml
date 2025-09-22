@@ -54,9 +54,7 @@ dependencies = [
     "redis>=6.4.0",
     
     # LangChain/AI ecosystem - using compatible versions
-    "langchain>=0.3.27",
     "langchain-core>=0.3.75", 
-    "langchain-community>=0.3.29",
     "langchain-openai>=0.3.32",
     "langchain-anthropic>=0.3.19",
     "langchain-google-genai>=2.1.10",

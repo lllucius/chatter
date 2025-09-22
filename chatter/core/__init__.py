@@ -7,11 +7,6 @@ except ImportError:
     agent_manager = None
 
 try:
-    from .langchain import orchestrator
-except ImportError:
-    orchestrator = None
-
-try:
     from .langgraph import workflow_manager
 except ImportError:
     workflow_manager = None
@@ -23,7 +18,6 @@ except ImportError:
 
 __all__ = [
     "agent_manager",
-    "orchestrator",
     "workflow_manager",
     "vector_store_manager",
 ]

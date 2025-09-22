@@ -147,10 +147,6 @@ def register_lazy_loaders() -> None:
     )
 
     container.register_lazy_loader(
-        "orchestrator", lambda: _lazy_import_orchestrator()
-    )
-
-    container.register_lazy_loader(
         "mcp_service", lambda: _lazy_import_mcp_service()
     )
 
@@ -168,13 +164,6 @@ def _lazy_import_builtin_tools():
     from chatter.services.mcp import BuiltInTools
 
     return BuiltInTools.create_builtin_tools()
-
-
-def _lazy_import_orchestrator():
-    """Lazy import of orchestrator to avoid circular imports."""
-    from chatter.core.langchain import orchestrator
-
-    return orchestrator
 
 
 def _lazy_import_mcp_service():
@@ -216,11 +205,6 @@ register_lazy_loaders()
 def get_builtin_tools():
     """Get builtin tools with dependency injection."""
     return container.get_lazy("builtin_tools")
-
-
-def get_orchestrator():
-    """Get orchestrator with dependency injection."""
-    return container.get_lazy("orchestrator")
 
 
 def get_mcp_service():

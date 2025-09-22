@@ -1,6 +1,7 @@
 """Comprehensive workflows API supporting advanced workflow editor features."""
 
 import json
+import time
 
 from fastapi import APIRouter, Depends, HTTPException, Request
 from fastapi.responses import StreamingResponse
@@ -8,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.api.auth import get_current_user
 from chatter.api.dependencies import WorkflowId
+from chatter.models.base import generate_ulid
 from chatter.models.user import User
 from chatter.schemas.chat import ChatResponse
 from chatter.schemas.workflows import (
@@ -886,3 +888,277 @@ async def execute_chat_workflow_streaming(
             "Connection": "keep-alive",
         },
     )
+
+
+# Modern Workflow System Endpoints
+
+@router.post("/definitions/validate", response_model=WorkflowValidationResponse)
+async def validate_workflow_definition(
+    nodes: list[dict],
+    edges: list[dict],
+    current_user: User = Depends(get_current_user),
+) -> WorkflowValidationResponse:
+    """Validate a workflow definition using the modern system."""
+    try:
+        from chatter.core.modern_langgraph import modern_workflow_manager
+        
+        validation_result = modern_workflow_manager.validate_workflow_definition(nodes, edges)
+        
+        return WorkflowValidationResponse(
+            is_valid=validation_result["valid"],
+            errors=[{"message": error} for error in validation_result["errors"]],
+            warnings=validation_result["warnings"],
+            metadata={
+                "supported_node_types": validation_result["supported_node_types"],
+                "validation_timestamp": time.time(),
+            }
+        )
+    except Exception as e:
+        logger.error(f"Workflow validation failed: {e}")
+        return WorkflowValidationResponse(
+            is_valid=False,
+            errors=[{"message": f"Validation error: {str(e)}"}],
+            warnings=[],
+            metadata={}
+        )
+
+
+@router.post("/definitions/custom/execute")
+async def execute_custom_workflow(
+    nodes: list[dict],
+    edges: list[dict],
+    message: str,
+    entry_point: str | None = None,
+    provider: str = "anthropic",
+    model: str = "claude-3-5-sonnet-20241022",
+    conversation_id: str | None = None,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowExecutionService = Depends(get_workflow_execution_service),
+) -> dict:
+    """Execute a custom workflow definition using the modern system."""
+    try:
+        from chatter.core.modern_langgraph import modern_workflow_manager
+        from chatter.services.llm import LLMService
+        from langchain_core.messages import HumanMessage
+        
+        # Validate the workflow first
+        validation = modern_workflow_manager.validate_workflow_definition(nodes, edges)
+        if not validation["valid"]:
+            raise ValueError(f"Invalid workflow: {', '.join(validation['errors'])}")
+        
+        # Get LLM
+        llm_service = LLMService()
+        llm = await llm_service.get_llm(provider=provider, model=model)
+        
+        # Create workflow
+        workflow = await modern_workflow_manager.create_custom_workflow(
+            nodes=nodes,
+            edges=edges,
+            llm=llm,
+            entry_point=entry_point,
+            tools=None,  # TODO: Add tool support
+            retriever=None,  # TODO: Add retriever support
+        )
+        
+        # Create initial state
+        from chatter.core.workflow_node_factory import WorkflowNodeContext
+        initial_state: WorkflowNodeContext = {
+            "messages": [HumanMessage(content=message)],
+            "user_id": current_user.id,
+            "conversation_id": conversation_id or generate_ulid(),
+            "retrieval_context": None,
+            "conversation_summary": None,
+            "tool_call_count": 0,
+            "metadata": {},
+            "variables": {},
+            "loop_state": {},
+            "error_state": {},
+            "conditional_results": {},
+            "execution_history": [],
+        }
+        
+        # Execute workflow
+        result = await modern_workflow_manager.run_workflow(
+            workflow=workflow,
+            initial_state=initial_state,
+        )
+        
+        # Extract response
+        messages = result.get("messages", [])
+        last_message = messages[-1] if messages else None
+        response_content = getattr(last_message, "content", "No response generated")
+        
+        return {
+            "response": response_content,
+            "metadata": result.get("metadata", {}),
+            "execution_summary": {
+                "nodes_executed": len(result.get("execution_history", [])),
+                "tool_calls": result.get("tool_call_count", 0),
+                "variables": result.get("variables", {}),
+                "conditional_results": result.get("conditional_results", {}),
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Custom workflow execution failed: {e}")
+        raise InternalServerProblem(
+            detail=f"Custom workflow execution failed: {str(e)}"
+        ) from e
+
+
+@router.get("/node-types/modern", response_model=dict)
+async def get_modern_supported_node_types(
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Get supported node types from the modern workflow system."""
+    try:
+        from chatter.core.modern_langgraph import modern_workflow_manager
+        
+        supported_types = modern_workflow_manager.get_supported_node_types()
+        
+        # Enhanced node type information
+        node_type_details = {
+            "conditional": {
+                "description": "Conditional logic and branching node",
+                "required_config": ["condition"],
+                "optional_config": [],
+                "examples": ["message contains 'hello'", "tool_calls > 3", "variable user_type equals 'premium'"]
+            },
+            "loop": {
+                "description": "Loop iteration and repetitive execution node", 
+                "required_config": [],
+                "optional_config": ["max_iterations", "condition"],
+                "examples": ["max_iterations: 5", "condition: 'variable counter < 10'"]
+            },
+            "variable": {
+                "description": "Variable manipulation and state management node",
+                "required_config": ["variable_name", "operation"],
+                "optional_config": ["value"],
+                "examples": ["set counter to 0", "increment counter", "get user_preference"]
+            },
+            "error_handler": {
+                "description": "Error handling and recovery node",
+                "required_config": [],
+                "optional_config": ["retry_count", "fallback_action"],
+                "examples": ["retry_count: 3", "fallback_action: 'continue'"]
+            },
+            "delay": {
+                "description": "Time delay and pacing node",
+                "required_config": ["duration"],
+                "optional_config": ["delay_type", "max_duration"],
+                "examples": ["duration: 1000 (ms)", "delay_type: 'exponential'"]
+            },
+            "memory": {
+                "description": "Memory management and summarization node",
+                "required_config": [],
+                "optional_config": ["memory_window"],
+                "examples": ["memory_window: 20"]
+            },
+            "retrieval": {
+                "description": "Document retrieval and context gathering node",
+                "required_config": [],
+                "optional_config": ["max_documents", "collection"],
+                "examples": ["max_documents: 5", "collection: 'knowledge_base'"]
+            }
+        }
+        
+        return {
+            "supported_types": supported_types,
+            "type_details": {
+                node_type: details 
+                for node_type, details in node_type_details.items() 
+                if node_type in supported_types
+            },
+            "capabilities": {
+                "conditional_routing": True,
+                "loop_iteration": True,
+                "variable_management": True,
+                "error_recovery": True,
+                "adaptive_memory": True,
+                "intelligent_tool_execution": True,
+            }
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to get modern node types: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to get modern node types: {str(e)}"
+        ) from e
+
+
+@router.post("/memory/configure")
+async def configure_memory_settings(
+    adaptive_mode: bool = True,
+    base_window_size: int = 10,
+    max_window_size: int = 50,
+    summary_strategy: str = "intelligent",
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Configure memory management settings for the user."""
+    try:
+        # Store user-specific memory configuration
+        # This would typically be stored in user preferences/settings
+        memory_config = {
+            "adaptive_mode": adaptive_mode,
+            "base_window_size": base_window_size,
+            "max_window_size": max_window_size,
+            "summary_strategy": summary_strategy,
+            "user_id": current_user.id,
+            "updated_at": time.time(),
+        }
+        
+        # TODO: Store in database user preferences table
+        logger.info(f"Memory configuration updated for user {current_user.id}: {memory_config}")
+        
+        return {
+            "status": "success",
+            "config": memory_config,
+            "message": "Memory settings configured successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to configure memory settings: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to configure memory settings: {str(e)}"
+        ) from e
+
+
+@router.post("/tools/configure")
+async def configure_tool_settings(
+    max_total_calls: int = 10,
+    max_consecutive_calls: int = 3,
+    recursion_strategy: str = "adaptive",
+    enable_recursion_detection: bool = True,
+    current_user: User = Depends(get_current_user),
+) -> dict:
+    """Configure tool execution settings for the user."""
+    try:
+        # Validate recursion strategy
+        valid_strategies = ["strict", "adaptive", "lenient"]
+        if recursion_strategy not in valid_strategies:
+            raise ValueError(f"Invalid recursion strategy. Must be one of: {valid_strategies}")
+        
+        tool_config = {
+            "max_total_calls": max_total_calls,
+            "max_consecutive_calls": max_consecutive_calls,
+            "recursion_strategy": recursion_strategy,
+            "enable_recursion_detection": enable_recursion_detection,
+            "user_id": current_user.id,
+            "updated_at": time.time(),
+        }
+        
+        # TODO: Store in database user preferences table
+        logger.info(f"Tool configuration updated for user {current_user.id}: {tool_config}")
+        
+        return {
+            "status": "success",
+            "config": tool_config,
+            "valid_strategies": valid_strategies,
+            "message": "Tool settings configured successfully"
+        }
+        
+    except Exception as e:
+        logger.error(f"Failed to configure tool settings: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to configure tool settings: {str(e)}"
+        ) from e

@@ -123,7 +123,7 @@ class UnifiedWorkflowExecutor:
                 memory_context={},
                 workflow_template=None,
                 a_b_test_group=None,
-                tool_call_count=0
+                tool_call_count=0,
             )
 
             # Track response time for non-streaming
@@ -205,9 +205,7 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
-            performance_monitor.start_workflow(
-                workflow_id, "dynamic"
-            )
+            performance_monitor.start_workflow(workflow_id, "dynamic")
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -397,9 +395,7 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
-            performance_monitor.start_workflow(
-                workflow_id, "dynamic"
-            )
+            performance_monitor.start_workflow(workflow_id, "dynamic")
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -694,36 +690,44 @@ class UnifiedWorkflowExecutor:
         # Configure based on requested capabilities
         # Set base memory window - adjust based on capabilities
         base_memory_window = 20
-        
+
         # Configure retrieval if enabled
         if chat_request.enable_retrieval:
-            config.update({
-                "max_documents": 10,
-            })
+            config.update(
+                {
+                    "max_documents": 10,
+                }
+            )
             config["retriever"] = await workflow_manager.get_retriever(
                 workspace_id,
                 document_ids=chat_request.document_ids,
             )
             base_memory_window = 30  # Increase for retrieval workflows
-            
+
         # Configure tools if enabled
         if chat_request.enable_tools:
-            config.update({
-                "max_tool_calls": 10,
-                "tools": await workflow_manager.get_tools(workspace_id),
-            })
+            config.update(
+                {
+                    "max_tool_calls": 10,
+                    "tools": await workflow_manager.get_tools(
+                        workspace_id
+                    ),
+                }
+            )
             # Increase memory window for tool usage
             if base_memory_window < 50:
                 base_memory_window = 50
-                
+
         # If both retrieval and tools are enabled, balance the configuration
         if chat_request.enable_retrieval and chat_request.enable_tools:
-            config.update({
-                "max_tool_calls": 5,  # Reduce tool calls when both are enabled
-                "max_documents": 10,
-            })
+            config.update(
+                {
+                    "max_tool_calls": 5,  # Reduce tool calls when both are enabled
+                    "max_documents": 10,
+                }
+            )
             base_memory_window = 50
-            
+
         config["memory_window"] = base_memory_window
         return config
 
@@ -1025,5 +1029,3 @@ class UnifiedWorkflowExecutor:
             error_type=error_type,
             correlation_id=correlation_id or "",
         )
-
-

@@ -95,7 +95,11 @@ class LLMService:
                 try:
                     providers, _ = await registry.list_providers()
                     for provider in providers:
-                        if provider.provider_type == ProviderType.OPENAI and provider.base_url:
+                        if (
+                            provider.provider_type
+                            == ProviderType.OPENAI
+                            and provider.base_url
+                        ):
                             base_url = provider.base_url
                             break
                 except Exception:
@@ -151,7 +155,11 @@ class LLMService:
                     try:
                         providers, _ = await registry.list_providers()
                         for provider in providers:
-                            if provider.provider_type == ProviderType.OPENAI and provider.base_url:
+                            if (
+                                provider.provider_type
+                                == ProviderType.OPENAI
+                                and provider.base_url
+                            ):
                                 base_url = provider.base_url
                                 break
                     except Exception:

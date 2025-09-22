@@ -196,9 +196,9 @@ class WorkflowNodeExecutor:
                         break
 
             # Mock retrieval for now - in real implementation would use retrieval service
-            context['retrieval_context'] = (
-                f"Retrieved context for: {user_message[:100]}..."
-            )
+            context[
+                'retrieval_context'
+            ] = f"Retrieved context for: {user_message[:100]}..."
             context['retrieved_documents'] = []
 
             logger.info(f"Executed retrieval node with top_k={top_k}")
@@ -262,9 +262,7 @@ class WorkflowNodeExecutor:
 class UnifiedWorkflowEngine:
     """Unified execution engine for all workflow types."""
 
-    def __init__(
-        self, llm_service, message_service
-    ):
+    def __init__(self, llm_service, message_service):
         self.llm_service = llm_service
         self.message_service = message_service
         self.node_executor = WorkflowNodeExecutor(

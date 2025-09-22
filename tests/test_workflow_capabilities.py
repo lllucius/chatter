@@ -1,7 +1,5 @@
 """Test the new capability-based workflow system."""
 
-import pytest
-from chatter.core.unified_workflow_executor import UnifiedWorkflowExecutor
 from chatter.core.workflow_capabilities import WorkflowCapabilities
 
 
@@ -12,17 +10,15 @@ class TestWorkflowCapabilities:
         """Test creating capabilities from template configuration."""
         # Test with tools only
         capabilities = WorkflowCapabilities.from_template_configuration(
-            required_tools=["test_tool"],
-            required_retrievers=None
+            required_tools=["test_tool"], required_retrievers=None
         )
         assert capabilities.enable_tools is True
         assert capabilities.enable_retrieval is False
         assert capabilities.enable_memory is True
 
-        # Test with retrievers only  
+        # Test with retrievers only
         capabilities = WorkflowCapabilities.from_template_configuration(
-            required_tools=None,
-            required_retrievers=["test_retriever"]
+            required_tools=None, required_retrievers=["test_retriever"]
         )
         assert capabilities.enable_tools is False
         assert capabilities.enable_retrieval is True
@@ -31,14 +27,16 @@ class TestWorkflowCapabilities:
         # Test with both
         capabilities = WorkflowCapabilities.from_template_configuration(
             required_tools=["test_tool"],
-            required_retrievers=["test_retriever"]
+            required_retrievers=["test_retriever"],
         )
         assert capabilities.enable_tools is True
         assert capabilities.enable_retrieval is True
         assert capabilities.enable_memory is True
 
         # Test with neither (plain)
-        capabilities = WorkflowCapabilities.from_template_configuration()
+        capabilities = (
+            WorkflowCapabilities.from_template_configuration()
+        )
         assert capabilities.enable_tools is False
         assert capabilities.enable_retrieval is False
         assert capabilities.enable_memory is True
@@ -50,23 +48,25 @@ class TestWorkflowCapabilities:
             WorkflowCapabilities(),  # Plain
             WorkflowCapabilities(enable_retrieval=True),  # RAG
             WorkflowCapabilities(enable_tools=True),  # Tools
-            WorkflowCapabilities(enable_retrieval=True, enable_tools=True),  # Full
+            WorkflowCapabilities(
+                enable_retrieval=True, enable_tools=True
+            ),  # Full
         ]
 
         # Verify all combinations are supported
         for capabilities in capability_combinations:
             # The unified executor should be able to handle any capability combination
-            assert isinstance(capabilities, WorkflowCapabilities), (
-                f"Capabilities object {capabilities} is not properly formed"
-            )
+            assert isinstance(
+                capabilities, WorkflowCapabilities
+            ), f"Capabilities object {capabilities} is not properly formed"
 
     def test_capability_merging(self):
         """Test merging workflow capabilities."""
         cap1 = WorkflowCapabilities(enable_tools=True)
         cap2 = WorkflowCapabilities(enable_retrieval=True)
-        
+
         merged = cap1.merge_with(cap2)
-        
+
         assert merged.enable_tools is True
         assert merged.enable_retrieval is True
         assert merged.enable_memory is True
@@ -74,13 +74,11 @@ class TestWorkflowCapabilities:
     def test_capability_serialization(self):
         """Test capability serialization to dict."""
         capabilities = WorkflowCapabilities(
-            enable_tools=True,
-            enable_retrieval=True,
-            max_tool_calls=5
+            enable_tools=True, enable_retrieval=True, max_tool_calls=5
         )
-        
+
         result = capabilities.to_dict()
-        
+
         assert result["enable_tools"] is True
         assert result["enable_retrieval"] is True
         assert result["max_tool_calls"] == 5
@@ -94,16 +92,25 @@ class TestWorkflowCapabilities:
             ([], ["retriever1"], False, True),  # Retrieval only
             (["tool1"], ["retriever1"], True, True),  # Both = full
         ]
-        
-        for tools, retrievers, expected_tools, expected_retrieval in test_cases:
-            capabilities = WorkflowCapabilities.from_template_configuration(
-                required_tools=tools if tools else None,
-                required_retrievers=retrievers if retrievers else None
+
+        for (
+            tools,
+            retrievers,
+            expected_tools,
+            expected_retrieval,
+        ) in test_cases:
+            capabilities = (
+                WorkflowCapabilities.from_template_configuration(
+                    required_tools=tools if tools else None,
+                    required_retrievers=retrievers
+                    if retrievers
+                    else None,
+                )
             )
-            
-            assert capabilities.enable_tools == expected_tools, (
-                f"Expected enable_tools={expected_tools} for tools={tools}, retrievers={retrievers}"
-            )
-            assert capabilities.enable_retrieval == expected_retrieval, (
-                f"Expected enable_retrieval={expected_retrieval} for tools={tools}, retrievers={retrievers}"
-            )
+
+            assert (
+                capabilities.enable_tools == expected_tools
+            ), f"Expected enable_tools={expected_tools} for tools={tools}, retrievers={retrievers}"
+            assert (
+                capabilities.enable_retrieval == expected_retrieval
+            ), f"Expected enable_retrieval={expected_retrieval} for tools={tools}, retrievers={retrievers}"

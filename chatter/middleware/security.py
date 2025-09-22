@@ -51,9 +51,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-XSS-Protection"] = "1; mode=block"
 
         # Referrer Policy
-        response.headers["Referrer-Policy"] = (
-            "strict-origin-when-cross-origin"
-        )
+        response.headers[
+            "Referrer-Policy"
+        ] = "strict-origin-when-cross-origin"
 
         # Permissions Policy
         response.headers["Permissions-Policy"] = (
@@ -66,9 +66,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
         response.headers["X-Permitted-Cross-Domain-Policies"] = "none"
 
         # Cross-Origin-Embedder-Policy
-        response.headers["Cross-Origin-Embedder-Policy"] = (
-            "require-corp"
-        )
+        response.headers[
+            "Cross-Origin-Embedder-Policy"
+        ] = "require-corp"
 
         # Cross-Origin-Opener-Policy
         response.headers["Cross-Origin-Opener-Policy"] = "same-origin"
@@ -81,9 +81,9 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
             self.strict_transport_security
             and request.url.scheme == "https"
         ):
-            response.headers["Strict-Transport-Security"] = (
-                "max-age=31536000; includeSubDomains; preload"
-            )
+            response.headers[
+                "Strict-Transport-Security"
+            ] = "max-age=31536000; includeSubDomains; preload"
 
         # Remove server information
         if "Server" in response.headers:

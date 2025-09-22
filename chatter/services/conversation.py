@@ -10,10 +10,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.exceptions import NotFoundError, ValidationError
 from chatter.models.conversation import Conversation, ConversationStatus
-from chatter.schemas.chat import (
-    ConversationCreate,
-    ConversationUpdate,
-)
+from chatter.schemas.chat import ConversationCreate, ConversationUpdate
 from chatter.utils.performance import (
     ConversationQueryService,
     get_conversation_optimized,
@@ -91,9 +88,9 @@ class ConversationService:
                 # Prepare metadata with workflow_config
                 metadata = conversation_data.extra_metadata or {}
                 if conversation_data.workflow_config is not None:
-                    metadata["workflow_config"] = (
-                        conversation_data.workflow_config
-                    )
+                    metadata[
+                        "workflow_config"
+                    ] = conversation_data.workflow_config
 
                 # Use schema object
                 conversation = Conversation(
@@ -357,9 +354,9 @@ class ConversationService:
                 # Store workflow_config in extra_metadata
                 if conversation.extra_metadata is None:
                     conversation.extra_metadata = {}
-                conversation.extra_metadata["workflow_config"] = (
-                    update_data.workflow_config
-                )
+                conversation.extra_metadata[
+                    "workflow_config"
+                ] = update_data.workflow_config
 
             if update_data.extra_metadata is not None:
                 # Merge metadata

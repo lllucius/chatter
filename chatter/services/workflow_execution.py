@@ -128,9 +128,7 @@ class WorkflowExecutionService:
             Dictionary containing execution results
         """
         try:
-            from chatter.schemas.chat import (
-                ConversationCreate,
-            )
+            from chatter.schemas.chat import ConversationCreate
             from chatter.services.conversation import (
                 ConversationService,
             )
@@ -273,9 +271,7 @@ class WorkflowExecutionService:
         self, user_id: str, request: ChatWorkflowRequest
     ) -> tuple[WorkflowSpec, Conversation]:
         """Convert ChatWorkflowRequest to WorkflowSpec and get conversation."""
-        from chatter.schemas.chat import (
-            ConversationCreate,
-        )
+        from chatter.schemas.chat import ConversationCreate
         from chatter.services.conversation import ConversationService
 
         # Setup conversation service

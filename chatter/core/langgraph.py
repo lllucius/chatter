@@ -1,7 +1,7 @@
 """LangGraph workflows for advanced conversation logic."""
 
 from collections.abc import Sequence
-from typing import Annotated, Any, Literal, TypedDict
+from typing import Annotated, Any, TypedDict
 
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
@@ -267,7 +267,7 @@ class LangGraphWorkflowManager:
         llm_for_call = (
             llm.bind_tools(tools) if (use_tools and tools) else llm
         )
-        
+
         # LLM for final response without tools
         llm_for_final = llm  # Always without tools for final response
 
@@ -490,7 +490,9 @@ class LangGraphWorkflowManager:
             messages = apply_system_and_context(state, messages)
 
             try:
-                response = await llm_for_call.ainvoke(messages, **kwargs)
+                response = await llm_for_call.ainvoke(
+                    messages, **kwargs
+                )
                 return {"messages": [response]}
             except Exception as e:
                 logger.error("Model call failed", error=str(e))
@@ -510,20 +512,22 @@ class LangGraphWorkflowManager:
                 # Don't call LLM again to avoid potential tool calls
                 # Instead, create a definitive final response based on the tool executions so far
                 tool_count = state.get("tool_call_count", 0)
-                
+
                 # Create a helpful final message
                 final_content = (
                     f"I have completed using tools (executed {tool_count} tool calls) to help with your request. "
                     "Based on the information gathered, I've done my best to address your question."
                 )
-                
+
                 # Create final AI message without tool calls
                 final_message = AIMessage(content=final_content)
-                
+
                 return {"messages": [final_message]}
-                
+
             except Exception as e:
-                logger.error("Final response generation failed", error=str(e))
+                logger.error(
+                    "Final response generation failed", error=str(e)
+                )
                 return {
                     "messages": [
                         AIMessage(
@@ -614,7 +618,7 @@ class LangGraphWorkflowManager:
                             tool_call_id=tool_id or "",
                         )
                     )
-                    
+
                     # Increment tool call count
                     current_tool_count += 1
 
@@ -656,7 +660,10 @@ class LangGraphWorkflowManager:
                             )
 
             # Returning ToolMessage(s) appends to state["messages"] via add_messages
-            return {"messages": tool_messages, "tool_call_count": current_tool_count}
+            return {
+                "messages": tool_messages,
+                "tool_call_count": current_tool_count,
+            }
 
         def should_continue(state: ConversationState) -> str:
             """If there are tool calls, execute them; otherwise end.
@@ -665,7 +672,7 @@ class LangGraphWorkflowManager:
             last_message = (
                 state["messages"][-1] if state["messages"] else None
             )
-            
+
             # Check if we have tool calls to execute
             has_tool_calls = (
                 use_tools
@@ -673,18 +680,26 @@ class LangGraphWorkflowManager:
                 and hasattr(last_message, "tool_calls")
                 and last_message.tool_calls
             )
-            
+
             if not has_tool_calls:
                 return str(END)
-            
+
             # Check tool call limit to prevent infinite recursion
             current_tool_count = state.get("tool_call_count", 0)
-            max_allowed = max_tool_calls or 10  # Default to 10 if not specified
-            
+            max_allowed = (
+                max_tool_calls or 10
+            )  # Default to 10 if not specified
+
             # Calculate how many tool calls would be executed if we proceed
-            pending_tool_calls = len(last_message.tool_calls) if last_message.tool_calls else 0
-            projected_tool_count = current_tool_count + pending_tool_calls
-            
+            pending_tool_calls = (
+                len(last_message.tool_calls)
+                if last_message.tool_calls
+                else 0
+            )
+            projected_tool_count = (
+                current_tool_count + pending_tool_calls
+            )
+
             if projected_tool_count > max_allowed:
                 logger.warning(
                     "Tool call limit would be exceeded, ending workflow",
@@ -693,11 +708,11 @@ class LangGraphWorkflowManager:
                     projected_count=projected_tool_count,
                     max_allowed=max_allowed,
                     user_id=user_id,
-                    conversation_id=conversation_id
+                    conversation_id=conversation_id,
                 )
                 # Instead of ending abruptly, generate a final response
                 return "finalize_response"
-            
+
             return "execute_tools"
 
         # Build graph dynamically
@@ -749,22 +764,22 @@ class LangGraphWorkflowManager:
             interrupt_before=[],
             interrupt_after=[],
         )
-        
+
         # Configure recursion limit based on max_tool_calls
         # Set recursion limit to be 3x max_tool_calls to account for:
-        # - Each tool call involves: call_model -> execute_tools -> call_model 
+        # - Each tool call involves: call_model -> execute_tools -> call_model
         # - Plus some buffer for memory management and other nodes
         recursion_limit = max((max_tool_calls or 10) * 3 + 10, 25)
         app.recursion_limit = recursion_limit
-        
+
         logger.debug(
             "Configured workflow recursion limit",
             max_tool_calls=max_tool_calls,
             recursion_limit=recursion_limit,
             enable_retrieval=enable_retrieval,
-            enable_tools=enable_tools
+            enable_tools=enable_tools,
         )
-        
+
         return app
 
     async def run_workflow(
@@ -1165,9 +1180,9 @@ class LangGraphWorkflowManager:
         # Create forked state (complete copy)
         fork_state = dict(source_state)
         fork_state["conversation_id"] = fork_id
-        fork_state["parent_conversation_id"] = (
-            None  # Forks are independent
-        )
+        fork_state[
+            "parent_conversation_id"
+        ] = None  # Forks are independent
         fork_state["branch_id"] = fork_id
         fork_state["metadata"] = {
             **source_state.get("metadata", {}),

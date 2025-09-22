@@ -150,7 +150,9 @@ class WorkflowTemplateBase(BaseModel):
     name: str = Field(
         ..., min_length=1, max_length=255, description="Template name"
     )
-    description: str = Field(..., min_length=1, description="Template description")
+    description: str = Field(
+        ..., min_length=1, description="Template description"
+    )
     category: str = Field(
         default="custom", description="Template category"
     )
@@ -638,7 +640,6 @@ class ChatWorkflowRequest(BaseModel):
     enable_tracing: bool = Field(
         False, description="Enable backend workflow tracing"
     )
-
 
 
 class WorkflowDeleteResponse(BaseModel):

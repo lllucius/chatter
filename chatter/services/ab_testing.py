@@ -164,9 +164,9 @@ class TestResult(BaseModel):
     statistical_significance: dict[str, bool] = Field(
         default_factory=dict
     )
-    confidence_intervals: dict[str, dict[str, dict[str, float]]] = (
-        Field(default_factory=dict)
-    )
+    confidence_intervals: dict[
+        str, dict[str, dict[str, float]]
+    ] = Field(default_factory=dict)
     recommendations: list[str] = Field(default_factory=list)
     analysis_date: datetime = Field(
         default_factory=lambda: datetime.now(UTC)
@@ -181,9 +181,9 @@ class ABTestManager:
         self.tests: dict[str, ABTest] = {}
         self.assignments: dict[str, TestAssignment] = {}
         # Add index for faster user assignment lookups
-        self.user_assignments: dict[str, dict[str, TestAssignment]] = (
-            {}
-        )  # user_id -> {test_id: assignment}
+        self.user_assignments: dict[
+            str, dict[str, TestAssignment]
+        ] = {}  # user_id -> {test_id: assignment}
         self.events: list[TestEvent] = []
         self.results: dict[str, TestResult] = {}
         self.max_events = 100000  # Limit event storage
@@ -1232,9 +1232,9 @@ class ABTestManager:
                 # Also set significance for control
                 if control_variant:
                     if control_variant not in statistical_significance:
-                        statistical_significance[control_variant] = (
-                            True  # Control is baseline
-                        )
+                        statistical_significance[
+                            control_variant
+                        ] = True  # Control is baseline
 
         # Generate recommendations
         recommendations = []
@@ -1311,9 +1311,9 @@ class ABTestManager:
         # Auto-stop conditions met - mark for completion
         test.metadata = test.metadata or {}
         test.metadata["auto_stop_triggered"] = True
-        test.metadata["auto_stop_reason"] = (
-            "Statistical significance reached"
-        )
+        test.metadata[
+            "auto_stop_reason"
+        ] = "Statistical significance reached"
         test.metadata["significant_variants"] = significant_variants
 
         logger.info(
@@ -1346,14 +1346,18 @@ class ABTestManager:
         z_alpha = (
             1.96
             if confidence_level == 0.95
-            else 2.576 if confidence_level == 0.99 else 1.645
+            else 2.576
+            if confidence_level == 0.99
+            else 1.645
         )
 
         # Z-score for statistical power (one-tailed)
         z_beta = (
             0.842
             if statistical_power == 0.8
-            else 1.036 if statistical_power == 0.85 else 1.282
+            else 1.036
+            if statistical_power == 0.85
+            else 1.282
         )
 
         # Expected conversion rates

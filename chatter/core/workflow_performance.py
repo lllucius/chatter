@@ -91,9 +91,7 @@ class PerformanceMonitor:
         self.error_counts: dict[str, int] = {}
         self.start_times: dict[str, float] = {}
 
-    def start_workflow(
-        self, workflow_id: str
-    ) -> None:
+    def start_workflow(self, workflow_id: str) -> None:
         """Start timing a workflow execution.
 
         Args:

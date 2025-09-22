@@ -305,21 +305,21 @@ class MonitoringService:
         self.slow_operation_threshold = 500  # ms
 
         # Aggregated statistics
-        self.stats_by_endpoint: dict[str, PerformanceStats] = (
-            defaultdict(PerformanceStats)
-        )
-        self.stats_by_workflow: dict[str, PerformanceStats] = (
-            defaultdict(PerformanceStats)
-        )
-        self.stats_by_llm_provider: dict[str, dict[str, Any]] = (
-            defaultdict(
-                lambda: {
-                    "total_tokens": 0,
-                    "total_cost": 0.0,
-                    "avg_response_time": 0.0,
-                    "request_count": 0,
-                }
-            )
+        self.stats_by_endpoint: dict[
+            str, PerformanceStats
+        ] = defaultdict(PerformanceStats)
+        self.stats_by_workflow: dict[
+            str, PerformanceStats
+        ] = defaultdict(PerformanceStats)
+        self.stats_by_llm_provider: dict[
+            str, dict[str, Any]
+        ] = defaultdict(
+            lambda: {
+                "total_tokens": 0,
+                "total_cost": 0.0,
+                "avg_response_time": 0.0,
+                "request_count": 0,
+            }
         )
 
         # Correlation tracking

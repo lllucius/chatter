@@ -814,17 +814,32 @@ class WorkflowValidator(BaseValidator):
         errors = []
 
         # Validate capability flags
-        if any(key in config for key in ["enable_retrieval", "enable_tools", "enable_memory"]):
+        if any(
+            key in config
+            for key in [
+                "enable_retrieval",
+                "enable_tools",
+                "enable_memory",
+            ]
+        ):
             # Validate capability flags
-            if "enable_retrieval" in config and not isinstance(config["enable_retrieval"], bool):
+            if "enable_retrieval" in config and not isinstance(
+                config["enable_retrieval"], bool
+            ):
                 errors.append(
-                    ValidationError("enable_retrieval must be a boolean")
+                    ValidationError(
+                        "enable_retrieval must be a boolean"
+                    )
                 )
-            if "enable_tools" in config and not isinstance(config["enable_tools"], bool):
+            if "enable_tools" in config and not isinstance(
+                config["enable_tools"], bool
+            ):
                 errors.append(
                     ValidationError("enable_tools must be a boolean")
                 )
-            if "enable_memory" in config and not isinstance(config["enable_memory"], bool):
+            if "enable_memory" in config and not isinstance(
+                config["enable_memory"], bool
+            ):
                 errors.append(
                     ValidationError("enable_memory must be a boolean")
                 )

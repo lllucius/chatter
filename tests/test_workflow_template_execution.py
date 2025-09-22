@@ -34,7 +34,10 @@ def test_workflow_generation_methods():
     merged_input = {**mock_template.default_params, **user_input}
 
     nodes, edges = service._generate_dynamic_workflow(
-        mock_template, merged_input, enable_retrieval=False, enable_tools=False
+        mock_template,
+        merged_input,
+        enable_retrieval=False,
+        enable_tools=False,
     )
 
     # Verify structure
@@ -76,7 +79,10 @@ def test_workflow_generation_methods():
 
     # Test workflow generation with retrieval capability
     nodes, edges = service._generate_dynamic_workflow(
-        mock_template, merged_input, enable_retrieval=True, enable_tools=False
+        mock_template,
+        merged_input,
+        enable_retrieval=True,
+        enable_tools=False,
     )
 
     assert (
@@ -96,7 +102,10 @@ def test_workflow_generation_methods():
     # Test workflow generation with tools capability
     mock_template.required_tools = ["search_tool", "calculator"]
     nodes, edges = service._generate_dynamic_workflow(
-        mock_template, merged_input, enable_retrieval=False, enable_tools=True
+        mock_template,
+        merged_input,
+        enable_retrieval=False,
+        enable_tools=True,
     )
 
     assert (
@@ -111,7 +120,10 @@ def test_workflow_generation_methods():
 
     # Test workflow generation with both capabilities
     nodes, edges = service._generate_dynamic_workflow(
-        mock_template, merged_input, enable_retrieval=True, enable_tools=True
+        mock_template,
+        merged_input,
+        enable_retrieval=True,
+        enable_tools=True,
     )
 
     assert (

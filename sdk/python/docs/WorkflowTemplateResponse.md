@@ -8,7 +8,6 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **name** | **str** | Template name | 
 **description** | **str** | Template description | 
-**workflow_type** | **str** | Workflow type | 
 **category** | **str** | Template category | [optional] [default to 'custom']
 **default_params** | **Dict[str, object]** | Default parameters | [optional] 
 **required_tools** | **List[str]** |  | [optional] 

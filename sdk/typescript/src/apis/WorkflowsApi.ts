@@ -221,12 +221,12 @@ export class WorkflowsApi extends BaseAPI {
   }
   /**Execute Chat Workflow
    * Execute chat using dynamically built workflow.
-## Workflow Capabilities
+## Dynamic Workflow Configuration
 
 This endpoint supports dynamic workflow configuration through capability flags:
 
-### Plain Chat
-Basic conversation without tools or retrieval.
+### Basic Chat
+Simple conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
@@ -235,8 +235,8 @@ Basic conversation without tools or retrieval.
 }
 ```
 
-### RAG Workflow
-Retrieval-Augmented Generation with document search.
+### Retrieval-Augmented Generation
+Document search and retrieval capabilities.
 ```json
 {
     "message": "What are the latest sales figures?",
@@ -245,7 +245,7 @@ Retrieval-Augmented Generation with document search.
 }
 ```
 
-### Tools Workflow
+### Tool-Enhanced Workflow
 Function calling with available tools.
 ```json
 {
@@ -255,8 +255,8 @@ Function calling with available tools.
 }
 ```
 
-### Full Workflow
-Combination of RAG and tools for complex tasks.
+### Full-Featured Workflow
+Combination of retrieval and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
@@ -318,12 +318,12 @@ Available templates:
   }
   /**Execute Chat Workflow Streaming
    * Execute chat using dynamically built workflow with streaming.
-## Workflow Capabilities
+## Dynamic Workflow Configuration
 
 This endpoint supports dynamic workflow configuration through capability flags:
 
-### Plain Chat
-Basic conversation without tools or retrieval.
+### Basic Chat
+Simple conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
@@ -332,8 +332,8 @@ Basic conversation without tools or retrieval.
 }
 ```
 
-### RAG Workflow
-Retrieval-Augmented Generation with document search.
+### Retrieval-Augmented Generation
+Document search and retrieval capabilities.
 ```json
 {
     "message": "What are the latest sales figures?",
@@ -342,7 +342,7 @@ Retrieval-Augmented Generation with document search.
 }
 ```
 
-### Tools Workflow
+### Tool-Enhanced Workflow
 Function calling with available tools.
 ```json
 {
@@ -352,8 +352,8 @@ Function calling with available tools.
 }
 ```
 
-### Full Workflow
-Combination of RAG and tools for complex tasks.
+### Full-Featured Workflow
+Combination of retrieval and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",

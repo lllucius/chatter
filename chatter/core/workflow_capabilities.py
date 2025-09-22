@@ -31,7 +31,10 @@ class WorkflowCapabilities:
 
     @classmethod
     def from_template_configuration(
-        cls, required_tools: list[str] | None = None, required_retrievers: list[str] | None = None, **kwargs
+        cls,
+        required_tools: list[str] | None = None,
+        required_retrievers: list[str] | None = None,
+        **kwargs,
     ) -> WorkflowCapabilities:
         """Create capabilities from template configuration."""
         return cls(
@@ -43,7 +46,7 @@ class WorkflowCapabilities:
             max_tool_calls=len(required_tools or []) * 2 or 10,
             max_documents=10,
             memory_window=50,
-            **kwargs
+            **kwargs,
         )
 
     def requires_tools(self) -> bool:
@@ -131,10 +134,14 @@ class WorkflowSpec:
         """Create workflow spec from ChatRequest."""
         # Determine capabilities from request configuration
         capabilities = WorkflowCapabilities(
-            enable_retrieval=getattr(chat_request, 'enable_retrieval', False),
+            enable_retrieval=getattr(
+                chat_request, 'enable_retrieval', False
+            ),
             enable_tools=getattr(chat_request, 'enable_tools', False),
             enable_memory=getattr(chat_request, 'enable_memory', True),
-            enable_web_search=getattr(chat_request, 'enable_web_search', False),
+            enable_web_search=getattr(
+                chat_request, 'enable_web_search', False
+            ),
         )
 
         return cls(

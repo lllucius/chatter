@@ -463,9 +463,7 @@ class WorkflowManagementService:
             category_enum = TemplateCategory(category)
 
             # Generate config hash
-            config_str = (
-                f"{name}:{str(default_params or {})}"
-            )
+            config_str = f"{name}:{str(default_params or {})}"
             config_hash = hashlib.sha256(
                 config_str.encode("utf-8")
             ).hexdigest()
@@ -596,7 +594,9 @@ class WorkflowManagementService:
 
             # Regenerate config hash if params changed
             if "default_params" in updates:
-                config_str = f"{template.name}:{str(template.default_params)}"
+                config_str = (
+                    f"{template.name}:{str(template.default_params)}"
+                )
                 template.config_hash = hashlib.sha256(
                     config_str.encode("utf-8")
                 ).hexdigest()

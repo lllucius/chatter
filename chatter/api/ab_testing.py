@@ -306,12 +306,10 @@ async def create_ab_test(
 
 @router.get("/", response_model=ABTestListResponse)
 async def list_ab_tests(
-    status: TestStatus | None = Query(
-        None, description="Filter by status"
-    ),
-    test_type: TestType | None = Query(
-        None, description="Filter by test type"
-    ),
+    status: TestStatus
+    | None = Query(None, description="Filter by status"),
+    test_type: TestType
+    | None = Query(None, description="Filter by test type"),
     tags: list[str] | None = Query(None, description="Filter by tags"),
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
@@ -1042,9 +1040,8 @@ async def end_ab_test(
     test_id: str,
     current_user: User = Depends(get_current_user),
     ab_test_manager: ABTestManager = Depends(get_ab_test_manager),
-    winner_variant: str | None = Query(
-        None, description="Winning variant identifier"
-    ),
+    winner_variant: str
+    | None = Query(None, description="Winning variant identifier"),
 ) -> ABTestActionResponse:
     """End A/B test and declare winner.
 

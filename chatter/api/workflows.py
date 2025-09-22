@@ -886,6 +886,3 @@ async def execute_chat_workflow_streaming(
             "Connection": "keep-alive",
         },
     )
-
-
-

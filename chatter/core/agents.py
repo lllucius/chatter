@@ -43,9 +43,9 @@ class BaseAgent(ABC):
         self.profile = profile
         self.llm = llm
         self.tools: dict[str, BaseTool] = {}
-        self.conversation_history: dict[str, list[AgentInteraction]] = (
-            {}
-        )
+        self.conversation_history: dict[
+            str, list[AgentInteraction]
+        ] = {}
         self.performance_metrics: dict[str, Any] = {
             "total_interactions": 0,
             "average_confidence": 0.0,
@@ -656,13 +656,19 @@ class AgentManager:
                 base_url = None
                 try:
                     session = await self._get_session()
-                    from chatter.core.dependencies import get_model_registry
+                    from chatter.core.dependencies import (
+                        get_model_registry,
+                    )
                     from chatter.models.registry import ProviderType
-                    
+
                     registry = get_model_registry()(session)
                     providers, _ = await registry.list_providers()
                     for provider_config in providers:
-                        if provider_config.provider_type == ProviderType.OPENAI and provider_config.base_url:
+                        if (
+                            provider_config.provider_type
+                            == ProviderType.OPENAI
+                            and provider_config.base_url
+                        ):
                             base_url = provider_config.base_url
                             break
                 except Exception:

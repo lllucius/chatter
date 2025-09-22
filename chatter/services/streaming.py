@@ -903,12 +903,27 @@ class StreamingService:
             "avg_tokens_per_stream": avg_tokens_per_stream,
             "avg_events_per_stream": avg_events_per_stream,
             "capability_summary": {
-                "enable_retrieval": sum(1 for info in self.active_streams.values() 
-                                      if info.get("capabilities", {}).get("enable_retrieval", False)),
-                "enable_tools": sum(1 for info in self.active_streams.values() 
-                                  if info.get("capabilities", {}).get("enable_tools", False)),
-                "enable_memory": sum(1 for info in self.active_streams.values() 
-                                   if info.get("capabilities", {}).get("enable_memory", True)),
+                "enable_retrieval": sum(
+                    1
+                    for info in self.active_streams.values()
+                    if info.get("capabilities", {}).get(
+                        "enable_retrieval", False
+                    )
+                ),
+                "enable_tools": sum(
+                    1
+                    for info in self.active_streams.values()
+                    if info.get("capabilities", {}).get(
+                        "enable_tools", False
+                    )
+                ),
+                "enable_memory": sum(
+                    1
+                    for info in self.active_streams.values()
+                    if info.get("capabilities", {}).get(
+                        "enable_memory", True
+                    )
+                ),
             },
         }
 

@@ -114,19 +114,15 @@ async def get_prompt_stats(
 
 @router.get("", response_model=PromptListResponse)
 async def list_prompts(
-    prompt_type: PromptType | None = Query(
-        None, description="Filter by prompt type"
-    ),
-    category: PromptCategory | None = Query(
-        None, description="Filter by category"
-    ),
+    prompt_type: PromptType
+    | None = Query(None, description="Filter by prompt type"),
+    category: PromptCategory
+    | None = Query(None, description="Filter by category"),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    is_public: bool | None = Query(
-        None, description="Filter by public status"
-    ),
-    is_chain: bool | None = Query(
-        None, description="Filter by chain status"
-    ),
+    is_public: bool
+    | None = Query(None, description="Filter by public status"),
+    is_chain: bool
+    | None = Query(None, description="Filter by chain status"),
     limit: int = Query(
         50, ge=1, description="Maximum number of results"
     ),

@@ -891,7 +891,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "code_assistant",
-
                 "category": TemplateCategory.PROGRAMMING,
                 "description": "Programming assistant with code tools",
                 "default_params": {
@@ -963,7 +962,6 @@ Keep the summary {length} and focused on {focus_area}.""",
         extended_templates_data = [
             {
                 "name": "customer_support",
-
                 "category": TemplateCategory.CUSTOMER_SUPPORT,
                 "description": "Customer support with knowledge base and tools",
                 "default_params": {
@@ -981,7 +979,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "research_assistant",
-
                 "category": TemplateCategory.RESEARCH,
                 "description": "Research assistant with document retrieval",
                 "default_params": {
@@ -994,7 +991,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "data_analyst",
-
                 "category": TemplateCategory.DATA_ANALYSIS,
                 "description": "Data analysis assistant with computation tools",
                 "default_params": {
@@ -1011,7 +1007,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "blog_writing_assistant",
-
                 "category": TemplateCategory.CREATIVE,
                 "description": "Blog writing assistant with research and editing tools",
                 "default_params": {
@@ -1028,7 +1023,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "meeting_summarizer",
-
                 "category": TemplateCategory.BUSINESS,
                 "description": "Meeting transcript summarizer and action item extractor",
                 "default_params": {
@@ -1040,7 +1034,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "learning_tutor",
-
                 "category": TemplateCategory.EDUCATIONAL,
                 "description": "Personalized learning tutor with assessment tools",
                 "default_params": {

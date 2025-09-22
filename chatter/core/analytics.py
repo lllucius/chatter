@@ -123,17 +123,17 @@ class AnalyticsService:
 
                 # Create specialized cache instance
                 if cache_tier == CacheType.SESSION:
-                    self._cache_instances[data_type] = (
-                        self.cache_factory.create_session_cache()
-                    )
+                    self._cache_instances[
+                        data_type
+                    ] = self.cache_factory.create_session_cache()
                 elif cache_tier == CacheType.PERSISTENT:
-                    self._cache_instances[data_type] = (
-                        self.cache_factory.create_persistent_cache()
-                    )
+                    self._cache_instances[
+                        data_type
+                    ] = self.cache_factory.create_persistent_cache()
                 else:
-                    self._cache_instances[data_type] = (
-                        self.cache_factory.create_general_cache()
-                    )
+                    self._cache_instances[
+                        data_type
+                    ] = self.cache_factory.create_general_cache()
 
                 logger.debug(
                     f"Created cache instance for {data_type} using {cache_tier}"
@@ -1505,9 +1505,9 @@ class AnalyticsService:
                 )
                 .group_by(Conversation.status)
             )
-            conversations_by_status: dict[ConversationStatus, int] = (
-                dict(status_result.all())
-            )
+            conversations_by_status: dict[
+                ConversationStatus, int
+            ] = dict(status_result.all())
 
             # Total messages
             total_messages_result = await self.session.execute(
@@ -3410,38 +3410,38 @@ class AnalyticsService:
             for metric in metrics:
                 try:
                     if metric == "conversations":
-                        export_data["conversations"] = (
-                            await self.get_conversation_stats(
-                                user_id, time_range
-                            )
+                        export_data[
+                            "conversations"
+                        ] = await self.get_conversation_stats(
+                            user_id, time_range
                         )
                     elif metric == "usage":
-                        export_data["usage"] = (
-                            await self.get_usage_metrics(
-                                user_id, time_range
-                            )
+                        export_data[
+                            "usage"
+                        ] = await self.get_usage_metrics(
+                            user_id, time_range
                         )
                     elif metric == "performance":
-                        export_data["performance"] = (
-                            await self.get_performance_metrics(
-                                user_id, time_range
-                            )
+                        export_data[
+                            "performance"
+                        ] = await self.get_performance_metrics(
+                            user_id, time_range
                         )
                     elif metric == "documents":
-                        export_data["documents"] = (
-                            await self.get_document_analytics(
-                                user_id, time_range
-                            )
+                        export_data[
+                            "documents"
+                        ] = await self.get_document_analytics(
+                            user_id, time_range
                         )
                     elif metric == "system":
-                        export_data["system"] = (
-                            await self.get_system_analytics()
-                        )
+                        export_data[
+                            "system"
+                        ] = await self.get_system_analytics()
                     elif metric == "toolservers":
-                        export_data["toolservers"] = (
-                            await self.get_tool_server_analytics(
-                                user_id, time_range
-                            )
+                        export_data[
+                            "toolservers"
+                        ] = await self.get_tool_server_analytics(
+                            user_id, time_range
                         )
                     else:
                         logger.warning(

@@ -121,9 +121,8 @@ async def create_backup(
 
 @router.get("/backups", response_model=BackupListResponse)
 async def list_backups(
-    backup_type: BackupType | None = Query(
-        None, description="Filter by backup type"
-    ),
+    backup_type: BackupType
+    | None = Query(None, description="Filter by backup type"),
     status: str | None = Query(None, description="Filter by status"),
     current_user: User = Depends(get_current_user),
     data_manager: DataManager = Depends(get_data_manager),

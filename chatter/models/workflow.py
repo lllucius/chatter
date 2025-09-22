@@ -92,8 +92,6 @@ class WorkflowTemplate(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
-
-
     # Enhanced dynamic workflow fields
     is_dynamic: Mapped[bool] = mapped_column(
         Boolean,
@@ -209,9 +207,9 @@ class WorkflowTemplate(Base):
     derived_templates: Mapped[list["WorkflowTemplate"]] = relationship(
         "WorkflowTemplate", back_populates="base_template"
     )
-    workflow_definitions: Mapped[list["WorkflowDefinition"]] = (
-        relationship("WorkflowDefinition", back_populates="template")
-    )
+    workflow_definitions: Mapped[
+        list["WorkflowDefinition"]
+    ] = relationship("WorkflowDefinition", back_populates="template")
 
     @validates("default_params")
     def _set_config_hash(
@@ -299,8 +297,6 @@ class TemplateSpec(Base):
         String(255), nullable=False, index=True
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
-
-
 
     # Spec configuration
     default_params: Mapped[dict[str, Any]] = mapped_column(

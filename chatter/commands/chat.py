@@ -33,13 +33,13 @@ async def send_message(
     enable_retrieval: bool = typer.Option(
         False, help="Enable document retrieval"
     ),
-    enable_tools: bool = typer.Option(
-        False, help="Enable tool usage"
-    ),
+    enable_tools: bool = typer.Option(False, help="Enable tool usage"),
 ):
     """Send a message in a chat conversation."""
     async with get_client() as sdk_client:
-        from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
+        from chatter_sdk.models.chat_workflow_request import (
+            ChatWorkflowRequest,
+        )
 
         chat_request = ChatWorkflowRequest(
             message=message,

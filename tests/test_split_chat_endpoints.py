@@ -37,12 +37,14 @@ class TestSplitChatEndpoints:
         "enable_retrieval,enable_tools,enable_memory",
         [
             (False, False, True),  # Plain
-            (True, False, True),   # RAG
-            (False, True, True),   # Tools
-            (True, True, True),    # Full
+            (True, False, True),  # RAG
+            (False, True, True),  # Tools
+            (True, True, True),  # Full
         ],
     )
-    def test_chat_request_capabilities(self, enable_retrieval, enable_tools, enable_memory):
+    def test_chat_request_capabilities(
+        self, enable_retrieval, enable_tools, enable_memory
+    ):
         """Test that all capability combinations are supported."""
         request_data = {
             "message": "Hello, world!",

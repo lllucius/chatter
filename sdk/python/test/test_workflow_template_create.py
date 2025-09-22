@@ -38,7 +38,6 @@ class TestWorkflowTemplateCreate(unittest.TestCase):
             return WorkflowTemplateCreate(
                 name = '0',
                 description = '0',
-                capabilities = '',
                 category = 'custom',
                 default_params = { },
                 required_tools = [
@@ -58,7 +57,6 @@ class TestWorkflowTemplateCreate(unittest.TestCase):
             return WorkflowTemplateCreate(
                 name = '0',
                 description = '0',
-                capabilities = '',
         )
         """
 

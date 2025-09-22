@@ -55,7 +55,8 @@ class TestLangGraphStreamingEnhancement:
         # Create a workflow
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            enable_retrieval=False, enable_tools=False,
+            enable_retrieval=False,
+            enable_tools=False,
             system_message="Test streaming interface",
         )
 
@@ -163,7 +164,10 @@ class TestLangGraphStreamingEnhancement:
             # Verify the workflow manager was called with correct parameters
             mock_manager.create_workflow.assert_called_once()
             call_args = mock_manager.create_workflow.call_args
-            assert call_args[1]['enable_retrieval'] is False and call_args[1]['enable_tools'] is False
+            assert (
+                call_args[1]['enable_retrieval'] is False
+                and call_args[1]['enable_tools'] is False
+            )
             assert call_args[1]['enable_memory']
             assert call_args[1]['memory_window'] == 10
 

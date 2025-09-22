@@ -6,12 +6,7 @@ from datetime import datetime
 from enum import Enum
 from typing import TYPE_CHECKING, Any
 
-from sqlalchemy import (
-    JSON,
-    Boolean,
-    CheckConstraint,
-    DateTime,
-)
+from sqlalchemy import JSON, Boolean, CheckConstraint, DateTime
 from sqlalchemy import Enum as SQLEnum
 from sqlalchemy import (
     Float,

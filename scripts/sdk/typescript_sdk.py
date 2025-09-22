@@ -133,9 +133,7 @@ class TypeScriptSDKGenerator:
                     missing_files.append(file_path)
 
             if missing_files:
-                print(
-                    f"❌ Missing essential SDK files: {missing_files}"
-                )
+                print(f"❌ Missing essential SDK files: {missing_files}")
                 return False
 
             # Check for API modules

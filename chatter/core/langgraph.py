@@ -841,7 +841,7 @@ class LangGraphWorkflowManager:
                     ]
                     
                     # Re-enabled recursion detection with improved logic
-                    if repeated_tools and len(tool_results) >= 2:
+                    if repeated_tools and len(tool_results) >= 1:
                         # Check if we're making meaningful progress
                         if not _is_making_progress(tool_results, repeated_tools):
                             logger.warning(
@@ -857,8 +857,25 @@ class LangGraphWorkflowManager:
 
         def _is_making_progress(tool_results: list[str], repeated_tools: list[str]) -> bool:
             """Check if repeated tool calls are making meaningful progress."""
-            if len(tool_results) < 2:
+            if len(tool_results) < 1:
                 return True  # Not enough data to determine
+            
+            # Special handling for time-related tools
+            # Time tools naturally return different results (different timestamps)
+            # but multiple calls don't constitute meaningful progress
+            time_related_tools = ["get_time", "get_current_time", "time", "clock", "date"]
+            if any(tool.lower() in time_related_tools for tool in repeated_tools):
+                # For time tools, multiple calls are rarely justified
+                # Check if we have at least one valid timestamp result
+                import re
+                timestamp_pattern = r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}'
+                has_valid_timestamp = any(re.search(timestamp_pattern, result) for result in tool_results)
+                if has_valid_timestamp:
+                    return False  # We have a time result, no need for more calls
+            
+            # If we only have one result, we can't compare for progress yet
+            if len(tool_results) < 2:
+                return True  # Give it one more chance
             
             # Simple heuristic: check if recent results are different from previous ones
             recent_results = tool_results[-2:]  # Last 2 results

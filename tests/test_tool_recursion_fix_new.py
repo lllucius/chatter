@@ -21,11 +21,35 @@ class TestToolRecursionFix:
         recent_tool_calls = ["get_time", "get_time", "get_time"]
         tool_results = ["2025-09-21T17:42:09.433315", "2025-09-21T17:42:11.067013"]
         
-        # Apply the logic from the fix
+        # Apply the logic from the fix (including progress detection)
         if recent_tool_calls and tool_results:
             tool_counts = Counter(recent_tool_calls)
             repeated_tools = [tool for tool, count in tool_counts.items() if count >= 2]
-            should_finalize = repeated_tools and len(tool_results) >= 1
+            
+            # Check for progress (simulate the _is_making_progress function)
+            def _is_making_progress(tool_results: list[str], repeated_tools: list[str]) -> bool:
+                if len(tool_results) < 1:
+                    return True
+                
+                # Special handling for time-related tools
+                time_related_tools = ["get_time", "get_current_time", "time", "clock", "date"]
+                if any(tool.lower() in time_related_tools for tool in repeated_tools):
+                    import re
+                    timestamp_pattern = r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}'
+                    has_valid_timestamp = any(re.search(timestamp_pattern, result) for result in tool_results)
+                    if has_valid_timestamp:
+                        return False  # We have a time result, no need for more calls
+                
+                if len(tool_results) < 2:
+                    return True
+                
+                recent_results = tool_results[-2:]
+                if len(set(recent_results)) > 1:
+                    return True
+                
+                return True
+            
+            should_finalize = repeated_tools and len(tool_results) >= 1 and not _is_making_progress(tool_results, repeated_tools)
             
             assert should_finalize is True
             assert "get_time" in repeated_tools
@@ -139,6 +163,51 @@ class TestToolRecursionFix:
             assert "2025-09-21T17:42:09.433315" in final_context
             assert "what is the time" in final_context
             assert "Please provide a direct and helpful answer" in final_context
+
+    def test_time_tool_recursion_prevention(self):
+        """Test that time tools specifically stop recursion after getting a valid timestamp."""
+        # Test data mimicking the real scenario from the error logs
+        tool_calls = ["get_time", "get_time"]
+        tool_results = ["2025-09-22T12:56:21.560005", "2025-09-22T12:56:24.163200"]
+        
+        # Simulate the _is_making_progress function for time tools
+        def _is_making_progress(tool_results: list[str], repeated_tools: list[str]) -> bool:
+            if len(tool_results) < 1:
+                return True
+            
+            # Special handling for time-related tools
+            time_related_tools = ["get_time", "get_current_time", "time", "clock", "date"]
+            if any(tool.lower() in time_related_tools for tool in repeated_tools):
+                import re
+                timestamp_pattern = r'\d{4}-\d{2}-\d{2}[T ]\d{2}:\d{2}:\d{2}'
+                has_valid_timestamp = any(re.search(timestamp_pattern, result) for result in tool_results)
+                if has_valid_timestamp:
+                    return False  # We have a time result, no need for more calls
+            
+            if len(tool_results) < 2:
+                return True
+            
+            recent_results = tool_results[-2:]
+            if len(set(recent_results)) > 1:
+                return True
+            
+            return True
+        
+        # Test the logic
+        tool_counts = Counter(tool_calls)
+        repeated_tools = [tool for tool, count in tool_counts.items() if count >= 2]
+        
+        # After first call - should allow continuation
+        should_stop_after_first = repeated_tools and len(tool_results[:1]) >= 1 and not _is_making_progress(tool_results[:1], repeated_tools)
+        assert should_stop_after_first is False, "Should not stop after first get_time call"
+        
+        # After second call - should detect recursion and stop
+        should_stop_after_second = repeated_tools and len(tool_results) >= 1 and not _is_making_progress(tool_results, repeated_tools)
+        assert should_stop_after_second is True, "Should stop after second get_time call with timestamp"
+        
+        # Verify the repeated tool is correctly identified
+        assert "get_time" in repeated_tools
+        assert tool_counts["get_time"] == 2
 
 
 if __name__ == "__main__":

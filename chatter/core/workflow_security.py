@@ -205,7 +205,6 @@ class AuditLogEntry:
         event_type: str,
         user_id: str,
         workflow_id: str,
-        workflow_mode: str,
         details: dict[str, Any],
         timestamp: datetime | None = None,
     ):
@@ -215,7 +214,6 @@ class AuditLogEntry:
             event_type: Type of event being logged
             user_id: ID of the user
             workflow_id: ID of the workflow
-            workflow_mode: Type of workflow
             details: Additional event details
             timestamp: Timestamp of the event
         """
@@ -223,7 +221,6 @@ class AuditLogEntry:
         self.event_type = event_type
         self.user_id = user_id
         self.workflow_id = workflow_id
-        self.workflow_mode = workflow_mode
         self.details = details
         self.timestamp = timestamp or datetime.now()
 
@@ -234,7 +231,6 @@ class AuditLogEntry:
             "event_type": self.event_type,
             "user_id": self.user_id,
             "workflow_id": self.workflow_id,
-            "workflow_mode": self.workflow_mode,
             "details": self.details,
             "timestamp": self.timestamp.isoformat(),
         }
@@ -356,7 +352,6 @@ class WorkflowSecurityManager:
         self,
         user_id: str,
         workflow_id: str,
-        workflow_mode: str,
         tool_name: str,
         method: str | None = None,
         parameters: dict[str, Any] | None = None,
@@ -366,7 +361,6 @@ class WorkflowSecurityManager:
         Args:
             user_id: ID of the user
             workflow_id: ID of the workflow
-            workflow_mode: Type of workflow
             tool_name: Name of the tool
             method: Specific method being called
             parameters: Tool parameters
@@ -382,7 +376,6 @@ class WorkflowSecurityManager:
                 "tool_access_denied",
                 user_id,
                 workflow_id,
-                workflow_mode,
                 {
                     "tool_name": tool_name,
                     "method": method,
@@ -397,7 +390,6 @@ class WorkflowSecurityManager:
                 "tool_access_denied",
                 user_id,
                 workflow_id,
-                workflow_mode,
                 {
                     "tool_name": tool_name,
                     "method": method,
@@ -412,7 +404,6 @@ class WorkflowSecurityManager:
                 "tool_access_denied",
                 user_id,
                 workflow_id,
-                workflow_mode,
                 {
                     "tool_name": tool_name,
                     "method": method,
@@ -426,7 +417,6 @@ class WorkflowSecurityManager:
             "tool_execution_authorized",
             user_id,
             workflow_id,
-            workflow_mode,
             {"tool_name": tool_name, "method": method},
         )
 
@@ -457,7 +447,6 @@ class WorkflowSecurityManager:
         event_type: str,
         user_id: str,
         workflow_id: str,
-        workflow_mode: str,
         details: dict[str, Any],
     ) -> None:
         """Log a security event.
@@ -466,14 +455,12 @@ class WorkflowSecurityManager:
             event_type: Type of event
             user_id: ID of the user
             workflow_id: ID of the workflow
-            workflow_mode: Type of workflow
             details: Event details
         """
         entry = AuditLogEntry(
             event_type=event_type,
             user_id=user_id,
             workflow_id=workflow_id,
-            workflow_mode=workflow_mode,
             details=details,
         )
 

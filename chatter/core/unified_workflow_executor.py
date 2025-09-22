@@ -77,9 +77,7 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
-            performance_monitor.start_workflow(
-                workflow_id, "dynamic"
-            )
+            performance_monitor.start_workflow(workflow_id)
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -1020,7 +1018,6 @@ class UnifiedWorkflowExecutor:
         """Record workflow execution metrics."""
         duration_ms = (time.time() - start_time) * 1000
         record_workflow_metrics(
-            workflow_mode="dynamic",
             workflow_id=workflow_id,
             step=step,
             duration_ms=duration_ms,

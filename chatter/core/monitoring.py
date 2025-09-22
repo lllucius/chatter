@@ -165,7 +165,6 @@ class WorkflowMetrics:
     """Metrics for workflow execution."""
 
     workflow_id: str = field(default_factory=generate_ulid)
-    workflow_mode: str = ""
     execution_time: float = 0.0
     token_usage: dict[str, int] = field(default_factory=dict)
     tool_calls: int = 0
@@ -437,7 +436,6 @@ class MonitoringService:
 
     def start_workflow_tracking(
         self,
-        workflow_mode: str,
         user_id: str,
         conversation_id: str,
         provider_name: str = "",
@@ -447,7 +445,6 @@ class MonitoringService:
     ) -> str:
         """Start tracking a new workflow execution."""
         metrics = WorkflowMetrics(
-            workflow_mode=workflow_mode,
             user_id=user_id,
             conversation_id=conversation_id,
             provider_name=provider_name,
@@ -462,7 +459,6 @@ class MonitoringService:
         logger.info(
             "Started workflow tracking",
             workflow_id=metrics.workflow_id,
-            workflow_mode=workflow_mode,
             user_id=user_id,
         )
 
@@ -779,7 +775,7 @@ class MonitoringService:
 
     def _update_workflow_stats(self, metrics: WorkflowMetrics) -> None:
         """Update workflow statistics."""
-        workflow_key = f"{metrics.workflow_mode}:{metrics.workflow_id}"
+        workflow_key = f"workflow:{metrics.workflow_id}"
         stats = self.stats_by_workflow[workflow_key]
 
         stats.total_requests += 1
@@ -1106,7 +1102,6 @@ async def _record_request_async(metrics: RequestMetrics):
 
 
 def record_workflow_metrics(
-    workflow_mode: str,
     workflow_id: str,
     step: str | None,
     duration_ms: float,
@@ -1121,7 +1116,6 @@ def record_workflow_metrics(
         if service:
             asyncio.create_task(
                 _record_workflow_async(
-                    workflow_mode,
                     workflow_id,
                     step,
                     duration_ms,
@@ -1135,7 +1129,6 @@ def record_workflow_metrics(
 
 
 async def _record_workflow_async(
-    workflow_mode: str,
     workflow_id: str,
     step: str | None,
     duration_ms: float,
@@ -1149,7 +1142,6 @@ async def _record_workflow_async(
     # Create a workflow metrics object
     metrics = WorkflowMetrics(
         workflow_id=workflow_id,
-        workflow_mode=workflow_mode,
         execution_time=duration_ms / 1000.0,  # Convert to seconds
         success=success,
         correlation_id=correlation_id,

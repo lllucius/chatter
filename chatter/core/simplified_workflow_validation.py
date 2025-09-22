@@ -84,16 +84,6 @@ class SimplifiedWorkflowValidationService:
         if not template.name or len(template.name.strip()) == 0:
             errors.append("Template name is required")
 
-        if not template.workflow_mode:
-            errors.append("Workflow type is required")
-        elif (
-            not isinstance(template.workflow_mode, str)
-            or len(template.workflow_mode.strip()) == 0
-        ):
-            errors.append(
-                "Invalid workflow type: must be a non-empty string"
-            )
-
         if not template.description:
             warnings.append("Template description is empty")
 

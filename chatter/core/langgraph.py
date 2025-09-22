@@ -248,7 +248,6 @@ class LangGraphWorkflowManager:
         workflow_tracking_config = None
         if METRICS_ENABLED and user_id and conversation_id:
             workflow_tracking_config = {
-                "workflow_mode": mode,
                 "user_id": user_id,
                 "conversation_id": conversation_id,
                 "provider_name": provider_name or "",
@@ -585,7 +584,6 @@ class LangGraphWorkflowManager:
                         authorized = workflow_security_manager.authorize_tool_execution(
                             user_id=user_id,
                             workflow_id="",
-                            workflow_mode=mode,
                             tool_name=tool_name,
                             method=None,
                             parameters=tool_args,

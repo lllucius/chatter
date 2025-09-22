@@ -70,7 +70,8 @@ def chat_request():
     """Create test chat request."""
     return ChatRequest(
         message="Hello test",
-        workflow="plain",
+        enable_retrieval=False,
+        enable_tools=False,
     )
 
 

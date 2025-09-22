@@ -221,45 +221,47 @@ export class WorkflowsApi extends BaseAPI {
   }
   /**Execute Chat Workflow
    * Execute chat using dynamically built workflow.
-## Workflow Types
+## Workflow Capabilities
 
-This endpoint supports multiple workflow types through the `workflow` parameter:
+This endpoint supports dynamic workflow configuration through capability flags:
 
-### Plain Chat (`plain`)
+### Plain Chat
 Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "plain"
+    "enable_retrieval": false,
+    "enable_tools": false
 }
 ```
 
-### RAG Workflow (`rag`)
+### RAG Workflow
 Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": false
 }
 ```
 
-### Tools Workflow (`tools`)
+### Tools Workflow
 Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "tools"
+    "enable_retrieval": false,
+    "enable_tools": true
 }
 ```
 
-### Full Workflow (`full`)
+### Full Workflow
 Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": true
 }
 ```
 
@@ -269,7 +271,8 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "plain",
+    "enable_retrieval": false,
+    "enable_tools": false,
     "stream": true
 }
 ```
@@ -315,45 +318,47 @@ Available templates:
   }
   /**Execute Chat Workflow Streaming
    * Execute chat using dynamically built workflow with streaming.
-## Workflow Types
+## Workflow Capabilities
 
-This endpoint supports multiple workflow types through the `workflow` parameter:
+This endpoint supports dynamic workflow configuration through capability flags:
 
-### Plain Chat (`plain`)
+### Plain Chat
 Basic conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "plain"
+    "enable_retrieval": false,
+    "enable_tools": false
 }
 ```
 
-### RAG Workflow (`rag`)
+### RAG Workflow
 Retrieval-Augmented Generation with document search.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": false
 }
 ```
 
-### Tools Workflow (`tools`)
+### Tools Workflow
 Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "tools"
+    "enable_retrieval": false,
+    "enable_tools": true
 }
 ```
 
-### Full Workflow (`full`)
+### Full Workflow
 Combination of RAG and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": true
 }
 ```
 
@@ -363,7 +368,8 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "plain",
+    "enable_retrieval": false,
+    "enable_tools": false,
     "stream": true
 }
 ```

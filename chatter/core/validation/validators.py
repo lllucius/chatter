@@ -14,9 +14,12 @@ from chatter.core.exceptions import (
     SecurityValidationError,
     ValidationError,
 )
+from chatter.utils.logging import get_logger
 
 from .context import ValidationContext
 from .results import ValidationResult
+
+logger = get_logger(__name__)
 
 
 class BaseValidator(ABC):
@@ -810,20 +813,23 @@ class WorkflowValidator(BaseValidator):
 
         errors = []
 
-        # Handle simple workflow type validation (for workflow execution service)
+        # Handle simple workflow capability validation (for workflow execution service)
         if "workflow_mode" in config and len(config) == 1:
-            workflow_mode = config["workflow_mode"]
-            valid_types = [
-                "plain",
-                "rag",
-                "tools",
-                "full",
-            ]
-            if workflow_mode not in valid_types:
+            # Legacy workflow_mode field - warn but don't fail
+            logger.warning("workflow_mode field is deprecated, use capability flags instead")
+        elif any(key in config for key in ["enable_retrieval", "enable_tools", "enable_memory"]):
+            # Validate capability flags
+            if "enable_retrieval" in config and not isinstance(config["enable_retrieval"], bool):
                 errors.append(
-                    ValidationError(
-                        f"Invalid workflow type: {workflow_mode}. Must be one of {valid_types}"
-                    )
+                    ValidationError("enable_retrieval must be a boolean")
+                )
+            if "enable_tools" in config and not isinstance(config["enable_tools"], bool):
+                errors.append(
+                    ValidationError("enable_tools must be a boolean")
+                )
+            if "enable_memory" in config and not isinstance(config["enable_memory"], bool):
+                errors.append(
+                    ValidationError("enable_memory must be a boolean")
                 )
         else:
             # Handle full workflow configuration validation

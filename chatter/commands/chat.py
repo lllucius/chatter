@@ -26,16 +26,15 @@ async def send_message(
     conversation_id: str = typer.Option(
         None, help="Conversation ID (creates new if not provided)"
     ),
-    workflow: str = typer.Option(
-        "plain",
-        help="Workflow type: plain, rag, tools, full",
-    ),
     template: str = typer.Option(None, help="Use workflow template"),
     stream: bool = typer.Option(
         False, help="Enable streaming response"
     ),
     enable_retrieval: bool = typer.Option(
-        False, help="Enable document retrieval for RAG"
+        False, help="Enable document retrieval"
+    ),
+    enable_tools: bool = typer.Option(
+        False, help="Enable tool usage"
     ),
 ):
     """Send a message in a chat conversation."""

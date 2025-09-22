@@ -404,7 +404,8 @@ class TaskOrientedAgent(BaseAgent):
             # Create workflow for task execution using unified API
             workflow = workflow_manager.create_workflow(
                 llm=self.llm,
-                mode="tools",
+                enable_retrieval=False,
+                enable_tools=True,
                 system_message=self.profile.system_message,
                 tools=list(self.tools.values()),
             )

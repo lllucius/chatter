@@ -16,45 +16,47 @@ EXAMPLE_TIMESTAMP = "2025-01-09T00:00:00Z"
 
 # Chat endpoint documentation template
 CHAT_ENDPOINT_DOCS = """
-## Workflow Types
+## Dynamic Workflow Configuration
 
-This endpoint supports multiple workflow types through the `workflow` parameter:
+This endpoint supports dynamic workflow configuration through capability flags:
 
-### Plain Chat (`plain`)
-Basic conversation without tools or retrieval.
+### Basic Chat
+Simple conversation without tools or retrieval.
 ```json
 {
     "message": "Hello, how are you?",
-    "workflow": "plain"
+    "enable_retrieval": false,
+    "enable_tools": false
 }
 ```
 
-### RAG Workflow (`rag`)
-Retrieval-Augmented Generation with document search.
+### Retrieval-Augmented Generation
+Document search and retrieval capabilities.
 ```json
 {
     "message": "What are the latest sales figures?",
-    "workflow": "rag",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": false
 }
 ```
 
-### Tools Workflow (`tools`)
+### Tool-Enhanced Workflow
 Function calling with available tools.
 ```json
 {
     "message": "Calculate the square root of 144",
-    "workflow": "tools"
+    "enable_retrieval": false,
+    "enable_tools": true
 }
 ```
 
-### Full Workflow (`full`)
-Combination of RAG and tools for complex tasks.
+### Full-Featured Workflow
+Combination of retrieval and tools for complex tasks.
 ```json
 {
     "message": "Find recent customer feedback and create a summary report",
-    "workflow": "full",
-    "enable_retrieval": true
+    "enable_retrieval": true,
+    "enable_tools": true
 }
 ```
 
@@ -64,7 +66,8 @@ Set `stream: true` to receive real-time responses:
 ```json
 {
     "message": "Tell me a story",
-    "workflow": "plain",
+    "enable_retrieval": false,
+    "enable_tools": false,
     "stream": true
 }
 ```
@@ -329,8 +332,8 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "What are the latest customer satisfaction metrics?",
-                "workflow": "rag",
                 "enable_retrieval": True,
+                "enable_tools": False,
                 "stream": False,
             },
             response_example={
@@ -347,7 +350,8 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "Write a Python function to calculate fibonacci numbers",
-                "workflow": "tools",
+                "enable_retrieval": False,
+                "enable_tools": True,
                 "stream": True,
             },
             response_example={

@@ -213,7 +213,7 @@ class TestWorkflowExecutionService:
 
         self.chat_request = ChatRequest(
             message="Test message",
-            workflow="plain",
+            enable_retrieval=False, enable_tools=False,
         )
 
         self.correlation_id = "corr_123"

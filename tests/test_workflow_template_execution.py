@@ -8,7 +8,7 @@ sys.path.insert(0, '/home/runner/work/chatter/chatter')
 
 
 def test_workflow_generation_methods():
-    """Test the workflow generation methods without loading the full service."""
+    """Test the dynamic workflow generation methods without loading the full service."""
 
     # Import just the methods we need to test
     from chatter.services.workflow_management import (
@@ -19,10 +19,9 @@ def test_workflow_generation_methods():
     mock_session = AsyncMock()
     service = WorkflowManagementService(mock_session)
 
-    # Create a mock template
+    # Create a mock template for basic workflow
     mock_template = MagicMock()
     mock_template.name = "Test Template"
-    mock_template.capabilities = "plain"
     mock_template.default_params = {
         "model": "gpt-4",
         "temperature": 0.7,
@@ -30,12 +29,12 @@ def test_workflow_generation_methods():
     }
     mock_template.required_tools = []
 
-    # Test plain workflow generation
+    # Test basic workflow generation (no special capabilities)
     user_input = {"temperature": 0.9, "max_tokens": 500}
     merged_input = {**mock_template.default_params, **user_input}
 
-    nodes, edges = service._generate_plain_workflow(
-        mock_template, merged_input
+    nodes, edges = service._generate_dynamic_workflow(
+        mock_template, merged_input, enable_retrieval=False, enable_tools=False
     )
 
     # Verify structure
@@ -73,32 +72,31 @@ def test_workflow_generation_methods():
     assert ('start', 'llm') in edge_connections
     assert ('llm', 'end') in edge_connections
 
-    print("✅ Plain workflow generation test passed")
+    print("✅ Basic workflow generation test passed")
 
-    # Test RAG workflow generation
-    mock_template.capabilities = "rag"
-    nodes, edges = service._generate_rag_workflow(
-        mock_template, merged_input
+    # Test workflow generation with retrieval capability
+    nodes, edges = service._generate_dynamic_workflow(
+        mock_template, merged_input, enable_retrieval=True, enable_tools=False
     )
 
     assert (
         len(nodes) == 4
-    ), f"Expected 4 nodes for RAG workflow, got {len(nodes)}"
+    ), f"Expected 4 nodes for retrieval workflow, got {len(nodes)}"
     assert (
         len(edges) == 3
-    ), f"Expected 3 edges for RAG workflow, got {len(edges)}"
+    ), f"Expected 3 edges for retrieval workflow, got {len(edges)}"
 
     node_ids = [node['id'] for node in nodes]
     assert (
         'retrieval' in node_ids
-    ), "RAG workflow should have retrieval node"
+    ), "Retrieval workflow should have retrieval node"
 
-    print("✅ RAG workflow generation test passed")
+    print("✅ Retrieval workflow generation test passed")
 
-    # Test tools workflow generation
-    mock_template.capabilities = "tools"
-    nodes, edges = service._generate_tools_workflow(
-        mock_template, merged_input
+    # Test workflow generation with tools capability
+    mock_template.required_tools = ["search_tool", "calculator"]
+    nodes, edges = service._generate_dynamic_workflow(
+        mock_template, merged_input, enable_retrieval=False, enable_tools=True
     )
 
     assert (
@@ -111,29 +109,25 @@ def test_workflow_generation_methods():
 
     print("✅ Tools workflow generation test passed")
 
-    # Test full workflow generation
-    mock_template.capabilities = "full"
-    nodes, edges = service._generate_full_workflow(
-        mock_template, merged_input
+    # Test workflow generation with both capabilities
+    nodes, edges = service._generate_dynamic_workflow(
+        mock_template, merged_input, enable_retrieval=True, enable_tools=True
     )
 
     assert (
         len(nodes) == 4
-    ), f"Expected 4 nodes for full workflow, got {len(nodes)}"
+    ), f"Expected 4 nodes for full capability workflow, got {len(nodes)}"
+
     node_ids = [node['id'] for node in nodes]
     assert (
         'retrieval' in node_ids
-    ), "Full workflow should have retrieval"
+    ), "Full capability workflow should have retrieval node"
 
-    # Verify LLM node has both context and tools
+    # Verify LLM node has tools enabled
     llm_node = next(node for node in nodes if 'llm' in node['id'])
-    llm_config = llm_node['data']['config']
-    assert llm_config.get('enable_tools')
-    assert llm_config.get('use_context')
+    assert llm_node['data']['config'].get('enable_tools')
 
-    print("✅ Full workflow generation test passed")
-
-    return True
+    print("✅ Full capability workflow generation test passed")
 
 
 if __name__ == "__main__":

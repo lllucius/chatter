@@ -22,18 +22,16 @@ class StreamlinedPerformanceMonitor:
     def __init__(self):
         """Initialize performance monitor."""
         self.execution_times: list[float] = []
-        self.workflow_modes: dict[str, int] = {}
+        self.execution_counts: int = 0
         self.error_counts: dict[str, int] = {}
         self.start_times: dict[str, float] = {}
 
     def start_workflow(
-        self, workflow_id: str, workflow_mode: str
+        self, workflow_id: str
     ) -> None:
         """Start timing a workflow execution."""
         self.start_times[workflow_id] = time.time()
-        self.workflow_modes[workflow_mode] = (
-            self.workflow_modes.get(workflow_mode, 0) + 1
-        )
+        self.execution_counts += 1
 
     def end_workflow(
         self,
@@ -62,11 +60,10 @@ class StreamlinedPerformanceMonitor:
         """Get performance statistics."""
         if not self.execution_times:
             return {
-                "total_executions": 0,
+                "total_executions": self.execution_counts,
                 "avg_execution_time_ms": 0,
                 "min_execution_time_ms": 0,
                 "max_execution_time_ms": 0,
-                "workflow_modes": self.workflow_modes,
                 "error_counts": self.error_counts,
             }
 
@@ -79,7 +76,6 @@ class StreamlinedPerformanceMonitor:
             "avg_execution_time_ms": int(avg_time * 1000),
             "min_execution_time_ms": int(min_time * 1000),
             "max_execution_time_ms": int(max_time * 1000),
-            "workflow_modes": self.workflow_modes,
             "error_counts": self.error_counts,
         }
 

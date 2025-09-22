@@ -138,22 +138,7 @@ class StreamingService:
             )
 
         # Record workflow metrics
-        capabilities = stream_info.get('capabilities', {})
-        enable_retrieval = capabilities.get('enable_retrieval', False)
-        enable_tools = capabilities.get('enable_tools', False)
-        
-        # Derive mode for metrics
-        if enable_retrieval and enable_tools:
-            mode = "full_streaming"
-        elif enable_tools:
-            mode = "tools_streaming"
-        elif enable_retrieval:
-            mode = "rag_streaming"
-        else:
-            mode = "plain_streaming"
-            
         record_workflow_metrics(
-            workflow_mode=mode,
             workflow_id=stream_id,
             step="complete",
             duration_ms=total_duration * 1000,

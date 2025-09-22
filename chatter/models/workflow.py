@@ -228,16 +228,6 @@ class WorkflowTemplate(Base):
         """String representation of workflow template."""
         return f"<WorkflowTemplate(id={self.id}, name={self.name})>"
 
-    def to_unified_template(self) -> dict[str, Any]:
-        """Convert to UnifiedTemplateManager format."""
-        return {
-            "name": self.name,
-            "description": self.description,
-            "default_params": self.default_params,
-            "required_tools": self.required_tools,
-            "required_retrievers": self.required_retrievers,
-        }
-
     def to_dict(self) -> dict[str, Any]:
         """Convert workflow template to dictionary."""
         return {

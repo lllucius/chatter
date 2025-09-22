@@ -156,10 +156,15 @@ const ChatPage: React.FC = () => {
 
           // Process each complete line
           for (const line of lines) {
+            if (!line.trim()) continue; // Skip empty lines
+            
             const eventData = parseSSELine(line);
             if (!eventData) {
+              console.debug('Streaming: skipping invalid SSE line:', line);
               continue; // Skip invalid or non-data lines
             }
+
+            console.debug('Streaming: processing event:', eventData);
 
             // Handle special end-of-stream marker
             if (eventData.type === 'done') {
@@ -169,11 +174,13 @@ const ChatPage: React.FC = () => {
             switch (eventData.type) {
               case 'start':
                 // Stream started
+                console.debug('Streaming: stream started');
                 break;
 
               case 'token': {
                 // Add the token to our streamed content
                 const tokenContent = (eventData.content as string) || '';
+                console.debug('Streaming: received token:', tokenContent);
                 setStreamedContent((prev) => prev + tokenContent);
 
                 // Update the message with the new content
@@ -223,13 +230,13 @@ const ChatPage: React.FC = () => {
                       ? {
                           ...msg,
                           metadata: {
-                            model: eventData.metadata?.model_used as
+                            model: (eventData.metadata as any)?.model_used as
                               | string
                               | undefined,
-                            tokens: eventData.metadata?.total_tokens as
+                            tokens: (eventData.metadata as any)?.total_tokens as
                               | number
                               | undefined,
-                            processingTime: eventData.metadata
+                            processingTime: (eventData.metadata as any)
                               ?.response_time_ms as number | undefined,
                             workflow: {
                               stage: 'Complete',
@@ -285,11 +292,15 @@ const ChatPage: React.FC = () => {
   const handleWorkflowStreamingResponse = useCallback(
     async (workflowRequest: ChatWorkflowRequest, isRegeneration: boolean) => {
       try {
+        console.debug('Streaming: starting workflow streaming request', workflowRequest);
+        
         // Get the streaming response from workflow API
         const stream = (await sendWorkflowMessage(
           workflowRequest,
           true
         )) as ReadableStream<Uint8Array>;
+
+        console.debug('Streaming: received stream response', stream);
 
         let assistantMessageId = `assistant-${Date.now()}`;
 
@@ -668,14 +679,17 @@ const ChatPage: React.FC = () => {
 
         // Send message to workflow API
         let response: ChatResponse;
+        console.debug('Streaming enabled:', streamingEnabled);
         if (streamingEnabled) {
           // Use streaming workflow endpoint
+          console.debug('Using streaming workflow endpoint');
           await handleWorkflowStreamingResponse(
             workflowRequest,
             isRegeneration
           );
           return; // Streaming handling is complete
         } else {
+          console.debug('Using non-streaming workflow endpoint');
           // Use non-streaming workflow endpoint
           response = (await sendWorkflowMessage(
             workflowRequest,

@@ -384,6 +384,33 @@ class LLMService:
 
 
 
+    async def get_llm(
+        self,
+        provider: str | None = None,
+        model: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> BaseChatModel:
+        """Get LLM instance with custom parameters.
+        
+        Args:
+            provider: Provider name (optional, uses default if not provided)
+            model: Model name (optional, uses default for provider if not provided)
+            temperature: Temperature override
+            max_tokens: Max tokens override
+            
+        Returns:
+            BaseChatModel instance
+            
+        Raises:
+            LLMProviderError: If provider/model not available
+        """
+        return await self._create_provider_with_custom_params(
+            provider_name=provider,
+            temperature=temperature,
+            max_tokens=max_tokens,
+        )
+
     async def _create_provider_with_custom_params(
         self,
         provider_name: str | None = None,

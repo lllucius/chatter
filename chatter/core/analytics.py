@@ -18,7 +18,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
 from chatter.core.cache_factory import CacheType, cache_factory
-from chatter.core.cache_interface import CacheInterface
+from chatter.core.cache import CacheInterface
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,

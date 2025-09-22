@@ -16,7 +16,7 @@ from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.cache_factory import get_general_cache
-from chatter.core.cache_interface import CacheConfig
+from chatter.core.cache import CacheConfig
 from chatter.core.langgraph import workflow_manager
 from chatter.core.workflow_node_factory import WorkflowNodeContext
 from chatter.schemas.agents import (

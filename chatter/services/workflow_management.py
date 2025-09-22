@@ -596,7 +596,7 @@ class WorkflowManagementService:
 
             # Regenerate config hash if params changed
             if "default_params" in updates:
-                config_str = f"{template.name}:{template.workflow_type.value}:{str(template.default_params)}"
+                config_str = f"{template.name}:{str(template.default_params)}"
                 template.config_hash = hashlib.sha256(
                     config_str.encode("utf-8")
                 ).hexdigest()
@@ -737,9 +737,10 @@ class WorkflowManagementService:
                 metadata={
                     "generated_from_template": template_id,
                     "template_name": template.name,
-                    "template_type": template.workflow_type,
                     "user_input": user_input,
                     "is_temporary": is_temporary,
+                    "required_tools": template.required_tools,
+                    "required_retrievers": template.required_retrievers,
                 },
                 template_id=template_id,
             )

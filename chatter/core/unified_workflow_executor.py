@@ -1,7 +1,7 @@
-"""Unified workflow executor that consolidates all workflow types.
+"""Unified workflow executor that consolidates all workflow capabilities.
 
 This replaces the multiple individual executors with a single configurable
-executor that handles all workflow types (plain, rag, tools, full) while
+executor that handles all workflow capabilities (retrieval, tools, memory) while
 eliminating code duplication.
 """
 

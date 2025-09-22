@@ -62,7 +62,7 @@ class ConversationState(TypedDict):
     tool_call_count: int
 
 
-WorkflowMode = Literal["plain", "rag", "tools", "full"]
+# Remove static workflow mode - now use dynamic capability flags
 
 
 class LangGraphWorkflowManager:
@@ -196,7 +196,8 @@ class LangGraphWorkflowManager:
         self,
         llm: BaseChatModel,
         *,
-        mode: WorkflowMode = "plain",
+        enable_retrieval: bool = False,
+        enable_tools: bool = False,
         system_message: str | None = None,
         retriever: Any | None = None,
         tools: list[Any] | None = None,
@@ -214,11 +215,10 @@ class LangGraphWorkflowManager:
     ) -> Pregel:
         """Create a unified conversation workflow.
 
-        Modes:
-        - plain: just the model
-        - rag: retrieval then model
-        - tools: model with tool-calling loop
-        - full: retrieval, then model+tools loop
+        Capabilities:
+        - enable_retrieval: Add document retrieval capability
+        - enable_tools: Add tool-calling capability
+        - Both can be combined for full feature workflows
 
         Optional:
         - enable_memory: summarize older messages and prepend summary as context
@@ -227,9 +227,10 @@ class LangGraphWorkflowManager:
 
         Args:
             llm: Language model to use
-            mode: Workflow mode
+            enable_retrieval: Whether to enable document retrieval
+            enable_tools: Whether to enable tool calling
             system_message: Optional system message
-            retriever: Optional retriever for RAG
+            retriever: Optional retriever for document search
             tools: Optional tools for tool-calling
             enable_memory: Whether to enable memory management
             memory_window: Number of recent messages to keep (default: 4 for 2 exchanges)
@@ -261,8 +262,8 @@ class LangGraphWorkflowManager:
                     "max_documents": max_documents,
                 },
             }
-        use_retriever = mode in ("rag", "full")
-        use_tools = mode in ("tools", "full")
+        use_retriever = enable_retrieval
+        use_tools = enable_tools
 
         llm_for_call = (
             llm.bind_tools(tools) if (use_tools and tools) else llm
@@ -762,7 +763,8 @@ class LangGraphWorkflowManager:
             "Configured workflow recursion limit",
             max_tool_calls=max_tool_calls,
             recursion_limit=recursion_limit,
-            mode=mode
+            enable_retrieval=enable_retrieval,
+            enable_tools=enable_tools
         )
         
         return app

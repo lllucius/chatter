@@ -332,8 +332,8 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "What are the latest customer satisfaction metrics?",
-                "workflow": "rag",
                 "enable_retrieval": True,
+                "enable_tools": False,
                 "stream": False,
             },
             response_example={
@@ -350,7 +350,8 @@ class APIDocumentationEnhancer:
             "POST",
             request_example={
                 "message": "Write a Python function to calculate fibonacci numbers",
-                "workflow": "tools",
+                "enable_retrieval": False,
+                "enable_tools": True,
                 "stream": True,
             },
             response_example={

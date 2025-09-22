@@ -156,6 +156,8 @@ const ChatPage: React.FC = () => {
 
           // Process each complete line
           for (const line of lines) {
+            if (!line.trim()) continue; // Skip empty lines
+            
             const eventData = parseSSELine(line);
             if (!eventData) {
               continue; // Skip invalid or non-data lines
@@ -223,13 +225,13 @@ const ChatPage: React.FC = () => {
                       ? {
                           ...msg,
                           metadata: {
-                            model: eventData.metadata?.model_used as
+                            model: (eventData.metadata as any)?.model_used as
                               | string
                               | undefined,
-                            tokens: eventData.metadata?.total_tokens as
+                            tokens: (eventData.metadata as any)?.total_tokens as
                               | number
                               | undefined,
-                            processingTime: eventData.metadata
+                            processingTime: (eventData.metadata as any)
                               ?.response_time_ms as number | undefined,
                             workflow: {
                               stage: 'Complete',
@@ -359,6 +361,7 @@ const ChatPage: React.FC = () => {
         focusInput();
       } catch (error) {
         // Handle errors by showing an error message
+        console.error('Streaming error in handleWorkflowStreamingResponse:', error);
         const errorMessage: ChatMessage = {
           id: `assistant-error-${Date.now()}`,
           role: 'assistant',
@@ -676,6 +679,7 @@ const ChatPage: React.FC = () => {
           );
           return; // Streaming handling is complete
         } else {
+          // Use non-streaming workflow endpoint
           // Use non-streaming workflow endpoint
           response = (await sendWorkflowMessage(
             workflowRequest,

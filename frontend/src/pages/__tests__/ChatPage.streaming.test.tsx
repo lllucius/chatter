@@ -8,9 +8,9 @@ import ChatPage from '../ChatPage';
 vi.mock('../../services/auth-service', () => {
   return {
     getSDK: vi.fn(() => ({
-      chat: {
-        streamingChatApiV1ChatStreaming: vi.fn(),
-        chatChat: vi.fn(),
+      workflows: {
+        executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming: vi.fn(),
+        executeChatWorkflowApiV1WorkflowsExecuteChat: vi.fn(),
       },
       profiles: {
         listProfilesApiV1Profiles: vi.fn(() =>
@@ -71,12 +71,12 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 describe('ChatPage Streaming Functionality', () => {
   let mockStreamingMethod: Mock;
 
-  beforeEach(() => {
+  beforeEach(async () => {
     vi.clearAllMocks();
 
     // Get the streaming method mock from the auth service
     const { getSDK } = await import('../../services/auth-service');
-    mockStreamingMethod = getSDK().chat.streamingChatApiV1ChatStreaming;
+    mockStreamingMethod = getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming;
   });
 
   it('should render the chat page', async () => {
@@ -131,17 +131,17 @@ describe('ChatPage Streaming Functionality', () => {
     });
 
     // Enable streaming toggle
-    const streamingToggle = screen.getByRole('checkbox');
+    const streamingToggle = screen.getByRole('switch');
     fireEvent.click(streamingToggle);
 
     // Type a message
-    const messageInput = screen.getByPlaceholderText(/Type your message here/);
+    const messageInput = screen.getByPlaceholderText(/Type your message/);
     fireEvent.change(messageInput, {
       target: { value: 'Test streaming message' },
     });
 
     // Send the message
-    const sendButton = screen.getByRole('button', { name: /send/i });
+    const sendButton = screen.getByRole('button', { name: '' });
     fireEvent.click(sendButton);
 
     // Verify that the streaming method was called
@@ -186,14 +186,14 @@ describe('ChatPage Streaming Functionality', () => {
     });
 
     // Enable streaming
-    const streamingToggle = screen.getByRole('checkbox');
+    const streamingToggle = screen.getByRole('switch');
     fireEvent.click(streamingToggle);
 
     // Send a message
-    const messageInput = screen.getByPlaceholderText(/Type your message here/);
+    const messageInput = screen.getByPlaceholderText(/Type your message/);
     fireEvent.change(messageInput, { target: { value: 'Test error' } });
 
-    const sendButton = screen.getByRole('button', { name: /send/i });
+    const sendButton = screen.getByRole('button', { name: '' });
     fireEvent.click(sendButton);
 
     // Verify error is handled (should show error message)

@@ -437,14 +437,29 @@ class WorkflowExecutionService:
         metadata: Dict[str, Any] | None = None,
     ) -> Message:
         """Create and save a message to the conversation."""
-        # Create message object
+        from datetime import datetime, timezone
+        
+        # Get next sequence number (for now, using a simple increment)
+        # TODO: Get proper sequence number from conversation message count
+        sequence_number = getattr(conversation, 'message_count', 0) + 1
+        
+        # Create message object with all required fields
+        # Note: Base class automatically sets id, created_at, updated_at, but we need to
+        # ensure all the Message-specific required fields are set
         message = Message(
             id=generate_ulid(),
             conversation_id=conversation.id,
             role=role,
             content=content,
-            metadata=metadata or {},
+            sequence_number=sequence_number,
+            rating_count=0,  # Default value for required field
+            extra_metadata=metadata or {},
         )
+        
+        # The Base class will automatically set created_at and updated_at
+        # But to be safe, let's explicitly set created_at if it's not set
+        if not hasattr(message, 'created_at') or message.created_at is None:
+            message.created_at = datetime.now(timezone.utc)
         
         # TODO: Save to database via message service
         # await self.message_service.create_message(message)

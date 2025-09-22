@@ -17,7 +17,8 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.core.cache_factory import get_general_cache
 from chatter.core.cache_interface import CacheConfig
-from chatter.core.langgraph import ConversationState, workflow_manager
+from chatter.core.langgraph import workflow_manager
+from chatter.core.workflow_node_factory import WorkflowNodeContext
 from chatter.schemas.agents import (
     AgentCapability,
     AgentInteraction,
@@ -402,7 +403,7 @@ class TaskOrientedAgent(BaseAgent):
 
         try:
             # Create workflow for task execution using unified API
-            workflow = workflow_manager.create_workflow(
+            workflow = await workflow_manager.create_workflow(
                 llm=self.llm,
                 enable_retrieval=False,
                 enable_tools=True,
@@ -411,7 +412,7 @@ class TaskOrientedAgent(BaseAgent):
             )
 
             # Create conversation state
-            state: ConversationState = {
+            state: WorkflowNodeContext = {
                 "messages": [HumanMessage(content=message)],
                 "user_id": (
                     context.get("user_id", "unknown")
@@ -420,14 +421,14 @@ class TaskOrientedAgent(BaseAgent):
                 ),
                 "conversation_id": conversation_id,
                 "retrieval_context": None,
-                "tool_calls": [],
-                "metadata": {},
                 "conversation_summary": None,
-                "parent_conversation_id": None,
-                "branch_id": None,
-                "memory_context": {},
-                "workflow_template": None,
-                "a_b_test_group": None,
+                "tool_call_count": 0,
+                "metadata": {},
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
             }
 
             # Execute workflow
@@ -447,11 +448,10 @@ class TaskOrientedAgent(BaseAgent):
                     else str(last_message)
                 )
 
-            if result and "tool_calls" in result:
-                tools_used = [
-                    call.get("name", "unknown")
-                    for call in result["tool_calls"]
-                ]
+            if result and "tool_call_count" in result:
+                # For now, we'll just note that tools were used
+                # The actual tool names would need to be extracted from execution_history
+                tools_used = ["tools_executed"] if result["tool_call_count"] > 0 else []
 
             # Calculate response time and confidence
             response_time = (

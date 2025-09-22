@@ -29,7 +29,11 @@ export interface LangGraphNode {
     | 'retrieve_context'
     | 'call_model'
     | 'execute_tools'
-    | 'conditional';
+    | 'conditional'
+    | 'loop'
+    | 'variable'
+    | 'error_handler'
+    | 'delay';
   config: Record<string, unknown>;
 }
 
@@ -149,6 +153,46 @@ export class WorkflowTranslator {
           throw new Error('Retrieval nodes must have collection or topK configured');
         }
         break;
+      case 'loop':
+        if (!config || (!config.maxIterations && !config.condition)) {
+          throw new Error('Loop nodes must have maxIterations or condition defined');
+        }
+        if (config.maxIterations && (typeof config.maxIterations !== 'number' || config.maxIterations <= 0)) {
+          throw new Error('Loop maxIterations must be a positive number');
+        }
+        break;
+      case 'variable':
+        if (!config || !config.variableName || !config.operation) {
+          throw new Error('Variable nodes must have variableName and operation defined');
+        }
+        const validOps = ['set', 'get', 'append', 'increment', 'decrement'];
+        if (!validOps.includes(String(config.operation))) {
+          throw new Error(`Variable operation must be one of: ${validOps.join(', ')}`);
+        }
+        break;
+      case 'error_handler':
+      case 'errorHandler':
+        if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
+          throw new Error('Error handler retryCount must be a non-negative number');
+        }
+        break;
+      case 'delay':
+        if (!config || !config.duration || typeof config.duration !== 'number') {
+          throw new Error('Delay nodes must have a numeric duration defined');
+        }
+        if (config.duration <= 0) {
+          throw new Error('Delay duration must be positive');
+        }
+        const validDelayTypes = ['fixed', 'random', 'exponential', 'dynamic'];
+        if (config.delayType && !validDelayTypes.includes(String(config.delayType))) {
+          throw new Error(`Delay type must be one of: ${validDelayTypes.join(', ')}`);
+        }
+        break;
+      case 'memory':
+        if (config && config.memoryWindow && (typeof config.memoryWindow !== 'number' || config.memoryWindow <= 0)) {
+          throw new Error('Memory window must be a positive number');
+        }
+        break;
       // Other node types have optional configuration
     }
   }
@@ -179,11 +223,22 @@ export class WorkflowTranslator {
       case 'retrieval':
         return 'retrieve_context';
       case 'model':
+      case 'llm':
         return 'call_model';
       case 'tool':
+      case 'tools':
         return 'execute_tools';
       case 'conditional':
         return 'conditional';
+      case 'loop':
+        return 'loop';
+      case 'variable':
+        return 'variable';
+      case 'error_handler':
+      case 'errorHandler':
+        return 'error_handler';
+      case 'delay':
+        return 'delay';
       default:
         throw new Error(`Unsupported node type for LangGraph: ${nodeType}`);
     }
@@ -303,6 +358,94 @@ export class WorkflowTranslator {
       if (!node.data.config?.condition) {
         errors.push(
           `Conditional node "${node.data.label}" must have a condition defined`
+        );
+      }
+    });
+
+    // Loop nodes must have proper configuration
+    const loopNodes = workflow.nodes.filter((n) => n.type === 'loop');
+    loopNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || (!config.maxIterations && !config.condition)) {
+        errors.push(
+          `Loop node "${node.data.label}" must have maxIterations or condition defined`
+        );
+      }
+    });
+
+    // Variable nodes must have proper configuration
+    const variableNodes = workflow.nodes.filter((n) => n.type === 'variable');
+    variableNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || !config.variableName || !config.operation) {
+        errors.push(
+          `Variable node "${node.data.label}" must have variableName and operation defined`
+        );
+      }
+    });
+
+    // Error handler nodes validation
+    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler' || n.type === 'error_handler');
+    errorNodes.forEach((node) => {
+      const config = node.data.config;
+      if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
+        errors.push(
+          `Error handler node "${node.data.label}" retryCount must be a non-negative number`
+        );
+      }
+    });
+
+    // Delay nodes validation  
+    const delayNodes = workflow.nodes.filter((n) => n.type === 'delay');
+    delayNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || !config.duration || typeof config.duration !== 'number' || config.duration <= 0) {
+        errors.push(
+          `Delay node "${node.data.label}" must have a positive numeric duration`
+        );
+      }
+    });
+
+    // Loop nodes must have proper configuration
+    const loopNodes = workflow.nodes.filter((n) => n.type === 'loop');
+    loopNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || (!config.maxIterations && !config.condition)) {
+        errors.push(
+          `Loop node "${node.data.label}" must have maxIterations or condition defined`
+        );
+      }
+    });
+
+    // Variable nodes must have proper configuration
+    const variableNodes = workflow.nodes.filter((n) => n.type === 'variable');
+    variableNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || !config.variableName || !config.operation) {
+        errors.push(
+          `Variable node "${node.data.label}" must have variableName and operation defined`
+        );
+      }
+    });
+
+    // Error handler nodes validation
+    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler' || n.type === 'error_handler');
+    errorNodes.forEach((node) => {
+      const config = node.data.config;
+      if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
+        errors.push(
+          `Error handler node "${node.data.label}" retryCount must be a non-negative number`
+        );
+      }
+    });
+
+    // Delay nodes validation  
+    const delayNodes = workflow.nodes.filter((n) => n.type === 'delay');
+    delayNodes.forEach((node) => {
+      const config = node.data.config;
+      if (!config || !config.duration || typeof config.duration !== 'number' || config.duration <= 0) {
+        errors.push(
+          `Delay node "${node.data.label}" must have a positive numeric duration`
         );
       }
     });

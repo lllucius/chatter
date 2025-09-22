@@ -900,9 +900,9 @@ async def validate_workflow_definition(
 ) -> WorkflowValidationResponse:
     """Validate a workflow definition using the modern system."""
     try:
-        from chatter.core.modern_langgraph import modern_workflow_manager
+        from chatter.core.langgraph import workflow_manager
         
-        validation_result = modern_workflow_manager.validate_workflow_definition(nodes, edges)
+        validation_result = workflow_manager.validate_workflow_definition(nodes, edges)
         
         return WorkflowValidationResponse(
             is_valid=validation_result["valid"],
@@ -937,12 +937,12 @@ async def execute_custom_workflow(
 ) -> dict:
     """Execute a custom workflow definition using the modern system."""
     try:
-        from chatter.core.modern_langgraph import modern_workflow_manager
+        from chatter.core.langgraph import workflow_manager
         from chatter.services.llm import LLMService
         from langchain_core.messages import HumanMessage
         
         # Validate the workflow first
-        validation = modern_workflow_manager.validate_workflow_definition(nodes, edges)
+        validation = workflow_manager.validate_workflow_definition(nodes, edges)
         if not validation["valid"]:
             raise ValueError(f"Invalid workflow: {', '.join(validation['errors'])}")
         
@@ -951,7 +951,7 @@ async def execute_custom_workflow(
         llm = await llm_service.get_llm(provider=provider, model=model)
         
         # Create workflow
-        workflow = await modern_workflow_manager.create_custom_workflow(
+        workflow = await workflow_manager.create_custom_workflow(
             nodes=nodes,
             edges=edges,
             llm=llm,
@@ -978,7 +978,7 @@ async def execute_custom_workflow(
         }
         
         # Execute workflow
-        result = await modern_workflow_manager.run_workflow(
+        result = await workflow_manager.run_workflow(
             workflow=workflow,
             initial_state=initial_state,
         )
@@ -1012,9 +1012,9 @@ async def get_modern_supported_node_types(
 ) -> dict:
     """Get supported node types from the modern workflow system."""
     try:
-        from chatter.core.modern_langgraph import modern_workflow_manager
+        from chatter.core.langgraph import workflow_manager
         
-        supported_types = modern_workflow_manager.get_supported_node_types()
+        supported_types = workflow_manager.get_supported_node_types()
         
         # Enhanced node type information
         node_type_details = {

@@ -6,8 +6,6 @@ export interface WorkflowTemplateCreate {
   name: string;
   /** Template description */
   description: string;
-  /** Workflow type */
-  workflow_type: string;
   /** Template category */
   category?: string;
   /** Default parameters */

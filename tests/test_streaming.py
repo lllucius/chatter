@@ -137,12 +137,12 @@ class TestStreamingService:
     async def test_create_stream(self):
         """Test creating a new stream."""
         stream_id = "test_stream_123"
-        workflow_type = "chat_completion"
+        capabilities = {"enable_tools": True, "enable_retrieval": False}
         correlation_id = "corr_456"
 
         await self.service.create_stream(
             stream_id=stream_id,
-            workflow_type=workflow_type,
+            capabilities=capabilities,
             correlation_id=correlation_id,
         )
 
@@ -150,7 +150,7 @@ class TestStreamingService:
         assert stream_id in self.service.stream_metrics
 
         stream_info = self.service.active_streams[stream_id]
-        assert stream_info["workflow_type"] == workflow_type
+        assert stream_info["capabilities"] == capabilities
         assert stream_info["correlation_id"] == correlation_id
         assert stream_info["token_count"] == 0
         assert stream_info["event_count"] == 0
@@ -166,10 +166,10 @@ class TestStreamingService:
         mock_get_correlation_id.return_value = "auto_corr_789"
 
         stream_id = "test_stream_auto"
-        workflow_type = "document_processing"
+        capabilities = {"enable_retrieval": True, "enable_tools": False}
 
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type=workflow_type
+            stream_id=stream_id, capabilities=capabilities
         )
 
         stream_info = self.service.active_streams[stream_id]
@@ -182,7 +182,7 @@ class TestStreamingService:
         stream_id = "metrics_test_stream"
 
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         metrics = self.service.stream_metrics[stream_id]
@@ -199,7 +199,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         # Simulate some activity
@@ -235,7 +235,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         # Create async generator for streaming
@@ -269,7 +269,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="chat_completion"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         token_content = "world"
@@ -303,7 +303,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="tool_execution"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         tool_name = "calculator"
@@ -339,7 +339,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="reasoning"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         thinking_content = "Let me analyze this problem..."
@@ -360,7 +360,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="document_search"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         source_info = {
@@ -388,7 +388,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         error_message = "Test error occurred"
@@ -414,7 +414,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         final_result = {"status": "success", "total_tokens": 150}
@@ -435,7 +435,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         metadata = {
@@ -460,7 +460,7 @@ class TestStreamingService:
 
         # Create stream
         await self.service.create_stream(
-            stream_id=stream_id, workflow_type="test_workflow"
+            stream_id=stream_id, capabilities={"enable_tools": True}
         )
 
         # Simulate some activity
@@ -617,10 +617,10 @@ class TestStreamingServiceIntegration:
     async def test_complete_streaming_workflow(self):
         """Test complete streaming workflow from start to finish."""
         stream_id = "complete_workflow_stream"
-        workflow_type = "chat_completion"
+        capabilities = "chat_completion"
 
         # 1. Create stream
-        await self.service.create_stream(stream_id, workflow_type)
+        await self.service.create_stream(stream_id, capabilities)
         assert self.service.is_stream_active(stream_id)
 
         # 2. Stream various events

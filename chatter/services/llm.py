@@ -1035,11 +1035,12 @@ class LLMService:
     async def create_langgraph_workflow(
         self,
         provider_name: str | None,
-        workflow_type: str = "plain",  # "plain" | "rag" | "tools" | "full"
+        enable_retrieval: bool = False,
+        enable_tools: bool = False,
+        enable_memory: bool = False,
         system_message: str | None = None,
         retriever=None,
         tools: list[Any] | None = None,
-        enable_memory: bool = False,
         memory_window: int = 4,
         max_tool_calls: int | None = None,
         max_documents: int | None = None,
@@ -1075,22 +1076,19 @@ class LLMService:
                 provider = await self.get_provider(provider_name)
 
         # Get default tools if needed
-        if workflow_type in ("tools", "full") and not tools:
+        if enable_tools and not tools:
             tools = await get_mcp_service().get_tools()
             tools.extend(get_builtin_tools())
 
-        # Note: do NOT hard-require a retriever; the workflow handles missing retriever gracefully.
-        mode = (
-            workflow_type
-            if workflow_type
-            in (
-                "plain",
-                "rag",
-                "tools",
-                "full",
-            )
-            else "plain"
-        )
+        # Determine workflow mode based on capabilities
+        if enable_retrieval and enable_tools:
+            mode = "full"
+        elif enable_tools:
+            mode = "tools"
+        elif enable_retrieval:
+            mode = "rag"
+        else:
+            mode = "plain"
 
         # Use the unified create_workflow method
         return await workflow_manager.create_workflow(

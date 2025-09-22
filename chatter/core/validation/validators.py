@@ -811,18 +811,18 @@ class WorkflowValidator(BaseValidator):
         errors = []
 
         # Handle simple workflow type validation (for workflow execution service)
-        if "workflow_type" in config and len(config) == 1:
-            workflow_type = config["workflow_type"]
+        if "workflow_mode" in config and len(config) == 1:
+            workflow_mode = config["workflow_mode"]
             valid_types = [
                 "plain",
                 "rag",
                 "tools",
                 "full",
             ]
-            if workflow_type not in valid_types:
+            if workflow_mode not in valid_types:
                 errors.append(
                     ValidationError(
-                        f"Invalid workflow type: {workflow_type}. Must be one of {valid_types}"
+                        f"Invalid workflow type: {workflow_mode}. Must be one of {valid_types}"
                     )
                 )
         else:

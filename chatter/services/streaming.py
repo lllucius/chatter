@@ -68,14 +68,14 @@ class StreamingService:
     async def create_stream(
         self,
         stream_id: str,
-        workflow_type: str,
+        capabilities: dict[str, Any] | None = None,
         correlation_id: str | None = None,
     ) -> None:
         """Create a new streaming session.
 
         Args:
             stream_id: Unique stream identifier
-            workflow_type: Type of workflow being streamed
+            capabilities: Workflow capabilities information
             correlation_id: Optional correlation ID
         """
         if correlation_id is None:
@@ -88,7 +88,7 @@ class StreamingService:
                 correlation_id = f"stream_{generate_ulid()}"
 
         self.active_streams[stream_id] = {
-            "workflow_type": workflow_type,
+            "capabilities": capabilities or {},
             "correlation_id": correlation_id,
             "start_time": time.time(),
             "token_count": 0,
@@ -106,7 +106,7 @@ class StreamingService:
         logger.info(
             "Created streaming session",
             stream_id=stream_id,
-            workflow_type=workflow_type,
+            capabilities=capabilities,
             correlation_id=correlation_id,
         )
 
@@ -138,8 +138,22 @@ class StreamingService:
             )
 
         # Record workflow metrics
+        capabilities = stream_info.get('capabilities', {})
+        enable_retrieval = capabilities.get('enable_retrieval', False)
+        enable_tools = capabilities.get('enable_tools', False)
+        
+        # Derive mode for metrics
+        if enable_retrieval and enable_tools:
+            mode = "full_streaming"
+        elif enable_tools:
+            mode = "tools_streaming"
+        elif enable_retrieval:
+            mode = "rag_streaming"
+        else:
+            mode = "plain_streaming"
+            
         record_workflow_metrics(
-            workflow_type=f"{stream_info['workflow_type']}_streaming",
+            workflow_mode=mode,
             workflow_id=stream_id,
             step="complete",
             duration_ms=total_duration * 1000,
@@ -451,7 +465,7 @@ class StreamingService:
 
         return {
             "stream_id": stream_id,
-            "workflow_type": stream_info["workflow_type"],
+            "capabilities": stream_info["capabilities"],
             "correlation_id": stream_info["correlation_id"],
             "status": "active",
             "duration_seconds": duration,
@@ -837,7 +851,7 @@ class StreamingService:
 
         return {
             "stream_id": stream_id,
-            "workflow_type": stream_info["workflow_type"],
+            "capabilities": stream_info["capabilities"],
             "correlation_id": stream_info["correlation_id"],
             "status": "active",
             "duration_seconds": duration,
@@ -903,12 +917,14 @@ class StreamingService:
             "total_events_streaming": total_events,
             "avg_tokens_per_stream": avg_tokens_per_stream,
             "avg_events_per_stream": avg_events_per_stream,
-            "workflow_types": list(
-                {
-                    info["workflow_type"]
-                    for info in self.active_streams.values()
-                }
-            ),
+            "capability_summary": {
+                "enable_retrieval": sum(1 for info in self.active_streams.values() 
+                                      if info.get("capabilities", {}).get("enable_retrieval", False)),
+                "enable_tools": sum(1 for info in self.active_streams.values() 
+                                  if info.get("capabilities", {}).get("enable_tools", False)),
+                "enable_memory": sum(1 for info in self.active_streams.values() 
+                                   if info.get("capabilities", {}).get("enable_memory", True)),
+            },
         }
 
 

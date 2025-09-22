@@ -151,7 +151,6 @@ class WorkflowTemplateBase(BaseModel):
         ..., min_length=1, max_length=255, description="Template name"
     )
     description: str = Field(..., min_length=1, description="Template description")
-    workflow_type: str = Field(..., description="Workflow type")
     category: str = Field(
         default="custom", description="Template category"
     )

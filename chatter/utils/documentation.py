@@ -385,7 +385,6 @@ class APIDocumentationEnhancer:
                 "templates": {
                     "customer_support": {
                         "name": "customer_support",
-                        "workflow_type": "full",
                         "description": "Customer support with knowledge base and tools",
                         "required_tools": [
                             "search_kb",
@@ -396,7 +395,6 @@ class APIDocumentationEnhancer:
                     },
                     "code_assistant": {
                         "name": "code_assistant",
-                        "workflow_type": "tools",
                         "description": "Programming assistant with code tools",
                         "required_tools": [
                             "execute_code",

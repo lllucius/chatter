@@ -30,7 +30,6 @@ class WorkflowTemplateCreate(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Template name")
     description: Annotated[str, Field(min_length=1, strict=True)] = Field(description="Template description")
-    workflow_type: StrictStr = Field(description="Workflow type")
     category: Optional[StrictStr] = Field(default='custom', description="Template category")
     default_params: Optional[Dict[str, Any]] = Field(default=None, description="Default parameters")
     required_tools: Optional[List[StrictStr]] = None
@@ -39,7 +38,7 @@ class WorkflowTemplateCreate(BaseModel):
     is_public: Optional[StrictBool] = Field(default=False, description="Whether template is public")
     workflow_definition_id: Optional[StrictStr] = None
     base_template_id: Optional[StrictStr] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "workflow_type", "category", "default_params", "required_tools", "required_retrievers", "tags", "is_public", "workflow_definition_id", "base_template_id"]
+    __properties: ClassVar[List[str]] = ["name", "description", "category", "default_params", "required_tools", "required_retrievers", "tags", "is_public", "workflow_definition_id", "base_template_id"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -119,7 +118,6 @@ class WorkflowTemplateCreate(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "description": obj.get("description"),
-            "workflow_type": obj.get("workflow_type"),
             "category": obj.get("category") if obj.get("category") is not None else 'custom',
             "default_params": obj.get("default_params"),
             "required_tools": obj.get("required_tools"),

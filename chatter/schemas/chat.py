@@ -212,7 +212,6 @@ class WorkflowTemplateInfo(BaseModel):
     """Schema for workflow template information."""
 
     name: str = Field(..., description="Template name")
-    workflow_type: str = Field(..., description="Workflow type")
     description: str = Field(..., description="Template description")
     required_tools: list[str] = Field(..., description="Required tools")
     required_retrievers: list[str] = Field(
@@ -249,9 +248,6 @@ class PerformanceStatsResponse(BaseModel):
     max_execution_time_ms: int = Field(
         ..., description="Maximum execution time in milliseconds"
     )
-    workflow_types: dict[str, int] = Field(
-        ..., description="Execution count by workflow type"
-    )
     error_counts: dict[str, int] = Field(
         ..., description="Error count by type"
     )
@@ -275,10 +271,18 @@ class ChatRequest(BaseModel):
         None, description="Profile ID to use"
     )
 
-    # Workflow selection - dynamic workflow type
-    workflow_type: str = Field(
-        default="plain",
-        description="Dynamic workflow type identifier",
+    # Workflow capability flags
+    enable_retrieval: bool = Field(
+        default=False, description="Enable retrieval capabilities"
+    )
+    enable_tools: bool = Field(
+        default=False, description="Enable tool calling capabilities"
+    )
+    enable_memory: bool = Field(
+        default=True, description="Enable memory capabilities"
+    )
+    enable_web_search: bool = Field(
+        default=False, description="Enable web search capabilities"
     )
 
     # Provider override (optional)
@@ -295,9 +299,6 @@ class ChatRequest(BaseModel):
     )
     context_limit: int | None = Field(
         None, ge=1, description="Context limit override"
-    )
-    enable_retrieval: bool | None = Field(
-        None, description="Enable retrieval override"
     )
     document_ids: list[str] | None = Field(
         None, description="Document IDs to include in context"

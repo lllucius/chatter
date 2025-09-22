@@ -449,7 +449,6 @@ class WorkflowManagementService:
         owner_id: str,
         name: str,
         description: str,
-        workflow_type: str,
         category: str = "custom",
         default_params: dict[str, Any] | None = None,
         required_tools: list[str] | None = None,
@@ -461,17 +460,11 @@ class WorkflowManagementService:
     ) -> WorkflowTemplate:
         """Create a new workflow template."""
         try:
-            # Validate workflow type is a valid string (no longer enum-based)
-            if not workflow_type or not isinstance(workflow_type, str):
-                raise ValueError(
-                    "workflow_type must be a non-empty string"
-                )
-
             category_enum = TemplateCategory(category)
 
             # Generate config hash
             config_str = (
-                f"{name}:{workflow_type}:{str(default_params or {})}"
+                f"{name}:{str(default_params or {})}"
             )
             config_hash = hashlib.sha256(
                 config_str.encode("utf-8")
@@ -482,7 +475,6 @@ class WorkflowManagementService:
                 owner_id=owner_id,
                 name=name,
                 description=description,
-                workflow_type=workflow_type,  # Now using string directly
                 category=category_enum,
                 default_params=default_params or {},
                 required_tools=required_tools,
@@ -490,9 +482,7 @@ class WorkflowManagementService:
                 base_template_id=base_template_id,
                 is_public=is_public,
                 is_dynamic=True,  # Mark new templates as dynamic
-                execution_pattern=(
-                    "chat" if "chat" in workflow_type.lower() else None
-                ),
+                execution_pattern="chat",  # Default to chat pattern
                 tags=tags,
                 config_hash=config_hash,
             )
@@ -606,7 +596,7 @@ class WorkflowManagementService:
 
             # Regenerate config hash if params changed
             if "default_params" in updates:
-                config_str = f"{template.name}:{template.workflow_type.value}:{str(template.default_params)}"
+                config_str = f"{template.name}:{str(template.default_params)}"
                 template.config_hash = hashlib.sha256(
                     config_str.encode("utf-8")
                 ).hexdigest()
@@ -747,9 +737,10 @@ class WorkflowManagementService:
                 metadata={
                     "generated_from_template": template_id,
                     "template_name": template.name,
-                    "template_type": template.workflow_type,
                     "user_input": user_input,
                     "is_temporary": is_temporary,
+                    "required_tools": template.required_tools,
+                    "required_retrievers": template.required_retrievers,
                 },
                 template_id=template_id,
             )
@@ -773,7 +764,7 @@ class WorkflowManagementService:
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Generate workflow nodes and edges from a template using capability-based approach.
 
-        This creates a workflow structure based on the template's capabilities
+        This creates a workflow structure based on the template's configuration
         rather than hardcoded workflow types.
 
         Args:
@@ -787,10 +778,10 @@ class WorkflowManagementService:
             WorkflowCapabilities,
         )
 
-        # Convert workflow type to capabilities
-        workflow_type = template.workflow_type or "plain"
-        capabilities = WorkflowCapabilities.from_workflow_type(
-            workflow_type
+        # Generate capabilities dynamically based on template configuration
+        capabilities = WorkflowCapabilities.from_template_configuration(
+            required_tools=template.required_tools,
+            required_retrievers=template.required_retrievers,
         )
 
         # Generate workflow based on capabilities

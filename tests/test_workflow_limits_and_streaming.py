@@ -419,7 +419,7 @@ class TestWorkflowExecutionService:
             mock_get_manager.return_value = mock_workflow_manager
 
             # Mock stream_workflow to return proper streaming events
-            async def mock_stream_workflow(workflow_type, state):
+            async def mock_stream_workflow(capabilities, state):
                 events = [
                     {"type": "token", "content": "Hello"},
                     {"type": "token", "content": " "},
@@ -474,7 +474,7 @@ class TestWorkflowExecutionService:
             mock_get_manager.return_value = mock_workflow_manager
 
             # Mock slow streaming response
-            async def slow_stream_workflow(workflow_type, state):
+            async def slow_stream_workflow(capabilities, state):
                 await asyncio.sleep(2)  # Simulate slow start
                 yield {"type": "token", "content": "slow"}
                 yield {"type": "complete", "usage": {"tokens": 1}}
@@ -535,7 +535,7 @@ class TestWorkflowExecutionService:
             mock_get_manager.return_value = mock_workflow_manager
 
             # Mock streaming workflow response
-            async def mock_stream_workflow(workflow_type, state):
+            async def mock_stream_workflow(capabilities, state):
                 events = [
                     {"type": "thinking", "thought": "Processing..."},
                     {"type": "token", "content": "Test"},
@@ -561,12 +561,12 @@ class TestWorkflowExecutionService:
             )
 
             # Test different workflow types
-            for workflow_type in [
+            for capabilities in [
                 "rag",
                 "tools",
                 "full",
             ]:
-                self.chat_request.workflow = workflow_type
+                self.chat_request.workflow = capabilities
 
                 chunks = []
                 async for (
@@ -586,7 +586,7 @@ class TestWorkflowExecutionService:
                 token_chunks = [c for c in chunks if c.type == "token"]
                 assert (
                     len(token_chunks) > 0
-                ), f"No token chunks for {workflow_type}"
+                ), f"No token chunks for {capabilities}"
 
 
 if __name__ == "__main__":

@@ -30,45 +30,21 @@ class WorkflowCapabilities:
     custom_capabilities: dict[str, Any] = field(default_factory=dict)
 
     @classmethod
-    def from_workflow_type(
-        cls, workflow_type: str
+    def from_template_configuration(
+        cls, required_tools: list[str] | None = None, required_retrievers: list[str] | None = None, **kwargs
     ) -> WorkflowCapabilities:
-        """Create capabilities from workflow type."""
-        # Handle modern workflow types only
-        if workflow_type == "plain":
-            return cls()
-        elif workflow_type == "rag":
-            return cls(
-                enable_retrieval=True,
-                max_documents=10,
-                memory_window=30,
-            )
-        elif workflow_type == "tools":
-            return cls(
-                enable_tools=True, max_tool_calls=10, memory_window=100
-            )
-        elif workflow_type == "full":
-            return cls(
-                enable_retrieval=True,
-                enable_tools=True,
-                max_tool_calls=5,
-                max_documents=10,
-                memory_window=50,
-            )
-        else:
-            # Custom or unknown type - default to plain capabilities
-            return cls()
-
-    def get_workflow_type(self) -> str:
-        """Get the appropriate workflow type for these capabilities."""
-        if self.enable_retrieval and self.enable_tools:
-            return "full"
-        elif self.enable_tools:
-            return "tools"
-        elif self.enable_retrieval:
-            return "rag"
-        else:
-            return "plain"
+        """Create capabilities from template configuration."""
+        return cls(
+            enable_retrieval=bool(required_retrievers),
+            enable_tools=bool(required_tools),
+            enable_memory=True,
+            enable_streaming=True,
+            enable_caching=True,
+            max_tool_calls=len(required_tools or []) * 2 or 10,
+            max_documents=10,
+            memory_window=50,
+            **kwargs
+        )
 
     def requires_tools(self) -> bool:
         """Check if workflow requires tools."""
@@ -153,12 +129,12 @@ class WorkflowSpec:
     @classmethod
     def from_chat_request(cls, chat_request) -> WorkflowSpec:
         """Create workflow spec from ChatRequest."""
-        # Determine capabilities from workflow type
-        workflow_type = getattr(
-            chat_request, 'workflow_type', None
-        ) or getattr(chat_request, 'workflow', 'plain')
-        capabilities = WorkflowCapabilities.from_workflow_type(
-            workflow_type
+        # Determine capabilities from request configuration
+        capabilities = WorkflowCapabilities(
+            enable_retrieval=getattr(chat_request, 'enable_retrieval', False),
+            enable_tools=getattr(chat_request, 'enable_tools', False),
+            enable_memory=getattr(chat_request, 'enable_memory', True),
+            enable_web_search=getattr(chat_request, 'enable_web_search', False),
         )
 
         return cls(

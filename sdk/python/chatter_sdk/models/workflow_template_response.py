@@ -30,7 +30,6 @@ class WorkflowTemplateResponse(BaseModel):
     """ # noqa: E501
     name: Annotated[str, Field(min_length=1, strict=True, max_length=255)] = Field(description="Template name")
     description: Annotated[str, Field(min_length=1, strict=True)] = Field(description="Template description")
-    workflow_type: StrictStr = Field(description="Workflow type")
     category: Optional[StrictStr] = Field(default='custom', description="Template category")
     default_params: Optional[Dict[str, Any]] = Field(default=None, description="Default parameters")
     required_tools: Optional[List[StrictStr]] = None
@@ -49,7 +48,7 @@ class WorkflowTemplateResponse(BaseModel):
     success_rate: Optional[Union[StrictFloat, StrictInt]] = None
     config_hash: StrictStr = Field(description="Configuration hash")
     estimated_complexity: Optional[StrictInt] = None
-    __properties: ClassVar[List[str]] = ["name", "description", "workflow_type", "category", "default_params", "required_tools", "required_retrievers", "tags", "is_public", "id", "owner_id", "base_template_id", "is_builtin", "version", "is_latest", "rating", "rating_count", "usage_count", "success_rate", "config_hash", "estimated_complexity"]
+    __properties: ClassVar[List[str]] = ["name", "description", "category", "default_params", "required_tools", "required_retrievers", "tags", "is_public", "id", "owner_id", "base_template_id", "is_builtin", "version", "is_latest", "rating", "rating_count", "usage_count", "success_rate", "config_hash", "estimated_complexity"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -139,7 +138,6 @@ class WorkflowTemplateResponse(BaseModel):
         _obj = cls.model_validate({
             "name": obj.get("name"),
             "description": obj.get("description"),
-            "workflow_type": obj.get("workflow_type"),
             "category": obj.get("category") if obj.get("category") is not None else 'custom',
             "default_params": obj.get("default_params"),
             "required_tools": obj.get("required_tools"),

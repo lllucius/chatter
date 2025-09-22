@@ -1,0 +1,503 @@
+"""Flexible workflow graph builder that supports all node types.
+
+This module provides a modern graph construction system that can build
+complex workflow topologies from definitions, replacing the hardcoded
+approach in the original LangGraphWorkflowManager.
+"""
+
+from __future__ import annotations
+
+from typing import Any, Dict, List, Optional, Set, Tuple
+
+from langchain_core.language_models import BaseChatModel
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage
+from langgraph.graph import END, StateGraph
+from langgraph.pregel import Pregel
+
+from chatter.core.workflow_node_factory import (
+    WorkflowNode,
+    WorkflowNodeContext,
+    WorkflowNodeFactory,
+)
+from chatter.utils.logging import get_logger
+
+logger = get_logger(__name__)
+
+
+class WorkflowDefinition:
+    """Definition of a workflow with nodes and edges."""
+    
+    def __init__(self):
+        self.nodes: List[Dict[str, Any]] = []
+        self.edges: List[Dict[str, Any]] = []
+        self.entry_point: Optional[str] = None
+        
+    def add_node(self, node_id: str, node_type: str, config: Dict[str, Any] | None = None) -> None:
+        """Add a node to the workflow definition."""
+        self.nodes.append({
+            "id": node_id,
+            "type": node_type,
+            "config": config or {}
+        })
+        
+    def add_edge(self, source: str, target: str, condition: str | None = None) -> None:
+        """Add an edge between two nodes."""
+        self.edges.append({
+            "source": source,
+            "target": target,
+            "condition": condition,
+            "type": "conditional" if condition else "regular"
+        })
+        
+    def set_entry_point(self, node_id: str) -> None:
+        """Set the entry point for the workflow."""
+        self.entry_point = node_id
+
+
+class WorkflowGraphBuilder:
+    """Builds LangGraph workflows from flexible definitions."""
+    
+    def __init__(self):
+        self.node_factory = WorkflowNodeFactory()
+        
+    def build_graph(
+        self,
+        definition: WorkflowDefinition,
+        llm: BaseChatModel,
+        retriever: Any = None,
+        tools: List[Any] | None = None,
+        **kwargs
+    ) -> Pregel:
+        """Build a LangGraph workflow from a definition."""
+        
+        # Validate the definition
+        self._validate_definition(definition)
+        
+        # Create the state graph
+        workflow = StateGraph(WorkflowNodeContext)
+        
+        # Create and add all nodes
+        nodes = self._create_nodes(definition, llm, retriever, tools, **kwargs)
+        
+        for node_id, node in nodes.items():
+            workflow.add_node(node_id, self._create_node_function(node))
+            
+        # Add edges
+        self._add_edges(workflow, definition, nodes)
+        
+        # Set entry point
+        if definition.entry_point:
+            workflow.set_entry_point(definition.entry_point)
+        else:
+            # Auto-detect entry point
+            entry_point = self._find_entry_point(definition)
+            if entry_point:
+                workflow.set_entry_point(entry_point)
+            else:
+                raise ValueError("No entry point found or specified")
+                
+        return workflow
+        
+    def _validate_definition(self, definition: WorkflowDefinition) -> None:
+        """Validate the workflow definition."""
+        if not definition.nodes:
+            raise ValueError("Workflow must have at least one node")
+            
+        # Check for duplicate node IDs
+        node_ids = [node["id"] for node in definition.nodes]
+        if len(node_ids) != len(set(node_ids)):
+            raise ValueError("Workflow has duplicate node IDs")
+            
+        # Check that all edge references exist
+        for edge in definition.edges:
+            source, target = edge["source"], edge["target"]
+            if source not in node_ids:
+                raise ValueError(f"Edge references non-existent source node: {source}")
+            if target not in node_ids and target != END:
+                raise ValueError(f"Edge references non-existent target node: {target}")
+                
+        # Check for cycles (basic detection)
+        self._check_for_cycles(definition)
+        
+    def _check_for_cycles(self, definition: WorkflowDefinition) -> None:
+        """Basic cycle detection in the workflow graph."""
+        # Build adjacency list
+        graph = {}
+        for node in definition.nodes:
+            graph[node["id"]] = []
+            
+        for edge in definition.edges:
+            if edge["target"] != END:
+                graph[edge["source"]].append(edge["target"])
+                
+        # DFS cycle detection
+        visited = set()
+        rec_stack = set()
+        
+        def has_cycle(node: str) -> bool:
+            visited.add(node)
+            rec_stack.add(node)
+            
+            for neighbor in graph.get(node, []):
+                if neighbor not in visited:
+                    if has_cycle(neighbor):
+                        return True
+                elif neighbor in rec_stack:
+                    return True
+                    
+            rec_stack.remove(node)
+            return False
+            
+        for node_id in graph:
+            if node_id not in visited:
+                if has_cycle(node_id):
+                    raise ValueError("Workflow contains cycles")
+                    
+    def _create_nodes(
+        self,
+        definition: WorkflowDefinition,
+        llm: BaseChatModel,
+        retriever: Any = None,
+        tools: List[Any] | None = None,
+        **kwargs
+    ) -> Dict[str, WorkflowNode]:
+        """Create all nodes from the definition."""
+        nodes = {}
+        
+        for node_def in definition.nodes:
+            node_id = node_def["id"]
+            node_type = node_def["type"]
+            node_config = node_def["config"]
+            
+            # Create the node
+            if node_type in ["call_model", "model", "llm"]:
+                # Special handling for LLM nodes
+                node = self._create_llm_node(node_id, llm, tools, node_config, **kwargs)
+            elif node_type in ["execute_tools", "tool", "tools"]:
+                # Special handling for tool nodes
+                node = self._create_tool_node(node_id, tools, node_config, **kwargs)
+            else:
+                # Use the factory for other node types
+                node = self.node_factory.create_node(node_type, node_id, node_config)
+                
+                # Set up dependencies
+                if hasattr(node, "set_llm"):
+                    node.set_llm(llm)
+                if hasattr(node, "set_retriever") and retriever:
+                    node.set_retriever(retriever)
+                    
+            nodes[node_id] = node
+            
+        return nodes
+        
+    def _create_llm_node(
+        self,
+        node_id: str,
+        llm: BaseChatModel,
+        tools: List[Any] | None = None,
+        config: Dict[str, Any] | None = None,
+        **kwargs
+    ) -> WorkflowNode:
+        """Create a specialized LLM node."""
+        from chatter.core.workflow_node_factory import WorkflowNode
+        
+        class LLMNode(WorkflowNode):
+            def __init__(self, node_id: str, llm: BaseChatModel, tools: List[Any] | None = None, config: Dict[str, Any] | None = None, **kwargs):
+                super().__init__(node_id, config)
+                self.llm = llm.bind_tools(tools) if tools else llm
+                self.llm_for_final = llm  # Without tools for final responses
+                self.system_message = config.get("system_message") if config else None
+                self.kwargs = kwargs
+                
+            async def execute(self, context: WorkflowNodeContext) -> Dict[str, Any]:
+                """Execute LLM call with context."""
+                messages = list(context["messages"])
+                messages = self._apply_context(context, messages)
+                
+                try:
+                    response = await self.llm.ainvoke(messages, **self.kwargs)
+                    return {"messages": [response]}
+                except Exception as e:
+                    logger.error(f"LLM call failed: {e}")
+                    return {
+                        "messages": [AIMessage(content=f"I encountered an error: {str(e)}")],
+                        "error_state": {
+                            **context.get("error_state", {}),
+                            f"llm_error_{self.node_id}": str(e),
+                        }
+                    }
+                    
+            def _apply_context(self, context: WorkflowNodeContext, messages: List[BaseMessage]) -> List[BaseMessage]:
+                """Apply system message, memory summary, and retrieval context."""
+                prefixed = []
+                
+                # Add conversation summary if available
+                if context.get("conversation_summary"):
+                    summary = context["conversation_summary"]
+                    if not summary.lower().startswith(("summary:", "context:", "previous conversation:")):
+                        summary = f"Context from previous conversation: {summary}"
+                    prefixed.append(SystemMessage(content=summary))
+                    
+                # Add system message with retrieval context
+                system_content = self.system_message or "You are a helpful assistant."
+                if context.get("retrieval_context"):
+                    system_content += f"\n\nContext:\n{context['retrieval_context']}"
+                    
+                prefixed.append(SystemMessage(content=system_content))
+                
+                return prefixed + messages
+                
+        return LLMNode(node_id, llm, tools, config, **kwargs)
+        
+    def _create_tool_node(
+        self,
+        node_id: str,
+        tools: List[Any] | None = None,
+        config: Dict[str, Any] | None = None,
+        **kwargs
+    ) -> WorkflowNode:
+        """Create a specialized tool execution node."""
+        from chatter.core.workflow_node_factory import WorkflowNode
+        
+        class ToolNode(WorkflowNode):
+            def __init__(self, node_id: str, tools: List[Any] | None = None, config: Dict[str, Any] | None = None, **kwargs):
+                super().__init__(node_id, config)
+                self.tools = tools or []
+                self.max_tool_calls = config.get("max_tool_calls", 10) if config else 10
+                
+            async def execute(self, context: WorkflowNodeContext) -> Dict[str, Any]:
+                """Execute tool calls from the last AI message."""
+                if not self.tools:
+                    return {}
+                    
+                messages = list(context["messages"])
+                last_message = messages[-1] if messages else None
+                
+                if not last_message or not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
+                    return {}
+                    
+                tool_messages = []
+                current_tool_count = context.get("tool_call_count", 0)
+                
+                for tool_call in last_message.tool_calls:
+                    tool_name = tool_call.get("name")
+                    tool_args = tool_call.get("args", {})
+                    tool_id = tool_call.get("id")
+                    
+                    # Find the tool
+                    tool_obj = None
+                    for tool in self.tools:
+                        t_name = getattr(tool, "name", None) or getattr(tool, "__name__", None)
+                        if t_name == tool_name:
+                            tool_obj = tool
+                            break
+                            
+                    if not tool_obj:
+                        tool_messages.append(ToolMessage(
+                            content=f"Error: tool '{tool_name}' not found.",
+                            tool_call_id=tool_id or "",
+                        ))
+                        continue
+                        
+                    try:
+                        # Execute the tool
+                        if hasattr(tool_obj, "ainvoke"):
+                            result = await tool_obj.ainvoke(tool_args)
+                        elif hasattr(tool_obj, "invoke"):
+                            result = tool_obj.invoke(tool_args)
+                        elif callable(tool_obj):
+                            result = tool_obj(tool_args)
+                        else:
+                            raise RuntimeError(f"Tool {tool_name} is not callable")
+                            
+                        tool_messages.append(ToolMessage(
+                            content=str(result) if result is not None else f"Tool {tool_name} completed",
+                            tool_call_id=tool_id or "",
+                        ))
+                        current_tool_count += 1
+                        
+                    except Exception as e:
+                        logger.error(f"Tool execution failed: {e}")
+                        tool_messages.append(ToolMessage(
+                            content=f"Error executing {tool_name}: {str(e)}",
+                            tool_call_id=tool_id or "",
+                        ))
+                        
+                return {
+                    "messages": tool_messages,
+                    "tool_call_count": current_tool_count,
+                }
+                
+        return ToolNode(node_id, tools, config, **kwargs)
+        
+    def _create_node_function(self, node: WorkflowNode):
+        """Create a function wrapper for the node to use in LangGraph."""
+        async def node_function(state: WorkflowNodeContext) -> Dict[str, Any]:
+            try:
+                return await node.execute(state)
+            except Exception as e:
+                logger.error(f"Node {node.node_id} execution failed: {e}")
+                return {
+                    "error_state": {
+                        **state.get("error_state", {}),
+                        f"node_error_{node.node_id}": str(e),
+                    }
+                }
+        return node_function
+        
+    def _add_edges(
+        self,
+        workflow: StateGraph,
+        definition: WorkflowDefinition,
+        nodes: Dict[str, WorkflowNode]
+    ) -> None:
+        """Add edges to the workflow graph."""
+        # Group edges by source to handle conditional edges
+        edges_by_source = {}
+        for edge in definition.edges:
+            source = edge["source"]
+            if source not in edges_by_source:
+                edges_by_source[source] = []
+            edges_by_source[source].append(edge)
+            
+        for source, edges in edges_by_source.items():
+            # Check if any edges are conditional
+            conditional_edges = [e for e in edges if e.get("condition")]
+            regular_edges = [e for e in edges if not e.get("condition")]
+            
+            if conditional_edges:
+                # Create conditional routing function
+                def create_router(source_node_id: str, edge_list: List[Dict[str, Any]]):
+                    async def route_function(state: WorkflowNodeContext) -> str:
+                        # Check conditional results
+                        conditional_results = state.get("conditional_results", {})
+                        
+                        for edge in edge_list:
+                            if edge.get("condition"):
+                                condition = edge["condition"]
+                                # Simple condition evaluation for routing
+                                if self._evaluate_routing_condition(condition, state):
+                                    return edge["target"]
+                                    
+                        # Default to first non-conditional edge or END
+                        for edge in edge_list:
+                            if not edge.get("condition"):
+                                return edge["target"]
+                        return str(END)
+                        
+                    return route_function
+                    
+                router = create_router(source, edges)
+                workflow.add_conditional_edges(source, router)
+            else:
+                # Add regular edges
+                for edge in regular_edges:
+                    workflow.add_edge(source, edge["target"])
+                    
+    def _evaluate_routing_condition(self, condition: str, state: WorkflowNodeContext) -> bool:
+        """Evaluate a routing condition for edge selection."""
+        # Simple condition evaluation - can be extended
+        condition = condition.lower().strip()
+        
+        # Check tool call count conditions
+        if "tool_calls" in condition:
+            tool_count = state.get("tool_call_count", 0)
+            if ">" in condition:
+                threshold = int(condition.split(">")[1].strip())
+                return tool_count > threshold
+            elif "<" in condition:
+                threshold = int(condition.split("<")[1].strip())
+                return tool_count < threshold
+                
+        # Check error conditions
+        if "has_errors" in condition:
+            error_state = state.get("error_state", {})
+            return bool(error_state)
+            
+        # Check variable conditions
+        if "variable" in condition and "equals" in condition:
+            parts = condition.split()
+            if len(parts) >= 3:
+                var_name = parts[1]
+                expected_value = parts[3]
+                variables = state.get("variables", {})
+                actual_value = variables.get(var_name)
+                return str(actual_value) == expected_value
+                
+        return True
+        
+    def _find_entry_point(self, definition: WorkflowDefinition) -> Optional[str]:
+        """Find the entry point node (node with no incoming edges)."""
+        targets = {edge["target"] for edge in definition.edges if edge["target"] != END}
+        sources = {edge["source"] for edge in definition.edges}
+        
+        # Find nodes that are sources but not targets (entry points)
+        entry_candidates = sources - targets
+        
+        if len(entry_candidates) == 1:
+            return entry_candidates.pop()
+        elif len(entry_candidates) > 1:
+            # Multiple entry points - prefer 'start' node if it exists
+            for node in definition.nodes:
+                if node["type"] == "start" and node["id"] in entry_candidates:
+                    return node["id"]
+            # Otherwise return the first one
+            return entry_candidates.pop()
+        else:
+            # No clear entry point, return first node
+            return definition.nodes[0]["id"] if definition.nodes else None
+
+
+def create_simple_workflow_definition(
+    enable_memory: bool = False,
+    enable_retrieval: bool = False,
+    enable_tools: bool = False,
+    memory_window: int = 10,
+    max_tool_calls: int = 10,
+    system_message: str | None = None
+) -> WorkflowDefinition:
+    """Create a simple workflow definition similar to the original hardcoded approach."""
+    definition = WorkflowDefinition()
+    
+    # Add nodes based on capabilities
+    if enable_memory:
+        definition.add_node("manage_memory", "memory", {"memory_window": memory_window})
+        
+    if enable_retrieval:
+        definition.add_node("retrieve_context", "retrieval", {})
+        
+    definition.add_node("call_model", "llm", {"system_message": system_message})
+    
+    if enable_tools:
+        definition.add_node("execute_tools", "tools", {"max_tool_calls": max_tool_calls})
+        definition.add_node("finalize_response", "llm", {"system_message": "Provide a final response based on the tool results."})
+        
+    # Add edges to create the workflow flow
+    entry = None
+    if enable_memory:
+        entry = "manage_memory"
+        if enable_retrieval:
+            definition.add_edge("manage_memory", "retrieve_context")
+            definition.add_edge("retrieve_context", "call_model")
+        else:
+            definition.add_edge("manage_memory", "call_model")
+    else:
+        if enable_retrieval:
+            entry = "retrieve_context"
+            definition.add_edge("retrieve_context", "call_model")
+        else:
+            entry = "call_model"
+            
+    if enable_tools:
+        definition.add_edge("call_model", "execute_tools", "has_tool_calls")
+        definition.add_edge("call_model", END, "no_tool_calls")
+        definition.add_edge("execute_tools", "call_model")
+        definition.add_edge("execute_tools", "finalize_response", "tool_calls > " + str(max_tool_calls))
+        definition.add_edge("finalize_response", END)
+    else:
+        definition.add_edge("call_model", END)
+        
+    if entry:
+        definition.set_entry_point(entry)
+        
+    return definition

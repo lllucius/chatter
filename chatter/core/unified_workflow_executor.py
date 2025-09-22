@@ -205,7 +205,7 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
-            performance_monitor.start_workflow(workflow_id, "dynamic")
+            performance_monitor.start_workflow(workflow_id)
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -395,7 +395,7 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
-            performance_monitor.start_workflow(workflow_id, "dynamic")
+            performance_monitor.start_workflow(workflow_id)
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(

@@ -11,10 +11,10 @@ import time
 from collections.abc import AsyncGenerator
 from typing import Any
 
-from langchain_core.messages import AIMessage
+from langchain_core.messages import AIMessage, HumanMessage, AIMessageChunk
 
 from chatter.core.dependencies import get_workflow_manager
-from chatter.core.langgraph import ConversationState, workflow_manager
+from chatter.core.langgraph import ConversationState, workflow_manager as lg_manager
 from chatter.core.monitoring import record_workflow_metrics
 from chatter.core.streamlined_workflow_performance import (
     performance_monitor,
@@ -66,9 +66,9 @@ class UnifiedWorkflowExecutor:
         user_id: str | None = None,
         limits: WorkflowLimits | None = None,
     ) -> tuple[Message, dict[str, Any]]:
-        """Execute workflow for any type."""
+        """Execute workflow for any type (non-streaming)."""
         start_time = time.time()
-        workflow_id, limits = await self._setup_execution(
+        workflow_id, limits, resolved_user_id = await self._setup_execution(
             conversation,
             chat_request,
             correlation_id,
@@ -79,54 +79,12 @@ class UnifiedWorkflowExecutor:
         try:
             performance_monitor.start_workflow(workflow_id)
 
-            # Get workflow configuration based on capabilities
-            workflow_config = await self._get_workflow_config(
-                conversation, chat_request
-            )
-
-            # Create unified workflow
-            workflow = await self.llm_service.create_langgraph_workflow(
-                provider_name=chat_request.provider,
-                enable_retrieval=chat_request.enable_retrieval,
-                enable_tools=chat_request.enable_tools,
-                **workflow_config,
-                system_message=chat_request.system_prompt_override,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-            )
-
-            # Prepare conversation context
-            user_id = user_id or conversation.user_id
-            if user_id is None:
-                raise WorkflowExecutionError(
-                    "No user_id provided and conversation has no associated user_id"
-                )
-
-            messages = await self._prepare_messages(
-                conversation,
-                chat_request,
-                user_id,
-                workflow_config["memory_window"],
+            # Build workflow and state (non-streaming)
+            workflow, state, _ = await self._build_workflow_and_state(
+                conversation, chat_request, resolved_user_id, enable_streaming=False
             )
 
             # Execute workflow
-            state = ConversationState(
-                messages=messages,
-                user_id=user_id,
-                conversation_id=conversation.id,
-                retrieval_context=None,
-                tool_calls=[],
-                metadata={},
-                conversation_summary=None,
-                parent_conversation_id=None,
-                branch_id=None,
-                memory_context={},
-                workflow_template=None,
-                a_b_test_group=None,
-                tool_call_count=0,
-            )
-
-            # Track response time for non-streaming
             llm_start_time = time.time()
             result = await workflow.ainvoke(
                 state, {"configurable": {"thread_id": conversation.id}}
@@ -138,8 +96,6 @@ class UnifiedWorkflowExecutor:
             # Extract response and usage metadata
             response_content = self._extract_response_content(result)
             usage_info = self._extract_usage_from_result(result)
-
-            # Add response time to usage info
             usage_info["response_time_ms"] = llm_response_time_ms
 
             # Create response message object (not persisted yet - will be saved by chat service)
@@ -181,9 +137,9 @@ class UnifiedWorkflowExecutor:
             ) from e
         finally:
             # Clean up resource tracking
-            if user_id:
+            if resolved_user_id:
                 self.limit_manager.end_workflow_tracking(
-                    workflow_id, user_id
+                    workflow_id, resolved_user_id
                 )
 
     async def execute_streaming(
@@ -193,10 +149,14 @@ class UnifiedWorkflowExecutor:
         correlation_id: str,
         user_id: str | None = None,
         limits: WorkflowLimits | None = None,
+        *,
+        enable_node_tracing: bool = False,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute workflow with streaming for any type."""
+        """Execute workflow with streaming for any type.
+        Set enable_node_tracing=True to include node-level events.
+        """
         start_time = time.time()
-        workflow_id, limits = await self._setup_execution(
+        workflow_id, limits, resolved_user_id = await self._setup_execution(
             conversation,
             chat_request,
             correlation_id,
@@ -207,248 +167,32 @@ class UnifiedWorkflowExecutor:
         try:
             performance_monitor.start_workflow(workflow_id)
 
-            # Get workflow configuration based on capabilities
-            workflow_config = await self._get_workflow_config(
-                conversation, chat_request
+            # Build streaming workflow and state
+            workflow, state, workflow_config = await self._build_workflow_and_state(
+                conversation, chat_request, resolved_user_id, enable_streaming=True
             )
-
-            # Create unified streaming workflow
-            workflow = await self.llm_service.create_langgraph_workflow(
-                provider_name=chat_request.provider,
-                enable_retrieval=chat_request.enable_retrieval,
-                enable_tools=chat_request.enable_tools,
-                **workflow_config,
-                system_message=chat_request.system_prompt_override,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-                enable_streaming=True,  # Enable streaming for streaming execution
-            )
-
-            # Prepare conversation context
-            user_id = user_id or conversation.user_id
-            if user_id is None:
-                raise WorkflowExecutionError(
-                    "No user_id provided and conversation has no associated user_id"
-                )
-
-            messages = await self._prepare_messages(
-                conversation,
-                chat_request,
-                user_id,
-                workflow_config["memory_window"],
-            )
-            state = ConversationState(messages=messages)
 
             # Create message for streaming and send start chunk
             streaming_message = await self._create_streaming_message(
-                conversation, user_id, correlation_id
+                conversation, resolved_user_id, correlation_id
             )
             yield await self._send_streaming_start_chunk(
                 streaming_message, conversation, correlation_id
             )
 
-            # Stream workflow execution using new astream_events approach
+            # Stream workflow execution using astream_events
             content_buffer = ""
             usage_metadata = {}
             model_used = None
             llm_start_time = None
             llm_response_time_ms = None
 
-            async for event in workflow_manager.stream_workflow(
+            async for event in lg_manager.stream_workflow(
                 workflow,
                 state,
                 thread_id=conversation.id,
-                enable_llm_streaming=True,  # Enable real token-by-token streaming
-                enable_node_tracing=False,  # Disable node tracing for production
-            ):
-                # Handle token streaming events
-                if "_token_stream" in event:
-                    token_data = event["_token_stream"]
-                    token_content = token_data.get("content", "")
-
-                    # Track LLM start time on first token
-                    if token_content and llm_start_time is None:
-                        llm_start_time = time.time()
-
-                    if token_content:
-                        content_buffer += token_content
-                        yield await self._send_streaming_token_chunk(
-                            token_content,
-                            streaming_message,
-                            conversation,
-                            correlation_id,
-                        )
-
-                # Handle traditional node completion events (for non-model nodes)
-                elif any(
-                    key not in ["_token_stream", "_node_trace"]
-                    for key in event.keys()
-                ):
-                    # Look for messages in any node's output (fallback for non-streaming)
-                    messages_found = None
-                    node_metadata = None
-                    for node_name, node_output in event.items():
-                        if (
-                            isinstance(node_output, dict)
-                            and "messages" in node_output
-                        ):
-                            messages_found = node_output["messages"]
-                            node_metadata = node_output.get(
-                                "metadata", {}
-                            )
-
-                            # Capture usage metadata and model info from call_model node
-                            if (
-                                node_name == "call_model"
-                                and node_metadata
-                            ):
-                                usage_metadata = node_metadata.get(
-                                    "usage", {}
-                                )
-                                model_used = node_metadata.get("model")
-                                # Calculate response time if we have start time
-                                if llm_start_time is not None:
-                                    llm_response_time_ms = int(
-                                        (time.time() - llm_start_time)
-                                        * 1000
-                                    )
-                            break
-
-                    if messages_found:
-                        message = messages_found[-1]
-                        if (
-                            hasattr(message, "content")
-                            and message.content
-                        ):
-                            # Only send new content if we haven't already streamed it
-                            if len(message.content) > len(
-                                content_buffer
-                            ):
-                                new_content = message.content[
-                                    len(content_buffer) :
-                                ]
-                                content_buffer = message.content
-
-                                yield await self._send_streaming_token_chunk(
-                                    new_content,
-                                    streaming_message,
-                                    conversation,
-                                    correlation_id,
-                                )
-
-            # Finalize streaming message and send completion chunk with usage metadata
-            yield await self._finalize_streaming_message(
-                streaming_message,
-                content_buffer,
-                conversation,
-                correlation_id,
-                usage_metadata,
-                model_used,
-                llm_response_time_ms,
-            )
-
-            # Record success metrics
-            await self._record_metrics(
-                workflow_id,
-                "stream",
-                start_time,
-                True,
-                correlation_id=correlation_id,
-            )
-
-        except Exception as e:
-            # Record error metrics
-            await self._record_metrics(
-                workflow_id,
-                "stream",
-                start_time,
-                False,
-                error_type=type(e).__name__,
-                correlation_id=correlation_id,
-            )
-            raise WorkflowExecutionError(
-                f"Workflow streaming failed: {str(e)}"
-            ) from e
-        finally:
-            # Clean up resource tracking
-            if user_id:
-                self.limit_manager.end_workflow_tracking(
-                    workflow_id, user_id
-                )
-
-    async def execute_streaming_with_tracing(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        correlation_id: str,
-        user_id: str | None = None,
-        limits: WorkflowLimits | None = None,
-    ) -> AsyncGenerator[StreamingChatChunk, None]:
-        """Execute workflow with streaming and node-level tracing for development."""
-        start_time = time.time()
-        workflow_id, limits = await self._setup_execution(
-            conversation,
-            chat_request,
-            correlation_id,
-            user_id,
-            limits,
-        )
-
-        try:
-            performance_monitor.start_workflow(workflow_id)
-
-            # Get workflow configuration based on capabilities
-            workflow_config = await self._get_workflow_config(
-                conversation, chat_request
-            )
-
-            # Create unified streaming workflow
-            workflow = await self.llm_service.create_langgraph_workflow(
-                provider_name=chat_request.provider,
-                enable_retrieval=chat_request.enable_retrieval,
-                enable_tools=chat_request.enable_tools,
-                **workflow_config,
-                system_message=chat_request.system_prompt_override,
-                temperature=chat_request.temperature,
-                max_tokens=chat_request.max_tokens,
-                enable_streaming=True,
-            )
-
-            # Prepare conversation context
-            user_id = user_id or conversation.user_id
-            if user_id is None:
-                raise WorkflowExecutionError(
-                    "No user_id provided and conversation has no associated user_id"
-                )
-
-            messages = await self._prepare_messages(
-                conversation,
-                chat_request,
-                user_id,
-                workflow_config["memory_window"],
-            )
-            state = ConversationState(messages=messages)
-
-            # Create message for streaming and send start chunk
-            streaming_message = await self._create_streaming_message(
-                conversation, user_id, correlation_id
-            )
-            yield await self._send_streaming_start_chunk(
-                streaming_message, conversation, correlation_id
-            )
-
-            # Stream workflow execution with both LLM streaming and node tracing
-            content_buffer = ""
-            usage_metadata = {}
-            model_used = None
-            llm_start_time = None
-            llm_response_time_ms = None
-            async for event in workflow_manager.stream_workflow(
-                workflow,
-                state,
-                thread_id=conversation.id,
-                enable_llm_streaming=True,  # Enable real token-by-token streaming
-                enable_node_tracing=True,  # Enable node tracing for development
+                enable_llm_streaming=True,
+                enable_node_tracing=enable_node_tracing,
             ):
                 # Handle node tracing events
                 if "_node_trace" in event:
@@ -574,11 +318,9 @@ class UnifiedWorkflowExecutor:
                             correlation_id,
                         )
 
-                # Handle traditional node completion events (fallback)
-                elif any(
-                    key not in ["_token_stream", "_node_trace"]
-                    for key in event.keys()
-                ):
+                # Handle traditional node completion events (for non-model nodes and final call_model snapshot)
+                else:
+                    # Look for messages in any node's output (fallback for non-streaming)
                     messages_found = None
                     node_metadata = None
                     for node_name, node_output in event.items():
@@ -592,15 +334,9 @@ class UnifiedWorkflowExecutor:
                             )
 
                             # Capture usage metadata and model info from call_model node
-                            if (
-                                node_name == "call_model"
-                                and node_metadata
-                            ):
-                                usage_metadata = node_metadata.get(
-                                    "usage", {}
-                                )
+                            if node_name == "call_model" and node_metadata:
+                                usage_metadata = node_metadata.get("usage", {})
                                 model_used = node_metadata.get("model")
-                                # Calculate response time if we have start time
                                 if llm_start_time is not None:
                                     llm_response_time_ms = int(
                                         (time.time() - llm_start_time)
@@ -610,18 +346,16 @@ class UnifiedWorkflowExecutor:
 
                     if messages_found:
                         message = messages_found[-1]
-                        if (
-                            hasattr(message, "content")
-                            and message.content
-                        ):
-                            if len(message.content) > len(
-                                content_buffer
-                            ):
-                                new_content = message.content[
-                                    len(content_buffer) :
-                                ]
-                                content_buffer = message.content
-
+                        # Only send new content if we haven't already streamed it
+                        final_text = (
+                            message.content
+                            if hasattr(message, "content")
+                            else str(message)
+                        )
+                        if final_text:
+                            if len(final_text) > len(content_buffer):
+                                new_content = final_text[len(content_buffer) :]
+                                content_buffer = final_text
                                 yield await self._send_streaming_token_chunk(
                                     new_content,
                                     streaming_message,
@@ -643,7 +377,7 @@ class UnifiedWorkflowExecutor:
             # Record success metrics
             await self._record_metrics(
                 workflow_id,
-                "stream_trace",
+                "stream" if not enable_node_tracing else "stream_trace",
                 start_time,
                 True,
                 correlation_id=correlation_id,
@@ -653,21 +387,93 @@ class UnifiedWorkflowExecutor:
             # Record error metrics
             await self._record_metrics(
                 workflow_id,
-                "stream_trace",
+                "stream" if not enable_node_tracing else "stream_trace",
                 start_time,
                 False,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
-                f"Workflow streaming with tracing failed: {str(e)}"
+                f"Workflow streaming failed: {str(e)}"
             ) from e
         finally:
             # Clean up resource tracking
-            if user_id:
+            if resolved_user_id:
                 self.limit_manager.end_workflow_tracking(
-                    workflow_id, user_id
+                    workflow_id, resolved_user_id
                 )
+
+    async def execute_streaming_with_tracing(
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        correlation_id: str,
+        user_id: str | None = None,
+        limits: WorkflowLimits | None = None,
+    ) -> AsyncGenerator[StreamingChatChunk, None]:
+        """Execute workflow with streaming and node-level tracing for development."""
+        # Delegate to execute_streaming with tracing enabled
+        async for chunk in self.execute_streaming(
+            conversation,
+            chat_request,
+            correlation_id,
+            user_id=user_id,
+            limits=limits,
+            enable_node_tracing=True,
+        ):
+            yield chunk
+
+    async def _build_workflow_and_state(
+        self,
+        conversation: Conversation,
+        chat_request: ChatRequest,
+        user_id: str,
+        *,
+        enable_streaming: bool,
+    ):
+        """Create the LangGraph workflow and the initial ConversationState."""
+        # Get workflow configuration based on requested capabilities
+        workflow_config = await self._get_workflow_config(
+            conversation, chat_request
+        )
+
+        # Create unified workflow
+        workflow = await self.llm_service.create_langgraph_workflow(
+            provider_name=chat_request.provider,
+            enable_retrieval=chat_request.enable_retrieval,
+            enable_tools=chat_request.enable_tools,
+            **workflow_config,
+            system_message=chat_request.system_prompt_override,
+            temperature=chat_request.temperature,
+            max_tokens=chat_request.max_tokens,
+            enable_streaming=enable_streaming,
+        )
+
+        # Prepare messages as LangChain BaseMessage objects
+        messages = await self._prepare_messages(
+            conversation,
+            chat_request,
+            user_id,
+            workflow_config["memory_window"],
+        )
+
+        # Full conversation state (tools/security depend on user_id)
+        state = ConversationState(
+            messages=messages,
+            user_id=user_id,
+            conversation_id=conversation.id,
+            retrieval_context=None,
+            tool_calls=[],
+            metadata={},
+            conversation_summary=None,
+            parent_conversation_id=None,
+            branch_id=None,
+            memory_context={},
+            workflow_template=None,
+            a_b_test_group=None,
+            tool_call_count=0,
+        )
+        return workflow, state, workflow_config
 
     async def _get_workflow_config(
         self,
@@ -683,11 +489,9 @@ class UnifiedWorkflowExecutor:
         }
 
         # Get workspace ID for tool and retriever lookup
-        # Use user_id as workspace_id since the Conversation model doesn't have workspace_id
         workspace_id = conversation.user_id or "default"
         workflow_manager = get_workflow_manager()
 
-        # Configure based on requested capabilities
         # Set base memory window - adjust based on capabilities
         base_memory_window = 20
 
@@ -700,7 +504,7 @@ class UnifiedWorkflowExecutor:
             )
             config["retriever"] = await workflow_manager.get_retriever(
                 workspace_id,
-                document_ids=chat_request.document_ids,
+                document_ids=getattr(chat_request, "document_ids", None),
             )
             base_memory_window = 30  # Increase for retrieval workflows
 
@@ -738,7 +542,7 @@ class UnifiedWorkflowExecutor:
         correlation_id: str,
         user_id: str | None,
         limits: WorkflowLimits | None,
-    ) -> tuple[str, WorkflowLimits]:
+    ) -> tuple[str, WorkflowLimits, str]:
         """Common setup for workflow execution."""
         workflow_id = f"{correlation_id}_dynamic"
 
@@ -746,26 +550,32 @@ class UnifiedWorkflowExecutor:
         if limits is None:
             limits = self.limit_manager.get_default_limits()
 
-        # Start resource tracking if user_id provided
-        if user_id:
-            try:
-                self.limit_manager.start_workflow_tracking(
-                    workflow_id, user_id, limits
-                )
-            except WorkflowResourceLimitError as e:
-                logger.warning(
-                    "Workflow rejected due to resource limits",
-                    extra={
-                        "user_id": user_id,
-                        "error": str(e),
-                        "correlation_id": correlation_id,
-                    },
-                )
-                raise WorkflowExecutionError(
-                    f"Resource limit exceeded: {e}"
-                ) from e
+        # Resolve user id (required for tools/security)
+        resolved_user_id = user_id or conversation.user_id
+        if resolved_user_id is None:
+            raise WorkflowExecutionError(
+                "No user_id provided and conversation has no associated user_id"
+            )
 
-        return workflow_id, limits
+        # Start resource tracking
+        try:
+            self.limit_manager.start_workflow_tracking(
+                workflow_id, resolved_user_id, limits
+            )
+        except WorkflowResourceLimitError as e:
+            logger.warning(
+                "Workflow rejected due to resource limits",
+                extra={
+                    "user_id": resolved_user_id,
+                    "error": str(e),
+                    "correlation_id": correlation_id,
+                },
+            )
+            raise WorkflowExecutionError(
+                f"Resource limit exceeded: {e}"
+            ) from e
+
+        return workflow_id, limits, resolved_user_id
 
     async def _prepare_messages(
         self,
@@ -773,9 +583,9 @@ class UnifiedWorkflowExecutor:
         chat_request: ChatRequest,
         user_id: str,
         memory_window: int,
-    ) -> list[dict[str, str]]:
-        """Prepare conversation messages for workflow execution."""
-        messages = []
+    ) -> list[Any]:
+        """Prepare conversation messages as LangChain BaseMessage objects."""
+        messages: list[Any] = []
 
         recent_messages = (
             await self.message_service.get_recent_messages(
@@ -785,21 +595,17 @@ class UnifiedWorkflowExecutor:
 
         for msg in recent_messages:
             if msg.role == MessageRole.USER:
-                messages.append(
-                    {"role": "human", "content": msg.content}
-                )
+                messages.append(HumanMessage(content=msg.content))
             elif msg.role == MessageRole.ASSISTANT:
-                messages.append({"role": "ai", "content": msg.content})
+                messages.append(AIMessage(content=msg.content))
 
-        # Add current message
-        messages.append(
-            {"role": "human", "content": chat_request.message}
-        )
+        # Add current user message last
+        messages.append(HumanMessage(content=chat_request.message))
         return messages
 
     def _extract_response_content(self, result: dict[str, Any]) -> str:
         """Extract response content from workflow result."""
-        if isinstance(result["messages"][-1], AIMessage):
+        if isinstance(result.get("messages", [])[-1], AIMessage):
             return result["messages"][-1].content
         else:
             return str(result["messages"][-1])

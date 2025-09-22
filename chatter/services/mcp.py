@@ -773,7 +773,12 @@ class BuiltInTools:
             StructuredTool.from_function(
                 func=cls.get_current_time,
                 name="get_time",
-                description="Get the current date and time",
+                description=(
+                    "Get the current date and time. Call this function once if needed, "
+                    "optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). "
+                    "After calling, use the returned time to answer the user's question "
+                    "in natural language."
+                ),
             ),
         ]
 

@@ -512,56 +512,54 @@ class LangGraphWorkflowManager:
                 # Extract tool results to provide a meaningful response
                 messages = state["messages"]
                 tool_results = []
-                
+
                 # Find recent tool results
                 for msg in messages:
-                    if hasattr(msg, "tool_call_id") and hasattr(msg, "content"):
+                    if isinstance(msg, ToolMessage) and getattr(
+                        msg, "content", None
+                    ):
                         tool_results.append(msg.content)
-                
+
                 # Get the original user question
                 user_question = ""
-                for msg in messages:
-                    if hasattr(msg, "content") and getattr(msg, "__class__", None).__name__ == "HumanMessage":
+                for msg in reversed(messages):
+                    if isinstance(msg, HumanMessage):
                         user_question = msg.content
                         break
-                
+
                 # Create a response that incorporates the tool results
                 if tool_results and user_question:
-                    # Use the LLM without tools to generate a final response
                     try:
                         final_context = (
-                            f"Based on the following information gathered from tools:\n"
-                            f"{', '.join(tool_results[-3:])}\n\n"  # Use last 3 results
-                            f"Please provide a direct and helpful answer to: {user_question}"
+                            "Based on the following information gathered from tools:\n"
+                            + "\n".join(tool_results[-3:])  # last 3 results
+                            + "\n\nPlease provide a direct and helpful answer to: "
+                            + user_question
                         )
-                        
-                        final_response = await llm_for_final.ainvoke([
-                            HumanMessage(content=final_context)
-                        ])
-                        
+                        final_response = await llm_for_final.ainvoke(
+                            [HumanMessage(content=final_context)]
+                        )
                         return {"messages": [final_response]}
-                        
                     except Exception as llm_error:
                         logger.warning(
                             "LLM finalization failed, using template response",
-                            error=str(llm_error)
+                            error=str(llm_error),
                         )
-                        # Fall back to template response
-                
+                        # Fall through to fallback
+
                 # Fallback response
                 tool_count = state.get("tool_call_count", 0)
-                
                 if tool_results:
                     final_content = (
-                        f"Based on the tool results I gathered: {', '.join(tool_results[-2:])}, "
-                        f"I have the information needed to answer your question."
+                        "Based on the tool results I gathered: "
+                        + ", ".join(tool_results[-2:])
+                        + ", I have the information needed to answer your question."
                     )
                 else:
                     final_content = (
                         f"I have completed using tools (executed {tool_count} tool calls) to help with your request. "
                         "Based on the information gathered, I've done my best to address your question."
                     )
-
                 final_message = AIMessage(content=final_content)
                 return {"messages": [final_message]}
 
@@ -572,7 +570,10 @@ class LangGraphWorkflowManager:
                 return {
                     "messages": [
                         AIMessage(
-                            content="I've completed my tool usage but encountered an issue generating a final response. Based on the available information, I've done my best to help with your request."
+                            content=(
+                                "I've completed my tool usage but encountered an issue generating a final response. "
+                                "Based on the available information, I've done my best to help with your request."
+                            )
                         )
                     ]
                 }
@@ -762,13 +763,13 @@ class LangGraphWorkflowManager:
                 # Count recent tool calls for the same tool
                 recent_tool_calls = []
                 tool_results = []
-                
+
                 # Look at the last several messages to detect patterns
                 for msg in messages[-6:]:  # Look at last 6 messages
                     if hasattr(msg, "tool_calls") and msg.tool_calls:
                         for tool_call in msg.tool_calls:
                             recent_tool_calls.append(tool_call.get("name"))
-                    elif hasattr(msg, "tool_call_id"):  # Tool result message
+                    elif isinstance(msg, ToolMessage):
                         tool_results.append(msg.content)
 
                 # Check if we have multiple calls to the same tool with results
@@ -776,12 +777,15 @@ class LangGraphWorkflowManager:
                 if recent_tool_calls and tool_results:
                     # Count how many times the same tool appears
                     from collections import Counter
+
                     tool_counts = Counter(recent_tool_calls)
-                    
+
                     # If any tool has been called more than once and we have results
                     # this suggests the LLM should provide a final answer
-                    repeated_tools = [tool for tool, count in tool_counts.items() if count >= 2]
-                    
+                    repeated_tools = [
+                        tool for tool, count in tool_counts.items() if count >= 2
+                    ]
+                    """
                     if repeated_tools and len(tool_results) >= 1:
                         logger.warning(
                             "Detected tool recursion pattern - forcing final response",
@@ -792,7 +796,7 @@ class LangGraphWorkflowManager:
                             conversation_id=conversation_id,
                         )
                         return "finalize_response"
-
+                    """
             return "execute_tools"
 
         # Build graph dynamically
@@ -949,21 +953,15 @@ class LangGraphWorkflowManager:
         """
         # Configure event filtering based on requirements
         include_types = []
-        include_names = []
 
         if enable_llm_streaming:
             include_types.append("chat_model")
-            # Focus on the final model call for token streaming
-            include_names.append("call_model")
+        # Always include chain events so we can derive non-streaming fallbacks
+        include_types.append("chain")
 
         if enable_node_tracing:
             # Include all workflow nodes for development tracing
-            include_types.extend(["chain", "tool", "runnable"])
-
-        # If neither specific streaming nor tracing is enabled,
-        # fall back to node completion events
-        if not include_types:
-            include_types = ["chain"]
+            include_types.extend(["tool", "runnable"])
 
         try:
             # Build parameters defensively to avoid passing None or problematic values
@@ -975,10 +973,6 @@ class LangGraphWorkflowManager:
             # Only add include_types if it has valid entries
             if include_types:
                 stream_params["include_types"] = include_types
-
-            # Only add include_names if it has valid entries
-            if include_names:
-                stream_params["include_names"] = include_names
 
             async for event in workflow.astream_events(
                 initial_state, **stream_params
@@ -1041,17 +1035,23 @@ class LangGraphWorkflowManager:
             # Extract token content from the streaming chunk
             chunk = event_data.get("chunk")
             if chunk and hasattr(chunk, "content"):
-                # Create a token streaming event that mimics the old format
-                # but includes token-level data
-                return {
-                    "_token_stream": {
-                        "content": chunk.content,
-                        "token": True,
-                        "model": event_name,
-                        "run_id": event.get("run_id"),
-                        "parent_ids": event.get("parent_ids", []),
+                content = chunk.content
+                if isinstance(content, list):
+                    # Best effort: join text parts
+                    text = "".join(str(part) for part in content)
+                else:
+                    text = str(content) if content is not None else ""
+
+                if text:
+                    return {
+                        "_token_stream": {
+                            "content": text,
+                            "token": True,
+                            "model": event_name,
+                            "run_id": event.get("run_id"),
+                            "parent_ids": event.get("parent_ids", []),
+                        }
                     }
-                }
 
         # Handle LLM completion events
         if event_type == "on_chat_model_end":

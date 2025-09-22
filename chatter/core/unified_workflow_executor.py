@@ -67,16 +67,6 @@ class UnifiedWorkflowExecutor:
         limits: WorkflowLimits | None = None,
     ) -> tuple[Message, dict[str, Any]]:
         """Execute workflow for any type."""
-        # Determine workflow mode from capabilities
-        if chat_request.enable_retrieval and chat_request.enable_tools:
-            workflow_mode = "full"
-        elif chat_request.enable_tools:
-            workflow_mode = "tools"
-        elif chat_request.enable_retrieval:
-            workflow_mode = "rag"
-        else:
-            workflow_mode = "plain"
-            
         start_time = time.time()
         workflow_id, limits = await self._setup_execution(
             conversation,
@@ -84,23 +74,23 @@ class UnifiedWorkflowExecutor:
             correlation_id,
             user_id,
             limits,
-            workflow_mode,
         )
 
         try:
             performance_monitor.start_workflow(
-                workflow_id, workflow_mode
+                workflow_id, "dynamic"
             )
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
-                workflow_mode, conversation, chat_request
+                conversation, chat_request
             )
 
             # Create unified workflow
             workflow = await self.llm_service.create_langgraph_workflow(
                 provider_name=chat_request.provider,
-                workflow_mode=workflow_mode,
+                enable_retrieval=chat_request.enable_retrieval,
+                enable_tools=chat_request.enable_tools,
                 **workflow_config,
                 system_message=chat_request.system_prompt_override,
                 temperature=chat_request.temperature,
@@ -173,7 +163,6 @@ class UnifiedWorkflowExecutor:
                 "execute",
                 start_time,
                 True,
-                workflow_mode,
                 correlation_id=correlation_id,
             )
 
@@ -186,12 +175,11 @@ class UnifiedWorkflowExecutor:
                 "execute",
                 start_time,
                 False,
-                workflow_mode,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
-                f"{workflow_mode.title()} workflow execution failed: {str(e)}"
+                f"Workflow execution failed: {str(e)}"
             ) from e
         finally:
             # Clean up resource tracking
@@ -209,11 +197,6 @@ class UnifiedWorkflowExecutor:
         limits: WorkflowLimits | None = None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute workflow with streaming for any type."""
-        workflow_mode = (
-            workflow_mode
-            
-            or "plain"
-        )
         start_time = time.time()
         workflow_id, limits = await self._setup_execution(
             conversation,
@@ -221,23 +204,23 @@ class UnifiedWorkflowExecutor:
             correlation_id,
             user_id,
             limits,
-            workflow_mode,
         )
 
         try:
             performance_monitor.start_workflow(
-                workflow_id, workflow_mode
+                workflow_id, "dynamic"
             )
 
-            # Get workflow configuration based on type
+            # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
-                workflow_mode, conversation, chat_request
+                conversation, chat_request
             )
 
             # Create unified streaming workflow
             workflow = await self.llm_service.create_langgraph_workflow(
                 provider_name=chat_request.provider,
-                workflow_mode=workflow_mode,
+                enable_retrieval=chat_request.enable_retrieval,
+                enable_tools=chat_request.enable_tools,
                 **workflow_config,
                 system_message=chat_request.system_prompt_override,
                 temperature=chat_request.temperature,
@@ -374,7 +357,6 @@ class UnifiedWorkflowExecutor:
                 "stream",
                 start_time,
                 True,
-                workflow_mode,
                 correlation_id=correlation_id,
             )
 
@@ -385,12 +367,11 @@ class UnifiedWorkflowExecutor:
                 "stream",
                 start_time,
                 False,
-                workflow_mode,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
-                f"{workflow_mode.title()} workflow streaming failed: {str(e)}"
+                f"Workflow streaming failed: {str(e)}"
             ) from e
         finally:
             # Clean up resource tracking
@@ -408,11 +389,6 @@ class UnifiedWorkflowExecutor:
         limits: WorkflowLimits | None = None,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute workflow with streaming and node-level tracing for development."""
-        workflow_mode = (
-            workflow_mode
-            
-            or "plain"
-        )
         start_time = time.time()
         workflow_id, limits = await self._setup_execution(
             conversation,
@@ -420,23 +396,23 @@ class UnifiedWorkflowExecutor:
             correlation_id,
             user_id,
             limits,
-            workflow_mode,
         )
 
         try:
             performance_monitor.start_workflow(
-                workflow_id, workflow_mode
+                workflow_id, "dynamic"
             )
 
-            # Get workflow configuration based on type
+            # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
-                workflow_mode, conversation, chat_request
+                conversation, chat_request
             )
 
             # Create unified streaming workflow
             workflow = await self.llm_service.create_langgraph_workflow(
                 provider_name=chat_request.provider,
-                workflow_mode=workflow_mode,
+                enable_retrieval=chat_request.enable_retrieval,
+                enable_tools=chat_request.enable_tools,
                 **workflow_config,
                 system_message=chat_request.system_prompt_override,
                 temperature=chat_request.temperature,
@@ -676,7 +652,6 @@ class UnifiedWorkflowExecutor:
                 "stream_trace",
                 start_time,
                 True,
-                workflow_mode,
                 correlation_id=correlation_id,
             )
 
@@ -687,12 +662,11 @@ class UnifiedWorkflowExecutor:
                 "stream_trace",
                 start_time,
                 False,
-                workflow_mode,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
             raise WorkflowExecutionError(
-                f"{workflow_mode.title()} workflow streaming with tracing failed: {str(e)}"
+                f"Workflow streaming with tracing failed: {str(e)}"
             ) from e
         finally:
             # Clean up resource tracking
@@ -703,11 +677,10 @@ class UnifiedWorkflowExecutor:
 
     async def _get_workflow_config(
         self,
-        workflow_mode: str,
         conversation: Conversation,
         chat_request: ChatRequest,
     ) -> dict[str, Any]:
-        """Get configuration for specific workflow type."""
+        """Get configuration based on requested capabilities."""
         # Base configuration
         config = {
             "enable_memory": True,
@@ -720,68 +693,40 @@ class UnifiedWorkflowExecutor:
         workspace_id = conversation.user_id or "default"
         workflow_manager = get_workflow_manager()
 
-        # Configure based on workflow type
-        if workflow_mode == "plain":
-            config.update(
-                {
-                    "memory_window": 20,
-                }
+        # Configure based on requested capabilities
+        # Set base memory window - adjust based on capabilities
+        base_memory_window = 20
+        
+        # Configure retrieval if enabled
+        if chat_request.enable_retrieval:
+            config.update({
+                "max_documents": 10,
+            })
+            config["retriever"] = await workflow_manager.get_retriever(
+                workspace_id,
+                document_ids=chat_request.document_ids,
             )
-        elif workflow_mode == "rag":
-            config.update(
-                {
-                    "memory_window": 30,
-                    "max_documents": 10,
-                }
-            )
-            # Only get retriever if retrieval is enabled
-            if chat_request.enable_retrieval is not False:
-                config["retriever"] = (
-                    await workflow_manager.get_retriever(
-                        workspace_id,
-                        document_ids=chat_request.document_ids,
-                    )
-                )
-        elif workflow_mode == "tools":
-            config.update(
-                {
-                    "memory_window": 100,
-                    "max_tool_calls": 10,
-                    "tools": await workflow_manager.get_tools(
-                        workspace_id
-                    ),
-                }
-            )
-        elif workflow_mode == "full":
-            config.update(
-                {
-                    "memory_window": 50,
-                    "max_tool_calls": 5,
-                    "max_documents": 10,
-                    "tools": await workflow_manager.get_tools(
-                        workspace_id
-                    ),
-                }
-            )
-            # Only get retriever if retrieval is enabled
-            if chat_request.enable_retrieval is not False:
-                config["retriever"] = (
-                    await workflow_manager.get_retriever(
-                        workspace_id,
-                        document_ids=chat_request.document_ids,
-                    )
-                )
-        else:
-            # Unknown workflow type - use plain config as fallback
-            logger.warning(
-                f"Unknown workflow type '{workflow_mode}', using plain config"
-            )
-            config.update(
-                {
-                    "memory_window": 20,
-                }
-            )
-
+            base_memory_window = 30  # Increase for retrieval workflows
+            
+        # Configure tools if enabled
+        if chat_request.enable_tools:
+            config.update({
+                "max_tool_calls": 10,
+                "tools": await workflow_manager.get_tools(workspace_id),
+            })
+            # Increase memory window for tool usage
+            if base_memory_window < 50:
+                base_memory_window = 50
+                
+        # If both retrieval and tools are enabled, balance the configuration
+        if chat_request.enable_retrieval and chat_request.enable_tools:
+            config.update({
+                "max_tool_calls": 5,  # Reduce tool calls when both are enabled
+                "max_documents": 10,
+            })
+            base_memory_window = 50
+            
+        config["memory_window"] = base_memory_window
         return config
 
     async def _setup_execution(
@@ -791,10 +736,9 @@ class UnifiedWorkflowExecutor:
         correlation_id: str,
         user_id: str | None,
         limits: WorkflowLimits | None,
-        workflow_mode: str,
     ) -> tuple[str, WorkflowLimits]:
         """Common setup for workflow execution."""
-        workflow_id = f"{correlation_id}_{workflow_mode}"
+        workflow_id = f"{correlation_id}_dynamic"
 
         # Use provided limits or get defaults
         if limits is None:
@@ -1070,14 +1014,13 @@ class UnifiedWorkflowExecutor:
         step: str,
         start_time: float,
         success: bool,
-        workflow_mode: str,
         error_type: str | None = None,
         correlation_id: str | None = None,
     ) -> None:
         """Record workflow execution metrics."""
         duration_ms = (time.time() - start_time) * 1000
         record_workflow_metrics(
-            workflow_mode=workflow_mode,
+            workflow_mode="dynamic",
             workflow_id=workflow_id,
             step=step,
             duration_ms=duration_ms,
@@ -1086,12 +1029,4 @@ class UnifiedWorkflowExecutor:
             correlation_id=correlation_id or "",
         )
 
-    @classmethod
-    def get_supported_types(cls) -> list[str]:
-        """Get list of supported workflow types."""
-        return [
-            "plain",
-            "rag",
-            "tools",
-            "full",
-        ]
+

@@ -6,7 +6,8 @@ import { WorkflowDefinition, WorkflowNodeType } from './WorkflowEditor';
  */
 
 export interface LangGraphWorkflowConfig {
-  mode: 'plain' | 'rag' | 'tools' | 'full';
+  enable_retrieval: boolean;
+  enable_tools: boolean;
   system_message?: string;
   enable_memory: boolean;
   memory_window?: number;
@@ -49,12 +50,13 @@ export class WorkflowTranslator {
     const nodes = this.translateNodes(workflow);
     const edges = this.translateEdges(workflow);
 
-    // Analyze workflow to determine mode
-    const mode = this.determineWorkflowMode(workflow);
+    // Analyze workflow to determine capabilities
+    const capabilities = this.determineWorkflowCapabilities(workflow);
 
     // Extract configuration from nodes
     const config: LangGraphWorkflowConfig = {
-      mode,
+      enable_retrieval: capabilities.hasRetrieval,
+      enable_tools: capabilities.hasTools,
       enable_memory: this.hasMemoryNode(workflow),
       nodes,
       edges,
@@ -148,23 +150,18 @@ export class WorkflowTranslator {
   }
 
   /**
-   * Determine workflow mode based on nodes present
+   * Determine workflow capabilities based on nodes present
    */
-  private static determineWorkflowMode(
+  private static determineWorkflowCapabilities(
     workflow: WorkflowDefinition
-  ): LangGraphWorkflowConfig['mode'] {
+  ): { hasRetrieval: boolean; hasTools: boolean } {
     const hasRetrieval = workflow.nodes.some((n) => n.type === 'retrieval');
     const hasTools = workflow.nodes.some((n) => n.type === 'tool');
 
-    if (hasRetrieval && hasTools) {
-      return 'full';
-    } else if (hasTools) {
-      return 'tools';
-    } else if (hasRetrieval) {
-      return 'rag';
-    } else {
-      return 'plain';
-    }
+    return {
+      hasRetrieval,
+      hasTools,
+    };
   }
 
   /**

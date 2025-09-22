@@ -929,7 +929,15 @@ class WorkflowValidator(BaseValidator):
         # Basic structure validation
         required_fields = ["name", "nodes", "edges"]
         for field in required_fields:
-            if field not in definition or not definition[field]:
+            if field not in definition:
+                errors.append(
+                    ValidationError(f"Missing required field: {field}")
+                )
+            elif field in ["nodes", "edges"] and not isinstance(definition[field], list):
+                errors.append(
+                    ValidationError(f"Field '{field}' must be a list")
+                )
+            elif field == "name" and not definition[field]:
                 errors.append(
                     ValidationError(f"Missing required field: {field}")
                 )

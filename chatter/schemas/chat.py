@@ -289,6 +289,9 @@ class ChatRequest(BaseModel):
     provider: str | None = Field(
         None, description="Override LLM provider for this request"
     )
+    model: str | None = Field(
+        None, description="Override LLM model for this request"
+    )
 
     # Optional overrides
     temperature: float | None = Field(

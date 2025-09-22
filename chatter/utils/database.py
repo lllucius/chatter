@@ -282,29 +282,7 @@ class DatabaseManager:
             "available": pool.checked_in(),
         }
 
-    async def _attempt_connection(self):
-        """Attempt to establish a database connection."""
-        engine = self.engine
-        async with engine.begin() as conn:
-            return conn
 
-    async def get_connection_with_retry(self, max_retries: int = 3):
-        """Get connection with retry mechanism."""
-        for attempt in range(max_retries):
-            try:
-                return await self._attempt_connection()
-            except Exception as e:
-                if attempt == max_retries - 1:
-                    raise e
-                await asyncio.sleep(0.1 * (2**attempt))
-
-    async def get_connection_with_timeout(
-        self, timeout_seconds: int = 30
-    ):
-        """Get connection with timeout."""
-        return await asyncio.wait_for(
-            self._attempt_connection(), timeout=timeout_seconds
-        )
 
     async def transaction(self, session: AsyncSession):
         """Context manager for database transactions."""

@@ -184,8 +184,8 @@ const ChatPage: React.FC = () => {
                 setStreamedContent((prev) => prev + tokenContent);
 
                 // Update the message with the new content
-                setMessages((prev) =>
-                  prev.map((msg) =>
+                setMessages((prev) => {
+                  const updatedMessages = prev.map((msg) =>
                     msg.id === assistantMessageId
                       ? {
                           ...msg,
@@ -201,8 +201,18 @@ const ChatPage: React.FC = () => {
                           },
                         }
                       : msg
-                  )
-                );
+                  );
+                  
+                  // Debug: verify the message was found and updated
+                  const updatedMessage = updatedMessages.find(m => m.id === assistantMessageId);
+                  if (updatedMessage) {
+                    console.debug('Streaming: updated message content length:', updatedMessage.content.length);
+                  } else {
+                    console.warn('Streaming: failed to find message with ID:', assistantMessageId);
+                  }
+                  
+                  return updatedMessages;
+                });
                 break;
               }
 
@@ -334,11 +344,17 @@ const ChatPage: React.FC = () => {
             }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = initialAssistantMessage;
+              console.debug('Streaming: replaced assistant message at index:', lastAssistantIndex, 'with ID:', assistantMessageId);
+            } else {
+              console.warn('Streaming: no existing assistant message found for regeneration');
             }
             return newMessages;
           });
         } else {
-          setMessages((prev) => [...prev, initialAssistantMessage]);
+          setMessages((prev) => {
+            console.debug('Streaming: adding new assistant message with ID:', assistantMessageId);
+            return [...prev, initialAssistantMessage];
+          });
         }
 
         // Local state for the callback functions (though they may not be used in this design)
@@ -370,6 +386,7 @@ const ChatPage: React.FC = () => {
         focusInput();
       } catch (error) {
         // Handle errors by showing an error message
+        console.error('Streaming error in handleWorkflowStreamingResponse:', error);
         const errorMessage: ChatMessage = {
           id: `assistant-error-${Date.now()}`,
           role: 'assistant',
@@ -687,6 +704,7 @@ const ChatPage: React.FC = () => {
             workflowRequest,
             isRegeneration
           );
+          console.debug('Streaming workflow response completed');
           return; // Streaming handling is complete
         } else {
           console.debug('Using non-streaming workflow endpoint');

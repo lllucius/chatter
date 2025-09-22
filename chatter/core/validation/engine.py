@@ -165,6 +165,22 @@ class ValidationEngine:
             config, "config_check", context
         )
 
+    def validate(
+        self,
+        validator_name: str,
+        value: Any,
+        rule: str,
+        context: ValidationContext | None = None,
+    ) -> ValidationResult:
+        """Validate using a specific validator and rule."""
+        context = context or DEFAULT_CONTEXT
+
+        if validator_name not in self._validators:
+            raise ValidationError(f"Validator '{validator_name}' not found")
+
+        validator = self._validators[validator_name]
+        return validator.validate(value, rule, context)
+
     def validate_multiple(
         self,
         validations: list[dict[str, Any]],

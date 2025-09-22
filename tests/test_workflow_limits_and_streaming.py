@@ -240,9 +240,6 @@ class TestWorkflowExecutionService:
         self.llm_service.get_default_provider.return_value = (
             mock_provider
         )
-        self.llm_service.convert_conversation_to_messages.return_value = (
-            []
-        )
 
         # Mock message service
         self.workflow_service._get_conversation_messages = AsyncMock(
@@ -294,8 +291,6 @@ class TestWorkflowExecutionService:
         self.llm_service.get_default_provider.return_value = (
             mock_provider
         )
-        self.llm_service.convert_conversation_to_messages.return_value = (
-            []
         )
         self.workflow_service._get_conversation_messages = AsyncMock(
             return_value=[]
@@ -336,8 +331,6 @@ class TestWorkflowExecutionService:
         self.llm_service.get_default_provider.return_value = (
             mock_provider
         )
-        self.llm_service.convert_conversation_to_messages.return_value = (
-            []
         )
         self.workflow_service._get_conversation_messages = AsyncMock(
             return_value=[]
@@ -405,8 +398,6 @@ class TestWorkflowExecutionService:
         self.llm_service.get_default_provider.return_value = (
             mock_provider
         )
-        self.llm_service.convert_conversation_to_messages.return_value = (
-            []
         )
         self.workflow_service._get_conversation_messages = AsyncMock(
             return_value=[]
@@ -485,8 +476,6 @@ class TestWorkflowExecutionService:
             self.llm_service.get_default_provider.return_value = (
                 AsyncMock()
             )
-            self.llm_service.convert_conversation_to_messages.return_value = (
-                []
             )
             self.workflow_service._get_conversation_messages = (
                 AsyncMock(return_value=[])

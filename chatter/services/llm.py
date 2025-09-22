@@ -416,14 +416,7 @@ class LLMService:
 
         return await self.get_provider(provider.name)
 
-    def _initialize_providers(self) -> None:
-        """Initialize available LLM providers.
 
-        Note: Providers are now loaded dynamically from model registry.
-        """
-        logger.info(
-            "LLM providers will be loaded dynamically from model registry"
-        )
 
     async def create_provider_from_profile(
         self, profile: "Profile"
@@ -556,174 +549,11 @@ class LLMService:
                 f"Failed to create provider from profile: {e}"
             ) from e
 
-    def convert_conversation_to_messages(
-        self, conversation: "Conversation", messages: list[Any]
-    ) -> list[BaseMessage]:
-        """Convert conversation messages to LangChain format.
 
-        Args:
-            conversation: Conversation object
-            messages: List of message objects
 
-        Returns:
-            List of LangChain messages
-        """
-        langchain_messages = []
 
-        # Add system message if present
-        if getattr(conversation, "system_prompt", None):
-            langchain_messages.append(
-                SystemMessage(content=conversation.system_prompt)
-            )
 
-        # Convert messages
-        for message in messages:
-            role_value = getattr(message, "role", None)
-            content = getattr(message, "content", "")
-            if role_value == "user":
-                langchain_messages.append(HumanMessage(content=content))
-            elif role_value == "assistant":
-                langchain_messages.append(AIMessage(content=content))
-            elif role_value == "system":
-                langchain_messages.append(
-                    SystemMessage(content=content)
-                )
 
-        return langchain_messages
-
-    async def generate(
-        self,
-        messages: list[dict],
-        provider: str | None,
-        model: str,
-        max_retries: int = 1,
-        track_cost: bool = False,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Generate response using specified provider and model.
-
-        Args:
-            messages: List of message dictionaries with role and content
-            provider: Provider name (openai, anthropic, etc.) or None for default
-            model: Model name
-            max_retries: Maximum retry attempts
-            track_cost: Whether to track cost information
-            **kwargs: Additional parameters
-
-        Returns:
-            Response dictionary with content, role, and optionally usage info
-        """
-        # Convert dict messages to LangChain format
-        langchain_messages = []
-        for msg in messages:
-            role = msg.get("role", "user")
-            content = msg.get("content", "")
-
-            if role == "system":
-                langchain_messages.append(
-                    SystemMessage(content=content)
-                )
-            elif role == "assistant":
-                langchain_messages.append(AIMessage(content=content))
-            else:  # user or any other role
-                langchain_messages.append(HumanMessage(content=content))
-
-        # Get provider instance
-        try:
-            if provider is None or provider == "":
-                provider_instance = await self.get_default_provider()
-            else:
-                provider_instance = await self.get_provider(provider)
-        except Exception as e:
-            # If provider not found, we should not create fallback instances that bypass
-            # registry settings. Instead, raise an appropriate error.
-            raise LLMProviderError(
-                f"Provider '{provider}' not available. Please ensure the provider is properly configured in the model registry."
-            ) from e
-
-        # Generate response with retries
-        last_exception = None
-        for attempt in range(max_retries):
-            try:
-                response = await provider_instance.ainvoke(
-                    langchain_messages
-                )
-
-                result = {
-                    "content": response.content,
-                    "role": "assistant",
-                }
-
-                # Add usage info if available
-                if (
-                    hasattr(response, "usage_metadata")
-                    and response.usage_metadata
-                ):
-                    result["usage"] = {
-                        "input_tokens": response.usage_metadata.get(
-                            "input_tokens", 0
-                        ),
-                        "output_tokens": response.usage_metadata.get(
-                            "output_tokens", 0
-                        ),
-                        "total_tokens": response.usage_metadata.get(
-                            "total_tokens", 0
-                        ),
-                    }
-
-                if track_cost:
-                    # Add cost calculation if needed
-                    result["cost"] = self._calculate_cost(
-                        result.get("usage", {}), provider, model
-                    )
-
-                return result
-
-            except Exception as e:
-                last_exception = e
-                if attempt < max_retries - 1:
-                    logger.warning(
-                        f"Attempt {attempt + 1} failed, retrying: {e}"
-                    )
-                    await asyncio.sleep(
-                        0.5 * (attempt + 1)
-                    )  # Exponential backoff
-                else:
-                    logger.error(
-                        f"All {max_retries} attempts failed: {e}"
-                    )
-
-        raise LLMProviderError(
-            f"Failed to generate response after {max_retries} attempts: {last_exception}"
-        )
-
-    def _calculate_cost(
-        self, usage: dict, provider: str, model: str
-    ) -> dict:
-        """Calculate approximate cost based on usage."""
-        # Simplified cost calculation - would need real pricing data
-        input_tokens = usage.get("input_tokens", 0)
-        output_tokens = usage.get("output_tokens", 0)
-
-        # Example pricing (per 1K tokens)
-        if provider.lower() == "openai":
-            if "gpt-4" in model.lower():
-                input_cost = input_tokens * 0.03 / 1000
-                output_cost = output_tokens * 0.06 / 1000
-            else:  # gpt-3.5-turbo
-                input_cost = input_tokens * 0.001 / 1000
-                output_cost = output_tokens * 0.002 / 1000
-        else:
-            # Default pricing
-            input_cost = input_tokens * 0.001 / 1000
-            output_cost = output_tokens * 0.002 / 1000
-
-        return {
-            "input_cost": input_cost,
-            "output_cost": output_cost,
-            "total_cost": input_cost + output_cost,
-            "currency": "USD",
-        }
 
     async def generate_response(
         self,
@@ -896,50 +726,7 @@ class LLMService:
                     provider_count=provider_count,
                 )
 
-    async def get_provider_info(
-        self, provider_name: str
-    ) -> dict[str, Any]:
-        """Get information about a provider.
 
-        Args:
-            provider_name: Provider name
-
-        Returns:
-            Provider information
-        """
-        session = await self._get_session()
-        registry = get_model_registry()(session)
-
-        provider = await registry.get_provider_by_name(provider_name)
-        if not provider:
-            raise LLMProviderError(
-                f"Provider '{provider_name}' not found"
-            ) from None
-
-        # Get models for this provider
-        models, _ = await registry.list_models(
-            provider.id, ModelType.LLM
-        )
-        active_models = [m for m in models if m.is_active]
-
-        return {
-            "name": provider.name,
-            "display_name": provider.display_name,
-            "provider_type": provider.provider_type,
-            "description": provider.description,
-            "is_active": provider.is_active,
-            "is_default": provider.is_default,
-            "models": [
-                {
-                    "name": m.name,
-                    "model_name": m.model_name,
-                    "display_name": m.display_name,
-                    "is_default": m.is_default,
-                    "max_tokens": m.max_tokens,
-                }
-                for m in active_models
-            ],
-        }
 
     async def generate_with_tools(
         self,
@@ -1076,101 +863,8 @@ class LLMService:
             **kwargs,
         )
 
-    async def generate_with_fallback(
-        self,
-        messages: list[dict],
-        primary_provider: str,
-        fallback_provider: str,
-        model: str,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Generate response with fallback provider.
 
-        Args:
-            messages: List of message dictionaries
-            primary_provider: Primary provider to try first
-            fallback_provider: Fallback provider if primary fails
-            model: Model name
-            **kwargs: Additional parameters
 
-        Returns:
-            Response with provider_used field
-        """
-        try:
-            result = await self.generate(
-                messages, primary_provider, model, **kwargs
-            )
-            result["provider_used"] = primary_provider
-            return result
-        except Exception as e:
-            logger.warning(
-                f"Primary provider {primary_provider} failed: {e}, trying fallback"
-            )
-            try:
-                result = await self.generate(
-                    messages, fallback_provider, model, **kwargs
-                )
-                result["provider_used"] = fallback_provider
-                return result
-            except Exception as fallback_error:
-                raise LLMProviderError(
-                    f"Both providers failed. Primary: {e}, Fallback: {fallback_error}"
-                ) from fallback_error
 
-    async def generate_with_context(
-        self,
-        messages: list[dict],
-        conversation_id: str,
-        provider: str,
-        model: str,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Generate response with conversation context.
 
-        Args:
-            messages: List of message dictionaries
-            conversation_id: Conversation ID for context
-            provider: Provider name
-            model: Model name
-            **kwargs: Additional parameters
 
-        Returns:
-            Response dictionary
-        """
-        # In a real implementation, this would load context from the conversation
-        # For now, just pass through to generate
-        result = await self.generate(
-            messages, provider, model, **kwargs
-        )
-        result["conversation_id"] = conversation_id
-        return result
-
-    async def generate_with_load_balancing(
-        self,
-        messages: list[dict],
-        providers: list[str],
-        model: str,
-        **kwargs,
-    ) -> dict[str, Any]:
-        """Generate response with load balancing across providers.
-
-        Args:
-            messages: List of message dictionaries
-            providers: List of provider names to balance across
-            model: Model name
-            **kwargs: Additional parameters
-
-        Returns:
-            Response with provider_used field
-        """
-        # Simple round-robin load balancing
-        # In production, this would use more sophisticated logic
-        import random
-
-        provider = random.choice(providers)
-
-        result = await self.generate(
-            messages, provider, model, **kwargs
-        )
-        result["provider_used"] = provider
-        return result

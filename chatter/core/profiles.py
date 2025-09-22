@@ -645,7 +645,7 @@ class ProfileService:
                     )
                     if default_provider_info:
                         provider_info = (
-                            await self.llm_service.get_provider_info(
+                            await self.get_provider_info(
                                 default_provider_info.name
                             )
                         )
@@ -674,7 +674,7 @@ class ProfileService:
                 provider_name
             ) in await self.llm_service.list_available_providers():
                 provider_info = (
-                    await self.llm_service.get_provider_info(
+                    await self.get_provider_info(
                         provider_name
                     )
                 )
@@ -698,6 +698,54 @@ class ProfileService:
                 "Failed to get available providers", error=str(e)
             )
             return {}
+
+    async def get_provider_info(
+        self, provider_name: str
+    ) -> dict[str, Any]:
+        """Get information about a provider.
+
+        Args:
+            provider_name: Provider name
+
+        Returns:
+            Provider information
+        """
+        from chatter.core.dependencies import get_model_registry
+        from chatter.models.registry import ModelType
+        from chatter.services.llm import LLMProviderError
+
+        registry = get_model_registry()(self.session)
+
+        provider = await registry.get_provider_by_name(provider_name)
+        if not provider:
+            raise LLMProviderError(
+                f"Provider '{provider_name}' not found"
+            ) from None
+
+        # Get models for this provider
+        models, _ = await registry.list_models(
+            provider.id, ModelType.LLM
+        )
+        active_models = [m for m in models if m.is_active]
+
+        return {
+            "name": provider.name,
+            "display_name": provider.display_name,
+            "provider_type": provider.provider_type,
+            "description": provider.description,
+            "is_active": provider.is_active,
+            "is_default": provider.is_default,
+            "models": [
+                {
+                    "name": m.name,
+                    "model_name": m.model_name,
+                    "display_name": m.display_name,
+                    "is_default": m.is_default,
+                    "max_tokens": m.max_tokens,
+                }
+                for m in active_models
+            ],
+        }
 
 
 class ProfileError(Exception):

@@ -56,227 +56,10 @@ class LLMService:
         session_maker = get_session_maker()
         return session_maker()
 
-    async def _create_custom_provider(
-        self,
-        provider_name: str | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-    ) -> BaseChatModel:
-        """Create a provider instance with custom temperature and max_tokens."""
-        session = await self._get_session()
-        registry_factory = get_model_registry()
-        registry = registry_factory(session)
-
-        # Get the default model if no provider specified
-        if provider_name is None:
-            try:
-                model_def = await registry.get_default_model()
-                provider_info = await registry.get_provider(
-                    model_def.provider_id
-                )
-            except Exception:
-                # Fallback to OpenAI if registry fails - but still check API key requirements
-                provider_name = "openai"
-                model_name = "gpt-3.5-turbo"
-                try:
-                    settings = get_settings()
-                    api_key = settings.openai_api_key
-                except Exception:
-                    api_key = None
-                # Don't use dummy API key - fail if no key is available for a fallback
-                if not api_key:
-                    raise LLMProviderError(
-                        "No default model available from registry and no OPENAI_API_KEY found for fallback"
-                    ) from None
-
-                # Try to get base_url from any configured OpenAI provider
-                base_url = None
-                try:
-                    providers, _ = await registry.list_providers()
-                    for provider in providers:
-                        if (
-                            provider.provider_type
-                            == ProviderType.OPENAI
-                            and provider.base_url
-                        ):
-                            base_url = provider.base_url
-                            break
-                except Exception:
-                    pass  # If we can't get providers, use default base_url
-
-                return ChatOpenAI(
-                    api_key=SecretStr(api_key),
-                    base_url=base_url,
-                    model=model_name,
-                    temperature=(
-                        temperature if temperature is not None else 0.7
-                    ),
-                    max_completion_tokens=(
-                        max_tokens if max_tokens is not None else 2048
-                    ),
-                )
-        else:
-            try:
-                # Find model by provider name
-                models, _ = await registry.list_models()
-                model_def = None
-                provider_info = None
-
-                for model in models:
-                    provider = await registry.get_provider(
-                        model.provider_id
-                    )
-                    if provider.name.lower() == provider_name.lower():
-                        model_def = model
-                        provider_info = provider
-                        break
-
-                if not model_def or not provider_info:
-                    raise ValueError(
-                        f"Provider {provider_name} not found"
-                    )
-
-            except Exception:
-                # Fallback creation based on provider name - but respect API key requirements
-                if provider_name.lower() == "openai":
-                    try:
-                        settings = get_settings()
-                        api_key = settings.openai_api_key
-                    except Exception:
-                        api_key = None
-                    if not api_key:
-                        raise LLMProviderError(
-                            f"Provider {provider_name} not found in registry and no OPENAI_API_KEY found for fallback"
-                        ) from None
-
-                    # Try to get base_url from any configured OpenAI provider
-                    base_url = None
-                    try:
-                        providers, _ = await registry.list_providers()
-                        for provider in providers:
-                            if (
-                                provider.provider_type
-                                == ProviderType.OPENAI
-                                and provider.base_url
-                            ):
-                                base_url = provider.base_url
-                                break
-                    except Exception:
-                        pass  # If we can't get providers, use default base_url
-
-                    return ChatOpenAI(
-                        api_key=SecretStr(api_key),
-                        base_url=base_url,
-                        model="gpt-3.5-turbo",
-                        temperature=(
-                            temperature
-                            if temperature is not None
-                            else 0.7
-                        ),
-                        max_completion_tokens=(
-                            max_tokens
-                            if max_tokens is not None
-                            else 2048
-                        ),
-                    )
-                elif provider_name.lower() == "anthropic":
-                    try:
-                        settings = get_settings()
-                        api_key = settings.anthropic_api_key
-                    except Exception:
-                        api_key = None
-                    if not api_key:
-                        raise LLMProviderError(
-                            f"Provider {provider_name} not found in registry and no ANTHROPIC_API_KEY found for fallback"
-                        ) from None
-                    return ChatAnthropic(
-                        api_key=SecretStr(api_key),
-                        model_name="claude-3-sonnet-20240229",
-                        temperature=(
-                            temperature
-                            if temperature is not None
-                            else 0.7
-                        ),
-                        max_tokens_to_sample=(
-                            max_tokens
-                            if max_tokens is not None
-                            else 2048
-                        ),
-                    )
-                else:
-                    raise ValueError(
-                        f"Unsupported provider: {provider_name}"
-                    ) from None
-
-        # Create provider instance with custom parameters
-        try:
-            settings = get_settings()
-            if provider_info.name.lower() == "openai":
-                api_key = settings.openai_api_key
-            elif provider_info.name.lower() == "anthropic":
-                api_key = settings.anthropic_api_key
-            else:
-                api_key = None
-        except Exception:
-            api_key = None
-
-        if provider_info.api_key_required and not api_key:
-            raise LLMProviderError(
-                f"API key required for provider {provider_info.name} but not found in settings"
-            )
-
-        config = model_def.default_config or {}
-
-        if provider_info.provider_type == ProviderType.OPENAI:
-            return ChatOpenAI(
-                api_key=SecretStr(api_key) if api_key else None,
-                base_url=provider_info.base_url,
-                model=model_def.model_name,
-                temperature=(
-                    temperature
-                    if temperature is not None
-                    else config.get("temperature", 0.7)
-                ),
-                max_completion_tokens=(
-                    max_tokens
-                    if max_tokens is not None
-                    else (
-                        model_def.max_tokens
-                        or config.get("max_tokens", 2048)
-                    )
-                ),
-            )
-
-        elif provider_info.provider_type == ProviderType.ANTHROPIC:
-            return ChatAnthropic(
-                api_key=SecretStr(api_key) if api_key else None,
-                model_name=model_def.model_name,
-                temperature=(
-                    temperature
-                    if temperature is not None
-                    else config.get("temperature", 0.7)
-                ),
-                max_tokens_to_sample=(
-                    max_tokens
-                    if max_tokens is not None
-                    else (
-                        model_def.max_tokens
-                        or config.get("max_tokens", 2048)
-                    )
-                ),
-                timeout=None,
-                stop=None,
-            )
-
-        else:
-            raise ValueError(
-                f"Unsupported provider type: {provider_info.provider_type}"
-            )
-
     async def _create_provider_instance(
-        self, provider, model_def
+        self, provider, model_def, temperature: float | None = None, max_tokens: int | None = None
     ) -> BaseChatModel | None:
-        """Create a provider instance based on registry data."""
+        """Create a provider instance based on registry data with optional custom parameters."""
         try:
             # Get API key from settings - registry doesn't store sensitive data
             try:
@@ -303,18 +86,20 @@ class LLMService:
                     api_key=SecretStr(api_key) if api_key else None,
                     base_url=provider.base_url,
                     model=model_def.model_name,
-                    temperature=config.get("temperature", 0.7),
-                    max_completion_tokens=model_def.max_tokens
-                    or config.get("max_tokens", 4096),
+                    temperature=temperature if temperature is not None else config.get("temperature", 0.7),
+                    max_completion_tokens=max_tokens if max_tokens is not None else (
+                        model_def.max_tokens or config.get("max_tokens", 4096)
+                    ),
                 )
 
             elif provider.provider_type == ProviderType.ANTHROPIC:
                 return ChatAnthropic(
                     api_key=SecretStr(api_key) if api_key else None,
                     model_name=model_def.model_name,
-                    temperature=config.get("temperature", 0.7),
-                    max_tokens_to_sample=model_def.max_tokens
-                    or config.get("max_tokens", 4096),
+                    temperature=temperature if temperature is not None else config.get("temperature", 0.7),
+                    max_tokens_to_sample=max_tokens if max_tokens is not None else (
+                        model_def.max_tokens or config.get("max_tokens", 4096)
+                    ),
                     timeout=None,
                     stop=None,
                 )
@@ -798,6 +583,61 @@ class LLMService:
                 f"Generation with tools failed: {str(e)}"
             ) from e
 
+    async def _create_provider_with_custom_params(
+        self,
+        provider_name: str | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+    ) -> BaseChatModel:
+        """Create a provider with custom parameters."""
+        session = await self._get_session()
+        registry = get_model_registry()(session)
+
+        if provider_name is None:
+            # Get default provider
+            provider_info = await registry.get_default_provider(ModelType.LLM)
+            if not provider_info:
+                raise LLMProviderError("No default LLM provider configured")
+            provider_name = provider_info.name
+
+        # Get provider and model info
+        provider = await registry.get_provider_by_name(provider_name)
+        if not provider or not provider.is_active:
+            raise LLMProviderError(
+                f"Provider '{provider_name}' not found or inactive"
+            )
+
+        # Get default LLM model for this provider
+        models, _ = await registry.list_models(provider.id, ModelType.LLM)
+        default_model = None
+        for model in models:
+            if model.is_default and model.is_active:
+                default_model = model
+                break
+
+        if not default_model:
+            # Get first active model if no default
+            for model in models:
+                if model.is_active:
+                    default_model = model
+                    break
+
+        if not default_model:
+            raise LLMProviderError(
+                f"No active LLM model found for provider '{provider_name}'"
+            )
+
+        # Create instance with custom parameters
+        instance = await self._create_provider_instance(
+            provider, default_model, temperature, max_tokens
+        )
+        if not instance:
+            raise LLMProviderError(
+                f"Failed to create instance for provider '{provider_name}'"
+            )
+
+        return instance
+
     async def create_langgraph_workflow(
         self,
         provider_name: str | None,
@@ -823,7 +663,7 @@ class LLMService:
         if provider_name is None or provider_name == "":
             if temperature is not None or max_tokens is not None:
                 # Create a custom provider instance with the specified parameters
-                provider = await self._create_custom_provider(
+                provider = await self._create_provider_with_custom_params(
                     provider_name=None,
                     temperature=temperature,
                     max_tokens=max_tokens,
@@ -833,7 +673,7 @@ class LLMService:
         else:
             if temperature is not None or max_tokens is not None:
                 # Create a custom provider instance with the specified parameters
-                provider = await self._create_custom_provider(
+                provider = await self._create_provider_with_custom_params(
                     provider_name=provider_name,
                     temperature=temperature,
                     max_tokens=max_tokens,

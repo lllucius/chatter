@@ -13,7 +13,7 @@ vi.mock('../../services/auth-service', () => ({
           'test-template': {
             name: 'Test Template',
             description: 'A test workflow template',
-            workflow_type: 'sequential',
+            capabilities: 'sequential',
             category: 'basic',
             required_tools: ['tool1', 'tool2'],
             parameters: {
@@ -121,7 +121,7 @@ describe('WorkflowManagementPage', () => {
     const clipboardData = JSON.parse(mockWriteText.mock.calls[0][0]);
     expect(clipboardData.name).toBe('Test Template (Copy)');
     expect(clipboardData.description).toBe('A test workflow template');
-    expect(clipboardData.workflow_type).toBe('sequential');
+    expect(clipboardData.capabilities).toBe('sequential');
     expect(clipboardData.category).toBe('basic');
     expect(clipboardData.required_tools).toEqual(['tool1', 'tool2']);
   });

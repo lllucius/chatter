@@ -226,7 +226,7 @@ class WorkflowTemplate(Base):
 
     def __repr__(self) -> str:
         """String representation of workflow template."""
-        return f"<WorkflowTemplate(id={self.id}, name={self.name}, type={self.workflow_type})>"
+        return f"<WorkflowTemplate(id={self.id}, name={self.name})>"
 
     def to_unified_template(self) -> dict[str, Any]:
         """Convert to UnifiedTemplateManager format."""

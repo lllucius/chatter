@@ -153,7 +153,7 @@ class StreamingService:
             mode = "plain_streaming"
             
         record_workflow_metrics(
-            workflow_type=mode,
+            workflow_mode=mode,
             workflow_id=stream_id,
             step="complete",
             duration_ms=total_duration * 1000,

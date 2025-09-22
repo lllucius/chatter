@@ -38,7 +38,7 @@ class TestWorkflowTemplateResponse(unittest.TestCase):
             return WorkflowTemplateResponse(
                 name = '0',
                 description = '0',
-                workflow_type = '',
+                capabilities = '',
                 category = 'custom',
                 default_params = { },
                 required_tools = [
@@ -68,7 +68,7 @@ class TestWorkflowTemplateResponse(unittest.TestCase):
             return WorkflowTemplateResponse(
                 name = '0',
                 description = '0',
-                workflow_type = '',
+                capabilities = '',
                 id = '',
                 owner_id = '',
                 config_hash = '',

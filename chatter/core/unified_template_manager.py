@@ -54,7 +54,7 @@ class WorkflowTemplate:
     """Pre-configured workflow template."""
 
     name: str
-    workflow_type: str
+    workflow_mode: str
     description: str
     default_params: dict[str, Any]
     required_tools: list[str] | None = None
@@ -67,7 +67,7 @@ class TemplateSpec:
 
     name: str
     description: str
-    workflow_type: str
+    workflow_mode: str
     default_params: dict[str, Any]
     required_tools: list[str] | None = None
     required_retrievers: list[str] | None = None
@@ -139,7 +139,7 @@ class UnifiedTemplateManager:
                 template_data = db_template.to_unified_template()
                 templates[template_data["name"]] = WorkflowTemplate(
                     name=template_data["name"],
-                    workflow_type=template_data["workflow_type"],
+                    workflow_mode=template_data["workflow_mode"],
                     description=template_data["description"],
                     default_params=template_data["default_params"],
                     required_tools=template_data["required_tools"],
@@ -201,7 +201,7 @@ class UnifiedTemplateManager:
                 )
                 return WorkflowTemplate(
                     name=template_data["name"],
-                    workflow_type=template_data["workflow_type"],
+                    workflow_mode=template_data["workflow_mode"],
                     description=template_data["description"],
                     default_params=template_data["default_params"],
                     required_tools=template_data["required_tools"],
@@ -258,7 +258,7 @@ class UnifiedTemplateManager:
             for name, template in templates.items():
                 info[name] = {
                     "name": template.name,
-                    "workflow_type": template.workflow_type,
+                    "workflow_mode": template.workflow_mode,
                     "description": template.description,
                     "required_tools": template.required_tools or [],
                     "required_retrievers": template.required_retrievers
@@ -308,7 +308,7 @@ class UnifiedTemplateManager:
         # Create custom template in memory for validation
         custom_template = WorkflowTemplate(
             name=spec.name,
-            workflow_type=spec.workflow_type,
+            workflow_mode=spec.workflow_mode,
             description=spec.description,
             default_params=default_params,
             required_tools=required_tools,
@@ -333,14 +333,14 @@ class UnifiedTemplateManager:
 
                 # Determine category based on name/type
                 category = self._determine_template_category(
-                    spec.name, spec.workflow_type
+                    spec.name, spec.workflow_mode
                 )
 
                 db_template = DBWorkflowTemplate(
                     owner_id=owner_id,
                     name=spec.name,
                     description=spec.description,
-                    workflow_type=spec.workflow_type,
+                    workflow_mode=spec.workflow_mode,
                     category=category,
                     default_params=default_params,
                     required_tools=required_tools,
@@ -396,7 +396,7 @@ class UnifiedTemplateManager:
         return custom_template
 
     def _determine_template_category(
-        self, name: str, workflow_type: str
+        self, name: str, workflow_mode: str
     ) -> TemplateCategory:
         """Determine template category based on name and type."""
         name_lower = name.lower()
@@ -446,7 +446,7 @@ class UnifiedTemplateManager:
         # Build specification
         spec = {
             "template_name": name,
-            "workflow_type": template.workflow_type,
+            "workflow_mode": template.workflow_mode,
             "description": template.description,
             "parameters": template.default_params.copy(),
             "required_tools": template.required_tools or [],
@@ -503,14 +503,14 @@ class UnifiedTemplateManager:
                 )
 
                 category = self._determine_template_category(
-                    template.name, template.workflow_type
+                    template.name, template.workflow_mode
                 )
 
                 db_template = DBWorkflowTemplate(
                     owner_id=owner_id,
                     name=template.name,
                     description=template.description,
-                    workflow_type=template.workflow_type,
+                    workflow_mode=template.workflow_mode,
                     category=category,
                     default_params=template.default_params,
                     required_tools=template.required_tools,
@@ -721,7 +721,7 @@ class UnifiedTemplateManager:
         # Create workflow with template parameters
         workflow_kwargs = {
             "provider_name": provider_name,
-            "workflow_type": template.workflow_type,
+            "workflow_mode": template.workflow_mode,
             **params,
         }
 
@@ -733,7 +733,7 @@ class UnifiedTemplateManager:
 
         logger.debug(
             f"Creating workflow from template: {template_name}",
-            workflow_type=template.workflow_type,
+            workflow_mode=template.workflow_mode,
         )
 
         return await llm_service.create_langgraph_workflow(
@@ -757,7 +757,7 @@ class UnifiedTemplateManager:
             template = await self.get_template(name, owner_id)
             return {
                 "name": template.name,
-                "workflow_type": template.workflow_type,
+                "workflow_mode": template.workflow_mode,
                 "description": template.description,
                 "default_params": template.default_params,
                 "required_tools": template.required_tools,
@@ -783,7 +783,7 @@ class UnifiedTemplateManager:
         """
         template = WorkflowTemplate(
             name=template_data["name"],
-            workflow_type=template_data["workflow_type"],
+            workflow_mode=template_data["workflow_mode"],
             description=template_data["description"],
             default_params=template_data.get("default_params", {}),
             required_tools=template_data.get("required_tools"),
@@ -797,12 +797,12 @@ class UnifiedTemplateManager:
 
     # Additional utility methods
     async def get_templates_by_type(
-        self, workflow_type: str, owner_id: str | None = None
+        self, workflow_mode: str, owner_id: str | None = None
     ) -> list[WorkflowTemplate]:
         """Get all templates of a specific workflow type.
 
         Args:
-            workflow_type: Type of workflow to filter by
+            workflow_mode: Type of workflow to filter by
             owner_id: Optional user ID for accessing private templates
 
         Returns:
@@ -814,7 +814,7 @@ class UnifiedTemplateManager:
         try:
             all_templates = await self._get_templates_from_db(owner_id)
             for template in all_templates.values():
-                if template.workflow_type == workflow_type:
+                if template.workflow_mode == workflow_mode:
                     templates.append(template)
         except Exception as e:
             logger.warning(f"Error loading templates by type: {e}")

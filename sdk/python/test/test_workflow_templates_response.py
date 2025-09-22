@@ -40,7 +40,7 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
                     chatter_sdk.models.workflow_template_response.WorkflowTemplateResponse(
                         name = '0', 
                         description = '0', 
-                        workflow_type = '', 
+                        capabilities = '', 
                         category = 'custom', 
                         default_params = { }, 
                         required_tools = [
@@ -74,7 +74,7 @@ class TestWorkflowTemplatesResponse(unittest.TestCase):
                     chatter_sdk.models.workflow_template_response.WorkflowTemplateResponse(
                         name = '0', 
                         description = '0', 
-                        workflow_type = '', 
+                        capabilities = '', 
                         category = 'custom', 
                         default_params = { }, 
                         required_tools = [

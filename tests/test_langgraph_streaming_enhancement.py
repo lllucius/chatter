@@ -146,7 +146,7 @@ class TestLangGraphStreamingEnhancement:
             # Test workflow creation through LLM service
             workflow = await llm_service.create_langgraph_workflow(
                 provider_name=None,
-                workflow_type="plain",
+                capabilities="plain",
                 system_message="Test streaming workflow",
                 enable_memory=True,
                 memory_window=10,

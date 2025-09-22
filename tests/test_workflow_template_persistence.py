@@ -186,7 +186,6 @@ class TestWorkflowTemplatePersistence:
         invalid_template = WorkflowTemplate(
             name="",  # Empty name should cause error
             description="",  # Empty description should cause warning
-            workflow_type="invalid_type",  # Invalid type should cause error
             default_params={},
         )
 
@@ -307,7 +306,7 @@ class TestWorkflowTemplateIntegration:
         spec = TemplateSpec(
             name="integration_test_template",
             description="Integration test template",
-            workflow_type="rag",
+            capabilities="rag",
             default_params={
                 "system_message": "Integration test system message",
                 "max_documents": 10,
@@ -329,7 +328,7 @@ class TestWorkflowTemplateIntegration:
         mock_db_template = MagicMock()
         mock_db_template.to_unified_template.return_value = {
             "name": "integration_test_template",
-            "workflow_type": "rag",
+            "capabilities": "rag",
             "description": "Integration test template",
             "default_params": {
                 "system_message": "Integration test system message",

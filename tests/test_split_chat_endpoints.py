@@ -34,15 +34,24 @@ class TestSplitChatEndpoints:
         assert response.status_code != 404
 
     @pytest.mark.parametrize(
-        "workflow",
-        ["plain", "rag", "tools", "full"],
+        "enable_retrieval,enable_tools,enable_memory",
+        [
+            (False, False, True),  # Plain
+            (True, False, True),   # RAG
+            (False, True, True),   # Tools
+            (True, True, True),    # Full
+        ],
     )
-    def test_chat_request_workflow_types(self, workflow):
-        """Test that all workflow types are supported."""
+    def test_chat_request_capabilities(self, enable_retrieval, enable_tools, enable_memory):
+        """Test that all capability combinations are supported."""
         request_data = {
             "message": "Hello, world!",
-            "workflow": workflow,
+            "enable_retrieval": enable_retrieval,
+            "enable_tools": enable_tools,
+            "enable_memory": enable_memory,
         }
 
         chat_request = ChatRequest(**request_data)
-        assert chat_request.workflow == workflow
+        assert chat_request.enable_retrieval == enable_retrieval
+        assert chat_request.enable_tools == enable_tools
+        assert chat_request.enable_memory == enable_memory

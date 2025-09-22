@@ -2,10 +2,7 @@
 
 import pytest
 
-from chatter.core.cache_interface import CacheConfig, CacheStats
-from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
-from chatter.core.enhanced_redis_cache import EnhancedRedisCache
-from chatter.core.multi_tier_cache import MultiTierCache
+from chatter.core.cache import CacheConfig, CacheStats, MemoryCache, MultiTierCache, RedisCache
 
 
 class TestCacheDisableFunctionality:
@@ -15,10 +12,7 @@ class TestCacheDisableFunctionality:
     async def test_memory_cache_disabled_operations(self):
         """Test that memory cache operations return expected values when disabled."""
         config = CacheConfig(max_size=10, disabled=True)
-        cache = EnhancedInMemoryCache(config)
-
-        # Verify cache is marked as disabled
-        assert cache.is_disabled
+        cache = MemoryCache(config)
 
         # Test get returns None
         result = await cache.get("test_key")
@@ -44,7 +38,7 @@ class TestCacheDisableFunctionality:
     async def test_memory_cache_enabled_operations(self):
         """Test that memory cache operations work normally when not disabled."""
         config = CacheConfig(max_size=10, disabled=False)
-        cache = EnhancedInMemoryCache(config)
+        cache = MemoryCache(config)
 
         # Verify cache is not disabled
         assert not cache.is_disabled
@@ -73,7 +67,7 @@ class TestCacheDisableFunctionality:
     async def test_redis_cache_disabled_operations(self):
         """Test that Redis cache operations return expected values when disabled."""
         config = CacheConfig(disabled=True)
-        cache = EnhancedRedisCache(config)
+        cache = RedisCache(config)
 
         # Verify cache is marked as disabled
         assert cache.is_disabled
@@ -138,8 +132,8 @@ class TestCacheDisableFunctionality:
         config_enabled = CacheConfig(disabled=False)
         config_disabled = CacheConfig(disabled=True)
 
-        cache_enabled = EnhancedInMemoryCache(config_enabled)
-        cache_disabled = EnhancedInMemoryCache(config_disabled)
+        cache_enabled = MemoryCache(config_enabled)
+        cache_disabled = MemoryCache(config_disabled)
 
         assert not cache_enabled.is_disabled
         assert cache_disabled.is_disabled
@@ -148,7 +142,7 @@ class TestCacheDisableFunctionality:
     async def test_disabled_cache_still_provides_stats(self):
         """Test that disabled cache can still provide statistics."""
         config = CacheConfig(disabled=True, enable_stats=True)
-        cache = EnhancedInMemoryCache(config)
+        cache = MemoryCache(config)
 
         # Even when disabled, stats should be accessible
         stats = await cache.get_stats()

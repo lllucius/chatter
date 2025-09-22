@@ -1,45 +1,39 @@
-"""Cache factory for creating and managing cache instances."""
+"""Simplified cache factory for creating cache instances."""
 
 from enum import Enum
 from typing import Any
 
 from chatter.config import settings
-from chatter.core.cache_interface import CacheConfig, CacheInterface
-from chatter.core.multi_tier_cache import MultiTierCache
+from chatter.core.cache import (
+    CacheConfig,
+    CacheInterface,
+    MemoryCache,
+    MultiTierCache,
+    RedisCache,
+)
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
 
 
 class CacheType(Enum):
-    """Simplified cache types for different use cases."""
+    """Cache types for different use cases."""
 
-    GENERAL = "general"  # General purpose caching (replaces TOOL, MODEL_REGISTRY)
-    SESSION = "session"  # Session-specific data with short TTL
-    PERSISTENT = (
-        "persistent"  # Long-term data caching (replaces WORKFLOW)
-    )
+    GENERAL = "general"  # General purpose caching
+    SESSION = "session"  # Session-specific data
+    PERSISTENT = "persistent"  # Long-term data caching
 
 
-class CacheFactory:
+class SimplifiedCacheFactory:
     """Simplified factory for creating cache instances."""
 
     def __init__(self):
         """Initialize cache factory."""
         self._cache_instances: dict[str, CacheInterface] = {}
-        logger.debug("Cache factory initialized")
+        logger.debug("Simplified cache factory initialized")
 
-    def _get_config_for_type(
-        self, cache_type: CacheType
-    ) -> CacheConfig:
-        """Get configuration for cache type.
-
-        Args:
-            cache_type: Type of cache
-
-        Returns:
-            Cache configuration
-        """
+    def _get_config_for_type(self, cache_type: CacheType) -> CacheConfig:
+        """Get configuration for cache type."""
         configs = {
             CacheType.GENERAL: CacheConfig(
                 default_ttl=settings.cache_ttl_default,
@@ -51,17 +45,15 @@ class CacheFactory:
             ),
             CacheType.SESSION: CacheConfig(
                 default_ttl=settings.cache_ttl_short,
-                max_size=settings.cache_max_size
-                // 2,  # Smaller for sessions
-                eviction_policy="ttl",  # TTL-based for sessions
+                max_size=settings.cache_max_size // 2,
+                eviction_policy="ttl",
                 key_prefix="session",
                 enable_stats=True,
                 disabled=settings.cache_disabled,
             ),
             CacheType.PERSISTENT: CacheConfig(
                 default_ttl=settings.cache_ttl_long,
-                max_size=settings.cache_max_size
-                * 2,  # Larger for persistent data
+                max_size=settings.cache_max_size * 2,
                 eviction_policy=settings.cache_eviction_policy,
                 key_prefix="persistent",
                 enable_stats=True,
@@ -76,24 +68,13 @@ class CacheFactory:
         config: CacheConfig | None = None,
         **kwargs,
     ) -> CacheInterface:
-        """Create a cache instance.
-
-        Args:
-            cache_type: Type of cache to create
-            config: Custom cache configuration (uses default if None)
-            **kwargs: Additional arguments for cache initialization
-
-        Returns:
-            Cache instance
-        """
+        """Create a cache instance."""
         # Use provided config or default for cache type
         using_default_config = config is None
         if config is None:
             config = self._get_config_for_type(cache_type)
 
         # Create instance key for reuse
-        # For default configs, use cache type only to ensure reuse
-        # For custom configs, include config id to allow multiple instances
         if using_default_config:
             instance_key = f"{cache_type.value}_default"
         else:
@@ -104,29 +85,18 @@ class CacheFactory:
             logger.debug(
                 "Reusing existing cache instance",
                 cache_type=cache_type.value,
-                is_default_config=using_default_config,
             )
             return self._cache_instances[instance_key]
 
         # Create cache based on backend configuration
         backend = settings.cache_backend
         redis_url = kwargs.get("redis_url")
-        l1_size_ratio = kwargs.get(
-            "l1_size_ratio", settings.cache_l1_size_ratio
-        )
+        l1_size_ratio = kwargs.get("l1_size_ratio", 0.1)
 
         if backend == "memory":
-            from chatter.core.enhanced_memory_cache import (
-                EnhancedInMemoryCache,
-            )
-
-            cache_instance = EnhancedInMemoryCache(config)
+            cache_instance = MemoryCache(config)
         elif backend == "redis":
-            from chatter.core.enhanced_redis_cache import (
-                EnhancedRedisCache,
-            )
-
-            cache_instance = EnhancedRedisCache(config, redis_url)
+            cache_instance = RedisCache(config, redis_url)
         else:  # multi_tier (default)
             cache_instance = MultiTierCache(
                 config, None, redis_url, l1_size_ratio
@@ -138,213 +108,64 @@ class CacheFactory:
         logger.info(
             "Created cache instance",
             cache_type=cache_type.value,
+            backend=backend,
             max_size=config.max_size,
             default_ttl=config.default_ttl,
-            key_prefix=config.key_prefix,
         )
 
         return cache_instance
 
     def get_cache(self, cache_type: CacheType) -> CacheInterface | None:
-        """Get existing cache instance if available.
+        """Get existing cache instance if available."""
+        instance_key = f"{cache_type.value}_default"
+        return self._cache_instances.get(instance_key)
 
-        Args:
-            cache_type: Type of cache to get
-
-        Returns:
-            Cache instance or None if not found
-        """
-        default_key = f"{cache_type.value}_default"
-        return self._cache_instances.get(default_key)
-
-    def create_general_cache(self, **kwargs) -> CacheInterface:
-        """Create general-purpose cache (replaces model_registry, tool caches).
-
-        Args:
-            **kwargs: Additional configuration options
-
-        Returns:
-            General cache instance
-        """
-        return self.create_cache(CacheType.GENERAL, **kwargs)
-
-    def create_session_cache(self, **kwargs) -> CacheInterface:
-        """Create cache for session data.
-
-        Args:
-            **kwargs: Additional configuration options
-
-        Returns:
-            Session cache instance
-        """
-        return self.create_cache(CacheType.SESSION, **kwargs)
-
-    def create_persistent_cache(self, **kwargs) -> CacheInterface:
-        """Create cache for persistent data (replaces workflow cache).
-
-        Args:
-            **kwargs: Additional configuration options
-
-        Returns:
-            Persistent cache instance
-        """
-        return self.create_cache(CacheType.PERSISTENT, **kwargs)
-
-    async def health_check_all(self) -> dict[str, Any]:
-        """Perform health check on all cache instances.
-
-        Returns:
-            Health status for all cache instances
-        """
-        health_results = {}
-
-        for (
-            instance_key,
-            cache_instance,
-        ) in self._cache_instances.items():
+    def clear_all_caches(self) -> None:
+        """Clear all cache instances."""
+        for cache in self._cache_instances.values():
             try:
-                health_result = await cache_instance.health_check()
-                health_results[instance_key] = health_result
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Schedule for later execution
+                    asyncio.create_task(cache.clear())
+                else:
+                    loop.run_until_complete(cache.clear())
             except Exception as e:
-                health_results[instance_key] = {
-                    "status": "unhealthy",
-                    "error": str(e),
-                }
+                logger.warning(f"Failed to clear cache: {e}")
 
-        # Overall health summary
-        all_healthy = all(
-            result.get("status") == "healthy"
-            for result in health_results.values()
-        )
-
-        overall_status = "healthy" if all_healthy else "degraded"
-        if not health_results:
-            overall_status = "no_caches"
-        elif all(
-            result.get("status") == "unhealthy"
-            for result in health_results.values()
-        ):
-            overall_status = "unhealthy"
-
-        return {
-            "overall_status": overall_status,
-            "cache_instances": health_results,
-            "total_instances": len(self._cache_instances),
-        }
-
-    async def get_stats_all(self) -> dict[str, Any]:
-        """Get statistics for all cache instances.
-
-        Returns:
-            Statistics for all cache instances
-        """
-        stats_results = {}
-
-        for (
-            instance_key,
-            cache_instance,
-        ) in self._cache_instances.items():
+    def get_all_stats(self) -> dict[str, Any]:
+        """Get statistics from all cache instances."""
+        stats = {}
+        for key, cache in self._cache_instances.items():
             try:
-                stats = await cache_instance.get_stats()
-                stats_results[instance_key] = {
-                    "total_entries": stats.total_entries,
-                    "cache_hits": stats.cache_hits,
-                    "cache_misses": stats.cache_misses,
-                    "hit_rate": stats.hit_rate,
-                    "memory_usage": stats.memory_usage,
-                    "evictions": stats.evictions,
-                    "errors": stats.errors,
-                }
+                import asyncio
+                loop = asyncio.get_event_loop()
+                if loop.is_running():
+                    # Return placeholder for async context
+                    stats[key] = {"status": "available"}
+                else:
+                    stats[key] = loop.run_until_complete(cache.get_stats())
             except Exception as e:
-                stats_results[instance_key] = {"error": str(e)}
-
-        # Calculate aggregate statistics
-        total_entries = sum(
-            stats.get("total_entries", 0)
-            for stats in stats_results.values()
-            if "error" not in stats
-        )
-
-        total_hits = sum(
-            stats.get("cache_hits", 0)
-            for stats in stats_results.values()
-            if "error" not in stats
-        )
-
-        total_misses = sum(
-            stats.get("cache_misses", 0)
-            for stats in stats_results.values()
-            if "error" not in stats
-        )
-
-        total_requests = total_hits + total_misses
-        overall_hit_rate = (
-            total_hits / total_requests if total_requests > 0 else 0
-        )
-
-        return {
-            "aggregate": {
-                "total_entries": total_entries,
-                "total_hits": total_hits,
-                "total_misses": total_misses,
-                "overall_hit_rate": overall_hit_rate,
-                "total_instances": len(self._cache_instances),
-            },
-            "instances": stats_results,
-        }
-
-    async def clear_all(self) -> dict[str, bool]:
-        """Clear all cache instances.
-
-        Returns:
-            Dictionary of instance key to clear success status
-        """
-        clear_results = {}
-
-        for (
-            instance_key,
-            cache_instance,
-        ) in self._cache_instances.items():
-            try:
-                success = await cache_instance.clear()
-                clear_results[instance_key] = success
-            except Exception as e:
-                logger.error(
-                    f"Failed to clear cache {instance_key}",
-                    error=str(e),
-                )
-                clear_results[instance_key] = False
-
-        successful_clears = sum(
-            1 for success in clear_results.values() if success
-        )
-        logger.info(
-            f"Cleared {successful_clears}/{len(clear_results)} cache instances"
-        )
-
-        return clear_results
-
-    def reset(self) -> None:
-        """Reset factory by clearing all instances."""
-        self._cache_instances.clear()
-        logger.info("Cache factory reset, all instances cleared")
+                stats[key] = {"error": str(e)}
+        return stats
 
 
 # Global factory instance
-cache_factory = CacheFactory()
+cache_factory = SimplifiedCacheFactory()
 
 
-# Simplified convenience functions for common cache types
+# Convenience functions for common cache types
 def get_general_cache(**kwargs) -> CacheInterface:
-    """Get general-purpose cache instance (replaces model_registry, tool caches)."""
-    return cache_factory.create_general_cache(**kwargs)
+    """Get general-purpose cache instance."""
+    return cache_factory.create_cache(CacheType.GENERAL, **kwargs)
 
 
 def get_session_cache(**kwargs) -> CacheInterface:
     """Get session cache instance."""
-    return cache_factory.create_session_cache(**kwargs)
+    return cache_factory.create_cache(CacheType.SESSION, **kwargs)
 
 
 def get_persistent_cache(**kwargs) -> CacheInterface:
-    """Get persistent cache instance (replaces workflow cache)."""
-    return cache_factory.create_persistent_cache(**kwargs)
+    """Get persistent cache instance."""
+    return cache_factory.create_cache(CacheType.PERSISTENT, **kwargs)

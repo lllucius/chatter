@@ -8,9 +8,7 @@ from sqlalchemy import and_, or_, select
 from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
-from chatter.core.simplified_workflow_validation import (
-    simplified_workflow_validation_service,
-)
+from chatter.core.validation import validate_workflow_definition
 from chatter.core.workflow_capabilities import WorkflowCapabilities
 from chatter.models.workflow import (
     TemplateCategory,
@@ -28,8 +26,8 @@ def _get_validation_errors_as_strings(validation_result) -> list[str]:
     errors = validation_result.errors
     if not errors:
         return []
-    # Always return strings directly from simplified validation
-    return errors
+    # Convert ValidationError objects to strings
+    return [str(error) for error in errors]
 
 
 def _is_validation_result_valid(validation_result) -> bool:
@@ -98,9 +96,7 @@ class WorkflowManagementService:
                 "metadata": metadata or {},
             }
 
-            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
-                definition_data, owner_id
-            )
+            validation_result = validate_workflow_definition(definition_data)
 
             if not _is_validation_result_valid(validation_result):
                 from chatter.utils.problem import BadRequestProblem
@@ -424,9 +420,7 @@ class WorkflowManagementService:
     ) -> dict[str, Any]:
         """Validate a workflow definition and return validation results."""
         try:
-            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
-                definition=definition_data, owner_id=owner_id
-            )
+            validation_result = validate_workflow_definition(definition_data)
 
             return {
                 "valid": _is_validation_result_valid(validation_result),
@@ -656,13 +650,11 @@ class WorkflowManagementService:
     ) -> dict[str, Any]:
         """Validate a workflow definition using simplified validation."""
         try:
-            validation_result = simplified_workflow_validation_service.validate_workflow_definition(
-                {
-                    "nodes": nodes,
-                    "edges": edges,
-                    "name": "validation_check",
-                }
-            )
+            validation_result = validate_workflow_definition({
+                "nodes": nodes,
+                "edges": edges,
+                "name": "validation_check",
+            })
 
             return {
                 "is_valid": validation_result.is_valid,

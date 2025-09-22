@@ -65,6 +65,15 @@ def validate_business_logic(
     )
 
 
+def validate_workflow_definition(
+    definition: dict[str, Any], context: ValidationContext | None = None
+) -> ValidationResult:
+    """Validate workflow definition structure."""
+    return validation_engine.validate(
+        "workflow", definition, "workflow_definition", context or DEFAULT_CONTEXT
+    )
+
+
 __all__ = [
     "ValidationEngine",
     "ValidationResult",
@@ -83,6 +92,7 @@ __all__ = [
     "validate_input",
     "validate_security",
     "validate_business_logic",
+    "validate_workflow_definition",
     "DEFAULT_CONTEXT",
     "LENIENT_CONTEXT",
 ]

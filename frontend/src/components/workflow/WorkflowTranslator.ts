@@ -47,6 +47,12 @@ export class WorkflowTranslator {
   static toLangGraphConfig(
     workflow: WorkflowDefinition
   ): LangGraphWorkflowConfig {
+    // Validate workflow before translation
+    const validation = this.validateForLangGraph(workflow);
+    if (!validation.valid) {
+      throw new Error(`Workflow validation failed: ${validation.errors.join(', ')}`);
+    }
+
     const nodes = this.translateNodes(workflow);
     const edges = this.translateEdges(workflow);
 
@@ -101,16 +107,50 @@ export class WorkflowTranslator {
    */
   private static translateNodes(workflow: WorkflowDefinition): LangGraphNode[] {
     return workflow.nodes.map((node) => {
-      const langGraphType = this.mapNodeTypeToLangGraph(
-        node.type as WorkflowNodeType
-      );
+      try {
+        const langGraphType = this.mapNodeTypeToLangGraph(
+          node.type as WorkflowNodeType
+        );
 
-      return {
-        id: node.id,
-        type: langGraphType,
-        config: node.data.config || {},
-      };
+        // Validate node configuration
+        this.validateNodeConfig(node.type as WorkflowNodeType, node.data.config);
+
+        return {
+          id: node.id,
+          type: langGraphType,
+          config: node.data.config || {},
+        };
+      } catch (error) {
+        throw new Error(`Failed to translate node ${node.id}: ${error.message}`);
+      }
     });
+  }
+
+  /**
+   * Validate node configuration based on node type
+   */
+  private static validateNodeConfig(
+    nodeType: WorkflowNodeType,
+    config: Record<string, unknown> | undefined
+  ): void {
+    switch (nodeType) {
+      case 'conditional':
+        if (!config || !config.condition) {
+          throw new Error('Conditional nodes must have a condition defined');
+        }
+        break;
+      case 'tool':
+        if (!config || !config.tools || !Array.isArray(config.tools)) {
+          throw new Error('Tool nodes must have tools configured');
+        }
+        break;
+      case 'retrieval':
+        if (!config || (!config.collection && !config.topK)) {
+          throw new Error('Retrieval nodes must have collection or topK configured');
+        }
+        break;
+      // Other node types have optional configuration
+    }
   }
 
   /**
@@ -145,7 +185,7 @@ export class WorkflowTranslator {
       case 'conditional':
         return 'conditional';
       default:
-        return 'call_model';
+        throw new Error(`Unsupported node type for LangGraph: ${nodeType}`);
     }
   }
 

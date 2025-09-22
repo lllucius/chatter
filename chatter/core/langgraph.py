@@ -43,23 +43,20 @@ except ImportError:
 
 
 class ConversationState(TypedDict):
-    """State for conversation workflows."""
-
+    """Simplified state for conversation workflows."""
+    
+    # Core required fields
     messages: Annotated[Sequence[BaseMessage], add_messages]
     user_id: str
     conversation_id: str
+    
+    # Workflow execution context
     retrieval_context: str | None
-    tool_calls: list[dict[str, Any]]
-    metadata: dict[str, Any]
-    # Advanced features
     conversation_summary: str | None
-    parent_conversation_id: str | None  # For conversation branching
-    branch_id: str | None  # For conversation forking
-    memory_context: dict[str, Any]  # For conversation memory
-    workflow_template: str | None  # For conversation templates
-    a_b_test_group: str | None  # For A/B testing
-    # Tool call tracking for recursion prevention
     tool_call_count: int
+    
+    # Extensible metadata for optional features
+    metadata: dict[str, Any]  # Use for branching, A/B testing, templates, etc.
 
 
 # Remove static workflow mode - now use dynamic capability flags
@@ -377,17 +374,34 @@ class LangGraphWorkflowManager:
                     return {
                         "messages": recent_messages,
                         "conversation_summary": summary,
-                        "memory_context": {
-                            "summarized_messages": len(older_messages),
-                            "kept_messages": len(recent_messages),
-                            "summary_created": True,
+                        "metadata": {
+                            **state.get("metadata", {}),
+                            "memory_context": {
+                                "summarized_messages": len(older_messages),
+                                "kept_messages": len(recent_messages),
+                                "summary_created": True,
+                            }
                         },
                     }
                 except Exception as e:
                     logger.error(
-                        "Memory management failed", error=str(e)
+                        "Memory summarization failed, falling back to truncation", 
+                        error=str(e)
                     )
-                    return {"messages": recent_messages}
+                    # Graceful degradation: use simple truncation instead of summarization
+                    return {
+                        "messages": recent_messages,
+                        "metadata": {
+                            **state.get("metadata", {}),
+                            "memory_context": {
+                                "summarized_messages": len(older_messages),
+                                "kept_messages": len(recent_messages),
+                                "summary_created": False,
+                                "fallback_used": "truncation",
+                                "error": str(e)
+                            }
+                        },
+                    }
 
             return {"messages": recent_messages}
 
@@ -644,6 +658,10 @@ class LangGraphWorkflowManager:
                             )
                             continue
 
+                    # Validate tool arguments before execution
+                    if not isinstance(tool_args, dict):
+                        raise ValueError(f"Tool arguments must be a dictionary, got {type(tool_args)}")
+
                     # Prefer async invocation when available
                     if hasattr(tool_obj, "ainvoke"):
                         result = await tool_obj.ainvoke(tool_args)
@@ -652,8 +670,12 @@ class LangGraphWorkflowManager:
                     elif callable(tool_obj):
                         result = tool_obj(tool_args)
                     else:
-                        result = f"Tool {tool_name} cannot be executed."
+                        raise RuntimeError(f"Tool {tool_name} is not callable")
 
+                    # Validate result before converting to string
+                    if result is None:
+                        result = f"Tool {tool_name} completed successfully (no return value)"
+                    
                     tool_messages.append(
                         ToolMessage(
                             content=str(result),
@@ -675,16 +697,48 @@ class LangGraphWorkflowManager:
                             logger.debug(
                                 f"Failed to defer workflow metrics: {e}"
                             )
-                except Exception as e:
-                    error_msg = str(e)
+                            
+                except ValueError as e:
+                    # Parameter validation errors
+                    error_msg = f"Invalid parameters: {str(e)}"
                     logger.error(
-                        "Tool execution failed",
+                        "Tool parameter validation failed",
+                        tool=tool_name,
+                        error=error_msg,
+                        parameters=tool_args,
+                    )
+                    tool_messages.append(
+                        ToolMessage(
+                            content=error_msg,
+                            tool_call_id=tool_id or "",
+                        )
+                    )
+                except RuntimeError as e:
+                    # Tool execution runtime errors
+                    error_msg = f"Execution error: {str(e)}"
+                    logger.error(
+                        "Tool runtime error",
                         tool=tool_name,
                         error=error_msg,
                     )
                     tool_messages.append(
                         ToolMessage(
-                            content=f"Error: {error_msg}",
+                            content=error_msg,
+                            tool_call_id=tool_id or "",
+                        )
+                    )
+                except Exception as e:
+                    # Unexpected errors
+                    error_msg = f"Unexpected error: {str(e)}"
+                    logger.error(
+                        "Tool execution failed unexpectedly",
+                        tool=tool_name,
+                        error=error_msg,
+                        exc_info=True,
+                    )
+                    tool_messages.append(
+                        ToolMessage(
+                            content=error_msg,
                             tool_call_id=tool_id or "",
                         )
                     )
@@ -785,19 +839,48 @@ class LangGraphWorkflowManager:
                     repeated_tools = [
                         tool for tool, count in tool_counts.items() if count >= 2
                     ]
-                    """
-                    if repeated_tools and len(tool_results) >= 1:
-                        logger.warning(
-                            "Detected tool recursion pattern - forcing final response",
-                            repeated_tools=repeated_tools,
-                            tool_results_count=len(tool_results),
-                            current_tool_count=current_tool_count,
-                            user_id=user_id,
-                            conversation_id=conversation_id,
-                        )
-                        return "finalize_response"
-                    """
+                    
+                    # Re-enabled recursion detection with improved logic
+                    if repeated_tools and len(tool_results) >= 2:
+                        # Check if we're making meaningful progress
+                        if not _is_making_progress(tool_results, repeated_tools):
+                            logger.warning(
+                                "Detected tool recursion pattern without progress - forcing final response",
+                                repeated_tools=repeated_tools,
+                                tool_results_count=len(tool_results),
+                                current_tool_count=current_tool_count,
+                                user_id=user_id,
+                                conversation_id=conversation_id,
+                            )
+                            return "finalize_response"
             return "execute_tools"
+
+        def _is_making_progress(tool_results: list[str], repeated_tools: list[str]) -> bool:
+            """Check if repeated tool calls are making meaningful progress."""
+            if len(tool_results) < 2:
+                return True  # Not enough data to determine
+            
+            # Simple heuristic: check if recent results are different from previous ones
+            recent_results = tool_results[-2:]  # Last 2 results
+            if len(set(recent_results)) > 1:
+                return True  # Results are different, likely making progress
+            
+            # Check for common indicators of no progress
+            no_progress_indicators = [
+                "no results found",
+                "not found", 
+                "error",
+                "failed",
+                "empty",
+                "null",
+                "none"
+            ]
+            
+            recent_content = " ".join(recent_results).lower()
+            if any(indicator in recent_content for indicator in no_progress_indicators):
+                return False  # Likely stuck in error loop
+                
+            return True  # Assume progress by default
 
         # Build graph dynamically
         workflow = StateGraph(ConversationState)
@@ -1208,10 +1291,10 @@ class LangGraphWorkflowManager:
 
         # Update metadata for branch
         branch_state["conversation_id"] = new_thread_id
-        branch_state["parent_conversation_id"] = parent_thread_id
-        branch_state["branch_id"] = new_thread_id
         branch_state["metadata"] = {
             **parent_state.get("metadata", {}),
+            "parent_conversation_id": parent_thread_id,
+            "branch_id": new_thread_id,
             "branch_created_at": generate_ulid(),  # timestamp-like ID
             "branch_point_index": branch_point_message_index,
         }
@@ -1260,12 +1343,10 @@ class LangGraphWorkflowManager:
         # Create forked state (complete copy)
         fork_state = dict(source_state)
         fork_state["conversation_id"] = fork_id
-        fork_state[
-            "parent_conversation_id"
-        ] = None  # Forks are independent
-        fork_state["branch_id"] = fork_id
         fork_state["metadata"] = {
             **source_state.get("metadata", {}),
+            "parent_conversation_id": None,  # Forks are independent
+            "branch_id": fork_id,
             "forked_from": source_thread_id,
             "fork_created_at": generate_ulid(),  # timestamp-like ID
         }
@@ -1436,7 +1517,7 @@ class LangGraphWorkflowManager:
     async def get_tools(
         self, workspace_id: str | None = None
     ) -> list[Any]:
-        """Get available tools for a workspace.
+        """Get available tools for a workspace using the centralized registry.
 
         Args:
             workspace_id: Workspace identifier (optional, for future tool filtering)
@@ -1445,33 +1526,42 @@ class LangGraphWorkflowManager:
             List of available tool objects
         """
         try:
-            from chatter.core.dependencies import get_builtin_tools
+            from chatter.core.tool_registry import tool_registry
 
-            tools = []
-
-            # Get builtin tools
-            builtin_tools = get_builtin_tools()
-            if builtin_tools:
-                tools.extend(builtin_tools)
-                logger.debug(
-                    f"Added {len(builtin_tools)} builtin tools"
-                )
-
-            # Note: MCP tools are loaded asynchronously in the LLM service
-            # when creating workflows, so we don't load them here to avoid
-            # blocking synchronous calls
+            # Get tools from centralized registry
+            tools = tool_registry.get_tools_for_workspace(
+                workspace_id or "default"
+            )
+            
             logger.debug(
-                f"Configured tools for workspace: {workspace_id}, total: {len(tools)}"
+                f"Retrieved {len(tools)} tools from registry for workspace: {workspace_id}"
             )
 
             return tools
 
         except Exception as e:
             logger.error(
-                "Failed to get tools for workspace",
+                "Failed to get tools from registry",
                 workspace_id=workspace_id,
                 error=str(e),
             )
+            # Fallback to old method for backwards compatibility
+            try:
+                from chatter.core.dependencies import get_builtin_tools
+                
+                builtin_tools = get_builtin_tools()
+                if builtin_tools:
+                    logger.debug(
+                        f"Fallback: Using {len(builtin_tools)} builtin tools"
+                    )
+                    return builtin_tools
+                    
+            except Exception as fallback_error:
+                logger.error(
+                    "Fallback tool loading also failed",
+                    error=str(fallback_error)
+                )
+                
             return []
 
 

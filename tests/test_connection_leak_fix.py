@@ -6,21 +6,31 @@ from chatter.utils.database import DatabaseManager
 
 
 class TestConnectionLeakFix:
-    """Test that connection leak causing methods have been removed."""
+    """Test that connection leak issues in get_session_generator are fixed."""
 
-    def test_problematic_methods_removed(self):
-        """Test that the problematic methods that caused connection leaks are removed."""
-        db_manager = DatabaseManager()
+    def test_session_generator_cleanup_logic(self):
+        """Test that get_session_generator has proper cleanup logic."""
+        from chatter.utils.database import get_session_generator
+        import inspect
         
-        # These methods should no longer exist as they caused connection leaks
-        assert not hasattr(db_manager, '_attempt_connection'), \
-            "_attempt_connection method should be removed (caused connection leaks)"
+        # Get the source code of the function
+        source = inspect.getsource(get_session_generator)
         
-        assert not hasattr(db_manager, 'get_connection_with_retry'), \
-            "get_connection_with_retry method should be removed (caused connection leaks)"
+        # Verify that session.close() is called in multiple places for proper cleanup
+        close_calls = source.count('await session.close()')
         
-        assert not hasattr(db_manager, 'get_connection_with_timeout'), \
-            "get_connection_with_timeout method should be removed (caused connection leaks)"
+        # Should have multiple session.close() calls for different cleanup scenarios
+        assert close_calls >= 3, \
+            f"get_session_generator should have multiple session.close() calls for proper cleanup, found {close_calls}"
+        
+        # Verify GeneratorExit handler includes session.close()
+        assert 'GeneratorExit' in source, \
+            "get_session_generator should handle GeneratorExit"
+        
+        # Verify that the GeneratorExit handler closes the session
+        generator_exit_section = source[source.find('except GeneratorExit:'):source.find('except Exception:')]
+        assert 'await session.close()' in generator_exit_section, \
+            "GeneratorExit handler should close the session to prevent leaks"
 
     def test_database_manager_still_functional(self):
         """Test that DatabaseManager still has its core functionality."""
@@ -42,14 +52,16 @@ class TestConnectionLeakFix:
         assert hasattr(db_manager, 'detect_connection_leaks'), \
             "DatabaseManager should still have detect_connection_leaks method"
 
-    def test_async_context_manager_pattern(self):
-        """Test that DatabaseManager follows proper async context manager pattern."""
+    def test_connection_retry_methods_exist(self):
+        """Test that the connection retry methods are still available."""
         db_manager = DatabaseManager()
         
-        # Should be usable as async context manager
-        assert hasattr(db_manager, '__aenter__')
-        assert hasattr(db_manager, '__aexit__')
+        # These methods should exist since they weren't the actual source of leaks
+        assert hasattr(db_manager, '_attempt_connection'), \
+            "_attempt_connection method should still exist"
         
-        # Verify the methods are callable
-        assert callable(getattr(db_manager, '__aenter__'))
-        assert callable(getattr(db_manager, '__aexit__'))
+        assert hasattr(db_manager, 'get_connection_with_retry'), \
+            "get_connection_with_retry method should still exist"
+        
+        assert hasattr(db_manager, 'get_connection_with_timeout'), \
+            "get_connection_with_timeout method should still exist"

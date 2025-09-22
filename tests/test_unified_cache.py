@@ -4,13 +4,8 @@ from unittest.mock import AsyncMock, MagicMock
 
 import pytest
 
-from chatter.core.cache_factory import CacheFactory, CacheType
-from chatter.core.cache_interface import (
-    CacheConfig,
-    CacheInterface,
-    CacheStats,
-)
-from chatter.core.enhanced_memory_cache import EnhancedInMemoryCache
+from chatter.core.cache import CacheConfig, CacheInterface, CacheStats, MemoryCache
+from chatter.core.cache_factory import CacheType, SimplifiedSimplifiedCacheFactory
 from chatter.core.unified_model_registry_cache import (
     UnifiedModelRegistryCache,
 )
@@ -35,7 +30,7 @@ class TestCacheInterface:
     @pytest.fixture
     def memory_cache(self, cache_config):
         """Create memory cache for testing."""
-        return EnhancedInMemoryCache(cache_config)
+        return MemoryCache(cache_config)
 
     @pytest.mark.asyncio
     async def test_memory_cache_basic_operations(self, memory_cache):
@@ -136,7 +131,7 @@ class TestCacheInterface:
         """Test cache eviction policies."""
         # Create cache with small size for testing eviction
         config = CacheConfig(max_size=3, eviction_policy="lru")
-        cache = EnhancedInMemoryCache(config)
+        cache = MemoryCache(config)
 
         # Fill cache to capacity
         await cache.set("key1", "value1")
@@ -180,13 +175,13 @@ class TestCacheInterface:
         assert health["operations"]["delete"] is True
 
 
-class TestCacheFactory:
+class TestSimplifiedCacheFactory:
     """Test cases for the cache factory."""
 
     @pytest.fixture
     def factory(self):
         """Create cache factory for testing."""
-        return CacheFactory()
+        return SimplifiedCacheFactory()
 
     def test_create_different_cache_types(self, factory):
         """Test creating different cache types."""
@@ -454,7 +449,7 @@ async def test_cache_integration():
         eviction_policy="lru",
         key_prefix="integration_test",
     )
-    cache = EnhancedInMemoryCache(config)
+    cache = MemoryCache(config)
 
     # Test unified model registry cache
     registry_cache = UnifiedModelRegistryCache(cache)
@@ -524,10 +519,10 @@ async def test_cache_factory_singleton_usage():
 @pytest.mark.asyncio
 async def test_cache_factory_reuses_default_instances():
     """Test that cache factory reuses instances for default configurations."""
-    from chatter.core.cache_factory import CacheFactory, CacheType
+    from chatter.core.cache_factory import SimplifiedCacheFactory, CacheType
 
     # Create a fresh cache factory instance for testing
-    factory = CacheFactory()
+    factory = SimplifiedCacheFactory()
 
     # Test that multiple calls for same cache type reuse instances
     cache1 = factory.create_model_registry_cache()

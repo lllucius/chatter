@@ -766,16 +766,17 @@ class ConfigValidator(BaseValidator):
 
 
 class WorkflowValidator(BaseValidator):
-    """Validates workflow configurations."""
+    """Validates workflow configurations and definitions."""
 
     def __init__(self) -> None:
         super().__init__(
-            "workflow", "Validates workflow configurations"
+            "workflow", "Validates workflow configurations and definitions"
         )
         self.supported_rules = [
             "workflow_config",
             "workflow_request",
             "workflow_parameters",
+            "workflow_definition",
         ]
 
     def validate(
@@ -803,6 +804,8 @@ class WorkflowValidator(BaseValidator):
             return self._validate_workflow_request(value, context)
         elif rule == "workflow_parameters":
             return self._validate_workflow_parameters(value, context)
+        elif rule == "workflow_definition":
+            return self._validate_workflow_definition(value, context)
         else:
             return ValidationResult(is_valid=True, value=value)
 
@@ -915,6 +918,159 @@ class WorkflowValidator(BaseValidator):
         return ValidationResult(
             is_valid=len(errors) == 0, value=params, errors=errors
         )
+
+    def _validate_workflow_definition(
+        self, definition: dict[str, Any], context: ValidationContext
+    ) -> ValidationResult:
+        """Validate a workflow definition structure."""
+        errors = []
+        warnings = []
+
+        # Basic structure validation
+        required_fields = ["name", "nodes", "edges"]
+        for field in required_fields:
+            if field not in definition or not definition[field]:
+                errors.append(
+                    ValidationError(f"Missing required field: {field}")
+                )
+
+        # Validate name
+        if "name" in definition:
+            name = definition["name"]
+            if not isinstance(name, str) or len(name.strip()) == 0:
+                errors.append(
+                    ValidationError(
+                        "Workflow name must be a non-empty string"
+                    )
+                )
+            elif len(name) > 255:
+                errors.append(
+                    ValidationError(
+                        "Workflow name must be 255 characters or less"
+                    )
+                )
+
+        # Validate nodes
+        if "nodes" in definition and isinstance(definition["nodes"], list):
+            if len(definition["nodes"]) == 0:
+                warnings.append("Workflow has no nodes")
+            else:
+                node_errors, node_warnings = self._validate_nodes(
+                    definition["nodes"]
+                )
+                errors.extend(node_errors)
+                warnings.extend(node_warnings)
+
+        # Validate edges
+        if "edges" in definition and isinstance(definition["edges"], list):
+            edge_errors, edge_warnings = self._validate_edges(
+                definition["edges"], definition.get("nodes", [])
+            )
+            errors.extend(edge_errors)
+            warnings.extend(edge_warnings)
+
+        return ValidationResult(
+            is_valid=len(errors) == 0,
+            value=definition,
+            errors=errors,
+            warnings=warnings,
+        )
+
+    def _validate_nodes(self, nodes: list[dict]) -> tuple[list, list]:
+        """Validate workflow nodes."""
+        errors = []
+        warnings = []
+        node_ids = set()
+
+        for i, node in enumerate(nodes):
+            # Validate node structure
+            if not isinstance(node, dict):
+                errors.append(
+                    ValidationError(f"Node {i} must be a dictionary")
+                )
+                continue
+
+            # Check required fields
+            required_node_fields = ["id", "type"]
+            for field in required_node_fields:
+                if field not in node:
+                    errors.append(
+                        ValidationError(
+                            f"Node {i} missing required field: {field}"
+                        )
+                    )
+
+            # Check for duplicate node IDs
+            if "id" in node:
+                node_id = node["id"]
+                if node_id in node_ids:
+                    errors.append(
+                        ValidationError(f"Duplicate node ID: {node_id}")
+                    )
+                node_ids.add(node_id)
+
+            # Validate node type
+            if "type" in node:
+                node_type = node["type"]
+                valid_types = [
+                    "start",
+                    "end",
+                    "llm",
+                    "tool",
+                    "conditional",
+                    "passthrough",
+                ]
+                if node_type not in valid_types:
+                    warnings.append(
+                        f"Node {i} has unknown type: {node_type}"
+                    )
+
+        return errors, warnings
+
+    def _validate_edges(
+        self, edges: list[dict], nodes: list[dict]
+    ) -> tuple[list, list]:
+        """Validate workflow edges."""
+        errors = []
+        warnings = []
+        
+        # Get valid node IDs
+        node_ids = {node.get("id") for node in nodes if "id" in node}
+
+        for i, edge in enumerate(edges):
+            # Validate edge structure
+            if not isinstance(edge, dict):
+                errors.append(
+                    ValidationError(f"Edge {i} must be a dictionary")
+                )
+                continue
+
+            # Check required fields
+            required_edge_fields = ["source", "target"]
+            for field in required_edge_fields:
+                if field not in edge:
+                    errors.append(
+                        ValidationError(
+                            f"Edge {i} missing required field: {field}"
+                        )
+                    )
+
+            # Validate source and target exist in nodes
+            if "source" in edge and edge["source"] not in node_ids:
+                errors.append(
+                    ValidationError(
+                        f"Edge {i} source '{edge['source']}' not found in nodes"
+                    )
+                )
+
+            if "target" in edge and edge["target"] not in node_ids:
+                errors.append(
+                    ValidationError(
+                        f"Edge {i} target '{edge['target']}' not found in nodes"
+                    )
+                )
+
+        return errors, warnings
 
 
 class AgentValidator(BaseValidator):

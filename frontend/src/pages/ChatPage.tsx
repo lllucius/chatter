@@ -139,6 +139,7 @@ const ChatPage: React.FC = () => {
       const reader = stream.getReader();
 
       let buffer = '';
+      let accumulatedContent = ''; // Track accumulated content locally
 
       try {
         // Process the stream
@@ -176,15 +177,16 @@ const ChatPage: React.FC = () => {
               case 'token': {
                 // Add the token to our streamed content
                 const tokenContent = (eventData.content as string) || '';
+                accumulatedContent += tokenContent;
                 setStreamedContent((prev) => prev + tokenContent);
 
-                // Update the message with the new content
+                // Update the message with the accumulated content
                 setMessages((prev) =>
                   prev.map((msg) =>
                     msg.id === assistantMessageId
                       ? {
                           ...msg,
-                          content: msg.content + tokenContent,
+                          content: accumulatedContent,
                           metadata: {
                             ...msg.metadata,
                             workflow: {

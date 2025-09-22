@@ -13,7 +13,7 @@ from typing import Any
 
 from langchain_core.messages import AIMessage, HumanMessage, AIMessageChunk
 
-from chatter.core.dependencies import get_workflow_manager
+from chatter.core.dependencies import get_workflow_manager, get_mcp_service, get_builtin_tools
 from chatter.core.langgraph import ConversationState, workflow_manager as lg_manager
 from chatter.core.monitoring import record_workflow_metrics
 from chatter.core.streamlined_workflow_performance import (
@@ -438,7 +438,7 @@ class UnifiedWorkflowExecutor:
         )
 
         # Create unified workflow
-        workflow = await self.llm_service.create_langgraph_workflow(
+        workflow = await self._create_workflow(
             provider_name=chat_request.provider,
             enable_retrieval=chat_request.enable_retrieval,
             enable_tools=chat_request.enable_tools,
@@ -828,4 +828,67 @@ class UnifiedWorkflowExecutor:
             success=success,
             error_type=error_type,
             correlation_id=correlation_id or "",
+        )
+
+    async def _create_workflow(
+        self,
+        provider_name: str | None,
+        enable_retrieval: bool = False,
+        enable_tools: bool = False,
+        enable_memory: bool = False,
+        system_message: str | None = None,
+        retriever=None,
+        tools: list[Any] | None = None,
+        memory_window: int = 4,
+        max_tool_calls: int | None = None,
+        max_documents: int | None = None,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
+        enable_streaming: bool = False,
+        focus_mode: bool = False,
+        **kwargs,
+    ):
+        """Create a LangGraph workflow with appropriate LLM provider."""
+        # Get the LLM provider with custom parameters if needed
+        if provider_name is None or provider_name == "":
+            if temperature is not None or max_tokens is not None:
+                # Create a custom provider instance with the specified parameters
+                provider = await self.llm_service._create_provider_with_custom_params(
+                    provider_name=None,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            else:
+                provider = await self.llm_service.get_default_provider()
+        else:
+            if temperature is not None or max_tokens is not None:
+                # Create a custom provider instance with the specified parameters
+                provider = await self.llm_service._create_provider_with_custom_params(
+                    provider_name=provider_name,
+                    temperature=temperature,
+                    max_tokens=max_tokens,
+                )
+            else:
+                provider = await self.llm_service.get_provider(provider_name)
+
+        # Get default tools if needed
+        if enable_tools and not tools:
+            tools = await get_mcp_service().get_tools()
+            tools.extend(get_builtin_tools())
+
+        # Use the unified create_workflow method with capability flags
+        return await lg_manager.create_workflow(
+            llm=provider,
+            enable_retrieval=enable_retrieval,
+            enable_tools=enable_tools,
+            system_message=system_message,
+            retriever=retriever if enable_retrieval else None,
+            tools=tools if enable_tools else None,
+            enable_memory=enable_memory,
+            memory_window=memory_window,
+            max_tool_calls=max_tool_calls,
+            max_documents=max_documents,
+            enable_streaming=enable_streaming,
+            focus_mode=focus_mode,
+            **kwargs,
         )

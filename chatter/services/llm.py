@@ -18,8 +18,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import get_settings
 from chatter.core.dependencies import (
-    get_builtin_tools,
-    get_mcp_service,
     get_model_registry,
 )
 from chatter.models.registry import ModelType, ProviderType
@@ -441,70 +439,7 @@ class LLMService:
 
         return instance
 
-    async def create_langgraph_workflow(
-        self,
-        provider_name: str | None,
-        enable_retrieval: bool = False,
-        enable_tools: bool = False,
-        enable_memory: bool = False,
-        system_message: str | None = None,
-        retriever=None,
-        tools: list[Any] | None = None,
-        memory_window: int = 4,
-        max_tool_calls: int | None = None,
-        max_documents: int | None = None,
-        temperature: float | None = None,
-        max_tokens: int | None = None,
-        enable_streaming: bool = False,
-        focus_mode: bool = False,
-        **kwargs,
-    ):
-        """Create a LangGraph workflow."""
-        from chatter.core.langgraph import workflow_manager
 
-        # Use default provider if none specified, but create with custom parameters if provided
-        if provider_name is None or provider_name == "":
-            if temperature is not None or max_tokens is not None:
-                # Create a custom provider instance with the specified parameters
-                provider = await self._create_provider_with_custom_params(
-                    provider_name=None,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-            else:
-                provider = await self.get_default_provider()
-        else:
-            if temperature is not None or max_tokens is not None:
-                # Create a custom provider instance with the specified parameters
-                provider = await self._create_provider_with_custom_params(
-                    provider_name=provider_name,
-                    temperature=temperature,
-                    max_tokens=max_tokens,
-                )
-            else:
-                provider = await self.get_provider(provider_name)
-
-        # Get default tools if needed
-        if enable_tools and not tools:
-            tools = await get_mcp_service().get_tools()
-            tools.extend(get_builtin_tools())
-
-        # Use the unified create_workflow method with capability flags
-        return await workflow_manager.create_workflow(
-            llm=provider,
-            enable_retrieval=enable_retrieval,
-            enable_tools=enable_tools,
-            system_message=system_message,
-            retriever=retriever if enable_retrieval else None,
-            tools=tools if enable_tools else None,
-            enable_memory=enable_memory,
-            memory_window=memory_window,
-            max_tool_calls=max_tool_calls,
-            max_documents=max_documents,
-            enable_streaming=enable_streaming,
-            focus_mode=focus_mode,
-            **kwargs,
-        )
 
 
 

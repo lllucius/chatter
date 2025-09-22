@@ -21,7 +21,6 @@ from chatter.core.dependencies import (
     get_builtin_tools,
     get_mcp_service,
     get_model_registry,
-    get_orchestrator,
 )
 from chatter.models.registry import ModelType, ProviderType
 from chatter.utils.database import get_session_maker
@@ -941,34 +940,6 @@ class LLMService:
                 for m in active_models
             ],
         }
-
-    async def create_conversation_chain(
-        self,
-        provider_name: str,
-        system_message: str | None = None,
-        include_history: bool = True,
-    ) -> Any:
-        """Create a conversation chain using LangChain orchestrator."""
-        provider = await self.get_provider(provider_name)
-        return get_orchestrator().create_chat_chain(
-            llm=provider,
-            system_message=system_message,
-            include_history=include_history,
-        )
-
-    async def create_rag_chain(
-        self,
-        provider_name: str,
-        retriever: Any,
-        system_message: str | None = None,
-    ) -> Any:
-        """Create a RAG chain using LangChain orchestrator."""
-        provider = await self.get_provider(provider_name)
-        return get_orchestrator().create_rag_chain(
-            llm=provider,
-            retriever=retriever,
-            system_message=system_message,
-        )
 
     async def generate_with_tools(
         self,

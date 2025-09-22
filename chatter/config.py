@@ -457,23 +457,8 @@ class Settings(BaseSettings):
     )
 
     # =============================================================================
-    # LANGCHAIN/LANGGRAPH SETTINGS
+    # LANGGRAPH SETTINGS
     # =============================================================================
-
-    # LangSmith
-    langchain_tracing_v2: bool = Field(
-        default=False, description="Enable LangSmith tracing"
-    )
-    langchain_endpoint: str = Field(
-        default="https://api.smith.langchain.com",
-        description="LangChain endpoint",
-    )
-    langchain_api_key: str | None = Field(
-        default=None, description="LangChain API key"
-    )
-    langchain_project: str = Field(
-        default="chatter", description="LangChain project"
-    )
 
     # LangGraph
     langgraph_checkpoint_store: str = Field(

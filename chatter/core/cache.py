@@ -96,6 +96,45 @@ class CacheInterface(ABC):
             return f"{self.config.key_prefix}:{key}"
         return key
 
+    def make_key(self, *args, **kwargs) -> str:
+        """Build cache key from components.
+        
+        Args:
+            *args: Key components to join with ':'
+            **kwargs: Additional key-value pairs to include
+            
+        Returns:
+            Formatted cache key with prefix
+        """
+        # Start with args joined by ':'
+        parts = [str(arg) for arg in args]
+        
+        # Add kwargs as key=value pairs
+        if kwargs:
+            for key, value in sorted(kwargs.items()):
+                parts.append(f"{key}={value}")
+        
+        # Join all parts and build with prefix
+        key = ":".join(parts)
+        return self._build_key(key)
+    
+    def is_valid_key(self, key: str) -> bool:
+        """Validate cache key format.
+        
+        Args:
+            key: Key to validate
+            
+        Returns:
+            True if key is valid, False otherwise
+        """
+        if not key:
+            return False
+        if " " in key:
+            return False
+        if len(key) > 250:  # Redis key limit is 512MB, but let's be reasonable
+            return False
+        return True
+
 
 class MemoryCache(CacheInterface):
     """In-memory cache implementation with LRU eviction."""

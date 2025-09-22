@@ -443,7 +443,10 @@ class WorkflowExecutionService:
 
         # Get next sequence number (for now, using a simple increment)
         # TODO: Get proper sequence number from conversation message count
-        sequence_number = getattr(conversation, 'message_count', 0) + 1
+        message_count = getattr(conversation, 'message_count', 0)
+        if message_count is None:
+            message_count = 0
+        sequence_number = message_count + 1
 
         # Create message object with all required fields
         # Note: Base class automatically sets id, created_at, updated_at, but we need to

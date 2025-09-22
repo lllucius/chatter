@@ -507,21 +507,62 @@ class LangGraphWorkflowManager:
         async def finalize_response(
             state: ConversationState,
         ) -> dict[str, Any]:
-            """Generate a final response when tool call limit is reached."""
+            """Generate a final response when tool call limit is reached or recursion detected."""
             try:
-                # Don't call LLM again to avoid potential tool calls
-                # Instead, create a definitive final response based on the tool executions so far
+                # Extract tool results to provide a meaningful response
+                messages = state["messages"]
+                tool_results = []
+                
+                # Find recent tool results
+                for msg in messages:
+                    if hasattr(msg, "tool_call_id") and hasattr(msg, "content"):
+                        tool_results.append(msg.content)
+                
+                # Get the original user question
+                user_question = ""
+                for msg in messages:
+                    if hasattr(msg, "content") and getattr(msg, "__class__", None).__name__ == "HumanMessage":
+                        user_question = msg.content
+                        break
+                
+                # Create a response that incorporates the tool results
+                if tool_results and user_question:
+                    # Use the LLM without tools to generate a final response
+                    try:
+                        final_context = (
+                            f"Based on the following information gathered from tools:\n"
+                            f"{', '.join(tool_results[-3:])}\n\n"  # Use last 3 results
+                            f"Please provide a direct and helpful answer to: {user_question}"
+                        )
+                        
+                        final_response = await llm_for_final.ainvoke([
+                            HumanMessage(content=final_context)
+                        ])
+                        
+                        return {"messages": [final_response]}
+                        
+                    except Exception as llm_error:
+                        logger.warning(
+                            "LLM finalization failed, using template response",
+                            error=str(llm_error)
+                        )
+                        # Fall back to template response
+                
+                # Fallback response
                 tool_count = state.get("tool_call_count", 0)
+                
+                if tool_results:
+                    final_content = (
+                        f"Based on the tool results I gathered: {', '.join(tool_results[-2:])}, "
+                        f"I have the information needed to answer your question."
+                    )
+                else:
+                    final_content = (
+                        f"I have completed using tools (executed {tool_count} tool calls) to help with your request. "
+                        "Based on the information gathered, I've done my best to address your question."
+                    )
 
-                # Create a helpful final message
-                final_content = (
-                    f"I have completed using tools (executed {tool_count} tool calls) to help with your request. "
-                    "Based on the information gathered, I've done my best to address your question."
-                )
-
-                # Create final AI message without tool calls
                 final_message = AIMessage(content=final_content)
-
                 return {"messages": [final_message]}
 
             except Exception as e:
@@ -703,7 +744,7 @@ class LangGraphWorkflowManager:
             if projected_tool_count > max_allowed:
                 logger.warning(
                     "Tool call limit would be exceeded, ending workflow",
-                    current_count=current_tool_count,
+                    current_tool_count=current_tool_count,
                     pending_calls=pending_tool_calls,
                     projected_count=projected_tool_count,
                     max_allowed=max_allowed,
@@ -712,6 +753,45 @@ class LangGraphWorkflowManager:
                 )
                 # Instead of ending abruptly, generate a final response
                 return "finalize_response"
+
+            # NEW: Check for tool recursion patterns to prevent loops
+            # Look for cases where the same tool is being called repeatedly
+            # without the LLM providing meaningful responses
+            messages = state["messages"]
+            if len(messages) >= 4:  # Need at least: Human, AI+tools, Tool, AI+tools
+                # Count recent tool calls for the same tool
+                recent_tool_calls = []
+                tool_results = []
+                
+                # Look at the last several messages to detect patterns
+                for msg in messages[-6:]:  # Look at last 6 messages
+                    if hasattr(msg, "tool_calls") and msg.tool_calls:
+                        for tool_call in msg.tool_calls:
+                            recent_tool_calls.append(tool_call.get("name"))
+                    elif hasattr(msg, "tool_call_id"):  # Tool result message
+                        tool_results.append(msg.content)
+
+                # Check if we have multiple calls to the same tool with results
+                # but the LLM keeps making more calls instead of using the results
+                if recent_tool_calls and tool_results:
+                    # Count how many times the same tool appears
+                    from collections import Counter
+                    tool_counts = Counter(recent_tool_calls)
+                    
+                    # If any tool has been called more than once and we have results
+                    # this suggests the LLM should provide a final answer
+                    repeated_tools = [tool for tool, count in tool_counts.items() if count >= 2]
+                    
+                    if repeated_tools and len(tool_results) >= 1:
+                        logger.warning(
+                            "Detected tool recursion pattern - forcing final response",
+                            repeated_tools=repeated_tools,
+                            tool_results_count=len(tool_results),
+                            current_tool_count=current_tool_count,
+                            user_id=user_id,
+                            conversation_id=conversation_id,
+                        )
+                        return "finalize_response"
 
             return "execute_tools"
 

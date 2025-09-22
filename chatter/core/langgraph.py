@@ -682,10 +682,16 @@ class LangGraphWorkflowManager:
             current_tool_count = state.get("tool_call_count", 0)
             max_allowed = max_tool_calls or 10  # Default to 10 if not specified
             
-            if current_tool_count >= max_allowed:
+            # Calculate how many tool calls would be executed if we proceed
+            pending_tool_calls = len(last_message.tool_calls) if last_message.tool_calls else 0
+            projected_tool_count = current_tool_count + pending_tool_calls
+            
+            if projected_tool_count > max_allowed:
                 logger.warning(
-                    "Tool call limit reached, ending workflow",
+                    "Tool call limit would be exceeded, ending workflow",
                     current_count=current_tool_count,
+                    pending_calls=pending_tool_calls,
+                    projected_count=projected_tool_count,
                     max_allowed=max_allowed,
                     user_id=user_id,
                     conversation_id=conversation_id

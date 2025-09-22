@@ -40,12 +40,11 @@ async def send_message(
 ):
     """Send a message in a chat conversation."""
     async with get_client() as sdk_client:
-        from chatter_sdk.models.chat_message import ChatMessage
+        from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 
-        chat_request = ChatMessage(
-            content=message,
+        chat_request = ChatWorkflowRequest(
+            message=message,
             conversation_id=conversation_id,
-            workflow_type=workflow,
             template_name=template,
             enable_retrieval=enable_retrieval,
         )

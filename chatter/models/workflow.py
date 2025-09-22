@@ -92,13 +92,7 @@ class WorkflowTemplate(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
-    # Dynamic workflow type (replaces enum constraint)
-    workflow_type: Mapped[str | None] = mapped_column(
-        String(50),
-        nullable=True,
-        index=True,
-        comment="Dynamic workflow type identifier (e.g., plain, rag, tools, full)",
-    )
+
 
     # Enhanced dynamic workflow fields
     is_dynamic: Mapped[bool] = mapped_column(
@@ -224,7 +218,7 @@ class WorkflowTemplate(Base):
         self, key: str, value: dict[str, Any]
     ) -> dict[str, Any]:
         """Set config hash when default_params is updated."""
-        config_str = f"{self.name}:{self.workflow_type}:{str(value)}"
+        config_str = f"{self.name}:{str(value)}"
         self.config_hash = hashlib.sha256(
             config_str.encode("utf-8")
         ).hexdigest()
@@ -238,8 +232,6 @@ class WorkflowTemplate(Base):
         """Convert to UnifiedTemplateManager format."""
         return {
             "name": self.name,
-            "workflow_type": self.workflow_type
-            or "unknown",  # Handle None values
             "description": self.description,
             "default_params": self.default_params,
             "required_tools": self.required_tools,
@@ -253,8 +245,6 @@ class WorkflowTemplate(Base):
             "owner_id": self.owner_id,
             "name": self.name,
             "description": self.description,
-            "workflow_type": self.workflow_type
-            or "unknown",  # Handle None values
             "category": self.category.value,
             "default_params": self.default_params,
             "required_tools": self.required_tools,
@@ -320,13 +310,7 @@ class TemplateSpec(Base):
     )
     description: Mapped[str] = mapped_column(Text, nullable=False)
 
-    # Dynamic workflow type (replaces enum constraint)
-    workflow_type: Mapped[str | None] = mapped_column(
-        String(50),
-        nullable=True,
-        index=True,
-        comment="Dynamic workflow type identifier",
-    )
+
 
     # Spec configuration
     default_params: Mapped[dict[str, Any]] = mapped_column(
@@ -363,7 +347,7 @@ class TemplateSpec(Base):
 
     def __repr__(self) -> str:
         """String representation of template spec."""
-        return f"<TemplateSpec(id={self.id}, name={self.name}, type={self.workflow_type})>"
+        return f"<TemplateSpec(id={self.id}, name={self.name})>"
 
     def to_dict(self) -> dict[str, Any]:
         """Convert template spec to dictionary."""
@@ -372,8 +356,6 @@ class TemplateSpec(Base):
             "owner_id": self.owner_id,
             "name": self.name,
             "description": self.description,
-            "workflow_type": self.workflow_type
-            or "unknown",  # Handle None values
             "default_params": self.default_params,
             "required_tools": self.required_tools,
             "required_retrievers": self.required_retrievers,

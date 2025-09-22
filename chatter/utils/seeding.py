@@ -869,7 +869,6 @@ Keep the summary {length} and focused on {focus_area}.""",
         templates_data = [
             {
                 "name": "general_chat",
-                "workflow_type": "plain",
                 "category": TemplateCategory.GENERAL,
                 "description": "General conversation assistant",
                 "default_params": {
@@ -880,7 +879,6 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "document_qa",
-                "workflow_type": "rag",
                 "category": TemplateCategory.RESEARCH,
                 "description": "Document question answering with retrieval",
                 "default_params": {
@@ -893,7 +891,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "code_assistant",
-                "workflow_type": "tools",
+
                 "category": TemplateCategory.PROGRAMMING,
                 "description": "Programming assistant with code tools",
                 "default_params": {
@@ -926,7 +924,6 @@ Keep the summary {length} and focused on {focus_area}.""",
                 owner_id=admin_user.id,
                 name=template_data["name"],
                 description=template_data["description"],
-                workflow_type=template_data["workflow_type"],
                 category=template_data["category"],
                 default_params=template_data["default_params"],
                 required_tools=template_data.get("required_tools"),
@@ -966,7 +963,7 @@ Keep the summary {length} and focused on {focus_area}.""",
         extended_templates_data = [
             {
                 "name": "customer_support",
-                "workflow_type": "full",
+
                 "category": TemplateCategory.CUSTOMER_SUPPORT,
                 "description": "Customer support with knowledge base and tools",
                 "default_params": {
@@ -984,7 +981,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "research_assistant",
-                "workflow_type": "rag",
+
                 "category": TemplateCategory.RESEARCH,
                 "description": "Research assistant with document retrieval",
                 "default_params": {
@@ -997,7 +994,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "data_analyst",
-                "workflow_type": "tools",
+
                 "category": TemplateCategory.DATA_ANALYSIS,
                 "description": "Data analysis assistant with computation tools",
                 "default_params": {
@@ -1014,7 +1011,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "blog_writing_assistant",
-                "workflow_type": "tools",
+
                 "category": TemplateCategory.CREATIVE,
                 "description": "Blog writing assistant with research and editing tools",
                 "default_params": {
@@ -1031,7 +1028,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "meeting_summarizer",
-                "workflow_type": "rag",
+
                 "category": TemplateCategory.BUSINESS,
                 "description": "Meeting transcript summarizer and action item extractor",
                 "default_params": {
@@ -1043,7 +1040,7 @@ Keep the summary {length} and focused on {focus_area}.""",
             },
             {
                 "name": "learning_tutor",
-                "workflow_type": "full",
+
                 "category": TemplateCategory.EDUCATIONAL,
                 "description": "Personalized learning tutor with assessment tools",
                 "default_params": {
@@ -1077,7 +1074,6 @@ Keep the summary {length} and focused on {focus_area}.""",
                 owner_id=admin_user.id,
                 name=template_data["name"],
                 description=template_data["description"],
-                workflow_type=template_data["workflow_type"],
                 category=template_data["category"],
                 default_params=template_data["default_params"],
                 required_tools=template_data.get("required_tools"),

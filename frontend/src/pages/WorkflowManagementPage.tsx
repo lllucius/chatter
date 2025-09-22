@@ -35,20 +35,6 @@ interface WorkflowFormData extends Record<string, unknown> {
   category: string;
 }
 
-// Helper function to derive workflow_type from template name or category
-const deriveWorkflowType = (name: string, _category: string): string => {
-  // Check template name for specific workflow type hints
-  const nameLower = name.toLowerCase();
-  if (nameLower.includes('tool')) return 'tools';
-  if (nameLower.includes('rag') || nameLower.includes('retrieval'))
-    return 'rag';
-  if (nameLower.includes('full') || nameLower.includes('complete'))
-    return 'full';
-
-  // Default to plain for general category or unknown cases
-  return 'plain';
-};
-
 const WorkflowManagementPage: React.FC = () => {
   const {
     loading,
@@ -82,13 +68,9 @@ const WorkflowManagementPage: React.FC = () => {
     },
     onSubmit: async (values) => {
       try {
-        // Determine workflow_type based on template name or category
-        const workflowType = deriveWorkflowType(values.name, values.category);
-
         // This would create a template with the workflow data
         const templateData = {
           ...values,
-          workflow_type: workflowType,
           workflow: {}, // Would come from workflow editor
         };
         await createTemplate(templateData);

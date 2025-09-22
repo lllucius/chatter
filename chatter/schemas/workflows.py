@@ -618,6 +618,7 @@ class ChatWorkflowRequest(BaseModel):
     # Request configuration fields
     profile_id: str | None = Field(None, description="Profile ID")
     provider: str | None = Field(None, description="LLM provider")
+    model: str | None = Field(None, description="LLM model")
     temperature: float | None = Field(
         None, ge=0.0, le=2.0, description="Temperature"
     )

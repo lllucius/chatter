@@ -72,7 +72,7 @@ class TestToolCallLimitFix:
         # Create workflow with limit of 3
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             max_tool_calls=3,  # Limit to 3 tool calls
             user_id="test_user",
@@ -174,7 +174,7 @@ class TestToolCallLimitFix:
         # Create workflow with reasonable limit
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             max_tool_calls=5,
             user_id="test_user", 

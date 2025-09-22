@@ -61,7 +61,7 @@ class TestToolRecursionFix:
         # Create workflow with limited tool calls
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             max_tool_calls=3,  # Limit to 3 tool calls
             user_id="test_user",
@@ -145,7 +145,7 @@ class TestToolRecursionFix:
         # Create workflow
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools", 
+            enable_retrieval=False, enable_tools=True, 
             tools=[test_tool],
             max_tool_calls=5,  # Higher limit
             user_id="test_user",
@@ -192,7 +192,7 @@ class TestToolRecursionFix:
         # Test with max_tool_calls=5
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             max_tool_calls=5,
             user_id="test_user",
@@ -213,7 +213,7 @@ class TestToolRecursionFix:
         # Create workflow without specifying max_tool_calls
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             # max_tool_calls not specified, should default to 10
             user_id="test_user",
@@ -259,7 +259,7 @@ class TestToolRecursionFix:
         
         workflow = await manager.create_workflow(
             llm=mock_llm,
-            mode="tools",
+            enable_retrieval=False, enable_tools=True,
             tools=[test_tool],
             max_tool_calls=2,
             user_id="test_user",

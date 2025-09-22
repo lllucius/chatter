@@ -136,7 +136,7 @@ const streamResponse = await chatApi.streamingChatApiV1ChatStreamingPost({
 from chatter_sdk import ChatApi, ChatRequest
 
 chat_api = ChatApi()
-request = ChatRequest(message="Hello", workflow="plain")
+request = ChatRequest(message="Hello", enable_retrieval=False, enable_tools=False)
 
 # Non-streaming
 response = await chat_api.chat_api_v1_chat_chat_post(request)

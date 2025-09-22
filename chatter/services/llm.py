@@ -1080,23 +1080,14 @@ class LLMService:
             tools = await get_mcp_service().get_tools()
             tools.extend(get_builtin_tools())
 
-        # Determine workflow mode based on capabilities
-        if enable_retrieval and enable_tools:
-            mode = "full"
-        elif enable_tools:
-            mode = "tools"
-        elif enable_retrieval:
-            mode = "rag"
-        else:
-            mode = "plain"
-
-        # Use the unified create_workflow method
+        # Use the unified create_workflow method with capability flags
         return await workflow_manager.create_workflow(
             llm=provider,
-            mode=mode,
+            enable_retrieval=enable_retrieval,
+            enable_tools=enable_tools,
             system_message=system_message,
-            retriever=retriever if mode in ("rag", "full") else None,
-            tools=tools if mode in ("tools", "full") else None,
+            retriever=retriever if enable_retrieval else None,
+            tools=tools if enable_tools else None,
             enable_memory=enable_memory,
             memory_window=memory_window,
             max_tool_calls=max_tool_calls,

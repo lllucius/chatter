@@ -46,6 +46,27 @@ class WorkflowExecutionService:
         
     async def execute_chat_workflow(
         self,
+        user_id: str,
+        request: Any,
+    ) -> tuple[Conversation, Message]:
+        """Execute chat workflow - API wrapper method."""
+        # Get or create conversation
+        conversation = await self._get_or_create_conversation(user_id, request)
+        
+        # Convert request to ChatRequest
+        chat_request = self._convert_to_chat_request(request)
+        
+        # Execute the actual workflow
+        message, result = await self._execute_chat_workflow_internal(
+            conversation=conversation,
+            chat_request=chat_request, 
+            user_id=user_id,
+        )
+        
+        return conversation, message
+        
+    async def _execute_chat_workflow_internal(
+        self,
         conversation: Conversation,
         chat_request: ChatRequest,
         user_id: str,
@@ -304,6 +325,78 @@ class WorkflowExecutionService:
             
         except Exception as e:
             logger.error(f"Custom workflow execution failed: {e}")
+            raise
+            
+    async def execute_workflow_definition(
+        self,
+        definition: Any,
+        input_data: Dict[str, Any],
+        user_id: str,
+    ) -> Dict[str, Any]:
+        """Execute a workflow from a stored definition."""
+        try:
+            # Get LLM from default settings for now
+            llm = await self.llm_service.get_llm(
+                provider="anthropic",
+                model="claude-3-5-sonnet-20241022",
+                temperature=0.1,
+                max_tokens=2048,
+            )
+            
+            # Extract message from input data
+            message = input_data.get("message", "")
+            if not message:
+                raise ValueError("No message provided in input_data")
+            
+            # Create simple workflow definition for now
+            # TODO: Parse actual definition structure when workflow definitions are implemented
+            workflow_def = create_simple_workflow_definition(
+                enable_memory=True,
+                enable_retrieval=False,
+                enable_tools=False,
+            )
+            
+            # Create workflow from definition
+            workflow = await workflow_manager.create_workflow_from_definition(
+                definition=workflow_def,
+                llm=llm,
+            )
+            
+            # Create execution context
+            context: WorkflowNodeContext = {
+                "messages": [HumanMessage(content=message)],
+                "user_id": user_id,
+                "conversation_id": generate_ulid(),
+                "retrieval_context": None,
+                "conversation_summary": None,
+                "tool_call_count": 0,
+                "metadata": input_data.get("metadata", {}),
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
+            }
+            
+            # Execute workflow
+            result = await workflow_manager.run_workflow(
+                workflow=workflow,
+                initial_state=context,
+                thread_id=generate_ulid(),
+            )
+            
+            # Extract response
+            ai_message = self._extract_ai_response(result)
+            
+            return {
+                "response": ai_message.content,
+                "conversation_id": context["conversation_id"],
+                "user_id": user_id,
+                "metadata": result.get("metadata", {}),
+            }
+            
+        except Exception as e:
+            logger.error(f"Workflow definition execution failed: {e}")
             raise
             
     async def _get_conversation_messages(self, conversation: Conversation) -> List[BaseMessage]:

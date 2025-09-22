@@ -1,7 +1,7 @@
 /**
  * Generated API client for Profiles
  */
-import { AvailableProvidersResponse, ProfileCloneRequest, ProfileCreate, ProfileDeleteResponse, ProfileListResponse, ProfileResponse, ProfileStatsResponse, ProfileTestRequest, ProfileTestResponse, ProfileType, ProfileUpdate } from '../models/index';
+import { AvailableProvidersResponse, ProfileCloneRequest, ProfileCreate, ProfileDeleteResponse, ProfileListResponse, ProfileResponse, ProfileStatsResponse, ProfileType, ProfileUpdate } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class ProfilesApi extends BaseAPI {
@@ -143,31 +143,6 @@ Returns:
 
     const response = await this.request(requestContext);
     return response.json() as Promise<ProfileDeleteResponse>;
-  }
-  /**Test Profile
-   * Test profile with a sample message.
-
-Args:
-    profile_id: Profile ID
-    test_request: Test request
-    current_user: Current authenticated user
-    profile_service: Profile service
-
-Returns:
-    Test results
-   */
-  public async testProfileApiV1ProfilesProfileIdTest(profileId: string, data: ProfileTestRequest): Promise<ProfileTestResponse> {
-    const requestContext: RequestOpts = {
-      path: `/api/v1/profiles/${profileId}/test`,
-      method: 'POST' as HTTPMethod,
-      headers: {
-        'Content-Type': 'application/json',
-      },
-      body: data,
-    };
-
-    const response = await this.request(requestContext);
-    return response.json() as Promise<ProfileTestResponse>;
   }
   /**Clone Profile
    * Clone an existing profile.

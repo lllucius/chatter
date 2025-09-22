@@ -250,7 +250,6 @@ Class | Method | HTTP request | Description
 *ProfilesApi* | [**get_profile_api_v1_profiles_profile_id_get**](docs/ProfilesApi.md#get_profile_api_v1_profiles_profile_id_get) | **GET** /api/v1/profiles/{profile_id} | Get Profile
 *ProfilesApi* | [**get_profile_stats_api_v1_profiles_stats_overview_get**](docs/ProfilesApi.md#get_profile_stats_api_v1_profiles_stats_overview_get) | **GET** /api/v1/profiles/stats/overview | Get Profile Stats
 *ProfilesApi* | [**list_profiles_api_v1_profiles_get**](docs/ProfilesApi.md#list_profiles_api_v1_profiles_get) | **GET** /api/v1/profiles | List Profiles
-*ProfilesApi* | [**test_profile_api_v1_profiles_profile_id_test_post**](docs/ProfilesApi.md#test_profile_api_v1_profiles_profile_id_test_post) | **POST** /api/v1/profiles/{profile_id}/test | Test Profile
 *ProfilesApi* | [**update_profile_api_v1_profiles_profile_id_put**](docs/ProfilesApi.md#update_profile_api_v1_profiles_profile_id_put) | **PUT** /api/v1/profiles/{profile_id} | Update Profile
 *PromptsApi* | [**clone_prompt_api_v1_prompts_prompt_id_clone_post**](docs/PromptsApi.md#clone_prompt_api_v1_prompts_prompt_id_clone_post) | **POST** /api/v1/prompts/{prompt_id}/clone | Clone Prompt
 *PromptsApi* | [**create_prompt_api_v1_prompts_post**](docs/PromptsApi.md#create_prompt_api_v1_prompts_post) | **POST** /api/v1/prompts/ | Create Prompt
@@ -468,8 +467,6 @@ Class | Method | HTTP request | Description
  - [ProfileListResponse](docs/ProfileListResponse.md)
  - [ProfileResponse](docs/ProfileResponse.md)
  - [ProfileStatsResponse](docs/ProfileStatsResponse.md)
- - [ProfileTestRequest](docs/ProfileTestRequest.md)
- - [ProfileTestResponse](docs/ProfileTestResponse.md)
  - [ProfileType](docs/ProfileType.md)
  - [ProfileUpdate](docs/ProfileUpdate.md)
  - [PromptCategory](docs/PromptCategory.md)

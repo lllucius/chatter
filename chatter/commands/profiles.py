@@ -148,31 +148,6 @@ async def delete_profile(
         console.print(f"✅ [green]Deleted profile {profile_id}[/green]")
 
 
-@profiles_app.command("test")
-@run_async
-async def test_profile(
-    profile_id: str = typer.Argument(..., help="Profile ID to test"),
-    message: str = typer.Option(
-        "Hello, this is a test message", help="Test message"
-    ),
-):
-    """Test a profile configuration."""
-    from chatter_sdk.models.profile_test_request import (
-        ProfileTestRequest,
-    )
-
-    async with get_client() as sdk_client:
-        test_request = ProfileTestRequest(test_message=message)
-        response = await sdk_client.profiles_api.test_profile_api_v1_profiles_profile_id_test_post(
-            profile_id=profile_id, profile_test_request=test_request
-        )
-
-        console.print("✅ [green]Profile test successful[/green]")
-        console.print(
-            f"[bold]Response:[/bold] {response.content if hasattr(response, 'content') else response}"
-        )
-
-
 @profiles_app.command("clone")
 @run_async
 async def clone_profile(

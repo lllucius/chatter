@@ -76,13 +76,6 @@ class TestProfilesApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
-    async def test_test_profile_api_v1_profiles_profile_id_test_post(self) -> None:
-        """Test case for test_profile_api_v1_profiles_profile_id_test_post
-
-        Test Profile
-        """
-        pass
-
     async def test_update_profile_api_v1_profiles_profile_id_put(self) -> None:
         """Test case for update_profile_api_v1_profiles_profile_id_put
 

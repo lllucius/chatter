@@ -11,7 +11,6 @@ Method | HTTP request | Description
 [**get_profile_api_v1_profiles_profile_id_get**](ProfilesApi.md#get_profile_api_v1_profiles_profile_id_get) | **GET** /api/v1/profiles/{profile_id} | Get Profile
 [**get_profile_stats_api_v1_profiles_stats_overview_get**](ProfilesApi.md#get_profile_stats_api_v1_profiles_stats_overview_get) | **GET** /api/v1/profiles/stats/overview | Get Profile Stats
 [**list_profiles_api_v1_profiles_get**](ProfilesApi.md#list_profiles_api_v1_profiles_get) | **GET** /api/v1/profiles | List Profiles
-[**test_profile_api_v1_profiles_profile_id_test_post**](ProfilesApi.md#test_profile_api_v1_profiles_profile_id_test_post) | **POST** /api/v1/profiles/{profile_id}/test | Test Profile
 [**update_profile_api_v1_profiles_profile_id_put**](ProfilesApi.md#update_profile_api_v1_profiles_profile_id_put) | **PUT** /api/v1/profiles/{profile_id} | Update Profile
 
 
@@ -630,97 +629,6 @@ Name | Type | Description  | Notes
 ### HTTP request headers
 
  - **Content-Type**: Not defined
- - **Accept**: application/json
-
-### HTTP response details
-
-| Status code | Description | Response headers |
-|-------------|-------------|------------------|
-**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
-**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
-
-[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
-
-# **test_profile_api_v1_profiles_profile_id_test_post**
-> ProfileTestResponse test_profile_api_v1_profiles_profile_id_test_post(profile_id, profile_test_request)
-
-Test Profile
-
-Test profile with a sample message.
-
-Args:
-    profile_id: Profile ID
-    test_request: Test request
-    current_user: Current authenticated user
-    profile_service: Profile service
-
-Returns:
-    Test results
-
-### Example
-
-* Bearer Authentication (CustomHTTPBearer):
-
-```python
-import chatter_sdk
-from chatter_sdk.models.profile_test_request import ProfileTestRequest
-from chatter_sdk.models.profile_test_response import ProfileTestResponse
-from chatter_sdk.rest import ApiException
-from pprint import pprint
-
-# Defining the host is optional and defaults to http://localhost:8000
-# See configuration.py for a list of all supported configuration parameters.
-configuration = chatter_sdk.Configuration(
-    host = "http://localhost:8000"
-)
-
-# The client must configure the authentication and authorization parameters
-# in accordance with the API server security policy.
-# Examples for each auth method are provided below, use the example that
-# satisfies your auth use case.
-
-# Configure Bearer authorization: CustomHTTPBearer
-configuration = chatter_sdk.Configuration(
-    access_token = os.environ["BEARER_TOKEN"]
-)
-
-# Enter a context with an instance of the API client
-async with chatter_sdk.ApiClient(configuration) as api_client:
-    # Create an instance of the API class
-    api_instance = chatter_sdk.ProfilesApi(api_client)
-    profile_id = 'profile_id_example' # str | 
-    profile_test_request = chatter_sdk.ProfileTestRequest() # ProfileTestRequest | 
-
-    try:
-        # Test Profile
-        api_response = await api_instance.test_profile_api_v1_profiles_profile_id_test_post(profile_id, profile_test_request)
-        print("The response of ProfilesApi->test_profile_api_v1_profiles_profile_id_test_post:\n")
-        pprint(api_response)
-    except Exception as e:
-        print("Exception when calling ProfilesApi->test_profile_api_v1_profiles_profile_id_test_post: %s\n" % e)
-```
-
-
-
-### Parameters
-
-
-Name | Type | Description  | Notes
-------------- | ------------- | ------------- | -------------
- **profile_id** | **str**|  | 
- **profile_test_request** | [**ProfileTestRequest**](ProfileTestRequest.md)|  | 
-
-### Return type
-
-[**ProfileTestResponse**](ProfileTestResponse.md)
-
-### Authorization
-
-[CustomHTTPBearer](../README.md#CustomHTTPBearer)
-
-### HTTP request headers
-
- - **Content-Type**: application/json
  - **Accept**: application/json
 
 ### HTTP response details

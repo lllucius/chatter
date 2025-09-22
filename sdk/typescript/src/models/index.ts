@@ -142,8 +142,6 @@ export * from './ProfileDeleteResponse';
 export * from './ProfileListResponse';
 export * from './ProfileResponse';
 export * from './ProfileStatsResponse';
-export * from './ProfileTestRequest';
-export * from './ProfileTestResponse';
 export * from './ProfileType';
 export * from './ProfileUpdate';
 export * from './PromptCategory';

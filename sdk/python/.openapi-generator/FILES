@@ -172,8 +172,6 @@ chatter_sdk/models/profile_delete_response.py
 chatter_sdk/models/profile_list_response.py
 chatter_sdk/models/profile_response.py
 chatter_sdk/models/profile_stats_response.py
-chatter_sdk/models/profile_test_request.py
-chatter_sdk/models/profile_test_response.py
 chatter_sdk/models/profile_type.py
 chatter_sdk/models/profile_update.py
 chatter_sdk/models/prompt_category.py
@@ -426,8 +424,6 @@ docs/ProfileDeleteResponse.md
 docs/ProfileListResponse.md
 docs/ProfileResponse.md
 docs/ProfileStatsResponse.md
-docs/ProfileTestRequest.md
-docs/ProfileTestResponse.md
 docs/ProfileType.md
 docs/ProfileUpdate.md
 docs/ProfilesApi.md
@@ -690,8 +686,6 @@ test/test_profile_delete_response.py
 test/test_profile_list_response.py
 test/test_profile_response.py
 test/test_profile_stats_response.py
-test/test_profile_test_request.py
-test/test_profile_test_response.py
 test/test_profile_type.py
 test/test_profile_update.py
 test/test_profiles_api.py

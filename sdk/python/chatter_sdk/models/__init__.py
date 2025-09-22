@@ -157,8 +157,6 @@ from chatter_sdk.models.profile_delete_response import ProfileDeleteResponse
 from chatter_sdk.models.profile_list_response import ProfileListResponse
 from chatter_sdk.models.profile_response import ProfileResponse
 from chatter_sdk.models.profile_stats_response import ProfileStatsResponse
-from chatter_sdk.models.profile_test_request import ProfileTestRequest
-from chatter_sdk.models.profile_test_response import ProfileTestResponse
 from chatter_sdk.models.profile_type import ProfileType
 from chatter_sdk.models.profile_update import ProfileUpdate
 from chatter_sdk.models.prompt_category import PromptCategory

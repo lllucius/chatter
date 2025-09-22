@@ -561,56 +561,6 @@ class ProfileStatsResponse(BaseModel):
     )
 
 
-class ProfileTestRequest(BaseModel):
-    """Schema for profile test request."""
-
-    test_message: str = Field(
-        ..., min_length=1, max_length=1000, description="Test message"
-    )
-    include_retrieval: bool = Field(
-        False, description="Include retrieval in test"
-    )
-    include_tools: bool = Field(
-        False, description="Include tools in test"
-    )
-
-    @field_validator("test_message")
-    @classmethod
-    def validate_test_message(cls, v: str) -> str:
-        """Validate test message for security threats."""
-        from chatter.core.validation import (
-            DEFAULT_CONTEXT,
-            validation_engine,
-        )
-
-        result = validation_engine.validate_security(v, DEFAULT_CONTEXT)
-        if not result.is_valid:
-            raise ValueError(
-                f"Test message security validation failed: {result.errors[0].message}"
-            )
-        return v
-
-
-class ProfileTestResponse(BaseModel):
-    """Schema for profile test response."""
-
-    profile_id: str = Field(..., description="Profile ID")
-    test_message: str = Field(..., description="Test message sent")
-    response: str = Field(..., description="Generated response")
-    usage_info: dict[str, Any] = Field(
-        ..., description="Token usage and cost information"
-    )
-    response_time_ms: int = Field(
-        ..., description="Response time in milliseconds"
-    )
-    retrieval_results: list[dict[str, Any]] | None = Field(
-        None, description="Retrieval results if enabled"
-    )
-    tools_used: list[str] | None = Field(
-        None, description="Tools used if enabled"
-    )
-
-
 class ProfileCloneRequest(BaseModel):
     """Schema for profile clone request."""
 

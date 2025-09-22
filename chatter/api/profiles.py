@@ -15,8 +15,6 @@ from chatter.schemas.profile import (
     ProfileListResponse,
     ProfileResponse,
     ProfileStatsResponse,
-    ProfileTestRequest,
-    ProfileTestResponse,
     ProfileUpdate,
 )
 from chatter.utils.database import get_session_generator
@@ -324,75 +322,6 @@ async def delete_profile(
         )
         raise InternalServerProblem(
             detail="Failed to delete profile"
-        ) from None
-
-
-@router.post("/{profile_id}/test", response_model=ProfileTestResponse)
-async def test_profile(
-    profile_id: str,
-    test_request: ProfileTestRequest,
-    current_user: User = Depends(get_current_user),
-    profile_service: ProfileService = Depends(get_profile_service),
-) -> ProfileTestResponse:
-    """Test profile with a sample message.
-
-    Args:
-        profile_id: Profile ID
-        test_request: Test request
-        current_user: Current authenticated user
-        profile_service: Profile service
-
-    Returns:
-        Test results
-    """
-    try:
-        # Rate limiting for expensive LLM operations
-        rate_limit_key = f"profile_test:{current_user.id}"
-        try:
-            # Check hourly limit
-            await rate_limiter.check_rate_limit(
-                key=rate_limit_key,
-                limit=20,  # Max 20 tests per hour per user
-                window=3600,  # 1 hour in seconds
-                identifier="profile_test_hourly",
-            )
-            # Check daily limit
-            await rate_limiter.check_rate_limit(
-                key=rate_limit_key,
-                limit=100,  # Max 100 tests per day per user
-                window=86400,  # 1 day in seconds
-                identifier="profile_test_daily",
-            )
-        except RateLimitExceeded as e:
-            logger.warning(
-                "Rate limit exceeded for profile test",
-                user_id=current_user.id,
-                profile_id=profile_id,
-            )
-            raise RateLimitProblem(
-                detail="Profile testing rate limit exceeded. You can test up to 20 profiles per hour and 100 per day.",
-                retry_after=1800,  # Suggest retry after 30 minutes
-            ) from e
-
-        result = await profile_service.test_profile(
-            profile_id, current_user.id, test_request
-        )
-
-        return ProfileTestResponse(**result)
-
-    except ProfileError as e:
-        raise ValidationProblem(
-            detail=f"Profile test failed: {str(e)}",
-            validation_errors=[{"field": "profile", "message": str(e)}],
-        ) from None
-    except ProblemException:
-        raise
-    except Exception as e:
-        logger.error(
-            "Profile test failed", profile_id=profile_id, error=str(e)
-        )
-        raise InternalServerProblem(
-            detail="Profile test failed"
         ) from None
 
 

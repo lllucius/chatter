@@ -189,8 +189,6 @@ __all__ = [
     "ProfileListResponse",
     "ProfileResponse",
     "ProfileStatsResponse",
-    "ProfileTestRequest",
-    "ProfileTestResponse",
     "ProfileType",
     "ProfileUpdate",
     "PromptCategory",
@@ -462,8 +460,6 @@ from chatter_sdk.models.profile_delete_response import ProfileDeleteResponse as 
 from chatter_sdk.models.profile_list_response import ProfileListResponse as ProfileListResponse
 from chatter_sdk.models.profile_response import ProfileResponse as ProfileResponse
 from chatter_sdk.models.profile_stats_response import ProfileStatsResponse as ProfileStatsResponse
-from chatter_sdk.models.profile_test_request import ProfileTestRequest as ProfileTestRequest
-from chatter_sdk.models.profile_test_response import ProfileTestResponse as ProfileTestResponse
 from chatter_sdk.models.profile_type import ProfileType as ProfileType
 from chatter_sdk.models.profile_update import ProfileUpdate as ProfileUpdate
 from chatter_sdk.models.prompt_category import PromptCategory as PromptCategory

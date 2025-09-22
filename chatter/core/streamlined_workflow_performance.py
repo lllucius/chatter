@@ -22,17 +22,30 @@ class StreamlinedPerformanceMonitor:
     def __init__(self):
         """Initialize performance monitor."""
         self.execution_times: list[float] = []
-        self.workflow_modes: dict[str, int] = {}
+        self.workflow_capabilities: dict[str, int] = {}
         self.error_counts: dict[str, int] = {}
         self.start_times: dict[str, float] = {}
 
     def start_workflow(
-        self, workflow_id: str, workflow_mode: str
+        self, workflow_id: str, workflow_capabilities: dict[str, Any]
     ) -> None:
         """Start timing a workflow execution."""
         self.start_times[workflow_id] = time.time()
-        self.workflow_modes[workflow_mode] = (
-            self.workflow_modes.get(workflow_mode, 0) + 1
+        
+        # Create capability-based key for tracking
+        capability_flags = []
+        if workflow_capabilities.get('enable_retrieval', False):
+            capability_flags.append('retrieval')
+        if workflow_capabilities.get('enable_tools', False):
+            capability_flags.append('tools')
+        if workflow_capabilities.get('enable_memory', True):
+            capability_flags.append('memory')
+        if workflow_capabilities.get('enable_web_search', False):
+            capability_flags.append('websearch')
+        
+        capability_key = '+'.join(sorted(capability_flags)) or 'basic'
+        self.workflow_capabilities[capability_key] = (
+            self.workflow_capabilities.get(capability_key, 0) + 1
         )
 
     def end_workflow(
@@ -66,7 +79,7 @@ class StreamlinedPerformanceMonitor:
                 "avg_execution_time_ms": 0,
                 "min_execution_time_ms": 0,
                 "max_execution_time_ms": 0,
-                "workflow_modes": self.workflow_modes,
+                "workflow_capabilities": self.workflow_capabilities,
                 "error_counts": self.error_counts,
             }
 
@@ -79,7 +92,7 @@ class StreamlinedPerformanceMonitor:
             "avg_execution_time_ms": int(avg_time * 1000),
             "min_execution_time_ms": int(min_time * 1000),
             "max_execution_time_ms": int(max_time * 1000),
-            "workflow_modes": self.workflow_modes,
+            "workflow_capabilities": self.workflow_capabilities,
             "error_counts": self.error_counts,
         }
 

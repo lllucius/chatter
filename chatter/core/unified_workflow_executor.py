@@ -77,8 +77,17 @@ class UnifiedWorkflowExecutor:
         )
 
         try:
+            # Extract workflow capabilities from request
+            workflow_capabilities = {
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_tools": chat_request.enable_tools,
+                "enable_memory": getattr(chat_request, 'enable_memory', True),
+                "enable_web_search": getattr(chat_request, 'enable_web_search', False),
+                "enable_streaming": getattr(chat_request, 'enable_streaming', True),
+            }
+
             performance_monitor.start_workflow(
-                workflow_id, "dynamic"
+                workflow_id, workflow_capabilities
             )
 
             # Get workflow configuration based on capabilities
@@ -163,6 +172,7 @@ class UnifiedWorkflowExecutor:
                 "execute",
                 start_time,
                 True,
+                workflow_capabilities=workflow_capabilities,
                 correlation_id=correlation_id,
             )
 
@@ -175,6 +185,7 @@ class UnifiedWorkflowExecutor:
                 "execute",
                 start_time,
                 False,
+                workflow_capabilities=workflow_capabilities,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
@@ -208,8 +219,17 @@ class UnifiedWorkflowExecutor:
 
         try:
             performance_monitor.start_workflow(
-                workflow_id, "dynamic"
+                workflow_id, workflow_capabilities
             )
+
+            # Extract workflow capabilities from request
+            workflow_capabilities = {
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_tools": chat_request.enable_tools,
+                "enable_memory": getattr(chat_request, 'enable_memory', True),
+                "enable_web_search": getattr(chat_request, 'enable_web_search', False),
+                "enable_streaming": True,  # Always true for streaming methods
+            }
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -357,6 +377,7 @@ class UnifiedWorkflowExecutor:
                 "stream",
                 start_time,
                 True,
+                workflow_capabilities=workflow_capabilities,
                 correlation_id=correlation_id,
             )
 
@@ -367,6 +388,7 @@ class UnifiedWorkflowExecutor:
                 "stream",
                 start_time,
                 False,
+                workflow_capabilities=workflow_capabilities,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
@@ -400,8 +422,17 @@ class UnifiedWorkflowExecutor:
 
         try:
             performance_monitor.start_workflow(
-                workflow_id, "dynamic"
+                workflow_id, workflow_capabilities
             )
+
+            # Extract workflow capabilities from request
+            workflow_capabilities = {
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_tools": chat_request.enable_tools,
+                "enable_memory": getattr(chat_request, 'enable_memory', True),
+                "enable_web_search": getattr(chat_request, 'enable_web_search', False),
+                "enable_streaming": True,  # Always true for streaming methods
+            }
 
             # Get workflow configuration based on capabilities
             workflow_config = await self._get_workflow_config(
@@ -652,6 +683,7 @@ class UnifiedWorkflowExecutor:
                 "stream_trace",
                 start_time,
                 True,
+                workflow_capabilities=workflow_capabilities,
                 correlation_id=correlation_id,
             )
 
@@ -662,6 +694,7 @@ class UnifiedWorkflowExecutor:
                 "stream_trace",
                 start_time,
                 False,
+                workflow_capabilities=workflow_capabilities,
                 error_type=type(e).__name__,
                 correlation_id=correlation_id,
             )
@@ -1014,13 +1047,14 @@ class UnifiedWorkflowExecutor:
         step: str,
         start_time: float,
         success: bool,
+        workflow_capabilities: dict[str, Any] | None = None,
         error_type: str | None = None,
         correlation_id: str | None = None,
     ) -> None:
         """Record workflow execution metrics."""
         duration_ms = (time.time() - start_time) * 1000
         record_workflow_metrics(
-            workflow_mode="dynamic",
+            workflow_capabilities=workflow_capabilities or {},
             workflow_id=workflow_id,
             step=step,
             duration_ms=duration_ms,

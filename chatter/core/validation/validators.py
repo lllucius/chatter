@@ -813,11 +813,8 @@ class WorkflowValidator(BaseValidator):
 
         errors = []
 
-        # Handle simple workflow capability validation (for workflow execution service)
-        if "workflow_mode" in config and len(config) == 1:
-            # Legacy workflow_mode field - warn but don't fail
-            logger.warning("workflow_mode field is deprecated, use capability flags instead")
-        elif any(key in config for key in ["enable_retrieval", "enable_tools", "enable_memory"]):
+        # Handle workflow capability validation (for workflow execution service)
+        if any(key in config for key in ["enable_retrieval", "enable_tools", "enable_memory"]):
             # Validate capability flags
             if "enable_retrieval" in config and not isinstance(config["enable_retrieval"], bool):
                 errors.append(

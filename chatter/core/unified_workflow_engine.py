@@ -134,7 +134,10 @@ class WorkflowNodeExecutor:
             temperature=temperature,
             max_tokens=max_tokens,
             system_prompt_override=system_prompt,
-            workflow_mode=spec.capabilities.get_workflow_mode(),
+            enable_retrieval=spec.capabilities.enable_retrieval,
+            enable_tools=spec.capabilities.enable_tools,
+            enable_memory=spec.capabilities.enable_memory,
+            enable_web_search=spec.capabilities.enable_web_search,
         )
 
         # Use the unified executor to process

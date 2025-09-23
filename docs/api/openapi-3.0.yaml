@@ -1537,6 +1537,25 @@ components:
       - differential
       title: BackupType
       type: string
+    Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post:
+      properties:
+        edges:
+          items:
+            additionalProperties: true
+            type: object
+          title: Edges
+          type: array
+        nodes:
+          items:
+            additionalProperties: true
+            type: object
+          title: Nodes
+          type: array
+      required:
+      - nodes
+      - edges
+      title: Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post
+      type: object
     Body_upload_document_api_v1_documents_upload_post:
       properties:
         chunk_overlap:
@@ -1573,6 +1592,25 @@ components:
       required:
       - file
       title: Body_upload_document_api_v1_documents_upload_post
+      type: object
+    Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post:
+      properties:
+        edges:
+          items:
+            additionalProperties: true
+            type: object
+          title: Edges
+          type: array
+        nodes:
+          items:
+            additionalProperties: true
+            type: object
+          title: Nodes
+          type: array
+      required:
+      - nodes
+      - edges
+      title: Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post
       type: object
     BottleneckInfo:
       description: Schema for bottleneck information.
@@ -1996,6 +2034,12 @@ components:
           minLength: 1
           title: Message
           type: string
+        model:
+          anyOf:
+          - type: string
+          - type: 'null'
+          description: LLM model
+          title: Model
         profile_id:
           anyOf:
           - type: string
@@ -19237,6 +19281,86 @@ paths:
       summary: Create Workflow Definition
       tags:
       - Workflows
+  /api/v1/workflows/definitions/custom/execute:
+    post:
+      description: Execute a custom workflow definition using the modern system.
+      operationId: execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post
+      parameters:
+      - in: query
+        name: message
+        required: true
+        schema:
+          title: Message
+          type: string
+      - in: query
+        name: entry_point
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Entry Point
+      - in: query
+        name: provider
+        required: false
+        schema:
+          default: openai
+          title: Provider
+          type: string
+      - in: query
+        name: model
+        required: false
+        schema:
+          default: gpt-4
+          title: Model
+          type: string
+      - in: query
+        name: conversation_id
+        required: false
+        schema:
+          anyOf:
+          - type: string
+          - type: 'null'
+          title: Conversation Id
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post'
+        required: true
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Execute Custom Workflow Api V1 Workflows Definitions
+                  Custom Execute Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Execute Custom Workflow
+      tags:
+      - Workflows
   /api/v1/workflows/definitions/from-template:
     post:
       description: Create a workflow definition from a template.
@@ -19279,13 +19403,13 @@ paths:
       - Workflows
   /api/v1/workflows/definitions/validate:
     post:
-      description: Validate a workflow definition.
+      description: Validate a workflow definition using the modern system.
       operationId: validate_workflow_definition_api_v1_workflows_definitions_validate_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/WorkflowDefinitionCreate'
+              $ref: '#/components/schemas/Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post'
         required: true
       responses:
         '200':
@@ -19729,6 +19853,72 @@ paths:
       summary: Execute Chat Workflow Streaming
       tags:
       - Workflows
+  /api/v1/workflows/memory/configure:
+    post:
+      description: Configure memory management settings for the user.
+      operationId: configure_memory_settings_api_v1_workflows_memory_configure_post
+      parameters:
+      - in: query
+        name: adaptive_mode
+        required: false
+        schema:
+          default: true
+          title: Adaptive Mode
+          type: boolean
+      - in: query
+        name: base_window_size
+        required: false
+        schema:
+          default: 10
+          title: Base Window Size
+          type: integer
+      - in: query
+        name: max_window_size
+        required: false
+        schema:
+          default: 50
+          title: Max Window Size
+          type: integer
+      - in: query
+        name: summary_strategy
+        required: false
+        schema:
+          default: intelligent
+          title: Summary Strategy
+          type: string
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Configure Memory Settings Api V1 Workflows Memory
+                  Configure Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Configure Memory Settings
+      tags:
+      - Workflows
   /api/v1/workflows/node-types:
     get:
       description: Get list of supported workflow node types.
@@ -19753,6 +19943,31 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Get Supported Node Types
+      tags:
+      - Workflows
+  /api/v1/workflows/node-types/modern:
+    get:
+      description: Get supported node types from the modern workflow system.
+      operationId: get_modern_supported_node_types_api_v1_workflows_node_types_modern_get
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Get Modern Supported Node Types Api V1 Workflows Node
+                  Types Modern Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Get Modern Supported Node Types
       tags:
       - Workflows
   /api/v1/workflows/templates:
@@ -19861,6 +20076,72 @@ paths:
       security:
       - CustomHTTPBearer: []
       summary: Update Workflow Template
+      tags:
+      - Workflows
+  /api/v1/workflows/tools/configure:
+    post:
+      description: Configure tool execution settings for the user.
+      operationId: configure_tool_settings_api_v1_workflows_tools_configure_post
+      parameters:
+      - in: query
+        name: max_total_calls
+        required: false
+        schema:
+          default: 10
+          title: Max Total Calls
+          type: integer
+      - in: query
+        name: max_consecutive_calls
+        required: false
+        schema:
+          default: 3
+          title: Max Consecutive Calls
+          type: integer
+      - in: query
+        name: recursion_strategy
+        required: false
+        schema:
+          default: adaptive
+          title: Recursion Strategy
+          type: string
+      - in: query
+        name: enable_recursion_detection
+        required: false
+        schema:
+          default: true
+          title: Enable Recursion Detection
+          type: boolean
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response Configure Tool Settings Api V1 Workflows Tools Configure
+                  Post
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: Configure Tool Settings
       tags:
       - Workflows
   /healthz:

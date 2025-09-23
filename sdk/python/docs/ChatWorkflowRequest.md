@@ -13,6 +13,7 @@ Name | Type | Description | Notes
 **workflow_template_name** | **str** |  | [optional] 
 **profile_id** | **str** |  | [optional] 
 **provider** | **str** |  | [optional] 
+**model** | **str** |  | [optional] 
 **temperature** | **float** |  | [optional] 
 **max_tokens** | **int** |  | [optional] 
 **context_limit** | **int** |  | [optional] 

@@ -27,6 +27,20 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
     async def asyncTearDown(self) -> None:
         await self.api.api_client.close()
 
+    async def test_configure_memory_settings_api_v1_workflows_memory_configure_post(self) -> None:
+        """Test case for configure_memory_settings_api_v1_workflows_memory_configure_post
+
+        Configure Memory Settings
+        """
+        pass
+
+    async def test_configure_tool_settings_api_v1_workflows_tools_configure_post(self) -> None:
+        """Test case for configure_tool_settings_api_v1_workflows_tools_configure_post
+
+        Configure Tool Settings
+        """
+        pass
+
     async def test_create_workflow_definition_api_v1_workflows_definitions_post(self) -> None:
         """Test case for create_workflow_definition_api_v1_workflows_definitions_post
 
@@ -69,10 +83,24 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post(self) -> None:
+        """Test case for execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post
+
+        Execute Custom Workflow
+        """
+        pass
+
     async def test_execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post(self) -> None:
         """Test case for execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post
 
         Execute Workflow
+        """
+        pass
+
+    async def test_get_modern_supported_node_types_api_v1_workflows_node_types_modern_get(self) -> None:
+        """Test case for get_modern_supported_node_types_api_v1_workflows_node_types_modern_get
+
+        Get Modern Supported Node Types
         """
         pass
 

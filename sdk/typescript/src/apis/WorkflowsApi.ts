@@ -1,8 +1,8 @@
 /**
  * Generated API client for Workflows
  */
-import { ChatResponse, ChatWorkflowRequest, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
-import { BaseAPI, Configuration, RequestOpts, HTTPMethod } from '../runtime';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post, ChatResponse, ChatWorkflowRequest, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
   constructor(configuration?: Configuration) {
@@ -176,9 +176,9 @@ export class WorkflowsApi extends BaseAPI {
     return response.json() as Promise<WorkflowExecutionResponse>;
   }
   /**Validate Workflow Definition
-   * Validate a workflow definition.
+   * Validate a workflow definition using the modern system.
    */
-  public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: WorkflowDefinitionCreate): Promise<WorkflowValidationResponse> {
+  public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post): Promise<WorkflowValidationResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions/validate`,
       method: 'POST' as HTTPMethod,
@@ -412,5 +412,88 @@ Available templates:
 
     const response = await this.requestStream(requestContext);
     return response;
+  }
+  /**Execute Custom Workflow
+   * Execute a custom workflow definition using the modern system.
+   */
+  public async executeCustomWorkflowApiV1WorkflowsDefinitionsCustomExecute(data: Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, options?: { message?: string; entryPoint?: string | null; provider?: string; model?: string; conversationId?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/definitions/custom/execute`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        'Content-Type': 'application/json',
+        ...options?.headers,
+      },
+      query: {
+        'message': options?.message,
+        'entry_point': options?.entryPoint,
+        'provider': options?.provider,
+        'model': options?.model,
+        'conversation_id': options?.conversationId,
+        ...options?.query
+      },
+      body: data,
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Get Modern Supported Node Types
+   * Get supported node types from the modern workflow system.
+   */
+  public async getModernSupportedNodeTypesApiV1WorkflowsNodeTypesModern(): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/node-types/modern`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Configure Memory Settings
+   * Configure memory management settings for the user.
+   */
+  public async configureMemorySettingsApiV1WorkflowsMemoryConfigure(options?: { adaptiveMode?: boolean; baseWindowSize?: number; maxWindowSize?: number; summaryStrategy?: string; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/memory/configure`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'adaptive_mode': options?.adaptiveMode,
+        'base_window_size': options?.baseWindowSize,
+        'max_window_size': options?.maxWindowSize,
+        'summary_strategy': options?.summaryStrategy,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Configure Tool Settings
+   * Configure tool execution settings for the user.
+   */
+  public async configureToolSettingsApiV1WorkflowsToolsConfigure(options?: { maxTotalCalls?: number; maxConsecutiveCalls?: number; recursionStrategy?: string; enableRecursionDetection?: boolean; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/tools/configure`,
+      method: 'POST' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'max_total_calls': options?.maxTotalCalls,
+        'max_consecutive_calls': options?.maxConsecutiveCalls,
+        'recursion_strategy': options?.recursionStrategy,
+        'enable_recursion_detection': options?.enableRecursionDetection,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
   }
 }

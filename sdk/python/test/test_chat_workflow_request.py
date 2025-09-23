@@ -74,6 +74,7 @@ class TestChatWorkflowRequest(unittest.TestCase):
                 workflow_template_name = '',
                 profile_id = '',
                 provider = '',
+                model = '',
                 temperature = 0.0,
                 max_tokens = 1.0,
                 context_limit = 1.0,

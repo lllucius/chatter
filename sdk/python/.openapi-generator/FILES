@@ -65,6 +65,8 @@ chatter_sdk/models/backup_list_response.py
 chatter_sdk/models/backup_request.py
 chatter_sdk/models/backup_response.py
 chatter_sdk/models/backup_type.py
+chatter_sdk/models/body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post.py
+chatter_sdk/models/body_validate_workflow_definition_api_v1_workflows_definitions_validate_post.py
 chatter_sdk/models/bottleneck_info.py
 chatter_sdk/models/bulk_delete_filtered_request.py
 chatter_sdk/models/bulk_delete_preview_response.py
@@ -308,6 +310,8 @@ docs/BackupListResponse.md
 docs/BackupRequest.md
 docs/BackupResponse.md
 docs/BackupType.md
+docs/BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost.md
+docs/BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost.md
 docs/BottleneckInfo.md
 docs/BulkDeleteFilteredRequest.md
 docs/BulkDeletePreviewResponse.md
@@ -570,6 +574,8 @@ test/test_backup_list_response.py
 test/test_backup_request.py
 test/test_backup_response.py
 test/test_backup_type.py
+test/test_body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post.py
+test/test_body_validate_workflow_definition_api_v1_workflows_definitions_validate_post.py
 test/test_bottleneck_info.py
 test/test_bulk_delete_filtered_request.py
 test/test_bulk_delete_preview_response.py

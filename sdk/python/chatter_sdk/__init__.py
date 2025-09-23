@@ -82,6 +82,8 @@ __all__ = [
     "BackupRequest",
     "BackupResponse",
     "BackupType",
+    "BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost",
+    "BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost",
     "BottleneckInfo",
     "BulkDeleteFilteredRequest",
     "BulkDeletePreviewResponse",
@@ -353,6 +355,8 @@ from chatter_sdk.models.backup_list_response import BackupListResponse as Backup
 from chatter_sdk.models.backup_request import BackupRequest as BackupRequest
 from chatter_sdk.models.backup_response import BackupResponse as BackupResponse
 from chatter_sdk.models.backup_type import BackupType as BackupType
+from chatter_sdk.models.body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post import BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost as BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost
+from chatter_sdk.models.body_validate_workflow_definition_api_v1_workflows_definitions_validate_post import BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost as BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
 from chatter_sdk.models.bottleneck_info import BottleneckInfo as BottleneckInfo
 from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest as BulkDeleteFilteredRequest
 from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse as BulkDeletePreviewResponse

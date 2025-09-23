@@ -18,6 +18,8 @@ export interface ChatWorkflowRequest {
   profile_id?: string | null;
   /** LLM provider */
   provider?: string | null;
+  /** LLM model */
+  model?: string | null;
   /** Temperature */
   temperature?: number | null;
   /** Max tokens */

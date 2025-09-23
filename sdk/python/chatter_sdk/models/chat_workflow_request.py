@@ -36,13 +36,14 @@ class ChatWorkflowRequest(BaseModel):
     workflow_template_name: Optional[StrictStr] = None
     profile_id: Optional[StrictStr] = None
     provider: Optional[StrictStr] = None
+    model: Optional[StrictStr] = None
     temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
     max_tokens: Optional[Annotated[int, Field(le=8192, strict=True, ge=1)]] = None
     context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     document_ids: Optional[List[StrictStr]] = None
     system_prompt_override: Optional[StrictStr] = None
     enable_tracing: Optional[StrictBool] = Field(default=False, description="Enable backend workflow tracing")
-    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "profile_id", "provider", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "profile_id", "provider", "model", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -116,6 +117,11 @@ class ChatWorkflowRequest(BaseModel):
         if self.provider is None and "provider" in self.model_fields_set:
             _dict['provider'] = None
 
+        # set to None if model (nullable) is None
+        # and model_fields_set contains the field
+        if self.model is None and "model" in self.model_fields_set:
+            _dict['model'] = None
+
         # set to None if temperature (nullable) is None
         # and model_fields_set contains the field
         if self.temperature is None and "temperature" in self.model_fields_set:
@@ -160,6 +166,7 @@ class ChatWorkflowRequest(BaseModel):
             "workflow_template_name": obj.get("workflow_template_name"),
             "profile_id": obj.get("profile_id"),
             "provider": obj.get("provider"),
+            "model": obj.get("model"),
             "temperature": obj.get("temperature"),
             "max_tokens": obj.get("max_tokens"),
             "context_limit": obj.get("context_limit"),

@@ -285,13 +285,17 @@ Class | Method | HTTP request | Description
 *ToolServersApi* | [**test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post**](docs/ToolServersApi.md#test_server_connectivity_api_v1_toolservers_servers_server_id_test_connectivity_post) | **POST** /api/v1/toolservers/servers/{server_id}/test-connectivity | Test Server Connectivity
 *ToolServersApi* | [**update_tool_permission_api_v1_toolservers_permissions_permission_id_put**](docs/ToolServersApi.md#update_tool_permission_api_v1_toolservers_permissions_permission_id_put) | **PUT** /api/v1/toolservers/permissions/{permission_id} | Update Tool Permission
 *ToolServersApi* | [**update_tool_server_api_v1_toolservers_servers_server_id_put**](docs/ToolServersApi.md#update_tool_server_api_v1_toolservers_servers_server_id_put) | **PUT** /api/v1/toolservers/servers/{server_id} | Update Tool Server
+*WorkflowsApi* | [**configure_memory_settings_api_v1_workflows_memory_configure_post**](docs/WorkflowsApi.md#configure_memory_settings_api_v1_workflows_memory_configure_post) | **POST** /api/v1/workflows/memory/configure | Configure Memory Settings
+*WorkflowsApi* | [**configure_tool_settings_api_v1_workflows_tools_configure_post**](docs/WorkflowsApi.md#configure_tool_settings_api_v1_workflows_tools_configure_post) | **POST** /api/v1/workflows/tools/configure | Configure Tool Settings
 *WorkflowsApi* | [**create_workflow_definition_api_v1_workflows_definitions_post**](docs/WorkflowsApi.md#create_workflow_definition_api_v1_workflows_definitions_post) | **POST** /api/v1/workflows/definitions | Create Workflow Definition
 *WorkflowsApi* | [**create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**](docs/WorkflowsApi.md#create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post) | **POST** /api/v1/workflows/definitions/from-template | Create Workflow Definition From Template
 *WorkflowsApi* | [**create_workflow_template_api_v1_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 *WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
 *WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 *WorkflowsApi* | [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](docs/WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
+*WorkflowsApi* | [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](docs/WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
 *WorkflowsApi* | [**execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post**](docs/WorkflowsApi.md#execute_workflow_api_v1_workflows_definitions_workflow_id_execute_post) | **POST** /api/v1/workflows/definitions/{workflow_id}/execute | Execute Workflow
+*WorkflowsApi* | [**get_modern_supported_node_types_api_v1_workflows_node_types_modern_get**](docs/WorkflowsApi.md#get_modern_supported_node_types_api_v1_workflows_node_types_modern_get) | **GET** /api/v1/workflows/node-types/modern | Get Modern Supported Node Types
 *WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 *WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
 *WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
@@ -360,6 +364,8 @@ Class | Method | HTTP request | Description
  - [BackupRequest](docs/BackupRequest.md)
  - [BackupResponse](docs/BackupResponse.md)
  - [BackupType](docs/BackupType.md)
+ - [BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost](docs/BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost.md)
+ - [BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost](docs/BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost.md)
  - [BottleneckInfo](docs/BottleneckInfo.md)
  - [BulkDeleteFilteredRequest](docs/BulkDeleteFilteredRequest.md)
  - [BulkDeletePreviewResponse](docs/BulkDeletePreviewResponse.md)

@@ -432,8 +432,17 @@ const ChatPage: React.FC = () => {
                 document_ids:
                   selectedDocuments.length > 0 ? selectedDocuments : undefined,
                 enable_tracing: enableTracing,
+                // Enable flags at root level for backend compatibility
+                enable_retrieval: enableRetrieval,
+                enable_tools: enableTools,
+                enable_memory: true,
+                enable_web_search: false,
                 workflow_config: {
                   ...getEffectiveConfig(),
+                  enable_retrieval: enableRetrieval,
+                  enable_tools: enableTools,
+                  enable_memory: true,
+                  enable_web_search: false,
                   llm_config: {
                     ...getEffectiveConfig().llm_config,
                     temperature,
@@ -533,6 +542,7 @@ const ChatPage: React.FC = () => {
       customPromptText,
       streamingEnabled,
       enableRetrieval,
+      enableTools,
       setMessages,
       buildWorkflowRequest,
       getEffectiveConfig,
@@ -653,9 +663,6 @@ const ChatPage: React.FC = () => {
             enable_tools: enableTools,
             enable_memory: true, // Always enable memory for chat
             enable_web_search: false, // TODO: add web search toggle to settings
-            // Direct config overrides at root level
-            temperature,
-            max_tokens: maxTokens,
             // Merge with effective workflow configuration
             workflow_config: {
               ...getEffectiveConfig(),
@@ -770,6 +777,7 @@ const ChatPage: React.FC = () => {
       customPromptText,
       streamingEnabled,
       enableRetrieval,
+      enableTools,
       setMessage,
       setMessages,
       setLoading,

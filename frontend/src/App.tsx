@@ -41,6 +41,9 @@ const ToolsPage = lazy(() => import('./pages/ToolsPage'));
 const WorkflowManagementPage = lazy(
   () => import('./pages/WorkflowManagementPage')
 );
+const WorkflowBuilderDemo = lazy(
+  () => import('./pages/WorkflowBuilderDemo')
+);
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
@@ -184,7 +187,21 @@ function App() {
                     }
                   />
 
-
+                  {/* Standalone Demo Route - No auth required */}
+                  <Route
+                    path="/workflow-demo"
+                    element={
+                      <SectionErrorBoundary
+                        level="page"
+                        name="WorkflowBuilderDemo"
+                        showHomeButton={false}
+                      >
+                        <SuspenseWrapper loadingMessage="Loading workflow builder demo...">
+                          <WorkflowBuilderDemo />
+                        </SuspenseWrapper>
+                      </SectionErrorBoundary>
+                    }
+                  />
 
                   {/* Protected routes */}
                   <Route
@@ -324,6 +341,14 @@ function App() {
                       element={
                         <SuspenseWrapper loadingMessage="Loading workflow management...">
                           <WorkflowManagementPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflow-demo"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow builder demo...">
+                          <WorkflowBuilderDemo />
                         </SuspenseWrapper>
                       }
                     />

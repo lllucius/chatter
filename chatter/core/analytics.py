@@ -2975,24 +2975,40 @@ class AnalyticsService:
                 daily_usage[date_str] = row.calls or 0
                 daily_errors[date_str] = row.errors or 0
 
-            return {
+            # Create tool usage stats
+            tool_usage_stats = {}
+            for tool in top_tools:
+                tool_usage_stats[tool["tool_name"]] = tool["total_calls"]
+
+            # Create server uptime stats from server metrics
+            server_uptime_stats = {
                 "total_servers": total_servers,
                 "active_servers": active_servers,
                 "total_tools": total_tools,
                 "enabled_tools": enabled_tools,
-                "total_calls_today": calls_today,
-                "total_calls_week": calls_week,
-                "total_calls_month": calls_month,
-                "total_errors_today": errors_today,
-                "overall_success_rate": overall_success_rate,
-                "avg_response_time_ms": avg_response_time,
-                "p95_response_time_ms": p95_response_time,
-                "server_metrics": server_metrics,
-                "top_tools": top_tools,
-                "failing_tools": failing_tools,
+                "server_details": server_metrics,
                 "daily_usage": daily_usage,
                 "daily_errors": daily_errors,
-                "generated_at": datetime.now(UTC),
+            }
+
+            # Create error distribution
+            error_distribution = {}
+            for tool in failing_tools:
+                error_type = f"{tool['tool_name']}_errors"
+                error_distribution[error_type] = tool["total_errors"]
+            
+            # If no failing tools, add general error count
+            if not error_distribution:
+                error_distribution["general_errors"] = total_errors
+
+            return {
+                "total_requests": calls_month,
+                "successful_requests": calls_month - total_errors,
+                "failed_requests": total_errors,
+                "average_response_time_ms": avg_response_time,
+                "tool_usage_stats": tool_usage_stats,
+                "server_uptime_stats": server_uptime_stats,
+                "error_distribution": error_distribution,
             }
 
         except Exception as e:
@@ -3001,23 +3017,21 @@ class AnalyticsService:
             )
             # Return default values to prevent validation errors
             return {
-                "total_servers": 0,
-                "active_servers": 0,
-                "total_tools": 0,
-                "enabled_tools": 0,
-                "total_calls_today": 0,
-                "total_calls_week": 0,
-                "total_calls_month": 0,
-                "total_errors_today": 0,
-                "overall_success_rate": 1.0,
-                "avg_response_time_ms": 0.0,
-                "p95_response_time_ms": 0.0,
-                "server_metrics": [],
-                "top_tools": [],
-                "failing_tools": [],
-                "daily_usage": {},
-                "daily_errors": {},
-                "generated_at": datetime.now(UTC),
+                "total_requests": 0,
+                "successful_requests": 0,
+                "failed_requests": 0,
+                "average_response_time_ms": 0.0,
+                "tool_usage_stats": {},
+                "server_uptime_stats": {
+                    "total_servers": 0,
+                    "active_servers": 0,
+                    "total_tools": 0,
+                    "enabled_tools": 0,
+                    "server_details": [],
+                    "daily_usage": {},
+                    "daily_errors": {},
+                },
+                "error_distribution": {},
             }
 
     def _build_time_filter_for_table(

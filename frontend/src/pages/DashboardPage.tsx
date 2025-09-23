@@ -134,6 +134,20 @@ function safeToFixed(n: number | undefined | null, digits: number): string {
   return (0).toFixed(digits);
 }
 
+// Dashboard data interfaces
+interface ConversationStats {
+  total_conversations?: number;
+  total_messages?: number;
+  avg_messages_per_conversation?: number;
+}
+
+interface UsageMetrics {
+  total_tokens?: number;
+  input_tokens?: number;
+  output_tokens?: number;
+  total_prompt_tokens?: number;
+}
+
 const DashboardPage: React.FC = () => {
   const [activeTab, setActiveTab] = useState(0);
   const [exportDialogOpen, setExportDialogOpen] = useState(false);
@@ -245,19 +259,6 @@ const DashboardPage: React.FC = () => {
     }
 
     // Fallback to real data if chart API isn't available
-    interface ConversationStats {
-      total_conversations?: number;
-      total_messages?: number;
-      avg_messages_per_conversation?: number;
-    }
-
-    interface UsageMetrics {
-      total_tokens?: number;
-      input_tokens?: number;
-      output_tokens?: number;
-      total_prompt_tokens?: number;
-    }
-
     const conversationStats = (data?.conversation_stats ||
       {}) as ConversationStats;
     const usageMetrics = (usageData ||
@@ -488,8 +489,8 @@ const DashboardPage: React.FC = () => {
 
   // Always show dashboard, even with limited data
   // Defensive checks for nested data
-  const conversationStats = data?.conversation_stats || {};
-  const usageMetrics = usageData || data?.usage_metrics || {};
+  const conversationStats = (data?.conversation_stats || {}) as ConversationStats;
+  const usageMetrics = (usageData || data?.usage_metrics || {}) as UsageMetrics;
   const documentAnalytics = documentData || data?.document_analytics || {};
   const systemHealth = systemData || data?.system_health || {};
   const performanceMetrics = performanceData || data?.performance_metrics || {};
@@ -919,7 +920,7 @@ const DashboardPage: React.FC = () => {
                       </Typography>
                       <Typography variant="h5">
                         {safeLocaleString(
-                          (toolServerData.active_servers as
+                          ((toolServerData as any).active_servers as
                             | number
                             | undefined
                             | null) ?? 0
@@ -945,7 +946,7 @@ const DashboardPage: React.FC = () => {
                       </Typography>
                       <Typography variant="h5">
                         {safeToFixed(
-                          (toolServerData.avg_response_time_ms as
+                          (toolServerData.average_response_time_ms as
                             | number
                             | undefined
                             | null) ?? 0,

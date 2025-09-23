@@ -512,10 +512,10 @@ const DocumentsPage: React.FC = () => {
                             }}
                           >
                             <Typography variant="subtitle2" sx={{ mr: 1 }}>
-                              Score: {(result.score || 0).toFixed(3)}
+                              Score: {Number(result.score || 0).toFixed(3)}
                             </Typography>
                             <Typography variant="body2" color="text.secondary">
-                              {result.source || 'Unknown'}
+                              {String(result.source || 'Unknown')}
                             </Typography>
                           </Box>
                         }
@@ -524,9 +524,9 @@ const DocumentsPage: React.FC = () => {
                             variant="body2"
                             sx={{ whiteSpace: 'pre-wrap' }}
                           >
-                            {result.content ||
+                            {String(result.content ||
                               result.text ||
-                              'No content available'}
+                              'No content available')}
                           </Typography>
                         }
                       />

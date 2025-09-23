@@ -125,7 +125,7 @@ export class WorkflowTranslator {
           config: node.data.config || {},
         };
       } catch (error) {
-        throw new Error(`Failed to translate node ${node.id}: ${error.message}`);
+        throw new Error(`Failed to translate node ${node.id}: ${(error as Error).message}`);
       }
     });
   }
@@ -170,7 +170,6 @@ export class WorkflowTranslator {
           throw new Error(`Variable operation must be one of: ${validOps.join(', ')}`);
         }
         break;
-      case 'error_handler':
       case 'errorHandler':
         if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
           throw new Error('Error handler retryCount must be a non-negative number');
@@ -385,51 +384,7 @@ export class WorkflowTranslator {
     });
 
     // Error handler nodes validation
-    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler' || n.type === 'error_handler');
-    errorNodes.forEach((node) => {
-      const config = node.data.config;
-      if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
-        errors.push(
-          `Error handler node "${node.data.label}" retryCount must be a non-negative number`
-        );
-      }
-    });
-
-    // Delay nodes validation  
-    const delayNodes = workflow.nodes.filter((n) => n.type === 'delay');
-    delayNodes.forEach((node) => {
-      const config = node.data.config;
-      if (!config || !config.duration || typeof config.duration !== 'number' || config.duration <= 0) {
-        errors.push(
-          `Delay node "${node.data.label}" must have a positive numeric duration`
-        );
-      }
-    });
-
-    // Loop nodes must have proper configuration
-    const loopNodes = workflow.nodes.filter((n) => n.type === 'loop');
-    loopNodes.forEach((node) => {
-      const config = node.data.config;
-      if (!config || (!config.maxIterations && !config.condition)) {
-        errors.push(
-          `Loop node "${node.data.label}" must have maxIterations or condition defined`
-        );
-      }
-    });
-
-    // Variable nodes must have proper configuration
-    const variableNodes = workflow.nodes.filter((n) => n.type === 'variable');
-    variableNodes.forEach((node) => {
-      const config = node.data.config;
-      if (!config || !config.variableName || !config.operation) {
-        errors.push(
-          `Variable node "${node.data.label}" must have variableName and operation defined`
-        );
-      }
-    });
-
-    // Error handler nodes validation
-    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler' || n.type === 'error_handler');
+    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler');
     errorNodes.forEach((node) => {
       const config = node.data.config;
       if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {

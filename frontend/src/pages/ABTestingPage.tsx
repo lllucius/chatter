@@ -129,7 +129,7 @@ const ABTestingPage: React.FC = () => {
       allocation_strategy: test.allocation_strategy || 'equal',
       variants: test.variants || [],
       metrics: test.metrics || [],
-      hypothesis: test.hypothesis || '',
+      hypothesis: (test as any).hypothesis || '',
       duration_days: test.duration_days || 14,
       min_sample_size: test.min_sample_size || 1000,
       confidence_level: test.confidence_level || 0.95,

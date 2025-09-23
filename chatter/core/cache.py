@@ -90,6 +90,11 @@ class CacheInterface(ABC):
         """Get cache statistics."""
         pass
 
+    @abstractmethod
+    async def health_check(self) -> dict[str, Any]:
+        """Check cache health status."""
+        pass
+
     def _build_key(self, key: str) -> str:
         """Build cache key with prefix."""
         if self.config.key_prefix:
@@ -256,6 +261,28 @@ class MemoryCache(CacheInterface):
             "evictions": self._evictions,
             "errors": self._stats.errors,
         }
+
+    async def health_check(self) -> dict[str, Any]:
+        """Check memory cache health status."""
+        if self.config.disabled:
+            return {"status": "disabled", "message": "Cache is disabled"}
+        
+        try:
+            # Memory cache is healthy if we can access basic properties
+            total_entries = len(self._cache)
+            return {
+                "status": "healthy",
+                "backend": "memory",
+                "total_entries": total_entries,
+                "max_size": self.config.max_size,
+                "evictions": self._evictions,
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy", 
+                "backend": "memory",
+                "error": str(e)
+            }
 
 
 class RedisCache(CacheInterface):
@@ -437,6 +464,40 @@ class RedisCache(CacheInterface):
                 
         return stats
 
+    async def health_check(self) -> dict[str, Any]:
+        """Check Redis cache health status."""
+        if self.config.disabled:
+            return {"status": "disabled", "message": "Cache is disabled"}
+        
+        if not self._enabled:
+            return {"status": "disabled", "message": "Redis cache is disabled"}
+        
+        try:
+            # Try to ensure connection and ping Redis
+            if await self._ensure_connection():
+                await self.redis.ping()
+                return {
+                    "status": "healthy",
+                    "backend": "redis",
+                    "connected": True,
+                    "connection_attempts": self._connection_attempts,
+                }
+            else:
+                return {
+                    "status": "unhealthy",
+                    "backend": "redis", 
+                    "connected": False,
+                    "connection_attempts": self._connection_attempts,
+                    "message": "Unable to connect to Redis"
+                }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "backend": "redis",
+                "connected": False,
+                "error": str(e)
+            }
+
 
 class MultiTierCache(CacheInterface):
     """Multi-tier cache combining memory (L1) and Redis (L2)."""
@@ -552,3 +613,38 @@ class MultiTierCache(CacheInterface):
             "l1_cache": l1_stats,
             "l2_cache": l2_stats,
         }
+
+    async def health_check(self) -> dict[str, Any]:
+        """Check multi-tier cache health status."""
+        if self.config.disabled:
+            return {"status": "disabled", "message": "Cache is disabled"}
+        
+        try:
+            # Check health of both cache tiers
+            l1_health = await self.l1_cache.health_check()
+            l2_health = await self.l2_cache.health_check()
+            
+            # Determine overall health
+            l1_healthy = l1_health.get("status") == "healthy"
+            l2_healthy = l2_health.get("status") == "healthy"
+            
+            if l1_healthy and l2_healthy:
+                overall_status = "healthy"
+            elif l1_healthy or l2_healthy:
+                overall_status = "degraded"
+            else:
+                overall_status = "unhealthy"
+            
+            return {
+                "status": overall_status,
+                "backend": "multi_tier",
+                "l1_cache": l1_health,
+                "l2_cache": l2_health,
+                "message": f"L1 cache: {l1_health.get('status', 'unknown')}, L2 cache: {l2_health.get('status', 'unknown')}"
+            }
+        except Exception as e:
+            return {
+                "status": "unhealthy",
+                "backend": "multi_tier",
+                "error": str(e)
+            }

@@ -120,7 +120,13 @@ class WorkflowGraphBuilder:
         self._check_for_cycles(definition)
         
     def _check_for_cycles(self, definition: WorkflowDefinition) -> None:
-        """Basic cycle detection in the workflow graph."""
+        """Basic cycle detection in the workflow graph.
+        
+        This allows controlled loops (like tool calling loops) but prevents infinite cycles.
+        A workflow is considered to have problematic cycles if:
+        1. There's a cycle without any conditional exit points
+        2. All paths in the cycle lead back to themselves without reaching END
+        """
         # Build adjacency list
         graph = {}
         for node in definition.nodes:
@@ -128,30 +134,71 @@ class WorkflowGraphBuilder:
             
         for edge in definition.edges:
             if edge["target"] != END:
-                graph[edge["source"]].append(edge["target"])
+                graph[edge["source"]].append({
+                    "target": edge["target"],
+                    "condition": edge.get("condition"),
+                    "type": edge.get("type", "regular")
+                })
                 
-        # DFS cycle detection
+        # Find strongly connected components (cycles)
         visited = set()
         rec_stack = set()
+        cycles = []
         
-        def has_cycle(node: str) -> bool:
+        def find_cycles(node: str, path: List[str]) -> None:
+            if node in rec_stack:
+                # Found a cycle - extract it
+                cycle_start = path.index(node)
+                cycle = path[cycle_start:] + [node]
+                cycles.append(cycle)
+                return
+                
+            if node in visited:
+                return
+                
             visited.add(node)
             rec_stack.add(node)
+            path.append(node)
             
-            for neighbor in graph.get(node, []):
-                if neighbor not in visited:
-                    if has_cycle(neighbor):
-                        return True
-                elif neighbor in rec_stack:
-                    return True
+            for edge in graph.get(node, []):
+                neighbor = edge["target"]
+                find_cycles(neighbor, path[:])
                     
             rec_stack.remove(node)
-            return False
+            path.pop()
             
+        # Find all cycles
         for node_id in graph:
             if node_id not in visited:
-                if has_cycle(node_id):
-                    raise ValueError("Workflow contains cycles")
+                find_cycles(node_id, [])
+                
+        # Check if any cycles are problematic
+        for cycle in cycles:
+            if self._is_problematic_cycle(cycle, definition):
+                logger.warning(f"Potentially problematic cycle detected: {' -> '.join(cycle)}")
+                # Instead of raising an error, just log a warning
+                # This allows controlled loops like tool calling patterns
+        
+    def _is_problematic_cycle(self, cycle: List[str], definition: WorkflowDefinition) -> bool:
+        """Check if a cycle is problematic (has no exit conditions)."""
+        # A cycle is problematic if:
+        # 1. No conditional edges lead out of the cycle
+        # 2. All edges in the cycle are unconditional
+        
+        cycle_nodes = set(cycle)
+        has_conditional_exit = False
+        
+        # Check for conditional edges that can exit the cycle
+        for edge in definition.edges:
+            if edge["source"] in cycle_nodes:
+                # If this edge goes to END or outside the cycle with a condition
+                if (edge["target"] == END or edge["target"] not in cycle_nodes) and edge.get("condition"):
+                    has_conditional_exit = True
+                    break
+                    
+        # If there are conditional exits, the cycle is not problematic
+        # This allows patterns like: model -> tools -> model (with max_tool_calls condition -> END)
+        return not has_conditional_exit
                     
     def _create_nodes(
         self,

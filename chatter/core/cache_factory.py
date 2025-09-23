@@ -150,6 +150,73 @@ class SimplifiedCacheFactory:
                 stats[key] = {"error": str(e)}
         return stats
 
+    async def health_check_all(self) -> dict[str, Any]:
+        """Get health status for all cache instances."""
+        health_results = {}
+        healthy_count = 0
+        total_count = len(self._cache_instances)
+        
+        for key, cache in self._cache_instances.items():
+            try:
+                health = await cache.health_check()
+                health_results[key] = health
+                if health.get("status") == "healthy":
+                    healthy_count += 1
+            except Exception as e:
+                health_results[key] = {
+                    "status": "unhealthy",
+                    "error": str(e)
+                }
+        
+        # Determine overall status
+        if total_count == 0:
+            overall_status = "healthy"  # No caches to check
+        elif healthy_count == total_count:
+            overall_status = "healthy"
+        elif healthy_count > 0:
+            overall_status = "degraded"
+        else:
+            overall_status = "unhealthy"
+        
+        return {
+            "overall_status": overall_status,
+            "total_instances": total_count,
+            "healthy_instances": healthy_count,
+            "cache_instances": health_results
+        }
+
+    async def get_stats_all(self) -> dict[str, Any]:
+        """Get statistics for all cache instances."""
+        stats_results = {}
+        total_entries = 0
+        total_hits = 0
+        total_misses = 0
+        
+        for key, cache in self._cache_instances.items():
+            try:
+                stats = await cache.get_stats()
+                stats_results[key] = stats
+                # Aggregate some metrics
+                if isinstance(stats, dict):
+                    total_entries += stats.get("total_entries", 0)
+                    total_hits += stats.get("cache_hits", 0)
+                    total_misses += stats.get("cache_misses", 0)
+            except Exception as e:
+                stats_results[key] = {"error": str(e)}
+        
+        return {
+            "aggregate": {
+                "total_instances": len(self._cache_instances),
+                "total_entries": total_entries,
+                "total_hits": total_hits,
+                "total_misses": total_misses,
+                "overall_hit_rate": (
+                    total_hits / max(1, total_hits + total_misses)
+                ) * 100
+            },
+            "instances": stats_results
+        }
+
 
 # Global factory instance
 cache_factory = SimplifiedCacheFactory()

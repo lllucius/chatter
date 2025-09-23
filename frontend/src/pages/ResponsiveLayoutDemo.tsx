@@ -185,7 +185,7 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
         {/* Sample Content Grid */}
         <Grid container spacing={3}>
           {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item}>
               <Card>
                 <CardContent>
                   <Typography variant="h6">Card {item}</Typography>
@@ -293,7 +293,7 @@ const DesignBTabNavigation: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* Sample Content */}
           <Grid container spacing={2}>
             {[1, 2, 3, 4, 5, 6].map((item) => (
-              <Grid item xs={12} sm={6} lg={4} key={item}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={item}>
                 <Card>
                   <CardContent>
                     <Typography variant="h6">{tabs[currentTab]?.label} Item {item}</Typography>
@@ -346,7 +346,7 @@ const DesignCFloatingPanels: React.FC<{ onBack: () => void }> = ({ onBack }) => 
         {/* Sample Content Grid - More space efficient */}
         <Grid container spacing={2}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }} key={item}>
               <Card sx={{ height: 200 }}>
                 <CardContent>
                   <Typography variant="h6">Item {item}</Typography>
@@ -469,7 +469,7 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
         {/* Priority Content Sections */}
         <Grid container spacing={1}>
           {/* High Priority - Always visible */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}>
               <CardContent>
                 <Typography variant="h6">🔥 High Priority Content</Typography>
@@ -482,13 +482,13 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           </Grid>
 
           {/* Medium Priority - Responsive layout */}
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Card>
               <CardContent>
                 <Typography variant="h6">📱 Main Content Area</Typography>
                 <Grid container spacing={1}>
                   {[1, 2, 3, 4].map((item) => (
-                    <Grid item xs={12} sm={6} lg={3} key={item}>
+                    <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item}>
                       <Card variant="outlined">
                         <CardContent>
                           <Typography variant="subtitle1">Item {item}</Typography>
@@ -505,7 +505,7 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           </Grid>
 
           {/* Low Priority - Hidden on small screens */}
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Card>
               <CardContent>
                 <Typography variant="h6">👻 Secondary Panel</Typography>
@@ -598,7 +598,7 @@ const ResponsiveLayoutDemo: React.FC = () => {
 
       <Grid container spacing={3}>
         {designs.map((design) => (
-          <Grid item xs={12} md={6} key={design.id}>
+          <Grid size={{ xs: 12, md: 6 }} key={design.id}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" gutterBottom>

@@ -27,7 +27,7 @@ import { initializeGlobalErrorHandling } from './utils/global-error-handler';
 
 // Lazy load pages for better performance
 const LoginPage = lazy(() => import('./pages/LoginPage'));
-const DashboardPage = lazy(() => import('./pages/NewDashboardPage'));
+const DashboardPage = lazy(() => import('./pages/DashboardPage'));
 const ConversationsPage = lazy(() => import('./pages/ConversationsPage'));
 const DocumentsPage = lazy(() => import('./pages/DocumentsPage'));
 const ProfilesPage = lazy(() => import('./pages/ProfilesPage'));
@@ -43,10 +43,7 @@ const WorkflowManagementPage = lazy(
 );
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
-const NotificationDemo = lazy(() => import('./pages/NotificationDemo'));
-const ErrorTestPage = lazy(() => import('./pages/ErrorTestPage'));
 const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
-const ChatBubbleDemo = lazy(() => import('./components/ChatBubbleDemo'));
 
 // Create theme context
 export const ThemeContext = React.createContext<{
@@ -186,34 +183,8 @@ function App() {
                       </SectionErrorBoundary>
                     }
                   />
-                  <Route
-                    path="/error-test-public"
-                    element={
-                      <SectionErrorBoundary
-                        level="page"
-                        name="ErrorTestPage"
-                        showHomeButton={true}
-                      >
-                        <SuspenseWrapper loadingMessage="Loading error test page...">
-                          <ErrorTestPage />
-                        </SuspenseWrapper>
-                      </SectionErrorBoundary>
-                    }
-                  />
-                  <Route
-                    path="/chat-bubble-demo-public"
-                    element={
-                      <SectionErrorBoundary
-                        level="page"
-                        name="ChatBubbleDemo"
-                        showHomeButton={true}
-                      >
-                        <SuspenseWrapper loadingMessage="Loading chat demo...">
-                          <ChatBubbleDemo />
-                        </SuspenseWrapper>
-                      </SectionErrorBoundary>
-                    }
-                  />
+
+
 
                   {/* Protected routes */}
                   <Route
@@ -388,36 +359,9 @@ function App() {
                         </SuspenseWrapper>
                       }
                     />
-                    <Route
-                      path="notifications-demo"
-                      element={
-                        <SuspenseWrapper loadingMessage="Loading demo...">
-                          <NotificationDemo />
-                        </SuspenseWrapper>
-                      }
-                    />
-                    <Route
-                      path="chat-bubble-demo"
-                      element={
-                        <SuspenseWrapper loadingMessage="Loading chat demo...">
-                          <ChatBubbleDemo />
-                        </SuspenseWrapper>
-                      }
-                    />
-                    <Route
-                      path="error-test"
-                      element={
-                        <SectionErrorBoundary
-                          level="page"
-                          name="ErrorTestPage"
-                          showHomeButton={true}
-                        >
-                          <SuspenseWrapper loadingMessage="Loading error test page...">
-                            <ErrorTestPage />
-                          </SuspenseWrapper>
-                        </SectionErrorBoundary>
-                      }
-                    />
+
+
+
                     <Route
                       path="sse-monitor"
                       element={

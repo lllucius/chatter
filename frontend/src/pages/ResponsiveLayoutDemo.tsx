@@ -50,9 +50,11 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('md'));
   const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+  
+  // For accessibility: Start collapsed on smaller screens but never completely hide
   const [sidebarCollapsed, setSidebarCollapsed] = useState(isMobile || isTablet);
-  const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
-
+  
+  // Always show at least icon-only sidebar for accessibility
   const sidebarWidth = sidebarCollapsed ? 64 : 240;
 
   const navigationItems = [
@@ -71,11 +73,13 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
           </Typography>
         )}
         <Box sx={{ flexGrow: 1 }} />
-        {!isMobile && (
-          <IconButton onClick={() => setSidebarCollapsed(!sidebarCollapsed)}>
-            <MenuIcon />
-          </IconButton>
-        )}
+        {/* Always show collapse/expand button for accessibility */}
+        <IconButton 
+          onClick={() => setSidebarCollapsed(!sidebarCollapsed)}
+          aria-label={sidebarCollapsed ? 'expand sidebar' : 'collapse sidebar'}
+        >
+          <MenuIcon />
+        </IconButton>
       </Toolbar>
       <List sx={{ flex: 1 }}>
         {navigationItems.map((item) => (
@@ -106,30 +110,25 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
 
   return (
     <Box sx={{ display: 'flex', height: '100vh' }}>
-      {/* Mobile Navigation */}
-      {isMobile ? (
-        <>
-          <Drawer
-            variant="temporary"
-            open={mobileDrawerOpen}
-            onClose={() => setMobileDrawerOpen(false)}
-            sx={{
-              '& .MuiDrawer-paper': { width: 240, boxSizing: 'border-box' },
-            }}
-          >
-            {sidebarContent}
-          </Drawer>
-          <Box sx={{ position: 'fixed', top: 16, left: 16, zIndex: 1200 }}>
-            <IconButton
-              onClick={() => setMobileDrawerOpen(true)}
-              sx={{ bgcolor: 'background.paper', boxShadow: 2 }}
-            >
-              <MenuIcon />
-            </IconButton>
-          </Box>
-        </>
+      {/* Unified Sidebar - Always visible, collapsible for accessibility */}
+      {isMobile && !sidebarCollapsed ? (
+        /* Temporary overlay when expanded on mobile for better UX */
+        <Drawer
+          variant="temporary"
+          open={true}
+          onClose={() => setSidebarCollapsed(true)}
+          sx={{
+            '& .MuiDrawer-paper': { 
+              width: sidebarWidth, 
+              boxSizing: 'border-box',
+              zIndex: theme.zIndex.drawer + 1,
+            },
+          }}
+        >
+          {sidebarContent}
+        </Drawer>
       ) : (
-        /* Desktop Sidebar */
+        /* Always show permanent sidebar (collapsed or expanded) */
         <Drawer
           variant="permanent"
           sx={{
@@ -155,9 +154,8 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
         sx={{
           flexGrow: 1,
           p: 3,
-          width: { sm: `calc(100% - ${isMobile ? 0 : sidebarWidth}px)` },
-          ml: { sm: isMobile ? 0 : `${sidebarWidth}px` },
-          transition: theme.transitions.create(['margin', 'width'], {
+          width: `calc(100% - ${sidebarWidth}px)`,
+          transition: theme.transitions.create(['width'], {
             easing: theme.transitions.easing.sharp,
             duration: theme.transitions.duration.leavingScreen,
           }),
@@ -173,20 +171,21 @@ const DesignACollapsibleSidebar: React.FC<{ onBack: () => void }> = ({ onBack })
           Design A: Collapsible Sidebar
         </Typography>
         <Typography variant="body1" paragraph>
-          Features: Sidebar collapses to icon-only mode on tablets, switches to drawer on mobile.
-          Provides smooth transitions and maintains easy access to navigation.
+          Features: Sidebar always remains accessible for users with high display scaling.
+          Collapses to icon-only mode but never completely disappears.
+          Provides consistent navigation access across all screen sizes.
         </Typography>
         
         <Box sx={{ mb: 3 }}>
-          <Chip label={`Current mode: ${isMobile ? 'Mobile Drawer' : sidebarCollapsed ? 'Icon Only' : 'Full Sidebar'}`} 
+          <Chip label={`Current mode: ${sidebarCollapsed ? 'Icon Only' : 'Full Sidebar'}`} 
                 color="primary" sx={{ mr: 1 }} />
-          <Chip label={`Sidebar width: ${isMobile ? '0' : sidebarWidth}px`} variant="outlined" />
+          <Chip label={`Sidebar width: ${sidebarWidth}px`} variant="outlined" />
         </Box>
         
         {/* Sample Content Grid */}
         <Grid container spacing={3}>
           {[1, 2, 3, 4, 5, 6].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3 }} key={item}>
               <Card>
                 <CardContent>
                   <Typography variant="h6">Card {item}</Typography>
@@ -294,7 +293,7 @@ const DesignBTabNavigation: React.FC<{ onBack: () => void }> = ({ onBack }) => {
           {/* Sample Content */}
           <Grid container spacing={2}>
             {[1, 2, 3, 4, 5, 6].map((item) => (
-              <Grid item xs={12} sm={6} lg={4} key={item}>
+              <Grid size={{ xs: 12, sm: 6, lg: 4 }} key={item}>
                 <Card>
                   <CardContent>
                     <Typography variant="h6">{tabs[currentTab]?.label} Item {item}</Typography>
@@ -347,7 +346,7 @@ const DesignCFloatingPanels: React.FC<{ onBack: () => void }> = ({ onBack }) => 
         {/* Sample Content Grid - More space efficient */}
         <Grid container spacing={2}>
           {[1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12].map((item) => (
-            <Grid item xs={12} sm={6} md={4} lg={3} xl={2} key={item}>
+            <Grid size={{ xs: 12, sm: 6, md: 4, lg: 3, xl: 2 }} key={item}>
               <Card sx={{ height: 200 }}>
                 <CardContent>
                   <Typography variant="h6">Item {item}</Typography>
@@ -470,7 +469,7 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
         {/* Priority Content Sections */}
         <Grid container spacing={1}>
           {/* High Priority - Always visible */}
-          <Grid item xs={12}>
+          <Grid size={{ xs: 12 }}>
             <Card sx={{ bgcolor: 'primary.light', color: 'primary.contrastText' }}>
               <CardContent>
                 <Typography variant="h6">🔥 High Priority Content</Typography>
@@ -483,13 +482,13 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           </Grid>
 
           {/* Medium Priority - Responsive layout */}
-          <Grid item xs={12} md={8}>
+          <Grid size={{ xs: 12, md: 8 }}>
             <Card>
               <CardContent>
                 <Typography variant="h6">📱 Main Content Area</Typography>
                 <Grid container spacing={1}>
                   {[1, 2, 3, 4].map((item) => (
-                    <Grid item xs={12} sm={6} lg={3} key={item}>
+                    <Grid size={{ xs: 12, sm: 6, lg: 3 }} key={item}>
                       <Card variant="outlined">
                         <CardContent>
                           <Typography variant="subtitle1">Item {item}</Typography>
@@ -506,7 +505,7 @@ const DesignDStackableLayout: React.FC<{ onBack: () => void }> = ({ onBack }) =>
           </Grid>
 
           {/* Low Priority - Hidden on small screens */}
-          <Grid item xs={12} md={4} sx={{ display: { xs: 'none', md: 'block' } }}>
+          <Grid size={{ xs: 12, md: 4 }} sx={{ display: { xs: 'none', md: 'block' } }}>
             <Card>
               <CardContent>
                 <Typography variant="h6">👻 Secondary Panel</Typography>
@@ -599,7 +598,7 @@ const ResponsiveLayoutDemo: React.FC = () => {
 
       <Grid container spacing={3}>
         {designs.map((design) => (
-          <Grid item xs={12} md={6} key={design.id}>
+          <Grid size={{ xs: 12, md: 6 }} key={design.id}>
             <Card sx={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
               <CardContent sx={{ flexGrow: 1 }}>
                 <Typography variant="h5" gutterBottom>

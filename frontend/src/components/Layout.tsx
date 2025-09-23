@@ -116,7 +116,6 @@ const navSections: NavSection[] = [
 ];
 
 const LayoutFrame: React.FC = () => {
-  const [mobileOpen, setMobileOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const [anchorEl, setAnchorEl] = useState<null | HTMLElement>(null);
   const [notificationAnchorEl, setNotificationAnchorEl] =
@@ -138,6 +137,10 @@ const LayoutFrame: React.FC = () => {
   const theme = useTheme();
   const isDesktop = useMediaQuery(theme.breakpoints.up('sm'));
   const isMobile = !isDesktop;
+  
+  // For better accessibility, always show collapsible sidebar instead of hiding completely
+  // This helps users with high display scaling (low vision) who need consistent navigation access
+  const shouldShowCollapsibleSidebar = useMediaQuery(theme.breakpoints.up('xs'));
 
   const {
     panelContent,
@@ -152,6 +155,10 @@ const LayoutFrame: React.FC = () => {
   const currentDrawerWidth = sidebarCollapsed
     ? collapsedDrawerWidth
     : drawerWidth;
+  
+  // For accessibility: Always provide minimum space for navigation, even on small screens
+  // Users with high scaling need access to navigation controls
+  const effectiveLeftWidth = isMobile && !sidebarCollapsed ? drawerWidth : currentDrawerWidth;
   // Right drawer should only be visible if there's content to show
   const isRightVisible = !!panelContent;
   const effectiveRightWidth = isRightVisible
@@ -177,10 +184,6 @@ const LayoutFrame: React.FC = () => {
     document.dispatchEvent(escapeEvent);
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [location.pathname]);
-
-  const handleDrawerToggle = () => {
-    setMobileOpen(!mobileOpen);
-  };
 
   const handleSidebarToggle = () => {
     setSidebarCollapsed(!sidebarCollapsed);
@@ -225,10 +228,10 @@ const LayoutFrame: React.FC = () => {
     }
   };
 
-  const renderNavigation = (isMobile: boolean = false) => (
+  const renderNavigation = () => (
     <CustomScrollbar
       style={{
-        height: isMobile ? 'calc(100vh - 128px)' : 'calc(100vh - 64px)',
+        height: 'calc(100vh - 64px)',
       }}
     >
       <List sx={{ pt: 0 }}>
@@ -280,8 +283,9 @@ const LayoutFrame: React.FC = () => {
                     selected={location.pathname === item.path}
                     onClick={() => {
                       navigate(item.path);
-                      if (isMobile) {
-                        handleDrawerToggle();
+                      // Auto-collapse on mobile when item is selected for better UX
+                      if (isMobile && !sidebarCollapsed) {
+                        setSidebarCollapsed(true);
                       }
                     }}
                     sx={{
@@ -359,7 +363,11 @@ const LayoutFrame: React.FC = () => {
           )}
           <IconButton
             onClick={handleSidebarToggle}
-            sx={{ display: { xs: 'none', sm: 'block' } }}
+            sx={{ 
+              display: 'block', // Always show collapse/expand button for accessibility
+              ml: sidebarCollapsed ? 0 : 'auto' 
+            }}
+            aria-label={sidebarCollapsed ? 'expand sidebar' : 'collapse sidebar'}
           >
             {sidebarCollapsed ? <ChevronRight /> : <ChevronLeft />}
           </IconButton>
@@ -420,7 +428,7 @@ const LayoutFrame: React.FC = () => {
         <IconButton
           onClick={() => setRightCollapsed(!rightCollapsed)}
           size="small"
-          sx={{ display: { xs: 'none', sm: 'inline-flex' } }}
+          sx={{ display: 'inline-flex' }} // Always show for accessibility
           aria-label={rightCollapsed ? 'expand panel' : 'collapse panel'}
         >
           {rightCollapsed ? <ChevronLeft /> : <ChevronRight />}
@@ -437,109 +445,52 @@ const LayoutFrame: React.FC = () => {
       {/* LEFT NAV */}
       <Box
         component="nav"
-        sx={{ width: { sm: currentDrawerWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: effectiveLeftWidth, flexShrink: 0 }}
       >
-        {/* Mobile Left Drawer - mount only on mobile */}
-        {isMobile && (
+        {/* Always show permanent drawer for accessibility - but allow mobile overlay when expanded */}
+        {isMobile && !sidebarCollapsed ? (
           <Drawer
             variant="temporary"
-            open={mobileOpen}
-            onClose={handleDrawerToggle}
-            hideBackdrop
+            open={true}
+            onClose={() => setSidebarCollapsed(true)}
+            hideBackdrop={false}
             ModalProps={{
-              keepMounted: false,
+              keepMounted: true,
               disableEnforceFocus: true,
               disableAutoFocus: true,
             }}
             sx={{
-              display: { xs: 'block', sm: 'none' },
+              display: 'block',
               '& .MuiDrawer-paper': {
                 boxSizing: 'border-box',
                 width: drawerWidth,
+                zIndex: theme.zIndex.drawer + 1,
               },
             }}
           >
-            <Box>
-              <Toolbar sx={{ justifyContent: 'space-between' }}>
-                <Typography
-                  variant="h6"
-                  noWrap
-                  component="div"
-                  sx={{ fontWeight: 'bold', flexGrow: 1 }}
-                >
-                  Chatter
-                </Typography>
-                <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                  <Tooltip
-                    title={`Switch to ${darkMode ? 'light' : 'dark'} mode`}
-                  >
-                    <IconButton onClick={toggleDarkMode} size="small">
-                      {darkMode ? <LightModeIcon /> : <DarkModeIcon />}
-                    </IconButton>
-                  </Tooltip>
-                  <IconButton
-                    size="small"
-                    aria-label="account of current user"
-                    onClick={handleProfileMenuOpen}
-                  >
-                    <Avatar sx={{ width: 24, height: 24 }}>U</Avatar>
-                  </IconButton>
-                  <IconButton onClick={handleDrawerToggle}>
-                    <MenuIcon />
-                  </IconButton>
-                </Box>
-              </Toolbar>
-              <Divider />
-              <CustomScrollbar style={{ height: 'calc(100vh - 128px)' }}>
-                {renderNavigation(true)}
-              </CustomScrollbar>
-
-              {/* Profile Menu (mobile left) */}
-              <Menu
-                id="profile-menu"
-                anchorEl={anchorEl}
-                open={Boolean(anchorEl)}
-                onClose={handleProfileMenuClose}
-                anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
-                transformOrigin={{ vertical: 'top', horizontal: 'right' }}
-              >
-                <MenuItem onClick={handleSettingsClick}>
-                  <ListItemIcon>
-                    <SettingsIcon fontSize="small" />
-                  </ListItemIcon>
-                  Settings
-                </MenuItem>
-                <MenuItem onClick={handleLogout}>
-                  <ListItemIcon>
-                    <LogoutIcon fontSize="small" />
-                  </ListItemIcon>
-                  Logout
-                </MenuItem>
-              </Menu>
-            </Box>
+            {drawer}
+          </Drawer>
+        ) : (
+          <Drawer
+            variant="permanent"
+            sx={{
+              display: 'block',
+              '& .MuiDrawer-paper': {
+                boxSizing: 'border-box',
+                width: currentDrawerWidth,
+                transition: (theme) =>
+                  theme.transitions.create('width', {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.enteringScreen,
+                  }),
+                overflow: 'hidden',
+              },
+            }}
+            open
+          >
+            {drawer}
           </Drawer>
         )}
-
-        {/* Desktop Left Drawer */}
-        <Drawer
-          variant="permanent"
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: currentDrawerWidth,
-              transition: (theme) =>
-                theme.transitions.create('width', {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-              overflow: 'hidden',
-            },
-          }}
-          open
-        >
-          {drawer}
-        </Drawer>
       </Box>
 
       {/* MAIN CONTENT */}
@@ -547,9 +498,7 @@ const LayoutFrame: React.FC = () => {
         component="main"
         sx={{
           flexGrow: 1,
-          width: {
-            sm: `calc(100% - ${currentDrawerWidth + effectiveRightWidth}px)`,
-          },
+          width: `calc(100% - ${effectiveLeftWidth + effectiveRightWidth}px)`,
           minWidth: 0,
           minHeight: 0,
           display: 'flex',
@@ -568,55 +517,32 @@ const LayoutFrame: React.FC = () => {
       {/* RIGHT NAV */}
       <Box
         component="nav"
-        sx={{ width: { sm: effectiveRightWidth }, flexShrink: { sm: 0 } }}
+        sx={{ width: effectiveRightWidth, flexShrink: 0 }}
       >
-        {/* Mobile Right Drawer - mount/open only on mobile */}
-        {isMobile && isRightVisible && (
+        {/* Right drawer - show when content exists, always collapsible for accessibility */}
+        {isRightVisible && (
           <Drawer
-            variant="temporary"
+            variant="persistent"
             anchor="right"
-            open={rightOpen}
-            onClose={() => setRightOpen(false)}
-            hideBackdrop
-            ModalProps={{
-              keepMounted: false,
-              disableEnforceFocus: true,
-              disableAutoFocus: true,
-            }}
+            open={true}
             sx={{
-              display: { xs: 'block', sm: 'none' },
+              display: 'block',
               '& .MuiDrawer-paper': {
                 boxSizing: 'border-box',
-                width: rightDrawerWidth,
+                width: effectiveRightWidth,
+                transition: (theme) =>
+                  theme.transitions.create('width', {
+                    easing: theme.transitions.easing.sharp,
+                    duration: theme.transitions.duration.enteringScreen,
+                  }),
+                overflow: 'hidden',
+                pointerEvents: 'auto',
               },
             }}
           >
             {rightDrawerContent}
           </Drawer>
         )}
-
-        {/* Desktop Right Drawer - use persistent (no modal/backdrop) */}
-        <Drawer
-          variant="persistent"
-          anchor="right"
-          open={isRightVisible}
-          sx={{
-            display: { xs: 'none', sm: 'block' },
-            '& .MuiDrawer-paper': {
-              boxSizing: 'border-box',
-              width: effectiveRightWidth,
-              transition: (theme) =>
-                theme.transitions.create('width', {
-                  easing: theme.transitions.easing.sharp,
-                  duration: theme.transitions.duration.enteringScreen,
-                }),
-              overflow: 'hidden',
-              pointerEvents: 'auto',
-            },
-          }}
-        >
-          {rightDrawerContent}
-        </Drawer>
       </Box>
     </Box>
   );

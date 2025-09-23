@@ -53,6 +53,7 @@ const EnhancedPropertiesPanel: React.FC<PropertiesPanelProps> = ({
   onEdgeUpdate,
   onClose,
   width = 350,
+  isMobile = false,
 }) => {
   const theme = useTheme();
   const [config, setConfig] = useState<NodeConfig>({});

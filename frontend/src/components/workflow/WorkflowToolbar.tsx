@@ -58,6 +58,8 @@ const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
   showAnalytics = false,
   showTemplates = false,
   validationStatus,
+  isMobile = false,
+  onToggleNodePalette,
 }) => {
   return (
     <Toolbar
@@ -74,6 +76,15 @@ const WorkflowToolbar: React.FC<WorkflowToolbarProps> = ({
     >
       {/* Left side - Main actions */}
       <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        {/* Mobile Node Palette Toggle */}
+        {isMobile && onToggleNodePalette && !readOnly && (
+          <Tooltip title="Toggle Node Palette">
+            <IconButton onClick={onToggleNodePalette} size="small">
+              <MenuIcon />
+            </IconButton>
+          </Tooltip>
+        )}
+
         <Typography variant="h6" component="h1" sx={{ mr: 2 }}>
           Workflow Builder
         </Typography>

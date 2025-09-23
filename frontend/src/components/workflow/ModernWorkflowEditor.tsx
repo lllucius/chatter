@@ -19,8 +19,17 @@ import {
   Alert,
   Snackbar,
   useTheme,
+  useMediaQuery,
   Paper,
+  Drawer,
+  IconButton,
+  Fab,
+  Typography,
 } from '@mui/material';
+import {
+  Menu as MenuIcon,
+  Close as CloseIcon,
+} from '@mui/icons-material';
 
 // Import components
 import NodePalette from './NodePalette';
@@ -100,6 +109,10 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const reactFlowWrapper = useRef<HTMLDivElement>(null);
   const { screenToFlowPosition } = useReactFlow();
 
+  // Responsive breakpoints
+  const isMobile = useMediaQuery(theme.breakpoints.down('md'));
+  const isTablet = useMediaQuery(theme.breakpoints.down('lg'));
+
   // Use the workflow editor hook
   const {
     workflow,
@@ -132,15 +145,27 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
     setSnapToGrid,
   } = useWorkflowEditor(initialWorkflow, onWorkflowChange);
 
-  // UI state
-  const [showPropertiesPanel, setShowPropertiesPanel] = useState(showProperties);
+  // UI state - responsive panel management
+  const [showPropertiesPanel, setShowPropertiesPanel] = useState(!isMobile && showProperties);
   const [showAnalyticsPanel, setShowAnalyticsPanel] = useState(false);
   const [showTemplatesDialog, setShowTemplatesDialog] = useState(false);
-  const [showNodePalette, setShowNodePalette] = useState(showPalette);
+  const [showNodePalette, setShowNodePalette] = useState(!isMobile && showPalette);
+  
+  // Mobile drawer states
+  const [mobileNodePaletteOpen, setMobileNodePaletteOpen] = useState(false);
+  const [mobilePropertiesOpen, setMobilePropertiesOpen] = useState(false);
+  const [mobileAnalyticsOpen, setMobileAnalyticsOpen] = useState(false);
+  
+  // Other UI state
   const [exampleMenuAnchor, setExampleMenuAnchor] = useState<null | HTMLElement>(null);
   const [validationResult, setValidationResult] = useState<ValidationResult | null>(null);
   const [showValidationSnackbar, setShowValidationSnackbar] = useState(false);
   const [isSaving, setIsSaving] = useState(false);
+
+  // Responsive panel widths
+  const nodePaletteWidth = isMobile ? 0 : isTablet ? 200 : 280;
+  const propertiesPanelWidth = isMobile ? 0 : isTablet ? 300 : 350;
+  const analyticsPanelWidth = isMobile ? 0 : isTablet ? 280 : 300;
 
   // Get selected nodes/edges
   const selectedNode = useMemo(
@@ -308,6 +333,58 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
     }
   }, [workflow.settings, onSave, readOnly, handleSave]);
 
+  // Handle responsive panel visibility changes
+  useEffect(() => {
+    if (isMobile) {
+      // On mobile, hide all panels and use drawers instead
+      setShowNodePalette(false);
+      setShowPropertiesPanel(false);
+      setShowAnalyticsPanel(false);
+    } else {
+      // On desktop/tablet, show panels based on original props
+      setShowNodePalette(showPalette);
+      setShowPropertiesPanel(showProperties);
+    }
+  }, [isMobile, showPalette, showProperties]);
+
+  // Mobile panel toggle handlers
+  const toggleMobileNodePalette = useCallback(() => {
+    setMobileNodePaletteOpen(!mobileNodePaletteOpen);
+  }, [mobileNodePaletteOpen]);
+
+  const toggleMobileProperties = useCallback(() => {
+    setMobilePropertiesOpen(!mobilePropertiesOpen);
+  }, [mobilePropertiesOpen]);
+
+  const toggleMobileAnalytics = useCallback(() => {
+    setMobileAnalyticsOpen(!mobileAnalyticsOpen);
+  }, [mobileAnalyticsOpen]);
+
+  // Enhanced toggle handlers for responsive behavior
+  const handleToggleProperties = useCallback(() => {
+    if (isMobile) {
+      toggleMobileProperties();
+    } else {
+      setShowPropertiesPanel(!showPropertiesPanel);
+    }
+  }, [isMobile, showPropertiesPanel, toggleMobileProperties]);
+
+  const handleToggleAnalytics = useCallback(() => {
+    if (isMobile) {
+      toggleMobileAnalytics();
+    } else {
+      setShowAnalyticsPanel(!showAnalyticsPanel);
+    }
+  }, [isMobile, showAnalyticsPanel, toggleMobileAnalytics]);
+
+  const handleToggleNodePalette = useCallback(() => {
+    if (isMobile) {
+      toggleMobileNodePalette();
+    } else {
+      setShowNodePalette(!showNodePalette);
+    }
+  }, [isMobile, showNodePalette, toggleMobileNodePalette]);
+
   return (
     <Box
       sx={{
@@ -336,16 +413,16 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
           isSaving={isSaving}
           readOnly={readOnly}
           onToggleGrid={() => setSnapToGrid(!snapToGrid)}
-          onToggleProperties={() => setShowPropertiesPanel(!showPropertiesPanel)}
-          onToggleAnalytics={() => setShowAnalyticsPanel(!showAnalyticsPanel)}
+          onToggleProperties={handleToggleProperties}
+          onToggleAnalytics={handleToggleAnalytics}
           onToggleTemplates={() => setShowTemplatesDialog(!showTemplatesDialog)}
           onZoomIn={zoomIn}
           onZoomOut={zoomOut}
           onFitView={fitView}
           onLoadExamples={(event: React.MouseEvent<HTMLElement>) => setExampleMenuAnchor(event.currentTarget)}
           snapToGrid={snapToGrid}
-          showProperties={showPropertiesPanel}
-          showAnalytics={showAnalyticsPanel}
+          showProperties={showPropertiesPanel || mobilePropertiesOpen}
+          showAnalytics={showAnalyticsPanel || mobileAnalyticsOpen}
           showTemplates={showTemplatesDialog}
           validationStatus={
             validationResult
@@ -354,20 +431,31 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
                 : 'invalid'
               : 'unknown'
           }
+          isMobile={isMobile}
+          onToggleNodePalette={handleToggleNodePalette}
         />
       )}
 
       {/* Main editor area */}
       <Box sx={{ flex: 1, display: 'flex', position: 'relative' }}>
-        {/* Node Palette */}
-        {showNodePalette && !readOnly && (
-          <NodePalette onAddNode={addNode} disabled={readOnly} />
+        {/* Desktop/Tablet Node Palette */}
+        {showNodePalette && !readOnly && !isMobile && (
+          <NodePalette 
+            onAddNode={addNode} 
+            disabled={readOnly}
+            width={nodePaletteWidth}
+            isCollapsed={isTablet}
+          />
         )}
 
         {/* React Flow Canvas */}
         <Box
           ref={reactFlowWrapper}
-          sx={{ flex: 1, position: 'relative' }}
+          sx={{ 
+            flex: 1, 
+            position: 'relative',
+            marginLeft: showNodePalette && !isMobile ? 0 : 0,
+          }}
           onDrop={onDrop}
           onDragOver={onDragOver}
         >
@@ -456,25 +544,161 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
           </ReactFlow>
         </Box>
 
-        {/* Properties Panel */}
-        {showPropertiesPanel && (
+        {/* Desktop/Tablet Properties Panel */}
+        {showPropertiesPanel && !isMobile && (
           <EnhancedPropertiesPanel
             selectedNode={selectedNode}
             selectedEdge={selectedEdge}
             onNodeUpdate={updateNode}
             onEdgeUpdate={updateEdge}
             onClose={() => setShowPropertiesPanel(false)}
-            width={350}
+            width={propertiesPanelWidth}
           />
         )}
 
-        {/* Analytics Panel */}
-        {showAnalyticsPanel && (
-          <Box sx={{ width: 300, borderLeft: `1px solid ${theme.palette.divider}` }}>
+        {/* Desktop/Tablet Analytics Panel */}
+        {showAnalyticsPanel && !isMobile && (
+          <Box sx={{ width: analyticsPanelWidth, borderLeft: `1px solid ${theme.palette.divider}` }}>
             <WorkflowAnalytics workflow={workflow} />
           </Box>
         )}
       </Box>
+
+      {/* Mobile Floating Action Button for Node Palette */}
+      {isMobile && !readOnly && (
+        <Fab
+          sx={{
+            position: 'fixed',
+            bottom: 16,
+            left: 16,
+            zIndex: 1000,
+          }}
+          color="primary"
+          onClick={toggleMobileNodePalette}
+        >
+          <MenuIcon />
+        </Fab>
+      )}
+
+      {/* Mobile Node Palette Drawer */}
+      {isMobile && (
+        <Drawer
+          anchor="left"
+          open={mobileNodePaletteOpen}
+          onClose={() => setMobileNodePaletteOpen(false)}
+          ModalProps={{
+            keepMounted: true, // Better mobile performance
+          }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: Math.min(320, window.innerWidth * 0.85),
+              maxWidth: '85vw',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h6">Node Palette</Typography>
+            <IconButton onClick={() => setMobileNodePaletteOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <NodePalette 
+            onAddNode={(nodeType, position) => {
+              addNode(nodeType, position);
+              setMobileNodePaletteOpen(false);
+            }} 
+            disabled={readOnly}
+            width={Math.min(320, window.innerWidth * 0.85)}
+            isMobile
+          />
+        </Drawer>
+      )}
+
+      {/* Mobile Properties Drawer */}
+      {isMobile && (
+        <Drawer
+          anchor="right"
+          open={mobilePropertiesOpen}
+          onClose={() => setMobilePropertiesOpen(false)}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: Math.min(350, window.innerWidth * 0.9),
+              maxWidth: '90vw',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h6">Properties</Typography>
+            <IconButton onClick={() => setMobilePropertiesOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <EnhancedPropertiesPanel
+            selectedNode={selectedNode}
+            selectedEdge={selectedEdge}
+            onNodeUpdate={updateNode}
+            onEdgeUpdate={updateEdge}
+            onClose={() => setMobilePropertiesOpen(false)}
+            width={Math.min(350, window.innerWidth * 0.9)}
+            isMobile
+          />
+        </Drawer>
+      )}
+
+      {/* Mobile Analytics Drawer */}
+      {isMobile && (
+        <Drawer
+          anchor="right"
+          open={mobileAnalyticsOpen}
+          onClose={() => setMobileAnalyticsOpen(false)}
+          ModalProps={{
+            keepMounted: true,
+          }}
+          sx={{
+            '& .MuiDrawer-paper': {
+              width: Math.min(350, window.innerWidth * 0.9),
+              maxWidth: '90vw',
+            },
+          }}
+        >
+          <Box
+            sx={{
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'space-between',
+              p: 2,
+              borderBottom: `1px solid ${theme.palette.divider}`,
+            }}
+          >
+            <Typography variant="h6">Analytics</Typography>
+            <IconButton onClick={() => setMobileAnalyticsOpen(false)}>
+              <CloseIcon />
+            </IconButton>
+          </Box>
+          <Box sx={{ height: '100%', overflow: 'auto' }}>
+            <WorkflowAnalytics workflow={workflow} />
+          </Box>
+        </Drawer>
+      )}
 
       {/* Example workflows menu */}
       <Menu

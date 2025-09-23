@@ -59,8 +59,11 @@ export interface NodePropertyDefinition {
 }
 
 interface NodePaletteProps {
-  onAddNode: (nodeType: WorkflowNodeType) => void;
+  onAddNode: (nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void;
   disabled?: boolean;
+  width?: number;
+  isCollapsed?: boolean;
+  isMobile?: boolean;
 }
 
 const nodeDefinitions: NodeDefinition[] = [
@@ -914,7 +917,13 @@ const categoryColors = {
   ai: '#9c27b0',
 };
 
-const NodePalette: React.FC<NodePaletteProps> = ({ onAddNode, disabled = false }) => {
+const NodePalette: React.FC<NodePaletteProps> = ({ 
+  onAddNode, 
+  disabled = false,
+  width = 280,
+  isCollapsed = false,
+  isMobile = false,
+}) => {
   const theme = useTheme();
   const [expandedCategories, setExpandedCategories] = useState<Record<string, boolean>>({
     core: true,
@@ -943,117 +952,141 @@ const NodePalette: React.FC<NodePaletteProps> = ({ onAddNode, disabled = false }
     event.dataTransfer.effectAllowed = 'move';
   };
 
+  const handleNodeClick = (nodeType: WorkflowNodeType) => {
+    // For mobile or when explicitly clicking, add node at default position
+    onAddNode(nodeType);
+  };
+
   return (
     <Paper
       sx={{
-        width: 280,
-        height: '100%',
+        width: isMobile ? '100%' : width,
+        height: isMobile ? 'auto' : '100%',
         overflow: 'auto',
-        borderRadius: 0,
-        borderRight: `1px solid ${theme.palette.divider}`,
+        borderRadius: isMobile ? 0 : 0,
+        borderRight: !isMobile ? `1px solid ${theme.palette.divider}` : 'none',
+        display: 'flex',
+        flexDirection: 'column',
       }}
     >
-      <Box sx={{ p: 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
-        <Typography variant="h6" component="h2">
-          Node Palette
-        </Typography>
-        <Typography variant="body2" color="textSecondary">
-          Drag nodes to the canvas or click to add
-        </Typography>
-      </Box>
-
-      {Object.entries(categorizedNodes).map(([category, nodes]) => (
-        <Box key={category}>
-          <Box
-            sx={{
-              display: 'flex',
-              alignItems: 'center',
-              p: 1,
-              cursor: 'pointer',
-              bgcolor: categoryColors[category as keyof typeof categoryColors] + '10',
-              '&:hover': {
-                bgcolor: categoryColors[category as keyof typeof categoryColors] + '20',
-              },
-            }}
-            onClick={() => toggleCategory(category)}
-          >
-            <Chip
-              label={category.charAt(0).toUpperCase() + category.slice(1)}
-              size="small"
-              sx={{
-                bgcolor: categoryColors[category as keyof typeof categoryColors],
-                color: 'white',
-                mr: 1,
-              }}
-            />
-            <Typography variant="body2" sx={{ flex: 1 }}>
-              {nodes.length} nodes
+      {!isMobile && (
+        <Box sx={{ p: isCollapsed ? 1 : 2, borderBottom: `1px solid ${theme.palette.divider}` }}>
+          <Typography variant={isCollapsed ? "subtitle1" : "h6"} component="h2">
+            {isCollapsed ? "Nodes" : "Node Palette"}
+          </Typography>
+          {!isCollapsed && (
+            <Typography variant="body2" color="textSecondary">
+              Drag nodes to the canvas or click to add
             </Typography>
-            <IconButton size="small">
-              {expandedCategories[category] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-            </IconButton>
-          </Box>
+          )}
+        </Box>
+      )}
 
-          <Collapse in={expandedCategories[category]}>
-            <Box sx={{ p: 1 }}>
-              {nodes.map((node) => (
-                <Tooltip
-                  key={node.type}
-                  title={node.description}
-                  placement="right"
-                  arrow
-                >
-                  <Card
-                    sx={{
-                      mb: 1,
-                      cursor: disabled ? 'not-allowed' : 'grab',
-                      opacity: disabled ? 0.5 : 1,
-                      '&:hover': disabled ? {} : {
-                        boxShadow: theme.shadows[4],
-                        transform: 'translateY(-1px)',
-                      },
-                      transition: 'all 0.2s ease-in-out',
-                    }}
-                    draggable={!disabled}
-                    onDragStart={(e) => handleDragStart(e, node.type)}
-                    onClick={() => !disabled && onAddNode(node.type)}
+      <Box sx={{ flex: 1, p: isMobile ? 0 : 1 }}>
+        {Object.entries(categorizedNodes).map(([category, nodes]) => (
+          <Box key={category}>
+            <Box
+              sx={{
+                display: 'flex',
+                alignItems: 'center',
+                p: isMobile ? 2 : 1,
+                cursor: 'pointer',
+                bgcolor: categoryColors[category as keyof typeof categoryColors] + '10',
+                '&:hover': {
+                  bgcolor: categoryColors[category as keyof typeof categoryColors] + '20',
+                },
+              }}
+              onClick={() => toggleCategory(category)}
+            >
+              <Chip
+                label={category.charAt(0).toUpperCase() + category.slice(1)}
+                size={isMobile ? "medium" : "small"}
+                sx={{
+                  bgcolor: categoryColors[category as keyof typeof categoryColors],
+                  color: 'white',
+                  mr: 1,
+                }}
+              />
+              {!isCollapsed && (
+                <Typography variant="body2" sx={{ flex: 1 }}>
+                  {nodes.length} nodes
+                </Typography>
+              )}
+              <IconButton size="small">
+                {expandedCategories[category] ? <ExpandLessIcon /> : <ExpandMoreIcon />}
+              </IconButton>
+            </Box>
+
+            <Collapse in={expandedCategories[category]}>
+              <Box sx={{ p: isMobile ? 2 : 1 }}>
+                {nodes.map((node) => (
+                  <Tooltip
+                    key={node.type}
+                    title={node.description}
+                    placement={isMobile ? "top" : "right"}
+                    arrow
                   >
-                    <CardContent sx={{ p: 1.5, '&:last-child': { pb: 1.5 } }}>
-                      <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            alignItems: 'center',
-                            justifyContent: 'center',
-                            width: 32,
-                            height: 32,
-                            borderRadius: 1,
-                            bgcolor: node.color + '20',
-                            color: node.color,
-                            mr: 1,
-                          }}
-                        >
-                          {node.icon}
-                        </Box>
-                        <Box sx={{ flex: 1, minWidth: 0 }}>
-                          <Typography variant="body2" fontWeight="medium" noWrap>
-                            {node.label}
-                          </Typography>
-                          <Typography
-                            variant="caption"
-                            color="textSecondary"
+                    <Card
+                      sx={{
+                        mb: 1,
+                        cursor: disabled ? 'not-allowed' : 'grab',
+                        opacity: disabled ? 0.5 : 1,
+                        '&:hover': disabled ? {} : {
+                          boxShadow: theme.shadows[4],
+                          transform: 'translateY(-1px)',
+                        },
+                        transition: 'all 0.2s ease-in-out',
+                        minHeight: isMobile ? 60 : isCollapsed ? 40 : 'auto',
+                      }}
+                      draggable={!disabled && !isMobile}
+                      onDragStart={(e) => !isMobile && handleDragStart(e, node.type)}
+                      onClick={() => !disabled && handleNodeClick(node.type)}
+                    >
+                      <CardContent sx={{ 
+                        p: isMobile ? 2 : isCollapsed ? 1 : 1.5, 
+                        '&:last-child': { pb: isMobile ? 2 : isCollapsed ? 1 : 1.5 } 
+                      }}>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <Box
                             sx={{
-                              display: '-webkit-box',
-                              WebkitLineClamp: 2,
-                              WebkitBoxOrient: 'vertical',
-                              overflow: 'hidden',
+                              display: 'flex',
+                              alignItems: 'center',
+                              justifyContent: 'center',
+                              width: isMobile ? 40 : isCollapsed ? 24 : 32,
+                              height: isMobile ? 40 : isCollapsed ? 24 : 32,
+                              borderRadius: 1,
+                              bgcolor: node.color + '20',
+                              color: node.color,
+                              mr: isCollapsed ? 0 : 1,
                             }}
                           >
-                            {node.description}
-                          </Typography>
+                            {node.icon}
+                          </Box>
+                          {!isCollapsed && (
+                            <Box sx={{ flex: 1, minWidth: 0 }}>
+                              <Typography variant={isMobile ? "body1" : "body2"} fontWeight="medium" noWrap>
+                                {node.label}
+                              </Typography>
+                              {!isMobile && (
+                                <Typography
+                                  variant="caption"
+                                  color="textSecondary"
+                                  sx={{
+                                    display: '-webkit-box',
+                                    WebkitLineClamp: 2,
+                                    WebkitBoxOrient: 'vertical',
+                                    overflow: 'hidden',
+                                  }}
+                                >
+                                  {node.description}
+                                </Typography>
+                              )}
+                            </Box>
+                          )}
+                          {!disabled && !isMobile && !isCollapsed && (
+                            <DragIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
+                          )}
                         </Box>
-                        <DragIcon sx={{ color: 'text.secondary', fontSize: 16 }} />
-                      </Box>
                     </CardContent>
                   </Card>
                 </Tooltip>
@@ -1062,6 +1095,7 @@ const NodePalette: React.FC<NodePaletteProps> = ({ onAddNode, disabled = false }
           </Collapse>
         </Box>
       ))}
+      </Box>
     </Paper>
   );
 };

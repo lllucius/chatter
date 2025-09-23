@@ -451,6 +451,7 @@ export interface PropertiesPanelProps {
   onEdgeUpdate?: (edgeId: string, updates: Partial<WorkflowEdgeData>) => void;
   onClose: () => void;
   width?: number;
+  isMobile?: boolean;
 }
 
 export interface WorkflowToolbarProps {
@@ -480,4 +481,6 @@ export interface WorkflowToolbarProps {
   showAnalytics?: boolean;
   showTemplates?: boolean;
   validationStatus?: 'valid' | 'invalid' | 'unknown';
+  isMobile?: boolean;
+  onToggleNodePalette?: () => void;
 }

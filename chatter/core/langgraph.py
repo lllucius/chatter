@@ -36,6 +36,12 @@ from chatter.utils.logging import get_logger
 logger = get_logger(__name__)
 
 
+# Define ConversationState for backward compatibility with tests
+class ConversationState(WorkflowNodeContext):
+    """Backward compatible state type for existing tests."""
+    pass
+
+
 class LangGraphWorkflowManager:
     """Workflow manager with flexible node support."""
     

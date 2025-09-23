@@ -24,7 +24,7 @@ import {
   MoreVert as MoreIcon,
   Description as TemplateIcon,
 } from '@mui/icons-material';
-import { WorkflowDefinition } from './WorkflowEditor';
+import { WorkflowDefinition } from './types';
 
 interface WorkflowTemplate {
   id: string;

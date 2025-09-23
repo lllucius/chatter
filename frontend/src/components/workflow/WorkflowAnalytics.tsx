@@ -23,7 +23,7 @@ import {
   WorkflowDefinition,
   WorkflowNodeType,
   WorkflowNodeData,
-} from './WorkflowEditor';
+} from './types';
 import { getSDK } from '../../services/auth-service';
 import { BottleneckInfo, OptimizationSuggestion } from 'chatter-sdk';
 

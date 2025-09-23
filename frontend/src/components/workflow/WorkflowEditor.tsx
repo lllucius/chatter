@@ -70,43 +70,12 @@ import PropertiesPanel from './PropertiesPanel';
 import WorkflowAnalytics from './WorkflowAnalytics';
 import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
-
-// Define node types for the workflow
-export type WorkflowNodeType =
-  | 'start'
-  | 'model'
-  | 'tool'
-  | 'memory'
-  | 'retrieval'
-  | 'conditional'
-  | 'loop'
-  | 'variable'
-  | 'errorHandler'
-  | 'delay';
-
-export interface WorkflowNodeData extends Record<string, unknown> {
-  label: string;
-  nodeType: WorkflowNodeType;
-  config?: Record<string, unknown>;
-}
-
-export interface WorkflowEdgeData extends Record<string, unknown> {
-  condition?: string;
-  label?: string;
-}
-
-export interface WorkflowDefinition {
-  id?: string;
-  nodes: Node<WorkflowNodeData>[];
-  edges: Edge<WorkflowEdgeData>[];
-  metadata: {
-    name: string;
-    description: string;
-    version: string;
-    createdAt: string;
-    updatedAt: string;
-  };
-}
+import {
+  WorkflowNodeType,
+  WorkflowNodeData,
+  WorkflowEdgeData,
+  WorkflowDefinition,
+} from './types';
 
 interface WorkflowEditorProps {
   initialWorkflow?: WorkflowDefinition;

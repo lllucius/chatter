@@ -24,7 +24,7 @@ import {
   ExpandMore as ExpandMoreIcon,
 } from '@mui/icons-material';
 import { Node } from '@xyflow/react';
-import { WorkflowNodeData, WorkflowNodeType } from './WorkflowEditor';
+import { WorkflowNodeData, WorkflowNodeType } from './types';
 
 interface PropertiesPanelProps {
   selectedNode: Node<WorkflowNodeData> | null;

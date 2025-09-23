@@ -2,7 +2,7 @@ import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Loop as LoopIcon } from '@mui/icons-material';
-import { WorkflowNodeData } from '../WorkflowEditor';
+import { WorkflowNodeData } from '../types';
 
 const LoopNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;

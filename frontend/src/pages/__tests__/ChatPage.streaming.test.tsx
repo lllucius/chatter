@@ -5,12 +5,15 @@ import { BrowserRouter } from 'react-router-dom';
 import ChatPage from '../ChatPage';
 
 // Mock dependencies
+const mockStreamingFn = vi.fn();
+const mockNonStreamingFn = vi.fn();
+
 vi.mock('../../services/auth-service', () => {
   return {
     getSDK: vi.fn(() => ({
       workflows: {
-        executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming: vi.fn(),
-        executeChatWorkflowApiV1WorkflowsExecuteChat: vi.fn(),
+        executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming: mockStreamingFn,
+        executeChatWorkflowApiV1WorkflowsExecuteChat: mockNonStreamingFn,
       },
       profiles: {
         listProfilesApiV1Profiles: vi.fn(() =>
@@ -69,14 +72,8 @@ const TestWrapper = ({ children }: { children: React.ReactNode }) => (
 );
 
 describe('ChatPage Streaming Functionality', () => {
-  let mockStreamingMethod: Mock;
-
   beforeEach(async () => {
     vi.clearAllMocks();
-
-    // Get the streaming method mock from the auth service
-    const { getSDK } = await import('../../services/auth-service');
-    mockStreamingMethod = getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming;
   });
 
   it('should render the chat page', async () => {
@@ -117,7 +114,7 @@ describe('ChatPage Streaming Functionality', () => {
       },
     });
 
-    mockStreamingMethod.mockResolvedValue(mockStream);
+    mockStreamingFn.mockResolvedValue(mockStream);
 
     render(
       <TestWrapper>
@@ -146,7 +143,7 @@ describe('ChatPage Streaming Functionality', () => {
 
     // Verify that the streaming method was called
     await waitFor(() => {
-      expect(mockStreamingMethod).toHaveBeenCalledWith(
+      expect(mockStreamingFn).toHaveBeenCalledWith(
         expect.objectContaining({
           message: 'Test streaming message',
         })
@@ -172,7 +169,7 @@ describe('ChatPage Streaming Functionality', () => {
 
   it('should handle streaming errors gracefully', async () => {
     // Mock stream that throws an error
-    mockStreamingMethod.mockRejectedValue(new Error('Streaming failed'));
+    mockStreamingFn.mockRejectedValue(new Error('Streaming failed'));
 
     render(
       <TestWrapper>

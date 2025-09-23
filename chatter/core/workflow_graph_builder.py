@@ -10,7 +10,7 @@ from __future__ import annotations
 from typing import Any, Dict, List, Optional, Set, Tuple
 
 from langchain_core.language_models import BaseChatModel
-from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage
+from langchain_core.messages import AIMessage, BaseMessage, HumanMessage, SystemMessage, ToolMessage
 from langgraph.graph import END, StateGraph
 from langgraph.pregel import Pregel
 
@@ -446,12 +446,33 @@ class WorkflowGraphBuilder:
         # Simple condition evaluation - can be extended
         condition = condition.lower().strip()
         
+        # Check for tool call presence
+        if condition == "has_tool_calls":
+            messages = state.get("messages", [])
+            if messages:
+                last_message = messages[-1]
+                return hasattr(last_message, "tool_calls") and bool(last_message.tool_calls)
+            return False
+            
+        if condition == "no_tool_calls":
+            messages = state.get("messages", [])
+            if messages:
+                last_message = messages[-1]
+                return not (hasattr(last_message, "tool_calls") and bool(last_message.tool_calls))
+            return True  # If no messages, assume no tool calls
+        
         # Check tool call count conditions
         if "tool_calls" in condition:
             tool_count = state.get("tool_call_count", 0)
-            if ">" in condition:
+            if ">=" in condition:
+                threshold = int(condition.split(">=")[1].strip())
+                return tool_count >= threshold
+            elif ">" in condition:
                 threshold = int(condition.split(">")[1].strip())
                 return tool_count > threshold
+            elif "<=" in condition:
+                threshold = int(condition.split("<=")[1].strip())
+                return tool_count <= threshold
             elif "<" in condition:
                 threshold = int(condition.split("<")[1].strip())
                 return tool_count < threshold
@@ -539,7 +560,7 @@ def create_simple_workflow_definition(
         definition.add_edge("call_model", "execute_tools", "has_tool_calls")
         definition.add_edge("call_model", END, "no_tool_calls")
         definition.add_edge("execute_tools", "call_model")
-        definition.add_edge("execute_tools", "finalize_response", "tool_calls > " + str(max_tool_calls))
+        definition.add_edge("execute_tools", "finalize_response", "tool_calls >= " + str(max_tool_calls))
         definition.add_edge("finalize_response", END)
     else:
         definition.add_edge("call_model", END)

@@ -432,35 +432,13 @@ const ChatPage: React.FC = () => {
                 document_ids:
                   selectedDocuments.length > 0 ? selectedDocuments : undefined,
                 enable_tracing: enableTracing,
-                // Enable flags at root level for backend compatibility
-                enable_retrieval: enableRetrieval,
-                enable_tools: enableTools,
-                enable_memory: true,
+                // Use workflow configuration directly for all settings
+                enable_retrieval: customWorkflowConfig.enable_retrieval,
+                enable_tools: customWorkflowConfig.enable_tools,
+                enable_memory: customWorkflowConfig.enable_memory,
                 enable_web_search: false,
-                workflow_config: {
-                  ...getEffectiveConfig(),
-                  enable_retrieval: enableRetrieval,
-                  enable_tools: enableTools,
-                  enable_memory: true,
-                  enable_web_search: false,
-                  llm_config: {
-                    ...getEffectiveConfig().llm_config,
-                    temperature,
-                    max_tokens: maxTokens,
-                  },
-                  retrieval_config: enableRetrieval
-                    ? {
-                        enabled: true,
-                        max_documents: 5,
-                        similarity_threshold: 0.7,
-                        document_ids:
-                          selectedDocuments.length > 0
-                            ? selectedDocuments
-                            : undefined,
-                        rerank: false,
-                      }
-                    : undefined,
-                },
+                // Use the effective workflow configuration
+                workflow_config: getEffectiveConfig(),
               }
             );
 
@@ -541,15 +519,12 @@ const ChatPage: React.FC = () => {
       currentConversation,
       customPromptText,
       streamingEnabled,
-      enableRetrieval,
-      enableTools,
+      customWorkflowConfig,
       setMessages,
       buildWorkflowRequest,
       getEffectiveConfig,
       sendWorkflowMessage,
       handleWorkflowStreamingResponse,
-      maxTokens,
-      temperature,
       enableTracing,
     ]
   );
@@ -658,36 +633,13 @@ const ChatPage: React.FC = () => {
             document_ids:
               selectedDocuments.length > 0 ? selectedDocuments : undefined,
             enable_tracing: enableTracing,
-            // Enable flags at root level for backend compatibility
-            enable_retrieval: enableRetrieval,
-            enable_tools: enableTools,
-            enable_memory: true, // Always enable memory for chat
+            // Use workflow configuration directly for all settings
+            enable_retrieval: customWorkflowConfig.enable_retrieval,
+            enable_tools: customWorkflowConfig.enable_tools,
+            enable_memory: customWorkflowConfig.enable_memory,
             enable_web_search: false, // TODO: add web search toggle to settings
-            // Merge with effective workflow configuration
-            workflow_config: {
-              ...getEffectiveConfig(),
-              enable_retrieval: enableRetrieval,
-              enable_tools: enableTools,
-              enable_memory: true,
-              enable_web_search: false,
-              llm_config: {
-                ...getEffectiveConfig().llm_config,
-                temperature,
-                max_tokens: maxTokens,
-              },
-              retrieval_config: enableRetrieval
-                ? {
-                    enabled: true,
-                    max_documents: 5,
-                    similarity_threshold: 0.7,
-                    document_ids:
-                      selectedDocuments.length > 0
-                        ? selectedDocuments
-                        : undefined,
-                    rerank: false,
-                  }
-                : undefined,
-            },
+            // Use the effective workflow configuration
+            workflow_config: getEffectiveConfig(),
           }
         );
 
@@ -776,8 +728,7 @@ const ChatPage: React.FC = () => {
       currentConversation,
       customPromptText,
       streamingEnabled,
-      enableRetrieval,
-      enableTools,
+      customWorkflowConfig,
       setMessage,
       setMessages,
       setLoading,
@@ -786,8 +737,6 @@ const ChatPage: React.FC = () => {
       sendWorkflowMessage,
       handleWorkflowStreamingResponse,
       focusInput,
-      maxTokens,
-      temperature,
       enableTracing,
     ]
   );

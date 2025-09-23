@@ -14,6 +14,14 @@ export interface ChatWorkflowRequest {
   workflow_definition_id?: string | null;
   /** Template name */
   workflow_template_name?: string | null;
+  /** Enable retrieval capabilities */
+  enable_retrieval?: boolean;
+  /** Enable tool calling capabilities */
+  enable_tools?: boolean;
+  /** Enable memory capabilities */
+  enable_memory?: boolean;
+  /** Enable web search capabilities */
+  enable_web_search?: boolean;
   /** Profile ID */
   profile_id?: string | null;
   /** LLM provider */

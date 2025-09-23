@@ -615,6 +615,20 @@ class ChatWorkflowRequest(BaseModel):
         None, description="Template name"
     )
 
+    # Workflow capability flags (at root level for compatibility with ChatRequest)
+    enable_retrieval: bool = Field(
+        False, description="Enable retrieval capabilities"
+    )
+    enable_tools: bool = Field(
+        False, description="Enable tool calling capabilities"
+    )
+    enable_memory: bool = Field(
+        True, description="Enable memory capabilities"
+    )
+    enable_web_search: bool = Field(
+        False, description="Enable web search capabilities"
+    )
+
     # Request configuration fields
     profile_id: str | None = Field(None, description="Profile ID")
     provider: str | None = Field(None, description="LLM provider")

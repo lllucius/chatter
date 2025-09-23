@@ -1,10 +1,10 @@
 import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
-import { CallSplit as ConditionalIcon } from '@mui/icons-material';
+import { Transform as TransformIcon } from '@mui/icons-material';
 import { WorkflowNodeData } from '../types';
 
-const ConditionalNode: React.FC<NodeProps> = ({ data, selected }) => {
+const TransformNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;
   const config = nodeData.config || {};
 
@@ -14,60 +14,47 @@ const ConditionalNode: React.FC<NodeProps> = ({ data, selected }) => {
       <Handle
         type="target"
         position={Position.Left}
-        style={{ background: '#795548' }}
+        style={{ background: '#8bc34a' }}
       />
 
       <Card
         sx={{
-          minWidth: 200,
+          minWidth: 180,
           border: selected ? 2 : 1,
           borderColor: selected ? 'primary.main' : 'divider',
-          bgcolor: '#8d6e63',
-          color: 'white',
+          bgcolor: '#8bc34a20',
+          color: '#8bc34a',
         }}
       >
         <CardContent sx={{ p: 2, '&:last-child': { pb: 2 } }}>
           <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <ConditionalIcon sx={{ mr: 1, fontSize: 20 }} />
+            <TransformIcon sx={{ mr: 1, fontSize: 20 }} />
             <Typography variant="body1" fontWeight="bold">
-              Conditional
+              Transform
             </Typography>
           </Box>
           <Typography variant="body2" sx={{ mb: 1 }}>
-            Decision point
+            Data transformation
           </Typography>
-          {String(config.condition) && (
+          {config.transformType && (
             <Chip
-              label={
-                String(config.condition).slice(0, 20) +
-                (String(config.condition).length > 20 ? '...' : '')
-              }
+              label={config.transformType}
               size="small"
-              sx={{
-                bgcolor: 'rgba(255,255,255,0.2)',
-                color: 'white',
-                border: '1px solid rgba(255,255,255,0.3)',
-              }}
+              variant="outlined"
+              sx={{ mr: 0.5, mb: 0.5, borderColor: '#8bc34a', color: '#8bc34a' }}
             />
           )}
         </CardContent>
       </Card>
 
-      {/* Multiple output handles for different branches */}
+      {/* Output handle */}
       <Handle
         type="source"
         position={Position.Right}
-        id="true"
-        style={{ background: '#4caf50', top: '40%' }}
-      />
-      <Handle
-        type="source"
-        position={Position.Right}
-        id="false"
-        style={{ background: '#f44336', top: '60%' }}
+        style={{ background: '#8bc34a' }}
       />
     </>
   );
 };
 
-export default ConditionalNode;
+export default TransformNode;

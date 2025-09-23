@@ -1,4 +1,4 @@
-import { WorkflowDefinition, WorkflowNodeType } from './WorkflowEditor';
+import { WorkflowDefinition, WorkflowNodeType } from './types';
 
 /**
  * Utility to convert visual workflow definitions to LangGraph-compatible format
@@ -74,7 +74,7 @@ export class WorkflowTranslator {
     };
 
     // Add retriever configuration if present
-    const retrieverNode = workflow.nodes.find((n) => n.type === 'retrieval');
+    const retrieverNode = workflow.nodes.find((n: any) => n.type === 'retrieval');
     if (retrieverNode?.data.config) {
       config.retriever = {
         collection: String(retrieverNode.data.config.collection || 'default'),
@@ -83,13 +83,13 @@ export class WorkflowTranslator {
     }
 
     // Add memory configuration if present
-    const memoryNode = workflow.nodes.find((n) => n.type === 'memory');
+    const memoryNode = workflow.nodes.find((n: any) => n.type === 'memory');
     if (memoryNode?.data.config) {
       config.memory_window = Number(memoryNode.data.config.window) || 20;
     }
 
     // Extract system message from model nodes
-    const modelNodes = workflow.nodes.filter((n) => n.type === 'model');
+    const modelNodes = workflow.nodes.filter((n: any) => n.type === 'model');
     if (modelNodes.length > 0 && modelNodes[0].data.config?.systemMessage) {
       config.system_message = String(modelNodes[0].data.config.systemMessage);
     }

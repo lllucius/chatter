@@ -2,7 +2,7 @@ import React from 'react';
 import { Handle, Position, NodeProps } from '@xyflow/react';
 import { Card, CardContent, Typography, Box, Chip } from '@mui/material';
 import { Memory as MemoryIcon } from '@mui/icons-material';
-import { WorkflowNodeData } from '../WorkflowEditor';
+import { WorkflowNodeData } from '../types';
 
 const MemoryNode: React.FC<NodeProps> = ({ data, selected }) => {
   const nodeData = data as WorkflowNodeData;

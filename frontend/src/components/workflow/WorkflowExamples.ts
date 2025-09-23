@@ -1,4 +1,4 @@
-import { WorkflowDefinition } from './WorkflowEditor';
+import { WorkflowDefinition } from './types';
 import type { Node, Edge } from '@xyflow/react';
 
 // Example workflows that demonstrate different patterns

@@ -1,4 +1,4 @@
-import { useState, useCallback } from 'react';
+import { useState, useCallback, useEffect } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
 import {
@@ -14,10 +14,32 @@ export type {
 
 export const useWorkflowChat = () => {
   const [customWorkflowConfig, setCustomWorkflowConfig] =
-    useState<ChatWorkflowConfig>({
-      enable_retrieval: false,
-      enable_tools: false,
-      enable_memory: true,
+    useState<ChatWorkflowConfig>(() => {
+      // Try to restore the workflow configuration from localStorage
+      const saved = localStorage.getItem('chatter_customWorkflowConfig');
+      if (saved) {
+        try {
+          return JSON.parse(saved);
+        } catch {
+          // If parsing fails, fall through to sync with individual settings
+        }
+      }
+      
+      // If no saved config, initialize from individual settings stored in localStorage
+      const enableRetrieval = localStorage.getItem('chatter_enableRetrieval');
+      const enableTools = localStorage.getItem('chatter_enableTools');
+      const temperature = localStorage.getItem('chatter_temperature');
+      const maxTokens = localStorage.getItem('chatter_maxTokens');
+
+      return {
+        enable_retrieval: enableRetrieval ? JSON.parse(enableRetrieval) : false,
+        enable_tools: enableTools ? JSON.parse(enableTools) : false,
+        enable_memory: true,
+        llm_config: {
+          temperature: temperature ? parseFloat(temperature) : 0.7,
+          max_tokens: maxTokens ? parseInt(maxTokens) : 1000,
+        },
+      };
     });
 
   // Build workflow request
@@ -75,6 +97,14 @@ export const useWorkflowChat = () => {
     },
     []
   );
+
+  // Persist workflow configuration to localStorage
+  useEffect(() => {
+    localStorage.setItem(
+      'chatter_customWorkflowConfig',
+      JSON.stringify(customWorkflowConfig)
+    );
+  }, [customWorkflowConfig]);
 
   // Get current effective configuration
   const getEffectiveConfig = useCallback((): ChatWorkflowConfig => {

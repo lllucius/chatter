@@ -1,242 +1,321 @@
-INFO:     127.0.0.1:63781 - "GET /api/v1/conversations/01K5QWQD53WXQ5R45TBMG4R71S/messages HTTP/1.1" 200 OK
-2025-09-22T17:56:18.959070Z [debug    ] HTTP Request                   [chatter.main] body={"message":"what time is it","workflow_config":{"enable_retrieval":false,"enable_tools":true,"enable_memory":true,"llm_config":{"temperature":0.1,"max_tokens":2048}},"profile_id":"01K5Q46GYKTZQM2KWWYW4AEQXG","enable_tracing":false} headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '231', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1UTQ2R1hER0dTMzlUM1E1SFdINDlQUCIsImp0aSI6IjAxSzVTOTM2V0hWWjhBN1RSUVM1UDJHTjhXIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODU2Mzc2OSwic2Vzc2lvbl9pZCI6IjAxSzVRNDlHVjhKVzFLM1dNMUszWlowNjI1IiwiZXhwIjoxNzU4NTY1NTY5fQ.jWhQEDeFbqwHFs0sE3SCaMdrBKwcCePj3dJmWqmQWqc', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1UTQ2R1hER0dTMzlUM1E1SFdINDlQUCIsImp0aSI6IjAxSzVTOTM2V0hWWjhBN1RSUVM1UDJHTjhXIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg1NjM3NjksInNlc3Npb25faWQiOiIwMUs1UTQ5R1Y4SlcxSzNXTTFLM1paMDYyNSIsImV4cCI6MTc1OTE2ODU2OX0.RikP1XCNLCbnj7oxuQIn0v68zVem4leomveeFpcwAYA'} method=POST url=http://localhost:8000/api/v1/workflows/execute/chat
-2025-09-22T17:56:18.960859Z [debug    ] Multi-tier cache miss          [chatter.core.multi_tier_cache] key=rate_limit:endpoint:/api/v1/workflows/execute/chat:ip:127.0.0.1
-2025-09-22T17:56:18.961128Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=19 key=rate_limit:endpoint:/api/v1/workflows/execute/chat:ip:127.0.0.1 ttl=120
-2025-09-22T17:56:18.961984Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] key=rate_limit:endpoint:/api/v1/workflows/execute/chat:ip:127.0.0.1 ttl=120
-2025-09-22T17:56:18.962137Z [debug    ] Multi-tier cache set           [chatter.core.multi_tier_cache] key=rate_limit:endpoint:/api/v1/workflows/execute/chat:ip:127.0.0.1 l1_success=True l2_success=True ttl=120
-2025-09-22T17:56:18.963942Z [debug    ] Multi-tier cache miss          [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=blacklist:01K5S936WHVZ8A7TRQS5P2GN8W
-2025-09-22T17:56:18.964100Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ is_default_config=True
-2025-09-22T17:56:18.964198Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=20 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778 ttl=1
-2025-09-22T17:56:18.965296Z [debug    ] Cache hit                      [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778
-2025-09-22T17:56:18.965369Z [debug    ] Cache delete                   [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778
-2025-09-22T17:56:18.966194Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186 ttl=1
-2025-09-22T17:56:18.966602Z [debug    ] Redis cache hit                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186
-2025-09-22T17:56:18.966948Z [debug    ] Redis cache delete             [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186
-2025-09-22T17:56:18.967761Z [debug    ] Cache hit                      [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=user:01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:18.967827Z [debug    ] Multi-tier cache L1 hit        [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=user:01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:18.967873Z [debug    ] User found in cache            [chatter.core.auth] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ user_id=01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:18.969982Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ is_default_config=True
-2025-09-22T17:56:18.970058Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=20 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778 ttl=1
-2025-09-22T17:56:18.970108Z [debug    ] Cache hit                      [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778
-2025-09-22T17:56:18.970197Z [debug    ] Cache delete                   [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_1758563778
-2025-09-22T17:56:18.970839Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186 ttl=1
-2025-09-22T17:56:18.971129Z [debug    ] Redis cache hit                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186
-2025-09-22T17:56:18.971404Z [debug    ] Redis cache delete             [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=__health_check_855186
-2025-09-22T17:56:18.972317Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=19 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=user:01K5Q46GXDGGS39T3Q5HWH49PP ttl=900
-2025-09-22T17:56:18.972660Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=user:01K5Q46GXDGGS39T3Q5HWH49PP ttl=900
-2025-09-22T17:56:18.972734Z [debug    ] Multi-tier cache set           [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=user:01K5Q46GXDGGS39T3Q5HWH49PP l1_success=True l2_success=True ttl=900
-2025-09-22T17:56:18.972799Z [debug    ] User cached                    [chatter.core.auth] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ user_id=01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:18.974718Z [debug    ] Multi-tier cache miss          [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=rate_limit:decorator:execute_chat_workflow:user:01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:18.974797Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=20 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=rate_limit:decorator:execute_chat_workflow:user:01K5Q46GXDGGS39T3Q5HWH49PP ttl=120
-2025-09-22T17:56:18.975102Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=rate_limit:decorator:execute_chat_workflow:user:01K5Q46GXDGGS39T3Q5HWH49PP ttl=120
-2025-09-22T17:56:18.975165Z [debug    ] Multi-tier cache set           [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=rate_limit:decorator:execute_chat_workflow:user:01K5Q46GXDGGS39T3Q5HWH49PP l1_success=True l2_success=True ttl=120
-2025-09-22T17:56:19.103230Z [info     ] Created conversation           [chatter.services.conversation] conversation_id=01K5S93GD08XWXSD98BREYK11H correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ title=what time is it user_id=01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:19.105316Z [debug    ] Enhanced in-memory cache initialized [chatter.core.enhanced_memory_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ default_ttl=300 eviction_policy=lru max_size=200
-2025-09-22T17:56:19.105401Z [debug    ] Enhanced Redis cache initialized [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ default_ttl=3600 enabled=True redis_url=redis://localhost:63...
-2025-09-22T17:56:19.105447Z [info     ] Multi-tier cache initialized   [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key_prefix=persistent l1_max_size=200 l2_enabled=True
-2025-09-22T17:56:19.105481Z [info     ] Created cache instance         [chatter.core.cache_factory] cache_type=persistent correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ default_ttl=3600 key_prefix=persistent max_size=2000
-2025-09-22T17:56:19.105515Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ is_default_config=True
-2025-09-22T17:56:19.105650Z [info     ] Started workflow tracking      [chatter.core.workflow_limits] concurrent_count=1 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ user_id=01K5Q46GXDGGS39T3Q5HWH49PP workflow_id=01K5S93GCJKFBNQ1D6FNE9GEBZ_dynamic
-2025-09-22T17:56:19.105715Z [debug    ] Lazy loaded service: workflow_manager [chatter.core.dependencies] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ
-2025-09-22T17:56:19.108676Z [debug    ] Lazy loaded service: builtin_tools [chatter.core.dependencies] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ
-Registered tool: calculator (category: builtin)
-Registered tool: get_time (category: builtin)
-Registered 2 built-in tools
-2025-09-22T17:56:19.109092Z [debug    ] Retrieved 2 tools from registry for workspace: 01K5Q46GXDGGS39T3Q5HWH49PP [chatter.core.langgraph] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ
-2025-09-22T17:56:19.109205Z [debug    ] Lazy loaded service: model_registry [chatter.core.dependencies] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ
-2025-09-22T17:56:19.109283Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ is_default_config=True
-2025-09-22T17:56:19.109961Z [debug    ] Multi-tier cache miss          [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=general:default_provider:llm
-2025-09-22T17:56:19.113830Z [debug    ] Cache set                      [chatter.core.enhanced_memory_cache] cache_size=21 correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=general:default_provider:llm ttl=1800
-2025-09-22T17:56:19.114238Z [debug    ] Redis cache set                [chatter.core.enhanced_redis_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=general:default_provider:llm ttl=1800
-2025-09-22T17:56:19.114309Z [debug    ] Multi-tier cache set           [chatter.core.multi_tier_cache] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ key=general:default_provider:llm l1_success=True l2_success=True ttl=1800
-2025-09-22T17:56:19.284976Z [info     ] LangGraph Memory checkpointer initialized [chatter.core.langgraph] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ
-2025-09-22T17:56:19.291810Z [debug    ] Configured workflow recursion limit [chatter.core.langgraph] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ enable_retrieval=False enable_tools=True max_tool_calls=10 recursion_limit=40
-2025-09-22T17:56:19.295196Z [debug    ] Retrieved recent messages      [chatter.services.message] conversation_id=01K5S93GD08XWXSD98BREYK11H correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ count=0 user_id=01K5Q46GXDGGS39T3Q5HWH49PP
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-d2ec1971-ffdd-4ddf-9204-dab01b53f1dc', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-connect_tcp.started host='127.0.0.1' port=8080 local_address=None timeout=None socket_options=None
-connect_tcp.complete return_value=<httpcore._backends.anyio.AnyIOStream object at 0x7ec3b6c2e420>
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'4919'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '4919', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-b378d70a-cd51-4ab5-bc2c-1633e2b6713b', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'5150'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '5150', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-51d0ec47-c5f0-49fd-93bc-b095fd51a5de', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'5370'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '5370', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-dada8dce-00e7-47ea-81a1-8704de5c44ce', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'5533'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '5533', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-1c825b40-84c5-4ae4-970d-9a2ddaaad8fb', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'5699'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '5699', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-76705f59-6a44-4ead-b989-3af48bb9f907', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'5915'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '5915', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-40aeb414-9814-4939-8b4e-20329bb25224', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:31.854827', 'role': 'tool', 'tool_call_id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'6105'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '6105', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-f54e67ac-cbdf-4857-9a95-956f767da7a4', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:31.854827', 'role': 'tool', 'tool_call_id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:33.484981', 'role': 'tool', 'tool_call_id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'6291'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '6291', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-b053057a-77d6-49a3-972b-8c16a9c46266', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:31.854827', 'role': 'tool', 'tool_call_id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:33.484981', 'role': 'tool', 'tool_call_id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:35.099534', 'role': 'tool', 'tool_call_id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'6485'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '6485', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-1447ba7a-ec0c-484a-b81a-fea7107cf963', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:31.854827', 'role': 'tool', 'tool_call_id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:33.484981', 'role': 'tool', 'tool_call_id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:35.099534', 'role': 'tool', 'tool_call_id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'IrTaRE2J0kuOWvs6EwBbbwRyzOqPa9yg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:36.734408', 'role': 'tool', 'tool_call_id': 'IrTaRE2J0kuOWvs6EwBbbwRyzOqPa9yg'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'6675'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '6675', 'access-control-allow-origin': ''})
-request_id: None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-9e5f7908-e992-48d6-a05e-17509c0f9f40', 'json_data': {'messages': [{'content': 'what time is it', 'role': 'user'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:21.560005', 'role': 'tool', 'tool_call_id': 'yiz1pm5wW0BNaKbR2Kg7LO55LFYHWseX'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/Denver"}'}}]}, {'content': '2025-09-22T12:56:24.163200', 'role': 'tool', 'tool_call_id': 'hw142mSpwNMlfG8Xd5ZqXx6t6e9tCPSp'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt', 'function': {'name': 'get_time', 'arguments': '{"tz": "America/New_York"}'}}]}, {'content': '2025-09-22T12:56:26.793013', 'role': 'tool', 'tool_call_id': 'UD7gxFDkA6lzpb3AoCdsyR05QNdx9gWt'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:28.609367', 'role': 'tool', 'tool_call_id': 'PsdxfzWFssLUcy9PriACXYelVYEolECH'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:30.247435', 'role': 'tool', 'tool_call_id': 'kDUwN0wuRfA3kFhCnNfzs9CidgZmiOWg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:31.854827', 'role': 'tool', 'tool_call_id': 'pqbgaJ3AKXFMiWUHbkTSQu4tT9PO2myb'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:33.484981', 'role': 'tool', 'tool_call_id': '3UUCVuf56R0DGsYjgJS6OZzJ4xpKHqOO'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:35.099534', 'role': 'tool', 'tool_call_id': 'WvOylNs7WA1XnealymxYW0nLfKkQNMXd'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'IrTaRE2J0kuOWvs6EwBbbwRyzOqPa9yg', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:36.734408', 'role': 'tool', 'tool_call_id': 'IrTaRE2J0kuOWvs6EwBbbwRyzOqPa9yg'}, {'content': None, 'role': 'assistant', 'tool_calls': [{'type': 'function', 'id': 'p2m7Jx523zTdAxOywYMij6etVC5Bwr73', 'function': {'name': 'get_time', 'arguments': '{}'}}]}, {'content': '2025-09-22T12:56:38.428364', 'role': 'tool', 'tool_call_id': 'p2m7Jx523zTdAxOywYMij6etVC5Bwr73'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1, 'tools': [{'type': 'function', 'function': {'name': 'calculator', 'description': 'Perform basic mathematical calculations', 'parameters': {'properties': {'expression': {'type': 'string'}}, 'required': ['expression'], 'type': 'object'}}}, {'type': 'function', 'function': {'name': 'get_time', 'description': "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.", 'parameters': {'properties': {}, 'type': 'object'}}}]}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'6845'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '6845', 'access-control-allow-origin': ''})
-request_id: None
-2025-09-22T17:56:40.094602Z [warning  ] Tool call limit would be exceeded, ending workflow [chatter.core.langgraph] conversation_id=None correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ current_tool_count=10 max_allowed=10 pending_calls=1 projected_count=11 user_id=None
-Request options: {'method': 'post', 'url': '/chat/completions', 'files': None, 'idempotency_key': 'stainless-python-retry-b2025ad0-602b-40b2-b2f4-564012f07196', 'json_data': {'messages': [{'content': 'Based on the following information gathered from tools:\n2025-09-22T12:56:35.099534\n2025-09-22T12:56:36.734408\n2025-09-22T12:56:38.428364\n\nPlease provide a direct and helpful answer to: what time is it', 'role': 'user'}], 'model': 'gpt-4', 'max_completion_tokens': 2048, 'stream': False, 'temperature': 0.1}}
-Sending HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions
-send_request_headers.started request=<Request [b'POST']>
-send_request_headers.complete
-send_request_body.started request=<Request [b'POST']>
-send_request_body.complete
-receive_response_headers.started request=<Request [b'POST']>
-receive_response_headers.complete return_value=(b'HTTP/1.1', 200, b'OK', [(b'Keep-Alive', b'timeout=5, max=100'), (b'Content-Type', b'application/json; charset=utf-8'), (b'Server', b'llama.cpp'), (b'Content-Length', b'2784'), (b'Access-Control-Allow-Origin', b'')])
-HTTP Request: POST http://127.0.0.1:8080/v1/chat/completions "HTTP/1.1 200 OK"
-receive_response_body.started request=<Request [b'POST']>
-receive_response_body.complete
-response_closed.started
-response_closed.complete
-HTTP Response: POST http://127.0.0.1:8080/v1/chat/completions "200 OK" Headers({'keep-alive': 'timeout=5, max=100', 'content-type': 'application/json; charset=utf-8', 'server': 'llama.cpp', 'content-length': '2784', 'access-control-allow-origin': ''})
-request_id: None
-2025-09-22T17:56:43.569155Z [info     ] Ended workflow tracking        [chatter.core.workflow_limits] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ errors_count=0 memory_used_mb=0.0 steps_completed=0 tokens_used=0 total_time_seconds=24.463497400283813 user_id=01K5Q46GXDGGS39T3Q5HWH49PP workflow_id=01K5S93GCJKFBNQ1D6FNE9GEBZ_dynamic
-2025-09-22T17:56:43.582932Z [info     ] Added message to conversation  [chatter.services.message] content_length=82 conversation_id=01K5S93GD08XWXSD98BREYK11H correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ message_id=01K5S948DN87YV3B6ZZ33MH9KB role=assistant user_id=01K5Q46GXDGGS39T3Q5HWH49PP
-2025-09-22T17:56:43.583734Z [debug    ] HTTP Response                  [chatter.main] correlation_id=01K5S93GCJKFBNQ1D6FNE9GEBZ duration=24.62499213218689 duration_ms=24624.99213218689 headers={'content-type': 'application/json', 'x-content-type-options': 'nosniff', 'x-frame-options': 'DENY', 'x-xss-protection': '1; mode=block', 'strict-transport-security': 'max-age=31536000; includeSubDomains', 'referrer-policy': 'strict-origin-when-cross-origin', 'vary': 'Accept-Encoding', 'content-encoding': 'gzip', 'x-correlation-id': '01K5S93GCJKFBNQ1D6FNE9GEBZ', 'x-ratelimit-limit': '100', 'x-ratelimit-remaining': '99', 'x-ratelimit-reset': '1758563838', 'x-ratelimit-window': '60'} status_code=200
-2025-09-22T17:56:43.583900Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/execute/chat response_time_ms=24624.99213218689
-INFO:     127.0.0.1:51107 - "POST /api/v1/workflows/execute/chat HTTP/1.1" 200 OK
+[32mINFO[0m:     Will watch for changes in these directories: ['/home/yam/chatter']
+[32mINFO[0m:     Uvicorn running on [1mhttp://0.0.0.0:8000[0m (Press CTRL+C to quit)
+[32mINFO[0m:     Started reloader process [[36m[1m178894[0m] using [36m[1mWatchFiles[0m
+[32mINFO[0m:     Started server process [[36m178942[0m]
+[32mINFO[0m:     Waiting for application startup.
+[32mINFO[0m:     Application startup complete.
+[31mERROR[0m:    Exception in ASGI application
+  + Exception Group Traceback (most recent call last):
+  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 77, in collapse_excgroups
+  |     yield
+  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 183, in __call__
+  |     async with anyio.create_task_group() as task_group:
+  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
+  |   File "/home/yam/.local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 772, in __aexit__
+  |     raise BaseExceptionGroup(
+  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
+  +-+---------------- 1 ----------------
+    | Traceback (most recent call last):
+    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    |     result = await app(  # type: ignore[func-returns-value]
+    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    |     return await self.app(scope, receive, send)
+    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    |     await self.app(scope, receive, _send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    |     await self.simple_response(scope, receive, send, request_headers=headers)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    |     await self.app(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
+    |     await responder(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
+    |     await super().__call__(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
+    |     await self.app(scope, receive, self.send_with_compression)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
+    |     await self.app(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    |     with recv_stream, send_stream, collapse_excgroups():
+    |                                    ^^^^^^^^^^^^^^^^^^^^
+    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    |     self.gen.throw(value)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    |     response = await self.dispatch_func(request, call_next)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
+    |     response = await call_next(request)
+    |                ^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    |     raise app_exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    |     await self.app(scope, receive_or_disconnect, send_no_error)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    |     await self.middleware_stack(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    |     await route.handle(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    |     await self.app(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    |     raise exc
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    |     await app(scope, receive, sender)
+    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    |     response = await f(request)
+    |                ^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
+    |     content = await serialize_response(
+    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
+    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
+    |     raise ResponseValidationError(
+    | fastapi.exceptions.ResponseValidationError: 7 validation errors:
+    |   {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    |   {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+    | 
+    +------------------------------------
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
+    result = await app(  # type: ignore[func-returns-value]
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
+    return await self.app(scope, receive, send)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
+    await self.app(scope, receive, _send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
+    await self.simple_response(scope, receive, send, request_headers=headers)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
+    await self.app(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    raise app_exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    raise app_exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    raise app_exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    raise app_exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
+    await responder(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
+    await super().__call__(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
+    await self.app(scope, receive, self.send_with_compression)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
+    await self.app(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
+    with recv_stream, send_stream, collapse_excgroups():
+                                   ^^^^^^^^^^^^^^^^^^^^
+  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
+    self.gen.throw(value)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
+    response = await self.dispatch_func(request, call_next)
+               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
+    response = await call_next(request)
+               ^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
+    raise app_exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
+    await self.app(scope, receive_or_disconnect, send_no_error)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
+    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
+    await self.middleware_stack(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
+    await route.handle(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
+    await self.app(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
+    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
+    raise exc
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
+    await app(scope, receive, sender)
+  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
+    response = await f(request)
+               ^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
+    content = await serialize_response(
+              ^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
+    raise ResponseValidationError(
+fastapi.exceptions.ResponseValidationError: 7 validation errors:
+  {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+  {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+
+[32mINFO[0m:     Shutting down
+[32mINFO[0m:     Waiting for connections to close. (CTRL+C to force quit)
+[32mINFO[0m:     Waiting for application shutdown.
+[32mINFO[0m:     Application shutdown complete.
+[32mINFO[0m:     Finished server process [[36m178942[0m]
+[32mINFO[0m:     Stopping reloader process [[36m[1m178894[0m]

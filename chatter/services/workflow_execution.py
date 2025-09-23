@@ -28,6 +28,84 @@ from datetime import UTC, datetime
 logger = get_logger(__name__)
 
 
+def _log_workflow_debug_info(
+    nodes: list[dict[str, Any]],
+    edges: list[dict[str, Any]],
+    execution_type: str = "workflow",
+    definition_name: str | None = None,
+) -> None:
+    """Log detailed debugging information about workflow shape and nodes prior to execution."""
+    
+    # Calculate workflow shape
+    node_count = len(nodes)
+    edge_count = len(edges)
+    
+    # Extract node types and their counts
+    node_types = {}
+    node_details = []
+    
+    for node in nodes:
+        node_id = node.get("id", "unknown")
+        node_type = node.get("type", "unknown")
+        node_config = node.get("config", {})
+        
+        # Count node types
+        node_types[node_type] = node_types.get(node_type, 0) + 1
+        
+        # Collect node details
+        node_details.append({
+            "id": node_id,
+            "type": node_type,
+            "config_keys": list(node_config.keys()) if isinstance(node_config, dict) else [],
+            "has_config": bool(node_config),
+        })
+    
+    # Extract edge information
+    edge_details = []
+    for edge in edges:
+        edge_info = {
+            "source": edge.get("source", "unknown"),
+            "target": edge.get("target", "unknown"),
+            "type": edge.get("type", "regular"),
+            "has_condition": bool(edge.get("condition")),
+        }
+        if edge.get("condition"):
+            edge_info["condition"] = edge["condition"]
+        edge_details.append(edge_info)
+    
+    # Find entry points (nodes with no incoming edges)
+    target_nodes = {edge.get("target") for edge in edges}
+    entry_points = [node.get("id") for node in nodes if node.get("id") not in target_nodes]
+    
+    # Find exit points (nodes with edges to END or no outgoing edges)
+    source_nodes = {edge.get("source") for edge in edges}
+    exit_points = []
+    for edge in edges:
+        if edge.get("target") == "END" or edge.get("target") == "__end__":
+            exit_points.append(edge.get("source"))
+    # Also add nodes with no outgoing edges
+    for node in nodes:
+        node_id = node.get("id")
+        if node_id not in source_nodes:
+            exit_points.append(node_id)
+    
+    # Log comprehensive workflow information
+    logger.info(
+        f"Workflow execution starting - {execution_type} shape and configuration",
+        execution_type=execution_type,
+        definition_name=definition_name,
+        workflow_shape={
+            "node_count": node_count,
+            "edge_count": edge_count,
+            "node_types": node_types,
+            "entry_points": entry_points,
+            "exit_points": list(set(exit_points)),  # Remove duplicates
+        },
+        nodes=node_details,
+        edges=edge_details,
+    )
+
+
 class WorkflowExecutionService:
     """Modern workflow execution service."""
 
@@ -290,6 +368,13 @@ class WorkflowExecutionService:
     ) -> dict[str, Any]:
         """Execute a custom workflow definition."""
         try:
+            # Log workflow debugging information before execution
+            _log_workflow_debug_info(
+                nodes=nodes,
+                edges=edges,
+                execution_type="custom_workflow",
+            )
+            
             # Get LLM
             llm = await self.llm_service.get_llm(provider=provider, model=model)
 
@@ -337,6 +422,63 @@ class WorkflowExecutionService:
     ) -> dict[str, Any]:
         """Execute a workflow from a stored definition."""
         try:
+            # Log stored definition structure if available
+            definition_name = getattr(definition, 'name', None) or getattr(definition, 'id', 'unknown')
+            
+            # Try to extract nodes and edges from the definition
+            nodes = []
+            edges = []
+            
+            if hasattr(definition, 'nodes') and hasattr(definition, 'edges'):
+                # If definition has nodes and edges attributes
+                nodes = definition.nodes if hasattr(definition.nodes, '__iter__') else []
+                edges = definition.edges if hasattr(definition.edges, '__iter__') else []
+            elif isinstance(definition, dict):
+                # If definition is a dictionary
+                nodes = definition.get('nodes', [])
+                edges = definition.get('edges', [])
+            
+            # Convert nodes and edges to dictionaries if they're not already
+            nodes_dict = []
+            edges_dict = []
+            
+            for node in nodes:
+                if hasattr(node, '__dict__'):
+                    # Convert object to dict
+                    node_dict = {
+                        'id': getattr(node, 'id', 'unknown'),
+                        'type': getattr(node, 'type', 'unknown'),
+                        'config': getattr(node, 'config', {}) or getattr(node, 'data', {})
+                    }
+                elif isinstance(node, dict):
+                    node_dict = node
+                else:
+                    node_dict = {'id': str(node), 'type': 'unknown', 'config': {}}
+                nodes_dict.append(node_dict)
+            
+            for edge in edges:
+                if hasattr(edge, '__dict__'):
+                    # Convert object to dict
+                    edge_dict = {
+                        'source': getattr(edge, 'source', 'unknown'),
+                        'target': getattr(edge, 'target', 'unknown'),
+                        'type': getattr(edge, 'type', 'regular'),
+                        'condition': getattr(edge, 'condition', None)
+                    }
+                elif isinstance(edge, dict):
+                    edge_dict = edge
+                else:
+                    edge_dict = {'source': 'unknown', 'target': 'unknown', 'type': 'regular'}
+                edges_dict.append(edge_dict)
+            
+            # Log workflow debugging information before execution
+            _log_workflow_debug_info(
+                nodes=nodes_dict,
+                edges=edges_dict,
+                execution_type="stored_definition",
+                definition_name=definition_name,
+            )
+            
             # Get LLM from default settings for now
             llm = await self.llm_service.get_llm(
                 provider="anthropic",
@@ -357,6 +499,38 @@ class WorkflowExecutionService:
                 enable_retrieval=False,
                 enable_tools=False,
             )
+            
+            # Log the actual workflow definition that will be executed
+            # Extract nodes and edges from the workflow definition
+            actual_nodes = []
+            actual_edges = []
+            
+            if hasattr(workflow_def, 'nodes') and hasattr(workflow_def, 'edges'):
+                actual_nodes = [
+                    {
+                        'id': node.get('id', 'unknown'),
+                        'type': node.get('type', 'unknown'), 
+                        'config': node.get('config', {})
+                    }
+                    for node in workflow_def.nodes
+                ]
+                actual_edges = [
+                    {
+                        'source': edge.get('source', 'unknown'),
+                        'target': edge.get('target', 'unknown'),
+                        'type': edge.get('type', 'regular'),
+                        'condition': edge.get('condition')
+                    }
+                    for edge in workflow_def.edges
+                ]
+                
+                # Log the actual workflow that will be executed
+                _log_workflow_debug_info(
+                    nodes=actual_nodes,
+                    edges=actual_edges,
+                    execution_type="generated_simple_workflow",
+                    definition_name=f"simple_workflow_for_{definition_name}",
+                )
 
             # Create workflow from definition
             workflow = await workflow_manager.create_workflow_from_definition(

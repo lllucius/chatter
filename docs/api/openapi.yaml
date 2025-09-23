@@ -2016,10 +2016,30 @@ components:
           - type: 'null'
           description: Document IDs
           title: Document Ids
+        enable_memory:
+          default: true
+          description: Enable memory capabilities
+          title: Enable Memory
+          type: boolean
+        enable_retrieval:
+          default: false
+          description: Enable retrieval capabilities
+          title: Enable Retrieval
+          type: boolean
+        enable_tools:
+          default: false
+          description: Enable tool calling capabilities
+          title: Enable Tools
+          type: boolean
         enable_tracing:
           default: false
           description: Enable backend workflow tracing
           title: Enable Tracing
+          type: boolean
+        enable_web_search:
+          default: false
+          description: Enable web search capabilities
+          title: Enable Web Search
           type: boolean
         max_tokens:
           anyOf:

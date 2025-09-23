@@ -34,6 +34,10 @@ class ChatWorkflowRequest(BaseModel):
     workflow_config: Optional[ChatWorkflowConfig] = None
     workflow_definition_id: Optional[StrictStr] = None
     workflow_template_name: Optional[StrictStr] = None
+    enable_retrieval: Optional[StrictBool] = Field(default=False, description="Enable retrieval capabilities")
+    enable_tools: Optional[StrictBool] = Field(default=False, description="Enable tool calling capabilities")
+    enable_memory: Optional[StrictBool] = Field(default=True, description="Enable memory capabilities")
+    enable_web_search: Optional[StrictBool] = Field(default=False, description="Enable web search capabilities")
     profile_id: Optional[StrictStr] = None
     provider: Optional[StrictStr] = None
     model: Optional[StrictStr] = None
@@ -43,7 +47,7 @@ class ChatWorkflowRequest(BaseModel):
     document_ids: Optional[List[StrictStr]] = None
     system_prompt_override: Optional[StrictStr] = None
     enable_tracing: Optional[StrictBool] = Field(default=False, description="Enable backend workflow tracing")
-    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "profile_id", "provider", "model", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "enable_retrieval", "enable_tools", "enable_memory", "enable_web_search", "profile_id", "provider", "model", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -164,6 +168,10 @@ class ChatWorkflowRequest(BaseModel):
             "workflow_config": ChatWorkflowConfig.from_dict(obj["workflow_config"]) if obj.get("workflow_config") is not None else None,
             "workflow_definition_id": obj.get("workflow_definition_id"),
             "workflow_template_name": obj.get("workflow_template_name"),
+            "enable_retrieval": obj.get("enable_retrieval") if obj.get("enable_retrieval") is not None else False,
+            "enable_tools": obj.get("enable_tools") if obj.get("enable_tools") is not None else False,
+            "enable_memory": obj.get("enable_memory") if obj.get("enable_memory") is not None else True,
+            "enable_web_search": obj.get("enable_web_search") if obj.get("enable_web_search") is not None else False,
             "profile_id": obj.get("profile_id"),
             "provider": obj.get("provider"),
             "model": obj.get("model"),

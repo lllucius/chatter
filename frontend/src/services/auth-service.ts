@@ -5,32 +5,44 @@
  */
 import { ChatterSDK, UserLogin } from 'chatter-sdk';
 import { handleError } from '../utils/error-handler';
+import type { AppConfig } from './config-service';
 
 class AuthService {
   private token: string | null = null; // Store access token in memory only
-  private baseSDK: ChatterSDK;
-  private basePath: string; // Store base path to avoid repeated withConfig calls
+  private baseSDK: ChatterSDK | null = null;
+  private basePath: string = ''; // Store base path to avoid repeated withConfig calls
   private initialized: boolean = false;
   private refreshInProgress: boolean = false; // Prevent multiple concurrent refresh attempts
 
   constructor() {
-    this.basePath =
-      import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
+    // Don't initialize SDK in constructor - wait for configuration
+  }
 
+  /**
+   * Configure the auth service with the loaded configuration
+   * This must be called before initialize()
+   */
+  public configure(config: AppConfig): void {
+    this.basePath = config.apiBaseUrl;
+    
     this.baseSDK = new ChatterSDK({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
     } as { basePath: string; credentials: string }); // ChatterSDK configuration type mismatch with our needs
-    // Don't call initialize() in constructor anymore - it's async now
   }
 
   /**
    * Initialize the auth service
    * Attempts to restore authentication state from refresh token cookie
+   * Must be called after configure()
    */
   public async initialize(): Promise<void> {
     if (this.initialized) {
       return;
+    }
+
+    if (!this.baseSDK) {
+      throw new Error('AuthService must be configured before initialization. Call configure() first.');
     }
 
     // Try to restore authentication state from refresh token cookie
@@ -60,6 +72,10 @@ class AuthService {
       );
     }
 
+    if (!this.baseSDK) {
+      throw new Error('SDK not configured. Please configure the service first.');
+    }
+
     let sdk: ChatterSDK;
     if (this.token) {
       sdk = this.baseSDK.withAuth(this.token, 'bearer');
@@ -76,6 +92,10 @@ class AuthService {
   }
 
   public async login(username: string, password: string): Promise<void> {
+    if (!this.baseSDK) {
+      throw new Error('SDK not configured. Please configure the service first.');
+    }
+
     try {
       const loginData: UserLogin = {
         username,
@@ -145,6 +165,10 @@ class AuthService {
         };
         checkRefresh();
       });
+    }
+
+    if (!this.baseSDK) {
+      return false; // Can't refresh without SDK configured
     }
 
     this.refreshInProgress = true;
@@ -271,7 +295,13 @@ export const getSDK = (): ChatterSDK => authService.getSDK();
 // Export initialization check for safe SDK access
 export const isSDKInitialized = (): boolean => authService.isInitialized();
 
-// Export initialization function for explicit app setup if needed
+// Export configuration and initialization function for explicit app setup
+export const configureAndInitializeSDK = async (config: any): Promise<void> => {
+  authService.configure(config);
+  await authService.initialize();
+};
+
+// Legacy export for backwards compatibility - will throw if not configured
 export const initializeSDK = async (): Promise<void> => {
   await authService.initialize();
 };

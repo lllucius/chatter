@@ -20,7 +20,10 @@ import { NotificationProvider } from './components/NotificationSystem';
 import { SSEProvider } from './services/sse-context';
 
 // Initialize SDK at app startup
-import { initializeSDK } from './services/auth-service';
+import { configureAndInitializeSDK } from './services/auth-service';
+
+// Load configuration at startup
+import { loadConfig, type AppConfig } from './services/config-service';
 
 // Initialize global error handling
 import { initializeGlobalErrorHandling } from './utils/global-error-handler';
@@ -63,22 +66,29 @@ export const ThemeContext = React.createContext<{
 function App() {
   const [darkMode, setDarkMode] = useState(true);
   const [authInitialized, setAuthInitialized] = useState(false);
+  const [config, setConfig] = useState<AppConfig | null>(null);
 
-  // Initialize SDK at app startup
+  // Initialize configuration and SDK at app startup
   useEffect(() => {
-    const initAuth = async () => {
+    const initApp = async () => {
       try {
         // Initialize global error handling first
         initializeGlobalErrorHandling();
 
-        await initializeSDK();
-      } catch {
-        // Failed to initialize SDK - handled gracefully by setting authInitialized to true
+        // Load configuration first
+        const loadedConfig = await loadConfig();
+        setConfig(loadedConfig);
+
+        // Configure and initialize SDK with loaded config
+        await configureAndInitializeSDK(loadedConfig);
+      } catch (error) {
+        console.error('Failed to initialize app:', error);
+        // Failed to initialize - handled gracefully by setting authInitialized to true
       } finally {
         setAuthInitialized(true);
       }
     };
-    initAuth();
+    initApp();
   }, []);
 
   const toggleDarkMode = () => {
@@ -155,7 +165,7 @@ function App() {
           >
             <CircularProgress size={60} />
             <Typography variant="h6" color="text.secondary">
-              Initializing...
+              {config ? 'Initializing...' : 'Loading configuration...'}
             </Typography>
           </Box>
         </ThemeProvider>

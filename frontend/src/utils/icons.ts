@@ -41,6 +41,18 @@ export {
   Work as JobIcon,
   Extension as PluginIcon,
   People as UsersIcon,
+  ContentCopy as CopyIcon,
+  ContentPaste as PasteIcon,
+  Undo as UndoIcon,
+  Redo as RedoIcon,
+  GridOn as GridIcon,
+  ZoomIn as ZoomInIcon,
+  ZoomOut as ZoomOutIcon,
+  CenterFocusStrong as FitViewIcon,
+  CheckCircle as ValidIcon,
+  LibraryBooks as TemplateIcon,
+  GetApp as ExampleIcon,
+  ArrowDropDown as DropdownIcon,
   DeleteSweep as BulkDeleteIcon,
 } from '@mui/icons-material';
 

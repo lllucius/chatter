@@ -1,4 +1,4 @@
-import React, { useState, useCallback, useEffect } from 'react';
+import React, { useState, useCallback, useEffect, useRef } from 'react';
 import { ReactFlowProvider } from '@xyflow/react';
 import { 
   Box, 
@@ -72,15 +72,15 @@ const WorkflowBuilderPage: React.FC = () => {
   const [nodeMenuAnchor, setNodeMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Workflow editor function refs
-  const [addNodeFunction, setAddNodeFunction] = useState<((nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void) | null>(null);
-  const [viewControls, setViewControls] = useState<{
+  const addNodeFunctionRef = useRef<((nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void) | null>(null);
+  const viewControlsRef = useRef<{
     zoomIn: () => void;
     zoomOut: () => void;
     fitView: () => void;
     toggleGrid: () => void;
     snapToGrid: boolean;
   } | null>(null);
-  const [editControls, setEditControls] = useState<{
+  const editControlsRef = useRef<{
     undo: () => void;
     redo: () => void;
     copy: () => void;
@@ -91,52 +91,52 @@ const WorkflowBuilderPage: React.FC = () => {
   } | null>(null);
 
   const handleUndo = useCallback(() => {
-    if (editControls) {
-      editControls.undo();
+    if (editControlsRef.current) {
+      editControlsRef.current.undo();
     }
-  }, [editControls]);
+  }, []);
 
   const handleRedo = useCallback(() => {
-    if (editControls) {
-      editControls.redo();
+    if (editControlsRef.current) {
+      editControlsRef.current.redo();
     }
-  }, [editControls]);
+  }, []);
 
   const handleCopy = useCallback(() => {
-    if (editControls) {
-      editControls.copy();
+    if (editControlsRef.current) {
+      editControlsRef.current.copy();
     }
-  }, [editControls]);
+  }, []);
 
   const handlePaste = useCallback(() => {
-    if (editControls) {
-      editControls.paste();
+    if (editControlsRef.current) {
+      editControlsRef.current.paste();
     }
-  }, [editControls]);
+  }, []);
 
   const handleZoomIn = useCallback(() => {
-    if (viewControls) {
-      viewControls.zoomIn();
+    if (viewControlsRef.current) {
+      viewControlsRef.current.zoomIn();
     }
-  }, [viewControls]);
+  }, []);
 
   const handleZoomOut = useCallback(() => {
-    if (viewControls) {
-      viewControls.zoomOut();
+    if (viewControlsRef.current) {
+      viewControlsRef.current.zoomOut();
     }
-  }, [viewControls]);
+  }, []);
 
   const handleFitView = useCallback(() => {
-    if (viewControls) {
-      viewControls.fitView();
+    if (viewControlsRef.current) {
+      viewControlsRef.current.fitView();
     }
-  }, [viewControls]);
+  }, []);
 
   const handleToggleGrid = useCallback(() => {
-    if (viewControls) {
-      viewControls.toggleGrid();
+    if (viewControlsRef.current) {
+      viewControlsRef.current.toggleGrid();
     }
-  }, [viewControls]);
+  }, []);
 
   const handleValidate = useCallback(async () => {
     try {
@@ -237,11 +237,11 @@ const WorkflowBuilderPage: React.FC = () => {
 
   const handleAddNode = useCallback((nodeType: WorkflowNodeType) => {
     // Use the addNode function from the editor if available
-    if (addNodeFunction) {
-      addNodeFunction(nodeType);
+    if (addNodeFunctionRef.current) {
+      addNodeFunctionRef.current(nodeType);
     }
     setNodeMenuAnchor(null);
-  }, [addNodeFunction]);
+  }, []);
 
   // Set up right sidebar content
   useEffect(() => {
@@ -471,9 +471,9 @@ const WorkflowBuilderPage: React.FC = () => {
             initialWorkflow={workflow}
             onWorkflowChange={setWorkflow}
             onSave={handleSave}
-            onAddNodeRef={setAddNodeFunction}
-            onViewControlsRef={setViewControls}
-            onEditControlsRef={setEditControls}
+            onAddNodeRef={(fn) => { addNodeFunctionRef.current = fn; }}
+            onViewControlsRef={(controls) => { viewControlsRef.current = controls; }}
+            onEditControlsRef={(controls) => { editControlsRef.current = controls; }}
             readOnly={false}
             showToolbar={false} // We're using our custom toolbar
             showPalette={false} // We're using dropdown instead

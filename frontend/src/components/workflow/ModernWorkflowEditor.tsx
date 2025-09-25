@@ -493,6 +493,8 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
             flex: 1, 
             position: 'relative',
             marginLeft: showNodePalette && !isMobile ? 0 : 0,
+            minHeight: '400px',
+            minWidth: '400px',
           }}
           onDrop={onDrop}
           onDragOver={onDragOver}

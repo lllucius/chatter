@@ -186,6 +186,12 @@ export const useWorkflowEditor = (
   // Add new node
   const addNode = useCallback(
     (nodeType: WorkflowNodeType, position?: { x: number; y: number }) => {
+      // Guard against null/undefined nodeType
+      if (!nodeType) {
+        console.error('addNode called with null/undefined nodeType');
+        return;
+      }
+      
       saveToHistory();
       
       const nodePosition = position || getSmartPosition(nodeType);

@@ -53,6 +53,9 @@ const WorkflowExecutionsPage = lazy(
 const WorkflowBuilderDemo = lazy(
   () => import('./pages/WorkflowBuilderDemo')
 );
+const NewWorkflowBuilderDemo = lazy(
+  () => import('./pages/NewWorkflowBuilderDemo')
+);
 const ResponsiveLayoutDemo = lazy(() => import('./pages/ResponsiveLayoutDemo'));
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
@@ -231,6 +234,22 @@ function App() {
                       >
                         <SuspenseWrapper loadingMessage="Loading responsive layout demo...">
                           <ResponsiveLayoutDemo />
+                        </SuspenseWrapper>
+                      </SectionErrorBoundary>
+                    }
+                  />
+
+                  {/* New Workflow Builder Demo - No auth required */}
+                  <Route
+                    path="/new-workflow-demo"
+                    element={
+                      <SectionErrorBoundary
+                        level="page"
+                        name="NewWorkflowBuilderDemo"
+                        showHomeButton={false}
+                      >
+                        <SuspenseWrapper loadingMessage="Loading new workflow builder demo...">
+                          <NewWorkflowBuilderDemo />
                         </SuspenseWrapper>
                       </SectionErrorBoundary>
                     }

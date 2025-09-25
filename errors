@@ -1,233 +1,30 @@
-sse-context.tsx:87 Auto-connecting SSE...
-sse-manager.ts:148 SSE: Connecting to http://localhost:8000/api/v1/events/stream
-ModernWorkflowEditor.tsx:500 [React Flow]: The React Flow parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+builder:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
+    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
+builder:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+error-handler.ts:246 [Error Handler] WorkflowService.getAuthenticatedSDK: TypeError: authService.getAuthenticatedSDK is not a function
+    at WorkflowService.getSDK (workflow-service.ts:35:32)
+    at WorkflowService.listTemplates (workflow-service.ts:268:30)
+    at WorkflowBuilderPage.tsx:218:47
 overrideMethod @ hook.js:608
-devWarn @ @xyflow_react.js?v=f0b574b0:2890
-updateDimensions @ @xyflow_react.js?v=f0b574b0:6060
-(anonymous) @ @xyflow_react.js?v=f0b574b0:6065
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17486
+handleError @ error-handler.ts:246
+handleError @ error-handler.ts:363
+getSDK @ workflow-service.ts:37
+listTemplates @ workflow-service.ts:268
+(anonymous) @ WorkflowBuilderPage.tsx:218
+await in (anonymous)
+onClick @ WorkflowBuilderPage.tsx:428
+executeDispatch @ react-dom_client.js?v=f0b574b0:11736
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-commitHookEffectListMount @ react-dom_client.js?v=f0b574b0:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=f0b574b0:8518
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9965
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9940
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9890
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
-recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
-commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9899
-flushPassiveEffects @ react-dom_client.js?v=f0b574b0:11302
-flushPendingEffects @ react-dom_client.js?v=f0b574b0:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11632
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-<ZoomPane>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-FlowRendererComponent @ @xyflow_react.js?v=f0b574b0:6666
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
-updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
-beginWork @ react-dom_client.js?v=f0b574b0:7915
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<FlowRenderer>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-GraphViewComponent @ @xyflow_react.js?v=f0b574b0:7481
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
-updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
-beginWork @ react-dom_client.js?v=f0b574b0:7915
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<GraphView>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-ReactFlow @ @xyflow_react.js?v=f0b574b0:7863
+processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
+(anonymous) @ react-dom_client.js?v=f0b574b0:12182
+batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
+dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
+<li>
+exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
+(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
+MuiButtonBase-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
 react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
 renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
 renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
@@ -235,227 +32,16 @@ updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
 beginWork @ react-dom_client.js?v=f0b574b0:7864
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
 performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
 performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<ForwardRef(ReactFlow)>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-ModernWorkflowEditor @ ModernWorkflowEditor.tsx:500
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7654
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<ModernWorkflowEditor>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-WorkflowBuilderPage @ WorkflowBuilderPage.tsx:470
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7613
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-ModernWorkflowEditor.tsx:500 [React Flow]: The React Flow parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
-overrideMethod @ hook.js:600
-devWarn @ @xyflow_react.js?v=f0b574b0:2890
-updateDimensions @ @xyflow_react.js?v=f0b574b0:6060
-(anonymous) @ @xyflow_react.js?v=f0b574b0:6065
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17486
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-commitHookEffectListMount @ react-dom_client.js?v=f0b574b0:8460
-commitHookPassiveMountEffects @ react-dom_client.js?v=f0b574b0:8518
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10016
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
-recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
-reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10031
-doubleInvokeEffectsOnFiber @ react-dom_client.js?v=f0b574b0:11461
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1487
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11442
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
-commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11469
-flushPassiveEffects @ react-dom_client.js?v=f0b574b0:11309
-flushPendingEffects @ react-dom_client.js?v=f0b574b0:11276
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11632
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
 flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-<ZoomPane>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-FlowRendererComponent @ @xyflow_react.js?v=f0b574b0:6666
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
-updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
-beginWork @ react-dom_client.js?v=f0b574b0:7915
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<FlowRenderer>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-GraphViewComponent @ @xyflow_react.js?v=f0b574b0:7481
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
-updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
-beginWork @ react-dom_client.js?v=f0b574b0:7915
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<GraphView>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-ReactFlow @ @xyflow_react.js?v=f0b574b0:7863
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<MuiButtonBaseRoot>
+exports.jsxs @ chunk-OBYCLIUT.js?v=f0b574b0:263
+ButtonBase2 @ @mui_material.js?v=f0b574b0:3767
 react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
 renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
 renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
@@ -463,56 +49,54 @@ updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
 beginWork @ react-dom_client.js?v=f0b574b0:7864
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
 performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
 performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<ForwardRef(ReactFlow)>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-ModernWorkflowEditor @ ModernWorkflowEditor.tsx:500
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<ForwardRef(ButtonBase2)>
+exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
+(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
+MuiMenuItem-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
 react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
 renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
 renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7654
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
 performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
 performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-<ModernWorkflowEditor>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-WorkflowBuilderPage @ WorkflowBuilderPage.tsx:470
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<MuiMenuItemRoot>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+MenuItem2 @ @mui_material.js?v=f0b574b0:27365
 react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
 renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
 renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7613
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
 performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
-renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
 performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
-performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
-useWorkflowEditor.ts:64 Cannot update a component (`ModernWorkflowEditor`) while rendering a different component (`WorkflowBuilderPage`). To locate the bad setState() call inside `WorkflowBuilderPage`, follow the stack trace as described in https://react.dev/link/setstate-in-render
-overrideMethod @ hook.js:608
-scheduleUpdateOnFiber @ react-dom_client.js?v=f0b574b0:10307
-dispatchSetStateInternal @ react-dom_client.js?v=f0b574b0:5352
-dispatchSetState @ react-dom_client.js?v=f0b574b0:5321
-(anonymous) @ useWorkflowEditor.ts:64
-(anonymous) @ useWorkflowEditor.ts:189
-basicStateReducer @ react-dom_client.js?v=f0b574b0:4406
-updateReducerImpl @ react-dom_client.js?v=f0b574b0:4493
-updateReducer @ react-dom_client.js?v=f0b574b0:4439
-useState @ react-dom_client.js?v=f0b574b0:16790
-exports.useState @ chunk-BQYK6RGN.js?v=f0b574b0:930
-WorkflowBuilderPage @ WorkflowBuilderPage.tsx:75
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<ForwardRef(MenuItem2)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+WorkflowBuilderPage @ WorkflowBuilderPage.tsx:428
 react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4206
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
 updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
 beginWork @ react-dom_client.js?v=f0b574b0:7654
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
@@ -522,182 +106,176 @@ renderRootSync @ react-dom_client.js?v=f0b574b0:10711
 performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
 performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
 flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-hook.js:608 TypeError: Cannot read properties of null (reading 'charAt')
-    at useWorkflowEditor.ts:199:51
-    at basicStateReducer (react-dom_client.js?v=f0b574b0:4406:47)
-    at updateReducerImpl (react-dom_client.js?v=f0b574b0:4493:54)
-    at updateReducer (react-dom_client.js?v=f0b574b0:4439:16)
-    at Object.useState (react-dom_client.js?v=f0b574b0:16790:20)
-    at exports.useState (chunk-BQYK6RGN.js?v=f0b574b0:930:36)
-    at WorkflowBuilderPage (WorkflowBuilderPage.tsx:75:49)
-    at Object.react_stack_bottom_frame (react-dom_client.js?v=f0b574b0:17424:20)
-    at renderWithHooks (react-dom_client.js?v=f0b574b0:4206:24)
-    at updateFunctionComponent (react-dom_client.js?v=f0b574b0:6619:21)
-
-The above error occurred in the <WorkflowBuilderPage> component.
-
-React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
-
-overrideMethod @ hook.js:608
-defaultOnCaughtError @ react-dom_client.js?v=f0b574b0:6264
-logCaughtError @ react-dom_client.js?v=f0b574b0:6296
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6341
-callCallback @ react-dom_client.js?v=f0b574b0:4097
-commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
-flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
-commitRoot @ react-dom_client.js?v=f0b574b0:11080
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-error-handler.ts:246 [Error Handler] ErrorBoundary: TypeError: Cannot read properties of null (reading 'charAt')
-    at useWorkflowEditor.ts:199:51
-    at basicStateReducer (react-dom_client.js?v=f0b574b0:4406:47)
-    at updateReducerImpl (react-dom_client.js?v=f0b574b0:4493:54)
-    at updateReducer (react-dom_client.js?v=f0b574b0:4439:16)
-    at Object.useState (react-dom_client.js?v=f0b574b0:16790:20)
-    at exports.useState (chunk-BQYK6RGN.js?v=f0b574b0:930:36)
-    at WorkflowBuilderPage (WorkflowBuilderPage.tsx:75:49)
-    at Object.react_stack_bottom_frame (react-dom_client.js?v=f0b574b0:17424:20)
-    at renderWithHooks (react-dom_client.js?v=f0b574b0:4206:24)
-    at updateFunctionComponent (react-dom_client.js?v=f0b574b0:6619:21)
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-componentDidCatch @ ErrorBoundary.tsx:28
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17462
-inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6349
-callCallback @ react-dom_client.js?v=f0b574b0:4097
-commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
-flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
-commitRoot @ react-dom_client.js?v=f0b574b0:11080
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
 error-handler.ts:248 Full Error Details:
- Source: ErrorBoundary
-Operation: React component rendering
-Timestamp: 2025-09-25T05:10:43.939Z
+ Source: WorkflowService.getAuthenticatedSDK
+Operation: Getting authenticated SDK instance
+Timestamp: 2025-09-25T05:29:46.159Z
 Error Type: TypeError
-Message: Cannot read properties of null (reading 'charAt')
+Message: authService.getAuthenticatedSDK is not a function
 Stack Trace:
-TypeError: Cannot read properties of null (reading 'charAt')
-    at http://localhost:3000/src/components/workflow/hooks/useWorkflowEditor.ts:131:51
-    at basicStateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4406:47)
-    at updateReducerImpl (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4493:54)
-    at updateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4439:16)
-    at Object.useState (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:16790:20)
-    at exports.useState (http://localhost:3000/node_modules/.vite/deps/chunk-BQYK6RGN.js?v=f0b574b0:930:36)
-    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:84:49)
-    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:17424:20)
-    at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4206:24)
-    at updateFunctionComponent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:6619:21)
-Additional Data: {
-  "componentStack": "\n    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:74:50)\n    at Suspense (<anonymous>)\n    at SuspenseWrapper (http://localhost:3000/src/components/SuspenseWrapper.tsx:57:3)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)\n    at Outlet (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6270:26)\n    at main (<anonymous>)\n    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)\n    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)\n    at div (<anonymous>)\n    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)\n    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)\n    at LayoutFrame (http://localhost:3000/src/components/Layout.tsx:192:51)\n    at RightSidebarProvider (http://localhost:3000/src/components/RightSidebarContext.tsx:23:3)\n    at Layout (<anonymous>)\n    at ProtectedRoute (http://localhost:3000/src/components/ProtectedRoute.tsx:22:27)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)\n    at Routes (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6336:3)\n    at Router (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6279:13)\n    at BrowserRouter (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:9370:3)\n    at SSEProvider (http://localhost:3000/src/services/sse-context.tsx:30:3)\n    at NotificationProvider (http://localhost:3000/src/components/NotificationSystem.tsx:140:3)\n    at DefaultPropsProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6081:3)\n    at RtlProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6057:3)\n    at ThemeProvider2 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6013:5)\n    at ThemeProvider3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6235:5)\n    at ThemeProviderNoVars (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:277:10)\n    at ThemeProvider (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:430:3)\n    at ErrorBoundary (http://localhost:3000/src/components/ErrorBoundary.tsx:8:1)\n    at App (http://localhost:3000/src/App.tsx:98:35)",
-  "errorBoundary": true
-}
+TypeError: authService.getAuthenticatedSDK is not a function
+    at WorkflowService.getSDK (http://localhost:3000/src/services/workflow-service.ts:9:32)
+    at WorkflowService.listTemplates (http://localhost:3000/src/services/workflow-service.ts:212:30)
+    at http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:192:47
 overrideMethod @ hook.js:608
 handleError @ error-handler.ts:248
-componentDidCatch @ ErrorBoundary.tsx:28
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17462
-inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6349
-callCallback @ react-dom_client.js?v=f0b574b0:4097
-commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
+handleError @ error-handler.ts:363
+getSDK @ workflow-service.ts:37
+listTemplates @ workflow-service.ts:268
+(anonymous) @ WorkflowBuilderPage.tsx:218
+await in (anonymous)
+onClick @ WorkflowBuilderPage.tsx:428
+executeDispatch @ react-dom_client.js?v=f0b574b0:11736
 runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
-recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
-commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
-flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
-commitRoot @ react-dom_client.js?v=f0b574b0:11080
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
+processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
+(anonymous) @ react-dom_client.js?v=f0b574b0:12182
+batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
+dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
+<li>
+exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
+(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
+MuiButtonBase-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
 performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
 flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
-commitRoot @ react-dom_client.js?v=f0b574b0:11081
-commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<MuiButtonBaseRoot>
+exports.jsxs @ chunk-OBYCLIUT.js?v=f0b574b0:263
+ButtonBase2 @ @mui_material.js?v=f0b574b0:3767
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<ForwardRef(ButtonBase2)>
+exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
+(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
+MuiMenuItem-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<MuiMenuItemRoot>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+MenuItem2 @ @mui_material.js?v=f0b574b0:27365
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+<ForwardRef(MenuItem2)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+WorkflowBuilderPage @ WorkflowBuilderPage.tsx:428
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7654
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
+(anonymous) @ react-dom_client.js?v=f0b574b0:11649
+error-handler.ts:246 [Error Handler] WorkflowService.listTemplates: undefined
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:246
+handleError @ error-handler.ts:363
+listTemplates @ workflow-service.ts:272
+await in listTemplates
+(anonymous) @ WorkflowBuilderPage.tsx:218
+await in (anonymous)
+onClick @ WorkflowBuilderPage.tsx:428
+executeDispatch @ react-dom_client.js?v=f0b574b0:11736
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
+(anonymous) @ react-dom_client.js?v=f0b574b0:12182
+batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
+dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
+error-handler.ts:248 Full Error Details:
+ Source: WorkflowService.listTemplates
+Operation: Loading workflow templates
+Timestamp: 2025-09-25T05:29:46.162Z
+Error Value: undefined
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:248
+handleError @ error-handler.ts:363
+listTemplates @ workflow-service.ts:272
+await in listTemplates
+(anonymous) @ WorkflowBuilderPage.tsx:218
+await in (anonymous)
+onClick @ WorkflowBuilderPage.tsx:428
+executeDispatch @ react-dom_client.js?v=f0b574b0:11736
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
+(anonymous) @ react-dom_client.js?v=f0b574b0:12182
+batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
+dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
+dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
+dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
 
 
-Something went wrong
-Cannot read properties of null (reading 'charAt')
 
-Error Details (Development Mode):
-Cannot read properties of null (reading 'charAt')
-
-Component Stack:
-    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:74:50)
-    at Suspense (<anonymous>)
-    at SuspenseWrapper (http://localhost:3000/src/components/SuspenseWrapper.tsx:57:3)
-    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)
-    at Outlet (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6270:26)
-    at main (<anonymous>)
-    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)
-    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)
-    at div (<anonymous>)
-    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)
-    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)
-    at LayoutFrame (http://localhost:3000/src/components/Layout.tsx:192:51)
-    at RightSidebarProvider (http://localhost:3000/src/components/RightSidebarContext.tsx:23:3)
-    at Layout (<anonymous>)
-    at ProtectedRoute (http://localhost:3000/src/components/ProtectedRoute.tsx:22:27)
-    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)
-    at Routes (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6336:3)
-    at Router (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6279:13)
-    at BrowserRouter (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:9370:3)
-    at SSEProvider (http://localhost:3000/src/services/sse-context.tsx:30:3)
-    at NotificationProvider (http://localhost:3000/src/components/NotificationSystem.tsx:140:3)
-    at DefaultPropsProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6081:3)
-    at RtlProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6057:3)
-    at ThemeProvider2 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6013:5)
-    at ThemeProvider3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6235:5)
-    at ThemeProviderNoVars (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:277:10)
-    at ThemeProvider (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:430:3)
-    at ErrorBoundary (http://localhost:3000/src/components/ErrorBoundary.tsx:8:1)
-    at App (http://localhost:3000/src/App.tsx:98:35)
-
-Error Stack:
-TypeError: Cannot read properties of null (reading 'charAt')
-    at http://localhost:3000/src/components/workflow/hooks/useWorkflowEditor.ts:131:51
-    at basicStateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4406:47)
-    at updateReducerImpl (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4493:54)
-    at updateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4439:16)
-    at Object.useState (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:16790:20)
-    at exports.useState (http://localhost:3000/node_modules/.vite/deps/chunk-BQYK6RGN.js?v=f0b574b0:930:36)
-    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:84:49)
-    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:17424:20)
-    at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4206:24)
-    at updateFunctionComponent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:6619:21)
-650
+2025-09-25T05:29:26.903879Z [error    ] Problem exception              [chatter.main] correlation_id=01K5ZNJ3KEYXX01J8Z7E2DHGWV detail=Invalid ULID format: must be a valid ULID method=GET status_code=400 title=Bad Request url=http://localhost:8000/api/v1/workflows/definitions/New Workflow/analytics
+2025-09-25T05:29:26.904447Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K5ZNJ3KEYXX01J8Z7E2DHGWV duration=0.012376070022583008 duration_ms=12.376070022583008 method=GET rate_limited=False request_body=None request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzVaTkgxTkJFTlFKNTk0SE5ORVI4UzEzIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODc3ODEzMiwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4Nzc5OTMyfQ.lcnZgk5uzC1xlK4gUu2wxoFAFuOTPssPmh9HWw5OVYc', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzVaTkgxTkY4NFYyRURBNDlXSzVUMVFIIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg3NzgxMzIsInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTM4MjkzMn0.DWx1deBlzuc8wddAQelkf5GnM9v9uh1Zqw9JZSM3SfA'} response_body=None response_headers={
+    "content-type": "application/problem+json",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block",
+    "strict-transport-security": "max-age=31536000; includeSubDomains",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "vary": "Accept-Encoding",
+    "content-encoding": "gzip",
+    "x-correlation-id": "01K5ZNJ3KEYXX01J8Z7E2DHGWV",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "88",
+    "x-ratelimit-reset": "1758778226",
+    "x-ratelimit-window": "60"
+} status_code=400 url=http://localhost:8000/api/v1/workflows/definitions/New Workflow/analytics

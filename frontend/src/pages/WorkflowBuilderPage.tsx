@@ -9,6 +9,15 @@ import {
   Divider,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Typography,
 } from '../utils/mui';
 import {
   UndoIcon,
@@ -35,6 +44,62 @@ import { nodeDefinitions } from '../components/workflow/NodePalette';
 import { WorkflowDefinition, WorkflowNodeType } from '../components/workflow/types';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import { toastService } from '../services/toast-service';
+import { exampleWorkflows } from '../components/workflow/WorkflowExamples';
+
+// Template Selection Component
+const TemplateSelectionList: React.FC<{
+  onSelectTemplate: (templateId: string) => void;
+}> = ({ onSelectTemplate }) => {
+  const [templates, setTemplates] = useState<any[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+
+  useEffect(() => {
+    const loadTemplates = async () => {
+      try {
+        setLoading(true);
+        const workflowService = (await import('../services/workflow-service')).default;
+        const templateList = await workflowService.listTemplates();
+        setTemplates(templateList);
+        setError(null);
+      } catch (err) {
+        setError('Failed to load templates');
+        setTemplates([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    loadTemplates();
+  }, []);
+
+  if (loading) {
+    return <Typography>Loading templates...</Typography>;
+  }
+
+  if (error) {
+    return <Typography color="error">{error}</Typography>;
+  }
+
+  if (templates.length === 0) {
+    return <Typography>No templates available</Typography>;
+  }
+
+  return (
+    <List>
+      {templates.map((template) => (
+        <ListItem key={template.id} disablePadding>
+          <ListItemButton onClick={() => onSelectTemplate(template.id)}>
+            <ListItemText
+              primary={template.name}
+              secondary={template.description || 'No description available'}
+            />
+          </ListItemButton>
+        </ListItem>
+      ))}
+    </List>
+  );
+};
 
 // Demo workflow for initial state
 const defaultWorkflow: WorkflowDefinition = {
@@ -70,6 +135,10 @@ const WorkflowBuilderPage: React.FC = () => {
   const [viewMenuAnchor, setViewMenuAnchor] = useState<null | HTMLElement>(null);
   const [toolsMenuAnchor, setToolsMenuAnchor] = useState<null | HTMLElement>(null);
   const [nodeMenuAnchor, setNodeMenuAnchor] = useState<null | HTMLElement>(null);
+
+  // Dialog states
+  const [showExampleDialog, setShowExampleDialog] = useState(false);
+  const [showTemplateDialog, setShowTemplateDialog] = useState(false);
 
   // Workflow editor function refs
   const addNodeFunctionRef = useRef<((nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void) | null>(null);
@@ -209,29 +278,56 @@ const WorkflowBuilderPage: React.FC = () => {
   }, []);
 
   const handleLoadExample = useCallback(() => {
-    toastService.info('Load Example functionality not implemented');
+    setShowExampleDialog(true);
   }, []);
 
-  const handleLoadTemplate = useCallback(async () => {
+  const handleSelectExample = useCallback((exampleKey: string) => {
+    const example = exampleWorkflows[exampleKey];
+    
+    if (example) {
+      setWorkflow({
+        ...example,
+        metadata: {
+          ...example.metadata,
+          createdAt: new Date().toISOString(),
+          updatedAt: new Date().toISOString(),
+        }
+      });
+      setSelectedNodeId(undefined);
+      setSelectedEdgeId(undefined);
+      toastService.success(`Loaded example: ${example.metadata.name}`);
+      setShowExampleDialog(false);
+    } else {
+      toastService.error('Failed to load example workflow');
+    }
+  }, [setWorkflow, setSelectedNodeId, setSelectedEdgeId]);
+
+  const handleLoadTemplate = useCallback(() => {
+    setShowTemplateDialog(true);
+  }, []);
+
+  const handleSelectTemplate = useCallback(async (templateId?: string) => {
     try {
       const workflowService = (await import('../services/workflow-service')).default;
       const templates = await workflowService.listTemplates();
       
       if (templates.length === 0) {
         toastService.info('No templates available');
+        setShowTemplateDialog(false);
         return;
       }
       
-      // For now, load the first template. In a real implementation,
-      // this should open a template selection dialog
-      const template = templates[0];
+      // Use provided templateId or first template
+      const template = templateId ? templates.find(t => t.id === templateId) || templates[0] : templates[0];
       const newWorkflow = await workflowService.createFromTemplate(template.id);
       setWorkflow(newWorkflow);
       setSelectedNodeId(undefined);
       setSelectedEdgeId(undefined);
       toastService.success(`Loaded template: ${template.name}`);
+      setShowTemplateDialog(false);
     } catch (error) {
       toastService.error('Failed to load template');
+      setShowTemplateDialog(false);
     }
   }, [setWorkflow, setSelectedNodeId, setSelectedEdgeId]);
 
@@ -484,6 +580,55 @@ const WorkflowBuilderPage: React.FC = () => {
           />
         </ReactFlowProvider>
       </Box>
+
+      {/* Example Selection Dialog */}
+      <Dialog
+        open={showExampleDialog}
+        onClose={() => setShowExampleDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Load Example Workflow</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Choose an example workflow to load:
+          </Typography>
+          <List>
+            {Object.entries(exampleWorkflows).map(([key, example]) => (
+              <ListItem key={key} disablePadding>
+                <ListItemButton onClick={() => handleSelectExample(key)}>
+                  <ListItemText
+                    primary={example.metadata.name}
+                    secondary={example.metadata.description}
+                  />
+                </ListItemButton>
+              </ListItem>
+            ))}
+          </List>
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowExampleDialog(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Template Selection Dialog */}
+      <Dialog
+        open={showTemplateDialog}
+        onClose={() => setShowTemplateDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Load Template</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Loading templates...
+          </Typography>
+          <TemplateSelectionList onSelectTemplate={handleSelectTemplate} />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setShowTemplateDialog(false)}>Cancel</Button>
+        </DialogActions>
+      </Dialog>
     </PageLayout>
   );
 };

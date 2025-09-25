@@ -50,12 +50,7 @@ const WorkflowBuilderPage = lazy(
 const WorkflowExecutionsPage = lazy(
   () => import('./pages/WorkflowExecutionsPage')
 );
-const WorkflowBuilderDemo = lazy(
-  () => import('./pages/WorkflowBuilderDemo')
-);
-const NewWorkflowBuilderDemo = lazy(
-  () => import('./pages/NewWorkflowBuilderDemo')
-);
+
 const ResponsiveLayoutDemo = lazy(() => import('./pages/ResponsiveLayoutDemo'));
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
@@ -207,53 +202,6 @@ function App() {
                     }
                   />
 
-                  {/* Standalone Demo Route - No auth required */}
-                  <Route
-                    path="/workflow-demo"
-                    element={
-                      <SectionErrorBoundary
-                        level="page"
-                        name="WorkflowBuilderDemo"
-                        showHomeButton={false}
-                      >
-                        <SuspenseWrapper loadingMessage="Loading workflow builder demo...">
-                          <WorkflowBuilderDemo />
-                        </SuspenseWrapper>
-                      </SectionErrorBoundary>
-                    }
-                  />
-
-                  {/* Responsive Layout Demo - No auth required */}
-                  <Route
-                    path="/layout-demo"
-                    element={
-                      <SectionErrorBoundary
-                        level="page"
-                        name="ResponsiveLayoutDemo"
-                        showHomeButton={false}
-                      >
-                        <SuspenseWrapper loadingMessage="Loading responsive layout demo...">
-                          <ResponsiveLayoutDemo />
-                        </SuspenseWrapper>
-                      </SectionErrorBoundary>
-                    }
-                  />
-
-                  {/* New Workflow Builder Demo - No auth required */}
-                  <Route
-                    path="/new-workflow-demo"
-                    element={
-                      <SectionErrorBoundary
-                        level="page"
-                        name="NewWorkflowBuilderDemo"
-                        showHomeButton={false}
-                      >
-                        <SuspenseWrapper loadingMessage="Loading new workflow builder demo...">
-                          <NewWorkflowBuilderDemo />
-                        </SuspenseWrapper>
-                      </SectionErrorBoundary>
-                    }
-                  />
 
                   {/* Protected routes */}
                   <Route
@@ -412,14 +360,7 @@ function App() {
                         </SuspenseWrapper>
                       }
                     />
-                    <Route
-                      path="workflow-demo"
-                      element={
-                        <SuspenseWrapper loadingMessage="Loading workflow builder demo...">
-                          <WorkflowBuilderDemo />
-                        </SuspenseWrapper>
-                      }
-                    />
+
                     <Route
                       path="ab-testing"
                       element={

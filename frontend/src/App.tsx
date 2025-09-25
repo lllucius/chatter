@@ -41,11 +41,20 @@ const AgentsPage = lazy(() => import('./pages/AgentsPage'));
 const AdministrationPage = lazy(() => import('./pages/AdministrationPage'));
 const ModelManagementPage = lazy(() => import('./pages/ModelManagementPage'));
 const ToolsPage = lazy(() => import('./pages/ToolsPage'));
-const WorkflowManagementPage = lazy(
-  () => import('./pages/WorkflowManagementPage')
+const WorkflowTemplatesPage = lazy(
+  () => import('./pages/WorkflowTemplatesPage')
+);
+const WorkflowBuilderPage = lazy(
+  () => import('./pages/WorkflowBuilderPage')
+);
+const WorkflowExecutionsPage = lazy(
+  () => import('./pages/WorkflowExecutionsPage')
 );
 const WorkflowBuilderDemo = lazy(
   () => import('./pages/WorkflowBuilderDemo')
+);
+const NewWorkflowBuilderDemo = lazy(
+  () => import('./pages/NewWorkflowBuilderDemo')
 );
 const ResponsiveLayoutDemo = lazy(() => import('./pages/ResponsiveLayoutDemo'));
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
@@ -230,6 +239,22 @@ function App() {
                     }
                   />
 
+                  {/* New Workflow Builder Demo - No auth required */}
+                  <Route
+                    path="/new-workflow-demo"
+                    element={
+                      <SectionErrorBoundary
+                        level="page"
+                        name="NewWorkflowBuilderDemo"
+                        showHomeButton={false}
+                      >
+                        <SuspenseWrapper loadingMessage="Loading new workflow builder demo...">
+                          <NewWorkflowBuilderDemo />
+                        </SuspenseWrapper>
+                      </SectionErrorBoundary>
+                    }
+                  />
+
                   {/* Protected routes */}
                   <Route
                     path="/"
@@ -364,10 +389,26 @@ function App() {
                       }
                     />
                     <Route
-                      path="workflows"
+                      path="workflows/templates"
                       element={
-                        <SuspenseWrapper loadingMessage="Loading workflow management...">
-                          <WorkflowManagementPage />
+                        <SuspenseWrapper loadingMessage="Loading workflow templates...">
+                          <WorkflowTemplatesPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/builder"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow builder...">
+                          <WorkflowBuilderPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/executions"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow executions...">
+                          <WorkflowExecutionsPage />
                         </SuspenseWrapper>
                       }
                     />

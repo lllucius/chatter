@@ -94,13 +94,21 @@ const navSections: NavSection[] = [
     ],
   },
   {
+    title: 'Workflows',
+    defaultExpanded: true,
+    items: [
+      { label: 'Templates', path: '/workflows/templates', icon: <WorkflowIcon /> },
+      { label: 'Builder', path: '/workflows/builder', icon: <WorkflowIcon /> },
+      { label: 'Executions', path: '/workflows/executions', icon: <WorkflowIcon /> },
+    ],
+  },
+  {
     title: 'AI & Models',
     defaultExpanded: true,
     items: [
       { label: 'Models', path: '/models', icon: <ModelsIcon /> },
       { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
       { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
-      { label: 'Workflows', path: '/workflows', icon: <WorkflowIcon /> },
       { label: 'A/B Testing', path: '/ab-testing', icon: <ABTestIcon /> },
     ],
   },

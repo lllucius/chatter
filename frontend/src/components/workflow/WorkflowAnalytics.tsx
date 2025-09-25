@@ -96,9 +96,17 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
 
   React.useEffect(() => {
     const fetchAnalytics = async () => {
-      // Only fetch analytics if we have a workflow with an ID
-      if (!workflow.metadata?.name || !workflow.nodes.length) {
-        // Fallback to simple client-side calculation for workflows without ID
+      // Only fetch analytics if we have a saved workflow with a valid ID
+      if (!workflow.id || !workflow.nodes.length) {
+        // Fallback to simple client-side calculation for unsaved workflows
+        setAnalytics(calculateSimpleMetrics());
+        return;
+      }
+
+      // Validate that the ID looks like a ULID (26 characters, alphanumeric)
+      const ulidPattern = /^[0123456789ABCDEFGHJKMNPQRSTVWXYZ]{26}$/;
+      if (!ulidPattern.test(workflow.id)) {
+        // If it's not a valid ULID, use client-side analytics
         setAnalytics(calculateSimpleMetrics());
         return;
       }
@@ -110,7 +118,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         // Use the new server-side analytics API
         const response =
           await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
-            workflow.metadata.name
+            workflow.id
           );
 
         // Transform server response to client format

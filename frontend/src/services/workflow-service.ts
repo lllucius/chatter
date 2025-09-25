@@ -32,10 +32,10 @@ class WorkflowService {
    */
   private async getSDK(): Promise<ChatterSDK> {
     try {
-      return await authService.getAuthenticatedSDK();
+      return authService.getSDK();
     } catch (error) {
       throw handleError(error, { 
-        source: 'WorkflowService.getAuthenticatedSDK',
+        source: 'WorkflowService.getSDK',
         operation: 'Getting authenticated SDK instance'
       });
     }

@@ -71,62 +71,133 @@ const WorkflowBuilderPage: React.FC = () => {
   const [toolsMenuAnchor, setToolsMenuAnchor] = useState<null | HTMLElement>(null);
   const [nodeMenuAnchor, setNodeMenuAnchor] = useState<null | HTMLElement>(null);
 
-  // Workflow editor actions (these would be passed from the ModernWorkflowEditor)
+  // Workflow editor function refs
+  const [addNodeFunction, setAddNodeFunction] = useState<((nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void) | null>(null);
+  const [viewControls, setViewControls] = useState<{
+    zoomIn: () => void;
+    zoomOut: () => void;
+    fitView: () => void;
+    toggleGrid: () => void;
+    snapToGrid: boolean;
+  } | null>(null);
+  const [editControls, setEditControls] = useState<{
+    undo: () => void;
+    redo: () => void;
+    copy: () => void;
+    paste: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
+    canPaste: boolean;
+  } | null>(null);
+
   const handleUndo = useCallback(() => {
-    toastService.info('Undo functionality not implemented');
-  }, []);
+    if (editControls) {
+      editControls.undo();
+    }
+  }, [editControls]);
 
   const handleRedo = useCallback(() => {
-    toastService.info('Redo functionality not implemented');
-  }, []);
+    if (editControls) {
+      editControls.redo();
+    }
+  }, [editControls]);
 
   const handleCopy = useCallback(() => {
-    toastService.info('Copy functionality not implemented');
-  }, []);
+    if (editControls) {
+      editControls.copy();
+    }
+  }, [editControls]);
 
   const handlePaste = useCallback(() => {
-    toastService.info('Paste functionality not implemented');
-  }, []);
+    if (editControls) {
+      editControls.paste();
+    }
+  }, [editControls]);
 
   const handleZoomIn = useCallback(() => {
-    toastService.info('Zoom In functionality not implemented');
-  }, []);
+    if (viewControls) {
+      viewControls.zoomIn();
+    }
+  }, [viewControls]);
 
   const handleZoomOut = useCallback(() => {
-    toastService.info('Zoom Out functionality not implemented');
-  }, []);
+    if (viewControls) {
+      viewControls.zoomOut();
+    }
+  }, [viewControls]);
 
   const handleFitView = useCallback(() => {
-    toastService.info('Fit View functionality not implemented');
-  }, []);
+    if (viewControls) {
+      viewControls.fitView();
+    }
+  }, [viewControls]);
 
   const handleToggleGrid = useCallback(() => {
-    toastService.info('Toggle Grid functionality not implemented');
-  }, []);
-
-  const handleValidate = useCallback(() => {
-    // Basic validation - check if there are nodes and edges are connected
-    if (workflow.nodes.length === 0) {
-      setValidationStatus('invalid');
-      toastService.error('Workflow is empty');
-      return;
+    if (viewControls) {
+      viewControls.toggleGrid();
     }
-    setValidationStatus('valid');
-    toastService.success('Workflow is valid');
+  }, [viewControls]);
+
+  const handleValidate = useCallback(async () => {
+    try {
+      const workflowService = (await import('../services/workflow-service')).default;
+      const result = await workflowService.validateWorkflow(workflow);
+      
+      if (result.isValid) {
+        setValidationStatus('valid');
+        toastService.success('Workflow is valid');
+      } else {
+        setValidationStatus('invalid');
+        const errorCount = result.errors.length;
+        const warningCount = result.warnings.length;
+        toastService.error(
+          `Found ${errorCount} error${errorCount !== 1 ? 's' : ''}${
+            warningCount > 0 ? ` and ${warningCount} warning${warningCount !== 1 ? 's' : ''}` : ''
+          }`
+        );
+      }
+    } catch (error) {
+      setValidationStatus('invalid');
+      toastService.error('Failed to validate workflow');
+    }
   }, [workflow]);
 
   const handleSave = useCallback(async () => {
     setIsSaving(true);
     try {
-      // Simulate save operation
-      await new Promise(resolve => setTimeout(resolve, 1000));
+      const workflowService = (await import('../services/workflow-service')).default;
+      
+      if (workflow.id) {
+        // Update existing workflow
+        await workflowService.updateWorkflow({
+          id: workflow.id,
+          name: workflow.metadata.name,
+          description: workflow.metadata.description,
+          nodes: workflow.nodes,
+          edges: workflow.edges,
+          metadata: workflow.metadata,
+        });
+      } else {
+        // Create new workflow
+        const newWorkflow = await workflowService.createWorkflow({
+          name: workflow.metadata.name,
+          description: workflow.metadata.description,
+          nodes: workflow.nodes,
+          edges: workflow.edges,
+          metadata: workflow.metadata,
+        });
+        // Update the workflow with the new ID
+        setWorkflow(prev => ({ ...prev, id: newWorkflow.id }));
+      }
+      
       toastService.success('Workflow saved successfully');
     } catch (error) {
+      console.error('Save error:', error);
       toastService.error('Failed to save workflow');
     } finally {
       setIsSaving(false);
     }
-  }, []);
+  }, [workflow, setWorkflow]);
 
   const handleClear = useCallback(() => {
     if (window.confirm('Are you sure you want to clear the workflow?')) {
@@ -141,14 +212,36 @@ const WorkflowBuilderPage: React.FC = () => {
     toastService.info('Load Example functionality not implemented');
   }, []);
 
-  const handleLoadTemplate = useCallback(() => {
-    toastService.info('Load Template functionality not implemented');
-  }, []);
+  const handleLoadTemplate = useCallback(async () => {
+    try {
+      const workflowService = (await import('../services/workflow-service')).default;
+      const templates = await workflowService.listTemplates();
+      
+      if (templates.length === 0) {
+        toastService.info('No templates available');
+        return;
+      }
+      
+      // For now, load the first template. In a real implementation,
+      // this should open a template selection dialog
+      const template = templates[0];
+      const newWorkflow = await workflowService.createFromTemplate(template.id);
+      setWorkflow(newWorkflow);
+      setSelectedNodeId(undefined);
+      setSelectedEdgeId(undefined);
+      toastService.success(`Loaded template: ${template.name}`);
+    } catch (error) {
+      toastService.error('Failed to load template');
+    }
+  }, [setWorkflow, setSelectedNodeId, setSelectedEdgeId]);
 
   const handleAddNode = useCallback((nodeType: WorkflowNodeType) => {
-    toastService.info(`Add ${nodeType} node functionality not implemented`);
+    // Use the addNode function from the editor if available
+    if (addNodeFunction) {
+      addNodeFunction(nodeType);
+    }
     setNodeMenuAnchor(null);
-  }, []);
+  }, [addNodeFunction]);
 
   // Set up right sidebar content
   useEffect(() => {
@@ -378,6 +471,9 @@ const WorkflowBuilderPage: React.FC = () => {
             initialWorkflow={workflow}
             onWorkflowChange={setWorkflow}
             onSave={handleSave}
+            onAddNodeRef={setAddNodeFunction}
+            onViewControlsRef={setViewControls}
+            onEditControlsRef={setEditControls}
             readOnly={false}
             showToolbar={false} // We're using our custom toolbar
             showPalette={false} // We're using dropdown instead

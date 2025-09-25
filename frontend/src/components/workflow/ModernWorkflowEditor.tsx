@@ -95,6 +95,9 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
   initialWorkflow,
   onWorkflowChange,
   onSave,
+  onAddNodeRef,
+  onViewControlsRef,
+  onEditControlsRef,
   readOnly = false,
   showToolbar = true,
   showPalette = true,
@@ -346,6 +349,41 @@ const ModernWorkflowEditor: React.FC<WorkflowEditorProps> = ({
       setShowPropertiesPanel(showProperties);
     }
   }, [isMobile, showPalette, showProperties]);
+
+  // Expose addNode function to parent
+  useEffect(() => {
+    if (onAddNodeRef) {
+      onAddNodeRef(addNode);
+    }
+  }, [onAddNodeRef, addNode]);
+
+  // Expose view controls to parent
+  useEffect(() => {
+    if (onViewControlsRef) {
+      onViewControlsRef({
+        zoomIn,
+        zoomOut,
+        fitView,
+        toggleGrid: () => setSnapToGrid(!snapToGrid),
+        snapToGrid,
+      });
+    }
+  }, [onViewControlsRef, zoomIn, zoomOut, fitView, snapToGrid]);
+
+  // Expose edit controls to parent
+  useEffect(() => {
+    if (onEditControlsRef) {
+      onEditControlsRef({
+        undo,
+        redo,
+        copy: copySelection,
+        paste: pasteFromClipboard,
+        canUndo,
+        canRedo,
+        canPaste: !!clipboardData,
+      });
+    }
+  }, [onEditControlsRef, undo, redo, copySelection, pasteFromClipboard, canUndo, canRedo, clipboardData]);
 
   // Mobile panel toggle handlers
   const toggleMobileNodePalette = useCallback(() => {

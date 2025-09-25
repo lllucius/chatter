@@ -425,6 +425,23 @@ export interface WorkflowEditorProps {
   initialWorkflow?: WorkflowDefinition;
   onWorkflowChange?: (workflow: WorkflowDefinition) => void;
   onSave?: (workflow: WorkflowDefinition) => Promise<void>;
+  onAddNodeRef?: (addNodeFn: (nodeType: WorkflowNodeType, position?: { x: number; y: number }) => void) => void;
+  onViewControlsRef?: (controls: {
+    zoomIn: () => void;
+    zoomOut: () => void;
+    fitView: () => void;
+    toggleGrid: () => void;
+    snapToGrid: boolean;
+  }) => void;
+  onEditControlsRef?: (controls: {
+    undo: () => void;
+    redo: () => void;
+    copy: () => void;
+    paste: () => void;
+    canUndo: boolean;
+    canRedo: boolean;
+    canPaste: boolean;
+  }) => void;
   readOnly?: boolean;
   showToolbar?: boolean;
   showPalette?: boolean;

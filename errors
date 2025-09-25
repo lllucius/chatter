@@ -1,321 +1,703 @@
-[32mINFO[0m:     Will watch for changes in these directories: ['/home/yam/chatter']
-[32mINFO[0m:     Uvicorn running on [1mhttp://0.0.0.0:8000[0m (Press CTRL+C to quit)
-[32mINFO[0m:     Started reloader process [[36m[1m178894[0m] using [36m[1mWatchFiles[0m
-[32mINFO[0m:     Started server process [[36m178942[0m]
-[32mINFO[0m:     Waiting for application startup.
-[32mINFO[0m:     Application startup complete.
-[31mERROR[0m:    Exception in ASGI application
-  + Exception Group Traceback (most recent call last):
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 77, in collapse_excgroups
-  |     yield
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 183, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  |   File "/home/yam/.local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 772, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    |     result = await app(  # type: ignore[func-returns-value]
-    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    |     return await self.app(scope, receive, send)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    |     await self.app(scope, receive, _send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    |     await self.simple_response(scope, receive, send, request_headers=headers)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    |     await responder(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    |     await self.app(scope, receive, self.send_with_compression)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    |     await route.handle(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    |     response = await f(request)
-    |                ^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
-    |     content = await serialize_response(
-    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
-    |     raise ResponseValidationError(
-    | fastapi.exceptions.ResponseValidationError: 7 validation errors:
-    |   {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    | 
-    +------------------------------------
+sse-context.tsx:87 Auto-connecting SSE...
+sse-manager.ts:148 SSE: Connecting to http://localhost:8000/api/v1/events/stream
+ModernWorkflowEditor.tsx:500 [React Flow]: The React Flow parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+overrideMethod @ hook.js:608
+devWarn @ @xyflow_react.js?v=f0b574b0:2890
+updateDimensions @ @xyflow_react.js?v=f0b574b0:6060
+(anonymous) @ @xyflow_react.js?v=f0b574b0:6065
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17486
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+commitHookEffectListMount @ react-dom_client.js?v=f0b574b0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=f0b574b0:8518
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10016
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9965
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9940
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9890
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9881
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9984
+recursivelyTraversePassiveMountEffects @ react-dom_client.js?v=f0b574b0:9868
+commitPassiveMountOnFiber @ react-dom_client.js?v=f0b574b0:9899
+flushPassiveEffects @ react-dom_client.js?v=f0b574b0:11302
+flushPendingEffects @ react-dom_client.js?v=f0b574b0:11276
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11632
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+<ZoomPane>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+FlowRendererComponent @ @xyflow_react.js?v=f0b574b0:6666
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
+updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
+beginWork @ react-dom_client.js?v=f0b574b0:7915
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<FlowRenderer>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+GraphViewComponent @ @xyflow_react.js?v=f0b574b0:7481
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
+updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
+beginWork @ react-dom_client.js?v=f0b574b0:7915
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<GraphView>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+ReactFlow @ @xyflow_react.js?v=f0b574b0:7863
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<ForwardRef(ReactFlow)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+ModernWorkflowEditor @ ModernWorkflowEditor.tsx:500
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7654
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<ModernWorkflowEditor>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+WorkflowBuilderPage @ WorkflowBuilderPage.tsx:470
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7613
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+ModernWorkflowEditor.tsx:500 [React Flow]: The React Flow parent container needs a width and a height to render the graph. Help: https://reactflow.dev/error#004
+overrideMethod @ hook.js:600
+devWarn @ @xyflow_react.js?v=f0b574b0:2890
+updateDimensions @ @xyflow_react.js?v=f0b574b0:6060
+(anonymous) @ @xyflow_react.js?v=f0b574b0:6065
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17486
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+commitHookEffectListMount @ react-dom_client.js?v=f0b574b0:8460
+commitHookPassiveMountEffects @ react-dom_client.js?v=f0b574b0:8518
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10016
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10054
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10009
+recursivelyTraverseReconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:9995
+reconnectPassiveEffects @ react-dom_client.js?v=f0b574b0:10031
+doubleInvokeEffectsOnFiber @ react-dom_client.js?v=f0b574b0:11461
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1487
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11442
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+recursivelyTraverseAndDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11438
+commitDoubleInvokeEffectsInDEV @ react-dom_client.js?v=f0b574b0:11469
+flushPassiveEffects @ react-dom_client.js?v=f0b574b0:11309
+flushPendingEffects @ react-dom_client.js?v=f0b574b0:11276
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11632
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+<ZoomPane>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+FlowRendererComponent @ @xyflow_react.js?v=f0b574b0:6666
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
+updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
+beginWork @ react-dom_client.js?v=f0b574b0:7915
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<FlowRenderer>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+GraphViewComponent @ @xyflow_react.js?v=f0b574b0:7481
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+updateSimpleMemoComponent @ react-dom_client.js?v=f0b574b0:6528
+updateMemoComponent @ react-dom_client.js?v=f0b574b0:6482
+beginWork @ react-dom_client.js?v=f0b574b0:7915
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<GraphView>
+exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
+ReactFlow @ @xyflow_react.js?v=f0b574b0:7863
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
+beginWork @ react-dom_client.js?v=f0b574b0:7864
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<ForwardRef(ReactFlow)>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+ModernWorkflowEditor @ ModernWorkflowEditor.tsx:500
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7654
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+<ModernWorkflowEditor>
+exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
+WorkflowBuilderPage @ WorkflowBuilderPage.tsx:470
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7613
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopConcurrentByScheduler @ react-dom_client.js?v=f0b574b0:10864
+renderRootConcurrent @ react-dom_client.js?v=f0b574b0:10844
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performWorkOnRootViaSchedulerTask @ react-dom_client.js?v=f0b574b0:11623
+performWorkUntilDeadline @ react-dom_client.js?v=f0b574b0:36
+useWorkflowEditor.ts:64 Cannot update a component (`ModernWorkflowEditor`) while rendering a different component (`WorkflowBuilderPage`). To locate the bad setState() call inside `WorkflowBuilderPage`, follow the stack trace as described in https://react.dev/link/setstate-in-render
+overrideMethod @ hook.js:608
+scheduleUpdateOnFiber @ react-dom_client.js?v=f0b574b0:10307
+dispatchSetStateInternal @ react-dom_client.js?v=f0b574b0:5352
+dispatchSetState @ react-dom_client.js?v=f0b574b0:5321
+(anonymous) @ useWorkflowEditor.ts:64
+(anonymous) @ useWorkflowEditor.ts:189
+basicStateReducer @ react-dom_client.js?v=f0b574b0:4406
+updateReducerImpl @ react-dom_client.js?v=f0b574b0:4493
+updateReducer @ react-dom_client.js?v=f0b574b0:4439
+useState @ react-dom_client.js?v=f0b574b0:16790
+exports.useState @ chunk-BQYK6RGN.js?v=f0b574b0:930
+WorkflowBuilderPage @ WorkflowBuilderPage.tsx:75
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
+renderWithHooks @ react-dom_client.js?v=f0b574b0:4206
+updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
+beginWork @ react-dom_client.js?v=f0b574b0:7654
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
+workLoopSync @ react-dom_client.js?v=f0b574b0:10728
+renderRootSync @ react-dom_client.js?v=f0b574b0:10711
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+hook.js:608 TypeError: Cannot read properties of null (reading 'charAt')
+    at useWorkflowEditor.ts:199:51
+    at basicStateReducer (react-dom_client.js?v=f0b574b0:4406:47)
+    at updateReducerImpl (react-dom_client.js?v=f0b574b0:4493:54)
+    at updateReducer (react-dom_client.js?v=f0b574b0:4439:16)
+    at Object.useState (react-dom_client.js?v=f0b574b0:16790:20)
+    at exports.useState (chunk-BQYK6RGN.js?v=f0b574b0:930:36)
+    at WorkflowBuilderPage (WorkflowBuilderPage.tsx:75:49)
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=f0b574b0:17424:20)
+    at renderWithHooks (react-dom_client.js?v=f0b574b0:4206:24)
+    at updateFunctionComponent (react-dom_client.js?v=f0b574b0:6619:21)
 
-During handling of the above exception, another exception occurred:
+The above error occurred in the <WorkflowBuilderPage> component.
 
-Traceback (most recent call last):
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    await self.simple_response(scope, receive, send, request_headers=headers)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    await responder(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    await self.app(scope, receive, self.send_with_compression)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
-    content = await serialize_response(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
-    raise ResponseValidationError(
-fastapi.exceptions.ResponseValidationError: 7 validation errors:
-  {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
+React will try to recreate this component tree from scratch using the error boundary you provided, ErrorBoundary.
 
-[32mINFO[0m:     Shutting down
-[32mINFO[0m:     Waiting for connections to close. (CTRL+C to force quit)
-[32mINFO[0m:     Waiting for application shutdown.
-[32mINFO[0m:     Application shutdown complete.
-[32mINFO[0m:     Finished server process [[36m178942[0m]
-[32mINFO[0m:     Stopping reloader process [[36m[1m178894[0m]
+overrideMethod @ hook.js:608
+defaultOnCaughtError @ react-dom_client.js?v=f0b574b0:6264
+logCaughtError @ react-dom_client.js?v=f0b574b0:6296
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6341
+callCallback @ react-dom_client.js?v=f0b574b0:4097
+commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
+flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
+commitRoot @ react-dom_client.js?v=f0b574b0:11080
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+error-handler.ts:246 [Error Handler] ErrorBoundary: TypeError: Cannot read properties of null (reading 'charAt')
+    at useWorkflowEditor.ts:199:51
+    at basicStateReducer (react-dom_client.js?v=f0b574b0:4406:47)
+    at updateReducerImpl (react-dom_client.js?v=f0b574b0:4493:54)
+    at updateReducer (react-dom_client.js?v=f0b574b0:4439:16)
+    at Object.useState (react-dom_client.js?v=f0b574b0:16790:20)
+    at exports.useState (chunk-BQYK6RGN.js?v=f0b574b0:930:36)
+    at WorkflowBuilderPage (WorkflowBuilderPage.tsx:75:49)
+    at Object.react_stack_bottom_frame (react-dom_client.js?v=f0b574b0:17424:20)
+    at renderWithHooks (react-dom_client.js?v=f0b574b0:4206:24)
+    at updateFunctionComponent (react-dom_client.js?v=f0b574b0:6619:21)
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:246
+componentDidCatch @ ErrorBoundary.tsx:28
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17462
+inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6349
+callCallback @ react-dom_client.js?v=f0b574b0:4097
+commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
+flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
+commitRoot @ react-dom_client.js?v=f0b574b0:11080
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+error-handler.ts:248 Full Error Details:
+ Source: ErrorBoundary
+Operation: React component rendering
+Timestamp: 2025-09-25T05:10:43.939Z
+Error Type: TypeError
+Message: Cannot read properties of null (reading 'charAt')
+Stack Trace:
+TypeError: Cannot read properties of null (reading 'charAt')
+    at http://localhost:3000/src/components/workflow/hooks/useWorkflowEditor.ts:131:51
+    at basicStateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4406:47)
+    at updateReducerImpl (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4493:54)
+    at updateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4439:16)
+    at Object.useState (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:16790:20)
+    at exports.useState (http://localhost:3000/node_modules/.vite/deps/chunk-BQYK6RGN.js?v=f0b574b0:930:36)
+    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:84:49)
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:17424:20)
+    at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4206:24)
+    at updateFunctionComponent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:6619:21)
+Additional Data: {
+  "componentStack": "\n    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:74:50)\n    at Suspense (<anonymous>)\n    at SuspenseWrapper (http://localhost:3000/src/components/SuspenseWrapper.tsx:57:3)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)\n    at Outlet (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6270:26)\n    at main (<anonymous>)\n    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)\n    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)\n    at div (<anonymous>)\n    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)\n    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)\n    at LayoutFrame (http://localhost:3000/src/components/Layout.tsx:192:51)\n    at RightSidebarProvider (http://localhost:3000/src/components/RightSidebarContext.tsx:23:3)\n    at Layout (<anonymous>)\n    at ProtectedRoute (http://localhost:3000/src/components/ProtectedRoute.tsx:22:27)\n    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)\n    at Routes (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6336:3)\n    at Router (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6279:13)\n    at BrowserRouter (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:9370:3)\n    at SSEProvider (http://localhost:3000/src/services/sse-context.tsx:30:3)\n    at NotificationProvider (http://localhost:3000/src/components/NotificationSystem.tsx:140:3)\n    at DefaultPropsProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6081:3)\n    at RtlProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6057:3)\n    at ThemeProvider2 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6013:5)\n    at ThemeProvider3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6235:5)\n    at ThemeProviderNoVars (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:277:10)\n    at ThemeProvider (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:430:3)\n    at ErrorBoundary (http://localhost:3000/src/components/ErrorBoundary.tsx:8:1)\n    at App (http://localhost:3000/src/App.tsx:98:35)",
+  "errorBoundary": true
+}
+overrideMethod @ hook.js:608
+handleError @ error-handler.ts:248
+componentDidCatch @ ErrorBoundary.tsx:28
+react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17462
+inst.componentDidCatch.update.callback @ react-dom_client.js?v=f0b574b0:6349
+callCallback @ react-dom_client.js?v=f0b574b0:4097
+commitCallbacks @ react-dom_client.js?v=f0b574b0:4109
+runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
+commitClassCallbacks @ react-dom_client.js?v=f0b574b0:8543
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9011
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:8956
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9096
+recursivelyTraverseLayoutEffects @ react-dom_client.js?v=f0b574b0:9682
+commitLayoutEffectOnFiber @ react-dom_client.js?v=f0b574b0:9016
+flushLayoutEffects @ react-dom_client.js?v=f0b574b0:11174
+commitRoot @ react-dom_client.js?v=f0b574b0:11080
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10457
+performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
+flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
+flushSpawnedWork @ react-dom_client.js?v=f0b574b0:11254
+commitRoot @ react-dom_client.js?v=f0b574b0:11081
+commitRootWhenReady @ react-dom_client.js?v=f0b574b0:10512
+
+
+Something went wrong
+Cannot read properties of null (reading 'charAt')
+
+Error Details (Development Mode):
+Cannot read properties of null (reading 'charAt')
+
+Component Stack:
+    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:74:50)
+    at Suspense (<anonymous>)
+    at SuspenseWrapper (http://localhost:3000/src/components/SuspenseWrapper.tsx:57:3)
+    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)
+    at Outlet (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6270:26)
+    at main (<anonymous>)
+    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)
+    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)
+    at div (<anonymous>)
+    at Styled(div) (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:2391:45)
+    at Box3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:5419:19)
+    at LayoutFrame (http://localhost:3000/src/components/Layout.tsx:192:51)
+    at RightSidebarProvider (http://localhost:3000/src/components/RightSidebarContext.tsx:23:3)
+    at Layout (<anonymous>)
+    at ProtectedRoute (http://localhost:3000/src/components/ProtectedRoute.tsx:22:27)
+    at RenderedRoute (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:5575:26)
+    at Routes (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6336:3)
+    at Router (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:6279:13)
+    at BrowserRouter (http://localhost:3000/node_modules/.vite/deps/react-router-dom.js?v=f0b574b0:9370:3)
+    at SSEProvider (http://localhost:3000/src/services/sse-context.tsx:30:3)
+    at NotificationProvider (http://localhost:3000/src/components/NotificationSystem.tsx:140:3)
+    at DefaultPropsProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6081:3)
+    at RtlProvider (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6057:3)
+    at ThemeProvider2 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6013:5)
+    at ThemeProvider3 (http://localhost:3000/node_modules/.vite/deps/chunk-2USXEQSY.js?v=f0b574b0:6235:5)
+    at ThemeProviderNoVars (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:277:10)
+    at ThemeProvider (http://localhost:3000/node_modules/.vite/deps/chunk-5GUWOTZC.js?v=f0b574b0:430:3)
+    at ErrorBoundary (http://localhost:3000/src/components/ErrorBoundary.tsx:8:1)
+    at App (http://localhost:3000/src/App.tsx:98:35)
+
+Error Stack:
+TypeError: Cannot read properties of null (reading 'charAt')
+    at http://localhost:3000/src/components/workflow/hooks/useWorkflowEditor.ts:131:51
+    at basicStateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4406:47)
+    at updateReducerImpl (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4493:54)
+    at updateReducer (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4439:16)
+    at Object.useState (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:16790:20)
+    at exports.useState (http://localhost:3000/node_modules/.vite/deps/chunk-BQYK6RGN.js?v=f0b574b0:930:36)
+    at WorkflowBuilderPage (http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:84:49)
+    at Object.react_stack_bottom_frame (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:17424:20)
+    at renderWithHooks (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:4206:24)
+    at updateFunctionComponent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=f0b574b0:6619:21)
+650

@@ -6,6 +6,7 @@ of the original analytics system.
 
 import hashlib
 import json
+from datetime import datetime, UTC
 from typing import Any
 
 from chatter.core.cache_factory import get_persistent_cache
@@ -78,17 +79,34 @@ class SimplifiedWorkflowAnalyticsService:
         complexity = self._calculate_basic_complexity(nodes, edges)
 
         # Simple suggestions
-        suggestions = self._get_basic_suggestions(nodes, edges)
+        optimization_suggestions = self._get_basic_suggestions(nodes, edges)
 
         # Basic bottleneck detection
         bottlenecks = self._detect_basic_bottlenecks(nodes, edges)
 
+        # Calculate execution paths (simplified)
+        execution_paths = max(1, len(edges) + 1)
+
+        # Basic risk factors
+        risk_factors = []
+        if len(nodes) > 15:
+            risk_factors.append("High node count may impact performance")
+        if complexity["depth"] > 8:
+            risk_factors.append("Deep workflow may be difficult to debug")
+        if not any(n.get("data", {}).get("nodeType") == "start" for n in nodes):
+            risk_factors.append("Missing start node")
+
         return {
             "complexity": complexity,
-            "suggestions": suggestions,
             "bottlenecks": bottlenecks,
-            "analysis_timestamp": None,  # Would use datetime.utcnow() if needed
-            "cache_info": {"cached": False, "ttl": 3600},
+            "optimization_suggestions": optimization_suggestions,
+            "execution_paths": execution_paths,
+            "estimated_execution_time_ms": None,
+            "risk_factors": risk_factors,
+            "total_execution_time_ms": 0,  # Default for analytics (not execution)
+            "error": None,
+            "started_at": datetime.now(UTC),
+            "completed_at": None,
         }
 
     def _calculate_basic_complexity(
@@ -98,30 +116,23 @@ class SimplifiedWorkflowAnalyticsService:
         node_count = len(nodes)
         edge_count = len(edges)
 
-        # Count different node types
-        node_types = {}
-        for node in nodes:
-            node_type = node.get("data", {}).get("nodeType", "unknown")
-            node_types[node_type] = node_types.get(node_type, 0) + 1
+        # Calculate maximum path depth (simplified)
+        depth = self._calculate_max_depth(nodes, edges)
+
+        # Calculate average branching factor
+        branching_factor = self._calculate_branching_factor(nodes, edges)
 
         # Simple complexity scoring
-        complexity_score = node_count + (edge_count * 0.5)
-        if complexity_score < 5:
-            complexity_level = "low"
-        elif complexity_score < 15:
-            complexity_level = "medium"
-        else:
-            complexity_level = "high"
+        complexity_score = int(node_count + (edge_count * 0.5) + (depth * 2))
 
         return {
+            "score": complexity_score,
             "node_count": node_count,
             "edge_count": edge_count,
-            "node_types": node_types,
-            "complexity_score": complexity_score,
-            "complexity_level": complexity_level,
-            "cyclomatic_complexity": edge_count
-            - node_count
-            + 2,  # Basic formula
+            "depth": depth,
+            "branching_factor": branching_factor,
+            "loop_complexity": 0,  # Default for simplified analytics
+            "conditional_complexity": 0,  # Default for simplified analytics
         }
 
     def _get_basic_suggestions(
@@ -135,9 +146,8 @@ class SimplifiedWorkflowAnalyticsService:
             suggestions.append(
                 {
                     "type": "complexity",
-                    "severity": "medium",
-                    "message": "Consider breaking down large workflows into smaller components",
-                    "category": "structure",
+                    "description": "Consider breaking down large workflows into smaller components",
+                    "impact": "medium",
                 }
             )
 
@@ -151,9 +161,8 @@ class SimplifiedWorkflowAnalyticsService:
             suggestions.append(
                 {
                     "type": "validation",
-                    "severity": "high",
-                    "message": "Workflow should have at least one start node",
-                    "category": "structure",
+                    "description": "Workflow should have at least one start node",
+                    "impact": "high",
                 }
             )
 
@@ -170,13 +179,82 @@ class SimplifiedWorkflowAnalyticsService:
             suggestions.append(
                 {
                     "type": "optimization",
-                    "severity": "low",
-                    "message": f"Found {len(disconnected)} disconnected nodes",
-                    "category": "structure",
+                    "description": f"Found {len(disconnected)} disconnected nodes",
+                    "impact": "low",
                 }
             )
 
         return suggestions
+
+    def _calculate_max_depth(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> int:
+        """Calculate maximum path depth in the workflow."""
+        if not nodes:
+            return 0
+
+        # Find start nodes
+        start_nodes = [
+            n["id"]
+            for n in nodes
+            if n.get("data", {}).get("nodeType") == "start"
+        ]
+        
+        if not start_nodes:
+            # If no start nodes, return basic depth estimation
+            return min(len(nodes), 10)
+
+        # Build adjacency list
+        graph = {}
+        for edge in edges:
+            source = edge.get("source")
+            target = edge.get("target")
+            if source and target:
+                if source not in graph:
+                    graph[source] = []
+                graph[source].append(target)
+
+        # Calculate maximum depth from start nodes
+        max_depth = 0
+        for start_node in start_nodes:
+            depth = self._dfs_depth(start_node, graph, set())
+            max_depth = max(max_depth, depth)
+
+        return max_depth
+
+    def _dfs_depth(self, node: str, graph: dict, visited: set) -> int:
+        """Calculate depth using DFS (with cycle detection)."""
+        if node in visited:
+            return 0  # Avoid infinite loops
+        
+        visited.add(node)
+        max_child_depth = 0
+        
+        for neighbor in graph.get(node, []):
+            child_depth = self._dfs_depth(neighbor, graph, visited.copy())
+            max_child_depth = max(max_child_depth, child_depth)
+        
+        return 1 + max_child_depth
+
+    def _calculate_branching_factor(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> float:
+        """Calculate average branching factor."""
+        if not nodes:
+            return 0.0
+
+        # Count outgoing edges for each node
+        outgoing_counts = {}
+        for edge in edges:
+            source = edge.get("source")
+            if source:
+                outgoing_counts[source] = outgoing_counts.get(source, 0) + 1
+
+        # Calculate average branching factor
+        total_branching = sum(outgoing_counts.values())
+        nodes_with_outgoing = len(outgoing_counts) or 1
+        
+        return round(total_branching / nodes_with_outgoing, 2)
 
     def _detect_basic_bottlenecks(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
@@ -193,15 +271,21 @@ class SimplifiedWorkflowAnalyticsService:
                     incoming_counts.get(target, 0) + 1
                 )
 
+        # Find node details
+        node_details = {node.get("id"): node for node in nodes}
+
         for node_id, count in incoming_counts.items():
             if count > 3:  # More than 3 incoming connections
+                node = node_details.get(node_id, {})
+                node_type = node.get("data", {}).get("nodeType", "unknown")
+                
                 bottlenecks.append(
                     {
                         "node_id": node_id,
-                        "type": "convergence",
+                        "node_type": node_type,
+                        "reason": f"Node has {count} incoming connections",
                         "severity": "medium",
-                        "description": f"Node has {count} incoming connections",
-                        "suggestion": "Consider simplifying node connections",
+                        "suggestions": ["Consider simplifying node connections"],
                     }
                 )
 
@@ -213,13 +297,21 @@ class SimplifiedWorkflowAnalyticsService:
         """Get basic fallback analysis when main analysis fails."""
         return {
             "complexity": {
+                "score": 0,
                 "node_count": len(nodes),
                 "edge_count": len(edges),
-                "complexity_level": "unknown",
-                "complexity_score": 0,
+                "depth": 1,
+                "branching_factor": 0.0,
+                "loop_complexity": 0,
+                "conditional_complexity": 0,
             },
-            "suggestions": [],
             "bottlenecks": [],
-            "analysis_timestamp": None,
-            "cache_info": {"cached": False, "error": True},
+            "optimization_suggestions": [],
+            "execution_paths": 1,
+            "estimated_execution_time_ms": None,
+            "risk_factors": ["Analysis failed - unable to assess risks"],
+            "total_execution_time_ms": 0,
+            "error": None,
+            "started_at": datetime.now(UTC),
+            "completed_at": None,
         }

@@ -1,270 +1,54 @@
-builder:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
-    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
-builder:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
-error-handler.ts:246 [Error Handler] WorkflowService.getAuthenticatedSDK: TypeError: authService.getAuthenticatedSDK is not a function
-    at WorkflowService.getSDK (workflow-service.ts:35:32)
-    at WorkflowService.listTemplates (workflow-service.ts:268:30)
-    at WorkflowBuilderPage.tsx:218:47
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-getSDK @ workflow-service.ts:37
-listTemplates @ workflow-service.ts:268
-(anonymous) @ WorkflowBuilderPage.tsx:218
-await in (anonymous)
-onClick @ WorkflowBuilderPage.tsx:428
-executeDispatch @ react-dom_client.js?v=f0b574b0:11736
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
-(anonymous) @ react-dom_client.js?v=f0b574b0:12182
-batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
-dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
-<li>
-exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
-(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
-MuiButtonBase-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<MuiButtonBaseRoot>
-exports.jsxs @ chunk-OBYCLIUT.js?v=f0b574b0:263
-ButtonBase2 @ @mui_material.js?v=f0b574b0:3767
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<ForwardRef(ButtonBase2)>
-exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
-(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
-MuiMenuItem-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<MuiMenuItemRoot>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-MenuItem2 @ @mui_material.js?v=f0b574b0:27365
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<ForwardRef(MenuItem2)>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-WorkflowBuilderPage @ WorkflowBuilderPage.tsx:428
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7654
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-error-handler.ts:248 Full Error Details:
- Source: WorkflowService.getAuthenticatedSDK
-Operation: Getting authenticated SDK instance
-Timestamp: 2025-09-25T05:29:46.159Z
-Error Type: TypeError
-Message: authService.getAuthenticatedSDK is not a function
-Stack Trace:
-TypeError: authService.getAuthenticatedSDK is not a function
-    at WorkflowService.getSDK (http://localhost:3000/src/services/workflow-service.ts:9:32)
-    at WorkflowService.listTemplates (http://localhost:3000/src/services/workflow-service.ts:212:30)
-    at http://localhost:3000/src/pages/WorkflowBuilderPage.tsx:192:47
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-getSDK @ workflow-service.ts:37
-listTemplates @ workflow-service.ts:268
-(anonymous) @ WorkflowBuilderPage.tsx:218
-await in (anonymous)
-onClick @ WorkflowBuilderPage.tsx:428
-executeDispatch @ react-dom_client.js?v=f0b574b0:11736
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
-(anonymous) @ react-dom_client.js?v=f0b574b0:12182
-batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
-dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
-<li>
-exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
-(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
-MuiButtonBase-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<MuiButtonBaseRoot>
-exports.jsxs @ chunk-OBYCLIUT.js?v=f0b574b0:263
-ButtonBase2 @ @mui_material.js?v=f0b574b0:3767
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<ForwardRef(ButtonBase2)>
-exports.createElement @ chunk-BQYK6RGN.js?v=f0b574b0:776
-(anonymous) @ chunk-2USXEQSY.js?v=f0b574b0:3281
-MuiMenuItem-root @ chunk-2USXEQSY.js?v=f0b574b0:2392
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<MuiMenuItemRoot>
-exports.jsx @ chunk-OBYCLIUT.js?v=f0b574b0:250
-MenuItem2 @ @mui_material.js?v=f0b574b0:27365
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateForwardRef @ react-dom_client.js?v=f0b574b0:6461
-beginWork @ react-dom_client.js?v=f0b574b0:7864
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-<ForwardRef(MenuItem2)>
-exports.jsxDEV @ react_jsx-dev-runtime.js?v=f0b574b0:250
-WorkflowBuilderPage @ WorkflowBuilderPage.tsx:428
-react_stack_bottom_frame @ react-dom_client.js?v=f0b574b0:17424
-renderWithHooksAgain @ react-dom_client.js?v=f0b574b0:4281
-renderWithHooks @ react-dom_client.js?v=f0b574b0:4217
-updateFunctionComponent @ react-dom_client.js?v=f0b574b0:6619
-beginWork @ react-dom_client.js?v=f0b574b0:7654
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-performUnitOfWork @ react-dom_client.js?v=f0b574b0:10868
-workLoopSync @ react-dom_client.js?v=f0b574b0:10728
-renderRootSync @ react-dom_client.js?v=f0b574b0:10711
-performWorkOnRoot @ react-dom_client.js?v=f0b574b0:10330
-performSyncWorkOnRoot @ react-dom_client.js?v=f0b574b0:11635
-flushSyncWorkAcrossRoots_impl @ react-dom_client.js?v=f0b574b0:11536
-processRootScheduleInMicrotask @ react-dom_client.js?v=f0b574b0:11558
-(anonymous) @ react-dom_client.js?v=f0b574b0:11649
-error-handler.ts:246 [Error Handler] WorkflowService.listTemplates: undefined
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:246
-handleError @ error-handler.ts:363
-listTemplates @ workflow-service.ts:272
-await in listTemplates
-(anonymous) @ WorkflowBuilderPage.tsx:218
-await in (anonymous)
-onClick @ WorkflowBuilderPage.tsx:428
-executeDispatch @ react-dom_client.js?v=f0b574b0:11736
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
-(anonymous) @ react-dom_client.js?v=f0b574b0:12182
-batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
-dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
-error-handler.ts:248 Full Error Details:
- Source: WorkflowService.listTemplates
-Operation: Loading workflow templates
-Timestamp: 2025-09-25T05:29:46.162Z
-Error Value: undefined
-overrideMethod @ hook.js:608
-handleError @ error-handler.ts:248
-handleError @ error-handler.ts:363
-listTemplates @ workflow-service.ts:272
-await in listTemplates
-(anonymous) @ WorkflowBuilderPage.tsx:218
-await in (anonymous)
-onClick @ WorkflowBuilderPage.tsx:428
-executeDispatch @ react-dom_client.js?v=f0b574b0:11736
-runWithFiberInDEV @ react-dom_client.js?v=f0b574b0:1485
-processDispatchQueue @ react-dom_client.js?v=f0b574b0:11772
-(anonymous) @ react-dom_client.js?v=f0b574b0:12182
-batchedUpdates$1 @ react-dom_client.js?v=f0b574b0:2628
-dispatchEventForPluginEventSystem @ react-dom_client.js?v=f0b574b0:11877
-dispatchEvent @ react-dom_client.js?v=f0b574b0:14792
-dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
-
-
-
-2025-09-25T05:29:26.903879Z [error    ] Problem exception              [chatter.main] correlation_id=01K5ZNJ3KEYXX01J8Z7E2DHGWV detail=Invalid ULID format: must be a valid ULID method=GET status_code=400 title=Bad Request url=http://localhost:8000/api/v1/workflows/definitions/New Workflow/analytics
-2025-09-25T05:29:26.904447Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K5ZNJ3KEYXX01J8Z7E2DHGWV duration=0.012376070022583008 duration_ms=12.376070022583008 method=GET rate_limited=False request_body=None request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzVaTkgxTkJFTlFKNTk0SE5ORVI4UzEzIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODc3ODEzMiwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4Nzc5OTMyfQ.lcnZgk5uzC1xlK4gUu2wxoFAFuOTPssPmh9HWw5OVYc', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzVaTkgxTkY4NFYyRURBNDlXSzVUMVFIIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg3NzgxMzIsInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTM4MjkzMn0.DWx1deBlzuc8wddAQelkf5GnM9v9uh1Zqw9JZSM3SfA'} response_body=None response_headers={
+2025-09-25T19:17:20.204186Z [error    ] Failed to get workflow analytics: 8 validation errors for WorkflowAnalyticsResponse
+complexity.score
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+complexity.depth
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+complexity.branching_factor
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+optimization_suggestions
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+execution_paths
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+risk_factors
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+total_execution_time_ms
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+started_at
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing [chatter.api.workflows] correlation_id=01K614Y0P08V2J0YT5WPMJVMZ7
+2025-09-25T19:17:20.204929Z [error    ] Problem exception              [chatter.main] correlation_id=01K614Y0P08V2J0YT5WPMJVMZ7 detail=Failed to get workflow analytics: 8 validation errors for WorkflowAnalyticsResponse
+complexity.score
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+complexity.depth
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+complexity.branching_factor
+  Field required [type=missing, input_value={'node_count': 4, 'edge_c...clomatic_complexity': 1}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+optimization_suggestions
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+execution_paths
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+risk_factors
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+total_execution_time_ms
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing
+started_at
+  Field required [type=missing, input_value={'complexity': {'node_cou...d': False, 'ttl': 3600}}, input_type=dict]
+    For further information visit https://errors.pydantic.dev/2.11/v/missing method=GET status_code=500 title=Internal Server Error url=http://localhost:8000/api/v1/workflows/definitions/01K614Y0KMETS47HX2HRA9JMS0/analytics
+2025-09-25T19:17:20.205428Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K614Y0P08V2J0YT5WPMJVMZ7 duration=0.013588190078735352 duration_ms=13.588190078735352 method=GET rate_limited=False request_body=None request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODgyNzgxOSwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4ODI5NjE5fQ.4MGCeffNNN0ETRZw0XwewtUTSCqKcnV5wriwmF1_FeQ', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg4Mjc4MTksInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTQzMjYxOX0.bVqLhKcsJBGyk7ooHROyBYawouAIGFNbkDLWLJ5mo0E'} response_body=None response_headers={
     "content-type": "application/problem+json",
     "x-content-type-options": "nosniff",
     "x-frame-options": "DENY",
@@ -273,9 +57,72 @@ dispatchDiscreteEvent @ react-dom_client.js?v=f0b574b0:14773
     "referrer-policy": "strict-origin-when-cross-origin",
     "vary": "Accept-Encoding",
     "content-encoding": "gzip",
-    "x-correlation-id": "01K5ZNJ3KEYXX01J8Z7E2DHGWV",
+    "x-correlation-id": "01K614Y0P08V2J0YT5WPMJVMZ7",
     "x-ratelimit-limit": "100",
-    "x-ratelimit-remaining": "88",
-    "x-ratelimit-reset": "1758778226",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1758827900",
     "x-ratelimit-window": "60"
-} status_code=400 url=http://localhost:8000/api/v1/workflows/definitions/New Workflow/analytics
+} status_code=500 url=http://localhost:8000/api/v1/workflows/definitions/01K614Y0KMETS47HX2HRA9JMS0/analytics
+2025-09-25T19:17:20.205549Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=GET path=/api/v1/workflows/definitions/01K614Y0KMETS47HX2HRA9JMS0/analytics response_time_ms=13.588190078735352
+INFO:     127.0.0.1:55552 - "GET /api/v1/workflows/definitions/01K614Y0KMETS47HX2HRA9JMS0/analytics HTTP/1.1" 500 Internal Server Error
+INFO:     127.0.0.1:57982 - "OPTIONS /api/v1/workflows/definitions HTTP/1.1" 200 OK
+2025-09-25T19:20:24.398279Z [debug    ] HTTP Request                   [chatter.main] body={"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","nodes":[{"id":"start-1","type":"start","position":{"x":-240,"y":20},"data":{"label":"Start","nodeType":"start","config":{"name":"Start"},"description":"Entry point for workflow execution"},"measured":{"width":150,"height":118},"selected":false,"dragging":false},{"id":"tool-2","type":"tool","position":{"x":80,"y":20},"data":{"label":"Tool Call","nodeType":"tool","config":{"name":"Tool Call","parallel":false,"timeout":30,"retryCount":1,"errorHandling":"continue"},"description":"Execute external tools and functions"},"measured":{"width":180,"height":96},"selected":true,"dragging":false},{"id":"api-3","type":"api","position":{"x":20,"y":180},"data":{"label":"API Call","nodeType":"api","config":{"name":"API Call","method":"GET","timeout":30},"description":"Make HTTP requests to external APIs"},"measured":{"width":180,"height":121},"selected":false,"dragging":false}],"edges":[{"source":"start-1","target":"tool-2","id":"edge-1758827930748","type":"smoothstep","animated":true,"data":{"label":""}},{"source":"tool-2","target":"api-3","id":"edge-1758827977564","type":"smoothstep","animated":true,"data":{"label":""}}],"metadata":{"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","version":"1.0.0","createdAt":"2025-09-25T19:17:34.384Z","updatedAt":"2025-09-25T19:17:34.384Z"},"is_public":false,"tags":[]} headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '1503', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODgyNzgxOSwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4ODI5NjE5fQ.4MGCeffNNN0ETRZw0XwewtUTSCqKcnV5wriwmF1_FeQ', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg4Mjc4MTksInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTQzMjYxOX0.bVqLhKcsJBGyk7ooHROyBYawouAIGFNbkDLWLJ5mo0E'} method=POST url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:20:24.400818Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6153MJFFS9678E80HABF3D8
+2025-09-25T19:20:24.401398Z [debug    ] User found in cache            [chatter.core.auth] correlation_id=01K6153MJFFS9678E80HABF3D8 user_id=01K5SM1MZVDTBVEV2ZTZ8JZVTX
+2025-09-25T19:20:24.405441Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6153MJFFS9678E80HABF3D8
+2025-09-25T19:20:24.406381Z [debug    ] User cached                    [chatter.core.auth] correlation_id=01K6153MJFFS9678E80HABF3D8 user_id=01K5SM1MZVDTBVEV2ZTZ8JZVTX
+2025-09-25T19:20:24.407638Z [error    ] ValidationError: Node 0 must be a dictionary [chatter.core.exceptions] correlation_id=01K6153MJFFS9678E80HABF3D8 details=None error_code=VALIDATION_ERROR error_id=01K6153MJQ619077DQCQ9DSY3G status_code=400
+2025-09-25T19:20:24.407729Z [error    ] ValidationError: Node 1 must be a dictionary [chatter.core.exceptions] correlation_id=01K6153MJFFS9678E80HABF3D8 details=None error_code=VALIDATION_ERROR error_id=01K6153MJQ619077DQCQ9DSY3H status_code=400
+2025-09-25T19:20:24.407796Z [error    ] ValidationError: Node 2 must be a dictionary [chatter.core.exceptions] correlation_id=01K6153MJFFS9678E80HABF3D8 details=None error_code=VALIDATION_ERROR error_id=01K6153MJQ619077DQCQ9DSY3J status_code=400
+2025-09-25T19:20:24.407865Z [error    ] ValidationError: Edge 0 must be a dictionary [chatter.core.exceptions] correlation_id=01K6153MJFFS9678E80HABF3D8 details=None error_code=VALIDATION_ERROR error_id=01K6153MJQ619077DQCQ9DSY3K status_code=400
+2025-09-25T19:20:24.407922Z [error    ] ValidationError: Edge 1 must be a dictionary [chatter.core.exceptions] correlation_id=01K6153MJFFS9678E80HABF3D8 details=None error_code=VALIDATION_ERROR error_id=01K6153MJQ619077DQCQ9DSY3M status_code=400
+2025-09-25T19:20:24.408416Z [error    ] Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary [chatter.services.workflow_management] correlation_id=01K6153MJFFS9678E80HABF3D8
+2025-09-25T19:20:24.408503Z [error    ] Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary [chatter.api.workflows] correlation_id=01K6153MJFFS9678E80HABF3D8
+2025-09-25T19:20:24.408652Z [error    ] Problem exception              [chatter.main] correlation_id=01K6153MJFFS9678E80HABF3D8 detail=Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary method=POST status_code=500 title=Internal Server Error url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:20:24.409019Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K6153MJFFS9678E80HABF3D8 duration=0.01081085205078125 duration_ms=10.81085205078125 method=POST rate_limited=False request_body={"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","nodes":[{"id":"start-1","type":"start","position":{"x":-240,"y":20},"data":{"label":"Start","nodeType":"start","config":{"name":"Start"},"description":"Entry point for workflow execution"},"measured":{"width":150,"height":118},"selected":false,"dragging":false},{"id":"tool-2","type":"tool","position":{"x":80,"y":20},"data":{"label":"Tool Call","nodeType":"tool","config":{"name":"Tool Call","parallel":false,"timeout":30,"retryCount":1,"errorHandling":"continue"},"description":"Execute external tools and functions"},"measured":{"width":180,"height":96},"selected":true,"dragging":false},{"id":"api-3","type":"api","position":{"x":20,"y":180},"data":{"label":"API Call","nodeType":"api","config":{"name":"API Call","method":"GET","timeout":30},"description":"Make HTTP requests to external APIs"},"measured":{"width":180,"height":121},"selected":false,"dragging":false}],"edges":[{"source":"start-1","target":"tool-2","id":"edge-1758827930748","type":"smoothstep","animated":true,"data":{"label":""}},{"source":"tool-2","target":"api-3","id":"edge-1758827977564","type":"smoothstep","animated":true,"data":{"label":""}}],"metadata":{"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","version":"1.0.0","createdAt":"2025-09-25T19:17:34.384Z","updatedAt":"2025-09-25T19:17:34.384Z"},"is_public":false,"tags":[]} request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '1503', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODgyNzgxOSwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4ODI5NjE5fQ.4MGCeffNNN0ETRZw0XwewtUTSCqKcnV5wriwmF1_FeQ', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg4Mjc4MTksInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTQzMjYxOX0.bVqLhKcsJBGyk7ooHROyBYawouAIGFNbkDLWLJ5mo0E'} response_body=None response_headers={
+    "content-type": "application/problem+json",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block",
+    "strict-transport-security": "max-age=31536000; includeSubDomains",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "vary": "Accept-Encoding",
+    "content-encoding": "gzip",
+    "x-correlation-id": "01K6153MJFFS9678E80HABF3D8",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "99",
+    "x-ratelimit-reset": "1758828084",
+    "x-ratelimit-window": "60"
+} status_code=500 url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:20:24.409126Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/definitions response_time_ms=10.81085205078125
+INFO:     127.0.0.1:55541 - "POST /api/v1/workflows/definitions HTTP/1.1" 500 Internal Server Error
+2025-09-25T19:21:01.396922Z [debug    ] HTTP Request                   [chatter.main] body={"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","nodes":[{"id":"start-1","type":"start","position":{"x":-240,"y":20},"data":{"label":"Start","nodeType":"start","config":{"name":"Start"},"description":"Entry point for workflow execution"},"measured":{"width":150,"height":118},"selected":false,"dragging":false},{"id":"tool-2","type":"tool","position":{"x":80,"y":20},"data":{"label":"Tool Call","nodeType":"tool","config":{"name":"Tool Call","parallel":false,"timeout":30,"retryCount":1,"errorHandling":"continue"},"description":"Execute external tools and functions"},"measured":{"width":180,"height":96},"selected":true,"dragging":false},{"id":"api-3","type":"api","position":{"x":20,"y":180},"data":{"label":"API Call","nodeType":"api","config":{"name":"API Call","method":"GET","timeout":30},"description":"Make HTTP requests to external APIs"},"measured":{"width":180,"height":121},"selected":false,"dragging":false}],"edges":[{"source":"start-1","target":"tool-2","id":"edge-1758827930748","type":"smoothstep","animated":true,"data":{"label":""}},{"source":"tool-2","target":"api-3","id":"edge-1758827977564","type":"smoothstep","animated":true,"data":{"label":""}}],"metadata":{"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","version":"1.0.0","createdAt":"2025-09-25T19:17:34.384Z","updatedAt":"2025-09-25T19:17:34.384Z"},"is_public":false,"tags":[]} headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '1503', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODgyNzgxOSwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4ODI5NjE5fQ.4MGCeffNNN0ETRZw0XwewtUTSCqKcnV5wriwmF1_FeQ', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg4Mjc4MTksInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTQzMjYxOX0.bVqLhKcsJBGyk7ooHROyBYawouAIGFNbkDLWLJ5mo0E'} method=POST url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:21:01.401425Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6154RPPPWREB5YBNT47XQNF
+2025-09-25T19:21:01.402527Z [debug    ] User found in cache            [chatter.core.auth] correlation_id=01K6154RPPPWREB5YBNT47XQNF user_id=01K5SM1MZVDTBVEV2ZTZ8JZVTX
+2025-09-25T19:21:01.407318Z [debug    ] Reusing existing cache instance [chatter.core.cache_factory] cache_type=general correlation_id=01K6154RPPPWREB5YBNT47XQNF
+2025-09-25T19:21:01.408456Z [debug    ] User cached                    [chatter.core.auth] correlation_id=01K6154RPPPWREB5YBNT47XQNF user_id=01K5SM1MZVDTBVEV2ZTZ8JZVTX
+2025-09-25T19:21:01.408746Z [error    ] ValidationError: Node 0 must be a dictionary [chatter.core.exceptions] correlation_id=01K6154RPPPWREB5YBNT47XQNF details=None error_code=VALIDATION_ERROR error_id=01K6154RQ0BCZKZYRZ391BHDFP status_code=400
+2025-09-25T19:21:01.408853Z [error    ] ValidationError: Node 1 must be a dictionary [chatter.core.exceptions] correlation_id=01K6154RPPPWREB5YBNT47XQNF details=None error_code=VALIDATION_ERROR error_id=01K6154RQ0BCZKZYRZ391BHDFQ status_code=400
+2025-09-25T19:21:01.408936Z [error    ] ValidationError: Node 2 must be a dictionary [chatter.core.exceptions] correlation_id=01K6154RPPPWREB5YBNT47XQNF details=None error_code=VALIDATION_ERROR error_id=01K6154RQ0BCZKZYRZ391BHDFR status_code=400
+2025-09-25T19:21:01.409013Z [error    ] ValidationError: Edge 0 must be a dictionary [chatter.core.exceptions] correlation_id=01K6154RPPPWREB5YBNT47XQNF details=None error_code=VALIDATION_ERROR error_id=01K6154RQ0BCZKZYRZ391BHDFS status_code=400
+2025-09-25T19:21:01.409086Z [error    ] ValidationError: Edge 1 must be a dictionary [chatter.core.exceptions] correlation_id=01K6154RPPPWREB5YBNT47XQNF details=None error_code=VALIDATION_ERROR error_id=01K6154RQ16EY0XFQ84VN85TGY status_code=400
+2025-09-25T19:21:01.409686Z [error    ] Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary [chatter.services.workflow_management] correlation_id=01K6154RPPPWREB5YBNT47XQNF
+2025-09-25T19:21:01.409785Z [error    ] Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary [chatter.api.workflows] correlation_id=01K6154RPPPWREB5YBNT47XQNF
+2025-09-25T19:21:01.409957Z [error    ] Problem exception              [chatter.main] correlation_id=01K6154RPPPWREB5YBNT47XQNF detail=Failed to create workflow definition: 400: Workflow validation failed: Node 0 must be a dictionary; Node 1 must be a dictionary; Node 2 must be a dictionary; Edge 0 must be a dictionary; Edge 1 must be a dictionary method=POST status_code=500 title=Internal Server Error url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:21:01.410309Z [error    ] HTTP Error Response            [chatter.main] correlation_id=01K6154RPPPWREB5YBNT47XQNF duration=0.01362156867980957 duration_ms=13.62156867980957 method=POST rate_limited=False request_body={"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","nodes":[{"id":"start-1","type":"start","position":{"x":-240,"y":20},"data":{"label":"Start","nodeType":"start","config":{"name":"Start"},"description":"Entry point for workflow execution"},"measured":{"width":150,"height":118},"selected":false,"dragging":false},{"id":"tool-2","type":"tool","position":{"x":80,"y":20},"data":{"label":"Tool Call","nodeType":"tool","config":{"name":"Tool Call","parallel":false,"timeout":30,"retryCount":1,"errorHandling":"continue"},"description":"Execute external tools and functions"},"measured":{"width":180,"height":96},"selected":true,"dragging":false},{"id":"api-3","type":"api","position":{"x":20,"y":180},"data":{"label":"API Call","nodeType":"api","config":{"name":"API Call","method":"GET","timeout":30},"description":"Make HTTP requests to external APIs"},"measured":{"width":180,"height":121},"selected":false,"dragging":false}],"edges":[{"source":"start-1","target":"tool-2","id":"edge-1758827930748","type":"smoothstep","animated":true,"data":{"label":""}},{"source":"tool-2","target":"api-3","id":"edge-1758827977564","type":"smoothstep","animated":true,"data":{"label":""}}],"metadata":{"name":"RAG with Tools","description":"Advanced workflow with memory, retrieval, conditional logic, and tool execution","version":"1.0.0","createdAt":"2025-09-25T19:17:34.384Z","updatedAt":"2025-09-25T19:17:34.384Z"},"is_public":false,"tags":[]} request_headers={'host': 'localhost:8000', 'connection': 'keep-alive', 'content-length': '1503', 'sec-ch-ua-platform': '"Windows"', 'authorization': 'Bearer eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6ImFjY2VzcyIsImlhdCI6MTc1ODgyNzgxOSwic2Vzc2lvbl9pZCI6IjAxSzVUOThRU1RDNFQyMzZRNFcwWE1CMEdUIiwiZXhwIjoxNzU4ODI5NjE5fQ.4MGCeffNNN0ETRZw0XwewtUTSCqKcnV5wriwmF1_FeQ', 'user-agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36', 'sec-ch-ua': '"Chromium";v="140", "Not=A?Brand";v="24", "Google Chrome";v="140"', 'content-type': 'application/json', 'sec-ch-ua-mobile': '?0', 'accept': '*/*', 'origin': 'http://localhost:3000', 'sec-fetch-site': 'same-site', 'sec-fetch-mode': 'cors', 'sec-fetch-dest': 'empty', 'referer': 'http://localhost:3000/', 'accept-encoding': 'gzip, deflate, br, zstd', 'accept-language': 'en-US,en;q=0.9', 'cookie': 'refresh_token=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiIwMUs1U00xTVpWRFRCVkVWMlpUWjhKWlZUWCIsImp0aSI6IjAxSzYxNFhDREMwWEpRSk1QR0dNWlExVjdEIiwidHlwZSI6InJlZnJlc2giLCJpYXQiOjE3NTg4Mjc4MTksInNlc3Npb25faWQiOiIwMUs1VDk4UVNUQzRUMjM2UTRXMFhNQjBHVCIsImV4cCI6MTc1OTQzMjYxOX0.bVqLhKcsJBGyk7ooHROyBYawouAIGFNbkDLWLJ5mo0E'} response_body=None response_headers={
+    "content-type": "application/problem+json",
+    "x-content-type-options": "nosniff",
+    "x-frame-options": "DENY",
+    "x-xss-protection": "1; mode=block",
+    "strict-transport-security": "max-age=31536000; includeSubDomains",
+    "referrer-policy": "strict-origin-when-cross-origin",
+    "vary": "Accept-Encoding",
+    "content-encoding": "gzip",
+    "x-correlation-id": "01K6154RPPPWREB5YBNT47XQNF",
+    "x-ratelimit-limit": "100",
+    "x-ratelimit-remaining": "98",
+    "x-ratelimit-reset": "1758828121",
+    "x-ratelimit-window": "60"
+} status_code=500 url=http://localhost:8000/api/v1/workflows/definitions
+2025-09-25T19:21:01.410422Z [debug    ] Recorded request metrics       [chatter.core.monitoring] method=POST path=/api/v1/workflows/definitions response_time_ms=13.62156867980957
+INFO:     127.0.0.1:59510 - "POST /api/v1/workflows/definitions HTTP/1.1" 500 Internal Server Error

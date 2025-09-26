@@ -124,6 +124,37 @@ class WorkflowExecutionService:
         self.memory_manager = EnhancedMemoryManager()
         self.tool_executor = EnhancedToolExecutor()
 
+    async def _get_default_provider_name(self) -> str:
+        """Get the system default provider name.
+        
+        Returns:
+            The name of the default provider
+            
+        Raises:
+            LLMProviderError: If no default provider is available
+        """
+        try:
+            from chatter.core.dependencies import get_model_registry
+            from chatter.models.registry import ModelType
+            
+            registry = get_model_registry()(self.session)
+            provider = await registry.get_default_provider(ModelType.LLM)
+            
+            if provider:
+                return provider.name
+            
+            # Fallback to first available provider
+            available_providers = await self.llm_service.list_available_providers()
+            if available_providers:
+                logger.warning("No default provider configured, using first available provider")
+                return available_providers[0]
+                
+            raise Exception("No providers available")
+            
+        except Exception as e:
+            logger.warning(f"Failed to get default provider: {e}, falling back to 'openai'")
+            return "openai"  # Safe fallback instead of "anthropic"
+
     async def execute_chat_workflow(
         self,
         user_id: str,
@@ -134,7 +165,7 @@ class WorkflowExecutionService:
         conversation = await self._get_or_create_conversation(user_id, request)
 
         # Convert request to ChatRequest
-        chat_request = self._convert_to_chat_request(request)
+        chat_request = await self._convert_to_chat_request(request)
 
         # Execute the actual workflow
         message, result = await self._execute_chat_workflow_internal(
@@ -277,7 +308,7 @@ class WorkflowExecutionService:
             conversation = await self._get_or_create_conversation(user_id, request)
 
             # Convert to ChatRequest for compatibility
-            chat_request = self._convert_to_chat_request(request)
+            chat_request = await self._convert_to_chat_request(request)
 
             # Get LLM
             llm = await self.llm_service.get_llm(
@@ -362,8 +393,8 @@ class WorkflowExecutionService:
         edges: list[dict[str, Any]],
         message: str,
         user_id: str,
-        provider: str = "anthropic",
-        model: str = "claude-3-5-sonnet-20241022",
+        provider: str | None = None,
+        model: str | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """Execute a custom workflow definition."""
@@ -374,6 +405,13 @@ class WorkflowExecutionService:
                 edges=edges,
                 execution_type="custom_workflow",
             )
+            
+            # Get provider and model, using system defaults if not specified
+            if provider is None:
+                provider = await self._get_default_provider_name()
+            if model is None:
+                # Let the LLM service determine the default model for the provider
+                model = None
             
             # Get LLM
             llm = await self.llm_service.get_llm(provider=provider, model=model)
@@ -479,10 +517,11 @@ class WorkflowExecutionService:
                 definition_name=definition_name,
             )
             
-            # Get LLM from default settings for now
+            # Get LLM using system default provider instead of hardcoded anthropic
+            default_provider = await self._get_default_provider_name()
             llm = await self.llm_service.get_llm(
-                provider="anthropic",
-                model="claude-3-5-sonnet-20241022",
+                provider=default_provider,
+                model=None,  # Let service choose default model for provider
                 temperature=0.1,
                 max_tokens=2048,
             )
@@ -678,13 +717,16 @@ class WorkflowExecutionService:
 
         return conversation
 
-    def _convert_to_chat_request(self, request: Any) -> ChatRequest:
+    async def _convert_to_chat_request(self, request: Any) -> ChatRequest:
         """Convert workflow request to ChatRequest for compatibility."""
+        # Get system default provider instead of hardcoded anthropic
+        default_provider = await self._get_default_provider_name()
+            
         return ChatRequest(
             message=request.message,
             conversation_id=getattr(request, 'conversation_id', None),
-            provider=getattr(request, 'provider', 'anthropic'),
-            model=getattr(request, 'model', 'claude-3-5-sonnet-20241022'),
+            provider=getattr(request, 'provider', default_provider),
+            model=getattr(request, 'model', None),  # Let service choose default
             temperature=getattr(request, 'temperature', None),
             max_tokens=getattr(request, 'max_tokens', None),
             system_prompt_override=getattr(request, 'system_prompt_override', None),

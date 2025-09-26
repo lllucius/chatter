@@ -53,7 +53,7 @@ class AgentDB(Base):
         String(100), default="openai"
     )
     fallback_llm: Mapped[str] = mapped_column(
-        String(100), default="anthropic"
+        String(100), default="openai"  # Use same as primary for consistency
     )
     temperature: Mapped[float] = mapped_column(Float, default=0.7)
     max_tokens: Mapped[int] = mapped_column(Integer, default=4096)

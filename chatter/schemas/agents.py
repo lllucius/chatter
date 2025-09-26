@@ -69,8 +69,8 @@ class AgentProfile(BaseModel):
     available_tools: list[str] = Field(default_factory=list)
 
     # Model configuration
-    primary_llm: str = "openai"
-    fallback_llm: str = "anthropic"
+    primary_llm: str = "openai"  # Use openai as safer default
+    fallback_llm: str = "openai"  # Use same as primary for consistency
     temperature: float = 0.7
     max_tokens: int = 4096
 

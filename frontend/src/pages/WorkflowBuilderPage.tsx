@@ -199,7 +199,7 @@ const WorkflowBuilderPage: React.FC = () => {
             }),
         }}
       >
-        <PageLayout title="Workflow Builder" toolbar={toolbar}>
+        <PageLayout title="Workflow Builder" toolbar={toolbar} fullHeight={true}>
           <Box sx={{ height: '100%', width: '100%' }}>
             <WorkflowEditor
               ref={workflowEditorRef}

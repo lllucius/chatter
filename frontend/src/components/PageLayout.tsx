@@ -8,6 +8,7 @@ interface PageLayoutProps {
   children: React.ReactNode;
   fixedBottom?: React.ReactNode;
   maxWidth?: string | number;
+  fullHeight?: boolean; // New prop to handle full-height content like React Flow
 }
 
 const PageLayout: React.FC<PageLayoutProps> = ({
@@ -16,6 +17,7 @@ const PageLayout: React.FC<PageLayoutProps> = ({
   children,
   fixedBottom,
   maxWidth = 'none',
+  fullHeight = false, // Default to false to maintain existing behavior
 }) => {
   return (
     <Box
@@ -74,9 +76,15 @@ const PageLayout: React.FC<PageLayoutProps> = ({
           position: 'relative',
         }}
       >
-        <CustomScrollbar style={{ flex: 1 }}>
-          <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>
-        </CustomScrollbar>
+        {fullHeight ? (
+          // Full-height content without padding or scrollbar (for React Flow, etc.)
+          <Box sx={{ flex: 1, minHeight: 0 }}>{children}</Box>
+        ) : (
+          // Standard scrollable content with padding
+          <CustomScrollbar style={{ flex: 1 }}>
+            <Box sx={{ p: { xs: 2, sm: 3 } }}>{children}</Box>
+          </CustomScrollbar>
+        )}
       </Box>
 
       {/* Fixed Bottom Area */}

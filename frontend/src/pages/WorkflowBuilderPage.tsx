@@ -1,4 +1,5 @@
-import React, { useState, useCallback } from 'react';
+import React, { useState, useCallback, useRef } from 'react';
+import { Node } from '@xyflow/react';
 import { Box, Menu, MenuItem, Button } from '../utils/mui';
 import {
   PlayArrow as StartIcon,
@@ -28,7 +29,7 @@ import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import PropertiesPanel from '../components/workflow/PropertiesPanel';
 import WorkflowAnalytics from '../components/workflow/WorkflowAnalytics';
-import { WorkflowDefinition, WorkflowNodeData } from '../components/workflow/WorkflowEditor';
+import { WorkflowDefinition, WorkflowNodeData, WorkflowNodeType } from '../components/workflow/WorkflowEditor';
 
 const WorkflowBuilderPage: React.FC = () => {
   const [_selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
@@ -43,6 +44,20 @@ const WorkflowBuilderPage: React.FC = () => {
       updatedAt: new Date().toISOString(),
     },
   });
+  
+  // Create a ref to access WorkflowEditor methods
+  const workflowEditorRef = useRef<{
+    addNode: (nodeType: WorkflowNodeType) => void;
+    handleUndo: () => void;
+    handleRedo: () => void;
+    handleCopy: () => void;
+    handlePaste: () => void;
+    handleSave: () => void;
+    handleClear: () => void;
+    handleToggleGrid: () => void;
+    handleValidate: () => void;
+    loadExample: (exampleName: string) => void;
+  }>(null);
   
   // Right sidebar state
   const { setPanelContent, setTitle, setOpen } = useRightSidebar();
@@ -153,6 +168,7 @@ const WorkflowBuilderPage: React.FC = () => {
     <PageLayout title="Workflow Builder" toolbar={toolbar}>
       <Box sx={{ height: '100%', width: '100%' }}>
         <WorkflowEditor
+          ref={workflowEditorRef}
           onNodeClick={handleNodeClick}
           onWorkflowChange={setCurrentWorkflow}
           showToolbar={false}
@@ -169,8 +185,9 @@ const WorkflowBuilderPage: React.FC = () => {
           <MenuItem 
             key={nodeType.type}
             onClick={() => {
-              // Add node logic would go here
-              console.log('Add node:', nodeType.type);
+              if (workflowEditorRef.current) {
+                workflowEditorRef.current.addNode(nodeType.type as WorkflowNodeType);
+              }
               setNodeMenuAnchor(null);
             }}
           >
@@ -186,19 +203,39 @@ const WorkflowBuilderPage: React.FC = () => {
         open={Boolean(editMenuAnchor)}
         onClose={() => setEditMenuAnchor(null)}
       >
-        <MenuItem onClick={() => setEditMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleUndo();
+          }
+          setEditMenuAnchor(null);
+        }}>
           <UndoIcon sx={{ mr: 1 }} />
           Undo
         </MenuItem>
-        <MenuItem onClick={() => setEditMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleRedo();
+          }
+          setEditMenuAnchor(null);
+        }}>
           <RedoIcon sx={{ mr: 1 }} />
           Redo
         </MenuItem>
-        <MenuItem onClick={() => setEditMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleCopy();
+          }
+          setEditMenuAnchor(null);
+        }}>
           <CopyIcon sx={{ mr: 1 }} />
           Copy
         </MenuItem>
-        <MenuItem onClick={() => setEditMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handlePaste();
+          }
+          setEditMenuAnchor(null);
+        }}>
           <PasteIcon sx={{ mr: 1 }} />
           Paste
         </MenuItem>
@@ -210,13 +247,28 @@ const WorkflowBuilderPage: React.FC = () => {
         open={Boolean(exampleMenuAnchor)}
         onClose={() => setExampleMenuAnchor(null)}
       >
-        <MenuItem onClick={() => setExampleMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.loadExample('simple');
+          }
+          setExampleMenuAnchor(null);
+        }}>
           Simple Chat
         </MenuItem>
-        <MenuItem onClick={() => setExampleMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.loadExample('ragWithTools');
+          }
+          setExampleMenuAnchor(null);
+        }}>
           RAG with Tools
         </MenuItem>
-        <MenuItem onClick={() => setExampleMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.loadExample('parallelProcessing');
+          }
+          setExampleMenuAnchor(null);
+        }}>
           Multi-step Process
         </MenuItem>
       </Menu>
@@ -227,7 +279,12 @@ const WorkflowBuilderPage: React.FC = () => {
         open={Boolean(actionMenuAnchor)}
         onClose={() => setActionMenuAnchor(null)}
       >
-        <MenuItem onClick={() => setActionMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleSave();
+          }
+          setActionMenuAnchor(null);
+        }}>
           <SaveIcon sx={{ mr: 1 }} />
           Save
         </MenuItem>
@@ -235,15 +292,30 @@ const WorkflowBuilderPage: React.FC = () => {
           <TemplateIcon sx={{ mr: 1 }} />
           Save as Template
         </MenuItem>
-        <MenuItem onClick={() => setActionMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleValidate();
+          }
+          setActionMenuAnchor(null);
+        }}>
           <ValidIcon sx={{ mr: 1 }} />
           Validate
         </MenuItem>
-        <MenuItem onClick={() => setActionMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleToggleGrid();
+          }
+          setActionMenuAnchor(null);
+        }}>
           <GridIcon sx={{ mr: 1 }} />
           Toggle Grid
         </MenuItem>
-        <MenuItem onClick={() => setActionMenuAnchor(null)}>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleClear();
+          }
+          setActionMenuAnchor(null);
+        }}>
           <ClearIcon sx={{ mr: 1 }} />
           Clear All
         </MenuItem>

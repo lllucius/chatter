@@ -26,7 +26,7 @@
     "forceConsistentCasingInFileNames": true,
     
     /* Type checking */
-    "types": ["vite/client", "node", "vitest/globals"],
+    "types": [],
     "baseUrl": ".",
     "paths": {
       "@/*": ["src/*"]

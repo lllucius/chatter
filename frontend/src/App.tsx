@@ -55,9 +55,7 @@ export const ThemeContext = React.createContext<{
   toggleDarkMode: () => void;
 }>({
   darkMode: false,
-  toggleDarkMode: () => {
-    // Implementation will be added when needed
-  },
+  toggleDarkMode: () => {},
 });
 
 function App() {

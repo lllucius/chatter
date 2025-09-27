@@ -65,7 +65,12 @@ const defaultTemplates: WorkflowTemplate[] = [
           data: {
             label: 'Chat Model',
             nodeType: 'model',
-            config: { temperature: 0.7, maxTokens: 1000, model: 'gpt-4' }, // TODO: Use dynamic defaults
+            config: { 
+              temperature: 0.7, 
+              maxTokens: 1000, 
+              model: 'gpt-4' 
+              // Note: Dynamic defaults can be loaded using workflowDefaultsService.getWorkflowDefaults()
+            },
           },
         },
       ],

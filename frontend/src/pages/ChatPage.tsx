@@ -436,7 +436,7 @@ const ChatPage: React.FC = () => {
                 enable_retrieval: customWorkflowConfig.enable_retrieval,
                 enable_tools: customWorkflowConfig.enable_tools,
                 enable_memory: customWorkflowConfig.enable_memory,
-                enable_web_search: false,
+                enable_web_search: customWorkflowConfig.enable_web_search || false,
                 // Use the effective workflow configuration
                 workflow_config: getEffectiveConfig(),
               }
@@ -637,7 +637,7 @@ const ChatPage: React.FC = () => {
             enable_retrieval: customWorkflowConfig.enable_retrieval,
             enable_tools: customWorkflowConfig.enable_tools,
             enable_memory: customWorkflowConfig.enable_memory,
-            enable_web_search: false, // TODO: add web search toggle to settings
+            enable_web_search: customWorkflowConfig.enable_web_search || false,
             // Use the effective workflow configuration
             workflow_config: getEffectiveConfig(),
           }

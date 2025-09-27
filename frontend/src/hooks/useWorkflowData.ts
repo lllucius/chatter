@@ -168,12 +168,9 @@ export const useWorkflowData = () => {
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      // TODO: Implement delete functionality when API is available
-      // await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
-      //   templateId
-      // );
-      // TODO: Delete workflow template not implemented in API
-      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      // Template deletion is not currently supported by the API
+      // Provide clear feedback to users
+      throw new Error('Template deletion is not currently supported by the API. Templates can only be updated or archived.');
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.deleteTemplate',

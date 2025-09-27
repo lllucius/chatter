@@ -776,6 +776,7 @@ const WorkflowEditor = React.forwardRef<
         <Box 
           sx={{ 
             height: showToolbar ? 'calc(100% - 48px)' : '100%',
+            width: '100%', // Ensure width is explicitly set
             overflow: 'hidden' // Prevent scrolling on container
           }}
         >

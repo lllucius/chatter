@@ -35,6 +35,7 @@ export const useWorkflowChat = () => {
         enable_retrieval: enableRetrieval ? JSON.parse(enableRetrieval) : false,
         enable_tools: enableTools ? JSON.parse(enableTools) : false,
         enable_memory: true,
+        enable_web_search: false, // Default to false, can be enabled through UI
         llm_config: {
           temperature: temperature ? parseFloat(temperature) : 0.7,
           max_tokens: maxTokens ? parseInt(maxTokens) : 1000,

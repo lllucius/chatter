@@ -319,7 +319,11 @@ export class SSEEventManager {
 
     // Extract unified event metadata if available
     const unifiedMetadata = this.extractUnifiedMetadata(event);
-    // TODO: Process unified metadata when ready
+    
+    // Process unified metadata for analytics and monitoring
+    if (unifiedMetadata) {
+      this.processUnifiedMetadata(event, unifiedMetadata);
+    }
 
     // Route high priority events to special handlers
     if (
@@ -550,6 +554,64 @@ export class SSEEventManager {
       // Show critical alert
       this.showCriticalAlert(event);
     }
+  }
+
+  /**
+   * Process unified metadata for analytics and correlation
+   */
+  private processUnifiedMetadata(
+    event: AnySSEEvent,
+    metadata: {
+      category?: string;
+      priority?: string;
+      source_system?: string;
+      correlation_id?: string;
+    }
+  ): void {
+    // Track event categories for analytics
+    if (metadata.category) {
+      this.trackEventCategory(metadata.category);
+    }
+
+    // Track correlation IDs for request tracing
+    if (metadata.correlation_id) {
+      this.trackCorrelationId(metadata.correlation_id, event);
+    }
+
+    // Log source system information for monitoring
+    if (metadata.source_system) {
+      this.trackSourceSystem(metadata.source_system, event.type);
+    }
+
+    // Additional processing could include:
+    // - Event correlation across conversations
+    // - Performance metrics collection
+    // - Error pattern detection
+    // - User interaction analytics
+  }
+
+  /**
+   * Track event categories for analytics
+   */
+  private trackEventCategory(category: string): void {
+    // This could send data to an analytics service
+    console.debug(`SSE Event Category: ${category}`);
+  }
+
+  /**
+   * Track correlation IDs for request tracing
+   */
+  private trackCorrelationId(correlationId: string, event: AnySSEEvent): void {
+    // This could be used for distributed tracing
+    console.debug(`SSE Correlation ID: ${correlationId} for event ${event.type}`);
+  }
+
+  /**
+   * Track source system metrics
+   */
+  private trackSourceSystem(sourceSystem: string, eventType: string): void {
+    // This could be used for system health monitoring
+    console.debug(`SSE Source: ${sourceSystem} -> ${eventType}`);
   }
 
   /**

@@ -199,17 +199,32 @@ const DocumentsPage: React.FC = () => {
       // Try to get document chunks for content preview
       let contentPreview = '';
 
+      // Get document chunks for content preview
       try {
-        // TODO: Implement when chunks API is available
-        // const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
-        //   document.id,
-        //   { limit: 3, offset: 0 }
-        // );
-        // TODO: Document chunks API not yet implemented
-        // console.warn('Document chunks API not yet implemented');
-        contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
-      } catch {
-        contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search. Chunk content not available for preview.`;
+        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
+          document.id,
+          { limit: 3, offset: 0 }
+        );
+        
+        if (chunksResponse.chunks && chunksResponse.chunks.length > 0) {
+          const chunkPreviews = chunksResponse.chunks
+            .slice(0, 3)
+            .map((chunk, index) => `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`)
+            .join('\n\n');
+          contentPreview = `Document preview (${chunksResponse.total_count} chunks total):\n\n${chunkPreviews}`;
+        } else {
+          contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search, but no chunks are available for preview.`;
+        }
+      } catch (error) {
+        // Fallback to status-based messaging if chunks API is not available
+        const chunkCount = document.chunk_count || 0;
+        if (chunkCount > 0) {
+          contentPreview = `This document has been successfully processed into ${chunkCount} chunks for vector search. Individual chunk content preview is not currently available.`;
+        } else if (document.status === 'processing') {
+          contentPreview = 'This document is currently being processed for vector search. Please check back shortly.';
+        } else {
+          contentPreview = 'This document is available for vector search but chunk content preview is not currently supported.';
+        }
       }
 
       // Create themed preview window
@@ -310,29 +325,38 @@ const DocumentsPage: React.FC = () => {
   // Handle download document
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
-      // TODO: Implement when download API is available
-      // const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(document.id);
-      // const blob = new Blob([response.data], { type: 'application/octet-stream' });
-      // const url = window.URL.createObjectURL(blob);
-      // const a = window.document.createElement('a');
-      // a.href = url;
-      // a.download = document.filename;
-      // window.document.body.appendChild(a);
-      // a.click();
-      // window.URL.revokeObjectURL(url);
-      // window.document.body.removeChild(a);
-      // TODO: Document download API not yet implemented
-      // console.warn('Document download API not yet implemented');
-      toastService.error('Document download not yet implemented');
+      // Use the new document download API
+      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(document.id);
+      
+      // Create a blob from the response and trigger download
+      const blob = new Blob([response], { type: 'application/octet-stream' });
+      const url = window.URL.createObjectURL(blob);
+      const a = window.document.createElement('a');
+      a.href = url;
+      a.download = document.original_filename || document.filename;
+      window.document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      window.document.body.removeChild(a);
+      
+      toastService.success(`Downloaded "${document.original_filename || document.filename}" successfully`);
     } catch (err: unknown) {
-      handleError(err, {
-        source: 'DocumentsPage.handleDownloadDocument',
-        operation: 'download document',
-        additionalData: {
-          documentId: document.id,
-          documentName: document.filename,
-        },
-      });
+      // If download API is not available, provide helpful feedback
+      const error = err as { status?: number; message?: string };
+      if (error.status === 404) {
+        toastService.info(
+          `Document download is not currently available. The document "${document.filename}" is stored and can be searched but not downloaded directly.`
+        );
+      } else {
+        handleError(err, {
+          source: 'DocumentsPage.handleDownloadDocument',
+          operation: 'download document',
+          additionalData: {
+            documentId: document.id,
+            documentName: document.filename,
+          },
+        });
+      }
     }
   };
 

@@ -361,6 +361,38 @@ async def update_workflow_template(
         ) from e
 
 
+@router.delete(
+    "/templates/{template_id}", response_model=WorkflowDeleteResponse
+)
+async def delete_workflow_template(
+    template_id: str,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> WorkflowDeleteResponse:
+    """Delete a workflow template."""
+    try:
+        success = await workflow_service.delete_workflow_template(
+            template_id=template_id,
+            owner_id=current_user.id,
+        )
+        
+        if not success:
+            raise NotFoundProblem(detail="Workflow template not found")
+
+        return WorkflowDeleteResponse(
+            message="Workflow template deleted successfully"
+        )
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(f"Failed to delete workflow template: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to delete workflow template: {str(e)}"
+        ) from e
+
+
 # Analytics
 @router.get(
     "/definitions/{workflow_id}/analytics",

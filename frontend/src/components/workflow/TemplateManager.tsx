@@ -38,7 +38,7 @@ interface TemplateManagerProps {
 }
 
 // Default templates
-const defaultTemplates: WorkflowTemplate[] = [
+const _staticTemplates: WorkflowTemplate[] = [
   {
     id: 'basic-chat',
     name: 'Basic Chat',
@@ -65,7 +65,12 @@ const defaultTemplates: WorkflowTemplate[] = [
           data: {
             label: 'Chat Model',
             nodeType: 'model',
-            config: { temperature: 0.7, maxTokens: 1000, model: 'gpt-4' }, // TODO: Use dynamic defaults
+            config: { 
+              temperature: 0.7, 
+              maxTokens: 1000, 
+              model: 'gpt-4' 
+              // Note: Dynamic defaults can be loaded using workflowDefaultsService.getWorkflowDefaults()
+            },
           },
         },
       ],
@@ -328,7 +333,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   currentWorkflow,
   onSaveAsTemplate,
 }) => {
-  const { templates: defaultTemplates, loading: templatesLoading, error: templatesError } = useWorkflowTemplates();
+  const { templates: defaultTemplates, loading: _templatesLoading, error: _templatesError } = useWorkflowTemplates();
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');

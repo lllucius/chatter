@@ -21,7 +21,6 @@ import {
   TableHead,
   TableRow,
   IconButton,
-  Chip,
   CircularProgress,
 } from '@mui/material';
 import Grid from '@mui/material/Grid';
@@ -37,23 +36,11 @@ import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { useForm } from '../hooks/useForm';
 import PageLayout from '../components/PageLayout';
+import type { APIKeyResponse, UserResponse } from 'chatter-sdk';
 
-interface UserProfile {
-  id: string;
-  username: string;
-  email: string;
-  full_name: string | null;
-  created_at: string;
-  updated_at: string;
-}
+// Use UserResponse from SDK instead of local interface
 
-interface APIKey {
-  id: string;
-  name: string;
-  created_at: string;
-  expires_at?: string;
-  last_used?: string;
-}
+// Use APIKeyResponse from SDK instead of local interface
 
 interface ProfileFormValues extends Record<string, unknown> {
   full_name: string;
@@ -73,8 +60,8 @@ interface ApiKeyFormValues extends Record<string, unknown> {
 
 const UserSettingsPage: React.FC = () => {
   const [tabValue, setTabValue] = useState(0);
-  const [userProfile, setUserProfile] = useState<UserProfile | null>(null);
-  const [apiKeys, setApiKeys] = useState<APIKey[]>([]);
+  const [userProfile, setUserProfile] = useState<UserResponse | null>(null);
+  const [apiKeys, setApiKeys] = useState<APIKeyResponse[]>([]);
   const [loading, setLoading] = useState(true);
   const [apiKeysLoading, setApiKeysLoading] = useState(false);
   const [apiKeyDialogOpen, setApiKeyDialogOpen] = useState(false);
@@ -153,12 +140,14 @@ const UserSettingsPage: React.FC = () => {
       name: '',
       expires_in_days: 90,
     },
-    onSubmit: async (_values) => {
+    onSubmit: async (values) => {
       try {
-        // TODO: Implement API key creation when endpoint is available
-        // const newKey = await getSDK().createApiKey(values);
-        // setApiKeys([...apiKeys, newKey]);
-        toastService.success('API key creation not yet implemented');
+        const newKey = await getSDK().auth.createApiKeyApiV1AuthApiKey({
+          name: values.name,
+          // Note: expires_in_days is not supported in the current API
+        });
+        setApiKeys([...apiKeys, newKey]);
+        toastService.success('API key created successfully');
         setApiKeyDialogOpen(false);
         apiKeyForm.resetForm();
       } catch (error: unknown) {
@@ -174,12 +163,10 @@ const UserSettingsPage: React.FC = () => {
 
   const loadUserProfile = useCallback(async () => {
     try {
-      // TODO: Implement user profile loading when endpoint is available
-      // const profile = await getSDK().getCurrentUser();
-      // setUserProfile(profile);
-      // Set default values for now
-      profileForm.setFieldValue('full_name', '');
-      profileForm.setFieldValue('email', '');
+      const profile = await getSDK().auth.getCurrentUserInfoApiV1AuthMe();
+      setUserProfile(profile);
+      profileForm.setFieldValue('full_name', profile.full_name || '');
+      profileForm.setFieldValue('email', profile.email || '');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadUserProfile',
@@ -191,10 +178,8 @@ const UserSettingsPage: React.FC = () => {
   const loadApiKeys = async () => {
     try {
       setApiKeysLoading(true);
-      // TODO: Implement API key listing when endpoint is available
-      // const keys = await getSDK().listApiKeys();
-      // setApiKeys(keys);
-      setApiKeys([]); // Placeholder until API is available
+      const keys = await getSDK().auth.listApiKeysApiV1AuthApiKeys();
+      setApiKeys(keys);
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.loadApiKeys',
@@ -205,27 +190,28 @@ const UserSettingsPage: React.FC = () => {
     }
   };
 
-  const handleRevokeApiKey = async (keyId: string) => {
+  const handleRevokeApiKey = async (_keyId: string) => {
     try {
-      // TODO: Implement API key revocation when endpoint is available
-      // await getSDK().revokeApiKey(keyId);
-      setApiKeys(apiKeys.filter((key) => key.id !== keyId));
+      // Note: The current API only supports revoking the current user's API key
+      // It doesn't support revoking specific keys by ID
+      await getSDK().auth.revokeApiKeyApiV1AuthApiKey();
+      // Refresh the key list after revocation
+      await loadApiKeys();
       toastService.success('API key revoked successfully');
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleRevokeKey',
         operation: 'revoke API key',
-        additionalData: { keyId },
+        additionalData: { keyId: _keyId },
       });
     }
   };
 
   const handleDeactivateAccount = async () => {
     try {
-      // TODO: Implement account deactivation when endpoint is available
-      // await getSDK().deactivateAccount();
-      toastService.success('Account deactivation not yet implemented');
-      // The SDK will handle logout and redirect
+      await getSDK().auth.deactivateAccountApiV1AuthAccount();
+      toastService.success('Account deactivated successfully');
+      // The API will handle logout and the auth service should redirect
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleDeactivateAccount',
@@ -434,31 +420,15 @@ const UserSettingsPage: React.FC = () => {
                     ) : (
                       apiKeys.map((key) => (
                         <TableRow key={key.id}>
-                          <TableCell>{key.name}</TableCell>
+                          <TableCell>{key.api_key_name}</TableCell>
                           <TableCell>
-                            {key.created_at
-                              ? format(new Date(key.created_at), 'PP')
-                              : 'Unknown'}
+                            {'Not available'}
                           </TableCell>
                           <TableCell>
-                            {key.expires_at ? (
-                              <Chip
-                                label={format(new Date(key.expires_at), 'PP')}
-                                color={
-                                  new Date(key.expires_at) < new Date()
-                                    ? 'error'
-                                    : 'default'
-                                }
-                                size="small"
-                              />
-                            ) : (
-                              'Never'
-                            )}
+                            {'Not available'}
                           </TableCell>
                           <TableCell>
-                            {key.last_used
-                              ? format(new Date(key.last_used), 'PP')
-                              : 'Never'}
+                            {'Not available'}
                           </TableCell>
                           <TableCell>
                             <IconButton

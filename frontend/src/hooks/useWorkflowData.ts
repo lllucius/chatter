@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
+import { toastService } from '../services/toast-service';
 import {
   WorkflowTemplateResponse,
   ServerToolsResponse,
@@ -168,12 +169,12 @@ export const useWorkflowData = () => {
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      // TODO: Implement delete functionality when API is available
-      // await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
-      //   templateId
-      // );
-      // TODO: Delete workflow template not implemented in API
+      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId);
+      
+      // Remove from local state on successful deletion
       setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      
+      toastService.success('Workflow template deleted successfully');
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.deleteTemplate',

@@ -247,9 +247,26 @@ export const useChatMessages = () => {
             onDelete: () => {
               // Placeholder for delete functionality
             },
-            onRate: (_rating: 'good' | 'bad') => {
-              // Placeholder for rating functionality
-              // TODO: Implement message rating
+            onRate: async (rating: 'good' | 'bad') => {
+              try {
+                // Convert 'good'/'bad' to numeric rating (0-5 scale)
+                const numericRating = rating === 'good' ? 5.0 : 1.0;
+                
+                await getSDK().conversations.updateMessageRatingApiV1ConversationsConversationIdMessagesMessageIdRating(
+                  conversationId,
+                  msg.id,
+                  { rating: numericRating }
+                );
+                
+                // Provide user feedback
+                console.log(`Message rated as ${rating} (${numericRating}/5.0)`);
+              } catch (error) {
+                handleError(error, {
+                  source: 'useChatData.rateMessage',
+                  operation: 'rate message',
+                  additionalData: { messageId: msg.id, rating },
+                });
+              }
             },
           })) || [];
 

@@ -145,6 +145,20 @@ export class WorkflowsApi extends BaseAPI {
     const response = await this.request(requestContext);
     return response.json() as Promise<WorkflowTemplateResponse>;
   }
+  /**Delete Workflow Template
+   * Delete a workflow template.
+   */
+  public async deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId: string): Promise<WorkflowDeleteResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/templates/${templateId}`,
+      method: 'DELETE' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowDeleteResponse>;
+  }
   /**Get Workflow Analytics
    * Get analytics for a specific workflow definition.
    */

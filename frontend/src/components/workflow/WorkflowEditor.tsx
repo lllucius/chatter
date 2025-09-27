@@ -1,4 +1,10 @@
-import React, { useCallback, useState, useMemo } from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useCallback,
+  useRef,
+} from 'react';
 import {
   ReactFlow,
   Node,
@@ -62,6 +68,7 @@ import DelayNode from './nodes/DelayNode';
 import CustomEdge from './edges/CustomEdge';
 import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
+import { workflowDefaultsService, WorkflowDefaults } from '../../services/workflow-defaults-service';
 
 // Define node types for the workflow
 export type WorkflowNodeType =
@@ -184,6 +191,25 @@ const WorkflowEditor = React.forwardRef<
   >([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
   const [showTemplateManager, setShowTemplateManager] = useState(false);
+  const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
+  const [loadingDefaults, setLoadingDefaults] = useState(false);
+
+  // Load workflow defaults on mount
+  useEffect(() => {
+    const loadDefaults = async () => {
+      setLoadingDefaults(true);
+      try {
+        const defaults = await workflowDefaultsService.getWorkflowDefaults();
+        setWorkflowDefaults(defaults);
+      } catch (error) {
+        console.error('Failed to load workflow defaults:', error);
+      } finally {
+        setLoadingDefaults(false);
+      }
+    };
+
+    loadDefaults();
+  }, []);
 
   // Save current state to history
   const saveToHistory = useCallback(() => {
@@ -289,9 +315,15 @@ const WorkflowEditor = React.forwardRef<
   );
 
   // Get default configuration for node type
-  const getDefaultNodeConfig = (
+  const getDefaultNodeConfig = useCallback((
     nodeType: WorkflowNodeType
   ): Record<string, unknown> => {
+    // Use dynamic defaults if available
+    if (workflowDefaults?.node_types[nodeType]) {
+      return workflowDefaults.node_types[nodeType];
+    }
+
+    // Fallback to hardcoded defaults
     switch (nodeType) {
       case 'start':
         return { isEntryPoint: true };
@@ -326,7 +358,7 @@ const WorkflowEditor = React.forwardRef<
       default:
         return {};
     }
-  };
+  }, [workflowDefaults]);
 
   // Create current workflow definition
   const currentWorkflow = useMemo(

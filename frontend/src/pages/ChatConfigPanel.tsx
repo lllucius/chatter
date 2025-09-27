@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -32,6 +32,7 @@ import {
   ConversationResponse,
 } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
+import { workflowDefaultsService, WorkflowDefaults } from '../services/workflow-defaults-service';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -94,11 +95,26 @@ const ChatConfigPanel: React.FC<Props> = ({
     const saved = localStorage.getItem('chatter_expandedPanel');
     return saved ? saved : 'profile';
   });
+  const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
 
-  // Default values for reset functionality
+  // Load workflow defaults on mount
+  useEffect(() => {
+    const loadDefaults = async () => {
+      try {
+        const defaults = await workflowDefaultsService.getWorkflowDefaults();
+        setWorkflowDefaults(defaults);
+      } catch (error) {
+        console.error('Failed to load workflow defaults:', error);
+      }
+    };
+
+    loadDefaults();
+  }, []);
+
+  // Default values for reset functionality - use dynamic defaults when available
   const defaultValues = {
-    temperature: 0.7,
-    maxTokens: 2048,
+    temperature: workflowDefaults?.model_config?.temperature || 0.7,
+    maxTokens: workflowDefaults?.model_config?.max_tokens || 2048,
     enableRetrieval: true,
   };
 

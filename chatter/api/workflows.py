@@ -37,6 +37,7 @@ from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.services.workflow_management import (
     WorkflowManagementService,
 )
+from chatter.services.workflow_defaults import WorkflowDefaultsService
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem, NotFoundProblem
@@ -59,6 +60,13 @@ async def get_workflow_analytics_service(
 ) -> SimplifiedWorkflowAnalyticsService:
     """Get workflow analytics service."""
     return SimplifiedWorkflowAnalyticsService(session)
+
+
+async def get_workflow_defaults_service(
+    session: AsyncSession = Depends(get_session_generator),
+) -> WorkflowDefaultsService:
+    """Get workflow defaults service."""
+    return WorkflowDefaultsService(session)
 
 
 async def get_workflow_execution_service(
@@ -1161,4 +1169,63 @@ async def configure_tool_settings(
         logger.error(f"Failed to configure tool settings: {e}")
         raise InternalServerProblem(
             detail=f"Failed to configure tool settings: {str(e)}"
+        ) from e
+
+
+@router.get("/defaults", response_model=dict[str, Any])
+async def get_workflow_defaults(
+    node_type: str | None = None,
+    current_user: User = Depends(get_current_user),
+    defaults_service: WorkflowDefaultsService = Depends(get_workflow_defaults_service),
+) -> dict[str, Any]:
+    """Get workflow defaults from profiles, models, and prompts.
+    
+    Args:
+        node_type: Optional specific node type to get defaults for
+        current_user: Current authenticated user
+        defaults_service: Workflow defaults service
+        
+    Returns:
+        Dictionary containing default configurations
+    """
+    try:
+        if node_type:
+            # Get defaults for specific node type
+            config = await defaults_service.get_default_node_config(
+                node_type, current_user.id
+            )
+            return {
+                "node_type": node_type,
+                "config": config
+            }
+        else:
+            # Get general model defaults
+            model_config = await defaults_service.get_default_model_config(
+                current_user.id
+            )
+            prompt_text = await defaults_service.get_default_prompt_text(
+                user_id=current_user.id
+            )
+            
+            return {
+                "model_config": model_config,
+                "default_prompt": prompt_text,
+                "node_types": {
+                    "model": await defaults_service.get_default_node_config("model", current_user.id),
+                    "retrieval": await defaults_service.get_default_node_config("retrieval", current_user.id),
+                    "memory": await defaults_service.get_default_node_config("memory", current_user.id),
+                    "loop": await defaults_service.get_default_node_config("loop", current_user.id),
+                    "conditional": await defaults_service.get_default_node_config("conditional", current_user.id),
+                    "variable": await defaults_service.get_default_node_config("variable", current_user.id),
+                    "errorHandler": await defaults_service.get_default_node_config("errorHandler", current_user.id),
+                    "delay": await defaults_service.get_default_node_config("delay", current_user.id),
+                    "tool": await defaults_service.get_default_node_config("tool", current_user.id),
+                    "start": await defaults_service.get_default_node_config("start", current_user.id),
+                }
+            }
+            
+    except Exception as e:
+        logger.error(f"Failed to get workflow defaults: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to get workflow defaults: {str(e)}"
         ) from e

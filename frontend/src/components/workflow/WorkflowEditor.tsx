@@ -165,7 +165,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const [showValidation, setShowValidation] = useState(false);
   const [selectedNode, setSelectedNode] =
     useState<Node<WorkflowNodeData> | null>(null);
-  const [showPropertiesPanel, setShowPropertiesPanel] = useState(false);
   const [snapToGrid, setSnapToGrid] = useState(true);
   const [clipboard, setClipboard] = useState<{
     nodes: Node<WorkflowNodeData>[];
@@ -175,9 +174,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     { nodes: Node<WorkflowNodeData>[]; edges: Edge<WorkflowEdgeData>[] }[]
   >([]);
   const [historyIndex, setHistoryIndex] = useState(-1);
-  const [sidePanelTab, setSidePanelTab] = useState<'properties' | 'analytics'>(
-    'properties'
-  );
   const [showTemplateManager, setShowTemplateManager] = useState(false);
 
   // Save current state to history
@@ -193,7 +189,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   const onNodeClick = useCallback(
     (event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
       setSelectedNode(node);
-      setShowPropertiesPanel(true);
       // Call external handler if provided
       if (onNodeClickProp) {
         onNodeClickProp(event, node);
@@ -430,7 +425,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         )
       );
       setSelectedNode(null);
-      setShowPropertiesPanel(false);
     }
   }, [selectedNode, setNodes, setEdges, saveToHistory]);
 
@@ -499,7 +493,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     setNodes([]);
     setEdges([]);
     setSelectedNode(null);
-    setShowPropertiesPanel(false);
   }, [setNodes, setEdges, saveToHistory]);
 
   // Load example workflow
@@ -547,117 +540,118 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         }}
       >
         {/* Toolbar */}
-        <Toolbar
-          sx={{
-            bgcolor: 'background.paper',
-            borderBottom: '1px solid #e0e0e0',
-            minHeight: '48px !important',
-          }}
-        >
-          <Typography variant="h6" sx={{ flexGrow: 1 }}>
-            Workflow Editor
-          </Typography>
+        {showToolbar && (
+          <Toolbar
+            sx={{
+              bgcolor: 'background.paper',
+              borderBottom: '1px solid #e0e0e0',
+              minHeight: '48px !important',
+            }}
+          >
+            <Typography variant="h6" sx={{ flexGrow: 1 }}>
+              Workflow Editor
+            </Typography>
 
-          {!readOnly && (
-            <>
-              {/* Node Type Buttons */}
-              <ButtonGroup size="small" sx={{ mr: 2 }}>
-                <Button
-                  startIcon={<StartIcon />}
-                  onClick={() => addNode('start')}
-                  variant="outlined"
-                >
-                  Start
-                </Button>
-                <Button
-                  startIcon={<ModelIcon />}
-                  onClick={() => addNode('model')}
-                  variant="outlined"
-                >
-                  Model
-                </Button>
-                <Button
-                  startIcon={<ToolIcon />}
-                  onClick={() => addNode('tool')}
-                  variant="outlined"
-                >
-                  Tool
-                </Button>
-                <Button
-                  startIcon={<MemoryIcon />}
-                  onClick={() => addNode('memory')}
-                  variant="outlined"
-                >
-                  Memory
-                </Button>
-                <Button
-                  startIcon={<RetrievalIcon />}
-                  onClick={() => addNode('retrieval')}
-                  variant="outlined"
-                >
-                  Retrieval
-                </Button>
-                <Button
-                  startIcon={<ConditionalIcon />}
-                  onClick={() => addNode('conditional')}
-                  variant="outlined"
-                >
-                  Conditional
-                </Button>
-              </ButtonGroup>
+            {!readOnly && (
+              <>
+                {/* Node Type Buttons */}
+                <ButtonGroup size="small" sx={{ mr: 2 }}>
+                  <Button
+                    startIcon={<StartIcon />}
+                    onClick={() => addNode('start')}
+                    variant="outlined"
+                  >
+                    Start
+                  </Button>
+                  <Button
+                    startIcon={<ModelIcon />}
+                    onClick={() => addNode('model')}
+                    variant="outlined"
+                  >
+                    Model
+                  </Button>
+                  <Button
+                    startIcon={<ToolIcon />}
+                    onClick={() => addNode('tool')}
+                    variant="outlined"
+                  >
+                    Tool
+                  </Button>
+                  <Button
+                    startIcon={<MemoryIcon />}
+                    onClick={() => addNode('memory')}
+                    variant="outlined"
+                  >
+                    Memory
+                  </Button>
+                  <Button
+                    startIcon={<RetrievalIcon />}
+                    onClick={() => addNode('retrieval')}
+                    variant="outlined"
+                  >
+                    Retrieval
+                  </Button>
+                  <Button
+                    startIcon={<ConditionalIcon />}
+                    onClick={() => addNode('conditional')}
+                    variant="outlined"
+                  >
+                    Conditional
+                  </Button>
+                </ButtonGroup>
 
-              {/* Advanced Node Types */}
-              <ButtonGroup size="small" sx={{ mr: 2 }}>
-                <Button
-                  startIcon={<LoopIcon />}
-                  onClick={() => addNode('loop')}
-                  variant="outlined"
-                  color="secondary"
-                >
-                  Loop
-                </Button>
-                <Button
-                  startIcon={<VariableIcon />}
-                  onClick={() => addNode('variable')}
-                  variant="outlined"
-                  color="secondary"
-                >
-                  Variable
-                </Button>
-                <Button
-                  startIcon={<ErrorHandlerIcon />}
-                  onClick={() => addNode('errorHandler')}
-                  variant="outlined"
-                  color="secondary"
-                >
-                  Error
-                </Button>
-                <Button
-                  startIcon={<DelayIcon />}
-                  onClick={() => addNode('delay')}
-                  variant="outlined"
-                  color="secondary"
-                >
-                  Delay
-                </Button>
-              </ButtonGroup>
+                {/* Advanced Node Types */}
+                <ButtonGroup size="small" sx={{ mr: 2 }}>
+                  <Button
+                    startIcon={<LoopIcon />}
+                    onClick={() => addNode('loop')}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Loop
+                  </Button>
+                  <Button
+                    startIcon={<VariableIcon />}
+                    onClick={() => addNode('variable')}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Variable
+                  </Button>
+                  <Button
+                    startIcon={<ErrorHandlerIcon />}
+                    onClick={() => addNode('errorHandler')}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Error
+                  </Button>
+                  <Button
+                    startIcon={<DelayIcon />}
+                    onClick={() => addNode('delay')}
+                    variant="outlined"
+                    color="secondary"
+                  >
+                    Delay
+                  </Button>
+                </ButtonGroup>
 
-              {/* Edit Controls */}
-              <ButtonGroup size="small" sx={{ mr: 2 }}>
-                <Button
-                  onClick={handleUndo}
-                  disabled={historyIndex <= 0}
-                  variant="outlined"
-                  startIcon={<UndoIcon />}
-                  title="Undo (Ctrl+Z)"
-                >
-                  Undo
-                </Button>
-                <Button
-                  onClick={handleRedo}
-                  disabled={historyIndex >= history.length - 1}
-                  variant="outlined"
-                  startIcon={<RedoIcon />}
+                {/* Edit Controls */}
+                <ButtonGroup size="small" sx={{ mr: 2 }}>
+                  <Button
+                    onClick={handleUndo}
+                    disabled={historyIndex <= 0}
+                    variant="outlined"
+                    startIcon={<UndoIcon />}
+                    title="Undo (Ctrl+Z)"
+                  >
+                    Undo
+                  </Button>
+                  <Button
+                    onClick={handleRedo}
+                    disabled={historyIndex >= history.length - 1}
+                    variant="outlined"
+                    startIcon={<RedoIcon />}
                   title="Redo (Ctrl+Shift+Z)"
                 >
                   Redo
@@ -691,14 +685,6 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
                   title="Toggle Grid Snap"
                 >
                   Grid
-                </Button>
-                <Button
-                  onClick={() => setShowPropertiesPanel(!showPropertiesPanel)}
-                  variant={showPropertiesPanel ? 'contained' : 'outlined'}
-                  startIcon={<PropertiesIcon />}
-                  title="Toggle Properties Panel"
-                >
-                  Properties
                 </Button>
                 <Button
                   onClick={handleValidate}
@@ -740,9 +726,10 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
             </>
           )}
         </Toolbar>
+        )}
 
         {/* React Flow Canvas */}
-        <Box sx={{ height: 'calc(100% - 48px)' }}>
+        <Box sx={{ height: showToolbar ? 'calc(100% - 48px)' : '100%' }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -766,49 +753,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
         </Box>
       </Box>
 
-      {/* Side Panel with Tabs */}
-      {showPropertiesPanel && (
-        <Fade in={showPropertiesPanel} timeout={300}>
-          <Paper
-            elevation={3}
-            sx={{ borderRadius: 0, display: 'flex', flexDirection: 'column' }}
-          >
-            <Tabs
-              value={sidePanelTab}
-              onChange={(_, newValue) => setSidePanelTab(newValue)}
-              variant="fullWidth"
-            >
-              <Tab
-                label="Properties"
-                value="properties"
-                icon={<PropertiesIcon />}
-                iconPosition="start"
-              />
-              <Tab
-                label="Analytics"
-                value="analytics"
-                icon={<AnalyticsIcon />}
-                iconPosition="start"
-              />
-            </Tabs>
-
-            <Box sx={{ flex: 1, overflow: 'hidden' }}>
-              {sidePanelTab === 'properties' && (
-                <PropertiesPanel
-                  selectedNode={selectedNode}
-                  onNodeUpdate={handleNodeUpdate}
-                  onClose={() => setShowPropertiesPanel(false)}
-                />
-              )}
-              {sidePanelTab === 'analytics' && (
-                <WorkflowAnalytics workflow={currentWorkflow} />
-              )}
-            </Box>
-          </Paper>
-        </Fade>
-      )}
-
-      {/* Example workflows menu */}
+      {/* Dialogs and Menus */}
       <Menu
         anchorEl={exampleMenuAnchor}
         open={Boolean(exampleMenuAnchor)}

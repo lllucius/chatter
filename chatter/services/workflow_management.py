@@ -129,6 +129,15 @@ class WorkflowManagementService:
             await self.session.commit()
             await self.session.refresh(definition)
 
+            # Validate that the created definition has a proper ULID
+            try:
+                from ulid import ULID
+                ULID.from_str(definition.id)
+            except ValueError as e:
+                logger.error(f"Created workflow definition has invalid ULID: {definition.id}")
+                await self.session.rollback()
+                raise RuntimeError(f"Failed to create workflow with valid ULID: {e}") from e
+
             # Invalidate workflow caches after creation
             await self._invalidate_workflow_caches(definition.id)
 

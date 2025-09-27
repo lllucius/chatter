@@ -9,6 +9,7 @@ import {
   Button,
 } from '../utils/mui';
 import { AddIcon, RefreshIcon, PlayArrowIcon, EditIcon } from '../utils/icons';
+import { useNavigate } from 'react-router-dom';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, {
   CrudConfig,
@@ -27,6 +28,7 @@ import { handleError } from '../utils/error-handler';
 import { useWorkflowData } from '../hooks/useWorkflowData';
 
 const WorkflowTemplatesPage: React.FC = () => {
+  const navigate = useNavigate();
   const crudTableRef = useRef<CrudDataTableRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplateResponse | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
@@ -44,8 +46,12 @@ const WorkflowTemplatesPage: React.FC = () => {
 
   const handleEditTemplate = (template: WorkflowTemplateResponse) => {
     // Navigate to builder page with template data
-    // This would be implemented with router navigation
-    console.log('Edit template:', template);
+    navigate('/workflows/builder', { 
+      state: { 
+        editTemplate: template,
+        mode: 'edit'
+      } 
+    });
   };
 
   const handleExecuteWorkflow = async () => {
@@ -100,10 +106,14 @@ const WorkflowTemplatesPage: React.FC = () => {
       render: createCategoryChipRenderer<WorkflowTemplateResponse>(),
     },
     {
-      id: 'updated_at',
-      label: 'Updated',
-      width: '140px',
-      render: createDateRenderer<WorkflowTemplateResponse>(),
+      id: 'version',
+      label: 'Version',
+      width: '100px',
+      render: (version: unknown) => (
+        <Typography variant="body2" color="text.secondary">
+          v{String(version || '1')}
+        </Typography>
+      ),
     },
   ];
 
@@ -161,7 +171,7 @@ const WorkflowTemplatesPage: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.refresh()}
+        onClick={() => crudTableRef.current?.handleRefresh()}
       >
         Refresh
       </Button>
@@ -170,7 +180,11 @@ const WorkflowTemplatesPage: React.FC = () => {
         startIcon={<AddIcon />}
         onClick={() => {
           // Navigate to builder page to create new template
-          console.log('Create new template');
+          navigate('/workflows/builder', { 
+            state: { 
+              mode: 'create'
+            } 
+          });
         }}
       >
         Create Template

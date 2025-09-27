@@ -146,6 +146,7 @@ const WorkflowEditor = React.forwardRef<
     loadExample: (exampleName: string) => void;
     showTemplateManager: () => void;
     deleteSelected: () => void;
+    updateNode: (nodeId: string, updates: Partial<WorkflowNodeData>) => void;
   },
   WorkflowEditorProps
 >(({
@@ -554,6 +555,7 @@ const WorkflowEditor = React.forwardRef<
     loadExample: handleLoadExample,
     showTemplateManager: () => setShowTemplateManager(true),
     deleteSelected: handleDeleteSelected,
+    updateNode: _handleNodeUpdate,
   }), [
     addNode,
     handleUndo,
@@ -566,10 +568,11 @@ const WorkflowEditor = React.forwardRef<
     handleValidate,
     handleLoadExample,
     handleDeleteSelected,
+    _handleNodeUpdate,
   ]);
 
   return (
-    <Box sx={{ height: '600px', width: '100%', display: 'flex' }}>
+    <Box sx={{ height: '100%', width: '100%', display: 'flex' }}>
       {/* Main Editor Area */}
       <Box
         sx={{

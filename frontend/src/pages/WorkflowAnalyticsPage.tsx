@@ -5,7 +5,6 @@ import {
   Card,
   CardContent,
   Typography,
-  Grid,
   Select,
   MenuItem,
   FormControl,
@@ -17,7 +16,6 @@ import { RefreshIcon, AnalyticsIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import { getSDK } from '../services/auth-service';
 import { WorkflowDefinitionResponse, WorkflowAnalyticsResponse } from 'chatter-sdk';
-import { handleError } from '../utils/error-handler';
 
 const WorkflowAnalyticsPage: React.FC = () => {
   const [workflows, setWorkflows] = useState<WorkflowDefinitionResponse[]>([]);

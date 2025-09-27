@@ -10,7 +10,6 @@ import {
 } from '../utils/mui';
 import { AddIcon, RefreshIcon, PlayArrowIcon, EditIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
-import { CrudPageHeader } from '../components/PageHeader';
 import CrudDataTable, {
   CrudConfig,
   CrudService,
@@ -131,7 +130,7 @@ const WorkflowTemplatesPage: React.FC = () => {
 
   // Define service methods
   const service: CrudService<WorkflowTemplateResponse, WorkflowTemplateCreate, WorkflowTemplateUpdate> = {
-    list: async (page: number, pageSize: number) => {
+    list: async (_page: number, _pageSize: number) => {
       const sdk = await getSDK();
       const response = await sdk.workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
       return {
@@ -143,12 +142,11 @@ const WorkflowTemplatesPage: React.FC = () => {
       const sdk = await getSDK();
       return await sdk.workflows.createWorkflowTemplateApiV1WorkflowsTemplates(data);
     },
-    update: async (id: string, data: WorkflowTemplateUpdate) => {
+    update: async (_id: string, data: WorkflowTemplateUpdate) => {
       const sdk = await getSDK();
-      return await sdk.workflows.updateWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(id, data);
+      return await sdk.workflows.updateWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(_id, data);
     },
-    delete: async (id: string) => {
-      const sdk = await getSDK();
+    delete: async (_id: string) => {
       // Note: Delete method may not be available in API, will need to implement
       throw new Error('Delete not implemented for templates');
     },

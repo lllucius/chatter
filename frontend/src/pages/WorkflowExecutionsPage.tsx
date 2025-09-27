@@ -5,7 +5,7 @@ import {
   Button,
   Chip,
 } from '../utils/mui';
-import { RefreshIcon, PlayArrowIcon, InfoIcon } from '../utils/icons';
+import { RefreshIcon, InfoIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, {
   CrudConfig,
@@ -153,8 +153,7 @@ const WorkflowExecutionsPage: React.FC = () => {
 
   // Define service methods
   const service: CrudService<WorkflowExecutionResponse, never, never> = {
-    list: async (page: number, pageSize: number) => {
-      const sdk = await getSDK();
+    list: async (_page: number, _pageSize: number) => {
       // Note: This API may require a workflow ID, will need to adjust
       // For now, return empty results
       return {

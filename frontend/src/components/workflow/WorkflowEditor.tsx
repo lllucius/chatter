@@ -25,10 +25,6 @@ import {
   MenuItem,
   Alert,
   Snackbar,
-  Paper,
-  Fade,
-  Tab,
-  Tabs,
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -44,13 +40,11 @@ import {
   CheckCircle as ValidIcon,
   Error as ErrorIcon,
   GetApp as ExampleIcon,
-  Settings as PropertiesIcon,
   GridOn as GridIcon,
   Undo as UndoIcon,
   Redo as RedoIcon,
   ContentCopy as CopyIcon,
   ContentPaste as PasteIcon,
-  Analytics as AnalyticsIcon,
   LibraryBooks as TemplateIcon,
 } from '@mui/icons-material';
 
@@ -66,8 +60,6 @@ import VariableNode from './nodes/VariableNode';
 import ErrorHandlerNode from './nodes/ErrorHandlerNode';
 import DelayNode from './nodes/DelayNode';
 import CustomEdge from './edges/CustomEdge';
-import PropertiesPanel from './PropertiesPanel';
-import WorkflowAnalytics from './WorkflowAnalytics';
 import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 
@@ -198,7 +190,7 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   );
 
   // Handle node updates from properties panel
-  const handleNodeUpdate = useCallback(
+  const _handleNodeUpdate = useCallback(
     (nodeId: string, updates: Partial<WorkflowNodeData>) => {
       saveToHistory();
       setNodes((nds) =>

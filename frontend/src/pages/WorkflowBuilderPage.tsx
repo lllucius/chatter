@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from 'react';
-import { Box, Menu, MenuItem, Button, ButtonGroup } from '../utils/mui';
+import { Box, Menu, MenuItem, Button } from '../utils/mui';
 import {
   PlayArrow as StartIcon,
   SmartToy as ModelIcon,
@@ -12,7 +12,6 @@ import {
   Error as ErrorHandlerIcon,
   Schedule as DelayIcon,
   CheckCircle as ValidIcon,
-  Error as ErrorIcon,
   GetApp as ExampleIcon,
   GridOn as GridIcon,
   Undo as UndoIcon,
@@ -32,7 +31,7 @@ import WorkflowAnalytics from '../components/workflow/WorkflowAnalytics';
 import { WorkflowDefinition, WorkflowNodeData } from '../components/workflow/WorkflowEditor';
 
 const WorkflowBuilderPage: React.FC = () => {
-  const [selectedNode, setSelectedNode] = useState<any>(null);
+  const [_selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowDefinition>({
     nodes: [],
     edges: [],
@@ -55,7 +54,7 @@ const WorkflowBuilderPage: React.FC = () => {
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
 
   // Handle node selection - show properties in right sidebar
-  const handleNodeClick = useCallback((event: any, node: any) => {
+  const handleNodeClick = useCallback((event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
     setSelectedNode(node);
     setTitle('Node Properties');
     setPanelContent(
@@ -63,7 +62,7 @@ const WorkflowBuilderPage: React.FC = () => {
         selectedNode={node}
         onNodeUpdate={(nodeId: string, data: Partial<WorkflowNodeData>) => {
           // Update node logic would go here
-          console.log('Update node:', nodeId, data);
+          // console.log('Update node:', nodeId, data);
         }}
         onClose={() => {
           setSelectedNode(null);

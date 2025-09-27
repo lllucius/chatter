@@ -15,6 +15,7 @@ import { CrudFormProps } from './CrudDataTable';
 import { FormDialog } from './BaseDialog';
 import { useBaseForm } from '../hooks/useBaseForm';
 import { getSDK } from '../services/auth-service';
+import { workflowDefaultsService } from '../services/workflow-defaults-service';
 
 interface Provider {
   name: string;
@@ -61,11 +62,38 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
     null
   );
   const [providersError, setProvidersError] = useState<string | null>(null);
+  const [dynamicDefaults, setDynamicDefaults] = useState(defaultProfileData);
+
+  // Load dynamic defaults on mount
+  useEffect(() => {
+    const loadDynamicDefaults = async () => {
+      try {
+        const defaults = await workflowDefaultsService.getWorkflowDefaults();
+        const updatedDefaults = {
+          ...defaultProfileData,
+          temperature: defaults.model_config?.temperature || defaultProfileData.temperature,
+          max_tokens: defaults.model_config?.max_tokens || defaultProfileData.max_tokens,
+          top_p: defaults.model_config?.top_p || defaultProfileData.top_p,
+          frequency_penalty: defaults.model_config?.frequency_penalty || defaultProfileData.frequency_penalty,
+          presence_penalty: defaults.model_config?.presence_penalty || defaultProfileData.presence_penalty,
+          llmModel: defaults.model_config?.model || defaultProfileData.llmModel,
+          llmProvider: defaults.model_config?.provider || defaultProfileData.llmProvider,
+        };
+        setDynamicDefaults(updatedDefaults);
+      } catch (error) {
+        console.error('Failed to load dynamic profile defaults:', error);
+      }
+    };
+
+    if (open && mode === 'create') {
+      loadDynamicDefaults();
+    }
+  }, [open, mode]);
 
   const { formData, updateFormData, isSubmitting, handleSubmit, handleClose } =
     useBaseForm(
       {
-        defaultData: defaultProfileData,
+        defaultData: dynamicDefaults,
         transformInitialData: (data: unknown) => {
           const profileData = data as ProfileResponse;
           return {

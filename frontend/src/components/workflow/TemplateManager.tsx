@@ -25,16 +25,7 @@ import {
   Description as TemplateIcon,
 } from '@mui/icons-material';
 import { WorkflowDefinition } from './WorkflowEditor';
-
-interface WorkflowTemplate {
-  id: string;
-  name: string;
-  description: string;
-  category: 'basic' | 'advanced' | 'custom';
-  workflow: WorkflowDefinition;
-  tags: string[];
-  createdAt: string;
-}
+import { useWorkflowTemplates, WorkflowTemplate } from './useWorkflowTemplates';
 
 interface TemplateManagerProps {
   open: boolean;
@@ -74,7 +65,7 @@ const defaultTemplates: WorkflowTemplate[] = [
           data: {
             label: 'Chat Model',
             nodeType: 'model',
-            config: { temperature: 0.7, maxTokens: 1000, model: 'gpt-4' },
+            config: { temperature: 0.7, maxTokens: 1000, model: 'gpt-4' }, // TODO: Use dynamic defaults
           },
         },
       ],
@@ -337,12 +328,19 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   currentWorkflow,
   onSaveAsTemplate,
 }) => {
-  const [templates, setTemplates] =
-    useState<WorkflowTemplate[]>(defaultTemplates);
+  const { templates: defaultTemplates, loading: templatesLoading, error: templatesError } = useWorkflowTemplates();
+  const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');
   const [templateDescription, setTemplateDescription] = useState('');
   const [templateTags, setTemplateTags] = useState('');
+  
+  // Update templates when defaults change
+  React.useEffect(() => {
+    if (defaultTemplates.length > 0) {
+      setTemplates(defaultTemplates);
+    }
+  }, [defaultTemplates]);
   const [menuAnchor, setMenuAnchor] = useState<{
     element: HTMLElement;
     templateId: string;

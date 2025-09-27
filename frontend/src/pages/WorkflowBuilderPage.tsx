@@ -36,6 +36,13 @@ const WorkflowBuilderPage: React.FC = () => {
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowDefinition>({
     nodes: [],
     edges: [],
+    metadata: {
+      name: 'New Workflow',
+      description: '',
+      version: '1.0.0',
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+    },
   });
   
   // Right sidebar state

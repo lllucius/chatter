@@ -137,146 +137,115 @@ const WorkflowAnalyticsPage: React.FC = () => {
 
       {selectedWorkflowId && !loading && analytics && (
         <Box>
-          <Grid container spacing={3}>
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 3 }}>
             {/* Complexity Score */}
-            <Grid item xs={12} md={6} lg={3}>
-              <Card>
-                <CardContent>
-                  <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-                    <AnalyticsIcon color="primary" sx={{ mr: 1 }} />
-                    <Typography variant="h6" component="h2">
-                      Complexity Score
-                    </Typography>
-                  </Box>
-                  <Typography variant="h3" color="primary">
-                    {analytics.complexityScore || 0}
+            <Card>
+              <CardContent>
+                <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+                  <AnalyticsIcon color="primary" sx={{ mr: 1 }} />
+                  <Typography variant="h6" component="h2">
+                    Complexity Score
                   </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Lower is simpler
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+                </Box>
+                <Typography variant="h3" color="primary">
+                  {analytics.complexity?.score || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Lower is simpler
+                </Typography>
+              </CardContent>
+            </Card>
 
             {/* Node Count */}
-            <Grid item xs={12} md={6} lg={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    Total Nodes
-                  </Typography>
-                  <Typography variant="h3" color="secondary">
-                    {analytics.totalNodes || 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Workflow components
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  Total Nodes
+                </Typography>
+                <Typography variant="h3" color="secondary">
+                  {analytics.complexity?.node_count || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Workflow components
+                </Typography>
+              </CardContent>
+            </Card>
 
             {/* Execution Paths */}
-            <Grid item xs={12} md={6} lg={3}>
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    Execution Paths
-                  </Typography>
-                  <Typography variant="h3" color="info.main">
-                    {analytics.executionPaths?.length || 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Possible routes
-                  </Typography>
-                </CardContent>
-              </Card>
-            </Grid>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  Execution Paths
+                </Typography>
+                <Typography variant="h3" color="info.main">
+                  {analytics.execution_paths || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Possible routes
+                </Typography>
+              </CardContent>
+            </Card>
 
             {/* Bottlenecks */}
-            <Grid item xs={12} md={6} lg={3}>
+            <Card>
+              <CardContent>
+                <Typography variant="h6" component="h2" gutterBottom>
+                  Bottlenecks
+                </Typography>
+                <Typography variant="h3" color="warning.main">
+                  {analytics.bottlenecks?.length || 0}
+                </Typography>
+                <Typography variant="body2" color="text.secondary">
+                  Performance issues
+                </Typography>
+              </CardContent>
+            </Card>
+          </Box>
+
+          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 3 }}>
+            {/* Optimization Suggestions */}
+            {analytics.optimization_suggestions && analytics.optimization_suggestions.length > 0 && (
               <Card>
                 <CardContent>
                   <Typography variant="h6" component="h2" gutterBottom>
-                    Bottlenecks
+                    Optimization Suggestions
                   </Typography>
-                  <Typography variant="h3" color="warning.main">
-                    {analytics.potentialBottlenecks?.length || 0}
-                  </Typography>
-                  <Typography variant="body2" color="text.secondary">
-                    Performance issues
-                  </Typography>
+                  <Box sx={{ mt: 2 }}>
+                    {analytics.optimization_suggestions.map((suggestion, index) => (
+                      <Alert key={index} severity="info" sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          <strong>{suggestion.type}:</strong> {suggestion.description}
+                        </Typography>
+                      </Alert>
+                    ))}
+                  </Box>
                 </CardContent>
               </Card>
-            </Grid>
-
-            {/* Node Type Distribution */}
-            {analytics.nodeTypeDistribution && (
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" component="h2" gutterBottom>
-                      Node Type Distribution
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      {Object.entries(analytics.nodeTypeDistribution).map(([type, count]) => (
-                        <Box key={type} sx={{ display: 'flex', justifyContent: 'space-between', mb: 1 }}>
-                          <Typography variant="body2">{type}</Typography>
-                          <Typography variant="body2" fontWeight="medium">{count}</Typography>
-                        </Box>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
-            )}
-
-            {/* Recommendations */}
-            {analytics.optimizationSuggestions && analytics.optimizationSuggestions.length > 0 && (
-              <Grid item xs={12} md={6}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" component="h2" gutterBottom>
-                      Optimization Suggestions
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      {analytics.optimizationSuggestions.map((suggestion, index) => (
-                        <Alert key={index} severity="info" sx={{ mb: 1 }}>
-                          <Typography variant="body2">
-                            <strong>{suggestion.type}:</strong> {suggestion.message}
-                          </Typography>
-                        </Alert>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
             )}
 
             {/* Bottleneck Details */}
-            {analytics.potentialBottlenecks && analytics.potentialBottlenecks.length > 0 && (
-              <Grid item xs={12}>
-                <Card>
-                  <CardContent>
-                    <Typography variant="h6" component="h2" gutterBottom>
-                      Potential Bottlenecks
-                    </Typography>
-                    <Box sx={{ mt: 2 }}>
-                      {analytics.potentialBottlenecks.map((bottleneck, index) => (
-                        <Alert key={index} severity="warning" sx={{ mb: 1 }}>
-                          <Typography variant="body2">
-                            <strong>Node {bottleneck.nodeId}:</strong> {bottleneck.reason}
-                            {bottleneck.impactScore && (
-                              <> (Impact Score: {bottleneck.impactScore})</>
-                            )}
-                          </Typography>
-                        </Alert>
-                      ))}
-                    </Box>
-                  </CardContent>
-                </Card>
-              </Grid>
+            {analytics.bottlenecks && analytics.bottlenecks.length > 0 && (
+              <Card>
+                <CardContent>
+                  <Typography variant="h6" component="h2" gutterBottom>
+                    Potential Bottlenecks
+                  </Typography>
+                  <Box sx={{ mt: 2 }}>
+                    {analytics.bottlenecks.map((bottleneck, index) => (
+                      <Alert key={index} severity="warning" sx={{ mb: 1 }}>
+                        <Typography variant="body2">
+                          <strong>Node {bottleneck.node_id}:</strong> {bottleneck.reason}
+                          {bottleneck.severity && (
+                            <> (Severity: {bottleneck.severity})</>
+                          )}
+                        </Typography>
+                      </Alert>
+                    ))}
+                  </Box>
+                </CardContent>
+              </Card>
             )}
-          </Grid>
+          </Box>
         </Box>
       )}
 

@@ -60,19 +60,6 @@ const WorkflowExecutionsPage: React.FC = () => {
     );
   };
 
-  // Duration renderer
-  const renderDuration = (execution: WorkflowExecutionResponse) => {
-    if (!execution.started_at) return '-';
-    
-    const start = new Date(execution.started_at);
-    const end = execution.completed_at ? new Date(execution.completed_at) : new Date();
-    const duration = Math.round((end.getTime() - start.getTime()) / 1000);
-    
-    if (duration < 60) return `${duration}s`;
-    if (duration < 3600) return `${Math.round(duration / 60)}m`;
-    return `${Math.round(duration / 3600)}h`;
-  };
-
   // Define table columns
   const columns: CrudColumn<WorkflowExecutionResponse>[] = [
     {
@@ -86,12 +73,12 @@ const WorkflowExecutionsPage: React.FC = () => {
       ),
     },
     {
-      id: 'workflow_definition_id',
+      id: 'definition_id',
       label: 'Workflow',
       width: '150px',
-      render: (workflowId: unknown) => (
+      render: (definitionId: unknown) => (
         <Typography variant="body2" fontFamily="monospace" fontSize="0.75rem">
-          {String(workflowId).substring(0, 8)}...
+          {String(definitionId).substring(0, 8)}...
         </Typography>
       ),
     },
@@ -105,15 +92,24 @@ const WorkflowExecutionsPage: React.FC = () => {
       id: 'duration',
       label: 'Duration',
       width: '80px',
-      render: renderDuration,
+      render: (value: unknown, execution: WorkflowExecutionResponse) => {
+        if (!execution.started_at) return '-';
+        
+        const start = new Date(execution.started_at);
+        const end = execution.completed_at ? new Date(execution.completed_at) : new Date();
+        const duration = Math.round((end.getTime() - start.getTime()) / 1000);
+        
+        if (duration < 60) return `${duration}s`;
+        if (duration < 3600) return `${Math.round(duration / 60)}m`;
+        return `${Math.round(duration / 3600)}h`;
+      },
     },
     {
-      id: 'input',
+      id: 'input_data',
       label: 'Input',
-      render: (input: unknown) => {
+      render: (inputData: unknown) => {
         try {
-          const inputObj = typeof input === 'string' ? JSON.parse(input) : input;
-          const keys = Object.keys(inputObj || {});
+          const keys = Object.keys(inputData || {});
           return (
             <Typography variant="body2" color="text.secondary" noWrap>
               {keys.length > 0 ? `${keys.length} parameters` : 'No input'}
@@ -183,7 +179,7 @@ const WorkflowExecutionsPage: React.FC = () => {
       <Button
         variant="outlined"
         startIcon={<RefreshIcon />}
-        onClick={() => crudTableRef.current?.refresh()}
+        onClick={() => crudTableRef.current?.reload?.()}
       >
         Refresh
       </Button>

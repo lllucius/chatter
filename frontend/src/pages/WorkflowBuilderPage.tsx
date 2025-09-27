@@ -1,5 +1,6 @@
-import React, { useState, useCallback, useRef } from 'react';
+import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Node } from '@xyflow/react';
+import { useLocation } from 'react-router-dom';
 import { Box, Menu, MenuItem, Button } from '../utils/mui';
 import {
   PlayArrow as StartIcon,
@@ -31,6 +32,7 @@ import WorkflowSectionDrawer from '../components/workflow/WorkflowSectionDrawer'
 import { WorkflowDefinition, WorkflowNodeData, WorkflowNodeType } from '../components/workflow/WorkflowEditor';
 
 const WorkflowBuilderPage: React.FC = () => {
+  const location = useLocation();
   const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowDefinition>({
     nodes: [],
@@ -62,6 +64,7 @@ const WorkflowBuilderPage: React.FC = () => {
     loadExample: (exampleName: string) => void;
     showTemplateManager: () => void;
     deleteSelected: () => void;
+    updateNode: (nodeId: string, updates: Partial<WorkflowNodeData>) => void;
   }>(null);
   
   // Dropdown menu state
@@ -80,9 +83,33 @@ const WorkflowBuilderPage: React.FC = () => {
 
   // Handle node updates
   const handleNodeUpdate = useCallback((nodeId: string, data: Partial<WorkflowNodeData>) => {
-    // Update node logic would go here
-    // console.log('Update node:', nodeId, data);
+    // Forward the update to WorkflowEditor via ref
+    if (workflowEditorRef.current) {
+      workflowEditorRef.current.updateNode(nodeId, data);
+    }
   }, []);
+
+  // Handle template data from navigation state
+  useEffect(() => {
+    const state = location.state as any;
+    if (state?.editTemplate) {
+      const template = state.editTemplate;
+      // If template has workflow data, load it
+      if (template.workflow) {
+        setCurrentWorkflow({
+          nodes: template.workflow.nodes || [],
+          edges: template.workflow.edges || [],
+          metadata: {
+            name: template.name || 'Template Workflow',
+            description: template.description || '',
+            version: '1.0.0',
+            createdAt: template.created_at || new Date().toISOString(),
+            updatedAt: template.updated_at || new Date().toISOString(),
+          },
+        });
+      }
+    }
+  }, [location.state]);
 
   // Node types for dropdown menu
   const nodeTypes = [

@@ -166,7 +166,7 @@ export const useWorkflowData = () => {
     []
   );
 
-  const deleteTemplate = useCallback(async (templateId: string) => {
+  const deleteTemplate = useCallback(async (_templateId: string) => {
     try {
       // Template deletion is not currently supported by the API
       // Provide clear feedback to users

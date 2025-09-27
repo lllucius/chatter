@@ -38,7 +38,7 @@ interface TemplateManagerProps {
 }
 
 // Default templates
-const defaultTemplates: WorkflowTemplate[] = [
+const _staticTemplates: WorkflowTemplate[] = [
   {
     id: 'basic-chat',
     name: 'Basic Chat',
@@ -333,7 +333,7 @@ const TemplateManager: React.FC<TemplateManagerProps> = ({
   currentWorkflow,
   onSaveAsTemplate,
 }) => {
-  const { templates: defaultTemplates, loading: templatesLoading, error: templatesError } = useWorkflowTemplates();
+  const { templates: defaultTemplates, loading: _templatesLoading, error: _templatesError } = useWorkflowTemplates();
   const [templates, setTemplates] = useState<WorkflowTemplate[]>([]);
   const [saveDialogOpen, setSaveDialogOpen] = useState(false);
   const [templateName, setTemplateName] = useState('');

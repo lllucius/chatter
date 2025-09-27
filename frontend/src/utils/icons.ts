@@ -94,4 +94,6 @@ export {
   Assignment as TaskIcon,
   History as HistoryIcon,
   Star,
+  PlayArrow as PlayArrowIcon,
+  LibraryBooks as TemplateIcon,
 } from '@mui/icons-material';

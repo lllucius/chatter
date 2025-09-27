@@ -111,8 +111,10 @@ export interface WorkflowDefinition {
 interface WorkflowEditorProps {
   initialWorkflow?: WorkflowDefinition;
   onWorkflowChange?: (workflow: WorkflowDefinition) => void;
+  onNodeClick?: (event: React.MouseEvent, node: Node<WorkflowNodeData>) => void;
   onSave?: (workflow: WorkflowDefinition) => void;
   readOnly?: boolean;
+  showToolbar?: boolean;
 }
 
 // Grid settings for smart positioning
@@ -141,8 +143,10 @@ const edgeTypes: EdgeTypes = {
 const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
   initialWorkflow,
   onWorkflowChange,
+  onNodeClick: onNodeClickProp,
   onSave,
   readOnly = false,
+  showToolbar = true,
 }) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(
     initialWorkflow?.nodes || []
@@ -187,11 +191,15 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
 
   // Handle node selection
   const onNodeClick = useCallback(
-    (_: React.MouseEvent, node: Node<WorkflowNodeData>) => {
+    (event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
       setSelectedNode(node);
       setShowPropertiesPanel(true);
+      // Call external handler if provided
+      if (onNodeClickProp) {
+        onNodeClickProp(event, node);
+      }
     },
-    []
+    [onNodeClickProp]
   );
 
   // Handle node updates from properties panel

@@ -41,6 +41,10 @@ const ToolsPage = lazy(() => import('./pages/ToolsPage'));
 const WorkflowManagementPage = lazy(
   () => import('./pages/WorkflowManagementPage')
 );
+const WorkflowBuilderPage = lazy(() => import('./pages/WorkflowBuilderPage'));
+const WorkflowTemplatesPage = lazy(() => import('./pages/WorkflowTemplatesPage'));
+const WorkflowExecutionsPage = lazy(() => import('./pages/WorkflowExecutionsPage'));
+const WorkflowAnalyticsPage = lazy(() => import('./pages/WorkflowAnalyticsPage'));
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
@@ -324,6 +328,38 @@ function App() {
                       element={
                         <SuspenseWrapper loadingMessage="Loading workflow management...">
                           <WorkflowManagementPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/builder"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow builder...">
+                          <WorkflowBuilderPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/templates"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow templates...">
+                          <WorkflowTemplatesPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/executions"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow executions...">
+                          <WorkflowExecutionsPage />
+                        </SuspenseWrapper>
+                      }
+                    />
+                    <Route
+                      path="workflows/analytics"
+                      element={
+                        <SuspenseWrapper loadingMessage="Loading workflow analytics...">
+                          <WorkflowAnalyticsPage />
                         </SuspenseWrapper>
                       }
                     />

@@ -47,6 +47,8 @@ import {
   ExpandLess,
   ExpandMore,
   MonitorIcon,
+  TemplateIcon,
+  SpeedIcon,
 } from '../utils/icons';
 import { authService } from '../services/auth-service';
 import { ThemeContext } from '../App';
@@ -100,8 +102,17 @@ const navSections: NavSection[] = [
       { label: 'Models', path: '/models', icon: <ModelsIcon /> },
       { label: 'Agents', path: '/agents', icon: <AgentIcon /> },
       { label: 'Tools', path: '/tools', icon: <ToolsIcon /> },
-      { label: 'Workflows', path: '/workflows', icon: <WorkflowIcon /> },
       { label: 'A/B Testing', path: '/ab-testing', icon: <ABTestIcon /> },
+    ],
+  },
+  {
+    title: 'Workflows',
+    defaultExpanded: true,
+    items: [
+      { label: 'Builder', path: '/workflows/builder', icon: <WorkflowIcon /> },
+      { label: 'Templates', path: '/workflows/templates', icon: <TemplateIcon /> },
+      { label: 'Executions', path: '/workflows/executions', icon: <SpeedIcon /> },
+      { label: 'Analytics', path: '/workflows/analytics', icon: <AnalyticsIcon /> },
     ],
   },
   {

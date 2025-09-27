@@ -144,6 +144,8 @@ const WorkflowEditor = React.forwardRef<
     handleToggleGrid: () => void;
     handleValidate: () => void;
     loadExample: (exampleName: string) => void;
+    showTemplateManager: () => void;
+    deleteSelected: () => void;
   },
   WorkflowEditorProps
 >(({
@@ -550,6 +552,8 @@ const WorkflowEditor = React.forwardRef<
     handleToggleGrid,
     handleValidate,
     loadExample: handleLoadExample,
+    showTemplateManager: () => setShowTemplateManager(true),
+    deleteSelected: handleDeleteSelected,
   }), [
     addNode,
     handleUndo,
@@ -561,6 +565,7 @@ const WorkflowEditor = React.forwardRef<
     handleToggleGrid,
     handleValidate,
     handleLoadExample,
+    handleDeleteSelected,
   ]);
 
   return (
@@ -765,7 +770,12 @@ const WorkflowEditor = React.forwardRef<
         )}
 
         {/* React Flow Canvas */}
-        <Box sx={{ height: showToolbar ? 'calc(100% - 48px)' : '100%' }}>
+        <Box 
+          sx={{ 
+            height: showToolbar ? 'calc(100% - 48px)' : '100%',
+            overflow: 'hidden' // Prevent scrolling on container
+          }}
+        >
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -781,6 +791,9 @@ const WorkflowEditor = React.forwardRef<
             snapGrid={[GRID_SIZE, GRID_SIZE]}
             attributionPosition="bottom-left"
             proOptions={{ hideAttribution: true }}
+            panOnDrag={true} // Enable infinite panning
+            panOnScroll={false} // Disable scroll-to-pan to prevent conflicts
+            zoomOnScroll={false} // Disable zoom on scroll for cleaner interaction
           >
             <Controls />
             <MiniMap />

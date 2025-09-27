@@ -23,16 +23,15 @@ import {
   Save as SaveIcon,
   Clear as ClearIcon,
   MoreVert as MoreIcon,
+  Delete as DeleteIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
-import { useRightSidebar } from '../components/RightSidebarContext';
-import PropertiesPanel from '../components/workflow/PropertiesPanel';
-import WorkflowAnalytics from '../components/workflow/WorkflowAnalytics';
+import WorkflowSectionDrawer from '../components/workflow/WorkflowSectionDrawer';
 import { WorkflowDefinition, WorkflowNodeData, WorkflowNodeType } from '../components/workflow/WorkflowEditor';
 
 const WorkflowBuilderPage: React.FC = () => {
-  const [_selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
+  const [selectedNode, setSelectedNode] = useState<Node<WorkflowNodeData> | null>(null);
   const [currentWorkflow, setCurrentWorkflow] = useState<WorkflowDefinition>({
     nodes: [],
     edges: [],
@@ -44,6 +43,10 @@ const WorkflowBuilderPage: React.FC = () => {
       updatedAt: new Date().toISOString(),
     },
   });
+  
+  // Sectioned drawer state
+  const [drawerOpen, setDrawerOpen] = useState(true);
+  const [drawerCollapsed, setDrawerCollapsed] = useState(false);
   
   // Create a ref to access WorkflowEditor methods
   const workflowEditorRef = useRef<{
@@ -57,10 +60,9 @@ const WorkflowBuilderPage: React.FC = () => {
     handleToggleGrid: () => void;
     handleValidate: () => void;
     loadExample: (exampleName: string) => void;
+    showTemplateManager: () => void;
+    deleteSelected: () => void;
   }>(null);
-  
-  // Right sidebar state
-  const { setPanelContent, setTitle, setOpen } = useRightSidebar();
   
   // Dropdown menu state
   const [nodeMenuAnchor, setNodeMenuAnchor] = useState<null | HTMLElement>(null);
@@ -68,34 +70,19 @@ const WorkflowBuilderPage: React.FC = () => {
   const [exampleMenuAnchor, setExampleMenuAnchor] = useState<null | HTMLElement>(null);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
 
-  // Handle node selection - show properties in right sidebar
+  // Handle node selection
   const handleNodeClick = useCallback((event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
     setSelectedNode(node);
-    setTitle('Node Properties');
-    setPanelContent(
-      <PropertiesPanel
-        selectedNode={node}
-        onNodeUpdate={(nodeId: string, data: Partial<WorkflowNodeData>) => {
-          // Update node logic would go here
-          // console.log('Update node:', nodeId, data);
-        }}
-        onClose={() => {
-          setSelectedNode(null);
-          setPanelContent(null);
-        }}
-      />
-    );
-    setOpen(true);
-  }, [setPanelContent, setTitle, setOpen]);
+    if (!drawerOpen) {
+      setDrawerOpen(true);
+    }
+  }, [drawerOpen]);
 
-  // Show analytics in right sidebar
-  const handleShowAnalytics = useCallback(() => {
-    setTitle('Workflow Analytics');
-    setPanelContent(
-      <WorkflowAnalytics workflow={currentWorkflow} />
-    );
-    setOpen(true);
-  }, [currentWorkflow, setPanelContent, setTitle, setOpen]);
+  // Handle node updates
+  const handleNodeUpdate = useCallback((nodeId: string, data: Partial<WorkflowNodeData>) => {
+    // Update node logic would go here
+    // console.log('Update node:', nodeId, data);
+  }, []);
 
   // Node types for dropdown menu
   const nodeTypes = [
@@ -133,6 +120,19 @@ const WorkflowBuilderPage: React.FC = () => {
         Edit
       </Button>
       
+      {/* Templates Button */}
+      <Button
+        variant="outlined"
+        onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.showTemplateManager();
+          }
+        }}
+        startIcon={<TemplateIcon />}
+      >
+        Templates
+      </Button>
+
       {/* Examples Dropdown */}
       <Button
         variant="outlined"
@@ -152,28 +152,51 @@ const WorkflowBuilderPage: React.FC = () => {
       >
         Actions
       </Button>
-
-      {/* Analytics Button */}
-      <Button
-        variant="outlined"
-        onClick={handleShowAnalytics}
-        startIcon={<ValidIcon />}
-      >
-        Analytics
-      </Button>
     </>
   );
 
+  const drawerWidth = 350;
+  const collapsedDrawerWidth = 64;
+  const currentDrawerWidth = drawerCollapsed ? collapsedDrawerWidth : drawerWidth;
+
   return (
-    <PageLayout title="Workflow Builder" toolbar={toolbar}>
-      <Box sx={{ height: '100%', width: '100%' }}>
-        <WorkflowEditor
-          ref={workflowEditorRef}
-          onNodeClick={handleNodeClick}
-          onWorkflowChange={setCurrentWorkflow}
-          showToolbar={false}
-        />
+    <Box sx={{ display: 'flex', height: '100%' }}>
+      <Box
+        sx={{
+          flexGrow: 1,
+          width: drawerOpen ? `calc(100% - ${currentDrawerWidth}px)` : '100%',
+          transition: (theme) =>
+            theme.transitions.create('width', {
+              easing: theme.transitions.easing.sharp,
+              duration: theme.transitions.duration.leavingScreen,
+            }),
+        }}
+      >
+        <PageLayout title="Workflow Builder" toolbar={toolbar}>
+          <Box sx={{ height: '100%', width: '100%' }}>
+            <WorkflowEditor
+              ref={workflowEditorRef}
+              onNodeClick={handleNodeClick}
+              onWorkflowChange={setCurrentWorkflow}
+              showToolbar={false}
+            />
+          </Box>
+        </PageLayout>
       </Box>
+
+      {/* Sectioned Right Drawer */}
+      <WorkflowSectionDrawer
+        open={drawerOpen}
+        collapsed={drawerCollapsed}
+        onToggleCollapsed={() => setDrawerCollapsed(!drawerCollapsed)}
+        selectedNode={selectedNode}
+        currentWorkflow={currentWorkflow}
+        onNodeUpdate={handleNodeUpdate}
+        width={drawerWidth}
+        collapsedWidth={collapsedDrawerWidth}
+      />
+
+      {/* Menu components remain the same */}
 
       {/* Add Nodes Menu */}
       <Menu
@@ -238,6 +261,15 @@ const WorkflowBuilderPage: React.FC = () => {
         }}>
           <PasteIcon sx={{ mr: 1 }} />
           Paste
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.deleteSelected();
+          }
+          setEditMenuAnchor(null);
+        }}>
+          <DeleteIcon sx={{ mr: 1 }} />
+          Delete
         </MenuItem>
       </Menu>
 
@@ -320,7 +352,7 @@ const WorkflowBuilderPage: React.FC = () => {
           Clear All
         </MenuItem>
       </Menu>
-    </PageLayout>
+    </Box>
   );
 };
 

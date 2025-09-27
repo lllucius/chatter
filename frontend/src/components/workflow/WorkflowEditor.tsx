@@ -564,12 +564,7 @@ const WorkflowEditor = React.forwardRef<
   ]);
 
   return (
-    <Box sx={{ 
-      height: '600px', 
-      width: '100%', 
-      display: 'flex',
-      overflow: 'hidden', // Prevent scrollbars on main container
-    }}>
+    <Box sx={{ height: '600px', width: '100%', display: 'flex' }}>
       {/* Main Editor Area */}
       <Box
         sx={{
@@ -578,7 +573,6 @@ const WorkflowEditor = React.forwardRef<
           borderRadius: 1,
           display: 'flex',
           flexDirection: 'column',
-          overflow: 'hidden', // Prevent scrollbars on editor area
         }}
       >
         {/* Toolbar */}
@@ -771,11 +765,7 @@ const WorkflowEditor = React.forwardRef<
         )}
 
         {/* React Flow Canvas */}
-        <Box sx={{ 
-          height: showToolbar ? 'calc(100% - 48px)' : '100%',
-          overflow: 'hidden', // Prevent scrollbars on canvas container
-          position: 'relative', // Ensure proper positioning for ReactFlow
-        }}>
+        <Box sx={{ height: showToolbar ? 'calc(100% - 48px)' : '100%' }}>
           <ReactFlow
             nodes={nodes}
             edges={edges}
@@ -791,11 +781,6 @@ const WorkflowEditor = React.forwardRef<
             snapGrid={[GRID_SIZE, GRID_SIZE]}
             attributionPosition="bottom-left"
             proOptions={{ hideAttribution: true }}
-            style={{ 
-              width: '100%', 
-              height: '100%',
-              overflow: 'hidden', // Ensure ReactFlow itself doesn't create scrollbars
-            }}
           >
             <Controls />
             <MiniMap />

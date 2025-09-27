@@ -24,12 +24,16 @@ import { getSDK } from '../services/auth-service';
 import { WorkflowTemplateResponse, WorkflowTemplateCreate, WorkflowTemplateUpdate } from 'chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
+import { useWorkflowData } from '../hooks/useWorkflowData';
 
 const WorkflowTemplatesPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
   const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplateResponse | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
+
+  // Use the workflow data hook
+  const { executeTemplate } = useWorkflowData();
 
   // Handle template execution
   const handleExecuteTemplate = (template: WorkflowTemplateResponse) => {
@@ -56,16 +60,15 @@ const WorkflowTemplatesPage: React.FC = () => {
         return;
       }
 
-      const sdk = await getSDK();
-      await sdk.workflows.executeTemplate({
-        templateId: selectedTemplate.id,
-        input,
-      });
+      await executeTemplate(selectedTemplate.id, input);
       
       toastService.success('Workflow execution started');
       setExecuteDialogOpen(false);
     } catch (error) {
-      handleError(error, 'Failed to execute workflow');
+      handleError(error, {
+        source: 'WorkflowTemplatesPage.handleExecuteWorkflow',
+        operation: 'execute workflow template',
+      });
     }
   };
 
@@ -182,6 +185,7 @@ const WorkflowTemplatesPage: React.FC = () => {
         config={config}
         service={service}
         FormComponent={undefined} // Would need to implement a template form
+        getItemId={(item) => item.id}
       />
 
       {/* Execute Template Dialog */}

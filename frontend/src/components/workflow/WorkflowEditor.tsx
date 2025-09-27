@@ -132,14 +132,28 @@ const edgeTypes: EdgeTypes = {
   custom: CustomEdge,
 };
 
-const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
+const WorkflowEditor = React.forwardRef<
+  {
+    addNode: (nodeType: WorkflowNodeType) => void;
+    handleUndo: () => void;
+    handleRedo: () => void;
+    handleCopy: () => void;
+    handlePaste: () => void;
+    handleSave: () => void;
+    handleClear: () => void;
+    handleToggleGrid: () => void;
+    handleValidate: () => void;
+    loadExample: (exampleName: string) => void;
+  },
+  WorkflowEditorProps
+>(({
   initialWorkflow,
   onWorkflowChange,
   onNodeClick: onNodeClickProp,
   onSave,
   readOnly = false,
   showToolbar = true,
-}) => {
+}, ref) => {
   const [nodes, setNodes, onNodesChange] = useNodesState(
     initialWorkflow?.nodes || []
   );
@@ -519,6 +533,36 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
     setShowValidation(true);
   }, [currentWorkflow]);
 
+  // Toggle grid
+  const handleToggleGrid = useCallback(() => {
+    setSnapToGrid(!snapToGrid);
+  }, [snapToGrid]);
+
+  // Expose methods through ref
+  React.useImperativeHandle(ref, () => ({
+    addNode,
+    handleUndo,
+    handleRedo,
+    handleCopy,
+    handlePaste,
+    handleSave,
+    handleClear,
+    handleToggleGrid,
+    handleValidate,
+    loadExample: handleLoadExample,
+  }), [
+    addNode,
+    handleUndo,
+    handleRedo,
+    handleCopy,
+    handlePaste,
+    handleSave,
+    handleClear,
+    handleToggleGrid,
+    handleValidate,
+    handleLoadExample,
+  ]);
+
   return (
     <Box sx={{ height: '600px', width: '100%', display: 'flex' }}>
       {/* Main Editor Area */}
@@ -787,6 +831,8 @@ const WorkflowEditor: React.FC<WorkflowEditorProps> = ({
       />
     </Box>
   );
-};
+});
+
+WorkflowEditor.displayName = 'WorkflowEditor';
 
 export default WorkflowEditor;

@@ -3,7 +3,7 @@
  * Manages tokens and provides authenticated SDK instances
  * Uses memory for access tokens and HttpOnly cookies for refresh tokens
  */
-import { ChatterSDK, UserLogin } from 'chatter-sdk';
+import { ChatterSDK, Configuration, UserLogin } from 'chatter-sdk';
 import { handleError } from '../utils/error-handler';
 
 class AuthService {
@@ -17,10 +17,10 @@ class AuthService {
     this.basePath =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-    this.baseSDK = new ChatterSDK({
+    this.baseSDK = new ChatterSDK(new Configuration({
       basePath: this.basePath,
       credentials: 'include', // Include cookies for refresh token
-    } as { basePath: string; credentials: string }); // ChatterSDK configuration type mismatch with our needs
+    }));
     // Don't call initialize() in constructor anymore - it's async now
   }
 

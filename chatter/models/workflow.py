@@ -375,6 +375,10 @@ class WorkflowDefinition(Base):
             "name != ''",
             name="check_workflow_name_not_empty",
         ),
+        CheckConstraint(
+            "LENGTH(id) = 26",
+            name="check_workflow_id_length",
+        ),
     )
 
     # Foreign keys

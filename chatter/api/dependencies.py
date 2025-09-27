@@ -36,9 +36,15 @@ class ValidatedULID(str):
                 ULID.from_str(v)
                 return v
             except ValueError as e:
-                raise BadRequestProblem(
-                    detail="Invalid ULID format: must be a valid ULID"
-                ) from e
+                # Provide more detailed error message for debugging
+                if len(v) != 26:
+                    raise BadRequestProblem(
+                        detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                    ) from e
+                else:
+                    raise BadRequestProblem(
+                        detail=f"Invalid ULID format: contains invalid characters: '{v}'"
+                    ) from e
 
         return core_schema.chain_schema(
             [
@@ -57,9 +63,15 @@ class ValidatedULID(str):
                 ULID.from_str(v)
                 return v
             except ValueError as e:
-                raise BadRequestProblem(
-                    detail="Invalid ULID format: must be a valid ULID"
-                ) from e
+                # Provide more detailed error message for debugging
+                if len(v) != 26:
+                    raise BadRequestProblem(
+                        detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                    ) from e
+                else:
+                    raise BadRequestProblem(
+                        detail=f"Invalid ULID format: contains invalid characters: '{v}'"
+                    ) from e
         raise BadRequestProblem(
             detail="Invalid ULID format: must be a string"
         )

@@ -33,7 +33,8 @@ class TestULIDValidation:
             ValidatedULID.validate("not-a-ulid")
 
         assert "Invalid ULID format" in str(exc_info.value.detail)
-        assert "must be a valid ULID" in str(exc_info.value.detail)
+        # Updated to match new detailed error messages
+        assert "must be exactly 26 characters" in str(exc_info.value.detail)
 
     def test_empty_ulid(self):
         """Test validation fails for empty ULID."""
@@ -64,6 +65,25 @@ class TestULIDValidation:
         for malformed_ulid in malformed_ulids:
             with pytest.raises(BadRequestProblem):
                 ValidatedULID.validate(malformed_ulid)
+
+    def test_improved_error_messages(self):
+        """Test that ULID validation provides detailed error messages."""
+        from chatter.api.dependencies import ValidatedULID
+
+        # Test wrong length gives length-specific error
+        with pytest.raises(BadRequestProblem) as exc_info:
+            ValidatedULID.validate("Untitled Workflow")
+        
+        assert "must be exactly 26 characters" in str(exc_info.value.detail)
+        assert "got 17 characters" in str(exc_info.value.detail)
+        assert "Untitled Workflow" in str(exc_info.value.detail)
+        
+        # Test empty string gives length-specific error
+        with pytest.raises(BadRequestProblem) as exc_info:
+            ValidatedULID.validate("")
+        
+        assert "must be exactly 26 characters" in str(exc_info.value.detail)
+        assert "got 0 characters" in str(exc_info.value.detail)
 
 
 if __name__ == "__main__":

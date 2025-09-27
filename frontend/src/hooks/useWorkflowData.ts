@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
+import { toastService } from '../services/toast-service';
 import {
   WorkflowTemplateResponse,
   ServerToolsResponse,
@@ -166,11 +167,14 @@ export const useWorkflowData = () => {
     []
   );
 
-  const deleteTemplate = useCallback(async (_templateId: string) => {
+  const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      // Template deletion is not currently supported by the API
-      // Provide clear feedback to users
-      throw new Error('Template deletion is not currently supported by the API. Templates can only be updated or archived.');
+      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId);
+      
+      // Remove from local state on successful deletion
+      setTemplates((prev) => prev.filter((t) => t.id !== templateId));
+      
+      toastService.success('Workflow template deleted successfully');
     } catch (error) {
       handleError(error, {
         source: 'useWorkflowData.deleteTemplate',

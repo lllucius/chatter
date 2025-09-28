@@ -233,6 +233,38 @@ export class WorkflowsApi extends BaseAPI {
     const response = await this.request(requestContext);
     return response.json() as Promise<WorkflowExecutionResponse[]>;
   }
+  /**Get Workflow Execution Details
+   * Get detailed information about a specific workflow execution.
+   */
+  public async getWorkflowExecutionDetailsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionId(workflowId: string, executionId: string): Promise<WorkflowExecutionResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/definitions/${workflowId}/executions/${executionId}`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<WorkflowExecutionResponse>;
+  }
+  /**Get Workflow Execution Logs
+   * Get execution logs for a specific workflow execution.
+   */
+  public async getWorkflowExecutionLogsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionIdLogs(workflowId: string, executionId: string, logLevel?: string, limit?: number): Promise<any[]> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/definitions/${workflowId}/executions/${executionId}/logs`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+      query: {
+        log_level: logLevel,
+        limit: limit?.toString(),
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<any[]>;
+  }
   /**Execute Chat Workflow
    * Execute chat using dynamically built workflow.
 ## Dynamic Workflow Configuration

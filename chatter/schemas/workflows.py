@@ -539,6 +539,9 @@ class WorkflowExecutionRequest(WorkflowExecutionBase):
     definition_id: str = Field(
         ..., description="Workflow definition ID"
     )
+    debug_mode: bool = Field(
+        default=False, description="Enable debug mode for detailed logging"
+    )
 
 
 class WorkflowExecutionResponse(WorkflowExecutionBase):
@@ -567,6 +570,12 @@ class WorkflowExecutionResponse(WorkflowExecutionBase):
     )
     tokens_used: int = Field(default=0, description="Total tokens used")
     cost: float = Field(default=0.0, description="Total cost")
+    execution_log: list[dict[str, Any]] | None = Field(
+        None, description="Detailed execution log entries"
+    )
+    debug_info: dict[str, Any] | None = Field(
+        None, description="Debug information when debug mode enabled"
+    )
     created_at: datetime | None = Field(
         None, description="Creation timestamp"
     )
@@ -771,4 +780,53 @@ class WorkflowDeleteResponse(BaseModel):
     )
     workflow_id: str = Field(
         ..., description="ID of the deleted workflow"
+    )
+
+
+class WorkflowExecutionLogEntry(BaseModel):
+    """Schema for individual execution log entries."""
+
+    timestamp: datetime = Field(..., description="Log entry timestamp")
+    level: str = Field(..., description="Log level (DEBUG, INFO, WARN, ERROR)")
+    node_id: str | None = Field(None, description="Associated workflow node ID")
+    step_name: str | None = Field(None, description="Execution step name")
+    message: str = Field(..., description="Log message")
+    data: dict[str, Any] | None = Field(None, description="Additional log data")
+    execution_time_ms: int | None = Field(None, description="Step execution time")
+
+
+class WorkflowDebugInfo(BaseModel):
+    """Schema for workflow debug information."""
+
+    workflow_structure: dict[str, Any] = Field(
+        ..., description="Workflow nodes and edges structure"
+    )
+    execution_path: list[str] = Field(
+        ..., description="Actual path taken through the workflow"
+    )
+    node_executions: list[dict[str, Any]] = Field(
+        ..., description="Details of each node execution"
+    )
+    variable_states: dict[str, Any] = Field(
+        ..., description="Variable states throughout execution"
+    )
+    performance_metrics: dict[str, Any] = Field(
+        ..., description="Performance metrics for each step"
+    )
+    llm_interactions: list[dict[str, Any]] = Field(
+        default_factory=list, description="LLM API interactions"
+    )
+    tool_calls: list[dict[str, Any]] = Field(
+        default_factory=list, description="Tool execution details"
+    )
+
+
+class DetailedWorkflowExecutionResponse(WorkflowExecutionResponse):
+    """Schema for detailed workflow execution response with full debug info."""
+
+    logs: list[WorkflowExecutionLogEntry] = Field(
+        default_factory=list, description="Structured execution logs"
+    )
+    debug_details: WorkflowDebugInfo | None = Field(
+        None, description="Comprehensive debug information"
     )

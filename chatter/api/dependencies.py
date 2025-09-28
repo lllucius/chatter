@@ -27,9 +27,10 @@ class ValidatedULID(str):
                 )
 
             # Temporary allowance for stream-prefixed IDs during streaming
+            # This appears to be legacy code - streaming should provide proper ULIDs
+            # Investigate if this is still needed and remove if possible
             if v.startswith("stream-"):
-                # For now, allow stream IDs to pass through
-                # TODO: Remove this once streaming properly provides ULIDs
+                logger.warning(f"Accepting legacy stream-prefixed ID: {v}")
                 return v
 
             try:

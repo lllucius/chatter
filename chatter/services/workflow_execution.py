@@ -168,12 +168,26 @@ class WorkflowExecutionService:
             retriever = None
 
             if chat_request.enable_tools:
-                # TODO: Get tools from tool registry
-                tools = []
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+                    tool_registry = ToolRegistry()
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[]  # TODO: Add user permission system
+                    )
+                    logger.info(f"Loaded {len(tools) if tools else 0} tools for workflow execution")
+                except Exception as e:
+                    logger.warning(f"Could not load tools from tool registry: {e}")
+                    tools = []
 
             if chat_request.enable_retrieval:
-                # TODO: Get retriever from vector store
-                retriever = None
+                try:
+                    from chatter.core.vector_store import get_vector_store_retriever
+                    retriever = get_vector_store_retriever(user_id=user_id)
+                    logger.info("Loaded retriever from vector store")
+                except Exception as e:
+                    logger.warning(f"Could not load retriever from vector store: {e}")
+                    retriever = None
 
             # Create workflow using modern system
             workflow = await workflow_manager.create_workflow(
@@ -492,12 +506,25 @@ class WorkflowExecutionService:
             if not message:
                 raise ValueError("No message provided in input_data")
 
-            # Create simple workflow definition for now
-            # TODO: Parse actual definition structure when workflow definitions are implemented
+            # Parse workflow definition with enhanced flexibility
+            # Check if workflow_definition contains specific configuration
+            enable_memory = True  # Default
+            enable_retrieval = False  # Default
+            enable_tools = False  # Default
+            
+            if isinstance(workflow_definition, dict):
+                # Extract configuration from workflow definition if available
+                config = workflow_definition.get("config", {})
+                enable_memory = config.get("enable_memory", True)
+                enable_retrieval = config.get("enable_retrieval", False) 
+                enable_tools = config.get("enable_tools", False)
+                
+                logger.info(f"Parsed workflow definition config: memory={enable_memory}, retrieval={enable_retrieval}, tools={enable_tools}")
+            
             workflow_def = create_simple_workflow_definition(
-                enable_memory=True,
-                enable_retrieval=False,
-                enable_tools=False,
+                enable_memory=enable_memory,
+                enable_retrieval=enable_retrieval,
+                enable_tools=enable_tools,
             )
             
             # Log the actual workflow definition that will be executed
@@ -576,19 +603,35 @@ class WorkflowExecutionService:
             raise
 
     async def _get_conversation_messages(self, conversation: Conversation) -> list[BaseMessage]:
-        """Get conversation history as LangChain messages."""
+        """Get conversation history as LangChain messages with pagination."""
         messages = []
 
-        # Get recent messages from conversation
-        # TODO: Implement pagination and limits
-        conversation_messages = []  # await self.message_service.get_messages(conversation.id)
-
-        for msg in conversation_messages:
-            if msg.role == MessageRole.USER:
-                messages.append(HumanMessage(content=msg.content))
-            elif msg.role == MessageRole.ASSISTANT:
-                from langchain_core.messages import AIMessage
-                messages.append(AIMessage(content=msg.content))
+        try:
+            # Get recent messages from conversation with limit for performance
+            from sqlalchemy import select, desc
+            
+            # Implement pagination and limits - get last 50 messages
+            query = select(Message).where(
+                Message.conversation_id == conversation.id
+            ).order_by(desc(Message.created_at)).limit(50)
+            
+            result = await self.session.execute(query)
+            conversation_messages = result.scalars().all()
+            
+            # Reverse to get chronological order
+            conversation_messages = list(reversed(conversation_messages))
+            
+            for msg in conversation_messages:
+                if msg.role == MessageRole.USER:
+                    messages.append(HumanMessage(content=msg.content))
+                elif msg.role == MessageRole.ASSISTANT:
+                    from langchain_core.messages import AIMessage
+                    messages.append(AIMessage(content=msg.content))
+        
+        except Exception as e:
+            logger.warning(f"Could not get conversation messages: {e}")
+            # Return empty list if retrieval fails
+            messages = []
 
         return messages
 
@@ -615,11 +658,12 @@ class WorkflowExecutionService:
         """Create and save a message to the conversation."""
         from datetime import datetime
 
-        # Get next sequence number (for now, using a simple increment)
-        # TODO: Get proper sequence number from conversation message count
-        message_count = getattr(conversation, 'message_count', 0)
-        if message_count is None:
-            message_count = 0
+        # Get proper sequence number from conversation message count
+        query = select(func.count(Message.id)).where(
+            Message.conversation_id == conversation.id
+        )
+        result = await self.session.execute(query)
+        message_count = result.scalar() or 0
         sequence_number = message_count + 1
 
         # Create message object with all required fields
@@ -640,9 +684,16 @@ class WorkflowExecutionService:
         if not hasattr(message, 'created_at') or message.created_at is None:
             message.created_at = datetime.now(UTC)
 
-        # TODO: Save to database via message service
-        # await self.message_service.create_message(message)
-
+        # Save to database via session
+        try:
+            self.session.add(message)
+            await self.session.commit()
+            logger.debug(f"Saved message {message.id} to database")
+        except Exception as e:
+            logger.error(f"Failed to save message to database: {e}")
+            await self.session.rollback()
+            # Don't fail the entire workflow execution for message saving issues
+            
         return message
 
     async def _get_or_create_conversation(self, user_id: str, request: Any) -> Conversation:
@@ -673,8 +724,15 @@ class WorkflowExecutionService:
             updated_at=now,
         )
 
-        # TODO: Save to database
-        # await self.conversation_service.create_conversation(conversation)
+        # Save conversation to database  
+        try:
+            self.session.add(conversation)
+            await self.session.commit()
+            logger.debug(f"Saved conversation {conversation.id} to database")
+        except Exception as e:
+            logger.error(f"Failed to save conversation to database: {e}")
+            await self.session.rollback()
+            # Don't fail the entire workflow for conversation saving issues
 
         return conversation
 

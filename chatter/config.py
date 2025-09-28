@@ -724,6 +724,12 @@ class Settings(BaseSettings):
     anthropic_api_key: str | None = Field(
         default=None, description="Anthropic API key"
     )
+    google_api_key: str | None = Field(
+        default=None, description="Google API key"
+    )
+    cohere_api_key: str | None = Field(
+        default=None, description="Cohere API key"
+    )
 
     # =============================================================================
     # MCP TOOL API KEYS

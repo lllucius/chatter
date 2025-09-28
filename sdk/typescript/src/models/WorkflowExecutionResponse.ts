@@ -26,6 +26,10 @@ export interface WorkflowExecutionResponse {
   tokens_used?: number;
   /** Total cost */
   cost?: number;
+  /** Detailed execution log entries */
+  execution_log?: Array<Record<string, unknown>> | null;
+  /** Debug information when debug mode enabled */
+  debug_info?: Record<string, unknown> | null;
   /** Creation timestamp */
   created_at?: string | null;
   /** Last update timestamp */

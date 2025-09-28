@@ -15,6 +15,7 @@ from chatter.models.user import User
 from chatter.schemas.chat import ChatResponse
 from chatter.schemas.workflows import (
     ChatWorkflowRequest,
+    DetailedWorkflowExecutionResponse,
     NodeTypeResponse,
     WorkflowAnalyticsResponse,
     WorkflowDefinitionCreate,
@@ -476,6 +477,7 @@ async def execute_workflow(
             definition=definition,
             input_data=execution_request.input_data,
             user_id=current_user.id,
+            debug_mode=execution_request.debug_mode,
         )
         return WorkflowExecutionResponse(**result)
     except HTTPException:
@@ -843,6 +845,108 @@ async def list_workflow_executions(
         )
         raise InternalServerProblem(
             detail=f"Failed to list executions: {str(e)}"
+        ) from e
+
+
+@router.get(
+    "/definitions/{workflow_id}/executions/{execution_id}",
+    response_model=DetailedWorkflowExecutionResponse,
+)
+async def get_workflow_execution_details(
+    workflow_id: WorkflowId,
+    execution_id: str,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> DetailedWorkflowExecutionResponse:
+    """Get detailed information about a specific workflow execution."""
+    try:
+        # First verify the workflow exists and user has access
+        definition = await workflow_service.get_workflow_definition(
+            workflow_id=workflow_id,
+            owner_id=current_user.id,
+        )
+        if not definition:
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
+
+        # Get the execution
+        execution = await workflow_service.get_workflow_execution_details(
+            execution_id=execution_id,
+            owner_id=current_user.id,
+        )
+        if not execution:
+            raise NotFoundProblem(
+                detail="Workflow execution not found"
+            )
+        
+        # Verify the execution belongs to this workflow
+        if execution.definition_id != workflow_id:
+            raise NotFoundProblem(
+                detail="Execution does not belong to this workflow"
+            )
+
+        return DetailedWorkflowExecutionResponse.model_validate(
+            execution.to_dict()
+        )
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to get execution details {execution_id}: {e}"
+        )
+        raise InternalServerProblem(
+            detail=f"Failed to get execution details: {str(e)}"
+        ) from e
+
+
+@router.get(
+    "/definitions/{workflow_id}/executions/{execution_id}/logs",
+    response_model=list[dict[str, Any]],
+)
+async def get_workflow_execution_logs(
+    workflow_id: WorkflowId,
+    execution_id: str,
+    log_level: str | None = None,
+    limit: int = 1000,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> list[dict[str, Any]]:
+    """Get execution logs for a specific workflow execution."""
+    try:
+        # First verify the workflow exists and user has access
+        definition = await workflow_service.get_workflow_definition(
+            workflow_id=workflow_id,
+            owner_id=current_user.id,
+        )
+        if not definition:
+            raise NotFoundProblem(
+                detail="Workflow definition not found"
+            )
+
+        # Get execution logs
+        logs = await workflow_service.get_workflow_execution_logs(
+            execution_id=execution_id,
+            owner_id=current_user.id,
+            log_level=log_level,
+            limit=limit,
+        )
+
+        return logs
+
+    except HTTPException:
+        raise
+    except Exception as e:
+        logger.error(
+            f"Failed to get execution logs {execution_id}: {e}"
+        )
+        raise InternalServerProblem(
+            detail=f"Failed to get execution logs: {str(e)}"
         ) from e
 
 

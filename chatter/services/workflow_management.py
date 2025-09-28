@@ -446,6 +446,87 @@ class WorkflowManagementService:
             logger.error(f"Failed to validate workflow definition: {e}")
             raise
 
+    async def get_workflow_execution_details(
+        self,
+        execution_id: str,
+        owner_id: str,
+    ) -> WorkflowExecution | None:
+        """Get detailed information about a workflow execution."""
+        try:
+            result = await self.session.execute(
+                select(WorkflowExecution)
+                .options(selectinload(WorkflowExecution.definition))
+                .where(
+                    and_(
+                        WorkflowExecution.id == execution_id,
+                        WorkflowExecution.owner_id == owner_id,
+                    )
+                )
+            )
+            execution = result.scalar_one_or_none()
+            
+            if execution and execution.execution_log:
+                # Parse and structure the execution logs
+                from chatter.schemas.workflows import WorkflowExecutionLogEntry
+                structured_logs = []
+                for log_entry in execution.execution_log:
+                    if isinstance(log_entry, dict):
+                        try:
+                            structured_logs.append(WorkflowExecutionLogEntry(**log_entry))
+                        except Exception as e:
+                            logger.warning(f"Failed to parse log entry: {e}")
+                
+                # Add structured logs to the response
+                execution._structured_logs = structured_logs
+            
+            return execution
+
+        except Exception as e:
+            logger.error(
+                f"Failed to get workflow execution details {execution_id}: {e}"
+            )
+            raise
+
+    async def get_workflow_execution_logs(
+        self,
+        execution_id: str,
+        owner_id: str,
+        log_level: str | None = None,
+        limit: int = 1000,
+    ) -> list[dict[str, Any]]:
+        """Get execution logs for a workflow execution."""
+        try:
+            result = await self.session.execute(
+                select(WorkflowExecution.execution_log).where(
+                    and_(
+                        WorkflowExecution.id == execution_id,
+                        WorkflowExecution.owner_id == owner_id,
+                    )
+                )
+            )
+            execution_log = result.scalar_one_or_none()
+            
+            if not execution_log:
+                return []
+            
+            logs = execution_log if isinstance(execution_log, list) else []
+            
+            # Filter by log level if specified
+            if log_level:
+                logs = [
+                    log for log in logs 
+                    if log.get('level', '').upper() == log_level.upper()
+                ]
+            
+            # Apply limit
+            logs = logs[-limit:] if len(logs) > limit else logs
+            
+            return logs
+
+        except Exception as e:
+            logger.error(f"Failed to get execution logs {execution_id}: {e}")
+            raise
+
     # Template CRUD
     async def create_workflow_template(
         self,

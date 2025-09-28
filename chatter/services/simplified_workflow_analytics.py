@@ -6,6 +6,7 @@ of the original analytics system.
 
 import hashlib
 import json
+from datetime import datetime, timezone
 from typing import Any
 
 from chatter.core.cache_factory import get_persistent_cache
@@ -83,12 +84,26 @@ class SimplifiedWorkflowAnalyticsService:
         # Basic bottleneck detection
         bottlenecks = self._detect_basic_bottlenecks(nodes, edges)
 
+        # Calculate execution paths (simplified)
+        execution_paths = self._calculate_execution_paths(nodes, edges)
+
+        # Generate risk factors
+        risk_factors = self._get_risk_factors(nodes, edges)
+
+        # Get current timestamp for execution tracking
+        now = datetime.now(timezone.utc)
+
         return {
             "complexity": complexity,
-            "suggestions": suggestions,
             "bottlenecks": bottlenecks,
-            "analysis_timestamp": None,  # Would use datetime.utcnow() if needed
-            "cache_info": {"cached": False, "ttl": 3600},
+            "optimization_suggestions": suggestions,
+            "execution_paths": execution_paths,
+            "estimated_execution_time_ms": None,
+            "risk_factors": risk_factors,
+            "total_execution_time_ms": 0,  # This is analysis time, not workflow execution
+            "error": None,
+            "started_at": now,
+            "completed_at": now,
         }
 
     def _calculate_basic_complexity(
@@ -113,15 +128,20 @@ class SimplifiedWorkflowAnalyticsService:
         else:
             complexity_level = "high"
 
+        # Calculate depth (maximum path length)
+        depth = self._calculate_max_depth(nodes, edges)
+
+        # Calculate branching factor
+        branching_factor = self._calculate_branching_factor(nodes, edges)
+
         return {
+            "score": int(complexity_score),  # Required field for schema
             "node_count": node_count,
             "edge_count": edge_count,
-            "node_types": node_types,
-            "complexity_score": complexity_score,
-            "complexity_level": complexity_level,
-            "cyclomatic_complexity": edge_count
-            - node_count
-            + 2,  # Basic formula
+            "depth": depth,  # Required field for schema
+            "branching_factor": branching_factor,  # Required field for schema
+            "loop_complexity": 0,  # Default value
+            "conditional_complexity": max(0, edge_count - node_count + 2),  # Basic formula
         }
 
     def _get_basic_suggestions(
@@ -135,9 +155,9 @@ class SimplifiedWorkflowAnalyticsService:
             suggestions.append(
                 {
                     "type": "complexity",
-                    "severity": "medium",
-                    "message": "Consider breaking down large workflows into smaller components",
-                    "category": "structure",
+                    "description": "Consider breaking down large workflows into smaller components",
+                    "impact": "medium",
+                    "node_ids": None,
                 }
             )
 
@@ -151,9 +171,9 @@ class SimplifiedWorkflowAnalyticsService:
             suggestions.append(
                 {
                     "type": "validation",
-                    "severity": "high",
-                    "message": "Workflow should have at least one start node",
-                    "category": "structure",
+                    "description": "Workflow should have at least one start node",
+                    "impact": "high",
+                    "node_ids": None,
                 }
             )
 
@@ -167,12 +187,13 @@ class SimplifiedWorkflowAnalyticsService:
             n for n in nodes if n.get("id") not in connected_nodes
         ]
         if disconnected and len(disconnected) > 1:
+            disconnected_ids = [n.get("id") for n in disconnected]
             suggestions.append(
                 {
-                    "type": "optimization",
-                    "severity": "low",
-                    "message": f"Found {len(disconnected)} disconnected nodes",
-                    "category": "structure",
+                    "type": "connectivity",
+                    "description": f"Found {len(disconnected)} disconnected nodes",
+                    "impact": "medium",
+                    "node_ids": disconnected_ids,
                 }
             )
 
@@ -189,37 +210,177 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             target = edge.get("target")
             if target:
-                incoming_counts[target] = (
-                    incoming_counts.get(target, 0) + 1
-                )
+                incoming_counts[target] = incoming_counts.get(target, 0) + 1
 
+        # Flag nodes with high incoming connections as bottlenecks
         for node_id, count in incoming_counts.items():
-            if count > 3:  # More than 3 incoming connections
+            if count > 3:  # Threshold for bottleneck
+                # Find the actual node to get more info
+                node = next((n for n in nodes if n.get("id") == node_id), None)
+                node_type = node.get("data", {}).get("nodeType", "unknown") if node else "unknown"
+                
                 bottlenecks.append(
                     {
                         "node_id": node_id,
-                        "type": "convergence",
+                        "node_type": node_type,
+                        "reason": f"Node has {count} incoming connections",
                         "severity": "medium",
-                        "description": f"Node has {count} incoming connections",
-                        "suggestion": "Consider simplifying node connections",
+                        "suggestions": ["Consider simplifying node connections"],
                     }
                 )
 
         return bottlenecks
 
+    def _calculate_max_depth(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> int:
+        """Calculate maximum depth of the workflow."""
+        if not nodes or not edges:
+            return len(nodes)  # If no edges, depth equals node count
+
+        # Build adjacency list
+        adjacency = {}
+        for edge in edges:
+            source = edge.get("source")
+            target = edge.get("target")
+            if source and target:
+                if source not in adjacency:
+                    adjacency[source] = []
+                adjacency[source].append(target)
+
+        # Find start nodes (nodes with no incoming edges)
+        all_nodes = {n.get("id") for n in nodes}
+        targets = {edge.get("target") for edge in edges}
+        start_nodes = all_nodes - targets
+
+        if not start_nodes:
+            return 1  # Circular or no clear start
+
+        # DFS to find maximum depth
+        def dfs(node, visited):
+            if node in visited:
+                return 0  # Avoid cycles
+            visited.add(node)
+            max_child_depth = 0
+            for neighbor in adjacency.get(node, []):
+                max_child_depth = max(max_child_depth, dfs(neighbor, visited.copy()))
+            return 1 + max_child_depth
+
+        max_depth = 0
+        for start_node in start_nodes:
+            depth = dfs(start_node, set())
+            max_depth = max(max_depth, depth)
+
+        return max_depth
+
+    def _calculate_branching_factor(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> float:
+        """Calculate average branching factor."""
+        if not nodes or not edges:
+            return 0.0
+
+        # Count outgoing edges for each node
+        outgoing_counts = {}
+        for edge in edges:
+            source = edge.get("source")
+            if source:
+                outgoing_counts[source] = outgoing_counts.get(source, 0) + 1
+
+        if not outgoing_counts:
+            return 0.0
+
+        # Calculate average
+        total_outgoing = sum(outgoing_counts.values())
+        return round(total_outgoing / len(nodes), 2)
+
+    def _calculate_execution_paths(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> int:
+        """Calculate approximate number of execution paths."""
+        if not nodes:
+            return 0
+        if not edges:
+            return 1
+
+        # Simple estimation based on branching nodes
+        branching_nodes = 0
+        outgoing_counts = {}
+        for edge in edges:
+            source = edge.get("source")
+            if source:
+                outgoing_counts[source] = outgoing_counts.get(source, 0) + 1
+
+        for count in outgoing_counts.values():
+            if count > 1:
+                branching_nodes += count - 1  # Each additional branch adds paths
+
+        return max(1, 2 ** min(branching_nodes, 10))  # Cap to prevent overflow
+
+    def _get_risk_factors(
+        self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
+    ) -> list[str]:
+        """Identify risk factors in the workflow."""
+        risk_factors = []
+
+        # Check for complex workflow
+        if len(nodes) > 15:
+            risk_factors.append("High complexity workflow with many nodes")
+
+        # Check for missing start nodes
+        start_nodes = [
+            n for n in nodes 
+            if n.get("data", {}).get("nodeType") == "start"
+        ]
+        if not start_nodes:
+            risk_factors.append("No start node defined")
+
+        # Check for disconnected nodes
+        connected_nodes = set()
+        for edge in edges:
+            connected_nodes.add(edge.get("source"))
+            connected_nodes.add(edge.get("target"))
+        
+        disconnected = [n for n in nodes if n.get("id") not in connected_nodes]
+        if disconnected:
+            risk_factors.append(f"{len(disconnected)} disconnected nodes found")
+
+        # Check for potential bottlenecks
+        incoming_counts = {}
+        for edge in edges:
+            target = edge.get("target")
+            if target:
+                incoming_counts[target] = incoming_counts.get(target, 0) + 1
+        
+        high_convergence = [node_id for node_id, count in incoming_counts.items() if count > 3]
+        if high_convergence:
+            risk_factors.append(f"{len(high_convergence)} potential bottleneck nodes")
+
+        return risk_factors
+
     def _get_fallback_analysis(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Get basic fallback analysis when main analysis fails."""
+        now = datetime.now(timezone.utc)
+        
         return {
             "complexity": {
+                "score": 0,
                 "node_count": len(nodes),
                 "edge_count": len(edges),
-                "complexity_level": "unknown",
-                "complexity_score": 0,
+                "depth": 1,
+                "branching_factor": 0.0,
+                "loop_complexity": 0,
+                "conditional_complexity": 0,
             },
-            "suggestions": [],
             "bottlenecks": [],
-            "analysis_timestamp": None,
-            "cache_info": {"cached": False, "error": True},
+            "optimization_suggestions": [],
+            "execution_paths": 1,
+            "estimated_execution_time_ms": None,
+            "risk_factors": ["Analysis failed - using fallback data"],
+            "total_execution_time_ms": 0,
+            "error": None,
+            "started_at": now,
+            "completed_at": now,
         }

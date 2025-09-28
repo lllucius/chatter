@@ -435,7 +435,33 @@ class WorkflowExecutionService:
         user_id: str,
     ) -> dict[str, Any]:
         """Execute a workflow from a stored definition."""
+        start_time = datetime.now(UTC)
+        
+        # Import WorkflowManagementService to create execution record
+        from chatter.services.workflow_management import WorkflowManagementService
+        
+        # Create workflow management service
+        workflow_service = WorkflowManagementService(self.session)
+        
+        # Get definition_id from definition object
+        definition_id = getattr(definition, 'id', 'unknown')
+        
+        # Create workflow execution record
+        execution = await workflow_service.create_workflow_execution(
+            definition_id=definition_id,
+            owner_id=user_id,
+            input_data=input_data,
+        )
+        
         try:
+            # Update execution status to running
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=start_time,
+            )
+            
             # Log stored definition structure if available
             definition_name = getattr(definition, 'name', None) or getattr(definition, 'id', 'unknown')
             
@@ -590,17 +616,51 @@ class WorkflowExecutionService:
 
             # Extract response
             ai_message = self._extract_ai_response(result)
-
-            return {
-                "response": ai_message.content,
-                "conversation_id": context["conversation_id"],
-                "user_id": user_id,
-                "metadata": result.get("metadata", {}),
-            }
+            
+            # Calculate execution time
+            end_time = datetime.now(UTC)
+            execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
+            
+            # Update execution with success status and results
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=end_time,
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": ai_message.content,
+                    "conversation_id": context["conversation_id"],
+                    "metadata": result.get("metadata", {}),
+                },
+                tokens_used=result.get("tokens_used", 0),
+                cost=result.get("cost", 0.0),
+            )
+            
+            logger.info(f"Workflow execution {execution.id} completed successfully")
+            
+            # Return execution record as dictionary
+            return execution.to_dict()
 
         except Exception as e:
-            logger.error(f"Workflow definition execution failed: {e}")
+            # Calculate execution time even on failure
+            end_time = datetime.now(UTC)
+            execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
+            
+            # Update execution with failed status
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="failed",
+                completed_at=end_time,
+                execution_time_ms=execution_time_ms,
+                error_message=str(e),
+            )
+            
+            logger.error(f"Workflow execution {execution.id} failed: {e}")
             raise
+
+
 
     async def _get_conversation_messages(self, conversation: Conversation) -> list[BaseMessage]:
         """Get conversation history as LangChain messages with pagination."""
@@ -608,7 +668,7 @@ class WorkflowExecutionService:
 
         try:
             # Get recent messages from conversation with limit for performance
-            from sqlalchemy import select, desc
+            from sqlalchemy import select, desc, func
             
             # Implement pagination and limits - get last 50 messages
             query = select(Message).where(

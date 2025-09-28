@@ -14,6 +14,7 @@ import {
   useEdgesState,
   addEdge,
   Controls,
+  ControlButton,
   Background,
   MiniMap,
   NodeTypes,
@@ -54,6 +55,7 @@ import {
   ContentPaste as PasteIcon,
   LibraryBooks as TemplateIcon,
   Map as MiniMapIcon,
+  MapOutlined as MiniMapOutlinedIcon,
 } from '@mui/icons-material';
 
 // Import custom node components
@@ -222,14 +224,53 @@ const WorkflowEditor = React.forwardRef<
     loadDefaults();
   }, []);
 
-  // Save current state to history
-  const saveToHistory = useCallback(() => {
+  // Save current state to history with optional debouncing for property updates
+  const saveToHistory = useCallback((immediate = false) => {
     const currentState = { nodes, edges };
+    
+    // Don't save duplicate states
+    if (history[historyIndex] && 
+        JSON.stringify(history[historyIndex]) === JSON.stringify(currentState)) {
+      return;
+    }
+    
     const newHistory = history.slice(0, historyIndex + 1);
     newHistory.push(currentState);
+    
+    // Limit history size to prevent memory issues
+    if (newHistory.length > 50) {
+      newHistory.shift();
+    } else {
+      setHistoryIndex(newHistory.length - 1);
+    }
+    
     setHistory(newHistory);
-    setHistoryIndex(newHistory.length - 1);
   }, [nodes, edges, history, historyIndex]);
+
+  // Debounced save for property updates
+  const debouncedSaveToHistory = useCallback(() => {
+    const timeoutId = setTimeout(() => {
+      saveToHistory(false);
+    }, 1000); // Save after 1 second of inactivity
+    
+    return () => clearTimeout(timeoutId);
+  }, [saveToHistory]);
+
+  // Handle node updates from properties panel - use debounced save
+  const _handleNodeUpdate = useCallback(
+    (nodeId: string, updates: Partial<WorkflowNodeData>) => {
+      setNodes((nds) =>
+        nds.map((node) =>
+          node.id === nodeId
+            ? { ...node, data: { ...node.data, ...updates } }
+            : node
+        )
+      );
+      // Use debounced save for property changes to avoid creating too many history entries
+      debouncedSaveToHistory();
+    },
+    [setNodes, debouncedSaveToHistory]
+  );
 
   // Handle node selection
   const onNodeClick = useCallback(
@@ -241,21 +282,6 @@ const WorkflowEditor = React.forwardRef<
       }
     },
     [onNodeClickProp]
-  );
-
-  // Handle node updates from properties panel
-  const _handleNodeUpdate = useCallback(
-    (nodeId: string, updates: Partial<WorkflowNodeData>) => {
-      saveToHistory();
-      setNodes((nds) =>
-        nds.map((node) =>
-          node.id === nodeId
-            ? { ...node, data: { ...node.data, ...updates } }
-            : node
-        )
-      );
-    },
-    [setNodes, saveToHistory]
   );
 
   // Smart positioning function
@@ -291,7 +317,7 @@ const WorkflowEditor = React.forwardRef<
   // Handle new connections
   const onConnect = useCallback(
     (params: Connection) => {
-      saveToHistory();
+      saveToHistory(true); // Immediate save for structural changes
       const newEdge: Edge<WorkflowEdgeData> = {
         ...params,
         id: `e${edges.length + 1}`,
@@ -306,7 +332,7 @@ const WorkflowEditor = React.forwardRef<
   // Add new node of specific type
   const addNode = useCallback(
     (nodeType: WorkflowNodeType) => {
-      saveToHistory();
+      saveToHistory(true); // Immediate save for structural changes
       const position = getSmartPosition(nodeType);
       const newNode: Node<WorkflowNodeData> = {
         id: `${nodeType}-${nodeIdCounter}`,
@@ -468,7 +494,7 @@ const WorkflowEditor = React.forwardRef<
   // Delete selected node
   const handleDeleteSelected = useCallback(() => {
     if (selectedNode) {
-      saveToHistory();
+      saveToHistory(true); // Immediate save for structural changes
       setNodes((nds) => nds.filter((node) => node.id !== selectedNode.id));
       setEdges((eds) =>
         eds.filter(
@@ -829,14 +855,6 @@ const WorkflowEditor = React.forwardRef<
                   Grid
                 </Button>
                 <Button
-                  onClick={handleToggleMiniMap}
-                  variant={showMiniMap ? 'contained' : 'outlined'}
-                  startIcon={<MiniMapIcon />}
-                  title="Toggle MiniMap"
-                >
-                  MiniMap
-                </Button>
-                <Button
                   onClick={handleValidate}
                   variant="outlined"
                   startIcon={
@@ -906,7 +924,18 @@ const WorkflowEditor = React.forwardRef<
             panOnScroll={false} // Disable scroll-to-pan to prevent conflicts
             zoomOnScroll={false} // Disable zoom on scroll for cleaner interaction
           >
-            <Controls />
+            <Controls>
+              <ControlButton
+                onClick={handleToggleMiniMap}
+                title={showMiniMap ? "Hide MiniMap" : "Show MiniMap"}
+              >
+                {showMiniMap ? (
+                  <MiniMapIcon sx={{ fontSize: 16 }} />
+                ) : (
+                  <MiniMapOutlinedIcon sx={{ fontSize: 16 }} />
+                )}
+              </ControlButton>
+            </Controls>
             {showMiniMap && <MiniMap />}
             <Background gap={GRID_SIZE} />
           </ReactFlow>

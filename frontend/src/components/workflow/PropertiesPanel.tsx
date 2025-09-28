@@ -45,6 +45,10 @@ const PropertiesPanel: React.FC<PropertiesPanelProps> = ({
     if (selectedNode) {
       setConfig(selectedNode.data.config || {});
       setLabel(selectedNode.data.label || '');
+    } else {
+      // Clear state when no node is selected
+      setConfig({});
+      setLabel('');
     }
   }, [selectedNode]);
 

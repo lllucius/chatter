@@ -163,7 +163,8 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
           justifyContent: 'space-between',
           borderBottom: '1px solid',
           borderColor: 'divider',
-          minHeight: '48px !important',
+          minHeight: { xs: 56, sm: 64 }, // Match PageLayout
+          px: { xs: 2, sm: 3 }, // Match PageLayout
         }}
       >
         {!collapsed && (
@@ -203,6 +204,8 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
               duration: theme.transitions.duration.enteringScreen,
             }),
           overflow: 'hidden',
+          // Ensure the drawer doesn't interfere with toolbar menus
+          zIndex: (theme) => theme.zIndex.drawer - 1,
         },
       }}
     >

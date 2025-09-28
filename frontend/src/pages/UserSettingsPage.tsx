@@ -173,7 +173,7 @@ const UserSettingsPage: React.FC = () => {
         operation: 'load user profile',
       });
     }
-  }, [profileForm]);
+  }, []);
 
   const loadApiKeys = async () => {
     try {

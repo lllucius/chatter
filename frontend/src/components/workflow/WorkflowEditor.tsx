@@ -39,6 +39,8 @@ import {
   DialogActions,
   TextField,
   Grid,
+  FormControlLabel,
+  Switch,
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -216,6 +218,7 @@ const WorkflowEditor = React.forwardRef<
   // Execution dialog state
   const [showExecutionDialog, setShowExecutionDialog] = useState(false);
   const [executionInputs, setExecutionInputs] = useState<Record<string, string>>({});
+  const [debugMode, setDebugMode] = useState(false);
   
   // Access theme context for styling
   const { darkMode } = React.useContext(ThemeContext);
@@ -732,19 +735,30 @@ const WorkflowEditor = React.forwardRef<
   const executeWorkflow = useCallback(async (inputs: Record<string, string>) => {
     try {
       // TODO: Implement actual workflow execution API call
-      // For now, just show success message
+      // For demonstration purposes, include debug mode in the execution
       const inputKeys = Object.keys(inputs);
+      const debugStatus = debugMode ? ' (Debug Mode Enabled)' : '';
       const inputSummary = inputKeys.length > 0 
         ? ` with inputs: ${inputKeys.join(', ')}`
         : '';
       
-      toastService.success(`Workflow execution started${inputSummary}!`);
+      toastService.success(`Workflow execution started${inputSummary}${debugStatus}!`);
       setShowExecutionDialog(false);
+      
+      // Log debug information if debug mode is enabled
+      if (debugMode) {
+        console.log('Debug Mode Enabled - Execution Details:', {
+          workflow: currentWorkflow,
+          inputs,
+          debugMode,
+          timestamp: new Date().toISOString()
+        });
+      }
     } catch (error) {
       toastService.error('Failed to execute workflow', 'Execution Error');
       console.error('Workflow execution error:', error);
     }
-  }, []);
+  }, [debugMode, currentWorkflow]);
 
   // Debug workflow
   const handleDebug = useCallback(() => {
@@ -1117,6 +1131,22 @@ const WorkflowEditor = React.forwardRef<
                 placeholder='{"key": "value", "setting": "option"}'
                 helperText="Optional: Additional parameters as JSON object"
               />
+            </Grid>
+            <Grid size={12}>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={debugMode}
+                    onChange={(e) => setDebugMode(e.target.checked)}
+                    name="debugMode"
+                    color="primary"
+                  />
+                }
+                label="Enable Debug Mode"
+              />
+              <Typography variant="caption" display="block" color="text.secondary">
+                Capture detailed execution logs and debugging information
+              </Typography>
             </Grid>
           </Grid>
         </DialogContent>

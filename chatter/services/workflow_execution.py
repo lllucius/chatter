@@ -23,6 +23,7 @@ from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
+from chatter.utils.workflow_debug_logger import WorkflowDebugLogger
 from datetime import UTC, datetime
 
 logger = get_logger(__name__)
@@ -433,6 +434,7 @@ class WorkflowExecutionService:
         definition: Any,
         input_data: dict[str, Any],
         user_id: str,
+        debug_mode: bool = False,
     ) -> dict[str, Any]:
         """Execute a workflow from a stored definition."""
         start_time = datetime.now(UTC)
@@ -451,6 +453,14 @@ class WorkflowExecutionService:
             definition_id=definition_id,
             owner_id=user_id,
             input_data=input_data,
+        )
+
+        # Initialize debug logger
+        debug_logger = WorkflowDebugLogger(debug_mode=debug_mode)
+        debug_logger.log_entry(
+            "INFO", 
+            f"Started workflow execution for definition {definition_id}",
+            data={"execution_id": execution.id, "user_id": user_id}
         )
 
         try:
@@ -607,11 +617,32 @@ class WorkflowExecutionService:
                 "execution_history": [],
             }
 
+            # Log workflow structure for debugging
+            debug_logger.log_entry(
+                "DEBUG" if debug_mode else "INFO",
+                f"Executing workflow with {len(actual_nodes)} nodes and {len(actual_edges)} edges",
+                data={
+                    "nodes": [n.get('id') for n in actual_nodes],
+                    "edges": [(e.get('source'), e.get('target')) for e in actual_edges],
+                    "enable_memory": enable_memory,
+                    "enable_retrieval": enable_retrieval,
+                    "enable_tools": enable_tools,
+                }
+            )
+
             # Execute workflow
+            workflow_start_time = time.time()
             result = await workflow_manager.run_workflow(
                 workflow=workflow,
                 initial_state=context,
                 thread_id=generate_ulid(),
+            )
+            workflow_execution_time = int((time.time() - workflow_start_time) * 1000)
+
+            debug_logger.log_entry(
+                "INFO",
+                f"Workflow execution completed in {workflow_execution_time}ms",
+                data={"execution_time_ms": workflow_execution_time}
             )
 
             # Extract response
@@ -620,6 +651,10 @@ class WorkflowExecutionService:
             # Calculate execution time
             end_time = datetime.now(UTC)
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            # Collect debug information if enabled
+            debug_info = debug_logger.get_debug_info(actual_nodes, actual_edges) if debug_mode else {}
+            execution_log = debug_logger.get_structured_logs()
 
             # Update execution with success status and results
             updated_execution = await workflow_service.update_workflow_execution(
@@ -632,9 +667,11 @@ class WorkflowExecutionService:
                     "response": ai_message.content,
                     "conversation_id": context["conversation_id"],
                     "metadata": result.get("metadata", {}),
+                    "debug_info": debug_info,
                 },
                 tokens_used=result.get("tokens_used", 0),
                 cost=result.get("cost", 0.0),
+                execution_log=execution_log,
             )
 
             if not updated_execution:
@@ -663,6 +700,20 @@ class WorkflowExecutionService:
             end_time = datetime.now(UTC)
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
+            # Log error for debugging
+            debug_logger.log_entry(
+                "ERROR",
+                f"Workflow execution failed: {str(e)}",
+                data={"error_type": type(e).__name__, "error_message": str(e)}
+            )
+
+            # Collect debug information if enabled (even on failure)
+            debug_info = debug_logger.get_debug_info(
+                actual_nodes if 'actual_nodes' in locals() else [],
+                actual_edges if 'actual_edges' in locals() else []
+            ) if debug_mode else {}
+            execution_log = debug_logger.get_structured_logs()
+
             # Update execution with failed status
             try:
                 updated_execution = await workflow_service.update_workflow_execution(
@@ -672,6 +723,7 @@ class WorkflowExecutionService:
                     completed_at=end_time,
                     execution_time_ms=execution_time_ms,
                     error_message=str(e),
+                    execution_log=execution_log,
                 )
                 if updated_execution:
                     logger.error(f"Workflow execution {updated_execution.id} failed: {e}")

@@ -35,8 +35,12 @@ class SimplifiedWorkflowAnalyticsService:
             # Check cache first
             cached_result = await self.cache.get(cache_key)
             if cached_result:
-                logger.debug("Returning cached workflow analytics")
-                return cached_result
+                # Validate cached result has required structure
+                if self._validate_analytics_result(cached_result):
+                    logger.debug("Returning cached workflow analytics")
+                    return cached_result
+                else:
+                    logger.warning("Cached result has invalid structure, regenerating")
 
             # Perform basic analysis
             analysis = self._perform_basic_analysis(nodes, edges)
@@ -64,11 +68,12 @@ class SimplifiedWorkflowAnalyticsService:
                 "edges": sorted(edges, key=lambda x: x.get("id", "")),
             }
             content = json.dumps(workflow_data, sort_keys=True)
-            return f"workflow_analytics:{hashlib.md5(content.encode()).hexdigest()}"
+            # Include schema version to invalidate old cached data
+            return f"workflow_analytics_v2:{hashlib.md5(content.encode()).hexdigest()}"
         except Exception:
             # Fallback to simple hash
             return (
-                f"workflow_analytics:fallback_{len(nodes)}_{len(edges)}"
+                f"workflow_analytics_v2:fallback_{len(nodes)}_{len(edges)}"
             )
 
     def _perform_basic_analysis(
@@ -357,6 +362,34 @@ class SimplifiedWorkflowAnalyticsService:
             risk_factors.append(f"{len(high_convergence)} potential bottleneck nodes")
 
         return risk_factors
+
+    def _validate_analytics_result(self, result: dict[str, Any]) -> bool:
+        """Validate that analytics result has the required structure."""
+        if not isinstance(result, dict):
+            return False
+        
+        # Check required top-level fields
+        required_top_fields = [
+            "complexity", "bottlenecks", "optimization_suggestions", 
+            "execution_paths", "risk_factors", "total_execution_time_ms", 
+            "started_at"
+        ]
+        
+        for field in required_top_fields:
+            if field not in result:
+                return False
+        
+        # Check complexity structure
+        complexity = result.get("complexity", {})
+        if not isinstance(complexity, dict):
+            return False
+            
+        required_complexity_fields = ["score", "depth", "branching_factor"]
+        for field in required_complexity_fields:
+            if field not in complexity:
+                return False
+        
+        return True
 
     def _get_fallback_analysis(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]

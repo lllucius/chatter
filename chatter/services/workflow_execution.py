@@ -512,9 +512,9 @@ class WorkflowExecutionService:
             enable_retrieval = False  # Default
             enable_tools = False  # Default
             
-            if isinstance(workflow_definition, dict):
+            if isinstance(definition, dict):
                 # Extract configuration from workflow definition if available
-                config = workflow_definition.get("config", {})
+                config = definition.get("config", {})
                 enable_memory = config.get("enable_memory", True)
                 enable_retrieval = config.get("enable_retrieval", False) 
                 enable_tools = config.get("enable_tools", False)

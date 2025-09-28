@@ -35,23 +35,23 @@ def _log_workflow_debug_info(
     definition_name: str | None = None,
 ) -> None:
     """Log detailed debugging information about workflow shape and nodes prior to execution."""
-    
+
     # Calculate workflow shape
     node_count = len(nodes)
     edge_count = len(edges)
-    
+
     # Extract node types and their counts
     node_types = {}
     node_details = []
-    
+
     for node in nodes:
         node_id = node.get("id", "unknown")
         node_type = node.get("type", "unknown")
         node_config = node.get("config", {})
-        
+
         # Count node types
         node_types[node_type] = node_types.get(node_type, 0) + 1
-        
+
         # Collect node details
         node_details.append({
             "id": node_id,
@@ -59,7 +59,7 @@ def _log_workflow_debug_info(
             "config_keys": list(node_config.keys()) if isinstance(node_config, dict) else [],
             "has_config": bool(node_config),
         })
-    
+
     # Extract edge information
     edge_details = []
     for edge in edges:
@@ -72,11 +72,11 @@ def _log_workflow_debug_info(
         if edge.get("condition"):
             edge_info["condition"] = edge["condition"]
         edge_details.append(edge_info)
-    
+
     # Find entry points (nodes with no incoming edges)
     target_nodes = {edge.get("target") for edge in edges}
     entry_points = [node.get("id") for node in nodes if node.get("id") not in target_nodes]
-    
+
     # Find exit points (nodes with edges to END or no outgoing edges)
     source_nodes = {edge.get("source") for edge in edges}
     exit_points = []
@@ -88,7 +88,7 @@ def _log_workflow_debug_info(
         node_id = node.get("id")
         if node_id not in source_nodes:
             exit_points.append(node_id)
-    
+
     # Log comprehensive workflow information
     logger.info(
         f"Workflow execution starting - {execution_type} shape and configuration",
@@ -388,7 +388,7 @@ class WorkflowExecutionService:
                 edges=edges,
                 execution_type="custom_workflow",
             )
-            
+
             # Get LLM
             llm = await self.llm_service.get_llm(provider=provider, model=model)
 
@@ -435,14 +435,40 @@ class WorkflowExecutionService:
         user_id: str,
     ) -> dict[str, Any]:
         """Execute a workflow from a stored definition."""
+        start_time = datetime.now(UTC)
+
+        # Import WorkflowManagementService to create execution record
+        from chatter.services.workflow_management import WorkflowManagementService
+
+        # Create workflow management service
+        workflow_service = WorkflowManagementService(self.session)
+
+        # Get definition_id from definition object
+        definition_id = getattr(definition, 'id', 'unknown')
+
+        # Create workflow execution record
+        execution = await workflow_service.create_workflow_execution(
+            definition_id=definition_id,
+            owner_id=user_id,
+            input_data=input_data,
+        )
+
         try:
+            # Update execution status to running
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=start_time,
+            )
+
             # Log stored definition structure if available
             definition_name = getattr(definition, 'name', None) or getattr(definition, 'id', 'unknown')
-            
+
             # Try to extract nodes and edges from the definition
             nodes = []
             edges = []
-            
+
             if hasattr(definition, 'nodes') and hasattr(definition, 'edges'):
                 # If definition has nodes and edges attributes
                 nodes = definition.nodes if hasattr(definition.nodes, '__iter__') else []
@@ -451,11 +477,11 @@ class WorkflowExecutionService:
                 # If definition is a dictionary
                 nodes = definition.get('nodes', [])
                 edges = definition.get('edges', [])
-            
+
             # Convert nodes and edges to dictionaries if they're not already
             nodes_dict = []
             edges_dict = []
-            
+
             for node in nodes:
                 if hasattr(node, '__dict__'):
                     # Convert object to dict
@@ -469,7 +495,7 @@ class WorkflowExecutionService:
                 else:
                     node_dict = {'id': str(node), 'type': 'unknown', 'config': {}}
                 nodes_dict.append(node_dict)
-            
+
             for edge in edges:
                 if hasattr(edge, '__dict__'):
                     # Convert object to dict
@@ -484,7 +510,7 @@ class WorkflowExecutionService:
                 else:
                     edge_dict = {'source': 'unknown', 'target': 'unknown', 'type': 'regular'}
                 edges_dict.append(edge_dict)
-            
+
             # Log workflow debugging information before execution
             _log_workflow_debug_info(
                 nodes=nodes_dict,
@@ -492,7 +518,7 @@ class WorkflowExecutionService:
                 execution_type="stored_definition",
                 definition_name=definition_name,
             )
-            
+
             # Get LLM using default provider and model
             llm = await self.llm_service.get_llm(
                 provider=None,  # Use default provider
@@ -511,32 +537,32 @@ class WorkflowExecutionService:
             enable_memory = True  # Default
             enable_retrieval = False  # Default
             enable_tools = False  # Default
-            
+
             if isinstance(definition, dict):
                 # Extract configuration from workflow definition if available
                 config = definition.get("config", {})
                 enable_memory = config.get("enable_memory", True)
-                enable_retrieval = config.get("enable_retrieval", False) 
+                enable_retrieval = config.get("enable_retrieval", False)
                 enable_tools = config.get("enable_tools", False)
-                
+
                 logger.info(f"Parsed workflow definition config: memory={enable_memory}, retrieval={enable_retrieval}, tools={enable_tools}")
-            
+
             workflow_def = create_simple_workflow_definition(
                 enable_memory=enable_memory,
                 enable_retrieval=enable_retrieval,
                 enable_tools=enable_tools,
             )
-            
+
             # Log the actual workflow definition that will be executed
             # Extract nodes and edges from the workflow definition
             actual_nodes = []
             actual_edges = []
-            
+
             if hasattr(workflow_def, 'nodes') and hasattr(workflow_def, 'edges'):
                 actual_nodes = [
                     {
                         'id': node.get('id', 'unknown'),
-                        'type': node.get('type', 'unknown'), 
+                        'type': node.get('type', 'unknown'),
                         'config': node.get('config', {})
                     }
                     for node in workflow_def.nodes
@@ -550,7 +576,7 @@ class WorkflowExecutionService:
                     }
                     for edge in workflow_def.edges
                 ]
-                
+
                 # Log the actual workflow that will be executed
                 _log_workflow_debug_info(
                     nodes=actual_nodes,
@@ -591,16 +617,50 @@ class WorkflowExecutionService:
             # Extract response
             ai_message = self._extract_ai_response(result)
 
-            return {
-                "response": ai_message.content,
-                "conversation_id": context["conversation_id"],
-                "user_id": user_id,
-                "metadata": result.get("metadata", {}),
-            }
+            # Calculate execution time
+            end_time = datetime.now(UTC)
+            execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            # Update execution with success status and results
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=end_time,
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": ai_message.content,
+                    "conversation_id": context["conversation_id"],
+                    "metadata": result.get("metadata", {}),
+                },
+                tokens_used=result.get("tokens_used", 0),
+                cost=result.get("cost", 0.0),
+            )
+
+            logger.info(f"Workflow execution {execution.id} completed successfully")
+
+            # Return execution record as dictionary
+            return execution.to_dict()
 
         except Exception as e:
-            logger.error(f"Workflow definition execution failed: {e}")
+            # Calculate execution time even on failure
+            end_time = datetime.now(UTC)
+            execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
+
+            # Update execution with failed status
+            execution = await workflow_service.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="failed",
+                completed_at=end_time,
+                execution_time_ms=execution_time_ms,
+                error_message=str(e),
+            )
+
+            logger.error(f"Workflow execution {execution.id} failed: {e}")
             raise
+
+
 
     async def _get_conversation_messages(self, conversation: Conversation) -> list[BaseMessage]:
         """Get conversation history as LangChain messages with pagination."""
@@ -609,25 +669,25 @@ class WorkflowExecutionService:
         try:
             # Get recent messages from conversation with limit for performance
             from sqlalchemy import select, desc
-            
+
             # Implement pagination and limits - get last 50 messages
             query = select(Message).where(
                 Message.conversation_id == conversation.id
             ).order_by(desc(Message.created_at)).limit(50)
-            
+
             result = await self.session.execute(query)
             conversation_messages = result.scalars().all()
-            
+
             # Reverse to get chronological order
             conversation_messages = list(reversed(conversation_messages))
-            
+
             for msg in conversation_messages:
                 if msg.role == MessageRole.USER:
                     messages.append(HumanMessage(content=msg.content))
                 elif msg.role == MessageRole.ASSISTANT:
                     from langchain_core.messages import AIMessage
                     messages.append(AIMessage(content=msg.content))
-        
+
         except Exception as e:
             logger.warning(f"Could not get conversation messages: {e}")
             # Return empty list if retrieval fails
@@ -657,6 +717,7 @@ class WorkflowExecutionService:
     ) -> Message:
         """Create and save a message to the conversation."""
         from datetime import datetime
+        from sqlalchemy import select, func
 
         # Get proper sequence number from conversation message count
         query = select(func.count(Message.id)).where(
@@ -693,7 +754,7 @@ class WorkflowExecutionService:
             logger.error(f"Failed to save message to database: {e}")
             await self.session.rollback()
             # Don't fail the entire workflow execution for message saving issues
-            
+
         return message
 
     async def _get_or_create_conversation(self, user_id: str, request: Any) -> Conversation:
@@ -724,7 +785,7 @@ class WorkflowExecutionService:
             updated_at=now,
         )
 
-        # Save conversation to database  
+        # Save conversation to database
         try:
             self.session.add(conversation)
             await self.session.commit()

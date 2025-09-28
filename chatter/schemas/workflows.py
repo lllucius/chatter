@@ -1,7 +1,7 @@
 """Schemas for workflow management API."""
 
 from datetime import datetime
-from typing import Any
+from typing import Any, Dict
 
 from pydantic import BaseModel, Field
 
@@ -15,6 +15,27 @@ class WorkflowNodeData(BaseModel):
     config: dict[str, Any] | None = Field(
         default_factory=dict, description="Node configuration"
     )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        """
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude_none=True,
+        )
+        # set to None if config (nullable) is None
+        # and model_fields_set contains the field
+        if self.config is None and "config" in self.model_fields_set:
+            _dict['config'] = None
+
+        return _dict
 
 
 class WorkflowNode(BaseModel):
@@ -33,6 +54,34 @@ class WorkflowNode(BaseModel):
         default=False, description="Whether node is being dragged"
     )
 
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        """
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude_none=True,
+        )
+        # override the default output from pydantic by calling `to_dict()` of data
+        if self.data:
+            _dict['data'] = self.data.to_dict()
+        # set to None if selected (nullable) is None
+        # and model_fields_set contains the field
+        if self.selected is None and "selected" in self.model_fields_set:
+            _dict['selected'] = None
+        # set to None if dragging (nullable) is None
+        # and model_fields_set contains the field
+        if self.dragging is None and "dragging" in self.model_fields_set:
+            _dict['dragging'] = None
+
+        return _dict
+
 
 class WorkflowEdgeData(BaseModel):
     """Schema for workflow edge data."""
@@ -41,6 +90,31 @@ class WorkflowEdgeData(BaseModel):
         default=None, description="Edge condition"
     )
     label: str | None = Field(default=None, description="Edge label")
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        """
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude_none=True,
+        )
+        # set to None if condition (nullable) is None
+        # and model_fields_set contains the field
+        if self.condition is None and "condition" in self.model_fields_set:
+            _dict['condition'] = None
+        # set to None if label (nullable) is None
+        # and model_fields_set contains the field
+        if self.label is None and "label" in self.model_fields_set:
+            _dict['label'] = None
+
+        return _dict
 
 
 class WorkflowEdge(BaseModel):
@@ -60,6 +134,38 @@ class WorkflowEdge(BaseModel):
         default_factory=lambda: WorkflowEdgeData(),
         description="Edge data",
     )
+
+    def to_dict(self) -> Dict[str, Any]:
+        """Return the dictionary representation of the model using alias.
+
+        This has the following differences from calling pydantic's
+        `self.model_dump(by_alias=True)`:
+
+        * `None` is only added to the output dict for nullable fields that
+          were set at model initialization. Other fields with value `None`
+          are ignored.
+        """
+        _dict = self.model_dump(
+            by_alias=True,
+            exclude_none=True,
+        )
+        # override the default output from pydantic by calling `to_dict()` of data
+        if self.data:
+            _dict['data'] = self.data.to_dict()
+        # set to None if sourceHandle (nullable) is None
+        # and model_fields_set contains the field
+        if self.sourceHandle is None and "sourceHandle" in self.model_fields_set:
+            _dict['sourceHandle'] = None
+        # set to None if targetHandle (nullable) is None
+        # and model_fields_set contains the field
+        if self.targetHandle is None and "targetHandle" in self.model_fields_set:
+            _dict['targetHandle'] = None
+        # set to None if type (nullable) is None
+        # and model_fields_set contains the field
+        if self.type is None and "type" in self.model_fields_set:
+            _dict['type'] = None
+
+        return _dict
 
 
 # Workflow Definition schemas

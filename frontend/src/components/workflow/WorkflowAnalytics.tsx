@@ -97,7 +97,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
   React.useEffect(() => {
     const fetchAnalytics = async () => {
       // Only fetch analytics if we have a workflow with an ID
-      if (!workflow.metadata?.name || !workflow.nodes.length) {
+      if (!workflow.id || !workflow.nodes.length) {
         // Fallback to simple client-side calculation for workflows without ID
         setAnalytics(calculateSimpleMetrics());
         return;
@@ -110,7 +110,7 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
         // Use the new server-side analytics API
         const response =
           await getSDK().workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
-            workflow.metadata.name
+            workflow.id
           );
 
         // Transform server response to client format
@@ -144,7 +144,6 @@ const WorkflowAnalytics: React.FC<WorkflowAnalyticsProps> = ({ workflow }) => {
     workflow.id,
     workflow.nodes,
     workflow.edges,
-    workflow.metadata.name,
     calculateSimpleMetrics,
     calculateNodeTypeDistribution,
   ]);

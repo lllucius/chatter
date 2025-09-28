@@ -96,12 +96,16 @@ async def create_workflow_definition(
 ) -> WorkflowDefinitionResponse:
     """Create a new workflow definition."""
     try:
+        # Convert Pydantic objects to dictionaries for validation
+        nodes_dict = [node.to_dict() for node in workflow_definition.nodes]
+        edges_dict = [edge.to_dict() for edge in workflow_definition.edges]
+        
         definition = await workflow_service.create_workflow_definition(
             owner_id=current_user.id,
             name=workflow_definition.name,
             description=workflow_definition.description,
-            nodes=workflow_definition.nodes,
-            edges=workflow_definition.edges,
+            nodes=nodes_dict,
+            edges=edges_dict,
             metadata=workflow_definition.metadata,
         )
         return WorkflowDefinitionResponse.model_validate(

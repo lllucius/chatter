@@ -288,10 +288,10 @@ def validate_password_advanced(password: str) -> dict[str, Any]:
     result = {"valid": True, "errors": [], "score": 0, "entropy": 0}
 
     # Length check
-    if len(password) < 8:
+    if len(password) < 6:
         result["valid"] = False
         result["errors"].append(
-            "Password must be at least 8 characters long"
+            "Password must be at least 6 characters long"
         )
     elif len(password) >= 12:
         result["score"] += 2

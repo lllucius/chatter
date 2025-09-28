@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
+import { useNavigate } from 'react-router-dom';
 import {
   Box,
   Typography,
@@ -31,7 +32,7 @@ import {
   Warning as WarningIcon,
 } from '@mui/icons-material';
 import { format } from 'date-fns';
-import { getSDK } from '../services/auth-service';
+import { getSDK, authService } from '../services/auth-service';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { useForm } from '../hooks/useForm';
@@ -59,6 +60,7 @@ interface ApiKeyFormValues extends Record<string, unknown> {
 }
 
 const UserSettingsPage: React.FC = () => {
+  const navigate = useNavigate();
   const [tabValue, setTabValue] = useState(0);
   const [userProfile, setUserProfile] = useState<UserResponse | null>(null);
   const [apiKeys, setApiKeys] = useState<APIKeyResponse[]>([]);
@@ -211,7 +213,16 @@ const UserSettingsPage: React.FC = () => {
     try {
       await getSDK().auth.deactivateAccountApiV1AuthAccount();
       toastService.success('Account deactivated successfully');
-      // The API will handle logout and the auth service should redirect
+      
+      // Clear localStorage and cookies, then redirect
+      localStorage.clear();
+      sessionStorage.clear();
+      
+      // Clear auth service tokens
+      await authService.logout();
+      
+      // Redirect to login page
+      navigate('/login', { replace: true });
     } catch (error: unknown) {
       handleError(error, {
         source: 'UserSettingsPage.handleDeactivateAccount',

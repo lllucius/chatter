@@ -36,7 +36,7 @@ class UserRegistration(UserBase):
     """Schema for user registration."""
 
     password: str = Field(
-        ..., min_length=8, max_length=128, description="Password"
+        ..., min_length=6, max_length=128, description="Password"
     )
 
 
@@ -44,7 +44,7 @@ class UserCreate(UserBase):
     """Schema for user creation (alias for UserRegistration)."""
 
     password: str = Field(
-        ..., min_length=8, max_length=128, description="Password"
+        ..., min_length=6, max_length=128, description="Password"
     )
 
 
@@ -165,7 +165,7 @@ class PasswordChange(BaseModel):
 
     current_password: str = Field(..., description="Current password")
     new_password: str = Field(
-        ..., min_length=8, max_length=128, description="New password"
+        ..., min_length=6, max_length=128, description="New password"
     )
 
 

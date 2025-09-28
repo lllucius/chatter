@@ -23,6 +23,7 @@ __all__ = [
     "AgentsApi",
     "AnalyticsApi",
     "AuthenticationApi",
+    "ChatApi",
     "ConversationsApi",
     "DataManagementApi",
     "DocumentsApi",
@@ -113,8 +114,11 @@ __all__ = [
     "DataFormat",
     "DatabaseHealthResponse",
     "DefaultProvider",
+    "DetailedWorkflowExecutionResponse",
     "DistanceMetric",
     "DocumentAnalyticsResponse",
+    "DocumentChunkResponse",
+    "DocumentChunksResponse",
     "DocumentDeleteResponse",
     "DocumentListRequest",
     "DocumentListResponse",
@@ -267,6 +271,7 @@ __all__ = [
     "VariantAllocation",
     "VariantPerformance",
     "WorkflowAnalyticsResponse",
+    "WorkflowDebugInfo",
     "WorkflowDefinitionCreate",
     "WorkflowDefinitionFromTemplateRequest",
     "WorkflowDefinitionResponse",
@@ -275,6 +280,7 @@ __all__ = [
     "WorkflowDeleteResponse",
     "WorkflowEdge",
     "WorkflowEdgeData",
+    "WorkflowExecutionLogEntry",
     "WorkflowExecutionRequest",
     "WorkflowExecutionResponse",
     "WorkflowNode",
@@ -292,6 +298,7 @@ from chatter_sdk.api.ab_testing_api import ABTestingApi as ABTestingApi
 from chatter_sdk.api.agents_api import AgentsApi as AgentsApi
 from chatter_sdk.api.analytics_api import AnalyticsApi as AnalyticsApi
 from chatter_sdk.api.authentication_api import AuthenticationApi as AuthenticationApi
+from chatter_sdk.api.chat_api import ChatApi as ChatApi
 from chatter_sdk.api.conversations_api import ConversationsApi as ConversationsApi
 from chatter_sdk.api.data_management_api import DataManagementApi as DataManagementApi
 from chatter_sdk.api.documents_api import DocumentsApi as DocumentsApi
@@ -386,8 +393,11 @@ from chatter_sdk.models.dashboard_response import DashboardResponse as Dashboard
 from chatter_sdk.models.data_format import DataFormat as DataFormat
 from chatter_sdk.models.database_health_response import DatabaseHealthResponse as DatabaseHealthResponse
 from chatter_sdk.models.default_provider import DefaultProvider as DefaultProvider
+from chatter_sdk.models.detailed_workflow_execution_response import DetailedWorkflowExecutionResponse as DetailedWorkflowExecutionResponse
 from chatter_sdk.models.distance_metric import DistanceMetric as DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse as DocumentAnalyticsResponse
+from chatter_sdk.models.document_chunk_response import DocumentChunkResponse as DocumentChunkResponse
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse as DocumentChunksResponse
 from chatter_sdk.models.document_delete_response import DocumentDeleteResponse as DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest as DocumentListRequest
 from chatter_sdk.models.document_list_response import DocumentListResponse as DocumentListResponse
@@ -540,6 +550,7 @@ from chatter_sdk.models.validation_error import ValidationError as ValidationErr
 from chatter_sdk.models.variant_allocation import VariantAllocation as VariantAllocation
 from chatter_sdk.models.variant_performance import VariantPerformance as VariantPerformance
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse as WorkflowAnalyticsResponse
+from chatter_sdk.models.workflow_debug_info import WorkflowDebugInfo as WorkflowDebugInfo
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate as WorkflowDefinitionCreate
 from chatter_sdk.models.workflow_definition_from_template_request import WorkflowDefinitionFromTemplateRequest as WorkflowDefinitionFromTemplateRequest
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse as WorkflowDefinitionResponse
@@ -548,6 +559,7 @@ from chatter_sdk.models.workflow_definitions_response import WorkflowDefinitions
 from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse as WorkflowDeleteResponse
 from chatter_sdk.models.workflow_edge import WorkflowEdge as WorkflowEdge
 from chatter_sdk.models.workflow_edge_data import WorkflowEdgeData as WorkflowEdgeData
+from chatter_sdk.models.workflow_execution_log_entry import WorkflowExecutionLogEntry as WorkflowExecutionLogEntry
 from chatter_sdk.models.workflow_execution_request import WorkflowExecutionRequest as WorkflowExecutionRequest
 from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResponse as WorkflowExecutionResponse
 from chatter_sdk.models.workflow_node import WorkflowNode as WorkflowNode

@@ -18,19 +18,23 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from pydantic import BaseModel, ConfigDict, Field, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkflowExecutionRequest(BaseModel):
+class WorkflowDebugInfo(BaseModel):
     """
-    Schema for starting a workflow execution.
+    Schema for workflow debug information.
     """ # noqa: E501
-    input_data: Optional[Dict[str, Any]] = None
-    definition_id: StrictStr = Field(description="Workflow definition ID")
-    debug_mode: Optional[StrictBool] = Field(default=False, description="Enable debug mode for detailed logging")
-    __properties: ClassVar[List[str]] = ["input_data", "definition_id", "debug_mode"]
+    workflow_structure: Dict[str, Any] = Field(description="Workflow nodes and edges structure")
+    execution_path: List[StrictStr] = Field(description="Actual path taken through the workflow")
+    node_executions: List[Dict[str, Any]] = Field(description="Details of each node execution")
+    variable_states: Dict[str, Any] = Field(description="Variable states throughout execution")
+    performance_metrics: Dict[str, Any] = Field(description="Performance metrics for each step")
+    llm_interactions: Optional[List[Dict[str, Any]]] = Field(default=None, description="LLM API interactions")
+    tool_calls: Optional[List[Dict[str, Any]]] = Field(default=None, description="Tool execution details")
+    __properties: ClassVar[List[str]] = ["workflow_structure", "execution_path", "node_executions", "variable_states", "performance_metrics", "llm_interactions", "tool_calls"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +54,7 @@ class WorkflowExecutionRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a JSON string"""
+        """Create an instance of WorkflowDebugInfo from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,16 +75,11 @@ class WorkflowExecutionRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if input_data (nullable) is None
-        # and model_fields_set contains the field
-        if self.input_data is None and "input_data" in self.model_fields_set:
-            _dict['input_data'] = None
-
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a dict"""
+        """Create an instance of WorkflowDebugInfo from a dict"""
         if obj is None:
             return None
 
@@ -88,9 +87,13 @@ class WorkflowExecutionRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "input_data": obj.get("input_data"),
-            "definition_id": obj.get("definition_id"),
-            "debug_mode": obj.get("debug_mode") if obj.get("debug_mode") is not None else False
+            "workflow_structure": obj.get("workflow_structure"),
+            "execution_path": obj.get("execution_path"),
+            "node_executions": obj.get("node_executions"),
+            "variable_states": obj.get("variable_states"),
+            "performance_metrics": obj.get("performance_metrics"),
+            "llm_interactions": obj.get("llm_interactions"),
+            "tool_calls": obj.get("tool_calls")
         })
         return _obj
 

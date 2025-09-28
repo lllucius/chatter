@@ -81,8 +81,11 @@ from chatter_sdk.models.dashboard_response import DashboardResponse
 from chatter_sdk.models.data_format import DataFormat
 from chatter_sdk.models.database_health_response import DatabaseHealthResponse
 from chatter_sdk.models.default_provider import DefaultProvider
+from chatter_sdk.models.detailed_workflow_execution_response import DetailedWorkflowExecutionResponse
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
+from chatter_sdk.models.document_chunk_response import DocumentChunkResponse
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
 from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest
 from chatter_sdk.models.document_list_response import DocumentListResponse
@@ -235,6 +238,7 @@ from chatter_sdk.models.validation_error import ValidationError
 from chatter_sdk.models.variant_allocation import VariantAllocation
 from chatter_sdk.models.variant_performance import VariantPerformance
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse
+from chatter_sdk.models.workflow_debug_info import WorkflowDebugInfo
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate
 from chatter_sdk.models.workflow_definition_from_template_request import WorkflowDefinitionFromTemplateRequest
 from chatter_sdk.models.workflow_definition_response import WorkflowDefinitionResponse
@@ -243,6 +247,7 @@ from chatter_sdk.models.workflow_definitions_response import WorkflowDefinitions
 from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse
 from chatter_sdk.models.workflow_edge import WorkflowEdge
 from chatter_sdk.models.workflow_edge_data import WorkflowEdgeData
+from chatter_sdk.models.workflow_execution_log_entry import WorkflowExecutionLogEntry
 from chatter_sdk.models.workflow_execution_request import WorkflowExecutionRequest
 from chatter_sdk.models.workflow_execution_response import WorkflowExecutionResponse
 from chatter_sdk.models.workflow_node import WorkflowNode

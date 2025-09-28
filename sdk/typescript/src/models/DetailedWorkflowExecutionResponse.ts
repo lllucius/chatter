@@ -1,7 +1,10 @@
 /**
- * Generated from OpenAPI schema: WorkflowExecutionResponse
+ * Generated from OpenAPI schema: DetailedWorkflowExecutionResponse
  */
-export interface WorkflowExecutionResponse {
+import { WorkflowDebugInfo } from './WorkflowDebugInfo';
+import { WorkflowExecutionLogEntry } from './WorkflowExecutionLogEntry';
+
+export interface DetailedWorkflowExecutionResponse {
   /** Execution input data */
   input_data?: Record<string, unknown> | null;
   /** Execution ID */
@@ -34,4 +37,8 @@ export interface WorkflowExecutionResponse {
   created_at?: string | null;
   /** Last update timestamp */
   updated_at?: string | null;
+  /** Structured execution logs */
+  logs?: WorkflowExecutionLogEntry[];
+  /** Comprehensive debug information */
+  debug_details?: WorkflowDebugInfo | null;
 }

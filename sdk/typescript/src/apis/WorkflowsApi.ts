@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post, ChatResponse, ChatWorkflowRequest, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post, ChatResponse, ChatWorkflowRequest, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -236,7 +236,7 @@ export class WorkflowsApi extends BaseAPI {
   /**Get Workflow Execution Details
    * Get detailed information about a specific workflow execution.
    */
-  public async getWorkflowExecutionDetailsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionId(workflowId: string, executionId: string): Promise<WorkflowExecutionResponse> {
+  public async getWorkflowExecutionDetailsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionId(workflowId: string, executionId: string): Promise<DetailedWorkflowExecutionResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions/${workflowId}/executions/${executionId}`,
       method: 'GET' as HTTPMethod,
@@ -245,25 +245,27 @@ export class WorkflowsApi extends BaseAPI {
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<WorkflowExecutionResponse>;
+    return response.json() as Promise<DetailedWorkflowExecutionResponse>;
   }
   /**Get Workflow Execution Logs
    * Get execution logs for a specific workflow execution.
    */
-  public async getWorkflowExecutionLogsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionIdLogs(workflowId: string, executionId: string, logLevel?: string, limit?: number): Promise<any[]> {
+  public async getWorkflowExecutionLogsApiV1WorkflowsDefinitionsWorkflowIdExecutionsExecutionIdLogs(workflowId: string, executionId: string, options?: { logLevel?: string | null; limit?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>[]> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions/${workflowId}/executions/${executionId}/logs`,
       method: 'GET' as HTTPMethod,
       headers: {
+        ...options?.headers,
       },
       query: {
-        log_level: logLevel,
-        limit: limit?.toString(),
+        'log_level': options?.logLevel,
+        'limit': options?.limit,
+        ...options?.query
       },
     };
 
     const response = await this.request(requestContext);
-    return response.json() as Promise<any[]>;
+    return response.json() as Promise<Record<string, unknown>[]>;
   }
   /**Execute Chat Workflow
    * Execute chat using dynamically built workflow.
@@ -535,6 +537,33 @@ Available templates:
         'max_consecutive_calls': options?.maxConsecutiveCalls,
         'recursion_strategy': options?.recursionStrategy,
         'enable_recursion_detection': options?.enableRecursionDetection,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
+  /**Get Workflow Defaults
+   * Get workflow defaults from profiles, models, and prompts.
+
+Args:
+    node_type: Optional specific node type to get defaults for
+    current_user: Current authenticated user
+    defaults_service: Workflow defaults service
+    
+Returns:
+    Dictionary containing default configurations
+   */
+  public async getWorkflowDefaultsApiV1WorkflowsDefaults(options?: { nodeType?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/defaults`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'node_type': options?.nodeType,
         ...options?.query
       },
     };

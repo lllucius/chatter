@@ -18,19 +18,24 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
+from datetime import datetime
+from pydantic import BaseModel, ConfigDict, Field, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkflowExecutionRequest(BaseModel):
+class WorkflowExecutionLogEntry(BaseModel):
     """
-    Schema for starting a workflow execution.
+    Schema for individual execution log entries.
     """ # noqa: E501
-    input_data: Optional[Dict[str, Any]] = None
-    definition_id: StrictStr = Field(description="Workflow definition ID")
-    debug_mode: Optional[StrictBool] = Field(default=False, description="Enable debug mode for detailed logging")
-    __properties: ClassVar[List[str]] = ["input_data", "definition_id", "debug_mode"]
+    timestamp: datetime = Field(description="Log entry timestamp")
+    level: StrictStr = Field(description="Log level (DEBUG, INFO, WARN, ERROR)")
+    node_id: Optional[StrictStr] = None
+    step_name: Optional[StrictStr] = None
+    message: StrictStr = Field(description="Log message")
+    data: Optional[Dict[str, Any]] = None
+    execution_time_ms: Optional[StrictInt] = None
+    __properties: ClassVar[List[str]] = ["timestamp", "level", "node_id", "step_name", "message", "data", "execution_time_ms"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +55,7 @@ class WorkflowExecutionRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a JSON string"""
+        """Create an instance of WorkflowExecutionLogEntry from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -70,17 +75,33 @@ class WorkflowExecutionRequest(BaseModel):
             by_alias=True,
             exclude=excluded_fields,
             exclude_none=True,
+    mode='json',
         )
-        # set to None if input_data (nullable) is None
+        # set to None if node_id (nullable) is None
         # and model_fields_set contains the field
-        if self.input_data is None and "input_data" in self.model_fields_set:
-            _dict['input_data'] = None
+        if self.node_id is None and "node_id" in self.model_fields_set:
+            _dict['node_id'] = None
+
+        # set to None if step_name (nullable) is None
+        # and model_fields_set contains the field
+        if self.step_name is None and "step_name" in self.model_fields_set:
+            _dict['step_name'] = None
+
+        # set to None if data (nullable) is None
+        # and model_fields_set contains the field
+        if self.data is None and "data" in self.model_fields_set:
+            _dict['data'] = None
+
+        # set to None if execution_time_ms (nullable) is None
+        # and model_fields_set contains the field
+        if self.execution_time_ms is None and "execution_time_ms" in self.model_fields_set:
+            _dict['execution_time_ms'] = None
 
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a dict"""
+        """Create an instance of WorkflowExecutionLogEntry from a dict"""
         if obj is None:
             return None
 
@@ -88,9 +109,13 @@ class WorkflowExecutionRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "input_data": obj.get("input_data"),
-            "definition_id": obj.get("definition_id"),
-            "debug_mode": obj.get("debug_mode") if obj.get("debug_mode") is not None else False
+            "timestamp": obj.get("timestamp"),
+            "level": obj.get("level"),
+            "node_id": obj.get("node_id"),
+            "step_name": obj.get("step_name"),
+            "message": obj.get("message"),
+            "data": obj.get("data"),
+            "execution_time_ms": obj.get("execution_time_ms")
         })
         return _obj
 

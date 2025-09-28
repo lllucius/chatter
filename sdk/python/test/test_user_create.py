@@ -42,13 +42,13 @@ class TestUserCreate(unittest.TestCase):
                 bio = '',
                 avatar_url = '',
                 phone_number = '',
-                password = '01234567'
+                password = '012345'
             )
         else:
             return UserCreate(
                 email = '',
                 username = '012',
-                password = '01234567',
+                password = '012345',
         )
         """
 

@@ -5,6 +5,7 @@ from chatter_sdk.api.ab_testing_api import ABTestingApi
 from chatter_sdk.api.agents_api import AgentsApi
 from chatter_sdk.api.analytics_api import AnalyticsApi
 from chatter_sdk.api.authentication_api import AuthenticationApi
+from chatter_sdk.api.chat_api import ChatApi
 from chatter_sdk.api.conversations_api import ConversationsApi
 from chatter_sdk.api.data_management_api import DataManagementApi
 from chatter_sdk.api.documents_api import DocumentsApi

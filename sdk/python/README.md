@@ -160,6 +160,8 @@ Class | Method | HTTP request | Description
 *AuthenticationApi* | [**request_password_reset_api_v1_auth_password_reset_request_post**](docs/AuthenticationApi.md#request_password_reset_api_v1_auth_password_reset_request_post) | **POST** /api/v1/auth/password-reset/request | Request Password Reset
 *AuthenticationApi* | [**revoke_api_key_api_v1_auth_api_key_delete**](docs/AuthenticationApi.md#revoke_api_key_api_v1_auth_api_key_delete) | **DELETE** /api/v1/auth/api-key | Revoke Api Key
 *AuthenticationApi* | [**update_profile_api_v1_auth_me_put**](docs/AuthenticationApi.md#update_profile_api_v1_auth_me_put) | **PUT** /api/v1/auth/me | Update Profile
+*ChatApi* | [**chat_endpoint_api_v1_chat_chat_post**](docs/ChatApi.md#chat_endpoint_api_v1_chat_chat_post) | **POST** /api/v1/chat/chat | Chat Endpoint
+*ChatApi* | [**streaming_chat_endpoint_api_v1_chat_streaming_post**](docs/ChatApi.md#streaming_chat_endpoint_api_v1_chat_streaming_post) | **POST** /api/v1/chat/streaming | Streaming Chat Endpoint
 *ConversationsApi* | [**create_conversation_api_v1_conversations_post**](docs/ConversationsApi.md#create_conversation_api_v1_conversations_post) | **POST** /api/v1/conversations/ | Create Conversation
 *ConversationsApi* | [**delete_conversation_api_v1_conversations_conversation_id_delete**](docs/ConversationsApi.md#delete_conversation_api_v1_conversations_conversation_id_delete) | **DELETE** /api/v1/conversations/{conversation_id} | Delete Conversation
 *ConversationsApi* | [**delete_message_api_v1_conversations_conversation_id_messages_message_id_delete**](docs/ConversationsApi.md#delete_message_api_v1_conversations_conversation_id_messages_message_id_delete) | **DELETE** /api/v1/conversations/{conversation_id}/messages/{message_id} | Delete Message
@@ -180,8 +182,12 @@ Class | Method | HTTP request | Description
 *DataManagementApi* | [**restore_from_backup_api_v1_data_restore_post**](docs/DataManagementApi.md#restore_from_backup_api_v1_data_restore_post) | **POST** /api/v1/data/restore | Restore From Backup
 *DocumentsApi* | [**delete_document_api_v1_documents_document_id_delete**](docs/DocumentsApi.md#delete_document_api_v1_documents_document_id_delete) | **DELETE** /api/v1/documents/{document_id} | Delete Document
 *DocumentsApi* | [**delete_document_api_v1_documents_document_id_delete_0**](docs/DocumentsApi.md#delete_document_api_v1_documents_document_id_delete_0) | **DELETE** /api/v1/documents/{document_id} | Delete Document
+*DocumentsApi* | [**download_document_api_v1_documents_document_id_download_get**](docs/DocumentsApi.md#download_document_api_v1_documents_document_id_download_get) | **GET** /api/v1/documents/{document_id}/download | Download Document
+*DocumentsApi* | [**download_document_api_v1_documents_document_id_download_get_0**](docs/DocumentsApi.md#download_document_api_v1_documents_document_id_download_get_0) | **GET** /api/v1/documents/{document_id}/download | Download Document
 *DocumentsApi* | [**get_document_api_v1_documents_document_id_get**](docs/DocumentsApi.md#get_document_api_v1_documents_document_id_get) | **GET** /api/v1/documents/{document_id} | Get Document
 *DocumentsApi* | [**get_document_api_v1_documents_document_id_get_0**](docs/DocumentsApi.md#get_document_api_v1_documents_document_id_get_0) | **GET** /api/v1/documents/{document_id} | Get Document
+*DocumentsApi* | [**get_document_chunks_api_v1_documents_document_id_chunks_get**](docs/DocumentsApi.md#get_document_chunks_api_v1_documents_document_id_chunks_get) | **GET** /api/v1/documents/{document_id}/chunks | Get Document Chunks
+*DocumentsApi* | [**get_document_chunks_api_v1_documents_document_id_chunks_get_0**](docs/DocumentsApi.md#get_document_chunks_api_v1_documents_document_id_chunks_get_0) | **GET** /api/v1/documents/{document_id}/chunks | Get Document Chunks
 *DocumentsApi* | [**get_user_document_stats_api_v1_documents_stats_user_get**](docs/DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get) | **GET** /api/v1/documents/stats/user | Get User Document Stats
 *DocumentsApi* | [**get_user_document_stats_api_v1_documents_stats_user_get_0**](docs/DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get_0) | **GET** /api/v1/documents/stats/user | Get User Document Stats
 *DocumentsApi* | [**list_documents_get_api_v1_documents_get**](docs/DocumentsApi.md#list_documents_get_api_v1_documents_get) | **GET** /api/v1/documents | List Documents Get
@@ -291,6 +297,7 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**](docs/WorkflowsApi.md#create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post) | **POST** /api/v1/workflows/definitions/from-template | Create Workflow Definition From Template
 *WorkflowsApi* | [**create_workflow_template_api_v1_workflows_templates_post**](docs/WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 *WorkflowsApi* | [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](docs/WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
+*WorkflowsApi* | [**delete_workflow_template_api_v1_workflows_templates_template_id_delete**](docs/WorkflowsApi.md#delete_workflow_template_api_v1_workflows_templates_template_id_delete) | **DELETE** /api/v1/workflows/templates/{template_id} | Delete Workflow Template
 *WorkflowsApi* | [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](docs/WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 *WorkflowsApi* | [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](docs/WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 *WorkflowsApi* | [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](docs/WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
@@ -298,7 +305,10 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**get_modern_supported_node_types_api_v1_workflows_node_types_modern_get**](docs/WorkflowsApi.md#get_modern_supported_node_types_api_v1_workflows_node_types_modern_get) | **GET** /api/v1/workflows/node-types/modern | Get Modern Supported Node Types
 *WorkflowsApi* | [**get_supported_node_types_api_v1_workflows_node_types_get**](docs/WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 *WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
+*WorkflowsApi* | [**get_workflow_defaults_api_v1_workflows_defaults_get**](docs/WorkflowsApi.md#get_workflow_defaults_api_v1_workflows_defaults_get) | **GET** /api/v1/workflows/defaults | Get Workflow Defaults
 *WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
+*WorkflowsApi* | [**get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get**](docs/WorkflowsApi.md#get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id} | Get Workflow Execution Details
+*WorkflowsApi* | [**get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get**](docs/WorkflowsApi.md#get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}/logs | Get Workflow Execution Logs
 *WorkflowsApi* | [**list_workflow_definitions_api_v1_workflows_definitions_get**](docs/WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_definitions_get) | **GET** /api/v1/workflows/definitions | List Workflow Definitions
 *WorkflowsApi* | [**list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get**](docs/WorkflowsApi.md#list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions | List Workflow Executions
 *WorkflowsApi* | [**list_workflow_templates_api_v1_workflows_templates_get**](docs/WorkflowsApi.md#list_workflow_templates_api_v1_workflows_templates_get) | **GET** /api/v1/workflows/templates | List Workflow Templates
@@ -395,8 +405,11 @@ Class | Method | HTTP request | Description
  - [DataFormat](docs/DataFormat.md)
  - [DatabaseHealthResponse](docs/DatabaseHealthResponse.md)
  - [DefaultProvider](docs/DefaultProvider.md)
+ - [DetailedWorkflowExecutionResponse](docs/DetailedWorkflowExecutionResponse.md)
  - [DistanceMetric](docs/DistanceMetric.md)
  - [DocumentAnalyticsResponse](docs/DocumentAnalyticsResponse.md)
+ - [DocumentChunkResponse](docs/DocumentChunkResponse.md)
+ - [DocumentChunksResponse](docs/DocumentChunksResponse.md)
  - [DocumentDeleteResponse](docs/DocumentDeleteResponse.md)
  - [DocumentListRequest](docs/DocumentListRequest.md)
  - [DocumentListResponse](docs/DocumentListResponse.md)
@@ -549,6 +562,7 @@ Class | Method | HTTP request | Description
  - [VariantAllocation](docs/VariantAllocation.md)
  - [VariantPerformance](docs/VariantPerformance.md)
  - [WorkflowAnalyticsResponse](docs/WorkflowAnalyticsResponse.md)
+ - [WorkflowDebugInfo](docs/WorkflowDebugInfo.md)
  - [WorkflowDefinitionCreate](docs/WorkflowDefinitionCreate.md)
  - [WorkflowDefinitionFromTemplateRequest](docs/WorkflowDefinitionFromTemplateRequest.md)
  - [WorkflowDefinitionResponse](docs/WorkflowDefinitionResponse.md)
@@ -557,6 +571,7 @@ Class | Method | HTTP request | Description
  - [WorkflowDeleteResponse](docs/WorkflowDeleteResponse.md)
  - [WorkflowEdge](docs/WorkflowEdge.md)
  - [WorkflowEdgeData](docs/WorkflowEdgeData.md)
+ - [WorkflowExecutionLogEntry](docs/WorkflowExecutionLogEntry.md)
  - [WorkflowExecutionRequest](docs/WorkflowExecutionRequest.md)
  - [WorkflowExecutionResponse](docs/WorkflowExecutionResponse.md)
  - [WorkflowNode](docs/WorkflowNode.md)

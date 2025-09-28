@@ -18,19 +18,21 @@ import pprint
 import re  # noqa: F401
 import json
 
-from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
-from typing import Any, ClassVar, Dict, List, Optional
+from pydantic import BaseModel, ConfigDict, Field, StrictInt
+from typing import Any, ClassVar, Dict, List
+from chatter_sdk.models.document_chunk_response import DocumentChunkResponse
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkflowExecutionRequest(BaseModel):
+class DocumentChunksResponse(BaseModel):
     """
-    Schema for starting a workflow execution.
+    Schema for document chunks response with pagination.
     """ # noqa: E501
-    input_data: Optional[Dict[str, Any]] = None
-    definition_id: StrictStr = Field(description="Workflow definition ID")
-    debug_mode: Optional[StrictBool] = Field(default=False, description="Enable debug mode for detailed logging")
-    __properties: ClassVar[List[str]] = ["input_data", "definition_id", "debug_mode"]
+    chunks: List[DocumentChunkResponse] = Field(description="List of document chunks")
+    total_count: StrictInt = Field(description="Total number of chunks")
+    limit: StrictInt = Field(description="Applied limit")
+    offset: StrictInt = Field(description="Applied offset")
+    __properties: ClassVar[List[str]] = ["chunks", "total_count", "limit", "offset"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -50,7 +52,7 @@ class WorkflowExecutionRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a JSON string"""
+        """Create an instance of DocumentChunksResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -71,16 +73,18 @@ class WorkflowExecutionRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # set to None if input_data (nullable) is None
-        # and model_fields_set contains the field
-        if self.input_data is None and "input_data" in self.model_fields_set:
-            _dict['input_data'] = None
-
+        # override the default output from pydantic by calling `to_dict()` of each item in chunks (list)
+        _items = []
+        if self.chunks:
+            for _item_chunks in self.chunks:
+                if _item_chunks:
+                    _items.append(_item_chunks.to_dict())
+            _dict['chunks'] = _items
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionRequest from a dict"""
+        """Create an instance of DocumentChunksResponse from a dict"""
         if obj is None:
             return None
 
@@ -88,9 +92,10 @@ class WorkflowExecutionRequest(BaseModel):
             return cls.model_validate(obj)
 
         _obj = cls.model_validate({
-            "input_data": obj.get("input_data"),
-            "definition_id": obj.get("definition_id"),
-            "debug_mode": obj.get("debug_mode") if obj.get("debug_mode") is not None else False
+            "chunks": [DocumentChunkResponse.from_dict(_item) for _item in obj["chunks"]] if obj.get("chunks") is not None else None,
+            "total_count": obj.get("total_count"),
+            "limit": obj.get("limit"),
+            "offset": obj.get("offset")
         })
         return _obj
 

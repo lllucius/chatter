@@ -69,6 +69,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_delete_workflow_template_api_v1_workflows_templates_template_id_delete(self) -> None:
+        """Test case for delete_workflow_template_api_v1_workflows_templates_template_id_delete
+
+        Delete Workflow Template
+        """
+        pass
+
     async def test_execute_chat_workflow_api_v1_workflows_execute_chat_post(self) -> None:
         """Test case for execute_chat_workflow_api_v1_workflows_execute_chat_post
 
@@ -118,10 +125,31 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_workflow_defaults_api_v1_workflows_defaults_get(self) -> None:
+        """Test case for get_workflow_defaults_api_v1_workflows_defaults_get
+
+        Get Workflow Defaults
+        """
+        pass
+
     async def test_get_workflow_definition_api_v1_workflows_definitions_workflow_id_get(self) -> None:
         """Test case for get_workflow_definition_api_v1_workflows_definitions_workflow_id_get
 
         Get Workflow Definition
+        """
+        pass
+
+    async def test_get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get(self) -> None:
+        """Test case for get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get
+
+        Get Workflow Execution Details
+        """
+        pass
+
+    async def test_get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get(self) -> None:
+        """Test case for get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get
+
+        Get Workflow Execution Logs
         """
         pass
 

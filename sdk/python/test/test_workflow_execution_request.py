@@ -37,7 +37,8 @@ class TestWorkflowExecutionRequest(unittest.TestCase):
         if include_optional:
             return WorkflowExecutionRequest(
                 input_data = { },
-                definition_id = ''
+                definition_id = '',
+                debug_mode = True
             )
         else:
             return WorkflowExecutionRequest(

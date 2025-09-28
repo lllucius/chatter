@@ -1,7 +1,7 @@
 /**
  * Generated API client for Documents
  */
-import { DocumentDeleteResponse, DocumentListRequest, DocumentListResponse, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
+import { DocumentChunksResponse, DocumentDeleteResponse, DocumentListRequest, DocumentListResponse, DocumentProcessingResponse, DocumentResponse, DocumentSearchRequest, DocumentStatsResponse, SearchResultResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class DocumentsApi extends BaseAPI {
@@ -121,6 +121,40 @@ the embedding processing pipeline asynchronously.
     const response = await this.request(requestContext);
     return response.json() as Promise<DocumentProcessingResponse>;
   }
+  /**Get Document Chunks
+   * Get document chunks with pagination.
+   */
+  public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: { limit?: number; offset?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<DocumentChunksResponse> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/chunks`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'limit': options?.limit,
+        'offset': options?.offset,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<DocumentChunksResponse>;
+  }
+  /**Download Document
+   * Download original document file.
+   */
+  public async downloadDocumentApiV1DocumentsDocumentIdDownload(documentId: string): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/documents/${documentId}/download`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
   /**Get User Document Stats
    * Get document statistics for the current user.
    */
@@ -134,53 +168,5 @@ the embedding processing pipeline asynchronously.
 
     const response = await this.request(requestContext);
     return response.json() as Promise<DocumentStatsResponse>;
-  }
-  /**Get Document Chunks
-   * Get document chunks with pagination.
-   */
-  public async getDocumentChunksApiV1DocumentsDocumentIdChunks(documentId: string, options?: {
-    limit?: number;
-    offset?: number;
-    query?: HTTPQuery;
-    headers?: HTTPHeaders;
-  }): Promise<any> {
-    const queryParams = new URLSearchParams();
-    if (options?.limit !== undefined) {
-      queryParams.set('limit', String(options.limit));
-    }
-    if (options?.offset !== undefined) {
-      queryParams.set('offset', String(options.offset));
-    }
-    if (options?.query) {
-      Object.entries(options.query).forEach(([key, value]) => {
-        if (value !== undefined) {
-          queryParams.set(key, String(value));
-        }
-      });
-    }
-
-    const requestContext: RequestOpts = {
-      path: `/api/v1/documents/${documentId}/chunks${queryParams.toString() ? '?' + queryParams.toString() : ''}`,
-      method: 'GET' as HTTPMethod,
-      headers: options?.headers || {},
-    };
-
-    const response = await this.request(requestContext);
-    return response.json();
-  }
-  /**Download Document
-   * Download original document file.
-   */
-  public async downloadDocumentApiV1DocumentsDocumentIdDownload(documentId: string, options?: {
-    headers?: HTTPHeaders;
-  }): Promise<Blob> {
-    const requestContext: RequestOpts = {
-      path: `/api/v1/documents/${documentId}/download`,
-      method: 'GET' as HTTPMethod,
-      headers: options?.headers || {},
-    };
-
-    const response = await this.request(requestContext);
-    return response.blob();
   }
 }

@@ -507,7 +507,7 @@ class WorkflowExecutionService:
                 raise ValueError("No message provided in input_data")
 
             # Parse workflow definition with enhanced flexibility
-            # Check if workflow_definition contains specific configuration
+            # Check if definition contains specific configuration
             enable_memory = True  # Default
             enable_retrieval = False  # Default
             enable_tools = False  # Default

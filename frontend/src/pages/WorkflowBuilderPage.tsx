@@ -25,6 +25,8 @@ import {
   Clear as ClearIcon,
   MoreVert as MoreIcon,
   Delete as DeleteIcon,
+  PlayArrow as ExecuteIcon,
+  BugReport as DebugIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
@@ -60,7 +62,10 @@ const WorkflowBuilderPage: React.FC = () => {
     handleSave: () => void;
     handleClear: () => void;
     handleToggleGrid: () => void;
+    handleToggleMiniMap: () => void;
     handleValidate: () => void;
+    handleExecute: () => void;
+    handleDebug: () => void;
     loadExample: (exampleName: string) => void;
     showTemplateManager: () => void;
     deleteSelected: () => void;
@@ -211,17 +216,19 @@ const WorkflowBuilderPage: React.FC = () => {
         </PageLayout>
       </Box>
 
-      {/* Sectioned Right Drawer */}
-      <WorkflowSectionDrawer
-        open={drawerOpen}
-        collapsed={drawerCollapsed}
-        onToggleCollapsed={() => setDrawerCollapsed(!drawerCollapsed)}
-        selectedNode={selectedNode}
-        currentWorkflow={currentWorkflow}
-        onNodeUpdate={handleNodeUpdate}
-        width={drawerWidth}
-        collapsedWidth={collapsedDrawerWidth}
-      />
+      {/* Sectioned Right Drawer - only show when open */}
+      {drawerOpen && (
+        <WorkflowSectionDrawer
+          open={drawerOpen}
+          collapsed={drawerCollapsed}
+          onToggleCollapsed={() => setDrawerCollapsed(!drawerCollapsed)}
+          selectedNode={selectedNode}
+          currentWorkflow={currentWorkflow}
+          onNodeUpdate={handleNodeUpdate}
+          width={drawerWidth}
+          collapsedWidth={collapsedDrawerWidth}
+        />
+      )}
 
       {/* Menu components remain the same */}
 
@@ -346,6 +353,24 @@ const WorkflowBuilderPage: React.FC = () => {
         }}>
           <SaveIcon sx={{ mr: 1 }} />
           Save
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleExecute();
+          }
+          setActionMenuAnchor(null);
+        }}>
+          <ExecuteIcon sx={{ mr: 1 }} />
+          Execute
+        </MenuItem>
+        <MenuItem onClick={() => {
+          if (workflowEditorRef.current) {
+            workflowEditorRef.current.handleDebug();
+          }
+          setActionMenuAnchor(null);
+        }}>
+          <DebugIcon sx={{ mr: 1 }} />
+          Debug
         </MenuItem>
         <MenuItem onClick={() => setActionMenuAnchor(null)}>
           <TemplateIcon sx={{ mr: 1 }} />

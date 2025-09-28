@@ -21,6 +21,7 @@ import {
   ConnectionMode,
 } from '@xyflow/react';
 import '@xyflow/react/dist/style.css';
+import './WorkflowEditor.css';
 import {
   Box,
   Toolbar,
@@ -52,6 +53,7 @@ import {
   ContentCopy as CopyIcon,
   ContentPaste as PasteIcon,
   LibraryBooks as TemplateIcon,
+  Map as MiniMapIcon,
 } from '@mui/icons-material';
 
 // Import custom node components
@@ -69,6 +71,8 @@ import CustomEdge from './edges/CustomEdge';
 import TemplateManager from './TemplateManager';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 import { workflowDefaultsService, WorkflowDefaults } from '../../services/workflow-defaults-service';
+import { ThemeContext } from '../../App';
+import { toastService } from '../../services/toast-service';
 
 // Define node types for the workflow
 export type WorkflowNodeType =
@@ -149,7 +153,10 @@ const WorkflowEditor = React.forwardRef<
     handleSave: () => void;
     handleClear: () => void;
     handleToggleGrid: () => void;
+    handleToggleMiniMap: () => void;
     handleValidate: () => void;
+    handleExecute: () => void;
+    handleDebug: () => void;
     loadExample: (exampleName: string) => void;
     showTemplateManager: () => void;
     deleteSelected: () => void;
@@ -193,6 +200,10 @@ const WorkflowEditor = React.forwardRef<
   const [showTemplateManager, setShowTemplateManager] = useState(false);
   const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
   const [loadingDefaults, setLoadingDefaults] = useState(false);
+  const [showMiniMap, setShowMiniMap] = useState(true);
+  
+  // Access theme context for styling
+  const { darkMode } = React.useContext(ThemeContext);
 
   // Load workflow defaults on mount
   useEffect(() => {
@@ -565,13 +576,62 @@ const WorkflowEditor = React.forwardRef<
   const handleValidate = useCallback(() => {
     const result = WorkflowValidator.validate(currentWorkflow);
     setValidationResult(result);
-    setShowValidation(true);
+    
+    // Use toast notifications instead of snackbar
+    if (result.isValid) {
+      toastService.success('Workflow is valid!');
+    } else {
+      toastService.error(
+        `Validation failed: ${result.errors.join(', ')}`,
+        'Workflow Validation',
+        {
+          autoClose: 8000, // Longer duration for detailed error messages
+        }
+      );
+    }
   }, [currentWorkflow]);
 
   // Toggle grid
   const handleToggleGrid = useCallback(() => {
     setSnapToGrid(!snapToGrid);
   }, [snapToGrid]);
+
+  // Toggle MiniMap
+  const handleToggleMiniMap = useCallback(() => {
+    setShowMiniMap(!showMiniMap);
+  }, [showMiniMap]);
+
+  // Execute workflow
+  const handleExecute = useCallback(() => {
+    // First validate the workflow
+    const result = WorkflowValidator.validate(currentWorkflow);
+    if (!result.isValid) {
+      toastService.error(
+        `Cannot execute invalid workflow: ${result.errors.join(', ')}`,
+        'Execution Error'
+      );
+      return;
+    }
+
+    // TODO: Implement workflow execution
+    toastService.success('Workflow execution started!');
+  }, [currentWorkflow]);
+
+  // Debug workflow
+  const handleDebug = useCallback(() => {
+    // First validate the workflow
+    const result = WorkflowValidator.validate(currentWorkflow);
+    if (!result.isValid) {
+      toastService.error(
+        `Cannot debug invalid workflow: ${result.errors.join(', ')}`,
+        'Debug Error'
+      );
+      return;
+    }
+
+    // TODO: Implement workflow debugging
+    toastService.info('Debug mode activated!');
+  }, [currentWorkflow]);
 
   // Expose methods through ref
   React.useImperativeHandle(ref, () => ({
@@ -583,7 +643,10 @@ const WorkflowEditor = React.forwardRef<
     handleSave,
     handleClear,
     handleToggleGrid,
+    handleToggleMiniMap,
     handleValidate,
+    handleExecute,
+    handleDebug,
     loadExample: handleLoadExample,
     showTemplateManager: () => setShowTemplateManager(true),
     deleteSelected: handleDeleteSelected,
@@ -597,7 +660,10 @@ const WorkflowEditor = React.forwardRef<
     handleSave,
     handleClear,
     handleToggleGrid,
+    handleToggleMiniMap,
     handleValidate,
+    handleExecute,
+    handleDebug,
     handleLoadExample,
     handleDeleteSelected,
     _handleNodeUpdate,
@@ -763,6 +829,14 @@ const WorkflowEditor = React.forwardRef<
                   Grid
                 </Button>
                 <Button
+                  onClick={handleToggleMiniMap}
+                  variant={showMiniMap ? 'contained' : 'outlined'}
+                  startIcon={<MiniMapIcon />}
+                  title="Toggle MiniMap"
+                >
+                  MiniMap
+                </Button>
+                <Button
                   onClick={handleValidate}
                   variant="outlined"
                   startIcon={
@@ -811,6 +885,7 @@ const WorkflowEditor = React.forwardRef<
             width: '100%', // Ensure width is explicitly set
             overflow: 'hidden' // Prevent scrolling on container
           }}
+          data-theme={darkMode ? 'dark' : 'light'}
         >
           <ReactFlow
             nodes={nodes}
@@ -832,7 +907,7 @@ const WorkflowEditor = React.forwardRef<
             zoomOnScroll={false} // Disable zoom on scroll for cleaner interaction
           >
             <Controls />
-            <MiniMap />
+            {showMiniMap && <MiniMap />}
             <Background gap={GRID_SIZE} />
           </ReactFlow>
         </Box>
@@ -854,22 +929,6 @@ const WorkflowEditor = React.forwardRef<
           Parallel Processing
         </MenuItem>
       </Menu>
-
-      {/* Validation feedback */}
-      <Snackbar
-        open={showValidation}
-        autoHideDuration={6000}
-        onClose={() => setShowValidation(false)}
-      >
-        <Alert
-          onClose={() => setShowValidation(false)}
-          severity={validationResult?.isValid ? 'success' : 'error'}
-        >
-          {validationResult?.isValid
-            ? 'Workflow is valid!'
-            : `Validation errors: ${validationResult?.errors.join(', ')}`}
-        </Alert>
-      </Snackbar>
 
       {/* Template Manager Dialog */}
       <TemplateManager

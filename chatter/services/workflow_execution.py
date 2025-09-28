@@ -507,14 +507,14 @@ class WorkflowExecutionService:
                 raise ValueError("No message provided in input_data")
 
             # Parse workflow definition with enhanced flexibility
-            # Check if workflow_definition contains specific configuration
+            # Check if definition contains specific configuration
             enable_memory = True  # Default
             enable_retrieval = False  # Default
             enable_tools = False  # Default
             
-            if isinstance(workflow_definition, dict):
+            if isinstance(definition, dict):
                 # Extract configuration from workflow definition if available
-                config = workflow_definition.get("config", {})
+                config = definition.get("config", {})
                 enable_memory = config.get("enable_memory", True)
                 enable_retrieval = config.get("enable_retrieval", False) 
                 enable_tools = config.get("enable_tools", False)

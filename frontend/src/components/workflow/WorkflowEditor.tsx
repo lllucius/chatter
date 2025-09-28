@@ -33,6 +33,12 @@ import {
   MenuItem,
   Alert,
   Snackbar,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
+  Grid,
 } from '@mui/material';
 import {
   PlayArrow as StartIcon,
@@ -206,6 +212,10 @@ const WorkflowEditor = React.forwardRef<
   const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
   const [loadingDefaults, setLoadingDefaults] = useState(false);
   const [showMiniMap, setShowMiniMap] = useState(true);
+  
+  // Execution dialog state
+  const [showExecutionDialog, setShowExecutionDialog] = useState(false);
+  const [executionInputs, setExecutionInputs] = useState<Record<string, string>>({});
   
   // Access theme context for styling
   const { darkMode } = React.useContext(ThemeContext);
@@ -703,9 +713,38 @@ const WorkflowEditor = React.forwardRef<
       return;
     }
 
-    // TODO: Implement workflow execution
-    toastService.success('Workflow execution started!');
+    // Check if the workflow has input parameters
+    const hasInputParams = currentWorkflow.nodes.some(node => 
+      node.type === 'start' && node.data?.config?.requiresInput
+    );
+
+    if (hasInputParams || currentWorkflow.nodes.length > 0) {
+      // Reset and show execution input dialog
+      setExecutionInputs({});
+      setShowExecutionDialog(true);
+    } else {
+      // Execute directly for simple workflows
+      executeWorkflow({});
+    }
   }, [currentWorkflow]);
+
+  // Execute workflow with inputs
+  const executeWorkflow = useCallback(async (inputs: Record<string, string>) => {
+    try {
+      // TODO: Implement actual workflow execution API call
+      // For now, just show success message
+      const inputKeys = Object.keys(inputs);
+      const inputSummary = inputKeys.length > 0 
+        ? ` with inputs: ${inputKeys.join(', ')}`
+        : '';
+      
+      toastService.success(`Workflow execution started${inputSummary}!`);
+      setShowExecutionDialog(false);
+    } catch (error) {
+      toastService.error('Failed to execute workflow', 'Execution Error');
+      console.error('Workflow execution error:', error);
+    }
+  }, []);
 
   // Debug workflow
   const handleDebug = useCallback(() => {
@@ -1031,6 +1070,71 @@ const WorkflowEditor = React.forwardRef<
         currentWorkflow={currentWorkflow}
         onSaveAsTemplate={handleSaveAsTemplate}
       />
+
+      {/* Workflow Execution Input Dialog */}
+      <Dialog
+        open={showExecutionDialog}
+        onClose={() => setShowExecutionDialog(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Workflow Execution - Input Parameters</DialogTitle>
+        <DialogContent>
+          <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+            Provide input parameters for workflow execution:
+          </Typography>
+          <Grid container spacing={2}>
+            <Grid size={12}>
+              <TextField
+                fullWidth
+                label="User Input"
+                multiline
+                rows={3}
+                value={executionInputs.userInput || ''}
+                onChange={(e) => 
+                  setExecutionInputs(prev => ({
+                    ...prev,
+                    userInput: e.target.value
+                  }))
+                }
+                placeholder="Enter your input for the workflow..."
+                helperText="This will be passed to the workflow as the initial input"
+              />
+            </Grid>
+            <Grid size={12}>
+              <TextField
+                fullWidth
+                label="Additional Parameters (JSON)"
+                multiline
+                rows={3}
+                value={executionInputs.parameters || ''}
+                onChange={(e) => 
+                  setExecutionInputs(prev => ({
+                    ...prev,
+                    parameters: e.target.value
+                  }))
+                }
+                placeholder='{"key": "value", "setting": "option"}'
+                helperText="Optional: Additional parameters as JSON object"
+              />
+            </Grid>
+          </Grid>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setShowExecutionDialog(false)}
+          >
+            Cancel
+          </Button>
+          <Button
+            onClick={() => executeWorkflow(executionInputs)}
+            variant="contained"
+            startIcon={<StartIcon />}
+          >
+            Execute Workflow
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 });

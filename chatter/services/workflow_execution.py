@@ -376,8 +376,8 @@ class WorkflowExecutionService:
         edges: list[dict[str, Any]],
         message: str,
         user_id: str,
-        provider: str = "anthropic",
-        model: str = "claude-3-5-sonnet-20241022",
+        provider: str | None = None,
+        model: str | None = None,
         **kwargs,
     ) -> dict[str, Any]:
         """Execute a custom workflow definition."""
@@ -493,10 +493,10 @@ class WorkflowExecutionService:
                 definition_name=definition_name,
             )
             
-            # Get LLM from default settings for now
+            # Get LLM using default provider and model
             llm = await self.llm_service.get_llm(
-                provider="anthropic",
-                model="claude-3-5-sonnet-20241022",
+                provider=None,  # Use default provider
+                model=None,     # Use default model for the provider
                 temperature=0.1,
                 max_tokens=2048,
             )
@@ -741,8 +741,8 @@ class WorkflowExecutionService:
         return ChatRequest(
             message=request.message,
             conversation_id=getattr(request, 'conversation_id', None),
-            provider=getattr(request, 'provider', 'anthropic'),
-            model=getattr(request, 'model', 'claude-3-5-sonnet-20241022'),
+            provider=getattr(request, 'provider', None),  # Let system choose default
+            model=getattr(request, 'model', None),  # Let system choose default
             temperature=getattr(request, 'temperature', None),
             max_tokens=getattr(request, 'max_tokens', None),
             system_prompt_override=getattr(request, 'system_prompt_override', None),

@@ -8,6 +8,7 @@ Name | Type | Description | Notes
 ------------ | ------------- | ------------- | -------------
 **input_data** | **Dict[str, object]** |  | [optional] 
 **definition_id** | **str** | Workflow definition ID | 
+**debug_mode** | **bool** | Enable debug mode for detailed logging | [optional] [default to False]
 
 ## Example
 

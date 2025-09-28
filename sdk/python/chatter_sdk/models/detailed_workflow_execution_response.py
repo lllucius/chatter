@@ -21,12 +21,14 @@ import json
 from datetime import datetime
 from pydantic import BaseModel, ConfigDict, Field, StrictFloat, StrictInt, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
+from chatter_sdk.models.workflow_debug_info import WorkflowDebugInfo
+from chatter_sdk.models.workflow_execution_log_entry import WorkflowExecutionLogEntry
 from typing import Optional, Set
 from typing_extensions import Self
 
-class WorkflowExecutionResponse(BaseModel):
+class DetailedWorkflowExecutionResponse(BaseModel):
     """
-    Schema for workflow execution response.
+    Schema for detailed workflow execution response with full debug info.
     """ # noqa: E501
     input_data: Optional[Dict[str, Any]] = None
     id: StrictStr = Field(description="Execution ID")
@@ -44,7 +46,9 @@ class WorkflowExecutionResponse(BaseModel):
     debug_info: Optional[Dict[str, Any]] = None
     created_at: Optional[datetime] = None
     updated_at: Optional[datetime] = None
-    __properties: ClassVar[List[str]] = ["input_data", "id", "definition_id", "owner_id", "status", "started_at", "completed_at", "execution_time_ms", "output_data", "error_message", "tokens_used", "cost", "execution_log", "debug_info", "created_at", "updated_at"]
+    logs: Optional[List[WorkflowExecutionLogEntry]] = Field(default=None, description="Structured execution logs")
+    debug_details: Optional[WorkflowDebugInfo] = None
+    __properties: ClassVar[List[str]] = ["input_data", "id", "definition_id", "owner_id", "status", "started_at", "completed_at", "execution_time_ms", "output_data", "error_message", "tokens_used", "cost", "execution_log", "debug_info", "created_at", "updated_at", "logs", "debug_details"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -64,7 +68,7 @@ class WorkflowExecutionResponse(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionResponse from a JSON string"""
+        """Create an instance of DetailedWorkflowExecutionResponse from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -86,6 +90,16 @@ class WorkflowExecutionResponse(BaseModel):
             exclude_none=True,
     mode='json',
         )
+        # override the default output from pydantic by calling `to_dict()` of each item in logs (list)
+        _items = []
+        if self.logs:
+            for _item_logs in self.logs:
+                if _item_logs:
+                    _items.append(_item_logs.to_dict())
+            _dict['logs'] = _items
+        # override the default output from pydantic by calling `to_dict()` of debug_details
+        if self.debug_details:
+            _dict['debug_details'] = self.debug_details.to_dict()
         # set to None if input_data (nullable) is None
         # and model_fields_set contains the field
         if self.input_data is None and "input_data" in self.model_fields_set:
@@ -136,11 +150,16 @@ class WorkflowExecutionResponse(BaseModel):
         if self.updated_at is None and "updated_at" in self.model_fields_set:
             _dict['updated_at'] = None
 
+        # set to None if debug_details (nullable) is None
+        # and model_fields_set contains the field
+        if self.debug_details is None and "debug_details" in self.model_fields_set:
+            _dict['debug_details'] = None
+
         return _dict
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of WorkflowExecutionResponse from a dict"""
+        """Create an instance of DetailedWorkflowExecutionResponse from a dict"""
         if obj is None:
             return None
 
@@ -163,7 +182,9 @@ class WorkflowExecutionResponse(BaseModel):
             "execution_log": obj.get("execution_log"),
             "debug_info": obj.get("debug_info"),
             "created_at": obj.get("created_at"),
-            "updated_at": obj.get("updated_at")
+            "updated_at": obj.get("updated_at"),
+            "logs": [WorkflowExecutionLogEntry.from_dict(_item) for _item in obj["logs"]] if obj.get("logs") is not None else None,
+            "debug_details": WorkflowDebugInfo.from_dict(obj["debug_details"]) if obj.get("debug_details") is not None else None
         })
         return _obj
 

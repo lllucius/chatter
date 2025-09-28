@@ -139,6 +139,20 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get(self) -> None:
+        """Test case for get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get
+
+        Get Workflow Execution Details
+        """
+        pass
+
+    async def test_get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get(self) -> None:
+        """Test case for get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get
+
+        Get Workflow Execution Logs
+        """
+        pass
+
     async def test_list_workflow_definitions_api_v1_workflows_definitions_get(self) -> None:
         """Test case for list_workflow_definitions_api_v1_workflows_definitions_get
 

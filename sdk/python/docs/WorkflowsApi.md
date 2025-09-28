@@ -20,6 +20,8 @@ Method | HTTP request | Description
 [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
 [**get_workflow_defaults_api_v1_workflows_defaults_get**](WorkflowsApi.md#get_workflow_defaults_api_v1_workflows_defaults_get) | **GET** /api/v1/workflows/defaults | Get Workflow Defaults
 [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
+[**get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get**](WorkflowsApi.md#get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id} | Get Workflow Execution Details
+[**get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get**](WorkflowsApi.md#get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}/logs | Get Workflow Execution Logs
 [**list_workflow_definitions_api_v1_workflows_definitions_get**](WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_definitions_get) | **GET** /api/v1/workflows/definitions | List Workflow Definitions
 [**list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get**](WorkflowsApi.md#list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions | List Workflow Executions
 [**list_workflow_templates_api_v1_workflows_templates_get**](WorkflowsApi.md#list_workflow_templates_api_v1_workflows_templates_get) | **GET** /api/v1/workflows/templates | List Workflow Templates
@@ -1458,6 +1460,171 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**WorkflowDefinitionResponse**](WorkflowDefinitionResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get**
+> DetailedWorkflowExecutionResponse get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get(workflow_id, execution_id)
+
+Get Workflow Execution Details
+
+Get detailed information about a specific workflow execution.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.detailed_workflow_execution_response import DetailedWorkflowExecutionResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_id = 'workflow_id_example' # str | Workflow ID
+    execution_id = 'execution_id_example' # str | 
+
+    try:
+        # Get Workflow Execution Details
+        api_response = await api_instance.get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get(workflow_id, execution_id)
+        print("The response of WorkflowsApi->get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_id** | **str**| Workflow ID | 
+ **execution_id** | **str**|  | 
+
+### Return type
+
+[**DetailedWorkflowExecutionResponse**](DetailedWorkflowExecutionResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get**
+> List[Dict[str, object]] get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get(workflow_id, execution_id, log_level=log_level, limit=limit)
+
+Get Workflow Execution Logs
+
+Get execution logs for a specific workflow execution.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    workflow_id = 'workflow_id_example' # str | Workflow ID
+    execution_id = 'execution_id_example' # str | 
+    log_level = 'log_level_example' # str |  (optional)
+    limit = 1000 # int |  (optional) (default to 1000)
+
+    try:
+        # Get Workflow Execution Logs
+        api_response = await api_instance.get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get(workflow_id, execution_id, log_level=log_level, limit=limit)
+        print("The response of WorkflowsApi->get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **workflow_id** | **str**| Workflow ID | 
+ **execution_id** | **str**|  | 
+ **log_level** | **str**|  | [optional] 
+ **limit** | **int**|  | [optional] [default to 1000]
+
+### Return type
+
+**List[Dict[str, object]]**
 
 ### Authorization
 

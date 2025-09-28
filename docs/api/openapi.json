@@ -10426,6 +10426,289 @@
         }
       }
     },
+    "/api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Get Workflow Execution Details",
+        "description": "Get detailed information about a specific workflow execution.",
+        "operationId": "get_workflow_execution_details_api_v1_workflows_definitions__workflow_id__executions__execution_id__get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Workflow ID",
+              "title": "Workflow Id"
+            },
+            "description": "Workflow ID"
+          },
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Execution Id"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/DetailedWorkflowExecutionResponse"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "/api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}/logs": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "Get Workflow Execution Logs",
+        "description": "Get execution logs for a specific workflow execution.",
+        "operationId": "get_workflow_execution_logs_api_v1_workflows_definitions__workflow_id__executions__execution_id__logs_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "workflow_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "minLength": 1,
+              "description": "Workflow ID",
+              "title": "Workflow Id"
+            },
+            "description": "Workflow ID"
+          },
+          {
+            "name": "execution_id",
+            "in": "path",
+            "required": true,
+            "schema": {
+              "type": "string",
+              "title": "Execution Id"
+            }
+          },
+          {
+            "name": "log_level",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "anyOf": [
+                {
+                  "type": "string"
+                },
+                {
+                  "type": "null"
+                }
+              ],
+              "title": "Log Level"
+            }
+          },
+          {
+            "name": "limit",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1000,
+              "title": "Limit"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "type": "object",
+                    "additionalProperties": true
+                  },
+                  "title": "Response Get Workflow Execution Logs Api V1 Workflows Definitions  Workflow Id  Executions  Execution Id  Logs Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflows/execute/chat": {
       "post": {
         "tags": [
@@ -29999,6 +30282,201 @@
         "title": "DefaultProvider",
         "description": "Schema for setting default provider."
       },
+      "DetailedWorkflowExecutionResponse": {
+        "properties": {
+          "input_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Input Data",
+            "description": "Execution input data"
+          },
+          "id": {
+            "type": "string",
+            "title": "Id",
+            "description": "Execution ID"
+          },
+          "definition_id": {
+            "type": "string",
+            "title": "Definition Id",
+            "description": "Workflow definition ID"
+          },
+          "owner_id": {
+            "type": "string",
+            "title": "Owner Id",
+            "description": "Owner user ID"
+          },
+          "status": {
+            "type": "string",
+            "title": "Status",
+            "description": "Execution status"
+          },
+          "started_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Started At",
+            "description": "Execution start time"
+          },
+          "completed_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Completed At",
+            "description": "Execution completion time"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms",
+            "description": "Execution time in milliseconds"
+          },
+          "output_data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Output Data",
+            "description": "Execution output data"
+          },
+          "error_message": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Error Message",
+            "description": "Error message if failed"
+          },
+          "tokens_used": {
+            "type": "integer",
+            "title": "Tokens Used",
+            "description": "Total tokens used",
+            "default": 0
+          },
+          "cost": {
+            "type": "number",
+            "title": "Cost",
+            "description": "Total cost",
+            "default": 0.0
+          },
+          "execution_log": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Log",
+            "description": "Detailed execution log entries"
+          },
+          "debug_info": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debug Info",
+            "description": "Debug information when debug mode enabled"
+          },
+          "created_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Created At",
+            "description": "Creation timestamp"
+          },
+          "updated_at": {
+            "anyOf": [
+              {
+                "type": "string",
+                "format": "date-time"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Updated At",
+            "description": "Last update timestamp"
+          },
+          "logs": {
+            "items": {
+              "$ref": "#/components/schemas/WorkflowExecutionLogEntry"
+            },
+            "type": "array",
+            "title": "Logs",
+            "description": "Structured execution logs"
+          },
+          "debug_details": {
+            "anyOf": [
+              {
+                "$ref": "#/components/schemas/WorkflowDebugInfo"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "description": "Comprehensive debug information"
+          }
+        },
+        "type": "object",
+        "required": [
+          "id",
+          "definition_id",
+          "owner_id",
+          "status"
+        ],
+        "title": "DetailedWorkflowExecutionResponse",
+        "description": "Schema for detailed workflow execution response with full debug info."
+      },
       "DistanceMetric": {
         "type": "string",
         "enum": [
@@ -40338,6 +40816,73 @@
         "title": "WorkflowAnalyticsResponse",
         "description": "Schema for workflow analytics response."
       },
+      "WorkflowDebugInfo": {
+        "properties": {
+          "workflow_structure": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Workflow Structure",
+            "description": "Workflow nodes and edges structure"
+          },
+          "execution_path": {
+            "items": {
+              "type": "string"
+            },
+            "type": "array",
+            "title": "Execution Path",
+            "description": "Actual path taken through the workflow"
+          },
+          "node_executions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Node Executions",
+            "description": "Details of each node execution"
+          },
+          "variable_states": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Variable States",
+            "description": "Variable states throughout execution"
+          },
+          "performance_metrics": {
+            "additionalProperties": true,
+            "type": "object",
+            "title": "Performance Metrics",
+            "description": "Performance metrics for each step"
+          },
+          "llm_interactions": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Llm Interactions",
+            "description": "LLM API interactions"
+          },
+          "tool_calls": {
+            "items": {
+              "additionalProperties": true,
+              "type": "object"
+            },
+            "type": "array",
+            "title": "Tool Calls",
+            "description": "Tool execution details"
+          }
+        },
+        "type": "object",
+        "required": [
+          "workflow_structure",
+          "execution_path",
+          "node_executions",
+          "variable_states",
+          "performance_metrics"
+        ],
+        "title": "WorkflowDebugInfo",
+        "description": "Schema for workflow debug information."
+      },
       "WorkflowDefinitionCreate": {
         "properties": {
           "name": {
@@ -40815,6 +41360,83 @@
         "title": "WorkflowEdgeData",
         "description": "Schema for workflow edge data."
       },
+      "WorkflowExecutionLogEntry": {
+        "properties": {
+          "timestamp": {
+            "type": "string",
+            "format": "date-time",
+            "title": "Timestamp",
+            "description": "Log entry timestamp"
+          },
+          "level": {
+            "type": "string",
+            "title": "Level",
+            "description": "Log level (DEBUG, INFO, WARN, ERROR)"
+          },
+          "node_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Node Id",
+            "description": "Associated workflow node ID"
+          },
+          "step_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Step Name",
+            "description": "Execution step name"
+          },
+          "message": {
+            "type": "string",
+            "title": "Message",
+            "description": "Log message"
+          },
+          "data": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Data",
+            "description": "Additional log data"
+          },
+          "execution_time_ms": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Time Ms",
+            "description": "Step execution time"
+          }
+        },
+        "type": "object",
+        "required": [
+          "timestamp",
+          "level",
+          "message"
+        ],
+        "title": "WorkflowExecutionLogEntry",
+        "description": "Schema for individual execution log entries."
+      },
       "WorkflowExecutionRequest": {
         "properties": {
           "input_data": {
@@ -40834,6 +41456,12 @@
             "type": "string",
             "title": "Definition Id",
             "description": "Workflow definition ID"
+          },
+          "debug_mode": {
+            "type": "boolean",
+            "title": "Debug Mode",
+            "description": "Enable debug mode for detailed logging",
+            "default": false
           }
         },
         "type": "object",
@@ -40952,6 +41580,35 @@
             "title": "Cost",
             "description": "Total cost",
             "default": 0.0
+          },
+          "execution_log": {
+            "anyOf": [
+              {
+                "items": {
+                  "additionalProperties": true,
+                  "type": "object"
+                },
+                "type": "array"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Execution Log",
+            "description": "Detailed execution log entries"
+          },
+          "debug_info": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Debug Info",
+            "description": "Debug information when debug mode enabled"
           },
           "created_at": {
             "anyOf": [

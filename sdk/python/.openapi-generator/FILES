@@ -96,6 +96,7 @@ chatter_sdk/models/dashboard_response.py
 chatter_sdk/models/data_format.py
 chatter_sdk/models/database_health_response.py
 chatter_sdk/models/default_provider.py
+chatter_sdk/models/detailed_workflow_execution_response.py
 chatter_sdk/models/distance_metric.py
 chatter_sdk/models/document_analytics_response.py
 chatter_sdk/models/document_chunk_response.py
@@ -252,6 +253,7 @@ chatter_sdk/models/validation_error.py
 chatter_sdk/models/variant_allocation.py
 chatter_sdk/models/variant_performance.py
 chatter_sdk/models/workflow_analytics_response.py
+chatter_sdk/models/workflow_debug_info.py
 chatter_sdk/models/workflow_definition_create.py
 chatter_sdk/models/workflow_definition_from_template_request.py
 chatter_sdk/models/workflow_definition_response.py
@@ -260,6 +262,7 @@ chatter_sdk/models/workflow_definitions_response.py
 chatter_sdk/models/workflow_delete_response.py
 chatter_sdk/models/workflow_edge.py
 chatter_sdk/models/workflow_edge_data.py
+chatter_sdk/models/workflow_execution_log_entry.py
 chatter_sdk/models/workflow_execution_request.py
 chatter_sdk/models/workflow_execution_response.py
 chatter_sdk/models/workflow_node.py
@@ -346,6 +349,7 @@ docs/DataManagementApi.md
 docs/DatabaseHealthResponse.md
 docs/DefaultApi.md
 docs/DefaultProvider.md
+docs/DetailedWorkflowExecutionResponse.md
 docs/DistanceMetric.md
 docs/DocumentAnalyticsResponse.md
 docs/DocumentChunkResponse.md
@@ -512,6 +516,7 @@ docs/ValidationError.md
 docs/VariantAllocation.md
 docs/VariantPerformance.md
 docs/WorkflowAnalyticsResponse.md
+docs/WorkflowDebugInfo.md
 docs/WorkflowDefinitionCreate.md
 docs/WorkflowDefinitionFromTemplateRequest.md
 docs/WorkflowDefinitionResponse.md
@@ -520,6 +525,7 @@ docs/WorkflowDefinitionsResponse.md
 docs/WorkflowDeleteResponse.md
 docs/WorkflowEdge.md
 docs/WorkflowEdgeData.md
+docs/WorkflowExecutionLogEntry.md
 docs/WorkflowExecutionRequest.md
 docs/WorkflowExecutionResponse.md
 docs/WorkflowNode.md
@@ -612,6 +618,7 @@ test/test_data_management_api.py
 test/test_database_health_response.py
 test/test_default_api.py
 test/test_default_provider.py
+test/test_detailed_workflow_execution_response.py
 test/test_distance_metric.py
 test/test_document_analytics_response.py
 test/test_document_chunk_response.py
@@ -778,6 +785,7 @@ test/test_validation_error.py
 test/test_variant_allocation.py
 test/test_variant_performance.py
 test/test_workflow_analytics_response.py
+test/test_workflow_debug_info.py
 test/test_workflow_definition_create.py
 test/test_workflow_definition_from_template_request.py
 test/test_workflow_definition_response.py
@@ -786,6 +794,7 @@ test/test_workflow_definitions_response.py
 test/test_workflow_delete_response.py
 test/test_workflow_edge.py
 test/test_workflow_edge_data.py
+test/test_workflow_execution_log_entry.py
 test/test_workflow_execution_request.py
 test/test_workflow_execution_response.py
 test/test_workflow_node.py

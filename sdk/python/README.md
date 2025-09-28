@@ -305,6 +305,8 @@ Class | Method | HTTP request | Description
 *WorkflowsApi* | [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](docs/WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
 *WorkflowsApi* | [**get_workflow_defaults_api_v1_workflows_defaults_get**](docs/WorkflowsApi.md#get_workflow_defaults_api_v1_workflows_defaults_get) | **GET** /api/v1/workflows/defaults | Get Workflow Defaults
 *WorkflowsApi* | [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](docs/WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
+*WorkflowsApi* | [**get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get**](docs/WorkflowsApi.md#get_workflow_execution_details_api_v1_workflows_definitions_workflow_id_executions_execution_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id} | Get Workflow Execution Details
+*WorkflowsApi* | [**get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get**](docs/WorkflowsApi.md#get_workflow_execution_logs_api_v1_workflows_definitions_workflow_id_executions_execution_id_logs_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions/{execution_id}/logs | Get Workflow Execution Logs
 *WorkflowsApi* | [**list_workflow_definitions_api_v1_workflows_definitions_get**](docs/WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_definitions_get) | **GET** /api/v1/workflows/definitions | List Workflow Definitions
 *WorkflowsApi* | [**list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get**](docs/WorkflowsApi.md#list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions | List Workflow Executions
 *WorkflowsApi* | [**list_workflow_templates_api_v1_workflows_templates_get**](docs/WorkflowsApi.md#list_workflow_templates_api_v1_workflows_templates_get) | **GET** /api/v1/workflows/templates | List Workflow Templates
@@ -401,6 +403,7 @@ Class | Method | HTTP request | Description
  - [DataFormat](docs/DataFormat.md)
  - [DatabaseHealthResponse](docs/DatabaseHealthResponse.md)
  - [DefaultProvider](docs/DefaultProvider.md)
+ - [DetailedWorkflowExecutionResponse](docs/DetailedWorkflowExecutionResponse.md)
  - [DistanceMetric](docs/DistanceMetric.md)
  - [DocumentAnalyticsResponse](docs/DocumentAnalyticsResponse.md)
  - [DocumentChunkResponse](docs/DocumentChunkResponse.md)
@@ -557,6 +560,7 @@ Class | Method | HTTP request | Description
  - [VariantAllocation](docs/VariantAllocation.md)
  - [VariantPerformance](docs/VariantPerformance.md)
  - [WorkflowAnalyticsResponse](docs/WorkflowAnalyticsResponse.md)
+ - [WorkflowDebugInfo](docs/WorkflowDebugInfo.md)
  - [WorkflowDefinitionCreate](docs/WorkflowDefinitionCreate.md)
  - [WorkflowDefinitionFromTemplateRequest](docs/WorkflowDefinitionFromTemplateRequest.md)
  - [WorkflowDefinitionResponse](docs/WorkflowDefinitionResponse.md)
@@ -565,6 +569,7 @@ Class | Method | HTTP request | Description
  - [WorkflowDeleteResponse](docs/WorkflowDeleteResponse.md)
  - [WorkflowEdge](docs/WorkflowEdge.md)
  - [WorkflowEdgeData](docs/WorkflowEdgeData.md)
+ - [WorkflowExecutionLogEntry](docs/WorkflowExecutionLogEntry.md)
  - [WorkflowExecutionRequest](docs/WorkflowExecutionRequest.md)
  - [WorkflowExecutionResponse](docs/WorkflowExecutionResponse.md)
  - [WorkflowNode](docs/WorkflowNode.md)

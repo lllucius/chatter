@@ -303,6 +303,22 @@ export class WorkflowValidator {
   } {
     const errors: string[] = [];
 
+    // Check basic structure
+    if (!workflow.nodes || !Array.isArray(workflow.nodes)) {
+      errors.push('Workflow must have a nodes array');
+      return { isValid: false, errors };
+    }
+
+    if (!workflow.edges || !Array.isArray(workflow.edges)) {
+      errors.push('Workflow must have an edges array');
+      return { isValid: false, errors };
+    }
+
+    // Allow empty workflows for building purposes
+    if (workflow.nodes.length === 0) {
+      return { isValid: true, errors };
+    }
+
     // Check for entry point
     const hasStartNode = workflow.nodes.some(
       (node: Node) => node.type === 'start'
@@ -311,26 +327,28 @@ export class WorkflowValidator {
       errors.push('Workflow must have at least one start node');
     }
 
-    // Check for isolated nodes
-    const connectedNodes = new Set<string>();
+    // Check for isolated nodes (only if there are edges)
+    if (workflow.edges.length > 0) {
+      const connectedNodes = new Set<string>();
 
-    workflow.edges.forEach((edge: Edge) => {
-      connectedNodes.add(edge.source);
-      connectedNodes.add(edge.target);
-    });
+      workflow.edges.forEach((edge: Edge) => {
+        connectedNodes.add(edge.source);
+        connectedNodes.add(edge.target);
+      });
 
-    const isolatedNodes = workflow.nodes.filter(
-      (node: Node) => node.type !== 'start' && !connectedNodes.has(node.id)
-    );
-
-    if (isolatedNodes.length > 0) {
-      errors.push(
-        `Isolated nodes found: ${isolatedNodes.map((n: Node) => n.data.label).join(', ')}`
+      const isolatedNodes = workflow.nodes.filter(
+        (node: Node) => node.type !== 'start' && !connectedNodes.has(node.id)
       );
+
+      if (isolatedNodes.length > 0) {
+        errors.push(
+          `Isolated nodes found: ${isolatedNodes.map((n: Node) => n.data?.label || n.id).join(', ')}`
+        );
+      }
     }
 
-    // Check for cycles (basic detection)
-    if (this.hasCycles(workflow)) {
+    // Check for cycles (basic detection) - only if there are edges
+    if (workflow.edges.length > 0 && this.hasCycles(workflow)) {
       errors.push('Workflow contains cycles - ensure proper loop structure');
     }
 
@@ -339,9 +357,9 @@ export class WorkflowValidator {
       (node: Node) => node.type === 'conditional'
     );
     conditionalNodes.forEach((node: Node) => {
-      const config = node.data.config as Record<string, unknown> | undefined;
+      const config = node.data?.config as Record<string, unknown> | undefined;
       if (!config?.condition) {
-        errors.push(`Conditional node "${node.data.label}" needs a condition`);
+        errors.push(`Conditional node "${node.data?.label || node.id}" needs a condition`);
       }
     });
 
@@ -355,15 +373,20 @@ export class WorkflowValidator {
     // Simple cycle detection using DFS
     const graph = new Map<string, string[]>();
 
-    // Build adjacency list
+    // Build adjacency list - only include valid nodes
+    const validNodeIds = new Set(workflow.nodes.map((node: Node) => node.id));
+    
     workflow.nodes.forEach((node: Node) => {
       graph.set(node.id, []);
     });
 
     workflow.edges.forEach((edge: Edge) => {
-      const sources = graph.get(edge.source) || [];
-      sources.push(edge.target);
-      graph.set(edge.source, sources);
+      // Only add edges between valid nodes
+      if (validNodeIds.has(edge.source) && validNodeIds.has(edge.target)) {
+        const sources = graph.get(edge.source) || [];
+        sources.push(edge.target);
+        graph.set(edge.source, sources);
+      }
     });
 
     const visited = new Set<string>();

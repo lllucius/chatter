@@ -1049,6 +1049,38 @@ Keep the summary {length} and focused on {focus_area}.""",
                 ],
                 "required_retrievers": ["learning_materials"],
             },
+            {
+                "name": "document_reviewer",
+                "category": TemplateCategory.BUSINESS,
+                "description": "Document review and feedback assistant",
+                "default_params": {
+                    "enable_memory": True,
+                    "memory_window": 30,
+                    "max_tool_calls": 5,
+                    "system_message": "You are a document review assistant. Analyze documents for clarity, grammar, structure, and completeness. Provide constructive feedback and suggestions for improvement.",
+                },
+                "required_tools": [
+                    "grammar_check",
+                    "readability_analysis",
+                    "document_compare",
+                ],
+                "required_retrievers": ["style_guides"],
+            },
+            {
+                "name": "workflow_validator",
+                "category": TemplateCategory.PROGRAMMING,
+                "description": "Workflow validation and optimization assistant",
+                "default_params": {
+                    "enable_memory": False,
+                    "max_tool_calls": 3,
+                    "system_message": "You are a workflow validation assistant. Analyze workflow definitions for correctness, efficiency, and best practices. Suggest improvements and identify potential issues.",
+                },
+                "required_tools": [
+                    "validate_workflow",
+                    "optimize_workflow",
+                    "generate_tests",
+                ],
+            },
         ]
 
         created_templates = []

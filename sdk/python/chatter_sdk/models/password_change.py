@@ -29,7 +29,7 @@ class PasswordChange(BaseModel):
     Schema for password change.
     """ # noqa: E501
     current_password: StrictStr = Field(description="Current password")
-    new_password: Annotated[str, Field(min_length=8, strict=True, max_length=128)] = Field(description="New password")
+    new_password: Annotated[str, Field(min_length=6, strict=True, max_length=128)] = Field(description="New password")
     __properties: ClassVar[List[str]] = ["current_password", "new_password"]
 
     model_config = ConfigDict(

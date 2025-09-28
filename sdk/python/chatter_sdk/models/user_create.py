@@ -34,7 +34,7 @@ class UserCreate(BaseModel):
     bio: Optional[Annotated[str, Field(strict=True, max_length=1000)]] = None
     avatar_url: Optional[Annotated[str, Field(strict=True, max_length=500)]] = None
     phone_number: Optional[Annotated[str, Field(strict=True, max_length=20)]] = None
-    password: Annotated[str, Field(min_length=8, strict=True, max_length=128)] = Field(description="Password")
+    password: Annotated[str, Field(min_length=6, strict=True, max_length=128)] = Field(description="Password")
     __properties: ClassVar[List[str]] = ["email", "username", "full_name", "bio", "avatar_url", "phone_number", "password"]
 
     model_config = ConfigDict(

@@ -622,7 +622,7 @@ class WorkflowExecutionService:
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
             # Update execution with success status and results
-            execution = await workflow_service.update_workflow_execution(
+            updated_execution = await workflow_service.update_workflow_execution(
                 execution_id=execution.id,
                 owner_id=user_id,
                 status="completed",
@@ -637,10 +637,26 @@ class WorkflowExecutionService:
                 cost=result.get("cost", 0.0),
             )
 
+            if not updated_execution:
+                logger.error("Failed to update workflow execution record")
+                raise RuntimeError("Failed to update workflow execution record")
+
+            execution = updated_execution
+
             logger.info(f"Workflow execution {execution.id} completed successfully")
 
-            # Return execution record as dictionary
-            return execution.to_dict()
+            # Return execution record as dictionary - ensure we return the complete execution record
+            execution_dict = execution.to_dict()
+
+            # Validate that the required fields are present to prevent schema validation errors
+            required_fields = ['id', 'definition_id', 'owner_id', 'status']
+            for field in required_fields:
+                if field not in execution_dict:
+                    logger.error(f"Missing required field '{field}' in execution dict")
+                    raise ValueError(f"Execution record missing required field: {field}")
+
+            logger.debug(f"Returning execution record for {execution.id} with fields: {list(execution_dict.keys())}")
+            return execution_dict
 
         except Exception as e:
             # Calculate execution time even on failure
@@ -648,16 +664,23 @@ class WorkflowExecutionService:
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
             # Update execution with failed status
-            execution = await workflow_service.update_workflow_execution(
-                execution_id=execution.id,
-                owner_id=user_id,
-                status="failed",
-                completed_at=end_time,
-                execution_time_ms=execution_time_ms,
-                error_message=str(e),
-            )
+            try:
+                updated_execution = await workflow_service.update_workflow_execution(
+                    execution_id=execution.id,
+                    owner_id=user_id,
+                    status="failed",
+                    completed_at=end_time,
+                    execution_time_ms=execution_time_ms,
+                    error_message=str(e),
+                )
+                if updated_execution:
+                    logger.error(f"Workflow execution {updated_execution.id} failed: {e}")
+                else:
+                    logger.error(f"Workflow execution {execution.id} failed: {e}")
+            except Exception as update_error:
+                logger.error(f"Failed to update execution status after error: {update_error}")
+                # Continue to raise the original exception
 
-            logger.error(f"Workflow execution {execution.id} failed: {e}")
             raise
 
 

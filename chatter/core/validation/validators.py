@@ -1027,6 +1027,9 @@ class WorkflowValidator(BaseValidator):
                     "tool",
                     "conditional",
                     "passthrough",
+                    "memory",
+                    "retrieval", 
+                    "model",
                 ]
                 if node_type not in valid_types:
                     warnings.append(

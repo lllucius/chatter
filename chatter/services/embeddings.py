@@ -459,9 +459,7 @@ class EmbeddingService:
                 # Get API key from settings (Google uses a different field name)
                 try:
                     current_settings = get_settings()
-                    # For now, we don't have a google_api_key field in settings
-                    # This would need to be added to the Settings class
-                    api_key = None  # TODO: Add google_api_key to Settings class
+                    api_key = current_settings.google_api_key
                 except Exception:
                     api_key = None
 
@@ -483,9 +481,7 @@ class EmbeddingService:
                 # Get API key from settings (Cohere uses a different field name)
                 try:
                     current_settings = get_settings()
-                    # For now, we don't have a cohere_api_key field in settings
-                    # This would need to be added to the Settings class
-                    api_key = None  # TODO: Add cohere_api_key to Settings class
+                    api_key = current_settings.cohere_api_key
                 except Exception:
                     api_key = None
 

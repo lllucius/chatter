@@ -992,13 +992,43 @@ async def execute_custom_workflow(
         llm = await llm_service.get_llm(provider=provider, model=model)
         
         # Create workflow
+        # Get tools and retriever if needed
+        tools = None
+        retriever = None
+        
+        # Import tool registry for tool support
+        from chatter.core.tool_registry import ToolRegistry
+        
+        # Get available tools based on request
+        if hasattr(request, 'enable_tools') and request.enable_tools:
+            try:
+                tool_registry = ToolRegistry()
+                tools = tool_registry.get_tools_for_workspace(
+                    workspace_id=current_user.id,  # Use user ID as workspace
+                    user_permissions=[]  # TODO: Add user permission system
+                )
+                logger.info(f"Loaded {len(tools) if tools else 0} tools for custom workflow")
+            except Exception as e:
+                logger.warning(f"Could not load tools for custom workflow: {e}")
+                tools = []
+        
+        # Get retriever if needed
+        if hasattr(request, 'enable_retrieval') and request.enable_retrieval:
+            try:
+                from chatter.core.vector_store import get_vector_store_retriever
+                retriever = get_vector_store_retriever(user_id=current_user.id)
+                logger.info("Loaded retriever for custom workflow")
+            except Exception as e:
+                logger.warning(f"Could not load retriever for custom workflow: {e}")
+                retriever = None
+        
         workflow = await workflow_manager.create_custom_workflow(
             nodes=nodes,
             edges=edges,
             llm=llm,
             entry_point=entry_point,
-            tools=None,  # TODO: Add tool support
-            retriever=None,  # TODO: Add retriever support
+            tools=tools,
+            retriever=retriever,
         )
         
         # Create initial state
@@ -1137,8 +1167,7 @@ async def configure_memory_settings(
 ) -> dict:
     """Configure memory management settings for the user."""
     try:
-        # Store user-specific memory configuration
-        # This would typically be stored in user preferences/settings
+        # Store user-specific memory configuration using preferences service
         memory_config = {
             "adaptive_mode": adaptive_mode,
             "base_window_size": base_window_size,
@@ -1148,12 +1177,19 @@ async def configure_memory_settings(
             "updated_at": time.time(),
         }
         
-        # TODO: Store in database user preferences table
-        logger.info(f"Memory configuration updated for user {current_user.id}: {memory_config}")
+        # Store in user preferences service
+        from chatter.services.user_preferences import get_user_preferences_service
+        preferences_service = get_user_preferences_service()
+        result = await preferences_service.save_memory_config(
+            user_id=current_user.id,
+            config=memory_config
+        )
+        
+        logger.info(f"Memory configuration stored for user {current_user.id}: {memory_config}")
         
         return {
             "status": "success",
-            "config": memory_config,
+            "config": result.get("config", memory_config),
             "message": "Memory settings configured successfully"
         }
         
@@ -1188,12 +1224,19 @@ async def configure_tool_settings(
             "updated_at": time.time(),
         }
         
-        # TODO: Store in database user preferences table
-        logger.info(f"Tool configuration updated for user {current_user.id}: {tool_config}")
+        # Store in user preferences service
+        from chatter.services.user_preferences import get_user_preferences_service
+        preferences_service = get_user_preferences_service()
+        result = await preferences_service.save_tool_config(
+            user_id=current_user.id,
+            config=tool_config
+        )
+        
+        logger.info(f"Tool configuration stored for user {current_user.id}: {tool_config}")
         
         return {
             "status": "success",
-            "config": tool_config,
+            "config": result.get("config", tool_config),
             "valid_strategies": valid_strategies,
             "message": "Tool settings configured successfully"
         }

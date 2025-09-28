@@ -1,7 +1,17 @@
 import React, { useState, useCallback, useRef, useEffect } from 'react';
 import { Node } from '@xyflow/react';
 import { useLocation } from 'react-router-dom';
-import { Box, Menu, MenuItem, Button } from '../utils/mui';
+import { 
+  Box, 
+  Menu, 
+  MenuItem, 
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField
+} from '../utils/mui';
 import {
   PlayArrow as StartIcon,
   SmartToy as ModelIcon,
@@ -27,11 +37,16 @@ import {
   Delete as DeleteIcon,
   PlayArrow as ExecuteIcon,
   BugReport as DebugIcon,
+  Add as NewIcon,
 } from '@mui/icons-material';
 import PageLayout from '../components/PageLayout';
 import WorkflowEditor from '../components/workflow/WorkflowEditor';
 import WorkflowSectionDrawer from '../components/workflow/WorkflowSectionDrawer';
 import { WorkflowDefinition, WorkflowNodeData, WorkflowNodeType } from '../components/workflow/WorkflowEditor';
+import { useWorkflowData } from '../hooks/useWorkflowData';
+import { toastService } from '../services/toast-service';
+import { getSDK } from '../services/auth-service';
+import { handleError } from '../utils/error-handler';
 
 const WorkflowBuilderPage: React.FC = () => {
   const location = useLocation();
@@ -78,6 +93,15 @@ const WorkflowBuilderPage: React.FC = () => {
   const [exampleMenuAnchor, setExampleMenuAnchor] = useState<null | HTMLElement>(null);
   const [actionMenuAnchor, setActionMenuAnchor] = useState<null | HTMLElement>(null);
 
+  // Save dialog state
+  const [saveDialogOpen, setSaveDialogOpen] = useState(false);
+  const [workflowName, setWorkflowName] = useState('');
+  const [workflowDescription, setWorkflowDescription] = useState('');
+  const [saving, setSaving] = useState(false);
+
+  // Use workflow data hook for API calls
+  const { createTemplate } = useWorkflowData();
+
   // Handle node selection
   const handleNodeClick = useCallback((event: React.MouseEvent, node: Node<WorkflowNodeData>) => {
     setSelectedNode(node);
@@ -92,6 +116,103 @@ const WorkflowBuilderPage: React.FC = () => {
     if (workflowEditorRef.current) {
       workflowEditorRef.current.updateNode(nodeId, data);
     }
+  }, []);
+
+  // Handle save workflow
+  const handleSaveWorkflow = useCallback(async () => {
+    if (!workflowName.trim()) {
+      toastService.error('Please enter a workflow name');
+      return;
+    }
+
+    try {
+      setSaving(true);
+
+      // Convert the current workflow to the API format
+      const workflowData = {
+        name: workflowName.trim(),
+        description: workflowDescription.trim() || undefined,
+        nodes: currentWorkflow.nodes.map(node => ({
+          id: node.id,
+          type: node.type || 'unknown', // Ensure type is always a string
+          position: node.position,
+          data: node.data
+        })),
+        edges: currentWorkflow.edges.map(edge => ({
+          id: edge.id,
+          source: edge.source,
+          target: edge.target,
+          type: edge.type || 'default', // Ensure type is always a string
+          data: edge.data || {},
+          sourceHandle: edge.sourceHandle,
+          targetHandle: edge.targetHandle
+        })),
+        metadata: {
+          ...currentWorkflow.metadata,
+          name: workflowName.trim(),
+          description: workflowDescription.trim()
+        }
+      };
+
+      // Create the workflow definition
+      const response = await getSDK().workflows.createWorkflowDefinitionApiV1WorkflowsDefinitions(workflowData);
+
+      // Update current workflow with the saved data
+      setCurrentWorkflow(prev => ({
+        ...prev,
+        id: response.id,
+        metadata: {
+          ...prev.metadata,
+          name: workflowName.trim(),
+          description: workflowDescription.trim()
+        }
+      }));
+
+      toastService.success(`Workflow "${workflowName}" saved successfully`);
+      
+      // Reset form and close dialog
+      setWorkflowName('');
+      setWorkflowDescription('');
+      setSaveDialogOpen(false);
+
+    } catch (error) {
+      handleError(error, {
+        source: 'WorkflowBuilderPage.handleSaveWorkflow',
+        operation: 'save workflow'
+      });
+    } finally {
+      setSaving(false);
+    }
+  }, [workflowName, workflowDescription, currentWorkflow]);
+
+  // Handle save as template
+  const handleSaveAsTemplate = useCallback(() => {
+    if (workflowEditorRef.current) {
+      workflowEditorRef.current.showTemplateManager();
+    }
+    setActionMenuAnchor(null);
+  }, []);
+
+  // Handle new workflow
+  const handleNewWorkflow = useCallback(() => {
+    if (workflowEditorRef.current) {
+      workflowEditorRef.current.handleClear();
+    }
+    
+    // Reset workflow to default
+    setCurrentWorkflow({
+      nodes: [],
+      edges: [],
+      metadata: {
+        name: 'New Workflow',
+        description: '',
+        version: '1.0.0',
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+      },
+    });
+    
+    setActionMenuAnchor(null);
   }, []);
 
   // Handle template data from navigation state
@@ -210,6 +331,7 @@ const WorkflowBuilderPage: React.FC = () => {
               ref={workflowEditorRef}
               onNodeClick={handleNodeClick}
               onWorkflowChange={setCurrentWorkflow}
+              onSave={() => setSaveDialogOpen(true)}
               showToolbar={false}
             />
           </Box>
@@ -345,14 +467,20 @@ const WorkflowBuilderPage: React.FC = () => {
         open={Boolean(actionMenuAnchor)}
         onClose={() => setActionMenuAnchor(null)}
       >
+        <MenuItem onClick={handleNewWorkflow}>
+          <NewIcon sx={{ mr: 1 }} />
+          New Workflow
+        </MenuItem>
         <MenuItem onClick={() => {
-          if (workflowEditorRef.current) {
-            workflowEditorRef.current.handleSave();
-          }
+          setSaveDialogOpen(true);
           setActionMenuAnchor(null);
         }}>
           <SaveIcon sx={{ mr: 1 }} />
           Save
+        </MenuItem>
+        <MenuItem onClick={handleSaveAsTemplate}>
+          <TemplateIcon sx={{ mr: 1 }} />
+          Save as Template
         </MenuItem>
         <MenuItem onClick={() => {
           if (workflowEditorRef.current) {
@@ -371,10 +499,6 @@ const WorkflowBuilderPage: React.FC = () => {
         }}>
           <DebugIcon sx={{ mr: 1 }} />
           Debug
-        </MenuItem>
-        <MenuItem onClick={() => setActionMenuAnchor(null)}>
-          <TemplateIcon sx={{ mr: 1 }} />
-          Save as Template
         </MenuItem>
         <MenuItem onClick={() => {
           if (workflowEditorRef.current) {
@@ -404,6 +528,47 @@ const WorkflowBuilderPage: React.FC = () => {
           Clear All
         </MenuItem>
       </Menu>
+
+      {/* Save Workflow Dialog */}
+      <Dialog
+        open={saveDialogOpen}
+        onClose={() => setSaveDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Save Workflow</DialogTitle>
+        <DialogContent>
+          <TextField
+            fullWidth
+            label="Workflow Name"
+            value={workflowName}
+            onChange={(e) => setWorkflowName(e.target.value)}
+            sx={{ mb: 2, mt: 1 }}
+            required
+            placeholder="Enter a name for your workflow"
+          />
+          <TextField
+            fullWidth
+            label="Description"
+            value={workflowDescription}
+            onChange={(e) => setWorkflowDescription(e.target.value)}
+            multiline
+            rows={3}
+            placeholder="Optional description of what this workflow does"
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setSaveDialogOpen(false)} disabled={saving}>Cancel</Button>
+          <Button
+            onClick={handleSaveWorkflow}
+            variant="contained"
+            startIcon={<SaveIcon />}
+            disabled={!workflowName.trim() || saving}
+          >
+            {saving ? 'Saving...' : 'Save Workflow'}
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };

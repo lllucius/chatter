@@ -71,10 +71,13 @@ import ErrorHandlerNode from './nodes/ErrorHandlerNode';
 import DelayNode from './nodes/DelayNode';
 import CustomEdge from './edges/CustomEdge';
 import TemplateManager from './TemplateManager';
+import { useWorkflowTemplates, WorkflowTemplate } from './useWorkflowTemplates';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 import { workflowDefaultsService, WorkflowDefaults } from '../../services/workflow-defaults-service';
 import { ThemeContext } from '../../App';
 import { toastService } from '../../services/toast-service';
+import { getSDK } from '../../services/auth-service';
+import { handleError } from '../../utils/error-handler';
 
 // Define node types for the workflow
 export type WorkflowNodeType =
@@ -598,6 +601,67 @@ const WorkflowEditor = React.forwardRef<
     [setNodes, setEdges, saveToHistory]
   );
 
+  // Save as template
+  const handleSaveAsTemplate = useCallback(
+    async (templateData: Omit<WorkflowTemplate, 'id' | 'createdAt'>) => {
+      try {
+        // First create a workflow definition if we don't have one
+        let workflowDefinitionId = currentWorkflow.id;
+        
+        if (!workflowDefinitionId) {
+          const workflowData = {
+            name: templateData.name,
+            description: templateData.description || undefined,
+            nodes: currentWorkflow.nodes.map(node => ({
+              id: node.id,
+              type: node.type || 'unknown', // Ensure type is always a string
+              position: node.position,
+              data: node.data
+            })),
+            edges: currentWorkflow.edges.map(edge => ({
+              id: edge.id,
+              source: edge.source,
+              target: edge.target,
+              type: edge.type || 'default', // Ensure type is always a string
+              data: edge.data || {},
+              sourceHandle: edge.sourceHandle,
+              targetHandle: edge.targetHandle
+            })),
+            metadata: {
+              ...currentWorkflow.metadata,
+              name: templateData.name,
+              description: templateData.description || ''
+            }
+          };
+
+          const workflowResponse = await getSDK().workflows.createWorkflowDefinitionApiV1WorkflowsDefinitions(workflowData);
+          workflowDefinitionId = workflowResponse.id;
+        }
+
+        // Now create the template
+        const templateCreateData = {
+          name: templateData.name,
+          description: templateData.description,
+          category: templateData.category || 'custom',
+          tags: templateData.tags || [],
+          workflow_definition_id: workflowDefinitionId
+        };
+
+        await getSDK().workflows.createWorkflowTemplateApiV1WorkflowsTemplates(templateCreateData);
+        
+        toastService.success(`Template "${templateData.name}" saved successfully`);
+        setShowTemplateManager(false);
+
+      } catch (error) {
+        handleError(error, {
+          source: 'WorkflowEditor.handleSaveAsTemplate',
+          operation: 'save template'
+        });
+      }
+    },
+    [currentWorkflow]
+  );
+
   // Validate workflow
   const handleValidate = useCallback(() => {
     const result = WorkflowValidator.validate(currentWorkflow);
@@ -965,6 +1029,7 @@ const WorkflowEditor = React.forwardRef<
         onClose={() => setShowTemplateManager(false)}
         onSelectTemplate={handleLoadTemplate}
         currentWorkflow={currentWorkflow}
+        onSaveAsTemplate={handleSaveAsTemplate}
       />
     </Box>
   );

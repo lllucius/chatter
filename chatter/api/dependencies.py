@@ -7,7 +7,10 @@ from pydantic import GetCoreSchemaHandler
 from pydantic_core import core_schema
 from ulid import ULID
 
+from chatter.utils.logging import get_logger
 from chatter.utils.problem import BadRequestProblem
+
+logger = get_logger(__name__)
 
 
 class ValidatedULID(str):
@@ -37,11 +40,35 @@ class ValidatedULID(str):
                 ULID.from_str(v)
                 return v
             except ValueError as e:
-                # Provide more detailed error message for debugging
-                if len(v) != 26:
+                # Check for common patterns that suggest names are being used as IDs
+                if " " in v:
                     raise BadRequestProblem(
-                        detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                        detail=f"Invalid ULID format: '{v}' appears to be a name or title, not a ULID. ULIDs must be exactly 26 characters without spaces. If you're seeing this error, there may be a bug where a workflow/resource name is being used as an ID instead of the proper ULID."
                     ) from e
+                elif len(v) != 26:
+                    # Handle empty string and very short strings first
+                    if len(v) == 0:
+                        raise BadRequestProblem(
+                            detail=f"Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
+                        ) from e
+                    elif len(v) < 10:  # Very short strings, likely not names
+                        raise BadRequestProblem(
+                            detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                        ) from e
+                    else:
+                        # Check for known problematic patterns for longer strings
+                        common_names = ["untitled", "default", "new", "test", "sample", "example"]
+                        v_lower = v.lower()
+                        is_likely_name = any(name in v_lower for name in common_names) or not v.isupper()
+                        
+                        if is_likely_name:
+                            raise BadRequestProblem(
+                                detail=f"Invalid ULID format: '{v}' (length: {len(v)}) appears to be a descriptive name rather than a ULID. ULIDs must be exactly 26 characters long and contain only uppercase alphanumeric characters. This suggests a bug where a name is being passed instead of the proper resource ID."
+                            ) from e
+                        else:
+                            raise BadRequestProblem(
+                                detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                            ) from e
                 else:
                     raise BadRequestProblem(
                         detail=f"Invalid ULID format: contains invalid characters: '{v}'"
@@ -64,11 +91,35 @@ class ValidatedULID(str):
                 ULID.from_str(v)
                 return v
             except ValueError as e:
-                # Provide more detailed error message for debugging
-                if len(v) != 26:
+                # Check for common patterns that suggest names are being used as IDs
+                if " " in v:
                     raise BadRequestProblem(
-                        detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                        detail=f"Invalid ULID format: '{v}' appears to be a name or title, not a ULID. ULIDs must be exactly 26 characters without spaces. If you're seeing this error, there may be a bug where a workflow/resource name is being used as an ID instead of the proper ULID."
                     ) from e
+                elif len(v) != 26:
+                    # Handle empty string and very short strings first
+                    if len(v) == 0:
+                        raise BadRequestProblem(
+                            detail=f"Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
+                        ) from e
+                    elif len(v) < 10:  # Very short strings, likely not names
+                        raise BadRequestProblem(
+                            detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                        ) from e
+                    else:
+                        # Check for known problematic patterns for longer strings
+                        common_names = ["untitled", "default", "new", "test", "sample", "example"]
+                        v_lower = v.lower()
+                        is_likely_name = any(name in v_lower for name in common_names) or not v.isupper()
+                        
+                        if is_likely_name:
+                            raise BadRequestProblem(
+                                detail=f"Invalid ULID format: '{v}' (length: {len(v)}) appears to be a descriptive name rather than a ULID. ULIDs must be exactly 26 characters long and contain only uppercase alphanumeric characters. This suggests a bug where a name is being passed instead of the proper resource ID."
+                            ) from e
+                        else:
+                            raise BadRequestProblem(
+                                detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
+                            ) from e
                 else:
                     raise BadRequestProblem(
                         detail=f"Invalid ULID format: contains invalid characters: '{v}'"

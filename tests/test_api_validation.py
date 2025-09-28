@@ -70,13 +70,14 @@ class TestULIDValidation:
         """Test that ULID validation provides detailed error messages."""
         from chatter.api.dependencies import ValidatedULID
 
-        # Test wrong length gives length-specific error
+        # Test workflow name gives name-specific error (spaces detected)
         with pytest.raises(BadRequestProblem) as exc_info:
             ValidatedULID.validate("Untitled Workflow")
         
-        assert "must be exactly 26 characters" in str(exc_info.value.detail)
-        assert "got 17 characters" in str(exc_info.value.detail)
+        assert "appears to be a name or title, not a ULID" in str(exc_info.value.detail)
+        assert "must be exactly 26 characters without spaces" in str(exc_info.value.detail)
         assert "Untitled Workflow" in str(exc_info.value.detail)
+        assert "there may be a bug where a workflow/resource name is being used as an ID" in str(exc_info.value.detail)
         
         # Test empty string gives length-specific error
         with pytest.raises(BadRequestProblem) as exc_info:
@@ -84,6 +85,13 @@ class TestULIDValidation:
         
         assert "must be exactly 26 characters" in str(exc_info.value.detail)
         assert "got 0 characters" in str(exc_info.value.detail)
+        
+        # Test descriptive names get name-specific error  
+        with pytest.raises(BadRequestProblem) as exc_info:
+            ValidatedULID.validate("untitled")
+        
+        assert "appears to be a descriptive name rather than a ULID" in str(exc_info.value.detail)
+        assert "must be exactly 26 characters long and contain only uppercase alphanumeric characters" in str(exc_info.value.detail)
 
 
 if __name__ == "__main__":

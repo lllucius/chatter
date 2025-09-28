@@ -6,8 +6,12 @@ Method | HTTP request | Description
 ------------- | ------------- | -------------
 [**delete_document_api_v1_documents_document_id_delete**](DocumentsApi.md#delete_document_api_v1_documents_document_id_delete) | **DELETE** /api/v1/documents/{document_id} | Delete Document
 [**delete_document_api_v1_documents_document_id_delete_0**](DocumentsApi.md#delete_document_api_v1_documents_document_id_delete_0) | **DELETE** /api/v1/documents/{document_id} | Delete Document
+[**download_document_api_v1_documents_document_id_download_get**](DocumentsApi.md#download_document_api_v1_documents_document_id_download_get) | **GET** /api/v1/documents/{document_id}/download | Download Document
+[**download_document_api_v1_documents_document_id_download_get_0**](DocumentsApi.md#download_document_api_v1_documents_document_id_download_get_0) | **GET** /api/v1/documents/{document_id}/download | Download Document
 [**get_document_api_v1_documents_document_id_get**](DocumentsApi.md#get_document_api_v1_documents_document_id_get) | **GET** /api/v1/documents/{document_id} | Get Document
 [**get_document_api_v1_documents_document_id_get_0**](DocumentsApi.md#get_document_api_v1_documents_document_id_get_0) | **GET** /api/v1/documents/{document_id} | Get Document
+[**get_document_chunks_api_v1_documents_document_id_chunks_get**](DocumentsApi.md#get_document_chunks_api_v1_documents_document_id_chunks_get) | **GET** /api/v1/documents/{document_id}/chunks | Get Document Chunks
+[**get_document_chunks_api_v1_documents_document_id_chunks_get_0**](DocumentsApi.md#get_document_chunks_api_v1_documents_document_id_chunks_get_0) | **GET** /api/v1/documents/{document_id}/chunks | Get Document Chunks
 [**get_user_document_stats_api_v1_documents_stats_user_get**](DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get) | **GET** /api/v1/documents/stats/user | Get User Document Stats
 [**get_user_document_stats_api_v1_documents_stats_user_get_0**](DocumentsApi.md#get_user_document_stats_api_v1_documents_stats_user_get_0) | **GET** /api/v1/documents/stats/user | Get User Document Stats
 [**list_documents_get_api_v1_documents_get**](DocumentsApi.md#list_documents_get_api_v1_documents_get) | **GET** /api/v1/documents | List Documents Get
@@ -180,6 +184,162 @@ Name | Type | Description  | Notes
 
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
+# **download_document_api_v1_documents_document_id_download_get**
+> object download_document_api_v1_documents_document_id_download_get(document_id)
+
+Download Document
+
+Download original document file.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DocumentsApi(api_client)
+    document_id = 'document_id_example' # str | 
+
+    try:
+        # Download Document
+        api_response = await api_instance.download_document_api_v1_documents_document_id_download_get(document_id)
+        print("The response of DocumentsApi->download_document_api_v1_documents_document_id_download_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DocumentsApi->download_document_api_v1_documents_document_id_download_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **document_id** | **str**|  | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **download_document_api_v1_documents_document_id_download_get_0**
+> object download_document_api_v1_documents_document_id_download_get_0(document_id)
+
+Download Document
+
+Download original document file.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DocumentsApi(api_client)
+    document_id = 'document_id_example' # str | 
+
+    try:
+        # Download Document
+        api_response = await api_instance.download_document_api_v1_documents_document_id_download_get_0(document_id)
+        print("The response of DocumentsApi->download_document_api_v1_documents_document_id_download_get_0:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DocumentsApi->download_document_api_v1_documents_document_id_download_get_0: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **document_id** | **str**|  | 
+
+### Return type
+
+**object**
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
 # **get_document_api_v1_documents_document_id_get**
 > DocumentResponse get_document_api_v1_documents_document_id_get(document_id)
 
@@ -319,6 +479,172 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**DocumentResponse**](DocumentResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_document_chunks_api_v1_documents_document_id_chunks_get**
+> DocumentChunksResponse get_document_chunks_api_v1_documents_document_id_chunks_get(document_id, limit=limit, offset=offset)
+
+Get Document Chunks
+
+Get document chunks with pagination.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DocumentsApi(api_client)
+    document_id = 'document_id_example' # str | 
+    limit = 10 # int |  (optional) (default to 10)
+    offset = 0 # int |  (optional) (default to 0)
+
+    try:
+        # Get Document Chunks
+        api_response = await api_instance.get_document_chunks_api_v1_documents_document_id_chunks_get(document_id, limit=limit, offset=offset)
+        print("The response of DocumentsApi->get_document_chunks_api_v1_documents_document_id_chunks_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DocumentsApi->get_document_chunks_api_v1_documents_document_id_chunks_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **document_id** | **str**|  | 
+ **limit** | **int**|  | [optional] [default to 10]
+ **offset** | **int**|  | [optional] [default to 0]
+
+### Return type
+
+[**DocumentChunksResponse**](DocumentChunksResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_document_chunks_api_v1_documents_document_id_chunks_get_0**
+> DocumentChunksResponse get_document_chunks_api_v1_documents_document_id_chunks_get_0(document_id, limit=limit, offset=offset)
+
+Get Document Chunks
+
+Get document chunks with pagination.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.DocumentsApi(api_client)
+    document_id = 'document_id_example' # str | 
+    limit = 10 # int |  (optional) (default to 10)
+    offset = 0 # int |  (optional) (default to 0)
+
+    try:
+        # Get Document Chunks
+        api_response = await api_instance.get_document_chunks_api_v1_documents_document_id_chunks_get_0(document_id, limit=limit, offset=offset)
+        print("The response of DocumentsApi->get_document_chunks_api_v1_documents_document_id_chunks_get_0:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling DocumentsApi->get_document_chunks_api_v1_documents_document_id_chunks_get_0: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **document_id** | **str**|  | 
+ **limit** | **int**|  | [optional] [default to 10]
+ **offset** | **int**|  | [optional] [default to 0]
+
+### Return type
+
+[**DocumentChunksResponse**](DocumentChunksResponse.md)
 
 ### Authorization
 

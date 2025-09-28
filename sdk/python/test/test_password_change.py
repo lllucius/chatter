@@ -37,12 +37,12 @@ class TestPasswordChange(unittest.TestCase):
         if include_optional:
             return PasswordChange(
                 current_password = '',
-                new_password = '01234567'
+                new_password = '012345'
             )
         else:
             return PasswordChange(
                 current_password = '',
-                new_password = '01234567',
+                new_password = '012345',
         )
         """
 

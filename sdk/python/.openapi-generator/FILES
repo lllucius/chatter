@@ -98,6 +98,8 @@ chatter_sdk/models/database_health_response.py
 chatter_sdk/models/default_provider.py
 chatter_sdk/models/distance_metric.py
 chatter_sdk/models/document_analytics_response.py
+chatter_sdk/models/document_chunk_response.py
+chatter_sdk/models/document_chunks_response.py
 chatter_sdk/models/document_delete_response.py
 chatter_sdk/models/document_list_request.py
 chatter_sdk/models/document_list_response.py
@@ -346,6 +348,8 @@ docs/DefaultApi.md
 docs/DefaultProvider.md
 docs/DistanceMetric.md
 docs/DocumentAnalyticsResponse.md
+docs/DocumentChunkResponse.md
+docs/DocumentChunksResponse.md
 docs/DocumentDeleteResponse.md
 docs/DocumentListRequest.md
 docs/DocumentListResponse.md
@@ -610,6 +614,8 @@ test/test_default_api.py
 test/test_default_provider.py
 test/test_distance_metric.py
 test/test_document_analytics_response.py
+test/test_document_chunk_response.py
+test/test_document_chunks_response.py
 test/test_document_delete_response.py
 test/test_document_list_request.py
 test/test_document_list_response.py

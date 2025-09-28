@@ -1,321 +1,121 @@
-[32mINFO[0m:     Will watch for changes in these directories: ['/home/yam/chatter']
-[32mINFO[0m:     Uvicorn running on [1mhttp://0.0.0.0:8000[0m (Press CTRL+C to quit)
-[32mINFO[0m:     Started reloader process [[36m[1m178894[0m] using [36m[1mWatchFiles[0m
-[32mINFO[0m:     Started server process [[36m178942[0m]
-[32mINFO[0m:     Waiting for application startup.
-[32mINFO[0m:     Application startup complete.
-[31mERROR[0m:    Exception in ASGI application
-  + Exception Group Traceback (most recent call last):
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 77, in collapse_excgroups
-  |     yield
-  |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 183, in __call__
-  |     async with anyio.create_task_group() as task_group:
-  |                ^^^^^^^^^^^^^^^^^^^^^^^^^
-  |   File "/home/yam/.local/lib/python3.12/site-packages/anyio/_backends/_asyncio.py", line 772, in __aexit__
-  |     raise BaseExceptionGroup(
-  | ExceptionGroup: unhandled errors in a TaskGroup (1 sub-exception)
-  +-+---------------- 1 ----------------
-    | Traceback (most recent call last):
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    |     result = await app(  # type: ignore[func-returns-value]
-    |              ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    |     return await self.app(scope, receive, send)
-    |            ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    |     await self.app(scope, receive, _send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    |     await self.simple_response(scope, receive, send, request_headers=headers)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    |     await responder(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    |     await super().__call__(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    |     await self.app(scope, receive, self.send_with_compression)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    |     with recv_stream, send_stream, collapse_excgroups():
-    |                                    ^^^^^^^^^^^^^^^^^^^^
-    |   File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    |     self.gen.throw(value)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    |     response = await self.dispatch_func(request, call_next)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
-    |     response = await call_next(request)
-    |                ^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    |     raise app_exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    |     await self.app(scope, receive_or_disconnect, send_no_error)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    |     await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    |     await self.middleware_stack(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    |     await route.handle(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    |     await self.app(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    |     await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    |     raise exc
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    |     await app(scope, receive, sender)
-    |   File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    |     response = await f(request)
-    |                ^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
-    |     content = await serialize_response(
-    |               ^^^^^^^^^^^^^^^^^^^^^^^^^
-    |   File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
-    |     raise ResponseValidationError(
-    | fastapi.exceptions.ResponseValidationError: 7 validation errors:
-    |   {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    |   {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-    | 
-    +------------------------------------
-
-During handling of the above exception, another exception occurred:
-
-Traceback (most recent call last):
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/protocols/http/httptools_impl.py", line 409, in run_asgi
-    result = await app(  # type: ignore[func-returns-value]
-             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/uvicorn/middleware/proxy_headers.py", line 60, in __call__
-    return await self.app(scope, receive, send)
-           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/applications.py", line 1054, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/applications.py", line 113, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 186, in __call__
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/errors.py", line 164, in __call__
-    await self.app(scope, receive, _send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 93, in __call__
-    await self.simple_response(scope, receive, send, request_headers=headers)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/cors.py", line 144, in simple_response
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 450, in cors_error_handler
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 69, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/unified_rate_limiter.py", line 475, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/utils/correlation.py", line 77, in dispatch
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 29, in __call__
-    await responder(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 130, in __call__
-    await super().__call__(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/gzip.py", line 46, in __call__
-    await self.app(scope, receive, self.send_with_compression)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/trustedhost.py", line 51, in __call__
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 182, in __call__
-    with recv_stream, send_stream, collapse_excgroups():
-                                   ^^^^^^^^^^^^^^^^^^^^
-  File "/usr/lib64/python3.12/contextlib.py", line 158, in __exit__
-    self.gen.throw(value)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_utils.py", line 83, in collapse_excgroups
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 184, in __call__
-    response = await self.dispatch_func(request, call_next)
-               ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/chatter/chatter/main.py", line 338, in add_security_headers
-    response = await call_next(request)
-               ^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 159, in call_next
-    raise app_exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/base.py", line 144, in coro
-    await self.app(scope, receive_or_disconnect, send_no_error)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/middleware/exceptions.py", line 63, in __call__
-    await wrap_app_handling_exceptions(self.app, conn)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 716, in __call__
-    await self.middleware_stack(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 736, in app
-    await route.handle(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 290, in handle
-    await self.app(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 78, in app
-    await wrap_app_handling_exceptions(app, request)(scope, receive, send)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 53, in wrapped_app
-    raise exc
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/_exception_handler.py", line 42, in wrapped_app
-    await app(scope, receive, sender)
-  File "/home/yam/.local/lib/python3.12/site-packages/starlette/routing.py", line 75, in app
-    response = await f(request)
-               ^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 328, in app
-    content = await serialize_response(
-              ^^^^^^^^^^^^^^^^^^^^^^^^^
-  File "/home/yam/.local/lib/python3.12/site-packages/fastapi/routing.py", line 177, in serialize_response
-    raise ResponseValidationError(
-fastapi.exceptions.ResponseValidationError: 7 validation errors:
-  {'type': 'missing', 'loc': ('response', 'total_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'successful_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'failed_requests'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'average_response_time_ms'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'tool_usage_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'server_uptime_stats'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-  {'type': 'missing', 'loc': ('response', 'error_distribution'), 'msg': 'Field required', 'input': {'total_servers': 4, 'active_servers': 0, 'total_tools': 2, 'enabled_tools': 2, 'total_calls_today': 0, 'total_calls_week': 0, 'total_calls_month': 0, 'total_errors_today': 0, 'overall_success_rate': 1.0, 'avg_response_time_ms': 0.0, 'p95_response_time_ms': 0.0, 'server_metrics': [{'server_id': '01K5SM358Z0W77PN5NNF96YM6R', 'server_name': 'browser', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM358X2J12ZE6W7E17G4ZQ', 'server_name': 'filesystem', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5SM359012H92PXQZTJ2ZQZ9', 'server_name': 'calculator', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 0, 'enabled_tools': 0, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}, {'server_id': '01K5T5YF4FSREAP6ATRG26PY7D', 'server_name': 'mcp', 'status': <ServerStatus.DISABLED: 'disabled'>, 'total_tools': 2, 'enabled_tools': 2, 'total_calls': 0, 'total_errors': 0, 'success_rate': 1.0, 'avg_response_time_ms': None, 'last_activity': None, 'uptime_percentage': None}], 'top_tools': [], 'failing_tools': [], 'daily_usage': {}, 'daily_errors': {}, 'generated_at': datetime.datetime(2025, 9, 23, 4, 38, 52, 421107, tzinfo=datetime.timezone.utc)}}
-
-[32mINFO[0m:     Shutting down
-[32mINFO[0m:     Waiting for connections to close. (CTRL+C to force quit)
-[32mINFO[0m:     Waiting for application shutdown.
-[32mINFO[0m:     Application shutdown complete.
-[32mINFO[0m:     Finished server process [[36m178942[0m]
-[32mINFO[0m:     Stopping reloader process [[36m[1m178894[0m]
+sse-context.tsx:87 Auto-connecting SSE...
+sse-manager.ts:148 SSE: Connecting to http://localhost:8000/api/v1/events/stream
+:3000/dashboard:1 Uncaught (in promise) Error: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+:3000/dashboard:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
+    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
+:3000/dashboard:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+WorkflowTemplatesPage.tsx:48 Edit template: Object
+WorkflowTemplatesPage.tsx:48 Edit template: Object
+templates:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
+    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
+templates:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+:8000/api/v1/workflows/definitions/01K65WVQ9WAV2HRJ4CYY5AB1KY/execute:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+hook.js:608 [Error Handler] useWorkflowData.executeTemplate: ResponseError: Response returned an error code
+    at WorkflowsApi.<anonymous> (runtime.js:159:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (runtime.js:17:58)
+overrideMethod @ hook.js:608
+hook.js:608 Full Error Details:
+ Source: useWorkflowData.executeTemplate
+Operation: execute workflow template
+Timestamp: 2025-09-27T15:32:28.635Z
+Error Type: ResponseError
+Message: Response returned an error code
+Stack Trace:
+ResponseError: Response returned an error code
+    at WorkflowsApi.<anonymous> (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:159:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:17:58)
+overrideMethod @ hook.js:608
+hook.js:608 [Error Handler] WorkflowTemplatesPage.handleExecuteWorkflow: ResponseError: Response returned an error code
+    at WorkflowsApi.<anonymous> (runtime.js:159:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (runtime.js:17:58)
+overrideMethod @ hook.js:608
+hook.js:608 Full Error Details:
+ Source: WorkflowTemplatesPage.handleExecuteWorkflow
+Operation: execute workflow template
+Timestamp: 2025-09-27T15:32:28.650Z
+Error Type: ResponseError
+Message: Response returned an error code
+Stack Trace:
+ResponseError: Response returned an error code
+    at WorkflowsApi.<anonymous> (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:159:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (http://localhost:3000/@fs/home/yam/chatter/sdk/typescript/dist/esm/runtime.js:17:58)
+overrideMethod @ hook.js:608
+templates:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
+    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
+templates:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+hook.js:608 MUI: You have provided an out-of-range value `20` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `5`, `10`, `25`, `50`.
+overrideMethod @ hook.js:608
+hook.js:600 MUI: You have provided an out-of-range value `20` for the select component.Consider providing a value that matches one of the available options or ''.The available values are `5`, `10`, `25`, `50`.
+overrideMethod @ hook.js:600
+hook.js:608 MUI: You have provided an out-of-range value `20` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `5`, `10`, `25`, `50`.
+overrideMethod @ hook.js:608
+hook.js:608 MUI: You have provided an out-of-range value `20` for the select component.
+Consider providing a value that matches one of the available options or ''.
+The available values are `5`, `10`, `25`, `50`.
+overrideMethod @ hook.js:608
+:8000/api/v1/workflows/definitions/01K65WVQ9WAV2HRJ4CYY5AB1KY/analytics:1  Failed to load resource: the server responded with a status of 500 (Internal Server Error)
+hook.js:608 Failed to load analytics: ResponseError: Response returned an error code
+    at WorkflowsApi.<anonymous> (runtime.js:159:19)
+    at Generator.next (<anonymous>)
+    at fulfilled (runtime.js:17:58)
+overrideMethod @ hook.js:608
+WorkflowTemplatesPage.tsx:173 Create new template
+WorkflowTemplatesPage.tsx:173 Create new template
+templates:1 Error handling response: TypeError: Cannot read properties of undefined (reading 'isCheckout')
+    at chrome-extension://clmkdohmabikagpnhjmgacbclihgmdje/content-script.js:1:5713
+templates:1 Unchecked runtime.lastError: A listener indicated an asynchronous response by returning true, but the message channel closed before a response was received
+hook.js:608 [Error Handler] GlobalErrorHandler.handleJavaScriptError: TypeError: crudTableRef.current?.refresh is not a function
+    at onClick (WorkflowTemplatesPage.tsx:164:46)
+    at executeDispatch (react-dom_client.js?v=d6911594:11736:11)
+    at runWithFiberInDEV (react-dom_client.js?v=d6911594:1485:72)
+    at processDispatchQueue (react-dom_client.js?v=d6911594:11772:37)
+    at react-dom_client.js?v=d6911594:12182:11
+    at batchedUpdates$1 (react-dom_client.js?v=d6911594:2628:42)
+    at dispatchEventForPluginEventSystem (react-dom_client.js?v=d6911594:11877:9)
+    at dispatchEvent (react-dom_client.js?v=d6911594:14792:13)
+    at dispatchDiscreteEvent (react-dom_client.js?v=d6911594:14773:62)
+overrideMethod @ hook.js:608
+hook.js:608 Full Error Details:
+ Source: GlobalErrorHandler.handleJavaScriptError
+Operation: Uncaught JavaScript error
+Timestamp: 2025-09-27T15:35:16.410Z
+Error Type: TypeError
+Message: crudTableRef.current?.refresh is not a function
+Stack Trace:
+TypeError: crudTableRef.current?.refresh is not a function
+    at onClick (http://localhost:3000/src/pages/WorkflowTemplatesPage.tsx:168:46)
+    at executeDispatch (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:11736:11)
+    at runWithFiberInDEV (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:1485:72)
+    at processDispatchQueue (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:11772:37)
+    at http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:12182:11
+    at batchedUpdates$1 (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:2628:42)
+    at dispatchEventForPluginEventSystem (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:11877:9)
+    at dispatchEvent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:14792:13)
+    at dispatchDiscreteEvent (http://localhost:3000/node_modules/.vite/deps/react-dom_client.js?v=d6911594:14773:62)
+Additional Data: {
+  "filename": "http://localhost:3000/src/pages/WorkflowTemplatesPage.tsx",
+  "lineno": 168,
+  "colno": 46,
+  "message": "Uncaught TypeError: crudTableRef.current?.refresh is not a function",
+  "url": "http://localhost:3000/workflows/templates",
+  "userAgent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/140.0.0.0 Safari/537.36"
+}
+overrideMethod @ hook.js:608
+WorkflowTemplatesPage.tsx:164 Uncaught TypeError: crudTableRef.current?.refresh is not a function
+    at onClick (WorkflowTemplatesPage.tsx:164:46)
+    at executeDispatch (react-dom_client.js?v=d6911594:11736:11)
+    at runWithFiberInDEV (react-dom_client.js?v=d6911594:1485:72)
+    at processDispatchQueue (react-dom_client.js?v=d6911594:11772:37)
+    at react-dom_client.js?v=d6911594:12182:11
+    at batchedUpdates$1 (react-dom_client.js?v=d6911594:2628:42)
+    at dispatchEventForPluginEventSystem (react-dom_client.js?v=d6911594:11877:9)
+    at dispatchEvent (react-dom_client.js?v=d6911594:14792:13)
+    at dispatchDiscreteEvent (react-dom_client.js?v=d6911594:14773:62)

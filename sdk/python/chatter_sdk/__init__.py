@@ -115,6 +115,8 @@ __all__ = [
     "DefaultProvider",
     "DistanceMetric",
     "DocumentAnalyticsResponse",
+    "DocumentChunkResponse",
+    "DocumentChunksResponse",
     "DocumentDeleteResponse",
     "DocumentListRequest",
     "DocumentListResponse",
@@ -388,6 +390,8 @@ from chatter_sdk.models.database_health_response import DatabaseHealthResponse a
 from chatter_sdk.models.default_provider import DefaultProvider as DefaultProvider
 from chatter_sdk.models.distance_metric import DistanceMetric as DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse as DocumentAnalyticsResponse
+from chatter_sdk.models.document_chunk_response import DocumentChunkResponse as DocumentChunkResponse
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse as DocumentChunksResponse
 from chatter_sdk.models.document_delete_response import DocumentDeleteResponse as DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest as DocumentListRequest
 from chatter_sdk.models.document_list_response import DocumentListResponse as DocumentListResponse

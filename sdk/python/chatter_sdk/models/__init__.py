@@ -83,6 +83,8 @@ from chatter_sdk.models.database_health_response import DatabaseHealthResponse
 from chatter_sdk.models.default_provider import DefaultProvider
 from chatter_sdk.models.distance_metric import DistanceMetric
 from chatter_sdk.models.document_analytics_response import DocumentAnalyticsResponse
+from chatter_sdk.models.document_chunk_response import DocumentChunkResponse
+from chatter_sdk.models.document_chunks_response import DocumentChunksResponse
 from chatter_sdk.models.document_delete_response import DocumentDeleteResponse
 from chatter_sdk.models.document_list_request import DocumentListRequest
 from chatter_sdk.models.document_list_response import DocumentListResponse

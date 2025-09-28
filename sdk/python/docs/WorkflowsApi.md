@@ -10,6 +10,7 @@ Method | HTTP request | Description
 [**create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post**](WorkflowsApi.md#create_workflow_definition_from_template_api_v1_workflows_definitions_from_template_post) | **POST** /api/v1/workflows/definitions/from-template | Create Workflow Definition From Template
 [**create_workflow_template_api_v1_workflows_templates_post**](WorkflowsApi.md#create_workflow_template_api_v1_workflows_templates_post) | **POST** /api/v1/workflows/templates | Create Workflow Template
 [**delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete**](WorkflowsApi.md#delete_workflow_definition_api_v1_workflows_definitions_workflow_id_delete) | **DELETE** /api/v1/workflows/definitions/{workflow_id} | Delete Workflow Definition
+[**delete_workflow_template_api_v1_workflows_templates_template_id_delete**](WorkflowsApi.md#delete_workflow_template_api_v1_workflows_templates_template_id_delete) | **DELETE** /api/v1/workflows/templates/{template_id} | Delete Workflow Template
 [**execute_chat_workflow_api_v1_workflows_execute_chat_post**](WorkflowsApi.md#execute_chat_workflow_api_v1_workflows_execute_chat_post) | **POST** /api/v1/workflows/execute/chat | Execute Chat Workflow
 [**execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**](WorkflowsApi.md#execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post) | **POST** /api/v1/workflows/execute/chat/streaming | Execute Chat Workflow Streaming
 [**execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post**](WorkflowsApi.md#execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post) | **POST** /api/v1/workflows/definitions/custom/execute | Execute Custom Workflow
@@ -17,6 +18,7 @@ Method | HTTP request | Description
 [**get_modern_supported_node_types_api_v1_workflows_node_types_modern_get**](WorkflowsApi.md#get_modern_supported_node_types_api_v1_workflows_node_types_modern_get) | **GET** /api/v1/workflows/node-types/modern | Get Modern Supported Node Types
 [**get_supported_node_types_api_v1_workflows_node_types_get**](WorkflowsApi.md#get_supported_node_types_api_v1_workflows_node_types_get) | **GET** /api/v1/workflows/node-types | Get Supported Node Types
 [**get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get**](WorkflowsApi.md#get_workflow_analytics_api_v1_workflows_definitions_workflow_id_analytics_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/analytics | Get Workflow Analytics
+[**get_workflow_defaults_api_v1_workflows_defaults_get**](WorkflowsApi.md#get_workflow_defaults_api_v1_workflows_defaults_get) | **GET** /api/v1/workflows/defaults | Get Workflow Defaults
 [**get_workflow_definition_api_v1_workflows_definitions_workflow_id_get**](WorkflowsApi.md#get_workflow_definition_api_v1_workflows_definitions_workflow_id_get) | **GET** /api/v1/workflows/definitions/{workflow_id} | Get Workflow Definition
 [**list_workflow_definitions_api_v1_workflows_definitions_get**](WorkflowsApi.md#list_workflow_definitions_api_v1_workflows_definitions_get) | **GET** /api/v1/workflows/definitions | List Workflow Definitions
 [**list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get**](WorkflowsApi.md#list_workflow_executions_api_v1_workflows_definitions_workflow_id_executions_get) | **GET** /api/v1/workflows/definitions/{workflow_id}/executions | List Workflow Executions
@@ -490,6 +492,85 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
  **workflow_id** | **str**| Workflow ID | 
+
+### Return type
+
+[**WorkflowDeleteResponse**](WorkflowDeleteResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **delete_workflow_template_api_v1_workflows_templates_template_id_delete**
+> WorkflowDeleteResponse delete_workflow_template_api_v1_workflows_templates_template_id_delete(template_id)
+
+Delete Workflow Template
+
+Delete a workflow template.
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.models.workflow_delete_response import WorkflowDeleteResponse
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    template_id = 'template_id_example' # str | 
+
+    try:
+        # Delete Workflow Template
+        api_response = await api_instance.delete_workflow_template_api_v1_workflows_templates_template_id_delete(template_id)
+        print("The response of WorkflowsApi->delete_workflow_template_api_v1_workflows_templates_template_id_delete:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->delete_workflow_template_api_v1_workflows_templates_template_id_delete: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **template_id** | **str**|  | 
 
 ### Return type
 
@@ -1212,6 +1293,92 @@ Name | Type | Description  | Notes
 ### Return type
 
 [**WorkflowAnalyticsResponse**](WorkflowAnalyticsResponse.md)
+
+### Authorization
+
+[CustomHTTPBearer](../README.md#CustomHTTPBearer)
+
+### HTTP request headers
+
+ - **Content-Type**: Not defined
+ - **Accept**: application/json
+
+### HTTP response details
+
+| Status code | Description | Response headers |
+|-------------|-------------|------------------|
+**200** | Successful Response |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+**422** | Validation Error |  * x-correlation-id - Request correlation ID for tracing <br>  * X-RateLimit-Limit-Minute - Requests allowed per minute <br>  * X-RateLimit-Limit-Hour - Requests allowed per hour <br>  * X-RateLimit-Remaining-Minute - Requests remaining this minute <br>  * X-RateLimit-Remaining-Hour - Requests remaining this hour <br>  |
+
+[[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
+
+# **get_workflow_defaults_api_v1_workflows_defaults_get**
+> Dict[str, object] get_workflow_defaults_api_v1_workflows_defaults_get(node_type=node_type)
+
+Get Workflow Defaults
+
+Get workflow defaults from profiles, models, and prompts.
+
+Args:
+    node_type: Optional specific node type to get defaults for
+    current_user: Current authenticated user
+    defaults_service: Workflow defaults service
+    
+Returns:
+    Dictionary containing default configurations
+
+### Example
+
+* Bearer Authentication (CustomHTTPBearer):
+
+```python
+import chatter_sdk
+from chatter_sdk.rest import ApiException
+from pprint import pprint
+
+# Defining the host is optional and defaults to http://localhost:8000
+# See configuration.py for a list of all supported configuration parameters.
+configuration = chatter_sdk.Configuration(
+    host = "http://localhost:8000"
+)
+
+# The client must configure the authentication and authorization parameters
+# in accordance with the API server security policy.
+# Examples for each auth method are provided below, use the example that
+# satisfies your auth use case.
+
+# Configure Bearer authorization: CustomHTTPBearer
+configuration = chatter_sdk.Configuration(
+    access_token = os.environ["BEARER_TOKEN"]
+)
+
+# Enter a context with an instance of the API client
+async with chatter_sdk.ApiClient(configuration) as api_client:
+    # Create an instance of the API class
+    api_instance = chatter_sdk.WorkflowsApi(api_client)
+    node_type = 'node_type_example' # str |  (optional)
+
+    try:
+        # Get Workflow Defaults
+        api_response = await api_instance.get_workflow_defaults_api_v1_workflows_defaults_get(node_type=node_type)
+        print("The response of WorkflowsApi->get_workflow_defaults_api_v1_workflows_defaults_get:\n")
+        pprint(api_response)
+    except Exception as e:
+        print("Exception when calling WorkflowsApi->get_workflow_defaults_api_v1_workflows_defaults_get: %s\n" % e)
+```
+
+
+
+### Parameters
+
+
+Name | Type | Description  | Notes
+------------- | ------------- | ------------- | -------------
+ **node_type** | **str**|  | [optional] 
+
+### Return type
+
+**Dict[str, object]**
 
 ### Authorization
 

@@ -41,6 +41,20 @@ class TestDocumentsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_download_document_api_v1_documents_document_id_download_get(self) -> None:
+        """Test case for download_document_api_v1_documents_document_id_download_get
+
+        Download Document
+        """
+        pass
+
+    async def test_download_document_api_v1_documents_document_id_download_get_0(self) -> None:
+        """Test case for download_document_api_v1_documents_document_id_download_get_0
+
+        Download Document
+        """
+        pass
+
     async def test_get_document_api_v1_documents_document_id_get(self) -> None:
         """Test case for get_document_api_v1_documents_document_id_get
 
@@ -52,6 +66,20 @@ class TestDocumentsApi(unittest.IsolatedAsyncioTestCase):
         """Test case for get_document_api_v1_documents_document_id_get_0
 
         Get Document
+        """
+        pass
+
+    async def test_get_document_chunks_api_v1_documents_document_id_chunks_get(self) -> None:
+        """Test case for get_document_chunks_api_v1_documents_document_id_chunks_get
+
+        Get Document Chunks
+        """
+        pass
+
+    async def test_get_document_chunks_api_v1_documents_document_id_chunks_get_0(self) -> None:
+        """Test case for get_document_chunks_api_v1_documents_document_id_chunks_get_0
+
+        Get Document Chunks
         """
         pass
 

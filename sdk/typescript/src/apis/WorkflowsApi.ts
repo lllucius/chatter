@@ -510,4 +510,31 @@ Available templates:
     const response = await this.request(requestContext);
     return response.json() as Promise<Record<string, unknown>>;
   }
+  /**Get Workflow Defaults
+   * Get workflow defaults from profiles, models, and prompts.
+
+Args:
+    node_type: Optional specific node type to get defaults for
+    current_user: Current authenticated user
+    defaults_service: Workflow defaults service
+    
+Returns:
+    Dictionary containing default configurations
+   */
+  public async getWorkflowDefaultsApiV1WorkflowsDefaults(options?: { nodeType?: string | null; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/defaults`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'node_type': options?.nodeType,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
 }

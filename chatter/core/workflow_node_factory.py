@@ -511,6 +511,40 @@ class DelayNode(WorkflowNode):
         }
 
 
+class StartNode(WorkflowNode):
+    """Node for workflow entry point."""
+
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute start node - initialize workflow context."""
+        return {
+            "metadata": {
+                **context.get("metadata", {}),
+                f"start_node_{self.node_id}": True,
+                "workflow_started": True,
+            }
+        }
+
+
+class EndNode(WorkflowNode):
+    """Node for workflow exit point."""
+
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute end node - finalize workflow context."""
+        return {
+            "metadata": {
+                **context.get("metadata", {}),
+                f"end_node_{self.node_id}": True,
+                "workflow_completed": True,
+            }
+        }
+
+
 class WorkflowNodeFactory:
     """Factory for creating workflow nodes of different types."""
 
@@ -523,6 +557,9 @@ class WorkflowNodeFactory:
         "error_handler": ErrorHandlerNode,
         "delay": DelayNode,
         "tools": ToolsNode,
+        "tool": ToolsNode,  # Alias for tools
+        "start": StartNode,
+        "end": EndNode,
     }
 
     @classmethod

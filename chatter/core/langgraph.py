@@ -332,7 +332,7 @@ class LangGraphWorkflowManager:
         from chatter.core.workflow_node_factory import WorkflowNodeFactory
         
         # Include built-in types plus factory types
-        builtin_types = ["call_model", "model", "llm", "execute_tools", "tool", "tools"]
+        builtin_types = ["call_model", "model", "llm", "execute_tools", "tool", "tools", "start", "end"]
         factory_types = WorkflowNodeFactory.get_supported_types()
         
         return builtin_types + factory_types

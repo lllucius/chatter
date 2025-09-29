@@ -331,11 +331,8 @@ class LangGraphWorkflowManager:
         """Get list of supported node types."""
         from chatter.core.workflow_node_factory import WorkflowNodeFactory
         
-        # Include built-in types plus factory types
-        builtin_types = ["call_model", "model", "llm", "execute_tools", "tool", "tools", "start", "end"]
-        factory_types = WorkflowNodeFactory.get_supported_types()
-        
-        return builtin_types + factory_types
+        # Factory is now the single source of truth for all node types
+        return WorkflowNodeFactory.get_supported_types()
         
     def validate_workflow_definition(
         self,

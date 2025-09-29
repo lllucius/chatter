@@ -59,6 +59,31 @@ class WorkflowGraphBuilder:
     
     def __init__(self):
         self.node_factory = WorkflowNodeFactory()
+        # Register custom creators for specialized node types
+        self._register_custom_creators()
+        
+    def _register_custom_creators(self):
+        """Register custom node creators with the factory."""
+        # Register LLM node creators
+        for node_type in ["call_model", "model", "llm"]:
+            WorkflowNodeFactory.register_custom_creator(node_type, self._create_llm_node_wrapper)
+        
+        # Register tool node creators
+        for node_type in ["execute_tools", "tool", "tools"]:
+            WorkflowNodeFactory.register_custom_creator(node_type, self._create_tool_node_wrapper)
+    
+    def _create_llm_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
+        """Wrapper to create LLM nodes with the required parameters."""
+        llm = kwargs.get('llm')
+        tools = kwargs.get('tools')
+        if not llm:
+            raise ValueError("LLM node requires 'llm' parameter")
+        return self._create_llm_node(node_id, llm, tools, config, **kwargs)
+    
+    def _create_tool_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
+        """Wrapper to create tool nodes with the required parameters."""
+        tools = kwargs.get('tools')
+        return self._create_tool_node(node_id, tools, config, **kwargs)
         
     def build_graph(
         self,
@@ -225,22 +250,24 @@ class WorkflowGraphBuilder:
                 # No config found, use empty dict
                 node_config = {}
             
-            # Create the node
-            if node_type in ["call_model", "model", "llm"]:
-                # Special handling for LLM nodes
-                node = self._create_llm_node(node_id, llm, tools, node_config, **kwargs)
-            elif node_type in ["execute_tools", "tool", "tools"]:
-                # Special handling for tool nodes
-                node = self._create_tool_node(node_id, tools, node_config, **kwargs)
-            else:
-                # Use the factory for other node types
-                node = self.node_factory.create_node(node_type, node_id, node_config)
+            # Use factory for all node creation - it now handles everything
+            node = self.node_factory.create_node(
+                node_type, 
+                node_id, 
+                node_config, 
+                llm=llm, 
+                tools=tools, 
+                retriever=retriever,
+                **kwargs
+            )
                 
-                # Set up dependencies
-                if hasattr(node, "set_llm"):
-                    node.set_llm(llm)
-                if hasattr(node, "set_retriever") and retriever:
-                    node.set_retriever(retriever)
+            # Set up dependencies for nodes that need them
+            if hasattr(node, "set_llm") and llm:
+                node.set_llm(llm)
+            if hasattr(node, "set_retriever") and retriever:
+                node.set_retriever(retriever)
+            if hasattr(node, "set_tools") and tools:
+                node.set_tools(tools)
                     
             nodes[node_id] = node
             

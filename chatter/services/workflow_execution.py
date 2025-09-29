@@ -15,7 +15,10 @@ from langchain_core.messages import BaseMessage, HumanMessage
 from chatter.core.enhanced_memory_manager import EnhancedMemoryManager
 from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
 from chatter.core.langgraph import workflow_manager
-from chatter.core.workflow_graph_builder import create_simple_workflow_definition
+from chatter.core.workflow_graph_builder import (
+    create_simple_workflow_definition,
+    create_workflow_definition_from_model,
+)
 from chatter.core.workflow_node_factory import WorkflowNodeContext
 from chatter.core.workflow_performance import PerformanceMonitor
 from chatter.models.base import generate_ulid
@@ -276,8 +279,10 @@ class WorkflowExecutionService:
                 retriever = None
 
         # Create workflow from definition
+        # Convert database WorkflowDefinition to graph builder WorkflowDefinition
+        graph_definition = create_workflow_definition_from_model(definition)
         workflow = await workflow_manager.create_workflow_from_definition(
-            definition=definition,
+            definition=graph_definition,
             llm=llm,
             retriever=retriever,
             tools=tools,
@@ -585,8 +590,10 @@ class WorkflowExecutionService:
                 retriever = None
 
         # Create workflow from definition
+        # Convert database WorkflowDefinition to graph builder WorkflowDefinition
+        graph_definition = create_workflow_definition_from_model(definition)
         workflow = await workflow_manager.create_workflow_from_definition(
-            definition=definition,
+            definition=graph_definition,
             llm=llm,
             retriever=retriever,
             tools=tools,

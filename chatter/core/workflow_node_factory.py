@@ -421,6 +421,56 @@ class ErrorHandlerNode(WorkflowNode):
         }
 
 
+class ToolsNode(WorkflowNode):
+    """Node for executing multiple tools with enhanced tracking."""
+    
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+        self.max_tool_calls = config.get("max_tool_calls", 10) if config else 10
+        self.tool_timeout_ms = config.get("tool_timeout_ms", 30000) if config else 30000
+        self.tools = []
+        
+    def set_tools(self, tools: list) -> None:
+        """Set the available tools for execution."""
+        self.tools = tools
+        
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute tools if the last message has tool calls."""
+        from chatter.core.enhanced_tool_executor import EnhancedToolExecutor, ToolExecutionConfig
+        
+        messages = context["messages"]
+        if not messages:
+            return {}
+            
+        last_message = messages[-1]
+        
+        # Check if we have tool calls in the last message
+        if not hasattr(last_message, "tool_calls") or not last_message.tool_calls:
+            return {}
+            
+        if not self.tools:
+            return {}
+            
+        # Create tool execution config
+        tool_config = ToolExecutionConfig(
+            max_total_calls=self.max_tool_calls,
+            timeout_seconds=self.tool_timeout_ms // 1000
+        )
+        
+        # Create tool executor
+        executor = EnhancedToolExecutor(tool_config)
+        
+        # Execute tools
+        result = await executor.execute_tools(
+            context=context,
+            tools=self.tools,
+            last_message=last_message,
+            user_id=context.get("user_id")
+        )
+        
+        return result
+
+
 class DelayNode(WorkflowNode):
     """Node for introducing delays in workflow execution."""
     
@@ -476,6 +526,7 @@ class WorkflowNodeFactory:
         "variable": VariableNode,
         "error_handler": ErrorHandlerNode,
         "delay": DelayNode,
+        "tools": ToolsNode,
     }
     
     @classmethod

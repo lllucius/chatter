@@ -14,7 +14,7 @@ from chatter_sdk import (
     AnalyticsApi,
     ApiClient,
     AuthenticationApi,
-    ChatApi,
+    ConversationsApi,
     Configuration,
     DataManagementApi,
     DocumentsApi,
@@ -141,7 +141,7 @@ class ChatterSDKClient:
         self.profiles_api = ProfilesApi(self.api_client)
         self.documents_api = DocumentsApi(self.api_client)
         self.analytics_api = AnalyticsApi(self.api_client)
-        self.chat_api = ChatApi(self.api_client)
+        self.chat_api = ConversationsApi(self.api_client)
         self.agents_api = AgentsApi(self.api_client)
         self.plugins_api = PluginsApi(self.api_client)
         self.jobs_api = JobsApi(self.api_client)

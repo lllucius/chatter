@@ -1,7 +1,7 @@
 """
-Tests for the split chat endpoints.
+Tests for the workflow chat endpoints.
 
-Tests the new separate /chat (non-streaming) and /streaming endpoints.
+Tests the existing /workflows/execute/chat endpoints.
 """
 
 import pytest
@@ -9,15 +9,15 @@ import pytest
 from chatter.schemas.chat import ChatRequest
 
 
-class TestSplitChatEndpoints:
-    """Test the separated chat and streaming endpoints."""
+class TestWorkflowChatEndpoints:
+    """Test the workflow chat endpoints."""
 
     async def test_non_streaming_chat_endpoint_exists(self, client):
         """Test that the non-streaming chat endpoint exists."""
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
-            "/api/v1/chat/chat",
-            json={"message": "Hello", "workflow": "plain"},
+            "/api/v1/workflows/execute/chat",
+            json={"message": "Hello"},
         )
         # We expect this to fail with auth or service errors, but not 404
         assert response.status_code != 404
@@ -26,8 +26,8 @@ class TestSplitChatEndpoints:
         """Test that the streaming chat endpoint exists."""
         # This just tests the endpoint is registered, not full functionality
         response = await client.post(
-            "/api/v1/chat/streaming",
-            json={"message": "Hello", "workflow": "plain"},
+            "/api/v1/workflows/execute/chat/streaming",
+            json={"message": "Hello"},
             headers={"Accept": "text/event-stream"},
         )
         # We expect this to fail with auth or service errors, but not 404

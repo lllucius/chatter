@@ -62,18 +62,18 @@ export const useWorkflowChat = () => {
     [customWorkflowConfig]
   );
 
-  // Send chat message using dedicated chat API
+  // Send chat message using workflow system
   const sendWorkflowMessage = useCallback(
     async (request: ChatWorkflowRequest, streaming: boolean = false) => {
       try {
         if (streaming) {
-          // Use streaming chat endpoint
-          return await getSDK().chat.streamingChatEndpointApiV1ChatStreaming(
+          // Use streaming workflow endpoint
+          return await getSDK().workflows.executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(
             request
           );
         } else {
-          // Use non-streaming chat endpoint
-          return await getSDK().chat.chatEndpointApiV1ChatChat(
+          // Use non-streaming workflow endpoint
+          return await getSDK().workflows.executeChatWorkflowApiV1WorkflowsExecuteChat(
             request
           );
         }

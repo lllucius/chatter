@@ -80,7 +80,8 @@ class WorkflowGraphBuilder:
             raise ValueError("LLM node requires 'llm' parameter")
         
         # Remove extracted parameters from kwargs to prevent duplication
-        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['llm', 'tools']}
+        # Also remove 'retriever' as it's not a valid LLM parameter
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['llm', 'tools', 'retriever']}
         return self._create_llm_node(node_id, llm, tools, config, **filtered_kwargs)
     
     def _create_tool_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
@@ -684,6 +685,42 @@ def get_workflow_builder() -> WorkflowGraphBuilder:
     if _workflow_builder_instance is None:
         _workflow_builder_instance = WorkflowGraphBuilder()
     return _workflow_builder_instance
+
+
+def create_workflow_definition_from_model(db_definition) -> WorkflowDefinition:
+    """Convert a database WorkflowDefinition model to a graph builder WorkflowDefinition.
+    
+    Args:
+        db_definition: Database WorkflowDefinition model instance
+        
+    Returns:
+        Graph builder WorkflowDefinition instance
+    """
+    definition = WorkflowDefinition()
+    
+    # Copy nodes
+    for node in db_definition.nodes:
+        definition.add_node(
+            node_id=node["id"],
+            node_type=node["type"], 
+            config=node.get("config", {})
+        )
+    
+    # Copy edges
+    for edge in db_definition.edges:
+        definition.add_edge(
+            source=edge["source"],
+            target=edge["target"],
+            condition=edge.get("condition")
+        )
+    
+    # Find and set entry point if not explicitly set
+    if not definition.entry_point:
+        entry_point = get_workflow_builder()._find_entry_point(definition)
+        if entry_point:
+            definition.set_entry_point(entry_point)
+    
+    return definition
 
 
 def create_simple_workflow_definition(

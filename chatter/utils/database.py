@@ -106,84 +106,21 @@ async def get_session_generator() -> AsyncGenerator[AsyncSession, None]:
 
     try:
         yield session
-    except GeneratorExit:
-        # Handle generator cleanup gracefully
-        # On GeneratorExit, avoid operations that might conflict with ongoing transactions
-        logger.debug("Database session generator closed")
-        try:
-            # Check if session is still usable before attempting cleanup
-            if session:
-                # Be very conservative on GeneratorExit - don't do anything that might hang
-                # Just expunge objects to clear the session state
-                try:
-                    session.expunge_all()
-                except Exception:
-                    # Even expunge_all might fail, so be defensive
-                    pass
-                # Always try to close the session to prevent connection leaks
-                try:
-                    await session.close()
-                except Exception:
-                    # If close fails, log but don't raise to avoid masking the GeneratorExit
-                    logger.debug("Failed to close session during GeneratorExit")
-        except Exception as e:
-            logger.debug(
-                "Session cleanup during generator exit", error=str(e)
-            )
-        raise
+        # Normal completion - commit the transaction
+        await session.commit()
     except Exception:
-        # On other exceptions, attempt rollback and close
+        # On any exception, attempt rollback
         try:
-            if session:
-                await session.rollback()
+            await session.rollback()
         except Exception as e:
             logger.warning("Error rolling back session", error=str(e))
-        # Always try to close the session even if rollback failed
-        try:
-            if session:
-                await session.close()
-        except Exception as e:
-            logger.warning("Error closing session after exception", error=str(e))
         raise
-    else:
-        # Normal completion - commit the transaction
-        try:
-            if session:
-                await session.commit()
-        except Exception as e:
-            logger.warning("Error committing session", error=str(e))
-            try:
-                await session.rollback()
-            except Exception:
-                pass
-            raise
     finally:
-        # Final cleanup - ensure the session is always closed
+        # Always close the session
         try:
-            if session:
-                # Check if session is still open and close it
-                try:
-                    # Try to determine if session is still open
-                    if hasattr(session, '_connection') and session._connection is not None:
-                        # Session still has a connection, need to close it
-                        await session.close()
-                    elif not getattr(session, '_closed', False):
-                        # Session might still be open, try to close it
-                        await session.close()
-                except Exception as cleanup_error:
-                    # If close fails, log the error but don't re-raise
-                    logger.debug(
-                        "Final session close failed, attempting expunge_all",
-                        error=str(cleanup_error),
-                    )
-                    # As a last resort, try to expunge all objects
-                    try:
-                        session.expunge_all()
-                    except Exception:
-                        # Even this might fail, but we've done our best
-                        logger.debug("Session expunge_all also failed during cleanup")
+            await session.close()
         except Exception as e:
-            logger.debug("Error in final session cleanup", error=str(e))
+            logger.warning("Error closing session", error=str(e))
 
 
 async def init_database() -> None:

@@ -98,7 +98,7 @@ class WorkflowDefaultsService:
             elif node_type == 'variable':
                 return {
                     'operation': 'set',
-                    'variableName': '',
+                    'variable_name': '',  # Use snake_case to match VariableNode
                     'value': '',
                     'scope': 'workflow',
                 }

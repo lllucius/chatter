@@ -214,7 +214,16 @@ class WorkflowGraphBuilder:
         for node_def in definition.nodes:
             node_id = node_def["id"]
             node_type = node_def["type"]
-            node_config = node_def["config"]
+            # Handle both simple and complex node config formats
+            if "config" in node_def:
+                # Simple format: {"id": ..., "type": ..., "config": {...}}
+                node_config = node_def["config"]
+            elif "data" in node_def and "config" in node_def["data"]:
+                # Complex format: {"id": ..., "type": ..., "data": {"config": {...}}}
+                node_config = node_def["data"]["config"]
+            else:
+                # No config found, use empty dict
+                node_config = {}
             
             # Create the node
             if node_type in ["call_model", "model", "llm"]:

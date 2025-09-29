@@ -345,14 +345,7 @@ class WorkflowExecutionService:
         }
 
         return message, usage_info
-        
-    async def _execute_with_dynamic_workflow(
-        self,
-        conversation: Conversation,
-        chat_request: ChatRequest,
-        user_id: str,
-        start_time: float,
-    ) -> tuple[Message, dict[str, Any]]:
+
     async def _execute_with_dynamic_workflow(
         self,
         conversation: Conversation,

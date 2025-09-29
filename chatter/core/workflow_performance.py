@@ -22,6 +22,60 @@ _workflow_cache = get_persistent_cache()
 _tool_cache = get_general_cache()
 
 
+class WorkflowCache:
+    """Centralized workflow caching system."""
+    
+    @property
+    def workflow_cache(self):
+        """Get the workflow cache instance.""" 
+        return _workflow_cache
+    
+    @property
+    def tool_cache(self):
+        """Get the tool cache instance."""
+        return _tool_cache
+    
+    async def get_cache_stats(self) -> dict[str, Any]:
+        """Get combined cache statistics."""
+        try:
+            workflow_stats = await _workflow_cache.get_stats()
+            tool_stats = await _tool_cache.get_stats()
+            
+            return {
+                "workflow_cache": workflow_stats,
+                "tool_cache": tool_stats,
+                "combined_entries": workflow_stats.get("total_entries", 0) + tool_stats.get("total_entries", 0),
+                "combined_hit_rate": (
+                    (workflow_stats.get("hit_rate", 0) + tool_stats.get("hit_rate", 0)) / 2
+                ),
+            }
+        except Exception as e:
+            logger.warning(f"Failed to get cache stats: {e}")
+            return {
+                "workflow_cache": {"error": str(e)},
+                "tool_cache": {"error": str(e)},
+                "combined_entries": 0,
+                "combined_hit_rate": 0.0,
+            }
+    
+    async def clear_all(self) -> None:
+        """Clear all workflow-related caches."""
+        try:
+            await _workflow_cache.clear()
+            await _tool_cache.clear()
+            logger.info("Cleared all workflow caches")
+        except Exception as e:
+            logger.warning(f"Failed to clear workflow caches: {e}")
+
+
+# Global cache instance  
+_cache_instance = WorkflowCache()
+
+def get_workflow_cache() -> WorkflowCache:
+    """Get the global workflow cache instance."""
+    return _cache_instance
+
+
 def _get_cache_stats_sync(cache):
     """Get cache stats synchronously for monitoring purposes."""
     try:
@@ -82,14 +136,34 @@ lazy_tool_loader = CacheWrapper(_tool_cache)
 
 
 class PerformanceMonitor:
-    """Monitor and track workflow performance metrics."""
+    """Monitor and track workflow performance metrics with integrated debug logging."""
 
-    def __init__(self):
+    def __init__(self, debug_mode: bool = False):
         """Initialize performance monitor."""
+        self.debug_mode = debug_mode
         self.execution_times: list[float] = []
         self.execution_counts: int = 0
         self.error_counts: dict[str, int] = {}
         self.start_times: dict[str, float] = {}
+        # Integrated debug information
+        self.debug_logs: list[dict[str, Any]] = []
+        self.node_executions: list[dict[str, Any]] = []
+    
+    def log_debug(self, message: str, node_id: str = None, data: dict[str, Any] = None) -> None:
+        """Log debug information if debug mode is enabled."""
+        if not self.debug_mode:
+            return
+        
+        log_entry = {
+            "timestamp": time.time(),
+            "message": message,
+            "node_id": node_id,
+            "data": data or {}
+        }
+        self.debug_logs.append(log_entry)
+        
+        if len(self.debug_logs) > 1000:  # Limit debug log size
+            self.debug_logs = self.debug_logs[-800:]  # Keep last 800 entries
 
     def start_workflow(self, workflow_id: str) -> None:
         """Start timing a workflow execution.

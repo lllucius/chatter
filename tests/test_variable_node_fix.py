@@ -69,6 +69,23 @@ class TestVariableNodeFix:
         assert node.operation == 'set'
         assert node.value == 'test'
 
+    def test_variable_node_backward_compatibility(self):
+        """Test that VariableNode handles both snake_case and camelCase variable names."""
+        # Test snake_case (preferred)
+        node1 = VariableNode('test_node1', {'variable_name': 'snake_case_var'})
+        assert node1.variable_name == 'snake_case_var'
+        
+        # Test camelCase (legacy support)
+        node2 = VariableNode('test_node2', {'variableName': 'camelCaseVar'})
+        assert node2.variable_name == 'camelCaseVar'
+        
+        # Test both provided (snake_case takes precedence)
+        node3 = VariableNode('test_node3', {
+            'variable_name': 'snake_wins', 
+            'variableName': 'camel_loses'
+        })
+        assert node3.variable_name == 'snake_wins'
+
     def test_variable_node_warning_logged_for_auto_generated_names(self, caplog):
         """Test that warnings are logged for auto-generated variable names."""
         import logging

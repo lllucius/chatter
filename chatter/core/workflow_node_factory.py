@@ -309,7 +309,12 @@ class VariableNode(WorkflowNode):
     def __init__(self, node_id: str, config: dict[str, Any] | None = None):
         super().__init__(node_id, config)
         self.operation = config.get("operation", "set") if config else "set"
-        self.variable_name = config.get("variable_name", "") if config else ""
+        
+        # Support both snake_case and camelCase for backward compatibility
+        self.variable_name = ""
+        if config:
+            self.variable_name = config.get("variable_name", "") or config.get("variableName", "")
+        
         self.value = config.get("value") if config else None
         
         # Provide a default variable name if one isn't specified

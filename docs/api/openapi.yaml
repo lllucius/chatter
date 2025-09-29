@@ -1593,25 +1593,6 @@ components:
       - file
       title: Body_upload_document_api_v1_documents_upload_post
       type: object
-    Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post:
-      properties:
-        edges:
-          items:
-            additionalProperties: true
-            type: object
-          title: Edges
-          type: array
-        nodes:
-          items:
-            additionalProperties: true
-            type: object
-          title: Nodes
-          type: array
-      required:
-      - nodes
-      - edges
-      title: Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post
-      type: object
     BottleneckInfo:
       description: Schema for bottleneck information.
       properties:
@@ -19928,13 +19909,18 @@ paths:
       - Workflows
   /api/v1/workflows/definitions/validate:
     post:
-      description: Validate a workflow definition using the modern system.
+      description: Validate a workflow definition - supports both legacy and modern
+        formats.
       operationId: validate_workflow_definition_api_v1_workflows_definitions_validate_post
       requestBody:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post'
+              anyOf:
+              - $ref: '#/components/schemas/WorkflowDefinitionCreate'
+              - additionalProperties: true
+                type: object
+              title: Request
         required: true
       responses:
         '200':

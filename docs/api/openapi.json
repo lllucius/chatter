@@ -10134,13 +10134,22 @@
           "Workflows"
         ],
         "summary": "Validate Workflow Definition",
-        "description": "Validate a workflow definition using the modern system.",
+        "description": "Validate a workflow definition - supports both legacy and modern formats.",
         "operationId": "validate_workflow_definition_api_v1_workflows_definitions_validate_post",
         "requestBody": {
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post"
+                "anyOf": [
+                  {
+                    "$ref": "#/components/schemas/WorkflowDefinitionCreate"
+                  },
+                  {
+                    "additionalProperties": true,
+                    "type": "object"
+                  }
+                ],
+                "title": "Request"
               }
             }
           },
@@ -28355,32 +28364,6 @@
           "file"
         ],
         "title": "Body_upload_document_api_v1_documents_upload_post"
-      },
-      "Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post": {
-        "properties": {
-          "nodes": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "title": "Nodes"
-          },
-          "edges": {
-            "items": {
-              "additionalProperties": true,
-              "type": "object"
-            },
-            "type": "array",
-            "title": "Edges"
-          }
-        },
-        "type": "object",
-        "required": [
-          "nodes",
-          "edges"
-        ],
-        "title": "Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post"
       },
       "BottleneckInfo": {
         "properties": {

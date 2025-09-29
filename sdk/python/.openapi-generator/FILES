@@ -66,7 +66,6 @@ chatter_sdk/models/backup_request.py
 chatter_sdk/models/backup_response.py
 chatter_sdk/models/backup_type.py
 chatter_sdk/models/body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post.py
-chatter_sdk/models/body_validate_workflow_definition_api_v1_workflows_definitions_validate_post.py
 chatter_sdk/models/bottleneck_info.py
 chatter_sdk/models/bulk_delete_filtered_request.py
 chatter_sdk/models/bulk_delete_preview_response.py
@@ -201,6 +200,7 @@ chatter_sdk/models/query_analysis_response.py
 chatter_sdk/models/readiness_check_response.py
 chatter_sdk/models/readiness_status.py
 chatter_sdk/models/reduction_strategy.py
+chatter_sdk/models/request.py
 chatter_sdk/models/restore_request.py
 chatter_sdk/models/restore_response.py
 chatter_sdk/models/retrieval_config.py
@@ -316,7 +316,6 @@ docs/BackupRequest.md
 docs/BackupResponse.md
 docs/BackupType.md
 docs/BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost.md
-docs/BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost.md
 docs/BottleneckInfo.md
 docs/BulkDeleteFilteredRequest.md
 docs/BulkDeletePreviewResponse.md
@@ -463,6 +462,7 @@ docs/ReadinessCheckResponse.md
 docs/ReadinessStatus.md
 docs/RealTimeAnalyticsApi.md
 docs/ReductionStrategy.md
+docs/Request.md
 docs/RestoreRequest.md
 docs/RestoreResponse.md
 docs/RetrievalConfig.md
@@ -585,7 +585,6 @@ test/test_backup_request.py
 test/test_backup_response.py
 test/test_backup_type.py
 test/test_body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post.py
-test/test_body_validate_workflow_definition_api_v1_workflows_definitions_validate_post.py
 test/test_bottleneck_info.py
 test/test_bulk_delete_filtered_request.py
 test/test_bulk_delete_preview_response.py
@@ -732,6 +731,7 @@ test/test_readiness_check_response.py
 test/test_readiness_status.py
 test/test_real_time_analytics_api.py
 test/test_reduction_strategy.py
+test/test_request.py
 test/test_restore_request.py
 test/test_restore_response.py
 test/test_retrieval_config.py

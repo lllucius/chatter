@@ -83,7 +83,6 @@ __all__ = [
     "BackupResponse",
     "BackupType",
     "BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost",
-    "BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost",
     "BottleneckInfo",
     "BulkDeleteFilteredRequest",
     "BulkDeletePreviewResponse",
@@ -218,6 +217,7 @@ __all__ = [
     "ReadinessCheckResponse",
     "ReadinessStatus",
     "ReductionStrategy",
+    "Request",
     "RestoreRequest",
     "RestoreResponse",
     "RetrievalConfig",
@@ -361,7 +361,6 @@ from chatter_sdk.models.backup_request import BackupRequest as BackupRequest
 from chatter_sdk.models.backup_response import BackupResponse as BackupResponse
 from chatter_sdk.models.backup_type import BackupType as BackupType
 from chatter_sdk.models.body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post import BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost as BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost
-from chatter_sdk.models.body_validate_workflow_definition_api_v1_workflows_definitions_validate_post import BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost as BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
 from chatter_sdk.models.bottleneck_info import BottleneckInfo as BottleneckInfo
 from chatter_sdk.models.bulk_delete_filtered_request import BulkDeleteFilteredRequest as BulkDeleteFilteredRequest
 from chatter_sdk.models.bulk_delete_preview_response import BulkDeletePreviewResponse as BulkDeletePreviewResponse
@@ -496,6 +495,7 @@ from chatter_sdk.models.query_analysis_response import QueryAnalysisResponse as 
 from chatter_sdk.models.readiness_check_response import ReadinessCheckResponse as ReadinessCheckResponse
 from chatter_sdk.models.readiness_status import ReadinessStatus as ReadinessStatus
 from chatter_sdk.models.reduction_strategy import ReductionStrategy as ReductionStrategy
+from chatter_sdk.models.request import Request as Request
 from chatter_sdk.models.restore_request import RestoreRequest as RestoreRequest
 from chatter_sdk.models.restore_response import RestoreResponse as RestoreResponse
 from chatter_sdk.models.retrieval_config import RetrievalConfig as RetrievalConfig

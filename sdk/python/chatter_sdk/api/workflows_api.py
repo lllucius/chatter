@@ -21,11 +21,11 @@ from pydantic import Field, StrictBool, StrictInt, StrictStr
 from typing import Any, Dict, List, Optional
 from typing_extensions import Annotated
 from chatter_sdk.models.body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post import BodyExecuteCustomWorkflowApiV1WorkflowsDefinitionsCustomExecutePost
-from chatter_sdk.models.body_validate_workflow_definition_api_v1_workflows_definitions_validate_post import BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
 from chatter_sdk.models.chat_response import ChatResponse
 from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 from chatter_sdk.models.detailed_workflow_execution_response import DetailedWorkflowExecutionResponse
 from chatter_sdk.models.node_type_response import NodeTypeResponse
+from chatter_sdk.models.request import Request
 from chatter_sdk.models.workflow_analytics_response import WorkflowAnalyticsResponse
 from chatter_sdk.models.workflow_definition_create import WorkflowDefinitionCreate
 from chatter_sdk.models.workflow_definition_from_template_request import WorkflowDefinitionFromTemplateRequest
@@ -6482,7 +6482,7 @@ class WorkflowsApi:
     @validate_call
     async def validate_workflow_definition_api_v1_workflows_definitions_validate_post(
         self,
-        body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost,
+        request: Request,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6498,10 +6498,10 @@ class WorkflowsApi:
     ) -> WorkflowValidationResponse:
         """Validate Workflow Definition
 
-        Validate a workflow definition using the modern system.
+        Validate a workflow definition - supports both legacy and modern formats.
 
-        :param body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: (required)
-        :type body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
+        :param request: (required)
+        :type request: Request
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6525,7 +6525,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
-            body_validate_workflow_definition_api_v1_workflows_definitions_validate_post=body_validate_workflow_definition_api_v1_workflows_definitions_validate_post,
+            request=request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6550,7 +6550,7 @@ class WorkflowsApi:
     @validate_call
     async def validate_workflow_definition_api_v1_workflows_definitions_validate_post_with_http_info(
         self,
-        body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost,
+        request: Request,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6566,10 +6566,10 @@ class WorkflowsApi:
     ) -> ApiResponse[WorkflowValidationResponse]:
         """Validate Workflow Definition
 
-        Validate a workflow definition using the modern system.
+        Validate a workflow definition - supports both legacy and modern formats.
 
-        :param body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: (required)
-        :type body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
+        :param request: (required)
+        :type request: Request
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6593,7 +6593,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
-            body_validate_workflow_definition_api_v1_workflows_definitions_validate_post=body_validate_workflow_definition_api_v1_workflows_definitions_validate_post,
+            request=request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6618,7 +6618,7 @@ class WorkflowsApi:
     @validate_call
     async def validate_workflow_definition_api_v1_workflows_definitions_validate_post_without_preload_content(
         self,
-        body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost,
+        request: Request,
         _request_timeout: Union[
             None,
             Annotated[StrictFloat, Field(gt=0)],
@@ -6634,10 +6634,10 @@ class WorkflowsApi:
     ) -> RESTResponseType:
         """Validate Workflow Definition
 
-        Validate a workflow definition using the modern system.
+        Validate a workflow definition - supports both legacy and modern formats.
 
-        :param body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: (required)
-        :type body_validate_workflow_definition_api_v1_workflows_definitions_validate_post: BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
+        :param request: (required)
+        :type request: Request
         :param _request_timeout: timeout setting for this request. If one
                                  number provided, it will be total request
                                  timeout. It can also be a pair (tuple) of
@@ -6661,7 +6661,7 @@ class WorkflowsApi:
         """ # noqa: E501
 
         _param = self._validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
-            body_validate_workflow_definition_api_v1_workflows_definitions_validate_post=body_validate_workflow_definition_api_v1_workflows_definitions_validate_post,
+            request=request,
             _request_auth=_request_auth,
             _content_type=_content_type,
             _headers=_headers,
@@ -6681,7 +6681,7 @@ class WorkflowsApi:
 
     def _validate_workflow_definition_api_v1_workflows_definitions_validate_post_serialize(
         self,
-        body_validate_workflow_definition_api_v1_workflows_definitions_validate_post,
+        request,
         _request_auth,
         _content_type,
         _headers,
@@ -6707,8 +6707,8 @@ class WorkflowsApi:
         # process the header parameters
         # process the form parameters
         # process the body parameter
-        if body_validate_workflow_definition_api_v1_workflows_definitions_validate_post is not None:
-            _body_params = body_validate_workflow_definition_api_v1_workflows_definitions_validate_post
+        if request is not None:
+            _body_params = request
 
 
         # set the HTTP header `Accept`

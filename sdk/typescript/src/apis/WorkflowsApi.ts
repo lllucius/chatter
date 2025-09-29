@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post, ChatResponse, ChatWorkflowRequest, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatResponse, ChatWorkflowRequest, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -190,9 +190,9 @@ export class WorkflowsApi extends BaseAPI {
     return response.json() as Promise<WorkflowExecutionResponse>;
   }
   /**Validate Workflow Definition
-   * Validate a workflow definition using the modern system.
+   * Validate a workflow definition - supports both legacy and modern formats.
    */
-  public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: Body_validate_workflow_definition_api_v1_workflows_definitions_validate_post): Promise<WorkflowValidationResponse> {
+  public async validateWorkflowDefinitionApiV1WorkflowsDefinitionsValidate(data: WorkflowDefinitionCreate | Record<string, unknown>): Promise<WorkflowValidationResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/definitions/validate`,
       method: 'POST' as HTTPMethod,

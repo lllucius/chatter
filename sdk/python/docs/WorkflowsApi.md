@@ -2036,11 +2036,11 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **validate_workflow_definition_api_v1_workflows_definitions_validate_post**
-> WorkflowValidationResponse validate_workflow_definition_api_v1_workflows_definitions_validate_post(body_validate_workflow_definition_api_v1_workflows_definitions_validate_post)
+> WorkflowValidationResponse validate_workflow_definition_api_v1_workflows_definitions_validate_post(request)
 
 Validate Workflow Definition
 
-Validate a workflow definition using the modern system.
+Validate a workflow definition - supports both legacy and modern formats.
 
 ### Example
 
@@ -2048,7 +2048,7 @@ Validate a workflow definition using the modern system.
 
 ```python
 import chatter_sdk
-from chatter_sdk.models.body_validate_workflow_definition_api_v1_workflows_definitions_validate_post import BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost
+from chatter_sdk.models.request import Request
 from chatter_sdk.models.workflow_validation_response import WorkflowValidationResponse
 from chatter_sdk.rest import ApiException
 from pprint import pprint
@@ -2073,11 +2073,11 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.WorkflowsApi(api_client)
-    body_validate_workflow_definition_api_v1_workflows_definitions_validate_post = chatter_sdk.BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost() # BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost | 
+    request = chatter_sdk.Request() # Request | 
 
     try:
         # Validate Workflow Definition
-        api_response = await api_instance.validate_workflow_definition_api_v1_workflows_definitions_validate_post(body_validate_workflow_definition_api_v1_workflows_definitions_validate_post)
+        api_response = await api_instance.validate_workflow_definition_api_v1_workflows_definitions_validate_post(request)
         print("The response of WorkflowsApi->validate_workflow_definition_api_v1_workflows_definitions_validate_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -2091,7 +2091,7 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **body_validate_workflow_definition_api_v1_workflows_definitions_validate_post** | [**BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost**](BodyValidateWorkflowDefinitionApiV1WorkflowsDefinitionsValidatePost.md)|  | 
+ **request** | [**Request**](Request.md)|  | 
 
 ### Return type
 

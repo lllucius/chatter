@@ -153,13 +153,36 @@ const WorkflowExecutionsPage: React.FC = () => {
 
   // Define service methods
   const service: CrudService<WorkflowExecutionResponse, never, never> = {
-    list: async (_page: number, _pageSize: number) => {
-      // Note: This API may require a workflow ID, will need to adjust
-      // For now, return empty results
-      return {
-        items: [],
-        total: 0,
-      };
+    list: async (page: number, pageSize: number) => {
+      try {
+        const sdk = getSDK();
+        // Use direct HTTP call to the new endpoint since SDK might not be regenerated yet
+        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/workflows/executions?page=${page}&page_size=${pageSize}`, {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${sdk.configuration?.accessToken || ''}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+        });
+        
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        
+        const data = await response.json();
+        return {
+          items: data.items || [],
+          total: data.total || 0,
+        };
+      } catch (error) {
+        console.error('Failed to fetch workflow executions:', error);
+        // Return empty results on error to prevent UI breakage
+        return {
+          items: [],
+          total: 0,
+        };
+      }
     },
     create: async () => {
       throw new Error('Create not supported for executions');

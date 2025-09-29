@@ -446,6 +446,23 @@ class WorkflowGraphBuilder:
         # Simple condition evaluation - can be extended
         condition = condition.lower().strip()
         
+        # Handle compound conditions with AND/OR
+        if " and " in condition:
+            parts = condition.split(" and ")
+            return all(self._evaluate_single_condition(part.strip(), state) for part in parts)
+        elif " or " in condition:
+            parts = condition.split(" or ")
+            return any(self._evaluate_single_condition(part.strip(), state) for part in parts)
+        else:
+            return self._evaluate_single_condition(condition, state)
+    
+    def _evaluate_single_condition(self, condition: str, state: WorkflowNodeContext) -> bool:
+        """Evaluate a single condition without compound logic."""
+        condition = condition.strip()
+    def _evaluate_single_condition(self, condition: str, state: WorkflowNodeContext) -> bool:
+        """Evaluate a single condition without compound logic."""
+        condition = condition.strip()
+        
         # Check for tool call presence
         if condition == "has_tool_calls":
             messages = state.get("messages", [])
@@ -489,8 +506,54 @@ class WorkflowGraphBuilder:
                 var_name = parts[1]
                 expected_value = parts[3]
                 variables = state.get("variables", {})
-                actual_value = variables.get(var_name)
-                return str(actual_value) == expected_value
+                
+                # Handle nested variable access (e.g., variable capabilities equals ...)
+                if var_name == "capabilities" and len(parts) >= 5:
+                    # Handle "variable capabilities enable_memory equals true"
+                    capability_name = parts[2]
+                    expected_value = parts[4]
+                    capabilities = variables.get("capabilities", {})
+                    actual_value = capabilities.get(capability_name)
+                    return str(actual_value).lower() == expected_value.lower()
+                elif "." in var_name:
+                    # Handle dot notation: variable.field
+                    main_var, field = var_name.split(".", 1)
+                    var_dict = variables.get(main_var, {})
+                    actual_value = var_dict.get(field) if isinstance(var_dict, dict) else None
+                    return str(actual_value).lower() == expected_value.lower()
+                else:
+                    # Simple variable access
+                    actual_value = variables.get(var_name)
+                    return str(actual_value).lower() == expected_value.lower()
+        
+        # Handle more complex variable conditions
+        if "variable" in condition:
+            # Handle "variable enable_memory equals true" pattern
+            if " enable_memory equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                return str(capabilities.get("enable_memory", False)).lower() == "true"
+            elif " enable_retrieval equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                return str(capabilities.get("enable_retrieval", False)).lower() == "true"
+            elif " enable_tools equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                return str(capabilities.get("enable_tools", False)).lower() == "true"
+            elif " max_tool_calls" in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                max_calls = capabilities.get("max_tool_calls", 10)
+                tool_count = state.get("tool_call_count", 0)
+                if ">=" in condition:
+                    return tool_count >= max_calls
+                elif ">" in condition:
+                    return tool_count > max_calls
+                elif "<=" in condition:
+                    return tool_count <= max_calls
+                elif "<" in condition:
+                    return tool_count < max_calls
                 
         return True
         

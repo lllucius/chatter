@@ -16,21 +16,29 @@ class TestConnectionLeakFix:
         # Get the source code of the function
         source = inspect.getsource(get_session_generator)
         
-        # Verify that session.close() is called in multiple places for proper cleanup
+        # Verify that session.close() is called in finally block for proper cleanup
         close_calls = source.count('await session.close()')
         
-        # Should have multiple session.close() calls for different cleanup scenarios
-        assert close_calls >= 3, \
-            f"get_session_generator should have multiple session.close() calls for proper cleanup, found {close_calls}"
+        # Should have at least one session.close() call in finally block
+        assert close_calls >= 1, \
+            f"get_session_generator should have session.close() call for proper cleanup, found {close_calls}"
         
-        # Verify GeneratorExit handler includes session.close()
-        assert 'GeneratorExit' in source, \
-            "get_session_generator should handle GeneratorExit"
+        # Verify finally block exists for cleanup
+        assert 'finally:' in source, \
+            "get_session_generator should have finally block for cleanup"
         
-        # Verify that the GeneratorExit handler closes the session
-        generator_exit_section = source[source.find('except GeneratorExit:'):source.find('except Exception:')]
-        assert 'await session.close()' in generator_exit_section, \
-            "GeneratorExit handler should close the session to prevent leaks"
+        # Verify that finally block closes the session
+        finally_section = source[source.find('finally:'):]
+        assert 'await session.close()' in finally_section, \
+            "Finally block should close the session to prevent leaks"
+        
+        # Verify proper exception handling
+        assert 'except Exception:' in source, \
+            "get_session_generator should handle exceptions properly"
+        
+        # Verify rollback on exception
+        assert 'await session.rollback()' in source, \
+            "get_session_generator should rollback on exceptions"
 
     def test_database_manager_still_functional(self):
         """Test that DatabaseManager still has its core functionality."""

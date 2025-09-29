@@ -1205,8 +1205,8 @@ async def get_modern_supported_node_types(
             },
             "variable": {
                 "description": "Variable manipulation and state management node",
-                "required_config": ["variable_name", "operation"],
-                "optional_config": ["value"],
+                "required_config": ["operation"],
+                "optional_config": ["variable_name", "value"],
                 "examples": ["set counter to 0", "increment counter", "get user_preference"]
             },
             "error_handler": {

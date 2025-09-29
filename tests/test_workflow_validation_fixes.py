@@ -48,6 +48,67 @@ class TestWorkflowValidationFixes:
         unknown_type_warnings = [w for w in result.warnings if "unknown type" in w]
         assert len(unknown_type_warnings) == 0, f"Should not have warnings about unknown node types: {unknown_type_warnings}"
 
+    def test_specific_problem_statement_warnings_fixed(self):
+        """Test that the specific warnings from the problem statement are fixed:
+        - Node 1 has unknown type: variable 
+        - Node 8 has unknown type: tools
+        """
+        
+        definition_data = {
+            "name": "universal_chat_workflow",
+            "description": "Universal chat workflow that was causing warnings", 
+            "nodes": [
+                {"id": "start", "type": "start", "position": {"x": 100, "y": 100}, "data": {"label": "Start"}},
+                {"id": "set_capabilities", "type": "variable", "position": {"x": 300, "y": 100}, "data": {"label": "Set Capabilities"}},  # Node 1 - variable type
+                {"id": "conditional_memory", "type": "conditional", "position": {"x": 500, "y": 100}, "data": {"label": "Memory Check"}},
+                {"id": "manage_memory", "type": "memory", "position": {"x": 500, "y": 200}, "data": {"label": "Manage Memory"}},
+                {"id": "conditional_retrieval", "type": "conditional", "position": {"x": 700, "y": 100}, "data": {"label": "Retrieval Check"}},
+                {"id": "retrieve_context", "type": "retrieval", "position": {"x": 700, "y": 200}, "data": {"label": "Retrieve Context"}},
+                {"id": "call_model", "type": "llm", "position": {"x": 900, "y": 100}, "data": {"label": "Call Model"}},
+                {"id": "conditional_tools", "type": "conditional", "position": {"x": 1100, "y": 100}, "data": {"label": "Tools Check"}},
+                {"id": "execute_tools", "type": "tools", "position": {"x": 1100, "y": 200}, "data": {"label": "Execute Tools"}},  # Node 8 - tools type  
+                {"id": "end", "type": "end", "position": {"x": 1300, "y": 100}, "data": {"label": "End"}}
+            ],
+            "edges": [
+                {"id": "e1", "source": "start", "target": "set_capabilities", "type": "default"},
+                {"id": "e2", "source": "set_capabilities", "target": "conditional_memory", "type": "default"},
+                {"id": "e3", "source": "conditional_memory", "target": "manage_memory", "type": "conditional"},
+                {"id": "e4", "source": "conditional_memory", "target": "conditional_retrieval", "type": "conditional"},
+                {"id": "e5", "source": "manage_memory", "target": "conditional_retrieval", "type": "default"},
+                {"id": "e6", "source": "conditional_retrieval", "target": "retrieve_context", "type": "conditional"},
+                {"id": "e7", "source": "conditional_retrieval", "target": "call_model", "type": "conditional"},
+                {"id": "e8", "source": "retrieve_context", "target": "call_model", "type": "default"},
+                {"id": "e9", "source": "call_model", "target": "conditional_tools", "type": "default"},
+                {"id": "e10", "source": "conditional_tools", "target": "execute_tools", "type": "conditional"},
+                {"id": "e11", "source": "conditional_tools", "target": "end", "type": "conditional"},
+                {"id": "e12", "source": "execute_tools", "target": "end", "type": "default"}
+            ],
+            "metadata": {}
+        }
+        
+        validator = WorkflowValidator()
+        context = ValidationContext()
+        
+        result = validator.validate(definition_data, "workflow_definition", context)
+        
+        # Convert warnings to strings for easier checking
+        warning_messages = [str(w) for w in result.warnings]
+        
+        # Check that the specific warnings from the problem statement are NOT present
+        variable_warning = any("unknown type: variable" in w.lower() for w in warning_messages)
+        tools_warning = any("unknown type: tools" in w.lower() for w in warning_messages)
+        
+        assert not variable_warning, f"Variable type should be recognized. Warnings: {warning_messages}"
+        assert not tools_warning, f"Tools type should be recognized. Warnings: {warning_messages}"
+        
+        # Check that these node types are specifically supported
+        nodes = definition_data["nodes"]
+        variable_node = next((n for n in nodes if n["type"] == "variable"), None)
+        tools_node = next((n for n in nodes if n["type"] == "tools"), None)
+        
+        assert variable_node is not None, "Should have a variable node in test data"
+        assert tools_node is not None, "Should have a tools node in test data"
+
     def test_comprehensive_workflow_from_error_log(self):
         """Test validation of the exact workflow from the error log."""
         

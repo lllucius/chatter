@@ -309,16 +309,32 @@ class VariableNode(WorkflowNode):
     def __init__(self, node_id: str, config: dict[str, Any] | None = None):
         super().__init__(node_id, config)
         self.operation = config.get("operation", "set") if config else "set"
-        self.variable_name = config.get("variable_name", "") if config else ""
+        
+        # Support both snake_case and camelCase for backward compatibility
+        self.variable_name = ""
+        if config:
+            self.variable_name = config.get("variable_name", "") or config.get("variableName", "")
+        
         self.value = config.get("value") if config else None
+        
+        # Provide a default variable name if one isn't specified
+        if not self.variable_name:
+            self.variable_name = f"var_{node_id}"
 
     def validate_config(self) -> list[str]:
         """Validate variable node configuration."""
         errors = []
-        if not self.variable_name:
-            errors.append("Variable node must have a variable_name defined")
+        # Now that we provide a default variable_name, we just validate the operation
         if self.operation not in ["set", "get", "append", "increment", "decrement"]:
             errors.append(f"Invalid operation: {self.operation}")
+        
+        # Log a warning if variable_name was auto-generated
+        if self.variable_name.startswith(f"var_{self.node_id}"):
+            logger.warning(
+                f"Variable node {self.node_id} using auto-generated variable name: {self.variable_name}. "
+                "Consider providing an explicit variable_name in the configuration."
+            )
+        
         return errors
 
     async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:

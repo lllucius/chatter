@@ -48,8 +48,8 @@ A comprehensive Python-based backend API platform for building advanced AI chatb
 ## Quick Start
 
 ### Prerequisites
-- Python 3.11 or higher
-- PostgreSQL 15+ with pgvector extension
+- Python 3.12 or higher
+- PostgreSQL 16+ with pgvector 0.6.2+ extension
 - Redis (optional, for caching and rate limiting)
 
 ### Installation
@@ -73,13 +73,12 @@ cp .env.example .env
 
 4. Initialize the database:
 ```bash
-chatter db init
-chatter db migrate
+python -m alembic upgrade head
 ```
 
 5. Start the development server:
 ```bash
-chatter serve --reload
+python -m chatter serve --reload
 ```
 
 The API will be available at `http://localhost:8000` with interactive documentation at `http://localhost:8000/docs`.
@@ -134,47 +133,71 @@ DEBUG_HTTP_REQUESTS=false
 ### Core Endpoints
 
 #### Authentication
-- `POST /auth/register` - Register new user
-- `POST /auth/login` - User login
-- `POST /auth/logout` - User logout
-- `GET /auth/me` - Get current user info
+- `POST /api/v1/auth/register` - Register new user
+- `POST /api/v1/auth/login` - User login
+- `POST /api/v1/auth/logout` - User logout
+- `GET /api/v1/auth/me` - Get current user info
 
 #### Conversations
-- `POST /chat` - Start new conversation
-- `POST /chat/{conversation_id}/message` - Send message
-- `GET /chat/{conversation_id}/messages` - Get message history
-- `GET /chat/{conversation_id}/stream` - Streaming chat endpoint
-- `DELETE /chat/{conversation_id}` - Delete conversation
+- `POST /api/v1/conversations` - Create new conversation
+- `GET /api/v1/conversations` - List conversations
+- `GET /api/v1/conversations/{conversation_id}` - Get conversation
+- `POST /api/v1/conversations/{conversation_id}/chat` - Send message (non-streaming)
+- `POST /api/v1/conversations/{conversation_id}/streaming` - Send message (streaming)
+- `DELETE /api/v1/conversations/{conversation_id}` - Delete conversation
 
 #### Documents & Knowledge Base
-- `POST /documents/upload` - Upload documents
-- `GET /documents` - List documents
-- `GET /documents/{document_id}` - Get document details
-- `DELETE /documents/{document_id}` - Delete document
-- `POST /documents/search` - Search knowledge base
+- `POST /api/v1/documents` - Upload documents
+- `GET /api/v1/documents` - List documents
+- `POST /api/v1/documents/list` - Advanced document listing
+- `POST /api/v1/documents/search` - Search documents
+- `GET /api/v1/documents/{document_id}` - Get document details
+- `PUT /api/v1/documents/{document_id}` - Update document
+- `DELETE /api/v1/documents/{document_id}` - Delete document
+- `GET /api/v1/documents/{document_id}/chunks` - Get document chunks
+- `POST /api/v1/documents/{document_id}/reprocess` - Reprocess document
+
+#### Workflows
+- `GET /api/v1/workflows/definitions` - List workflow definitions
+- `POST /api/v1/workflows/definitions` - Create workflow definition  
+- `GET /api/v1/workflows/definitions/{definition_id}` - Get workflow definition
+- `PUT /api/v1/workflows/definitions/{definition_id}` - Update workflow definition
+- `DELETE /api/v1/workflows/definitions/{definition_id}` - Delete workflow definition
+- `POST /api/v1/workflows/definitions/{definition_id}/execute` - Execute workflow
+- `GET /api/v1/workflows/definitions/{definition_id}/executions` - List executions
 
 #### Profiles & Prompts
-- `GET /profiles` - List LLM profiles
-- `POST /profiles` - Create LLM profile
-- `PUT /profiles/{profile_id}` - Update profile
-- `GET /prompts` - List prompts
-- `POST /prompts` - Create prompt
-- `GET /prompts/{prompt_id}` - Get prompt details
-- `PUT /prompts/{prompt_id}` - Update prompt
-- `DELETE /prompts/{prompt_id}` - Delete prompt
-- `POST /prompts/{prompt_id}/test` - Test prompt with variables
-- `POST /prompts/{prompt_id}/clone` - Clone prompt
-- `GET /prompts/stats/overview` - Get prompt statistics
+- `GET /api/v1/profiles` - List LLM profiles
+- `POST /api/v1/profiles` - Create LLM profile
+- `GET /api/v1/profiles/{profile_id}` - Get profile details
+- `PUT /api/v1/profiles/{profile_id}` - Update profile
+- `DELETE /api/v1/profiles/{profile_id}` - Delete profile
 
-#### Analytics
-- `GET /analytics/conversations` - Conversation statistics
-- `GET /analytics/usage` - Usage metrics
-- `GET /analytics/performance` - Performance metrics
+- `GET /api/v1/prompts` - List prompts
+- `POST /api/v1/prompts` - Create prompt
+- `GET /api/v1/prompts/{prompt_id}` - Get prompt details
+- `PUT /api/v1/prompts/{prompt_id}` - Update prompt
+- `DELETE /api/v1/prompts/{prompt_id}` - Delete prompt
+- `POST /api/v1/prompts/{prompt_id}/test` - Test prompt with variables
+- `POST /api/v1/prompts/{prompt_id}/clone` - Clone prompt
 
-#### Health & Monitoring
+#### Advanced Features
+- `GET /api/v1/agents` - List AI agents
+- `POST /api/v1/agents` - Create AI agent
+- `GET /api/v1/ab-tests` - A/B testing endpoints
+- `GET /api/v1/events` - Event management
+- `GET /api/v1/plugins` - Plugin management  
+- `GET /api/v1/jobs` - Background job management
+- `GET /api/v1/data` - Data management and export
+- `GET /api/v1/models` - Model registry management
+- `GET /api/v1/toolservers` - Tool server integration
+
+#### Analytics & Monitoring
+- `GET /api/v1/analytics/conversations` - Conversation analytics
+- `GET /api/v1/analytics/usage` - Usage metrics
+- `GET /api/v1/analytics/performance` - Performance metrics
 - `GET /healthz` - Health check
 - `GET /readyz` - Readiness check
-- `GET /metrics` - Prometheus metrics
 
 ## SDK Generation
 
@@ -220,46 +243,42 @@ chatter/
 │   ├── __init__.py
 │   ├── main.py              # FastAPI application
 │   ├── config.py            # Configuration management
-│   ├── cli.py               # Command-line interface
+│   ├── api_cli.py           # Command-line interface
 │   ├── api/                 # API routes
 │   │   ├── __init__.py
 │   │   ├── auth.py          # Authentication endpoints
-│   │   ├── chat.py          # Chat endpoints
-│   │   ├── documents.py     # Document management
+│   │   ├── conversations.py # Conversation management
+│   │   ├── new_documents.py # Document management
+│   │   ├── workflows.py     # LangGraph workflow execution
+│   │   ├── profiles.py      # LLM profile management
+│   │   ├── prompts.py       # Prompt management
 │   │   ├── analytics.py     # Analytics endpoints
+│   │   ├── agents.py        # AI agent management
+│   │   ├── ab_testing.py    # A/B testing framework
+│   │   ├── events.py        # Event system
+│   │   ├── plugins.py       # Plugin management
+│   │   ├── jobs.py          # Background job management
+│   │   ├── data_management.py # Data export/import
+│   │   ├── model_registry.py # Model registry
+│   │   ├── toolserver.py    # Tool server integration
 │   │   └── health.py        # Health checks
+│   ├── commands/            # CLI command modules
 │   ├── core/                # Core business logic
-│   │   ├── __init__.py
-│   │   ├── auth.py          # Authentication logic
-│   │   ├── chat.py          # Chat logic
-│   │   ├── langchain.py     # LangChain integration
-│   │   ├── langgraph.py     # LangGraph workflows
-│   │   └── vector_store.py  # Vector store operations
-│   ├── models/              # Database models
-│   │   ├── __init__.py
-│   │   ├── user.py          # User models
-│   │   ├── conversation.py  # Conversation models
-│   │   ├── document.py      # Document models
-│   │   └── analytics.py     # Analytics models
+│   ├── models/              # Database models (SQLAlchemy)
 │   ├── schemas/             # Pydantic schemas
-│   │   ├── __init__.py
-│   │   ├── auth.py          # Auth schemas
-│   │   ├── chat.py          # Chat schemas
-│   │   ├── document.py      # Document schemas
-│   │   └── analytics.py     # Analytics schemas
-│   ├── services/            # External services
-│   │   ├── __init__.py
-│   │   ├── llm.py           # LLM providers
-│   │   ├── embeddings.py    # Embedding providers
-│   │   ├── vector_store.py  # Vector store services
-│   │   └── mcp.py           # MCP tool integration
-│   └── utils/               # Utilities
-│       ├── __init__.py
-│       ├── logging.py       # Structured logging
-│       ├── security.py      # Security utilities
-│       └── database.py      # Database utilities
-├── tests/                   # Test suite
+│   ├── services/            # External service integrations
+│   ├── utils/               # Shared utilities
+│   └── middleware/          # Custom middleware
+├── tests/                   # Comprehensive test suite
 ├── docs/                    # Documentation
+│   ├── api/                 # OpenAPI specifications
+│   ├── sdk-generation.md    # SDK generation guide
+│   └── message_rating.md    # Feature documentation
+├── sdk/                     # Generated SDKs
+│   ├── python/              # Python SDK
+│   └── typescript/          # TypeScript SDK
+├── frontend/                # React frontend application
+├── scripts/                 # Build and utility scripts
 ├── alembic/                 # Database migrations
 ├── .env.example             # Environment template
 ├── pyproject.toml           # Project configuration
@@ -269,12 +288,15 @@ chatter/
 ### Key Components
 
 1. **FastAPI Application** (`main.py`): Core ASGI application with middleware and routing
-2. **LangChain Integration** (`core/langchain.py`): LLM orchestration and chain management
-3. **LangGraph Workflows** (`core/langgraph.py`): Advanced conversation workflows
-4. **Vector Store** (`core/vector_store.py`): Abstracted vector operations
-5. **Database Models** (`models/`): SQLAlchemy models for all entities
-6. **API Routes** (`api/`): RESTful endpoints with proper error handling
-7. **Services** (`services/`): External service integrations
+2. **LangGraph Workflows** (`workflows.py`): Advanced conversation workflows and execution
+3. **Document Management** (`new_documents.py`): Document processing and vector storage 
+4. **Conversation System** (`conversations.py`): Chat management with streaming support
+5. **AI Agents** (`agents.py`): Intelligent agent creation and management
+6. **A/B Testing Framework** (`ab_testing.py`): Experimentation and optimization
+7. **Analytics Engine** (`analytics.py`): Comprehensive usage and performance analytics
+8. **Plugin System** (`plugins.py`): Extensible plugin architecture
+9. **Model Registry** (`model_registry.py`): LLM and embedding model management
+10. **Tool Integration** (`toolserver.py`): MCP tool server integration
 
 ## Development
 
@@ -321,13 +343,13 @@ pytest -m "not slow"    # Skip slow tests
 
 ```bash
 # Create new migration
-chatter db revision --autogenerate -m "Add new feature"
+python -m alembic revision --autogenerate -m "Add new feature"
 
 # Apply migrations
-chatter db upgrade
+python -m alembic upgrade head
 
 # Downgrade
-chatter db downgrade -1
+python -m alembic downgrade -1
 ```
 
 ## Contributing

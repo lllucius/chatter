@@ -1,47 +1,86 @@
-# Running the New API Tests
+# API Tests Overview
 
-This document explains how to run the newly added tests for the documents and data_management APIs.
+This document explains the comprehensive API test suite for Chatter's REST endpoints.
 
-## Test Files Added
+## API Test Coverage
 
-1. **tests/test_documents_unit.py** - Unit tests for documents API endpoints
-2. **tests/test_documents_integration.py** - Integration tests for documents workflows  
-3. **tests/test_data_management_unit.py** - Unit tests for data management API endpoints
-4. **tests/test_data_management_integration.py** - Integration tests for data management workflows
+### Core API Endpoints Tested
 
-## Running the Tests
+1. **Authentication API** (`test_auth_unit.py`, `test_auth_integration.py`)
+   - User registration and login workflows
+   - Token management and validation
+   - Password operations
+   - API key management
 
-### With Full Dependencies (Recommended)
+2. **Documents API** (`test_documents_unit.py`, `test_documents_integration.py`)
+   - Document upload and processing
+   - Document search and retrieval
+   - CRUD operations and metadata management
+   - Document chunks and reprocessing
 
-If you have all the project dependencies installed:
+3. **Conversations API** (`test_conversations_*.py`)  
+   - Conversation creation and management
+   - Message handling and streaming
+   - Chat workflows and context management
+
+4. **Workflows API** (`test_workflow_*.py`)
+   - LangGraph workflow execution
+   - Workflow definition management
+   - Template-based workflow creation
+   - Validation and error handling
+
+5. **Analytics API** (`test_analytics_unit.py`, `test_analytics_integration.py`)
+   - Usage metrics and statistics
+   - Performance analytics
+   - Dashboard data aggregation
+
+6. **Data Management API** (`test_data_management_unit.py`, `test_data_management_integration.py`)
+   - Data export and backup operations
+   - Bulk operations and cleanup
+   - Storage statistics and management
+
+7. **Advanced Features**
+   - **Agents API**: AI agent management and execution
+   - **A/B Testing API**: Experiment creation and results tracking
+   - **Events API**: Event system and notifications  
+   - **Plugins API**: Plugin installation and management
+   - **Jobs API**: Background job scheduling and monitoring
+   - **Model Registry API**: LLM and embedding model management
+
+## Running API Tests
+
+### Prerequisites
+- PostgreSQL database with test configuration
+- All dependencies installed: `pip install -e ".[dev]"`
+
+### Test Commands
 
 ```bash
-# Install the project in development mode
-pip install -e .
+# Run all API tests
+pytest tests/ -v
 
-# Run all new API tests
-pytest tests/test_documents_unit.py tests/test_documents_integration.py tests/test_data_management_unit.py tests/test_data_management_integration.py -v
+# Run specific API test suites
+pytest tests/test_documents_*.py -v
+pytest tests/test_auth_*.py -v  
+pytest tests/test_workflows_*.py -v
 
-# Run just the unit tests
-pytest tests/test_documents_unit.py tests/test_data_management_unit.py -v -m unit
+# Run by test type
+pytest -m unit -v           # Unit tests only
+pytest -m integration -v    # Integration tests only
+pytest -m "not slow" -v     # Exclude slow tests
 
-# Run just the integration tests  
-pytest tests/test_documents_integration.py tests/test_data_management_integration.py -v -m integration
+# Run with coverage
+pytest --cov=chatter tests/ --cov-report=html
 ```
 
-### With Minimal Dependencies (For Testing)
+### Test Categories
 
-If you want to run tests without the full application dependencies, you can use a simplified approach:
+- **Unit Tests**: Fast, isolated endpoint testing
+- **Integration Tests**: Full workflow and database testing
+- **Contract Tests**: API specification compliance
+- **Performance Tests**: Load and response time testing
 
-```bash
-# Install minimal test dependencies
-pip install pytest pytest-asyncio fastapi httpx
-
-# Run tests with basic coverage
-pytest tests/test_documents_unit.py tests/test_data_management_unit.py -v
-```
-
-## Test Coverage
+## Test Statistics
 
 ### Documents API Tests (18 tests total)
 **Unit Tests (10 tests):**
@@ -87,6 +126,12 @@ pytest tests/test_documents_unit.py tests/test_data_management_unit.py -v
 - Bulk delete prompts workflow
 - Permission and access control workflow
 - Cross-API data consistency testing
+
+### Additional Test Suites
+- **Authentication Tests**: 15+ tests covering registration, login, tokens
+- **Workflow Tests**: 20+ tests for LangGraph execution and management
+- **Analytics Tests**: 12+ tests for metrics and dashboard functionality
+- **Integration Tests**: Cross-system workflow testing
 
 ## Test Features
 

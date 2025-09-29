@@ -494,26 +494,51 @@ async def execute_workflow(
     "/definitions/validate", response_model=WorkflowValidationResponse
 )
 async def validate_workflow_definition(
-    workflow_definition: WorkflowDefinitionCreate,
+    request: WorkflowDefinitionCreate | dict,
     current_user: User = Depends(get_current_user),
     workflow_service: WorkflowManagementService = Depends(
         get_workflow_management_service
     ),
 ) -> WorkflowValidationResponse:
-    """Validate a workflow definition."""
+    """Validate a workflow definition - supports both legacy and modern formats."""
     try:
-        validation_result = (
-            await workflow_service.validate_workflow_definition(
-                definition_data=workflow_definition.model_dump(),
-                owner_id=current_user.id,
+        # Handle both legacy (WorkflowDefinitionCreate) and modern (dict with nodes/edges) formats
+        if isinstance(request, WorkflowDefinitionCreate):
+            # Legacy format
+            validation_result = (
+                await workflow_service.validate_workflow_definition(
+                    definition_data=request.model_dump(),
+                    owner_id=current_user.id,
+                )
             )
-        )
-        return WorkflowValidationResponse(**validation_result)
+            return WorkflowValidationResponse(**validation_result)
+        else:
+            # Modern format - assume it's a dict with nodes and edges
+            from chatter.core.langgraph import workflow_manager
+            
+            nodes = request.get("nodes", [])
+            edges = request.get("edges", [])
+            
+            validation_result = workflow_manager.validate_workflow_definition(nodes, edges)
+            
+            return WorkflowValidationResponse(
+                is_valid=validation_result["valid"],
+                errors=[{"message": error} for error in validation_result["errors"]],
+                warnings=validation_result["warnings"],
+                metadata={
+                    "supported_node_types": validation_result["supported_node_types"],
+                    "validation_timestamp": time.time(),
+                }
+            )
     except Exception as e:
         logger.error(f"Failed to validate workflow definition: {e}")
-        raise InternalServerProblem(
-            detail=f"Failed to validate workflow definition: {str(e)}"
-        ) from e
+        # Return validation error response instead of raising exception
+        return WorkflowValidationResponse(
+            is_valid=False,
+            errors=[{"message": f"Validation error: {str(e)}"}],
+            warnings=[],
+            metadata={}
+        )
 
 
 # Node Types
@@ -1040,37 +1065,6 @@ async def execute_chat_workflow_streaming(
 
 
 # Modern Workflow System Endpoints
-
-@router.post("/definitions/validate", response_model=WorkflowValidationResponse)
-async def validate_workflow_definition(
-    nodes: list[dict],
-    edges: list[dict],
-    current_user: User = Depends(get_current_user),
-) -> WorkflowValidationResponse:
-    """Validate a workflow definition using the modern system."""
-    try:
-        from chatter.core.langgraph import workflow_manager
-        
-        validation_result = workflow_manager.validate_workflow_definition(nodes, edges)
-        
-        return WorkflowValidationResponse(
-            is_valid=validation_result["valid"],
-            errors=[{"message": error} for error in validation_result["errors"]],
-            warnings=validation_result["warnings"],
-            metadata={
-                "supported_node_types": validation_result["supported_node_types"],
-                "validation_timestamp": time.time(),
-            }
-        )
-    except Exception as e:
-        logger.error(f"Workflow validation failed: {e}")
-        return WorkflowValidationResponse(
-            is_valid=False,
-            errors=[{"message": f"Validation error: {str(e)}"}],
-            warnings=[],
-            metadata={}
-        )
-
 
 @router.post("/definitions/custom/execute")
 async def execute_custom_workflow(

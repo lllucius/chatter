@@ -50,21 +50,15 @@ class WorkflowManagementService:
             workflow_id: Specific workflow to invalidate, or None to invalidate all
         """
         try:
-            from chatter.core.cache_factory import get_persistent_cache
+            from chatter.core.workflow_performance import get_workflow_cache
 
-            workflow_cache = get_persistent_cache()
-
-            if workflow_id:
-                # For now, we don't have a way to invalidate specific workflows
-                # So we clear all workflows when any workflow changes
-                await workflow_cache.clear()
-                logger.debug(
-                    "Invalidated workflow cache for workflow",
-                    workflow_id=workflow_id,
-                )
-            else:
-                await workflow_cache.clear()
-                logger.debug("Invalidated all workflow caches")
+            workflow_cache = get_workflow_cache()
+            await workflow_cache.clear_all()
+            
+            logger.debug(
+                "Invalidated workflow caches",
+                workflow_id=workflow_id,
+            )
 
         except Exception as e:
             # Don't fail the main operation if cache invalidation fails

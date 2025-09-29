@@ -9,7 +9,7 @@ import json
 from datetime import datetime, timezone
 from typing import Any
 
-from chatter.core.cache_factory import get_persistent_cache
+from chatter.core.workflow_performance import get_workflow_cache
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -20,7 +20,7 @@ class SimplifiedWorkflowAnalyticsService:
 
     def __init__(self, session=None):
         self.session = session
-        self.cache = get_persistent_cache()
+        self.cache = get_workflow_cache().workflow_cache
 
     async def analyze_workflow(
         self,

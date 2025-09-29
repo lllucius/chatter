@@ -613,6 +613,72 @@ class WorkflowGraphBuilder:
         else:
             # No clear entry point, return first node
             return definition.nodes[0]["id"] if definition.nodes else None
+    
+    def create_simple_workflow(
+        self,
+        enable_memory: bool = False,
+        enable_retrieval: bool = False,
+        enable_tools: bool = False,
+        memory_window: int = 10,
+        max_tool_calls: int = 10,
+        system_message: str | None = None
+    ) -> WorkflowDefinition:
+        """Create a simple workflow definition - integrated into the builder class."""
+        definition = WorkflowDefinition()
+        
+        # Add nodes based on capabilities
+        if enable_memory:
+            definition.add_node("manage_memory", "memory", {"memory_window": memory_window})
+            
+        if enable_retrieval:
+            definition.add_node("retrieve_context", "retrieval", {})
+            
+        definition.add_node("call_model", "llm", {"system_message": system_message})
+        
+        if enable_tools:
+            definition.add_node("execute_tools", "tools", {"max_tool_calls": max_tool_calls})
+            definition.add_node("finalize_response", "llm", {"system_message": "Provide a final response based on the tool results."})
+            
+        # Add edges to create the workflow flow
+        entry = None
+        if enable_memory:
+            entry = "manage_memory"
+            if enable_retrieval:
+                definition.add_edge("manage_memory", "retrieve_context")
+                definition.add_edge("retrieve_context", "call_model")
+            else:
+                definition.add_edge("manage_memory", "call_model")
+        else:
+            if enable_retrieval:
+                entry = "retrieve_context"
+                definition.add_edge("retrieve_context", "call_model")
+            else:
+                entry = "call_model"
+                
+        if enable_tools:
+            definition.add_edge("call_model", "execute_tools", "has_tool_calls")
+            definition.add_edge("call_model", END, "no_tool_calls")
+            definition.add_edge("execute_tools", "call_model")
+            definition.add_edge("execute_tools", "finalize_response", "tool_calls >= " + str(max_tool_calls))
+            definition.add_edge("finalize_response", END)
+        else:
+            definition.add_edge("call_model", END)
+            
+        if entry:
+            definition.set_entry_point(entry)
+            
+        return definition
+
+
+# Global workflow builder instance for convenience
+_workflow_builder_instance = None
+
+def get_workflow_builder() -> WorkflowGraphBuilder:
+    """Get the global workflow builder instance."""
+    global _workflow_builder_instance
+    if _workflow_builder_instance is None:
+        _workflow_builder_instance = WorkflowGraphBuilder()
+    return _workflow_builder_instance
 
 
 def create_simple_workflow_definition(
@@ -623,48 +689,12 @@ def create_simple_workflow_definition(
     max_tool_calls: int = 10,
     system_message: str | None = None
 ) -> WorkflowDefinition:
-    """Create a simple workflow definition similar to the original hardcoded approach."""
-    definition = WorkflowDefinition()
-    
-    # Add nodes based on capabilities
-    if enable_memory:
-        definition.add_node("manage_memory", "memory", {"memory_window": memory_window})
-        
-    if enable_retrieval:
-        definition.add_node("retrieve_context", "retrieval", {})
-        
-    definition.add_node("call_model", "llm", {"system_message": system_message})
-    
-    if enable_tools:
-        definition.add_node("execute_tools", "tools", {"max_tool_calls": max_tool_calls})
-        definition.add_node("finalize_response", "llm", {"system_message": "Provide a final response based on the tool results."})
-        
-    # Add edges to create the workflow flow
-    entry = None
-    if enable_memory:
-        entry = "manage_memory"
-        if enable_retrieval:
-            definition.add_edge("manage_memory", "retrieve_context")
-            definition.add_edge("retrieve_context", "call_model")
-        else:
-            definition.add_edge("manage_memory", "call_model")
-    else:
-        if enable_retrieval:
-            entry = "retrieve_context"
-            definition.add_edge("retrieve_context", "call_model")
-        else:
-            entry = "call_model"
-            
-    if enable_tools:
-        definition.add_edge("call_model", "execute_tools", "has_tool_calls")
-        definition.add_edge("call_model", END, "no_tool_calls")
-        definition.add_edge("execute_tools", "call_model")
-        definition.add_edge("execute_tools", "finalize_response", "tool_calls >= " + str(max_tool_calls))
-        definition.add_edge("finalize_response", END)
-    else:
-        definition.add_edge("call_model", END)
-        
-    if entry:
-        definition.set_entry_point(entry)
-        
-    return definition
+    """Create a simple workflow definition - compatibility wrapper."""
+    return get_workflow_builder().create_simple_workflow(
+        enable_memory=enable_memory,
+        enable_retrieval=enable_retrieval,
+        enable_tools=enable_tools,
+        memory_window=memory_window,
+        max_tool_calls=max_tool_calls,
+        system_message=system_message
+    )

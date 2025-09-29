@@ -78,12 +78,17 @@ class WorkflowGraphBuilder:
         tools = kwargs.get('tools')
         if not llm:
             raise ValueError("LLM node requires 'llm' parameter")
-        return self._create_llm_node(node_id, llm, tools, config, **kwargs)
+        
+        # Remove extracted parameters from kwargs to prevent duplication
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['llm', 'tools']}
+        return self._create_llm_node(node_id, llm, tools, config, **filtered_kwargs)
     
     def _create_tool_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
         """Wrapper to create tool nodes with the required parameters."""
         tools = kwargs.get('tools')
-        return self._create_tool_node(node_id, tools, config, **kwargs)
+        # Remove extracted parameters from kwargs to prevent duplication
+        filtered_kwargs = {k: v for k, v in kwargs.items() if k not in ['tools']}
+        return self._create_tool_node(node_id, tools, config, **filtered_kwargs)
         
     def build_graph(
         self,

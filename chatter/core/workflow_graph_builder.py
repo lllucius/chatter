@@ -59,6 +59,31 @@ class WorkflowGraphBuilder:
     
     def __init__(self):
         self.node_factory = WorkflowNodeFactory()
+        # Register custom creators for specialized node types
+        self._register_custom_creators()
+        
+    def _register_custom_creators(self):
+        """Register custom node creators with the factory."""
+        # Register LLM node creators
+        for node_type in ["call_model", "model", "llm"]:
+            WorkflowNodeFactory.register_custom_creator(node_type, self._create_llm_node_wrapper)
+        
+        # Register tool node creators
+        for node_type in ["execute_tools", "tool", "tools"]:
+            WorkflowNodeFactory.register_custom_creator(node_type, self._create_tool_node_wrapper)
+    
+    def _create_llm_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
+        """Wrapper to create LLM nodes with the required parameters."""
+        llm = kwargs.get('llm')
+        tools = kwargs.get('tools')
+        if not llm:
+            raise ValueError("LLM node requires 'llm' parameter")
+        return self._create_llm_node(node_id, llm, tools, config, **kwargs)
+    
+    def _create_tool_node_wrapper(self, node_id: str, config: dict[str, Any] | None = None, **kwargs):
+        """Wrapper to create tool nodes with the required parameters."""
+        tools = kwargs.get('tools')
+        return self._create_tool_node(node_id, tools, config, **kwargs)
         
     def build_graph(
         self,
@@ -225,22 +250,24 @@ class WorkflowGraphBuilder:
                 # No config found, use empty dict
                 node_config = {}
             
-            # Create the node
-            if node_type in ["call_model", "model", "llm"]:
-                # Special handling for LLM nodes
-                node = self._create_llm_node(node_id, llm, tools, node_config, **kwargs)
-            elif node_type in ["execute_tools", "tool", "tools"]:
-                # Special handling for tool nodes
-                node = self._create_tool_node(node_id, tools, node_config, **kwargs)
-            else:
-                # Use the factory for other node types
-                node = self.node_factory.create_node(node_type, node_id, node_config)
+            # Use factory for all node creation - it now handles everything
+            node = self.node_factory.create_node(
+                node_type, 
+                node_id, 
+                node_config, 
+                llm=llm, 
+                tools=tools, 
+                retriever=retriever,
+                **kwargs
+            )
                 
-                # Set up dependencies
-                if hasattr(node, "set_llm"):
-                    node.set_llm(llm)
-                if hasattr(node, "set_retriever") and retriever:
-                    node.set_retriever(retriever)
+            # Set up dependencies for nodes that need them
+            if hasattr(node, "set_llm") and llm:
+                node.set_llm(llm)
+            if hasattr(node, "set_retriever") and retriever:
+                node.set_retriever(retriever)
+            if hasattr(node, "set_tools") and tools:
+                node.set_tools(tools)
                     
             nodes[node_id] = node
             
@@ -586,6 +613,72 @@ class WorkflowGraphBuilder:
         else:
             # No clear entry point, return first node
             return definition.nodes[0]["id"] if definition.nodes else None
+    
+    def create_simple_workflow(
+        self,
+        enable_memory: bool = False,
+        enable_retrieval: bool = False,
+        enable_tools: bool = False,
+        memory_window: int = 10,
+        max_tool_calls: int = 10,
+        system_message: str | None = None
+    ) -> WorkflowDefinition:
+        """Create a simple workflow definition - integrated into the builder class."""
+        definition = WorkflowDefinition()
+        
+        # Add nodes based on capabilities
+        if enable_memory:
+            definition.add_node("manage_memory", "memory", {"memory_window": memory_window})
+            
+        if enable_retrieval:
+            definition.add_node("retrieve_context", "retrieval", {})
+            
+        definition.add_node("call_model", "llm", {"system_message": system_message})
+        
+        if enable_tools:
+            definition.add_node("execute_tools", "tools", {"max_tool_calls": max_tool_calls})
+            definition.add_node("finalize_response", "llm", {"system_message": "Provide a final response based on the tool results."})
+            
+        # Add edges to create the workflow flow
+        entry = None
+        if enable_memory:
+            entry = "manage_memory"
+            if enable_retrieval:
+                definition.add_edge("manage_memory", "retrieve_context")
+                definition.add_edge("retrieve_context", "call_model")
+            else:
+                definition.add_edge("manage_memory", "call_model")
+        else:
+            if enable_retrieval:
+                entry = "retrieve_context"
+                definition.add_edge("retrieve_context", "call_model")
+            else:
+                entry = "call_model"
+                
+        if enable_tools:
+            definition.add_edge("call_model", "execute_tools", "has_tool_calls")
+            definition.add_edge("call_model", END, "no_tool_calls")
+            definition.add_edge("execute_tools", "call_model")
+            definition.add_edge("execute_tools", "finalize_response", "tool_calls >= " + str(max_tool_calls))
+            definition.add_edge("finalize_response", END)
+        else:
+            definition.add_edge("call_model", END)
+            
+        if entry:
+            definition.set_entry_point(entry)
+            
+        return definition
+
+
+# Global workflow builder instance for convenience
+_workflow_builder_instance = None
+
+def get_workflow_builder() -> WorkflowGraphBuilder:
+    """Get the global workflow builder instance."""
+    global _workflow_builder_instance
+    if _workflow_builder_instance is None:
+        _workflow_builder_instance = WorkflowGraphBuilder()
+    return _workflow_builder_instance
 
 
 def create_simple_workflow_definition(
@@ -596,48 +689,12 @@ def create_simple_workflow_definition(
     max_tool_calls: int = 10,
     system_message: str | None = None
 ) -> WorkflowDefinition:
-    """Create a simple workflow definition similar to the original hardcoded approach."""
-    definition = WorkflowDefinition()
-    
-    # Add nodes based on capabilities
-    if enable_memory:
-        definition.add_node("manage_memory", "memory", {"memory_window": memory_window})
-        
-    if enable_retrieval:
-        definition.add_node("retrieve_context", "retrieval", {})
-        
-    definition.add_node("call_model", "llm", {"system_message": system_message})
-    
-    if enable_tools:
-        definition.add_node("execute_tools", "tools", {"max_tool_calls": max_tool_calls})
-        definition.add_node("finalize_response", "llm", {"system_message": "Provide a final response based on the tool results."})
-        
-    # Add edges to create the workflow flow
-    entry = None
-    if enable_memory:
-        entry = "manage_memory"
-        if enable_retrieval:
-            definition.add_edge("manage_memory", "retrieve_context")
-            definition.add_edge("retrieve_context", "call_model")
-        else:
-            definition.add_edge("manage_memory", "call_model")
-    else:
-        if enable_retrieval:
-            entry = "retrieve_context"
-            definition.add_edge("retrieve_context", "call_model")
-        else:
-            entry = "call_model"
-            
-    if enable_tools:
-        definition.add_edge("call_model", "execute_tools", "has_tool_calls")
-        definition.add_edge("call_model", END, "no_tool_calls")
-        definition.add_edge("execute_tools", "call_model")
-        definition.add_edge("execute_tools", "finalize_response", "tool_calls >= " + str(max_tool_calls))
-        definition.add_edge("finalize_response", END)
-    else:
-        definition.add_edge("call_model", END)
-        
-    if entry:
-        definition.set_entry_point(entry)
-        
-    return definition
+    """Create a simple workflow definition - compatibility wrapper."""
+    return get_workflow_builder().create_simple_workflow(
+        enable_memory=enable_memory,
+        enable_retrieval=enable_retrieval,
+        enable_tools=enable_tools,
+        memory_window=memory_window,
+        max_tool_calls=max_tool_calls,
+        system_message=system_message
+    )

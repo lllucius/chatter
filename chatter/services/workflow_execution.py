@@ -17,13 +17,13 @@ from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
 from chatter.core.langgraph import workflow_manager
 from chatter.core.workflow_graph_builder import create_simple_workflow_definition
 from chatter.core.workflow_node_factory import WorkflowNodeContext
+from chatter.core.workflow_performance import PerformanceMonitor
 from chatter.models.base import generate_ulid
 from chatter.models.conversation import Conversation, ConversationStatus, Message, MessageRole
 from chatter.schemas.chat import ChatRequest, StreamingChatChunk
 from chatter.services.llm import LLMService
 from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
-from chatter.utils.workflow_debug_logger import WorkflowDebugLogger
 from datetime import UTC, datetime
 
 logger = get_logger(__name__)
@@ -805,10 +805,9 @@ class WorkflowExecutionService:
             input_data=input_data,
         )
 
-        # Initialize debug logger
-        debug_logger = WorkflowDebugLogger(debug_mode=debug_mode)
-        debug_logger.log_entry(
-            "INFO", 
+        # Initialize performance monitor with debug logging
+        performance_monitor = PerformanceMonitor(debug_mode=debug_mode)
+        performance_monitor.log_debug(
             f"Started workflow execution for definition {definition_id}",
             data={"execution_id": execution.id, "user_id": user_id}
         )
@@ -968,8 +967,7 @@ class WorkflowExecutionService:
             }
 
             # Log workflow structure for debugging
-            debug_logger.log_entry(
-                "DEBUG" if debug_mode else "INFO",
+            performance_monitor.log_debug(
                 f"Executing workflow with {len(actual_nodes)} nodes and {len(actual_edges)} edges",
                 data={
                     "nodes": [n.get('id') for n in actual_nodes],
@@ -989,8 +987,7 @@ class WorkflowExecutionService:
             )
             workflow_execution_time = int((time.time() - workflow_start_time) * 1000)
 
-            debug_logger.log_entry(
-                "INFO",
+            performance_monitor.log_debug(
                 f"Workflow execution completed in {workflow_execution_time}ms",
                 data={"execution_time_ms": workflow_execution_time}
             )
@@ -1003,8 +1000,8 @@ class WorkflowExecutionService:
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
             # Collect debug information if enabled
-            debug_info = debug_logger.get_debug_info(actual_nodes, actual_edges) if debug_mode else {}
-            execution_log = debug_logger.get_structured_logs()
+            debug_info = {"debug_logs": performance_monitor.debug_logs} if debug_mode else {}
+            execution_log = performance_monitor.debug_logs
 
             # Update execution with success status and results
             updated_execution = await workflow_service.update_workflow_execution(
@@ -1051,18 +1048,14 @@ class WorkflowExecutionService:
             execution_time_ms = int((end_time - start_time).total_seconds() * 1000)
 
             # Log error for debugging
-            debug_logger.log_entry(
-                "ERROR",
+            performance_monitor.log_debug(
                 f"Workflow execution failed: {str(e)}",
                 data={"error_type": type(e).__name__, "error_message": str(e)}
             )
 
             # Collect debug information if enabled (even on failure)
-            debug_info = debug_logger.get_debug_info(
-                actual_nodes if 'actual_nodes' in locals() else [],
-                actual_edges if 'actual_edges' in locals() else []
-            ) if debug_mode else {}
-            execution_log = debug_logger.get_structured_logs()
+            debug_info = {"debug_logs": performance_monitor.debug_logs} if debug_mode else {}
+            execution_log = performance_monitor.debug_logs
 
             # Update execution with failed status
             try:

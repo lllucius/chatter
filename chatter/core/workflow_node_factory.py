@@ -511,10 +511,99 @@ class DelayNode(WorkflowNode):
         }
 
 
+class StartNode(WorkflowNode):
+    """Node for workflow entry point."""
+
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute start node - initialize workflow context."""
+        return {
+            "metadata": {
+                **context.get("metadata", {}),
+                f"start_node_{self.node_id}": True,
+                "workflow_started": True,
+            }
+        }
+
+
+class EndNode(WorkflowNode):
+    """Node for workflow exit point."""
+
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute end node - finalize workflow context."""
+        return {
+            "metadata": {
+                **context.get("metadata", {}),
+                f"end_node_{self.node_id}": True,
+                "workflow_completed": True,
+            }
+        }
+
+
+class ModelNode(WorkflowNode):
+    """Node for language model processing with LLM integration."""
+
+    def __init__(self, node_id: str, config: dict[str, Any] | None = None):
+        super().__init__(node_id, config)
+        self.llm: BaseChatModel | None = None
+        self.tools: list[Any] | None = None
+        self.system_message = config.get("system_message") if config else None
+        self.temperature = config.get("temperature") if config else None
+        self.max_tokens = config.get("max_tokens") if config else None
+
+    def set_llm(self, llm: BaseChatModel) -> None:
+        """Set the LLM for this node."""
+        self.llm = llm
+
+    def set_tools(self, tools: list[Any] | None) -> None:
+        """Set the tools for this node."""
+        self.tools = tools
+
+    async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
+        """Execute LLM call with context - this is a placeholder that should be overridden by graph builder."""
+        if not self.llm:
+            return {
+                "messages": [HumanMessage(content="Error: No LLM configured for model node")],
+                "error_state": {
+                    **context.get("error_state", {}),
+                    f"model_error_{self.node_id}": "No LLM configured",
+                }
+            }
+
+        messages = list(context["messages"])
+        try:
+            # Apply configuration if provided
+            llm_kwargs = {}
+            if self.temperature is not None:
+                llm_kwargs["temperature"] = self.temperature
+            if self.max_tokens is not None:
+                llm_kwargs["max_tokens"] = self.max_tokens
+
+            # Use tools if available
+            llm_to_use = self.llm.bind_tools(self.tools) if self.tools else self.llm
+            response = await llm_to_use.ainvoke(messages, **llm_kwargs)
+            return {"messages": [response]}
+        except Exception as e:
+            logger.error(f"Model node execution failed: {e}")
+            return {
+                "messages": [HumanMessage(content=f"I encountered an error: {str(e)}")],
+                "error_state": {
+                    **context.get("error_state", {}),
+                    f"model_error_{self.node_id}": str(e),
+                }
+            }
+
+
 class WorkflowNodeFactory:
     """Factory for creating workflow nodes of different types."""
 
     _node_types = {
+        # Core workflow nodes
         "memory": MemoryNode,
         "retrieval": RetrievalNode,
         "conditional": ConditionalNode,
@@ -522,15 +611,36 @@ class WorkflowNodeFactory:
         "variable": VariableNode,
         "error_handler": ErrorHandlerNode,
         "delay": DelayNode,
+        
+        # Tool execution nodes
         "tools": ToolsNode,
+        "tool": ToolsNode,  # Alias for tools
+        "execute_tools": ToolsNode,  # Alias for tools
+        
+        # Workflow control nodes
+        "start": StartNode,
+        "end": EndNode,
+        
+        # Language model nodes (all aliases point to ModelNode)
+        "model": ModelNode,
+        "llm": ModelNode,
+        "call_model": ModelNode,
     }
 
+    # Registry for custom node creators (used by WorkflowGraphBuilder)
+    _custom_creators = {}
+
     @classmethod
-    def create_node(cls, node_type: str, node_id: str, config: dict[str, Any] | None = None) -> WorkflowNode:
+    def create_node(cls, node_type: str, node_id: str, config: dict[str, Any] | None = None, **kwargs) -> WorkflowNode:
         """Create a node of the specified type."""
         if node_type not in cls._node_types:
             raise ValueError(f"Unknown node type: {node_type}")
 
+        # Check if there's a custom creator registered for this node type
+        if node_type in cls._custom_creators:
+            return cls._custom_creators[node_type](node_id, config, **kwargs)
+
+        # Use standard factory creation
         node_class = cls._node_types[node_type]
         node = node_class(node_id, config)
 
@@ -540,6 +650,11 @@ class WorkflowNodeFactory:
             raise ValueError(f"Node configuration errors: {', '.join(errors)}")
 
         return node
+
+    @classmethod
+    def register_custom_creator(cls, node_type: str, creator_func):
+        """Register a custom creator function for a node type."""
+        cls._custom_creators[node_type] = creator_func
 
     @classmethod
     def get_supported_types(cls) -> list[str]:

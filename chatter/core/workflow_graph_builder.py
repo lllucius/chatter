@@ -639,12 +639,6 @@ class WorkflowGraphBuilder:
         """Evaluate a single condition without compound logic."""
         condition = condition.strip()
 
-    def _evaluate_single_condition(
-        self, condition: str, state: WorkflowNodeContext
-    ) -> bool:
-        """Evaluate a single condition without compound logic."""
-        condition = condition.strip()
-
         # Check for tool call presence
         if condition == "has_tool_calls":
             messages = state.get("messages", [])
@@ -686,7 +680,48 @@ class WorkflowGraphBuilder:
             error_state = state.get("error_state", {})
             return bool(error_state)
 
-        # Check variable conditions
+        # Handle capability-specific variable conditions BEFORE general variable handler
+        # These need special handling because capabilities are nested under variables["capabilities"]
+        if "variable" in condition:
+            # Handle "variable enable_memory equals <value>" pattern
+            if " enable_memory equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                actual_value = str(capabilities.get("enable_memory", False)).lower()
+                # Extract expected value from condition
+                expected_value = condition.split(" enable_memory equals ")[1].strip()
+                return actual_value == expected_value
+            elif " enable_retrieval equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                actual_value = str(capabilities.get("enable_retrieval", False)).lower()
+                # Extract expected value from condition
+                expected_value = condition.split(" enable_retrieval equals ")[1].strip()
+                return actual_value == expected_value
+            elif " enable_tools equals " in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                actual_value = str(capabilities.get("enable_tools", False)).lower()
+                # Extract expected value from condition
+                expected_value = condition.split(" enable_tools equals ")[1].strip()
+                return actual_value == expected_value
+            elif " max_tool_calls" in condition:
+                variables = state.get("variables", {})
+                capabilities = variables.get("capabilities", {})
+                max_calls = capabilities.get("max_tool_calls", 10)
+                tool_count = state.get("tool_call_count", 0)
+                if ">=" in condition:
+                    return tool_count >= max_calls
+                elif ">" in condition:
+                    return tool_count > max_calls
+                elif "<=" in condition:
+                    return tool_count <= max_calls
+                elif "<" in condition:
+                    return tool_count < max_calls
+
+        # Check general variable conditions
+        # This handles patterns like "variable capabilities enable_memory equals true" 
+        # or "variable.field equals value"
         if "variable" in condition and "equals" in condition:
             parts = condition.split()
             if len(parts) >= 3:
@@ -725,48 +760,6 @@ class WorkflowGraphBuilder:
                         str(actual_value).lower()
                         == expected_value.lower()
                     )
-
-        # Handle more complex variable conditions
-        if "variable" in condition:
-            # Handle "variable enable_memory equals true" pattern
-            if " enable_memory equals " in condition:
-                variables = state.get("variables", {})
-                capabilities = variables.get("capabilities", {})
-                return (
-                    str(
-                        capabilities.get("enable_memory", False)
-                    ).lower()
-                    == "true"
-                )
-            elif " enable_retrieval equals " in condition:
-                variables = state.get("variables", {})
-                capabilities = variables.get("capabilities", {})
-                return (
-                    str(
-                        capabilities.get("enable_retrieval", False)
-                    ).lower()
-                    == "true"
-                )
-            elif " enable_tools equals " in condition:
-                variables = state.get("variables", {})
-                capabilities = variables.get("capabilities", {})
-                return (
-                    str(capabilities.get("enable_tools", False)).lower()
-                    == "true"
-                )
-            elif " max_tool_calls" in condition:
-                variables = state.get("variables", {})
-                capabilities = variables.get("capabilities", {})
-                max_calls = capabilities.get("max_tool_calls", 10)
-                tool_count = state.get("tool_call_count", 0)
-                if ">=" in condition:
-                    return tool_count >= max_calls
-                elif ">" in condition:
-                    return tool_count > max_calls
-                elif "<=" in condition:
-                    return tool_count <= max_calls
-                elif "<" in condition:
-                    return tool_count < max_calls
 
         return True
 

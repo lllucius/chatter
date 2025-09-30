@@ -244,112 +244,193 @@ class WorkflowExecutionService:
             is_temporary=True
         )
         
-        # Get LLM
-        llm = await self.llm_service.get_llm(
-            provider=chat_request.provider,
-            model=chat_request.model,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
-        )
-
-        # Get tools and retriever if needed
-        tools = None
-        retriever = None
-
-        if chat_request.enable_tools:
-            try:
-                from chatter.core.tool_registry import ToolRegistry
-                tool_registry = ToolRegistry()
-                tools = tool_registry.get_tools_for_workspace(
-                    workspace_id=user_id,
-                    user_permissions=[]  # TODO: Add user permission system
-                )
-                logger.info(f"Loaded {len(tools) if tools else 0} tools for universal template execution")
-            except Exception as e:
-                logger.warning(f"Could not load tools from tool registry: {e}")
-                tools = []
-
-        if chat_request.enable_retrieval:
-            try:
-                from chatter.core.vector_store import get_vector_store_retriever
-                retriever = get_vector_store_retriever(user_id=user_id)
-                logger.info("Loaded retriever from vector store for universal template")
-            except Exception as e:
-                logger.warning(f"Could not load retriever from vector store: {e}")
-                retriever = None
-
-        # Create workflow from definition
-        # Convert database WorkflowDefinition to graph builder WorkflowDefinition
-        graph_definition = create_workflow_definition_from_model(definition)
-        workflow = await workflow_manager.create_workflow_from_definition(
-            definition=graph_definition,
-            llm=llm,
-            retriever=retriever,
-            tools=tools,
-            max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
-            user_id=user_id,
-            conversation_id=conversation.id,
-        )
-
-        # Get conversation history
-        messages = await self._get_conversation_messages(conversation)
-
-        # Add new user message
-        messages.append(HumanMessage(content=chat_request.message))
-
-        # Create initial state
-        initial_state: WorkflowNodeContext = {
-            "messages": messages,
-            "user_id": user_id,
-            "conversation_id": conversation.id,
-            "retrieval_context": None,
-            "conversation_summary": None,
-            "tool_call_count": 0,
-            "metadata": {
+        # Create workflow execution record
+        execution = await workflow_mgmt.create_workflow_execution(
+            definition_id=definition.id,
+            owner_id=user_id,
+            input_data={
+                "message": chat_request.message,
+                "conversation_id": conversation.id,
                 "provider": chat_request.provider,
                 "model": chat_request.model,
-                "temperature": chat_request.temperature,
-                "max_tokens": chat_request.max_tokens,
+            },
+        )
+        
+        # Initialize performance monitor for tracking
+        performance_monitor = PerformanceMonitor(debug_mode=True)
+        performance_monitor.log_debug(
+            "Started universal template execution",
+            data={
+                "execution_id": execution.id,
+                "template_id": universal_template.id,
+                "conversation_id": conversation.id,
+            }
+        )
+        
+        try:
+            # Update execution status to running
+            execution = await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=datetime.fromtimestamp(start_time, UTC),
+            )
+            
+            # Get LLM
+            llm = await self.llm_service.get_llm(
+                provider=chat_request.provider,
+                model=chat_request.model,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
+            )
+
+            # Get tools and retriever if needed
+            tools = None
+            retriever = None
+
+            if chat_request.enable_tools:
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+                    tool_registry = ToolRegistry()
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[]  # TODO: Add user permission system
+                    )
+                    logger.info(f"Loaded {len(tools) if tools else 0} tools for universal template execution")
+                except Exception as e:
+                    logger.warning(f"Could not load tools from tool registry: {e}")
+                    tools = []
+
+            if chat_request.enable_retrieval:
+                try:
+                    from chatter.core.vector_store import get_vector_store_retriever
+                    retriever = get_vector_store_retriever(user_id=user_id)
+                    logger.info("Loaded retriever from vector store for universal template")
+                except Exception as e:
+                    logger.warning(f"Could not load retriever from vector store: {e}")
+                    retriever = None
+
+            # Create workflow from definition
+            # Convert database WorkflowDefinition to graph builder WorkflowDefinition
+            graph_definition = create_workflow_definition_from_model(definition)
+            workflow = await workflow_manager.create_workflow_from_definition(
+                definition=graph_definition,
+                llm=llm,
+                retriever=retriever,
+                tools=tools,
+                max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
+                user_id=user_id,
+                conversation_id=conversation.id,
+            )
+            
+            performance_monitor.log_debug(
+                "Workflow created from universal template",
+                data={"definition_id": definition.id}
+            )
+
+            # Get conversation history
+            messages = await self._get_conversation_messages(conversation)
+
+            # Add new user message
+            messages.append(HumanMessage(content=chat_request.message))
+
+            # Create initial state
+            initial_state: WorkflowNodeContext = {
+                "messages": messages,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "conversation_summary": None,
+                "tool_call_count": 0,
+                "metadata": {
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                    "temperature": chat_request.temperature,
+                    "max_tokens": chat_request.max_tokens,
+                    "universal_template": True,
+                    "template_id": universal_template.id,
+                },
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
+            }
+
+            # Execute workflow
+            performance_monitor.log_debug("Starting workflow execution")
+            result = await workflow_manager.run_workflow(
+                workflow=workflow,
+                initial_state=initial_state,
+                thread_id=conversation.id,
+            )
+            performance_monitor.log_debug("Workflow execution completed")
+
+            # Extract AI response
+            ai_message = self._extract_ai_response(result)
+
+            # Create and save message
+            message = await self._create_and_save_message(
+                conversation=conversation,
+                content=ai_message.content,
+                role=MessageRole.ASSISTANT,
+                metadata=result.get("metadata", {}),
+            )
+
+            # Calculate usage info
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            usage_info = {
+                "execution_time_ms": execution_time_ms,
+                "tool_calls": result.get("tool_call_count", 0),
+                "workflow_execution": True,
                 "universal_template": True,
                 "template_id": universal_template.id,
-            },
-            "variables": {},
-            "loop_state": {},
-            "error_state": {},
-            "conditional_results": {},
-            "execution_history": [],
-        }
+                **result.get("metadata", {}),
+            }
+            
+            # Update execution with success
+            await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=datetime.now(UTC),
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": ai_message.content,
+                    "conversation_id": conversation.id,
+                    "metadata": result.get("metadata", {}),
+                },
+                tokens_used=result.get("tokens_used", 0),
+                cost=result.get("cost", 0.0),
+                execution_log=performance_monitor.debug_logs,
+            )
+            
+            logger.info(f"Universal template execution {execution.id} completed successfully")
 
-        # Execute workflow
-        result = await workflow_manager.run_workflow(
-            workflow=workflow,
-            initial_state=initial_state,
-            thread_id=conversation.id,
-        )
-
-        # Extract AI response
-        ai_message = self._extract_ai_response(result)
-
-        # Create and save message
-        message = await self._create_and_save_message(
-            conversation=conversation,
-            content=ai_message.content,
-            role=MessageRole.ASSISTANT,
-            metadata=result.get("metadata", {}),
-        )
-
-        # Calculate usage info
-        execution_time_ms = int((time.time() - start_time) * 1000)
-        usage_info = {
-            "execution_time_ms": execution_time_ms,
-            "tool_calls": result.get("tool_call_count", 0),
-            "workflow_execution": True,
-            "universal_template": True,
-            "template_id": universal_template.id,
-            **result.get("metadata", {}),
-        }
-
-        return message, usage_info
+            return message, usage_info
+            
+        except Exception as e:
+            # Update execution with failure
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            performance_monitor.log_debug(
+                f"Execution failed: {str(e)}",
+                data={"error_type": type(e).__name__}
+            )
+            
+            try:
+                await workflow_mgmt.update_workflow_execution(
+                    execution_id=execution.id,
+                    owner_id=user_id,
+                    status="failed",
+                    completed_at=datetime.now(UTC),
+                    execution_time_ms=execution_time_ms,
+                    error=str(e),
+                    execution_log=performance_monitor.debug_logs,
+                )
+            except Exception as update_error:
+                logger.error(f"Failed to update execution status: {update_error}")
+            
+            raise
 
     async def _execute_with_dynamic_workflow(
         self,
@@ -359,111 +440,222 @@ class WorkflowExecutionService:
         start_time: float,
     ) -> tuple[Message, dict[str, Any]]:
         """Fallback method using dynamic workflow creation."""
-        # Get LLM
-        llm = await self.llm_service.get_llm(
-            provider=chat_request.provider,
-            model=chat_request.model,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
+        from chatter.services.workflow_management import WorkflowManagementService
+        
+        # Create workflow management service
+        workflow_mgmt = WorkflowManagementService(self.session)
+        
+        # Create a simple workflow definition for tracking purposes
+        # Since this is dynamic, we create a minimal definition
+        definition = await workflow_mgmt.create_workflow_definition(
+            owner_id=user_id,
+            name="Dynamic Chat Workflow",
+            description="Dynamically created chat workflow for execution tracking",
+            nodes=[
+                {"id": "call_model", "type": "model", "config": {
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                    "temperature": chat_request.temperature,
+                    "max_tokens": chat_request.max_tokens,
+                }}
+            ],
+            edges=[
+                {"source": "call_model", "target": "END"}
+            ],
+            metadata={
+                "dynamic": True,
+                "execution_only": True,  # Mark as execution-only definition
+                "enable_memory": chat_request.enable_memory,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_tools": chat_request.enable_tools,
+            }
         )
-
-        # Get tools and retriever if needed
-        tools = None
-        retriever = None
-
-        if chat_request.enable_tools:
-            try:
-                from chatter.core.tool_registry import ToolRegistry
-                tool_registry = ToolRegistry()
-                tools = tool_registry.get_tools_for_workspace(
-                    workspace_id=user_id,
-                    user_permissions=[]  # TODO: Add user permission system
-                )
-                logger.info(f"Loaded {len(tools) if tools else 0} tools for workflow execution")
-            except Exception as e:
-                logger.warning(f"Could not load tools from tool registry: {e}")
-                tools = []
-
-        if chat_request.enable_retrieval:
-            try:
-                from chatter.core.vector_store import get_vector_store_retriever
-                retriever = get_vector_store_retriever(user_id=user_id)
-                logger.info("Loaded retriever from vector store")
-            except Exception as e:
-                logger.warning(f"Could not load retriever from vector store: {e}")
-                retriever = None
-
-        # Create workflow using modern system
-        workflow = await workflow_manager.create_workflow(
-            llm=llm,
-            enable_retrieval=chat_request.enable_retrieval,
-            enable_tools=chat_request.enable_tools,
-            enable_memory=chat_request.enable_memory,
-            system_message=chat_request.system_prompt_override,
-            retriever=retriever,
-            tools=tools,
-            memory_window=getattr(chat_request, 'memory_window', 10),
-            max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
-            user_id=user_id,
-            conversation_id=conversation.id,
-        )
-
-        # Get conversation history
-        messages = await self._get_conversation_messages(conversation)
-
-        # Add new user message
-        messages.append(HumanMessage(content=chat_request.message))
-
-        # Create initial state
-        initial_state: WorkflowNodeContext = {
-            "messages": messages,
-            "user_id": user_id,
-            "conversation_id": conversation.id,
-            "retrieval_context": None,
-            "conversation_summary": None,
-            "tool_call_count": 0,
-            "metadata": {
+        
+        # Create workflow execution record
+        execution = await workflow_mgmt.create_workflow_execution(
+            definition_id=definition.id,
+            owner_id=user_id,
+            input_data={
+                "message": chat_request.message,
+                "conversation_id": conversation.id,
                 "provider": chat_request.provider,
                 "model": chat_request.model,
-                "temperature": chat_request.temperature,
-                "max_tokens": chat_request.max_tokens,
             },
-            "variables": {},
-            "loop_state": {},
-            "error_state": {},
-            "conditional_results": {},
-            "execution_history": [],
-        }
-
-        # Execute workflow
-        result = await workflow_manager.run_workflow(
-            workflow=workflow,
-            initial_state=initial_state,
-            thread_id=conversation.id,
         )
-
-        # Extract AI response
-        ai_message = self._extract_ai_response(result)
-
-        # Create and save message
-        message = await self._create_and_save_message(
-            conversation=conversation,
-            content=ai_message.content,
-            role=MessageRole.ASSISTANT,
-            metadata=result.get("metadata", {}),
+        
+        # Initialize performance monitor for tracking
+        performance_monitor = PerformanceMonitor(debug_mode=True)
+        performance_monitor.log_debug(
+            "Started dynamic workflow execution",
+            data={
+                "execution_id": execution.id,
+                "conversation_id": conversation.id,
+            }
         )
+        
+        try:
+            # Update execution status to running
+            execution = await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=datetime.fromtimestamp(start_time, UTC),
+            )
+            
+            # Get LLM
+            llm = await self.llm_service.get_llm(
+                provider=chat_request.provider,
+                model=chat_request.model,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
+            )
 
-        # Calculate usage info
-        execution_time_ms = int((time.time() - start_time) * 1000)
-        usage_info = {
-            "execution_time_ms": execution_time_ms,
-            "tool_calls": result.get("tool_call_count", 0),
-            "workflow_execution": True,
-            "modern_system": True,
-            **result.get("metadata", {}),
-        }
+            # Get tools and retriever if needed
+            tools = None
+            retriever = None
 
-        return message, usage_info
+            if chat_request.enable_tools:
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+                    tool_registry = ToolRegistry()
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[]  # TODO: Add user permission system
+                    )
+                    logger.info(f"Loaded {len(tools) if tools else 0} tools for workflow execution")
+                except Exception as e:
+                    logger.warning(f"Could not load tools from tool registry: {e}")
+                    tools = []
+
+            if chat_request.enable_retrieval:
+                try:
+                    from chatter.core.vector_store import get_vector_store_retriever
+                    retriever = get_vector_store_retriever(user_id=user_id)
+                    logger.info("Loaded retriever from vector store")
+                except Exception as e:
+                    logger.warning(f"Could not load retriever from vector store: {e}")
+                    retriever = None
+
+            # Create workflow using modern system
+            workflow = await workflow_manager.create_workflow(
+                llm=llm,
+                enable_retrieval=chat_request.enable_retrieval,
+                enable_tools=chat_request.enable_tools,
+                enable_memory=chat_request.enable_memory,
+                system_message=chat_request.system_prompt_override,
+                retriever=retriever,
+                tools=tools,
+                memory_window=getattr(chat_request, 'memory_window', 10),
+                max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
+                user_id=user_id,
+                conversation_id=conversation.id,
+            )
+            
+            performance_monitor.log_debug(
+                "Dynamic workflow created",
+                data={"definition_id": definition.id}
+            )
+
+            # Get conversation history
+            messages = await self._get_conversation_messages(conversation)
+
+            # Add new user message
+            messages.append(HumanMessage(content=chat_request.message))
+
+            # Create initial state
+            initial_state: WorkflowNodeContext = {
+                "messages": messages,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "conversation_summary": None,
+                "tool_call_count": 0,
+                "metadata": {
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                    "temperature": chat_request.temperature,
+                    "max_tokens": chat_request.max_tokens,
+                },
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
+            }
+
+            # Execute workflow
+            performance_monitor.log_debug("Starting workflow execution")
+            result = await workflow_manager.run_workflow(
+                workflow=workflow,
+                initial_state=initial_state,
+                thread_id=conversation.id,
+            )
+            performance_monitor.log_debug("Workflow execution completed")
+
+            # Extract AI response
+            ai_message = self._extract_ai_response(result)
+
+            # Create and save message
+            message = await self._create_and_save_message(
+                conversation=conversation,
+                content=ai_message.content,
+                role=MessageRole.ASSISTANT,
+                metadata=result.get("metadata", {}),
+            )
+
+            # Calculate usage info
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            usage_info = {
+                "execution_time_ms": execution_time_ms,
+                "tool_calls": result.get("tool_call_count", 0),
+                "workflow_execution": True,
+                "modern_system": True,
+                **result.get("metadata", {}),
+            }
+            
+            # Update execution with success
+            await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=datetime.now(UTC),
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": ai_message.content,
+                    "conversation_id": conversation.id,
+                    "metadata": result.get("metadata", {}),
+                },
+                tokens_used=result.get("tokens_used", 0),
+                cost=result.get("cost", 0.0),
+                execution_log=performance_monitor.debug_logs,
+            )
+            
+            logger.info(f"Dynamic workflow execution {execution.id} completed successfully")
+
+            return message, usage_info
+            
+        except Exception as e:
+            # Update execution with failure
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            performance_monitor.log_debug(
+                f"Execution failed: {str(e)}",
+                data={"error_type": type(e).__name__}
+            )
+            
+            try:
+                await workflow_mgmt.update_workflow_execution(
+                    execution_id=execution.id,
+                    owner_id=user_id,
+                    status="failed",
+                    completed_at=datetime.now(UTC),
+                    execution_time_ms=execution_time_ms,
+                    error=str(e),
+                    execution_log=performance_monitor.debug_logs,
+                )
+            except Exception as update_error:
+                logger.error(f"Failed to update execution status: {update_error}")
+            
+            raise
 
     async def execute_chat_workflow_streaming(
         self,
@@ -554,102 +746,188 @@ class WorkflowExecutionService:
             user_input=template_params,
             is_temporary=True
         )
-
-        # Get LLM
-        llm = await self.llm_service.get_llm(
-            provider=chat_request.provider,
-            model=chat_request.model,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
+        
+        # Create workflow execution record
+        execution = await workflow_mgmt.create_workflow_execution(
+            definition_id=definition.id,
+            owner_id=user_id,
+            input_data={
+                "message": chat_request.message,
+                "conversation_id": conversation.id,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+                "streaming": True,
+            },
         )
+        
+        # Initialize performance monitor for tracking
+        performance_monitor = PerformanceMonitor(debug_mode=True)
+        performance_monitor.log_debug(
+            "Started universal template streaming execution",
+            data={
+                "execution_id": execution.id,
+                "template_id": universal_template.id,
+                "conversation_id": conversation.id,
+            }
+        )
+        
+        start_time = time.time()        
+        try:
+            # Update execution status to running
+            execution = await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=datetime.fromtimestamp(start_time, UTC),
+            )
 
-        # Get tools and retriever if needed
-        tools = None
-        retriever = None
+            # Get LLM
+            llm = await self.llm_service.get_llm(
+                provider=chat_request.provider,
+                model=chat_request.model,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
+            )
 
-        if chat_request.enable_tools:
+            # Get tools and retriever if needed
+            tools = None
+            retriever = None
+
+            if chat_request.enable_tools:
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+                    tool_registry = ToolRegistry()
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[]  # TODO: Add user permission system
+                    )
+                    logger.info(f"Loaded {len(tools) if tools else 0} tools for universal template streaming")
+                except Exception as e:
+                    logger.warning(f"Could not load tools from tool registry: {e}")
+                    tools = []
+
+            if chat_request.enable_retrieval:
+                try:
+                    from chatter.core.vector_store import get_vector_store_retriever
+                    retriever = get_vector_store_retriever(user_id=user_id)
+                    logger.info("Loaded retriever from vector store for universal template streaming")
+                except Exception as e:
+                    logger.warning(f"Could not load retriever from vector store: {e}")
+                    retriever = None
+
+            # Create workflow from definition
+            # Convert database WorkflowDefinition to graph builder WorkflowDefinition
+            graph_definition = create_workflow_definition_from_model(definition)
+            workflow = await workflow_manager.create_workflow_from_definition(
+                definition=graph_definition,
+                llm=llm,
+                retriever=retriever,
+                tools=tools,
+                max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
+                user_id=user_id,
+                conversation_id=conversation.id,
+            )
+            
+            performance_monitor.log_debug(
+                "Workflow created from universal template for streaming",
+                data={"definition_id": definition.id}
+            )
+
+            # Get conversation history and create initial state
+            messages = await self._get_conversation_messages(conversation)
+            messages.append(HumanMessage(content=request.message))
+
+            initial_state: WorkflowNodeContext = {
+                "messages": messages,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "conversation_summary": None,
+                "tool_call_count": 0,
+                "metadata": {"universal_template": True, "template_id": universal_template.id},
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
+            }
+
+            # Stream workflow execution
+            performance_monitor.log_debug("Starting streaming workflow execution")
+            content_buffer = ""
+            async for update in workflow_manager.stream_workflow(
+                workflow=workflow,
+                initial_state=initial_state,
+                thread_id=conversation.id,
+                enable_llm_streaming=True,
+            ):
+                if isinstance(update, dict) and "messages" in update:
+                    # Extract streaming content
+                    messages = update["messages"]
+                    if messages:
+                        last_message = messages[-1]
+                        if hasattr(last_message, "content"):
+                            new_content = last_message.content[len(content_buffer):]
+                            if new_content:
+                                content_buffer += new_content
+                                yield StreamingChatChunk(
+                                    type="content",
+                                    content=new_content,
+                                    metadata={**update.get("metadata", {}), "universal_template": True},
+                                )
+            
+            performance_monitor.log_debug(
+                "Streaming workflow execution completed",
+                data={"content_length": len(content_buffer)}
+            )
+
+            # Send completion chunk
+            yield StreamingChatChunk(
+                type="done",
+                content="",
+                metadata={"streaming_complete": True, "universal_template": True},
+            )
+            
+            # Update execution with success
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=datetime.now(UTC),
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": content_buffer,
+                    "conversation_id": conversation.id,
+                    "streaming": True,
+                },
+                execution_log=performance_monitor.debug_logs,
+            )
+            
+            logger.info(f"Universal template streaming execution {execution.id} completed successfully")
+            
+        except Exception as e:
+            # Update execution with failure
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            performance_monitor.log_debug(
+                f"Streaming execution failed: {str(e)}",
+                data={"error_type": type(e).__name__}
+            )
+            
             try:
-                from chatter.core.tool_registry import ToolRegistry
-                tool_registry = ToolRegistry()
-                tools = tool_registry.get_tools_for_workspace(
-                    workspace_id=user_id,
-                    user_permissions=[]  # TODO: Add user permission system
+                await workflow_mgmt.update_workflow_execution(
+                    execution_id=execution.id,
+                    owner_id=user_id,
+                    status="failed",
+                    completed_at=datetime.now(UTC),
+                    execution_time_ms=execution_time_ms,
+                    error=str(e),
+                    execution_log=performance_monitor.debug_logs,
                 )
-                logger.info(f"Loaded {len(tools) if tools else 0} tools for universal template streaming")
-            except Exception as e:
-                logger.warning(f"Could not load tools from tool registry: {e}")
-                tools = []
-
-        if chat_request.enable_retrieval:
-            try:
-                from chatter.core.vector_store import get_vector_store_retriever
-                retriever = get_vector_store_retriever(user_id=user_id)
-                logger.info("Loaded retriever from vector store for universal template streaming")
-            except Exception as e:
-                logger.warning(f"Could not load retriever from vector store: {e}")
-                retriever = None
-
-        # Create workflow from definition
-        # Convert database WorkflowDefinition to graph builder WorkflowDefinition
-        graph_definition = create_workflow_definition_from_model(definition)
-        workflow = await workflow_manager.create_workflow_from_definition(
-            definition=graph_definition,
-            llm=llm,
-            retriever=retriever,
-            tools=tools,
-            max_tool_calls=getattr(chat_request, 'max_tool_calls', 10),
-            user_id=user_id,
-            conversation_id=conversation.id,
-        )
-
-        # Get conversation history and create initial state
-        messages = await self._get_conversation_messages(conversation)
-        messages.append(HumanMessage(content=request.message))
-
-        initial_state: WorkflowNodeContext = {
-            "messages": messages,
-            "user_id": user_id,
-            "conversation_id": conversation.id,
-            "retrieval_context": None,
-            "conversation_summary": None,
-            "tool_call_count": 0,
-            "metadata": {"universal_template": True, "template_id": universal_template.id},
-            "variables": {},
-            "loop_state": {},
-            "error_state": {},
-            "conditional_results": {},
-            "execution_history": [],
-        }
-
-        # Stream workflow execution
-        content_buffer = ""
-        async for update in workflow_manager.stream_workflow(
-            workflow=workflow,
-            initial_state=initial_state,
-            thread_id=conversation.id,
-            enable_llm_streaming=True,
-        ):
-            if isinstance(update, dict) and "messages" in update:
-                # Extract streaming content
-                messages = update["messages"]
-                if messages:
-                    last_message = messages[-1]
-                    if hasattr(last_message, "content"):
-                        new_content = last_message.content[len(content_buffer):]
-                        if new_content:
-                            content_buffer += new_content
-                            yield StreamingChatChunk(
-                                type="content",
-                                content=new_content,
-                                metadata={**update.get("metadata", {}), "universal_template": True},
-                            )
-
-        # Send completion chunk
-        yield StreamingChatChunk(
-            type="done",
-            content="",
-            metadata={"streaming_complete": True, "universal_template": True},
-        )
+            except Exception as update_error:
+                logger.error(f"Failed to update execution status: {update_error}")
+            
+            raise
 
     async def _execute_streaming_with_dynamic_workflow(
         self,
@@ -659,74 +937,192 @@ class WorkflowExecutionService:
         request: Any,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Fallback method using dynamic workflow creation for streaming."""
-        # Get LLM
-        llm = await self.llm_service.get_llm(
-            provider=chat_request.provider,
-            model=chat_request.model,
-            temperature=chat_request.temperature,
-            max_tokens=chat_request.max_tokens,
+        from chatter.services.workflow_management import WorkflowManagementService
+        
+        # Create workflow management service
+        workflow_mgmt = WorkflowManagementService(self.session)
+        
+        # Create a simple workflow definition for tracking purposes
+        # Since this is dynamic, we create a minimal definition
+        definition = await workflow_mgmt.create_workflow_definition(
+            owner_id=user_id,
+            name="Dynamic Chat Workflow (Streaming)",
+            description="Dynamically created chat workflow for streaming execution tracking",
+            nodes=[
+                {"id": "call_model", "type": "model", "config": {
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                    "temperature": chat_request.temperature,
+                    "max_tokens": chat_request.max_tokens,
+                }}
+            ],
+            edges=[
+                {"source": "call_model", "target": "END"}
+            ],
+            metadata={
+                "dynamic": True,
+                "execution_only": True,  # Mark as execution-only definition
+                "streaming": True,
+                "enable_memory": chat_request.enable_memory,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_tools": chat_request.enable_tools,
+            }
         )
-
-        # Create workflow
-        workflow = await workflow_manager.create_workflow(
-            llm=llm,
-            enable_retrieval=chat_request.enable_retrieval,
-            enable_tools=chat_request.enable_tools,
-            enable_memory=chat_request.enable_memory,
-            enable_streaming=True,
-            system_message=chat_request.system_prompt_override,
-            user_id=user_id,
-            conversation_id=conversation.id,
+        
+        # Create workflow execution record
+        execution = await workflow_mgmt.create_workflow_execution(
+            definition_id=definition.id,
+            owner_id=user_id,
+            input_data={
+                "message": chat_request.message,
+                "conversation_id": conversation.id,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+                "streaming": True,
+            },
         )
-
-        # Get conversation history and create initial state
-        messages = await self._get_conversation_messages(conversation)
-        messages.append(HumanMessage(content=request.message))
-
-        initial_state: WorkflowNodeContext = {
-            "messages": messages,
-            "user_id": user_id,
-            "conversation_id": conversation.id,
-            "retrieval_context": None,
-            "conversation_summary": None,
-            "tool_call_count": 0,
-            "metadata": {},
-            "variables": {},
-            "loop_state": {},
-            "error_state": {},
-            "conditional_results": {},
-            "execution_history": [],
-        }
-
-        # Stream workflow execution
-        content_buffer = ""
-        async for update in workflow_manager.stream_workflow(
-            workflow=workflow,
-            initial_state=initial_state,
-            thread_id=conversation.id,
-            enable_llm_streaming=True,
-        ):
-            if isinstance(update, dict) and "messages" in update:
-                # Extract streaming content
-                messages = update["messages"]
-                if messages:
-                    last_message = messages[-1]
-                    if hasattr(last_message, "content"):
-                        new_content = last_message.content[len(content_buffer):]
-                        if new_content:
-                            content_buffer += new_content
-                            yield StreamingChatChunk(
-                                type="content",
-                                content=new_content,
-                                metadata=update.get("metadata", {}),
-                            )
-
-        # Send completion chunk
-        yield StreamingChatChunk(
-            type="done",
-            content="",
-            metadata={"streaming_complete": True},
+        
+        # Initialize performance monitor for tracking
+        performance_monitor = PerformanceMonitor(debug_mode=True)
+        performance_monitor.log_debug(
+            "Started dynamic workflow streaming execution",
+            data={
+                "execution_id": execution.id,
+                "conversation_id": conversation.id,
+            }
         )
+        
+        start_time = time.time()
+        
+        try:
+            # Update execution status to running
+            execution = await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="running",
+                started_at=datetime.fromtimestamp(start_time, UTC),
+            )
+            
+            # Get LLM
+            llm = await self.llm_service.get_llm(
+                provider=chat_request.provider,
+                model=chat_request.model,
+                temperature=chat_request.temperature,
+                max_tokens=chat_request.max_tokens,
+            )
+
+            # Create workflow
+            workflow = await workflow_manager.create_workflow(
+                llm=llm,
+                enable_retrieval=chat_request.enable_retrieval,
+                enable_tools=chat_request.enable_tools,
+                enable_memory=chat_request.enable_memory,
+                enable_streaming=True,
+                system_message=chat_request.system_prompt_override,
+                user_id=user_id,
+                conversation_id=conversation.id,
+            )
+            
+            performance_monitor.log_debug(
+                "Dynamic workflow created for streaming",
+                data={"definition_id": definition.id}
+            )
+
+            # Get conversation history and create initial state
+            messages = await self._get_conversation_messages(conversation)
+            messages.append(HumanMessage(content=request.message))
+
+            initial_state: WorkflowNodeContext = {
+                "messages": messages,
+                "user_id": user_id,
+                "conversation_id": conversation.id,
+                "retrieval_context": None,
+                "conversation_summary": None,
+                "tool_call_count": 0,
+                "metadata": {},
+                "variables": {},
+                "loop_state": {},
+                "error_state": {},
+                "conditional_results": {},
+                "execution_history": [],
+            }
+
+            # Stream workflow execution
+            performance_monitor.log_debug("Starting streaming workflow execution")
+            content_buffer = ""
+            async for update in workflow_manager.stream_workflow(
+                workflow=workflow,
+                initial_state=initial_state,
+                thread_id=conversation.id,
+                enable_llm_streaming=True,
+            ):
+                if isinstance(update, dict) and "messages" in update:
+                    # Extract streaming content
+                    messages = update["messages"]
+                    if messages:
+                        last_message = messages[-1]
+                        if hasattr(last_message, "content"):
+                            new_content = last_message.content[len(content_buffer):]
+                            if new_content:
+                                content_buffer += new_content
+                                yield StreamingChatChunk(
+                                    type="content",
+                                    content=new_content,
+                                    metadata=update.get("metadata", {}),
+                                )
+            
+            performance_monitor.log_debug(
+                "Streaming workflow execution completed",
+                data={"content_length": len(content_buffer)}
+            )
+
+            # Send completion chunk
+            yield StreamingChatChunk(
+                type="done",
+                content="",
+                metadata={"streaming_complete": True},
+            )
+            
+            # Update execution with success
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            await workflow_mgmt.update_workflow_execution(
+                execution_id=execution.id,
+                owner_id=user_id,
+                status="completed",
+                completed_at=datetime.now(UTC),
+                execution_time_ms=execution_time_ms,
+                output_data={
+                    "response": content_buffer,
+                    "conversation_id": conversation.id,
+                    "streaming": True,
+                },
+                execution_log=performance_monitor.debug_logs,
+            )
+            
+            logger.info(f"Dynamic workflow streaming execution {execution.id} completed successfully")
+            
+        except Exception as e:
+            # Update execution with failure
+            execution_time_ms = int((time.time() - start_time) * 1000)
+            performance_monitor.log_debug(
+                f"Streaming execution failed: {str(e)}",
+                data={"error_type": type(e).__name__}
+            )
+            
+            try:
+                await workflow_mgmt.update_workflow_execution(
+                    execution_id=execution.id,
+                    owner_id=user_id,
+                    status="failed",
+                    completed_at=datetime.now(UTC),
+                    execution_time_ms=execution_time_ms,
+                    error=str(e),
+                    execution_log=performance_monitor.debug_logs,
+                )
+            except Exception as update_error:
+                logger.error(f"Failed to update execution status: {update_error}")
+            
+            raise
 
     async def execute_custom_workflow(
         self,

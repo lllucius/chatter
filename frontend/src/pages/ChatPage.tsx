@@ -683,10 +683,13 @@ const ChatPage: React.FC = () => {
             hasResponse: !!response,
             hasMessage: !!(response?.message),
             contentType: typeof response?.message?.content,
-            response
+            contentValue: response?.message?.content,
+            fullResponse: response
           });
           throw new Error('Invalid response from chat API');
         }
+
+        console.log('[ChatPage] Response validation passed, content:', response.message.content);
 
         // Create assistant message
         const assistantMessage: ChatMessage = {

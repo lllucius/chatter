@@ -15,12 +15,17 @@ import {
 import { RefreshIcon, AnalyticsIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import { getSDK } from '../services/auth-service';
-import { WorkflowDefinitionResponse, WorkflowAnalyticsResponse } from 'chatter-sdk';
+import {
+  WorkflowDefinitionResponse,
+  WorkflowAnalyticsResponse,
+} from 'chatter-sdk';
 
 const WorkflowAnalyticsPage: React.FC = () => {
   const [workflows, setWorkflows] = useState<WorkflowDefinitionResponse[]>([]);
   const [selectedWorkflowId, setSelectedWorkflowId] = useState<string>('');
-  const [analytics, setAnalytics] = useState<WorkflowAnalyticsResponse | null>(null);
+  const [analytics, setAnalytics] = useState<WorkflowAnalyticsResponse | null>(
+    null
+  );
   const [loading, setLoading] = useState(false);
   const [workflowsLoading, setWorkflowsLoading] = useState(true);
 
@@ -40,9 +45,10 @@ const WorkflowAnalyticsPage: React.FC = () => {
     try {
       setWorkflowsLoading(true);
       const sdk = await getSDK();
-      const response = await sdk.workflows.listWorkflowDefinitionsApiV1WorkflowsDefinitions();
+      const response =
+        await sdk.workflows.listWorkflowDefinitionsApiV1WorkflowsDefinitions();
       setWorkflows(response.definitions || []);
-      
+
       // Auto-select first workflow if available
       if (response.definitions && response.definitions.length > 0) {
         setSelectedWorkflowId(response.definitions[0].id);
@@ -58,7 +64,10 @@ const WorkflowAnalyticsPage: React.FC = () => {
     try {
       setLoading(true);
       const sdk = await getSDK();
-      const analyticsData = await sdk.workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(workflowId);
+      const analyticsData =
+        await sdk.workflows.getWorkflowAnalyticsApiV1WorkflowsDefinitionsWorkflowIdAnalytics(
+          workflowId
+        );
       setAnalytics(analyticsData);
     } catch (error) {
       console.error('Failed to load analytics:', error);
@@ -122,9 +131,7 @@ const WorkflowAnalyticsPage: React.FC = () => {
       )}
 
       {!workflowsLoading && workflows.length > 0 && !selectedWorkflowId && (
-        <Alert severity="info">
-          Select a workflow to view its analytics.
-        </Alert>
+        <Alert severity="info">Select a workflow to view its analytics.</Alert>
       )}
 
       {selectedWorkflowId && loading && (
@@ -135,7 +142,14 @@ const WorkflowAnalyticsPage: React.FC = () => {
 
       {selectedWorkflowId && !loading && analytics && (
         <Box>
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: 3, mb: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))',
+              gap: 3,
+              mb: 3,
+            }}
+          >
             {/* Complexity Score */}
             <Card>
               <CardContent>
@@ -200,26 +214,36 @@ const WorkflowAnalyticsPage: React.FC = () => {
             </Card>
           </Box>
 
-          <Box sx={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))', gap: 3 }}>
+          <Box
+            sx={{
+              display: 'grid',
+              gridTemplateColumns: 'repeat(auto-fit, minmax(400px, 1fr))',
+              gap: 3,
+            }}
+          >
             {/* Optimization Suggestions */}
-            {analytics.optimization_suggestions && analytics.optimization_suggestions.length > 0 && (
-              <Card>
-                <CardContent>
-                  <Typography variant="h6" component="h2" gutterBottom>
-                    Optimization Suggestions
-                  </Typography>
-                  <Box sx={{ mt: 2 }}>
-                    {analytics.optimization_suggestions.map((suggestion, index) => (
-                      <Alert key={index} severity="info" sx={{ mb: 1 }}>
-                        <Typography variant="body2">
-                          <strong>{suggestion.type}:</strong> {suggestion.description}
-                        </Typography>
-                      </Alert>
-                    ))}
-                  </Box>
-                </CardContent>
-              </Card>
-            )}
+            {analytics.optimization_suggestions &&
+              analytics.optimization_suggestions.length > 0 && (
+                <Card>
+                  <CardContent>
+                    <Typography variant="h6" component="h2" gutterBottom>
+                      Optimization Suggestions
+                    </Typography>
+                    <Box sx={{ mt: 2 }}>
+                      {analytics.optimization_suggestions.map(
+                        (suggestion, index) => (
+                          <Alert key={index} severity="info" sx={{ mb: 1 }}>
+                            <Typography variant="body2">
+                              <strong>{suggestion.type}:</strong>{' '}
+                              {suggestion.description}
+                            </Typography>
+                          </Alert>
+                        )
+                      )}
+                    </Box>
+                  </CardContent>
+                </Card>
+              )}
 
             {/* Bottleneck Details */}
             {analytics.bottlenecks && analytics.bottlenecks.length > 0 && (
@@ -232,7 +256,8 @@ const WorkflowAnalyticsPage: React.FC = () => {
                     {analytics.bottlenecks.map((bottleneck, index) => (
                       <Alert key={index} severity="warning" sx={{ mb: 1 }}>
                         <Typography variant="body2">
-                          <strong>Node {bottleneck.node_id}:</strong> {bottleneck.reason}
+                          <strong>Node {bottleneck.node_id}:</strong>{' '}
+                          {bottleneck.reason}
                           {bottleneck.severity && (
                             <> (Severity: {bottleneck.severity})</>
                           )}

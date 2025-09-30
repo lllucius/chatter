@@ -15,17 +15,12 @@ import {
   Chip,
   TextField,
   Button,
-  Card,
-  CardContent,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-  Build as ToolIcon,
-  Storage as RetrievalIcon,
-  Memory as MemoryIcon,
   Settings as AdvancedIcon,
 } from '@mui/icons-material';
 import {
@@ -35,9 +30,7 @@ import {
   ConversationResponse,
 } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import {
-  ChatWorkflowConfig,
-} from '../hooks/useWorkflowChat';
+import { ChatWorkflowConfig } from '../hooks/useWorkflowChat';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -128,238 +121,234 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 Workflow Configuration
               </Typography>
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={workflowConfig.enable_retrieval}
-                      onChange={(e) =>
-                        updateWorkflowConfig({
-                          enable_retrieval: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Document Retrieval (RAG)"
-                />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={workflowConfig.enable_retrieval}
+                    onChange={(e) =>
+                      updateWorkflowConfig({
+                        enable_retrieval: e.target.checked,
+                      })
+                    }
+                  />
+                }
+                label="Document Retrieval (RAG)"
+              />
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={workflowConfig.enable_tools}
-                      onChange={(e) =>
-                        updateWorkflowConfig({ enable_tools: e.target.checked })
-                      }
-                    />
-                  }
-                  label="Function Calling (Tools)"
-                />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={workflowConfig.enable_tools}
+                    onChange={(e) =>
+                      updateWorkflowConfig({ enable_tools: e.target.checked })
+                    }
+                  />
+                }
+                label="Function Calling (Tools)"
+              />
 
-                <FormControlLabel
-                  control={
-                    <Switch
-                      checked={workflowConfig.enable_memory}
-                      onChange={(e) =>
-                        updateWorkflowConfig({
-                          enable_memory: e.target.checked,
-                        })
-                      }
-                    />
-                  }
-                  label="Conversation Memory"
-                />
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={workflowConfig.enable_memory}
+                    onChange={(e) =>
+                      updateWorkflowConfig({
+                        enable_memory: e.target.checked,
+                      })
+                    }
+                  />
+                }
+                label="Conversation Memory"
+              />
 
-                <Button
-                  variant="outlined"
-                  size="small"
-                  startIcon={<AdvancedIcon />}
-                  onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
-                  sx={{ mt: 1 }}
+              <Button
+                variant="outlined"
+                size="small"
+                startIcon={<AdvancedIcon />}
+                onClick={() => setShowAdvancedConfig(!showAdvancedConfig)}
+                sx={{ mt: 1 }}
+              >
+                {showAdvancedConfig ? 'Hide' : 'Show'} Advanced
+              </Button>
+
+              {showAdvancedConfig && (
+                <Box
+                  sx={{
+                    mt: 2,
+                    p: 2,
+                    bgcolor: (theme) =>
+                      theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
+                    borderRadius: 1,
+                  }}
                 >
-                  {showAdvancedConfig ? 'Hide' : 'Show'} Advanced
-                </Button>
+                  <Typography variant="subtitle2" gutterBottom>
+                    Model Configuration
+                  </Typography>
 
-                {showAdvancedConfig && (
-                  <Box
-                    sx={{
-                      mt: 2,
-                      p: 2,
-                      bgcolor: (theme) =>
-                        theme.palette.mode === 'dark' ? 'grey.900' : 'grey.50',
-                      borderRadius: 1,
-                    }}
-                  >
-                    <Typography variant="subtitle2" gutterBottom>
-                      Model Configuration
-                    </Typography>
+                  <Typography gutterBottom>
+                    Temperature: {workflowConfig.llm_config?.temperature || 0.7}
+                  </Typography>
+                  <Slider
+                    value={workflowConfig.llm_config?.temperature || 0.7}
+                    onChange={(_, value) =>
+                      updateWorkflowConfig({
+                        llm_config: {
+                          ...workflowConfig.llm_config,
+                          temperature: value as number,
+                        },
+                      })
+                    }
+                    min={0}
+                    max={2}
+                    step={0.1}
+                    valueLabelDisplay="auto"
+                  />
 
-                    <Typography gutterBottom>
-                      Temperature:{' '}
-                      {workflowConfig.llm_config?.temperature || 0.7}
-                    </Typography>
-                    <Slider
-                      value={workflowConfig.llm_config?.temperature || 0.7}
-                      onChange={(_, value) =>
-                        updateWorkflowConfig({
-                          llm_config: {
-                            ...workflowConfig.llm_config,
-                            temperature: value as number,
-                          },
-                        })
-                      }
-                      min={0}
-                      max={2}
-                      step={0.1}
-                      valueLabelDisplay="auto"
-                    />
+                  <Typography gutterBottom>
+                    Max Tokens: {workflowConfig.llm_config?.max_tokens || 1000}
+                  </Typography>
+                  <Slider
+                    value={workflowConfig.llm_config?.max_tokens || 1000}
+                    onChange={(_, value) =>
+                      updateWorkflowConfig({
+                        llm_config: {
+                          ...workflowConfig.llm_config,
+                          max_tokens: value as number,
+                        },
+                      })
+                    }
+                    min={100}
+                    max={4000}
+                    step={100}
+                    valueLabelDisplay="auto"
+                  />
 
-                    <Typography gutterBottom>
-                      Max Tokens:{' '}
-                      {workflowConfig.llm_config?.max_tokens || 1000}
-                    </Typography>
-                    <Slider
-                      value={workflowConfig.llm_config?.max_tokens || 1000}
-                      onChange={(_, value) =>
-                        updateWorkflowConfig({
-                          llm_config: {
-                            ...workflowConfig.llm_config,
-                            max_tokens: value as number,
-                          },
-                        })
-                      }
-                      min={100}
-                      max={4000}
-                      step={100}
-                      valueLabelDisplay="auto"
-                    />
-
-                    {workflowConfig.enable_retrieval && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle2" gutterBottom>
-                          Retrieval Configuration
-                        </Typography>
-
-                        <Typography gutterBottom>
-                          Max Documents:{' '}
-                          {workflowConfig.retrieval_config?.max_documents || 5}
-                        </Typography>
-                        <Slider
-                          value={
-                            workflowConfig.retrieval_config?.max_documents || 5
-                          }
-                          onChange={(_, value) =>
-                            updateWorkflowConfig({
-                              retrieval_config: {
-                                ...workflowConfig.retrieval_config,
-                                enabled: true,
-                                max_documents: value as number,
-                              },
-                            })
-                          }
-                          min={1}
-                          max={20}
-                          step={1}
-                          valueLabelDisplay="auto"
-                        />
-
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={
-                                workflowConfig.retrieval_config?.rerank || false
-                              }
-                              onChange={(e) =>
-                                updateWorkflowConfig({
-                                  retrieval_config: {
-                                    ...workflowConfig.retrieval_config,
-                                    enabled: true,
-                                    rerank: e.target.checked,
-                                  },
-                                })
-                              }
-                            />
-                          }
-                          label="Enable Reranking"
-                        />
-                      </Box>
-                    )}
-
-                    {workflowConfig.enable_tools && (
-                      <Box sx={{ mt: 2 }}>
-                        <Typography variant="subtitle2" gutterBottom>
-                          Tool Configuration
-                        </Typography>
-
-                        <Typography gutterBottom>
-                          Max Tool Calls:{' '}
-                          {workflowConfig.tool_config?.max_tool_calls || 3}
-                        </Typography>
-                        <Slider
-                          value={
-                            workflowConfig.tool_config?.max_tool_calls || 3
-                          }
-                          onChange={(_, value) =>
-                            updateWorkflowConfig({
-                              tool_config: {
-                                ...workflowConfig.tool_config,
-                                enabled: true,
-                                max_tool_calls: value as number,
-                              },
-                            })
-                          }
-                          min={1}
-                          max={10}
-                          step={1}
-                          valueLabelDisplay="auto"
-                        />
-
-                        <FormControlLabel
-                          control={
-                            <Switch
-                              checked={
-                                workflowConfig.tool_config
-                                  ?.parallel_tool_calls || false
-                              }
-                              onChange={(e) =>
-                                updateWorkflowConfig({
-                                  tool_config: {
-                                    ...workflowConfig.tool_config,
-                                    enabled: true,
-                                    parallel_tool_calls: e.target.checked,
-                                  },
-                                })
-                              }
-                            />
-                          }
-                          label="Parallel Tool Calls"
-                        />
-                      </Box>
-                    )}
-
-                    {/* Tracing Configuration */}
+                  {workflowConfig.enable_retrieval && (
                     <Box sx={{ mt: 2 }}>
                       <Typography variant="subtitle2" gutterBottom>
-                        Debug Configuration
+                        Retrieval Configuration
                       </Typography>
+
+                      <Typography gutterBottom>
+                        Max Documents:{' '}
+                        {workflowConfig.retrieval_config?.max_documents || 5}
+                      </Typography>
+                      <Slider
+                        value={
+                          workflowConfig.retrieval_config?.max_documents || 5
+                        }
+                        onChange={(_, value) =>
+                          updateWorkflowConfig({
+                            retrieval_config: {
+                              ...workflowConfig.retrieval_config,
+                              enabled: true,
+                              max_documents: value as number,
+                            },
+                          })
+                        }
+                        min={1}
+                        max={20}
+                        step={1}
+                        valueLabelDisplay="auto"
+                      />
 
                       <FormControlLabel
                         control={
                           <Switch
-                            checked={enableTracing}
-                            onChange={(e) => setEnableTracing(e.target.checked)}
+                            checked={
+                              workflowConfig.retrieval_config?.rerank || false
+                            }
+                            onChange={(e) =>
+                              updateWorkflowConfig({
+                                retrieval_config: {
+                                  ...workflowConfig.retrieval_config,
+                                  enabled: true,
+                                  rerank: e.target.checked,
+                                },
+                              })
+                            }
                           />
                         }
-                        label="Enable Backend Workflow Tracing"
+                        label="Enable Reranking"
                       />
-                      <Typography
-                        variant="body2"
-                        color="text.secondary"
-                        sx={{ mt: 0.5 }}
-                      >
-                        Shows detailed workflow execution steps in the response
-                      </Typography>
                     </Box>
+                  )}
+
+                  {workflowConfig.enable_tools && (
+                    <Box sx={{ mt: 2 }}>
+                      <Typography variant="subtitle2" gutterBottom>
+                        Tool Configuration
+                      </Typography>
+
+                      <Typography gutterBottom>
+                        Max Tool Calls:{' '}
+                        {workflowConfig.tool_config?.max_tool_calls || 3}
+                      </Typography>
+                      <Slider
+                        value={workflowConfig.tool_config?.max_tool_calls || 3}
+                        onChange={(_, value) =>
+                          updateWorkflowConfig({
+                            tool_config: {
+                              ...workflowConfig.tool_config,
+                              enabled: true,
+                              max_tool_calls: value as number,
+                            },
+                          })
+                        }
+                        min={1}
+                        max={10}
+                        step={1}
+                        valueLabelDisplay="auto"
+                      />
+
+                      <FormControlLabel
+                        control={
+                          <Switch
+                            checked={
+                              workflowConfig.tool_config?.parallel_tool_calls ||
+                              false
+                            }
+                            onChange={(e) =>
+                              updateWorkflowConfig({
+                                tool_config: {
+                                  ...workflowConfig.tool_config,
+                                  enabled: true,
+                                  parallel_tool_calls: e.target.checked,
+                                },
+                              })
+                            }
+                          />
+                        }
+                        label="Parallel Tool Calls"
+                      />
+                    </Box>
+                  )}
+
+                  {/* Tracing Configuration */}
+                  <Box sx={{ mt: 2 }}>
+                    <Typography variant="subtitle2" gutterBottom>
+                      Debug Configuration
+                    </Typography>
+
+                    <FormControlLabel
+                      control={
+                        <Switch
+                          checked={enableTracing}
+                          onChange={(e) => setEnableTracing(e.target.checked)}
+                        />
+                      }
+                      label="Enable Backend Workflow Tracing"
+                    />
+                    <Typography
+                      variant="body2"
+                      color="text.secondary"
+                      sx={{ mt: 0.5 }}
+                    >
+                      Shows detailed workflow execution steps in the response
+                    </Typography>
                   </Box>
-                )}
+                </Box>
+              )}
             </Box>
           </Box>
         </AccordionDetails>

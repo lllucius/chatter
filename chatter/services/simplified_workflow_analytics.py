@@ -6,7 +6,7 @@ of the original analytics system.
 
 import hashlib
 import json
-from datetime import datetime, timezone
+from datetime import UTC, datetime
 from typing import Any
 
 from chatter.core.workflow_performance import get_workflow_cache
@@ -40,7 +40,9 @@ class SimplifiedWorkflowAnalyticsService:
                     logger.debug("Returning cached workflow analytics")
                     return cached_result
                 else:
-                    logger.warning("Cached result has invalid structure, regenerating")
+                    logger.warning(
+                        "Cached result has invalid structure, regenerating"
+                    )
 
             # Perform basic analysis
             analysis = self._perform_basic_analysis(nodes, edges)
@@ -69,12 +71,10 @@ class SimplifiedWorkflowAnalyticsService:
             }
             content = json.dumps(workflow_data, sort_keys=True)
             # Include schema version to invalidate old cached data
-            return f"workflow_analytics_v2:{hashlib.md5(content.encode()).hexdigest()}"
+            return f"workflow_analytics_v2:{hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()}"
         except Exception:
             # Fallback to simple hash
-            return (
-                f"workflow_analytics_v2:fallback_{len(nodes)}_{len(edges)}"
-            )
+            return f"workflow_analytics_v2:fallback_{len(nodes)}_{len(edges)}"
 
     def _perform_basic_analysis(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
@@ -96,7 +96,7 @@ class SimplifiedWorkflowAnalyticsService:
         risk_factors = self._get_risk_factors(nodes, edges)
 
         # Get current timestamp for execution tracking
-        now = datetime.now(timezone.utc)
+        now = datetime.now(UTC)
 
         return {
             "complexity": complexity,
@@ -127,17 +127,19 @@ class SimplifiedWorkflowAnalyticsService:
         # Simple complexity scoring
         complexity_score = node_count + (edge_count * 0.5)
         if complexity_score < 5:
-            complexity_level = "low"
+            pass
         elif complexity_score < 15:
-            complexity_level = "medium"
+            pass
         else:
-            complexity_level = "high"
+            pass
 
         # Calculate depth (maximum path length)
         depth = self._calculate_max_depth(nodes, edges)
 
         # Calculate branching factor
-        branching_factor = self._calculate_branching_factor(nodes, edges)
+        branching_factor = self._calculate_branching_factor(
+            nodes, edges
+        )
 
         return {
             "score": int(complexity_score),  # Required field for schema
@@ -146,7 +148,9 @@ class SimplifiedWorkflowAnalyticsService:
             "depth": depth,  # Required field for schema
             "branching_factor": branching_factor,  # Required field for schema
             "loop_complexity": 0,  # Default value
-            "conditional_complexity": max(0, edge_count - node_count + 2),  # Basic formula
+            "conditional_complexity": max(
+                0, edge_count - node_count + 2
+            ),  # Basic formula
         }
 
     def _get_basic_suggestions(
@@ -215,22 +219,32 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             target = edge.get("target")
             if target:
-                incoming_counts[target] = incoming_counts.get(target, 0) + 1
+                incoming_counts[target] = (
+                    incoming_counts.get(target, 0) + 1
+                )
 
         # Flag nodes with high incoming connections as bottlenecks
         for node_id, count in incoming_counts.items():
             if count > 3:  # Threshold for bottleneck
                 # Find the actual node to get more info
-                node = next((n for n in nodes if n.get("id") == node_id), None)
-                node_type = node.get("data", {}).get("nodeType", "unknown") if node else "unknown"
-                
+                node = next(
+                    (n for n in nodes if n.get("id") == node_id), None
+                )
+                node_type = (
+                    node.get("data", {}).get("nodeType", "unknown")
+                    if node
+                    else "unknown"
+                )
+
                 bottlenecks.append(
                     {
                         "node_id": node_id,
                         "node_type": node_type,
                         "reason": f"Node has {count} incoming connections",
                         "severity": "medium",
-                        "suggestions": ["Consider simplifying node connections"],
+                        "suggestions": [
+                            "Consider simplifying node connections"
+                        ],
                     }
                 )
 
@@ -268,7 +282,9 @@ class SimplifiedWorkflowAnalyticsService:
             visited.add(node)
             max_child_depth = 0
             for neighbor in adjacency.get(node, []):
-                max_child_depth = max(max_child_depth, dfs(neighbor, visited.copy()))
+                max_child_depth = max(
+                    max_child_depth, dfs(neighbor, visited.copy())
+                )
             return 1 + max_child_depth
 
         max_depth = 0
@@ -290,7 +306,9 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             source = edge.get("source")
             if source:
-                outgoing_counts[source] = outgoing_counts.get(source, 0) + 1
+                outgoing_counts[source] = (
+                    outgoing_counts.get(source, 0) + 1
+                )
 
         if not outgoing_counts:
             return 0.0
@@ -314,13 +332,19 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             source = edge.get("source")
             if source:
-                outgoing_counts[source] = outgoing_counts.get(source, 0) + 1
+                outgoing_counts[source] = (
+                    outgoing_counts.get(source, 0) + 1
+                )
 
         for count in outgoing_counts.values():
             if count > 1:
-                branching_nodes += count - 1  # Each additional branch adds paths
+                branching_nodes += (
+                    count - 1
+                )  # Each additional branch adds paths
 
-        return max(1, 2 ** min(branching_nodes, 10))  # Cap to prevent overflow
+        return max(
+            1, 2 ** min(branching_nodes, 10)
+        )  # Cap to prevent overflow
 
     def _get_risk_factors(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
@@ -330,11 +354,14 @@ class SimplifiedWorkflowAnalyticsService:
 
         # Check for complex workflow
         if len(nodes) > 15:
-            risk_factors.append("High complexity workflow with many nodes")
+            risk_factors.append(
+                "High complexity workflow with many nodes"
+            )
 
         # Check for missing start nodes
         start_nodes = [
-            n for n in nodes 
+            n
+            for n in nodes
             if n.get("data", {}).get("nodeType") == "start"
         ]
         if not start_nodes:
@@ -345,58 +372,80 @@ class SimplifiedWorkflowAnalyticsService:
         for edge in edges:
             connected_nodes.add(edge.get("source"))
             connected_nodes.add(edge.get("target"))
-        
-        disconnected = [n for n in nodes if n.get("id") not in connected_nodes]
+
+        disconnected = [
+            n for n in nodes if n.get("id") not in connected_nodes
+        ]
         if disconnected:
-            risk_factors.append(f"{len(disconnected)} disconnected nodes found")
+            risk_factors.append(
+                f"{len(disconnected)} disconnected nodes found"
+            )
 
         # Check for potential bottlenecks
         incoming_counts = {}
         for edge in edges:
             target = edge.get("target")
             if target:
-                incoming_counts[target] = incoming_counts.get(target, 0) + 1
-        
-        high_convergence = [node_id for node_id, count in incoming_counts.items() if count > 3]
+                incoming_counts[target] = (
+                    incoming_counts.get(target, 0) + 1
+                )
+
+        high_convergence = [
+            node_id
+            for node_id, count in incoming_counts.items()
+            if count > 3
+        ]
         if high_convergence:
-            risk_factors.append(f"{len(high_convergence)} potential bottleneck nodes")
+            risk_factors.append(
+                f"{len(high_convergence)} potential bottleneck nodes"
+            )
 
         return risk_factors
 
-    def _validate_analytics_result(self, result: dict[str, Any]) -> bool:
+    def _validate_analytics_result(
+        self, result: dict[str, Any]
+    ) -> bool:
         """Validate that analytics result has the required structure."""
         if not isinstance(result, dict):
             return False
-        
+
         # Check required top-level fields
         required_top_fields = [
-            "complexity", "bottlenecks", "optimization_suggestions", 
-            "execution_paths", "risk_factors", "total_execution_time_ms", 
-            "started_at"
+            "complexity",
+            "bottlenecks",
+            "optimization_suggestions",
+            "execution_paths",
+            "risk_factors",
+            "total_execution_time_ms",
+            "started_at",
         ]
-        
+
         for field in required_top_fields:
             if field not in result:
                 return False
-        
+
         # Check complexity structure
         complexity = result.get("complexity", {})
         if not isinstance(complexity, dict):
             return False
-            
-        required_complexity_fields = ["score", "depth", "branching_factor"]
+
+        required_complexity_fields = [
+            "score",
+            "depth",
+            "branching_factor",
+        ]
         for field in required_complexity_fields:
             if field not in complexity:
                 return False
-        
+
         return True
 
     def _get_fallback_analysis(
         self, nodes: list[dict[str, Any]], edges: list[dict[str, Any]]
     ) -> dict[str, Any]:
         """Get basic fallback analysis when main analysis fails."""
-        now = datetime.now(timezone.utc)
-        
+        now = datetime.now(UTC)
+
         return {
             "complexity": {
                 "score": 0,

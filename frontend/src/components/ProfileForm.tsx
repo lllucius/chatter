@@ -71,13 +71,21 @@ const ProfileForm: React.FC<ProfileFormProps> = ({
         const defaults = await workflowDefaultsService.getWorkflowDefaults();
         const updatedDefaults = {
           ...defaultProfileData,
-          temperature: defaults.model_config?.temperature || defaultProfileData.temperature,
-          max_tokens: defaults.model_config?.max_tokens || defaultProfileData.max_tokens,
+          temperature:
+            defaults.model_config?.temperature ||
+            defaultProfileData.temperature,
+          max_tokens:
+            defaults.model_config?.max_tokens || defaultProfileData.max_tokens,
           top_p: defaults.model_config?.top_p || defaultProfileData.top_p,
-          frequency_penalty: defaults.model_config?.frequency_penalty || defaultProfileData.frequency_penalty,
-          presence_penalty: defaults.model_config?.presence_penalty || defaultProfileData.presence_penalty,
+          frequency_penalty:
+            defaults.model_config?.frequency_penalty ||
+            defaultProfileData.frequency_penalty,
+          presence_penalty:
+            defaults.model_config?.presence_penalty ||
+            defaultProfileData.presence_penalty,
           llmModel: defaults.model_config?.model || defaultProfileData.llmModel,
-          llmProvider: defaults.model_config?.provider || defaultProfileData.llmProvider,
+          llmProvider:
+            defaults.model_config?.provider || defaultProfileData.llmProvider,
         };
         setDynamicDefaults(updatedDefaults);
       } catch (error) {

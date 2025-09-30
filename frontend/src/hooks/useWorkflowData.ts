@@ -169,11 +169,13 @@ export const useWorkflowData = () => {
 
   const deleteTemplate = useCallback(async (templateId: string) => {
     try {
-      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(templateId);
-      
+      await getSDK().workflows.deleteWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
+        templateId
+      );
+
       // Remove from local state on successful deletion
       setTemplates((prev) => prev.filter((t) => t.id !== templateId));
-      
+
       toastService.success('Workflow template deleted successfully');
     } catch (error) {
       handleError(error, {

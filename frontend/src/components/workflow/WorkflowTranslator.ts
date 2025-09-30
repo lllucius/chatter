@@ -54,7 +54,9 @@ export class WorkflowTranslator {
     // Validate workflow before translation
     const validation = this.validateForLangGraph(workflow);
     if (!validation.valid) {
-      throw new Error(`Workflow validation failed: ${validation.errors.join(', ')}`);
+      throw new Error(
+        `Workflow validation failed: ${validation.errors.join(', ')}`
+      );
     }
 
     const nodes = this.translateNodes(workflow);
@@ -117,7 +119,10 @@ export class WorkflowTranslator {
         );
 
         // Validate node configuration
-        this.validateNodeConfig(node.type as WorkflowNodeType, node.data.config);
+        this.validateNodeConfig(
+          node.type as WorkflowNodeType,
+          node.data.config
+        );
 
         return {
           id: node.id,
@@ -125,7 +130,9 @@ export class WorkflowTranslator {
           config: node.data.config || {},
         };
       } catch (error) {
-        throw new Error(`Failed to translate node ${node.id}: ${(error as Error).message}`);
+        throw new Error(
+          `Failed to translate node ${node.id}: ${(error as Error).message}`
+        );
       }
     });
   }
@@ -150,45 +157,76 @@ export class WorkflowTranslator {
         break;
       case 'retrieval':
         if (!config || (!config.collection && !config.topK)) {
-          throw new Error('Retrieval nodes must have collection or topK configured');
+          throw new Error(
+            'Retrieval nodes must have collection or topK configured'
+          );
         }
         break;
       case 'loop':
         if (!config || (!config.maxIterations && !config.condition)) {
-          throw new Error('Loop nodes must have maxIterations or condition defined');
+          throw new Error(
+            'Loop nodes must have maxIterations or condition defined'
+          );
         }
-        if (config.maxIterations && (typeof config.maxIterations !== 'number' || config.maxIterations <= 0)) {
+        if (
+          config.maxIterations &&
+          (typeof config.maxIterations !== 'number' ||
+            config.maxIterations <= 0)
+        ) {
           throw new Error('Loop maxIterations must be a positive number');
         }
         break;
       case 'variable':
         if (!config || !config.variableName || !config.operation) {
-          throw new Error('Variable nodes must have variableName and operation defined');
+          throw new Error(
+            'Variable nodes must have variableName and operation defined'
+          );
         }
         const validOps = ['set', 'get', 'append', 'increment', 'decrement'];
         if (!validOps.includes(String(config.operation))) {
-          throw new Error(`Variable operation must be one of: ${validOps.join(', ')}`);
+          throw new Error(
+            `Variable operation must be one of: ${validOps.join(', ')}`
+          );
         }
         break;
       case 'errorHandler':
-        if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
-          throw new Error('Error handler retryCount must be a non-negative number');
+        if (
+          config &&
+          config.retryCount &&
+          (typeof config.retryCount !== 'number' || config.retryCount < 0)
+        ) {
+          throw new Error(
+            'Error handler retryCount must be a non-negative number'
+          );
         }
         break;
       case 'delay':
-        if (!config || !config.duration || typeof config.duration !== 'number') {
+        if (
+          !config ||
+          !config.duration ||
+          typeof config.duration !== 'number'
+        ) {
           throw new Error('Delay nodes must have a numeric duration defined');
         }
         if (config.duration <= 0) {
           throw new Error('Delay duration must be positive');
         }
         const validDelayTypes = ['fixed', 'random', 'exponential', 'dynamic'];
-        if (config.delayType && !validDelayTypes.includes(String(config.delayType))) {
-          throw new Error(`Delay type must be one of: ${validDelayTypes.join(', ')}`);
+        if (
+          config.delayType &&
+          !validDelayTypes.includes(String(config.delayType))
+        ) {
+          throw new Error(
+            `Delay type must be one of: ${validDelayTypes.join(', ')}`
+          );
         }
         break;
       case 'memory':
-        if (config && config.memoryWindow && (typeof config.memoryWindow !== 'number' || config.memoryWindow <= 0)) {
+        if (
+          config &&
+          config.memoryWindow &&
+          (typeof config.memoryWindow !== 'number' || config.memoryWindow <= 0)
+        ) {
           throw new Error('Memory window must be a positive number');
         }
         break;
@@ -246,9 +284,10 @@ export class WorkflowTranslator {
   /**
    * Determine workflow capabilities based on nodes present
    */
-  private static determineWorkflowCapabilities(
-    workflow: WorkflowDefinition
-  ): { hasRetrieval: boolean; hasTools: boolean } {
+  private static determineWorkflowCapabilities(workflow: WorkflowDefinition): {
+    hasRetrieval: boolean;
+    hasTools: boolean;
+  } {
     const hasRetrieval = workflow.nodes.some((n) => n.type === 'retrieval');
     const hasTools = workflow.nodes.some((n) => n.type === 'tool');
 
@@ -387,18 +426,27 @@ export class WorkflowTranslator {
     const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler');
     errorNodes.forEach((node) => {
       const config = node.data.config;
-      if (config && config.retryCount && (typeof config.retryCount !== 'number' || config.retryCount < 0)) {
+      if (
+        config &&
+        config.retryCount &&
+        (typeof config.retryCount !== 'number' || config.retryCount < 0)
+      ) {
         errors.push(
           `Error handler node "${node.data.label}" retryCount must be a non-negative number`
         );
       }
     });
 
-    // Delay nodes validation  
+    // Delay nodes validation
     const delayNodes = workflow.nodes.filter((n) => n.type === 'delay');
     delayNodes.forEach((node) => {
       const config = node.data.config;
-      if (!config || !config.duration || typeof config.duration !== 'number' || config.duration <= 0) {
+      if (
+        !config ||
+        !config.duration ||
+        typeof config.duration !== 'number' ||
+        config.duration <= 0
+      ) {
         errors.push(
           `Delay node "${node.data.label}" must have a positive numeric duration`
         );

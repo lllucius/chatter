@@ -2,7 +2,10 @@
  * Hook for creating workflow templates with dynamic defaults
  */
 import { useState, useEffect, useMemo } from 'react';
-import { workflowDefaultsService, WorkflowDefaults } from '../../services/workflow-defaults-service';
+import {
+  workflowDefaultsService,
+  WorkflowDefaults,
+} from '../../services/workflow-defaults-service';
 import { WorkflowDefinition } from './WorkflowEditor';
 
 export interface WorkflowTemplate {
@@ -19,7 +22,8 @@ export interface WorkflowTemplate {
  * Custom hook that provides workflow templates using dynamic defaults
  */
 export const useWorkflowTemplates = () => {
-  const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
+  const [workflowDefaults, setWorkflowDefaults] =
+    useState<WorkflowDefaults | null>(null);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
@@ -32,7 +36,9 @@ export const useWorkflowTemplates = () => {
         const defaults = await workflowDefaultsService.getWorkflowDefaults();
         setWorkflowDefaults(defaults);
       } catch (err) {
-        setError(err instanceof Error ? err.message : 'Failed to load defaults');
+        setError(
+          err instanceof Error ? err.message : 'Failed to load defaults'
+        );
         console.error('Failed to load workflow defaults:', err);
       } finally {
         setLoading(false);
@@ -50,12 +56,12 @@ export const useWorkflowTemplates = () => {
       maxTokens: 1000,
       model: 'gpt-4',
     };
-    
+
     const memoryConfig = workflowDefaults?.node_types.memory || {
       enabled: true,
       window: 20,
     };
-    
+
     const retrievalConfig = workflowDefaults?.node_types.retrieval || {
       collection: 'docs',
       topK: 5,
@@ -113,7 +119,8 @@ export const useWorkflowTemplates = () => {
       {
         id: 'rag-pipeline',
         name: 'RAG Pipeline',
-        description: 'Retrieval-Augmented Generation with memory and error handling',
+        description:
+          'Retrieval-Augmented Generation with memory and error handling',
         category: 'advanced',
         tags: ['rag', 'retrieval', 'memory', 'error-handling'],
         createdAt: new Date().toISOString(),
@@ -158,8 +165,14 @@ export const useWorkflowTemplates = () => {
                 nodeType: 'model',
                 config: {
                   ...modelConfig,
-                  temperature: Math.max(0.1, (modelConfig.temperature || 0.7) - 0.4), // Lower temperature for factual responses
-                  maxTokens: Math.max(1000, (modelConfig.maxTokens || 1000) + 500), // More tokens for detailed responses
+                  temperature: Math.max(
+                    0.1,
+                    (modelConfig.temperature || 0.7) - 0.4
+                  ), // Lower temperature for factual responses
+                  maxTokens: Math.max(
+                    1000,
+                    (modelConfig.maxTokens || 1000) + 500
+                  ), // More tokens for detailed responses
                 },
               },
             },
@@ -170,7 +183,10 @@ export const useWorkflowTemplates = () => {
               data: {
                 label: 'Error Handler',
                 nodeType: 'errorHandler',
-                config: workflowDefaults?.node_types.errorHandler || { retryCount: 2, fallbackAction: 'continue' },
+                config: workflowDefaults?.node_types.errorHandler || {
+                  retryCount: 2,
+                  fallbackAction: 'continue',
+                },
               },
             },
           ],
@@ -239,7 +255,11 @@ export const useWorkflowTemplates = () => {
               data: {
                 label: 'Initialize Counter',
                 nodeType: 'variable',
-                config: workflowDefaults?.node_types.variable || { operation: 'set', variableName: 'counter', value: '0' },
+                config: workflowDefaults?.node_types.variable || {
+                  operation: 'set',
+                  variableName: 'counter',
+                  value: '0',
+                },
               },
             },
             {
@@ -249,7 +269,10 @@ export const useWorkflowTemplates = () => {
               data: {
                 label: 'Process Loop',
                 nodeType: 'loop',
-                config: workflowDefaults?.node_types.loop || { maxIterations: 10, condition: 'counter < 10' },
+                config: workflowDefaults?.node_types.loop || {
+                  maxIterations: 10,
+                  condition: 'counter < 10',
+                },
               },
             },
             {
@@ -261,8 +284,14 @@ export const useWorkflowTemplates = () => {
                 nodeType: 'model',
                 config: {
                   ...modelConfig,
-                  temperature: Math.min(1.0, (modelConfig.temperature || 0.7) - 0.2), // Slightly lower for processing
-                  maxTokens: Math.min(4000, (modelConfig.maxTokens || 1000) - 200), // Fewer tokens for processing
+                  temperature: Math.min(
+                    1.0,
+                    (modelConfig.temperature || 0.7) - 0.2
+                  ), // Slightly lower for processing
+                  maxTokens: Math.min(
+                    4000,
+                    (modelConfig.maxTokens || 1000) - 200
+                  ), // Fewer tokens for processing
                 },
               },
             },
@@ -283,7 +312,10 @@ export const useWorkflowTemplates = () => {
               data: {
                 label: 'Check Complete',
                 nodeType: 'conditional',
-                config: workflowDefaults?.node_types.conditional || { condition: 'counter >= 10', branches: {} },
+                config: workflowDefaults?.node_types.conditional || {
+                  condition: 'counter >= 10',
+                  branches: {},
+                },
               },
             },
           ],

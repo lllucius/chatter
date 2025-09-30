@@ -72,10 +72,12 @@ async def get_analytics_service(
     max_requests=20, window_seconds=60
 )  # 20 requests per minute
 async def get_conversation_stats(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -154,10 +156,12 @@ async def get_conversation_stats(
 
 @router.get("/usage", response_model=UsageMetricsResponse)
 async def get_usage_metrics(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -225,10 +229,12 @@ async def get_usage_metrics(
 
 @router.get("/performance", response_model=PerformanceMetricsResponse)
 async def get_performance_metrics(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -305,10 +311,12 @@ async def get_performance_metrics(
 
 @router.get("/documents", response_model=DocumentAnalyticsResponse)
 async def get_document_analytics(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -443,10 +451,12 @@ async def get_system_analytics(
     max_requests=20, window_seconds=60
 )  # 20 requests per minute
 async def get_dashboard_chart_data(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -543,10 +553,12 @@ async def get_integrated_dashboard_stats(
     max_requests=10, window_seconds=60
 )  # 10 dashboard requests per minute
 async def get_dashboard(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -616,10 +628,12 @@ async def get_dashboard(
 
 @router.get("/toolservers", response_model=ToolServerAnalyticsResponse)
 async def get_tool_server_analytics(
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -664,10 +678,12 @@ async def get_tool_server_analytics(
 @router.get("/users/{user_id}", response_model=dict)
 async def get_user_analytics(
     user_id: str,
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),
@@ -738,10 +754,12 @@ async def export_analytics(
     metrics: list[str] = Query(
         ..., description="List of metrics to export"
     ),
-    start_date: datetime
-    | None = Query(None, description="Start date for analytics"),
-    end_date: datetime
-    | None = Query(None, description="End date for analytics"),
+    start_date: datetime | None = Query(
+        None, description="Start date for analytics"
+    ),
+    end_date: datetime | None = Query(
+        None, description="End date for analytics"
+    ),
     period: str = Query(
         "7d", description="Predefined period (1h, 24h, 7d, 30d, 90d)"
     ),

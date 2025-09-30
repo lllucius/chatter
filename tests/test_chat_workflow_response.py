@@ -3,7 +3,6 @@
 import pytest
 from httpx import AsyncClient
 
-from chatter.models.user import User
 from chatter.schemas.workflows import ChatWorkflowRequest
 
 
@@ -29,13 +28,17 @@ async def test_chat_workflow_returns_proper_structure(
     )
 
     # Verify response status
-    assert response.status_code == 200, f"Expected 200, got {response.status_code}: {response.text}"
+    assert (
+        response.status_code == 200
+    ), f"Expected 200, got {response.status_code}: {response.text}"
 
     # Parse response
     data = response.json()
 
     # Verify response structure
-    assert "conversation_id" in data, "Response should have conversation_id"
+    assert (
+        "conversation_id" in data
+    ), "Response should have conversation_id"
     assert "message" in data, "Response should have message"
     assert "conversation" in data, "Response should have conversation"
 
@@ -44,17 +47,27 @@ async def test_chat_workflow_returns_proper_structure(
     assert "role" in message, "Message should have role"
     assert "content" in message, "Message should have content"
     assert "id" in message, "Message should have id"
-    assert "conversation_id" in message, "Message should have conversation_id"
+    assert (
+        "conversation_id" in message
+    ), "Message should have conversation_id"
 
     # Verify message content
-    assert message["role"] == "assistant", f"Expected role 'assistant', got '{message['role']}'"
-    assert isinstance(message["content"], str), f"Expected content to be string, got {type(message['content'])}"
-    assert len(message["content"]) > 0, "Message content should not be empty"
+    assert (
+        message["role"] == "assistant"
+    ), f"Expected role 'assistant', got '{message['role']}'"
+    assert isinstance(
+        message["content"], str
+    ), f"Expected content to be string, got {type(message['content'])}"
+    assert (
+        len(message["content"]) > 0
+    ), "Message content should not be empty"
 
     # Verify conversation ID matches
-    assert data["conversation_id"] == message["conversation_id"], "Conversation IDs should match"
+    assert (
+        data["conversation_id"] == message["conversation_id"]
+    ), "Conversation IDs should match"
 
-    print(f"✓ Chat workflow response structure is correct")
+    print("✓ Chat workflow response structure is correct")
     print(f"✓ Message content: {message['content'][:100]}...")
 
 
@@ -109,5 +122,5 @@ async def test_chat_workflow_multiple_messages(
     assert data2["message"]["content"]
     assert len(data2["message"]["content"]) > 0
 
-    print(f"✓ Multiple messages in conversation work correctly")
+    print("✓ Multiple messages in conversation work correctly")
     print(f"✓ Conversation ID: {conversation_id}")

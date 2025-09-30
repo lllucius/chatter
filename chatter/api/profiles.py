@@ -114,13 +114,16 @@ async def create_profile(
 
 @router.get("", response_model=ProfileListResponse)
 async def list_profiles(
-    profile_type: ProfileType
-    | None = Query(None, description="Filter by profile type"),
-    llm_provider: str
-    | None = Query(None, description="Filter by LLM provider"),
+    profile_type: ProfileType | None = Query(
+        None, description="Filter by profile type"
+    ),
+    llm_provider: str | None = Query(
+        None, description="Filter by LLM provider"
+    ),
     tags: list[str] | None = Query(None, description="Filter by tags"),
-    is_public: bool
-    | None = Query(None, description="Filter by public status"),
+    is_public: bool | None = Query(
+        None, description="Filter by public status"
+    ),
     limit: int = Query(
         50, ge=1, description="Maximum number of results"
     ),

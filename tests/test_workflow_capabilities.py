@@ -102,9 +102,9 @@ class TestWorkflowCapabilities:
             capabilities = (
                 WorkflowCapabilities.from_template_configuration(
                     required_tools=tools if tools else None,
-                    required_retrievers=retrievers
-                    if retrievers
-                    else None,
+                    required_retrievers=(
+                        retrievers if retrievers else None
+                    ),
                 )
             )
 

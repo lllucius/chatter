@@ -11,16 +11,16 @@ mock_security_manager = unittest.mock.MagicMock()
 mock_security_manager.authorize_tool_execution.return_value = True
 
 # Set up mocks for imports
-import sys
+import sys  # noqa: E402
 
-sys.modules[
-    'chatter.core.workflow_security'
-] = unittest.mock.MagicMock()
+sys.modules['chatter.core.workflow_security'] = (
+    unittest.mock.MagicMock()
+)
 sys.modules[
     'chatter.core.workflow_security'
 ].workflow_security_manager = mock_security_manager
 
-from chatter.core.langgraph import (
+from chatter.core.langgraph import (  # noqa: E402
     ConversationState,
     LangGraphWorkflowManager,
 )

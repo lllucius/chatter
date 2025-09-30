@@ -69,7 +69,10 @@ def test_frontend_dependency_resolution():
     # This allows the test to pass when the SDK hasn't been built/linked
     if result.returncode != 0:
         import pytest
-        pytest.skip(f"chatter-sdk dependency not installed: {result.stderr}")
+
+        pytest.skip(
+            f"chatter-sdk dependency not installed: {result.stderr}"
+        )
 
     assert (
         "chatter-sdk@0.1.0" in result.stdout

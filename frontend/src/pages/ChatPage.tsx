@@ -164,7 +164,7 @@ const ChatPage: React.FC = () => {
           // Process each complete line
           for (const line of lines) {
             if (!line.trim()) continue; // Skip empty lines
-            
+
             const eventData = parseSSELine(line);
             if (!eventData) {
               continue; // Skip invalid or non-data lines
@@ -236,9 +236,8 @@ const ChatPage: React.FC = () => {
                             model: (eventData.metadata as any)?.model_used as
                               | string
                               | undefined,
-                            tokens: (eventData.metadata as any)?.total_tokens as
-                              | number
-                              | undefined,
+                            tokens: (eventData.metadata as any)
+                              ?.total_tokens as number | undefined,
                             processingTime: (eventData.metadata as any)
                               ?.response_time_ms as number | undefined,
                             workflow: {
@@ -257,13 +256,14 @@ const ChatPage: React.FC = () => {
               case 'error':
                 // Handle error events gracefully
                 // Server sends error in 'error' field, but fallback to 'message' for compatibility
-                const errorMessage = (eventData.error as string) || 
+                const errorMessage =
+                  (eventData.error as string) ||
                   (eventData.message as string) ||
                   'Workflow streaming error occurred';
-                
+
                 // Log the error for debugging
                 console.error('Workflow streaming error:', errorMessage);
-                
+
                 // Throw the error to be caught by handleWorkflowStreamingResponse
                 throw new Error(errorMessage);
 
@@ -336,7 +336,9 @@ const ChatPage: React.FC = () => {
               newMessages[lastAssistantIndex] = initialAssistantMessage;
             } else {
               // If no assistant message found to replace, add it instead
-              console.warn('[ChatPage] No assistant message found to replace during streaming regeneration, adding new message');
+              console.warn(
+                '[ChatPage] No assistant message found to replace during streaming regeneration, adding new message'
+              );
               newMessages.push(initialAssistantMessage);
             }
             return newMessages;
@@ -374,7 +376,10 @@ const ChatPage: React.FC = () => {
         focusInput();
       } catch (error) {
         // Handle errors by showing an error message
-        console.error('Streaming error in handleWorkflowStreamingResponse:', error);
+        console.error(
+          'Streaming error in handleWorkflowStreamingResponse:',
+          error
+        );
         const errorMessage: ChatMessage = {
           id: `assistant-error-${Date.now()}`,
           role: 'assistant',
@@ -405,7 +410,9 @@ const ChatPage: React.FC = () => {
               newMessages[lastAssistantIndex] = errorMessage;
             } else {
               // If no assistant message found to replace, add the error message instead
-              console.warn('[ChatPage] No assistant message found to replace during error handling in streaming, adding error message');
+              console.warn(
+                '[ChatPage] No assistant message found to replace during error handling in streaming, adding error message'
+              );
               newMessages.push(errorMessage);
             }
             return newMessages;
@@ -451,7 +458,8 @@ const ChatPage: React.FC = () => {
                 enable_retrieval: customWorkflowConfig.enable_retrieval,
                 enable_tools: customWorkflowConfig.enable_tools,
                 enable_memory: customWorkflowConfig.enable_memory,
-                enable_web_search: customWorkflowConfig.enable_web_search || false,
+                enable_web_search:
+                  customWorkflowConfig.enable_web_search || false,
                 // Use the effective workflow configuration
                 workflow_config: getEffectiveConfig(),
               }
@@ -514,7 +522,9 @@ const ChatPage: React.FC = () => {
                 newMessages[lastAssistantIndex] = assistantMessage;
               } else {
                 // If no assistant message found to replace, add it instead
-                console.warn('[ChatPage] No assistant message found to replace during regeneration, adding new message');
+                console.warn(
+                  '[ChatPage] No assistant message found to replace during regeneration, adding new message'
+                );
                 newMessages.push(assistantMessage);
               }
               return newMessages;
@@ -686,15 +696,18 @@ const ChatPage: React.FC = () => {
         ) {
           console.error('[ChatPage] Invalid response structure:', {
             hasResponse: !!response,
-            hasMessage: !!(response?.message),
+            hasMessage: !!response?.message,
             contentType: typeof response?.message?.content,
             contentValue: response?.message?.content,
-            fullResponse: response
+            fullResponse: response,
           });
           throw new Error('Invalid response from chat API');
         }
 
-        console.log('[ChatPage] Response validation passed, content:', response.message.content);
+        console.log(
+          '[ChatPage] Response validation passed, content:',
+          response.message.content
+        );
 
         // Create assistant message
         const assistantMessage: ChatMessage = {
@@ -734,17 +747,27 @@ const ChatPage: React.FC = () => {
               newMessages[lastAssistantIndex] = assistantMessage;
             } else {
               // If no assistant message found to replace, add it instead
-              console.warn('[ChatPage] No assistant message found to replace during regeneration in sendMessage, adding new message');
+              console.warn(
+                '[ChatPage] No assistant message found to replace during regeneration in sendMessage, adding new message'
+              );
               newMessages.push(assistantMessage);
             }
             return newMessages;
           });
         } else {
-          console.log('[ChatPage] Adding assistant message to state (not regeneration)');
+          console.log(
+            '[ChatPage] Adding assistant message to state (not regeneration)'
+          );
           setMessages((prev) => {
-            console.log('[ChatPage] setMessages updater called, prev.length:', prev.length);
+            console.log(
+              '[ChatPage] setMessages updater called, prev.length:',
+              prev.length
+            );
             const newMessages = [...prev, assistantMessage];
-            console.log('[ChatPage] setMessages updater returning, newMessages.length:', newMessages.length);
+            console.log(
+              '[ChatPage] setMessages updater returning, newMessages.length:',
+              newMessages.length
+            );
             return newMessages;
           });
           console.log('[ChatPage] setMessages call completed');

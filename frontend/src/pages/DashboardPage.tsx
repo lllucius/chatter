@@ -489,7 +489,8 @@ const DashboardPage: React.FC = () => {
 
   // Always show dashboard, even with limited data
   // Defensive checks for nested data
-  const conversationStats = (data?.conversation_stats || {}) as ConversationStats;
+  const conversationStats = (data?.conversation_stats ||
+    {}) as ConversationStats;
   const usageMetrics = (usageData || data?.usage_metrics || {}) as UsageMetrics;
   const documentAnalytics = documentData || data?.document_analytics || {};
   const systemHealth = systemData || data?.system_health || {};

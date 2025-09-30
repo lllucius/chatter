@@ -234,9 +234,9 @@ class APIDocumentationEnhancer:
                                 for media_type in response[
                                     "content"
                                 ].values():
-                                    media_type[
-                                        "example"
-                                    ] = example_data["response"]
+                                    media_type["example"] = (
+                                        example_data["response"]
+                                    )
 
                 # Add additional description
                 description = self.descriptions.get(key)

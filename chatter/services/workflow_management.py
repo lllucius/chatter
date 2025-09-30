@@ -50,11 +50,13 @@ class WorkflowManagementService:
             workflow_id: Specific workflow to invalidate, or None to invalidate all
         """
         try:
-            from chatter.core.workflow_performance import get_workflow_cache
+            from chatter.core.workflow_performance import (
+                get_workflow_cache,
+            )
 
             workflow_cache = get_workflow_cache()
             await workflow_cache.clear_all()
-            
+
             logger.debug(
                 "Invalidated workflow caches",
                 workflow_id=workflow_id,
@@ -90,7 +92,9 @@ class WorkflowManagementService:
                 "metadata": metadata or {},
             }
 
-            validation_result = validate_workflow_definition(definition_data)
+            validation_result = validate_workflow_definition(
+                definition_data
+            )
 
             if not _is_validation_result_valid(validation_result):
                 from chatter.utils.problem import BadRequestProblem
@@ -126,11 +130,16 @@ class WorkflowManagementService:
             # Validate that the created definition has a proper ULID
             try:
                 from ulid import ULID
+
                 ULID.from_str(definition.id)
             except ValueError as e:
-                logger.error(f"Created workflow definition has invalid ULID: {definition.id}")
+                logger.error(
+                    f"Created workflow definition has invalid ULID: {definition.id}"
+                )
                 await self.session.rollback()
-                raise RuntimeError(f"Failed to create workflow with valid ULID: {e}") from e
+                raise RuntimeError(
+                    f"Failed to create workflow with valid ULID: {e}"
+                ) from e
 
             # Invalidate workflow caches after creation
             await self._invalidate_workflow_caches(definition.id)
@@ -425,8 +434,9 @@ class WorkflowManagementService:
         try:
             # Get total count
             count_result = await self.session.execute(
-                select(WorkflowExecution)
-                .where(WorkflowExecution.owner_id == owner_id)
+                select(WorkflowExecution).where(
+                    WorkflowExecution.owner_id == owner_id
+                )
             )
             total_count = len(list(count_result.scalars().all()))
 
@@ -439,7 +449,7 @@ class WorkflowManagementService:
                 .offset(offset)
             )
             executions = list(result.scalars().all())
-            
+
             return executions, total_count
 
         except Exception as e:
@@ -454,7 +464,9 @@ class WorkflowManagementService:
     ) -> dict[str, Any]:
         """Validate a workflow definition and return validation results."""
         try:
-            validation_result = validate_workflow_definition(definition_data)
+            validation_result = validate_workflow_definition(
+                definition_data
+            )
 
             return {
                 "valid": _is_validation_result_valid(validation_result),
@@ -489,21 +501,28 @@ class WorkflowManagementService:
                 )
             )
             execution = result.scalar_one_or_none()
-            
+
             if execution and execution.execution_log:
                 # Parse and structure the execution logs
-                from chatter.schemas.workflows import WorkflowExecutionLogEntry
+                from chatter.schemas.workflows import (
+                    WorkflowExecutionLogEntry,
+                )
+
                 structured_logs = []
                 for log_entry in execution.execution_log:
                     if isinstance(log_entry, dict):
                         try:
-                            structured_logs.append(WorkflowExecutionLogEntry(**log_entry))
+                            structured_logs.append(
+                                WorkflowExecutionLogEntry(**log_entry)
+                            )
                         except Exception as e:
-                            logger.warning(f"Failed to parse log entry: {e}")
-                
+                            logger.warning(
+                                f"Failed to parse log entry: {e}"
+                            )
+
                 # Add structured logs to the response
                 execution._structured_logs = structured_logs
-            
+
             return execution
 
         except Exception as e:
@@ -530,26 +549,31 @@ class WorkflowManagementService:
                 )
             )
             execution_log = result.scalar_one_or_none()
-            
+
             if not execution_log:
                 return []
-            
-            logs = execution_log if isinstance(execution_log, list) else []
-            
+
+            logs = (
+                execution_log if isinstance(execution_log, list) else []
+            )
+
             # Filter by log level if specified
             if log_level:
                 logs = [
-                    log for log in logs 
+                    log
+                    for log in logs
                     if log.get('level', '').upper() == log_level.upper()
                 ]
-            
+
             # Apply limit
             logs = logs[-limit:] if len(logs) > limit else logs
-            
+
             return logs
 
         except Exception as e:
-            logger.error(f"Failed to get execution logs {execution_id}: {e}")
+            logger.error(
+                f"Failed to get execution logs {execution_id}: {e}"
+            )
             raise
 
     # Template CRUD
@@ -765,11 +789,13 @@ class WorkflowManagementService:
     ) -> dict[str, Any]:
         """Validate a workflow definition using simplified validation."""
         try:
-            validation_result = validate_workflow_definition({
-                "nodes": nodes,
-                "edges": edges,
-                "name": "validation_check",
-            })
+            validation_result = validate_workflow_definition(
+                {
+                    "nodes": nodes,
+                    "edges": edges,
+                    "name": "validation_check",
+                }
+            )
 
             return {
                 "is_valid": validation_result.is_valid,
@@ -898,21 +924,21 @@ class WorkflowManagementService:
 
     def _generate_universal_chat_workflow(
         self,
-        template: "WorkflowTemplate", 
+        template: "WorkflowTemplate",
         input_params: dict[str, Any],
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Generate the universal chat workflow using conditional and variable nodes.
-        
+
         This creates a single workflow that can handle all chat patterns dynamically
         based on request parameters using conditional routing and variable nodes.
         """
         nodes = []
         edges = []
-        
+
         # Node positions for layout
         x_positions = {
             'start': 100,
-            'set_capabilities': 300, 
+            'set_capabilities': 300,
             'conditional_memory': 500,
             'manage_memory': 500,
             'conditional_retrieval': 700,
@@ -922,222 +948,391 @@ class WorkflowManagementService:
             'execute_tools': 1100,
             'conditional_finalize': 1300,
             'finalize_response': 1300,
-            'end': 1500
+            'end': 1500,
         }
-        
+
         # 1. Start Node
-        nodes.append({
-            "id": "start",
-            "type": "start",
-            "position": {"x": x_positions['start'], "y": 100},
-            "data": {
-                "label": "Start",
-                "nodeType": "start", 
-                "config": {}
+        nodes.append(
+            {
+                "id": "start",
+                "type": "start",
+                "position": {"x": x_positions['start'], "y": 100},
+                "data": {
+                    "label": "Start",
+                    "nodeType": "start",
+                    "config": {},
+                },
             }
-        })
-        
+        )
+
         # 2. Set Capabilities Variable Node
-        nodes.append({
-            "id": "set_capabilities",
-            "type": "variable",
-            "position": {"x": x_positions['set_capabilities'], "y": 100},
-            "data": {
-                "label": "Set Capabilities",
-                "nodeType": "variable",
-                "config": {
-                    "operation": "set",
-                    "variable_name": "capabilities",
-                    "value": {
-                        "enable_memory": input_params.get("enable_memory", False),
-                        "enable_retrieval": input_params.get("enable_retrieval", False),
-                        "enable_tools": input_params.get("enable_tools", False),
-                        "memory_window": input_params.get("memory_window", 10),
-                        "max_tool_calls": input_params.get("max_tool_calls", 10),
-                        "max_documents": input_params.get("max_documents", 5)
-                    }
-                }
+        nodes.append(
+            {
+                "id": "set_capabilities",
+                "type": "variable",
+                "position": {
+                    "x": x_positions['set_capabilities'],
+                    "y": 100,
+                },
+                "data": {
+                    "label": "Set Capabilities",
+                    "nodeType": "variable",
+                    "config": {
+                        "operation": "set",
+                        "variable_name": "capabilities",
+                        "value": {
+                            "enable_memory": input_params.get(
+                                "enable_memory", False
+                            ),
+                            "enable_retrieval": input_params.get(
+                                "enable_retrieval", False
+                            ),
+                            "enable_tools": input_params.get(
+                                "enable_tools", False
+                            ),
+                            "memory_window": input_params.get(
+                                "memory_window", 10
+                            ),
+                            "max_tool_calls": input_params.get(
+                                "max_tool_calls", 10
+                            ),
+                            "max_documents": input_params.get(
+                                "max_documents", 5
+                            ),
+                        },
+                    },
+                },
             }
-        })
-        
+        )
+
         # 3. Memory Conditional Node
-        nodes.append({
-            "id": "conditional_memory",
-            "type": "conditional",
-            "position": {"x": x_positions['conditional_memory'], "y": 100},
-            "data": {
-                "label": "Memory Check",
-                "nodeType": "conditional",
-                "config": {
-                    "condition": "variable enable_memory equals true"
-                }
+        nodes.append(
+            {
+                "id": "conditional_memory",
+                "type": "conditional",
+                "position": {
+                    "x": x_positions['conditional_memory'],
+                    "y": 100,
+                },
+                "data": {
+                    "label": "Memory Check",
+                    "nodeType": "conditional",
+                    "config": {
+                        "condition": "variable enable_memory equals true"
+                    },
+                },
             }
-        })
-        
+        )
+
         # 4. Memory Management Node
-        nodes.append({
-            "id": "manage_memory",
-            "type": "memory",
-            "position": {"x": x_positions['manage_memory'], "y": 200},
-            "data": {
-                "label": "Manage Memory",
-                "nodeType": "memory",
-                "config": {
-                    "memory_window": input_params.get("memory_window", 10)
-                }
+        nodes.append(
+            {
+                "id": "manage_memory",
+                "type": "memory",
+                "position": {
+                    "x": x_positions['manage_memory'],
+                    "y": 200,
+                },
+                "data": {
+                    "label": "Manage Memory",
+                    "nodeType": "memory",
+                    "config": {
+                        "memory_window": input_params.get(
+                            "memory_window", 10
+                        )
+                    },
+                },
             }
-        })
-        
-        # 5. Retrieval Conditional Node  
-        nodes.append({
-            "id": "conditional_retrieval",
-            "type": "conditional",
-            "position": {"x": x_positions['conditional_retrieval'], "y": 100},
-            "data": {
-                "label": "Retrieval Check", 
-                "nodeType": "conditional",
-                "config": {
-                    "condition": "variable enable_retrieval equals true"
-                }
+        )
+
+        # 5. Retrieval Conditional Node
+        nodes.append(
+            {
+                "id": "conditional_retrieval",
+                "type": "conditional",
+                "position": {
+                    "x": x_positions['conditional_retrieval'],
+                    "y": 100,
+                },
+                "data": {
+                    "label": "Retrieval Check",
+                    "nodeType": "conditional",
+                    "config": {
+                        "condition": "variable enable_retrieval equals true"
+                    },
+                },
             }
-        })
-        
+        )
+
         # 6. Document Retrieval Node
-        nodes.append({
-            "id": "retrieve_context",
-            "type": "retrieval",
-            "position": {"x": x_positions['retrieve_context'], "y": 200},
-            "data": {
-                "label": "Retrieve Context",
-                "nodeType": "retrieval",
-                "config": {
-                    "max_documents": input_params.get("max_documents", 5),
-                    "score_threshold": input_params.get("score_threshold", 0.5)
-                }
+        nodes.append(
+            {
+                "id": "retrieve_context",
+                "type": "retrieval",
+                "position": {
+                    "x": x_positions['retrieve_context'],
+                    "y": 200,
+                },
+                "data": {
+                    "label": "Retrieve Context",
+                    "nodeType": "retrieval",
+                    "config": {
+                        "max_documents": input_params.get(
+                            "max_documents", 5
+                        ),
+                        "score_threshold": input_params.get(
+                            "score_threshold", 0.5
+                        ),
+                    },
+                },
             }
-        })
-        
+        )
+
         # 7. LLM Call Node
-        nodes.append({
-            "id": "call_model",
-            "type": "llm",
-            "position": {"x": x_positions['call_model'], "y": 100},
-            "data": {
-                "label": "LLM Response",
-                "nodeType": "llm",
-                "config": {
-                    "provider": input_params.get("provider", "openai"),
-                    "model": input_params.get("model", "gpt-4"),
-                    "temperature": input_params.get("temperature", 0.7),
-                    "max_tokens": input_params.get("max_tokens", 1000),
-                    "system_message": input_params.get("system_message", template.default_params.get("system_message", "You are a helpful assistant."))
-                }
+        nodes.append(
+            {
+                "id": "call_model",
+                "type": "llm",
+                "position": {"x": x_positions['call_model'], "y": 100},
+                "data": {
+                    "label": "LLM Response",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get(
+                            "provider", "openai"
+                        ),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get(
+                            "temperature", 0.7
+                        ),
+                        "max_tokens": input_params.get(
+                            "max_tokens", 1000
+                        ),
+                        "system_message": input_params.get(
+                            "system_message",
+                            template.default_params.get(
+                                "system_message",
+                                "You are a helpful assistant.",
+                            ),
+                        ),
+                    },
+                },
             }
-        })
-        
+        )
+
         # 8. Tools Conditional Node
-        nodes.append({
-            "id": "conditional_tools",
-            "type": "conditional",
-            "position": {"x": x_positions['conditional_tools'], "y": 100},
-            "data": {
-                "label": "Tools Check",
-                "nodeType": "conditional", 
-                "config": {
-                    "condition": "variable enable_tools equals true AND has_tool_calls"
-                }
+        nodes.append(
+            {
+                "id": "conditional_tools",
+                "type": "conditional",
+                "position": {
+                    "x": x_positions['conditional_tools'],
+                    "y": 100,
+                },
+                "data": {
+                    "label": "Tools Check",
+                    "nodeType": "conditional",
+                    "config": {
+                        "condition": "variable enable_tools equals true AND has_tool_calls"
+                    },
+                },
             }
-        })
-        
+        )
+
         # 9. Tool Execution Node
-        nodes.append({
-            "id": "execute_tools",
-            "type": "tools",
-            "position": {"x": x_positions['execute_tools'], "y": 200},
-            "data": {
-                "label": "Execute Tools",
-                "nodeType": "tools",
-                "config": {
-                    "max_tool_calls": input_params.get("max_tool_calls", 10),
-                    "tool_timeout_ms": input_params.get("tool_timeout_ms", 30000)
-                }
+        nodes.append(
+            {
+                "id": "execute_tools",
+                "type": "tools",
+                "position": {
+                    "x": x_positions['execute_tools'],
+                    "y": 200,
+                },
+                "data": {
+                    "label": "Execute Tools",
+                    "nodeType": "tools",
+                    "config": {
+                        "max_tool_calls": input_params.get(
+                            "max_tool_calls", 10
+                        ),
+                        "tool_timeout_ms": input_params.get(
+                            "tool_timeout_ms", 30000
+                        ),
+                    },
+                },
             }
-        })
-        
+        )
+
         # 10. Finalize Conditional Node
-        nodes.append({
-            "id": "conditional_finalize",
-            "type": "conditional", 
-            "position": {"x": x_positions['conditional_finalize'], "y": 100},
-            "data": {
-                "label": "Finalize Check",
-                "nodeType": "conditional",
-                "config": {
-                    "condition": "tool_calls >= variable max_tool_calls"
-                }
+        nodes.append(
+            {
+                "id": "conditional_finalize",
+                "type": "conditional",
+                "position": {
+                    "x": x_positions['conditional_finalize'],
+                    "y": 100,
+                },
+                "data": {
+                    "label": "Finalize Check",
+                    "nodeType": "conditional",
+                    "config": {
+                        "condition": "tool_calls >= variable max_tool_calls"
+                    },
+                },
             }
-        })
-        
+        )
+
         # 11. Finalize Response Node
-        nodes.append({
-            "id": "finalize_response",
-            "type": "llm",
-            "position": {"x": x_positions['finalize_response'], "y": 200},
-            "data": {
-                "label": "Finalize Response",
-                "nodeType": "llm",
-                "config": {
-                    "provider": input_params.get("provider", "openai"),
-                    "model": input_params.get("model", "gpt-4"),
-                    "temperature": input_params.get("temperature", 0.7),
-                    "max_tokens": input_params.get("max_tokens", 1000),
-                    "system_message": "Provide a final response based on the tool results."
-                }
+        nodes.append(
+            {
+                "id": "finalize_response",
+                "type": "llm",
+                "position": {
+                    "x": x_positions['finalize_response'],
+                    "y": 200,
+                },
+                "data": {
+                    "label": "Finalize Response",
+                    "nodeType": "llm",
+                    "config": {
+                        "provider": input_params.get(
+                            "provider", "openai"
+                        ),
+                        "model": input_params.get("model", "gpt-4"),
+                        "temperature": input_params.get(
+                            "temperature", 0.7
+                        ),
+                        "max_tokens": input_params.get(
+                            "max_tokens", 1000
+                        ),
+                        "system_message": "Provide a final response based on the tool results.",
+                    },
+                },
             }
-        })
-        
+        )
+
         # 12. End Node
-        nodes.append({
-            "id": "end",
-            "type": "end",
-            "position": {"x": x_positions['end'], "y": 100},
-            "data": {
-                "label": "End",
-                "nodeType": "end",
-                "config": {}
+        nodes.append(
+            {
+                "id": "end",
+                "type": "end",
+                "position": {"x": x_positions['end'], "y": 100},
+                "data": {
+                    "label": "End",
+                    "nodeType": "end",
+                    "config": {},
+                },
             }
-        })
-        
+        )
+
         # Define Edges with Conditional Routing
         edges = [
             # Linear flow with conditional branches
-            {"id": "start-set_capabilities", "source": "start", "target": "set_capabilities", "type": "default"},
-            {"id": "set_capabilities-conditional_memory", "source": "set_capabilities", "target": "conditional_memory", "type": "default"},
-            
+            {
+                "id": "start-set_capabilities",
+                "source": "start",
+                "target": "set_capabilities",
+                "type": "default",
+            },
+            {
+                "id": "set_capabilities-conditional_memory",
+                "source": "set_capabilities",
+                "target": "conditional_memory",
+                "type": "default",
+            },
             # Memory branch
-            {"id": "conditional_memory-manage_memory", "source": "conditional_memory", "target": "manage_memory", "type": "conditional", "condition": "variable enable_memory equals true"},
-            {"id": "conditional_memory-conditional_retrieval", "source": "conditional_memory", "target": "conditional_retrieval", "type": "conditional", "condition": "variable enable_memory equals false"},
-            {"id": "manage_memory-conditional_retrieval", "source": "manage_memory", "target": "conditional_retrieval", "type": "default"},
-            
-            # Retrieval branch  
-            {"id": "conditional_retrieval-retrieve_context", "source": "conditional_retrieval", "target": "retrieve_context", "type": "conditional", "condition": "variable enable_retrieval equals true"},
-            {"id": "conditional_retrieval-call_model", "source": "conditional_retrieval", "target": "call_model", "type": "conditional", "condition": "variable enable_retrieval equals false"},
-            {"id": "retrieve_context-call_model", "source": "retrieve_context", "target": "call_model", "type": "default"},
-            
+            {
+                "id": "conditional_memory-manage_memory",
+                "source": "conditional_memory",
+                "target": "manage_memory",
+                "type": "conditional",
+                "condition": "variable enable_memory equals true",
+            },
+            {
+                "id": "conditional_memory-conditional_retrieval",
+                "source": "conditional_memory",
+                "target": "conditional_retrieval",
+                "type": "conditional",
+                "condition": "variable enable_memory equals false",
+            },
+            {
+                "id": "manage_memory-conditional_retrieval",
+                "source": "manage_memory",
+                "target": "conditional_retrieval",
+                "type": "default",
+            },
+            # Retrieval branch
+            {
+                "id": "conditional_retrieval-retrieve_context",
+                "source": "conditional_retrieval",
+                "target": "retrieve_context",
+                "type": "conditional",
+                "condition": "variable enable_retrieval equals true",
+            },
+            {
+                "id": "conditional_retrieval-call_model",
+                "source": "conditional_retrieval",
+                "target": "call_model",
+                "type": "conditional",
+                "condition": "variable enable_retrieval equals false",
+            },
+            {
+                "id": "retrieve_context-call_model",
+                "source": "retrieve_context",
+                "target": "call_model",
+                "type": "default",
+            },
             # Model to tools check
-            {"id": "call_model-conditional_tools", "source": "call_model", "target": "conditional_tools", "type": "default"},
-            
+            {
+                "id": "call_model-conditional_tools",
+                "source": "call_model",
+                "target": "conditional_tools",
+                "type": "default",
+            },
             # Tools branch
-            {"id": "conditional_tools-execute_tools", "source": "conditional_tools", "target": "execute_tools", "type": "conditional", "condition": "variable enable_tools equals true AND has_tool_calls"},
-            {"id": "conditional_tools-end", "source": "conditional_tools", "target": "end", "type": "conditional", "condition": "variable enable_tools equals false OR no_tool_calls"},
-            
+            {
+                "id": "conditional_tools-execute_tools",
+                "source": "conditional_tools",
+                "target": "execute_tools",
+                "type": "conditional",
+                "condition": "variable enable_tools equals true AND has_tool_calls",
+            },
+            {
+                "id": "conditional_tools-end",
+                "source": "conditional_tools",
+                "target": "end",
+                "type": "conditional",
+                "condition": "variable enable_tools equals false OR no_tool_calls",
+            },
             # Tool execution loop and finalization
-            {"id": "execute_tools-conditional_finalize", "source": "execute_tools", "target": "conditional_finalize", "type": "default"},
-            {"id": "conditional_finalize-call_model", "source": "conditional_finalize", "target": "call_model", "type": "conditional", "condition": "tool_calls < variable max_tool_calls"},  
-            {"id": "conditional_finalize-finalize_response", "source": "conditional_finalize", "target": "finalize_response", "type": "conditional", "condition": "tool_calls >= variable max_tool_calls"},
-            {"id": "finalize_response-end", "source": "finalize_response", "target": "end", "type": "default"},
+            {
+                "id": "execute_tools-conditional_finalize",
+                "source": "execute_tools",
+                "target": "conditional_finalize",
+                "type": "default",
+            },
+            {
+                "id": "conditional_finalize-call_model",
+                "source": "conditional_finalize",
+                "target": "call_model",
+                "type": "conditional",
+                "condition": "tool_calls < variable max_tool_calls",
+            },
+            {
+                "id": "conditional_finalize-finalize_response",
+                "source": "conditional_finalize",
+                "target": "finalize_response",
+                "type": "conditional",
+                "condition": "tool_calls >= variable max_tool_calls",
+            },
+            {
+                "id": "finalize_response-end",
+                "source": "finalize_response",
+                "target": "end",
+                "type": "default",
+            },
         ]
-        
+
         return nodes, edges
 
     def _generate_capability_based_workflow(
@@ -1148,8 +1343,13 @@ class WorkflowManagementService:
     ) -> tuple[list[dict[str, Any]], list[dict[str, Any]]]:
         """Generate workflow based on capabilities rather than hardcoded types."""
         # Check if this is the universal template
-        if getattr(template, 'name', '') == 'universal_chat' or input_params.get('workflow_type') == 'universal_chat':
-            return self._generate_universal_chat_workflow(template, input_params)
+        if (
+            getattr(template, 'name', '') == 'universal_chat'
+            or input_params.get('workflow_type') == 'universal_chat'
+        ):
+            return self._generate_universal_chat_workflow(
+                template, input_params
+            )
         nodes = []
         edges = []
 

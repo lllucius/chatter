@@ -17,8 +17,8 @@ from sqlalchemy import and_, desc, func, literal, select, text
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from chatter.config import settings
-from chatter.core.cache_factory import CacheType, cache_factory
 from chatter.core.cache import CacheInterface
+from chatter.core.cache_factory import CacheType, cache_factory
 from chatter.models.conversation import (
     Conversation,
     ConversationStatus,
@@ -37,6 +37,7 @@ from chatter.utils.performance import get_performance_metrics
 # Import AB testing for real metrics
 try:
     from chatter.services.ab_testing import ABTestManager, TestStatus
+
     AB_TESTING_AVAILABLE = True
 except ImportError:
     AB_TESTING_AVAILABLE = False
@@ -133,17 +134,17 @@ class AnalyticsService:
 
                 # Create specialized cache instance
                 if cache_tier == CacheType.SESSION:
-                    self._cache_instances[
-                        data_type
-                    ] = self.cache_factory.create_session_cache()
+                    self._cache_instances[data_type] = (
+                        self.cache_factory.create_session_cache()
+                    )
                 elif cache_tier == CacheType.PERSISTENT:
-                    self._cache_instances[
-                        data_type
-                    ] = self.cache_factory.create_persistent_cache()
+                    self._cache_instances[data_type] = (
+                        self.cache_factory.create_persistent_cache()
+                    )
                 else:
-                    self._cache_instances[
-                        data_type
-                    ] = self.cache_factory.create_general_cache()
+                    self._cache_instances[data_type] = (
+                        self.cache_factory.create_general_cache()
+                    )
 
                 logger.debug(
                     f"Created cache instance for {data_type} using {cache_tier}"
@@ -628,29 +629,35 @@ class AnalyticsService:
         try:
             # Query for conversations with ratings from the last 30 days
             thirty_days_ago = datetime.now(UTC) - timedelta(days=30)
-            
+
             query = select(
                 func.avg(Conversation.rating).label('avg_rating'),
-                func.count(Conversation.id).label('total_rated')
+                func.count(Conversation.id).label('total_rated'),
             ).where(
                 and_(
                     Conversation.rating.is_not(None),
-                    Conversation.created_at >= thirty_days_ago
+                    Conversation.created_at >= thirty_days_ago,
                 )
             )
-            
+
             result = await self.session.execute(query)
             row = result.first()
-            
-            if row and row.avg_rating is not None and row.total_rated > 0:
+
+            if (
+                row
+                and row.avg_rating is not None
+                and row.total_rated > 0
+            ):
                 # Convert 0-5 rating scale to 0-100 percentage
                 return round((row.avg_rating / 5.0) * 100, 1)
             else:
                 # No ratings available, return neutral score
                 return 75.0  # Assume positive experience if no explicit feedback
-                
+
         except Exception as e:
-            logger.warning(f"Could not calculate satisfaction score: {e}")
+            logger.warning(
+                f"Could not calculate satisfaction score: {e}"
+            )
             return 75.0  # Return default if calculation fails
 
     async def _get_ab_testing_metrics(self) -> dict[str, Any]:
@@ -666,59 +673,89 @@ class AnalyticsService:
                 "totalImprovement": 0,
                 "testsThisMonth": 0,
             }
-        
+
         try:
             # Get AB test manager instance (this would need to be injected properly in real implementation)
             ab_manager = ABTestManager()
-            
+
             # Get active tests
-            active_tests = await ab_manager.list_tests(status=TestStatus.RUNNING)
+            active_tests = await ab_manager.list_tests(
+                status=TestStatus.RUNNING
+            )
             active_count = len(active_tests)
-            
+
             # Get completed tests
-            completed_tests = await ab_manager.list_tests(status=TestStatus.COMPLETED)
+            completed_tests = await ab_manager.list_tests(
+                status=TestStatus.COMPLETED
+            )
             completed_count = len(completed_tests)
-            
+
             # Calculate tests this month
-            this_month_start = datetime.now(UTC).replace(day=1, hour=0, minute=0, second=0, microsecond=0)
+            this_month_start = datetime.now(UTC).replace(
+                day=1, hour=0, minute=0, second=0, microsecond=0
+            )
             tests_this_month = 0
             significant_results = 0
             total_improvement = 0.0
-            
+
             # Count tests created this month and significant results
             for test in active_tests + completed_tests:
                 if test.created_at >= this_month_start:
                     tests_this_month += 1
-                    
+
                 # Check if test has significant results
-                test_results = await ab_manager.get_test_results(test.id)
-                if test_results and hasattr(test_results, 'is_significant') and test_results.is_significant:
+                test_results = await ab_manager.get_test_results(
+                    test.id
+                )
+                if (
+                    test_results
+                    and hasattr(test_results, 'is_significant')
+                    and test_results.is_significant
+                ):
                     significant_results += 1
                     if hasattr(test_results, 'improvement_percentage'):
-                        total_improvement += test_results.improvement_percentage or 0
-            
+                        total_improvement += (
+                            test_results.improvement_percentage or 0
+                        )
+
             # Calculate average conversion rate from active tests
             conversion_rate = 0.0
             confidence_level = 0.0
-            
+
             if active_tests:
                 total_conversion = 0.0
                 total_confidence = 0.0
                 valid_tests = 0
-                
+
                 for test in active_tests:
-                    test_results = await ab_manager.get_test_results(test.id)
+                    test_results = await ab_manager.get_test_results(
+                        test.id
+                    )
                     if test_results:
-                        if hasattr(test_results, 'conversion_rate') and test_results.conversion_rate:
-                            total_conversion += test_results.conversion_rate
+                        if (
+                            hasattr(test_results, 'conversion_rate')
+                            and test_results.conversion_rate
+                        ):
+                            total_conversion += (
+                                test_results.conversion_rate
+                            )
                             valid_tests += 1
-                        if hasattr(test_results, 'confidence_level') and test_results.confidence_level:
-                            total_confidence += test_results.confidence_level
-                
+                        if (
+                            hasattr(test_results, 'confidence_level')
+                            and test_results.confidence_level
+                        ):
+                            total_confidence += (
+                                test_results.confidence_level
+                            )
+
                 if valid_tests > 0:
-                    conversion_rate = round(total_conversion / valid_tests, 2)
-                    confidence_level = round(total_confidence / valid_tests, 2)
-            
+                    conversion_rate = round(
+                        total_conversion / valid_tests, 2
+                    )
+                    confidence_level = round(
+                        total_confidence / valid_tests, 2
+                    )
+
             return {
                 # For the first format (dashboard stats)
                 "active_tests": active_count,
@@ -731,7 +768,7 @@ class AnalyticsService:
                 "totalImprovement": round(total_improvement, 1),
                 "testsThisMonth": tests_this_month,
             }
-            
+
         except Exception as e:
             logger.warning(f"Could not get A/B testing metrics: {e}")
             # Return zero metrics if calculation fails
@@ -781,35 +818,43 @@ class AnalyticsService:
             # 1. Completed successfully (not abandoned)
             # 2. Have positive ratings if ratings exist
             # 3. Don't have error indicators in recent activity
-            
+
             total_conversations = stats.get("conversation_count", 0)
             if total_conversations == 0:
-                return 100.0  # Perfect score if no conversations to fail
-            
+                return (
+                    100.0  # Perfect score if no conversations to fail
+                )
+
             # Base success rate on conversation completion
             # Assume conversations with messages are successful
             message_count = stats.get("message_count", 0)
-            
+
             # If we have messages, conversations are generally successful
             # Use a heuristic: conversations with multiple messages are more likely successful
             if message_count > 0 and total_conversations > 0:
                 # Average messages per conversation as success indicator
                 avg_messages = message_count / total_conversations
-                
+
                 # More messages generally indicate successful engagement
                 # Scale from 85% to 98% based on message engagement
                 base_success_rate = min(85 + (avg_messages * 5), 98)
-                
+
                 # If we have ratings, factor them in
-                if hasattr(stats, 'average_rating') and stats.get('average_rating'):
-                    rating_factor = stats['average_rating'] / 5.0  # 0-1 scale
-                    base_success_rate = base_success_rate * (0.8 + 0.2 * rating_factor)
-                
+                if hasattr(stats, 'average_rating') and stats.get(
+                    'average_rating'
+                ):
+                    rating_factor = (
+                        stats['average_rating'] / 5.0
+                    )  # 0-1 scale
+                    base_success_rate = base_success_rate * (
+                        0.8 + 0.2 * rating_factor
+                    )
+
                 return round(base_success_rate, 1)
-            
+
             # Default to high success rate for active systems
             return 85.0
-            
+
         except Exception as e:
             logger.debug(f"Could not calculate success rate: {e}")
             return 85.0  # Conservative estimate
@@ -1672,9 +1717,9 @@ class AnalyticsService:
                 )
                 .group_by(Conversation.status)
             )
-            conversations_by_status: dict[
-                ConversationStatus, int
-            ] = dict(status_result.all())
+            conversations_by_status: dict[ConversationStatus, int] = (
+                dict(status_result.all())
+            )
 
             # Total messages
             total_messages_result = await self.session.execute(
@@ -2855,7 +2900,7 @@ class AnalyticsService:
                     )
                 )
             )
-            calls_today = calls_today_result.scalar() or 0
+            calls_today_result.scalar() or 0
 
             calls_week_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
@@ -2872,7 +2917,7 @@ class AnalyticsService:
                     )
                 )
             )
-            calls_week = calls_week_result.scalar() or 0
+            calls_week_result.scalar() or 0
 
             calls_month_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
@@ -2905,7 +2950,7 @@ class AnalyticsService:
                     )
                 )
             )
-            errors_today = errors_today_result.scalar() or 0
+            errors_today_result.scalar() or 0
 
             # Success rate
             total_calls = calls_month
@@ -2926,7 +2971,7 @@ class AnalyticsService:
                 )
             )
             total_errors = total_errors.scalar() or 0
-            overall_success_rate = (
+            (
                 (total_calls - total_errors) / total_calls
                 if total_calls > 0
                 else 1.0
@@ -2964,7 +3009,7 @@ class AnalyticsService:
                     )
                 )
             )
-            p95_response_time = float(p95_response_result.scalar() or 0)
+            float(p95_response_result.scalar() or 0)
 
             # Server metrics
             server_metrics_result = await self.session.execute(
@@ -3145,7 +3190,9 @@ class AnalyticsService:
             # Create tool usage stats
             tool_usage_stats = {}
             for tool in top_tools:
-                tool_usage_stats[tool["tool_name"]] = tool["total_calls"]
+                tool_usage_stats[tool["tool_name"]] = tool[
+                    "total_calls"
+                ]
 
             # Create server uptime stats from server metrics
             server_uptime_stats = {
@@ -3163,7 +3210,7 @@ class AnalyticsService:
             for tool in failing_tools:
                 error_type = f"{tool['tool_name']}_errors"
                 error_distribution[error_type] = tool["total_errors"]
-            
+
             # If no failing tools, add general error count
             if not error_distribution:
                 error_distribution["general_errors"] = total_errors
@@ -3591,38 +3638,38 @@ class AnalyticsService:
             for metric in metrics:
                 try:
                     if metric == "conversations":
-                        export_data[
-                            "conversations"
-                        ] = await self.get_conversation_stats(
-                            user_id, time_range
+                        export_data["conversations"] = (
+                            await self.get_conversation_stats(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "usage":
-                        export_data[
-                            "usage"
-                        ] = await self.get_usage_metrics(
-                            user_id, time_range
+                        export_data["usage"] = (
+                            await self.get_usage_metrics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "performance":
-                        export_data[
-                            "performance"
-                        ] = await self.get_performance_metrics(
-                            user_id, time_range
+                        export_data["performance"] = (
+                            await self.get_performance_metrics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "documents":
-                        export_data[
-                            "documents"
-                        ] = await self.get_document_analytics(
-                            user_id, time_range
+                        export_data["documents"] = (
+                            await self.get_document_analytics(
+                                user_id, time_range
+                            )
                         )
                     elif metric == "system":
-                        export_data[
-                            "system"
-                        ] = await self.get_system_analytics()
+                        export_data["system"] = (
+                            await self.get_system_analytics()
+                        )
                     elif metric == "toolservers":
-                        export_data[
-                            "toolservers"
-                        ] = await self.get_tool_server_analytics(
-                            user_id, time_range
+                        export_data["toolservers"] = (
+                            await self.get_tool_server_analytics(
+                                user_id, time_range
+                            )
                         )
                     else:
                         logger.warning(

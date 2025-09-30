@@ -33,7 +33,9 @@ class ValidatedULID(str):
             # This appears to be legacy code - streaming should provide proper ULIDs
             # Investigate if this is still needed and remove if possible
             if v.startswith("stream-"):
-                logger.warning(f"Accepting legacy stream-prefixed ID: {v}")
+                logger.warning(
+                    f"Accepting legacy stream-prefixed ID: {v}"
+                )
                 return v
 
             try:
@@ -49,18 +51,32 @@ class ValidatedULID(str):
                     # Handle empty string and very short strings first
                     if len(v) == 0:
                         raise BadRequestProblem(
-                            detail=f"Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
+                            detail="Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
                         ) from e
-                    elif len(v) < 10:  # Very short strings, likely not names
+                    elif (
+                        len(v) < 10
+                    ):  # Very short strings, likely not names
                         raise BadRequestProblem(
                             detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
                         ) from e
                     else:
                         # Check for known problematic patterns for longer strings
-                        common_names = ["untitled", "default", "new", "test", "sample", "example"]
+                        common_names = [
+                            "untitled",
+                            "default",
+                            "new",
+                            "test",
+                            "sample",
+                            "example",
+                        ]
                         v_lower = v.lower()
-                        is_likely_name = any(name in v_lower for name in common_names) or not v.isupper()
-                        
+                        is_likely_name = (
+                            any(
+                                name in v_lower for name in common_names
+                            )
+                            or not v.isupper()
+                        )
+
                         if is_likely_name:
                             raise BadRequestProblem(
                                 detail=f"Invalid ULID format: '{v}' (length: {len(v)}) appears to be a descriptive name rather than a ULID. ULIDs must be exactly 26 characters long and contain only uppercase alphanumeric characters. This suggests a bug where a name is being passed instead of the proper resource ID."
@@ -100,18 +116,32 @@ class ValidatedULID(str):
                     # Handle empty string and very short strings first
                     if len(v) == 0:
                         raise BadRequestProblem(
-                            detail=f"Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
+                            detail="Invalid ULID format: must be exactly 26 characters, got 0 characters: ''"
                         ) from e
-                    elif len(v) < 10:  # Very short strings, likely not names
+                    elif (
+                        len(v) < 10
+                    ):  # Very short strings, likely not names
                         raise BadRequestProblem(
                             detail=f"Invalid ULID format: must be exactly 26 characters, got {len(v)} characters: '{v}'"
                         ) from e
                     else:
                         # Check for known problematic patterns for longer strings
-                        common_names = ["untitled", "default", "new", "test", "sample", "example"]
+                        common_names = [
+                            "untitled",
+                            "default",
+                            "new",
+                            "test",
+                            "sample",
+                            "example",
+                        ]
                         v_lower = v.lower()
-                        is_likely_name = any(name in v_lower for name in common_names) or not v.isupper()
-                        
+                        is_likely_name = (
+                            any(
+                                name in v_lower for name in common_names
+                            )
+                            or not v.isupper()
+                        )
+
                         if is_likely_name:
                             raise BadRequestProblem(
                                 detail=f"Invalid ULID format: '{v}' (length: {len(v)}) appears to be a descriptive name rather than a ULID. ULIDs must be exactly 26 characters long and contain only uppercase alphanumeric characters. This suggests a bug where a name is being passed instead of the proper resource ID."

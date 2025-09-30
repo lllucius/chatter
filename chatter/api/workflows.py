@@ -35,11 +35,11 @@ from chatter.schemas.workflows import (
 from chatter.services.simplified_workflow_analytics import (
     SimplifiedWorkflowAnalyticsService,
 )
+from chatter.services.workflow_defaults import WorkflowDefaultsService
 from chatter.services.workflow_execution import WorkflowExecutionService
 from chatter.services.workflow_management import (
     WorkflowManagementService,
 )
-from chatter.services.workflow_defaults import WorkflowDefaultsService
 from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 from chatter.utils.problem import InternalServerProblem, NotFoundProblem
@@ -98,9 +98,13 @@ async def create_workflow_definition(
     """Create a new workflow definition."""
     try:
         # Convert Pydantic objects to dictionaries for validation
-        nodes_dict = [node.to_dict() for node in workflow_definition.nodes]
-        edges_dict = [edge.to_dict() for edge in workflow_definition.edges]
-        
+        nodes_dict = [
+            node.to_dict() for node in workflow_definition.nodes
+        ]
+        edges_dict = [
+            edge.to_dict() for edge in workflow_definition.edges
+        ]
+
         definition = await workflow_service.create_workflow_definition(
             owner_id=current_user.id,
             name=workflow_definition.name,
@@ -382,7 +386,7 @@ async def delete_workflow_template(
             template_id=template_id,
             owner_id=current_user.id,
         )
-        
+
         if not success:
             raise NotFoundProblem(detail="Workflow template not found")
 
@@ -515,20 +519,29 @@ async def validate_workflow_definition(
         else:
             # Modern format - assume it's a dict with nodes and edges
             from chatter.core.langgraph import workflow_manager
-            
+
             nodes = request.get("nodes", [])
             edges = request.get("edges", [])
-            
-            validation_result = workflow_manager.validate_workflow_definition(nodes, edges)
-            
+
+            validation_result = (
+                workflow_manager.validate_workflow_definition(
+                    nodes, edges
+                )
+            )
+
             return WorkflowValidationResponse(
                 is_valid=validation_result["valid"],
-                errors=[{"message": error} for error in validation_result["errors"]],
+                errors=[
+                    {"message": error}
+                    for error in validation_result["errors"]
+                ],
                 warnings=validation_result["warnings"],
                 metadata={
-                    "supported_node_types": validation_result["supported_node_types"],
+                    "supported_node_types": validation_result[
+                        "supported_node_types"
+                    ],
                     "validation_timestamp": time.time(),
-                }
+                },
             )
     except Exception as e:
         logger.error(f"Failed to validate workflow definition: {e}")
@@ -537,7 +550,7 @@ async def validate_workflow_definition(
             is_valid=False,
             errors=[{"message": f"Validation error: {str(e)}"}],
             warnings=[],
-            metadata={}
+            metadata={},
         )
 
 
@@ -855,13 +868,15 @@ async def list_all_workflow_executions(
     try:
         # Calculate offset
         offset = (page - 1) * page_size
-        
-        executions, total_count = await workflow_service.list_all_workflow_executions(
-            owner_id=current_user.id,
-            limit=page_size,
-            offset=offset,
+
+        executions, total_count = (
+            await workflow_service.list_all_workflow_executions(
+                owner_id=current_user.id,
+                limit=page_size,
+                offset=offset,
+            )
         )
-        
+
         return {
             "items": [
                 WorkflowExecutionResponse.model_validate(exec.to_dict())
@@ -936,15 +951,15 @@ async def get_workflow_execution_details(
             )
 
         # Get the execution
-        execution = await workflow_service.get_workflow_execution_details(
-            execution_id=execution_id,
-            owner_id=current_user.id,
+        execution = (
+            await workflow_service.get_workflow_execution_details(
+                execution_id=execution_id,
+                owner_id=current_user.id,
+            )
         )
         if not execution:
-            raise NotFoundProblem(
-                detail="Workflow execution not found"
-            )
-        
+            raise NotFoundProblem(detail="Workflow execution not found")
+
         # Verify the execution belongs to this workflow
         if execution.definition_id != workflow_id:
             raise NotFoundProblem(
@@ -1104,6 +1119,7 @@ async def execute_chat_workflow_streaming(
 
 # Modern Workflow System Endpoints
 
+
 @router.post("/definitions/custom/execute")
 async def execute_custom_workflow(
     nodes: list[dict],
@@ -1114,54 +1130,35 @@ async def execute_custom_workflow(
     model: str = "gpt-4",
     conversation_id: str | None = None,
     current_user: User = Depends(get_current_user),
-    workflow_service: WorkflowExecutionService = Depends(get_workflow_execution_service),
+    workflow_service: WorkflowExecutionService = Depends(
+        get_workflow_execution_service
+    ),
 ) -> dict:
     """Execute a custom workflow definition using the modern system."""
     try:
+        from langchain_core.messages import HumanMessage
+
         from chatter.core.langgraph import workflow_manager
         from chatter.services.llm import LLMService
-        from langchain_core.messages import HumanMessage
-        
+
         # Validate the workflow first
-        validation = workflow_manager.validate_workflow_definition(nodes, edges)
+        validation = workflow_manager.validate_workflow_definition(
+            nodes, edges
+        )
         if not validation["valid"]:
-            raise ValueError(f"Invalid workflow: {', '.join(validation['errors'])}")
-        
+            raise ValueError(
+                f"Invalid workflow: {', '.join(validation['errors'])}"
+            )
+
         # Get LLM
         llm_service = LLMService()
         llm = await llm_service.get_llm(provider=provider, model=model)
-        
+
         # Create workflow
         # Get tools and retriever if needed
         tools = None
         retriever = None
-        
-        # Import tool registry for tool support
-        from chatter.core.tool_registry import ToolRegistry
-        
-        # Get available tools based on request
-        if hasattr(request, 'enable_tools') and request.enable_tools:
-            try:
-                tool_registry = ToolRegistry()
-                tools = tool_registry.get_tools_for_workspace(
-                    workspace_id=current_user.id,  # Use user ID as workspace
-                    user_permissions=[]  # TODO: Add user permission system
-                )
-                logger.info(f"Loaded {len(tools) if tools else 0} tools for custom workflow")
-            except Exception as e:
-                logger.warning(f"Could not load tools for custom workflow: {e}")
-                tools = []
-        
-        # Get retriever if needed
-        if hasattr(request, 'enable_retrieval') and request.enable_retrieval:
-            try:
-                from chatter.core.vector_store import get_vector_store_retriever
-                retriever = get_vector_store_retriever(user_id=current_user.id)
-                logger.info("Loaded retriever for custom workflow")
-            except Exception as e:
-                logger.warning(f"Could not load retriever for custom workflow: {e}")
-                retriever = None
-        
+
         workflow = await workflow_manager.create_custom_workflow(
             nodes=nodes,
             edges=edges,
@@ -1170,9 +1167,12 @@ async def execute_custom_workflow(
             tools=tools,
             retriever=retriever,
         )
-        
+
         # Create initial state
-        from chatter.core.workflow_node_factory import WorkflowNodeContext
+        from chatter.core.workflow_node_factory import (
+            WorkflowNodeContext,
+        )
+
         initial_state: WorkflowNodeContext = {
             "messages": [HumanMessage(content=message)],
             "user_id": current_user.id,
@@ -1187,29 +1187,35 @@ async def execute_custom_workflow(
             "conditional_results": {},
             "execution_history": [],
         }
-        
+
         # Execute workflow
         result = await workflow_manager.run_workflow(
             workflow=workflow,
             initial_state=initial_state,
         )
-        
+
         # Extract response
         messages = result.get("messages", [])
         last_message = messages[-1] if messages else None
-        response_content = getattr(last_message, "content", "No response generated")
-        
+        response_content = getattr(
+            last_message, "content", "No response generated"
+        )
+
         return {
             "response": response_content,
             "metadata": result.get("metadata", {}),
             "execution_summary": {
-                "nodes_executed": len(result.get("execution_history", [])),
+                "nodes_executed": len(
+                    result.get("execution_history", [])
+                ),
                 "tool_calls": result.get("tool_call_count", 0),
                 "variables": result.get("variables", {}),
-                "conditional_results": result.get("conditional_results", {}),
-            }
+                "conditional_results": result.get(
+                    "conditional_results", {}
+                ),
+            },
         }
-        
+
     except Exception as e:
         logger.error(f"Custom workflow execution failed: {e}")
         raise InternalServerProblem(
@@ -1224,60 +1230,80 @@ async def get_modern_supported_node_types(
     """Get supported node types from the modern workflow system."""
     try:
         from chatter.core.langgraph import workflow_manager
-        
+
         supported_types = workflow_manager.get_supported_node_types()
-        
+
         # Enhanced node type information
         node_type_details = {
             "conditional": {
                 "description": "Conditional logic and branching node",
                 "required_config": ["condition"],
                 "optional_config": [],
-                "examples": ["message contains 'hello'", "tool_calls > 3", "variable user_type equals 'premium'"]
+                "examples": [
+                    "message contains 'hello'",
+                    "tool_calls > 3",
+                    "variable user_type equals 'premium'",
+                ],
             },
             "loop": {
-                "description": "Loop iteration and repetitive execution node", 
+                "description": "Loop iteration and repetitive execution node",
                 "required_config": [],
                 "optional_config": ["max_iterations", "condition"],
-                "examples": ["max_iterations: 5", "condition: 'variable counter < 10'"]
+                "examples": [
+                    "max_iterations: 5",
+                    "condition: 'variable counter < 10'",
+                ],
             },
             "variable": {
                 "description": "Variable manipulation and state management node",
                 "required_config": ["operation"],
                 "optional_config": ["variable_name", "value"],
-                "examples": ["set counter to 0", "increment counter", "get user_preference"]
+                "examples": [
+                    "set counter to 0",
+                    "increment counter",
+                    "get user_preference",
+                ],
             },
             "error_handler": {
                 "description": "Error handling and recovery node",
                 "required_config": [],
                 "optional_config": ["retry_count", "fallback_action"],
-                "examples": ["retry_count: 3", "fallback_action: 'continue'"]
+                "examples": [
+                    "retry_count: 3",
+                    "fallback_action: 'continue'",
+                ],
             },
             "delay": {
                 "description": "Time delay and pacing node",
                 "required_config": ["duration"],
                 "optional_config": ["delay_type", "max_duration"],
-                "examples": ["duration: 1000 (ms)", "delay_type: 'exponential'"]
+                "examples": [
+                    "duration: 1000 (ms)",
+                    "delay_type: 'exponential'",
+                ],
             },
             "memory": {
                 "description": "Memory management and summarization node",
                 "required_config": [],
                 "optional_config": ["memory_window"],
-                "examples": ["memory_window: 20"]
+                "examples": ["memory_window: 20"],
             },
             "retrieval": {
                 "description": "Document retrieval and context gathering node",
                 "required_config": [],
                 "optional_config": ["max_documents", "collection"],
-                "examples": ["max_documents: 5", "collection: 'knowledge_base'"]
-            }
+                "examples": [
+                    "max_documents: 5",
+                    "collection: 'knowledge_base'",
+                ],
+            },
         }
-        
+
         return {
             "supported_types": supported_types,
             "type_details": {
-                node_type: details 
-                for node_type, details in node_type_details.items() 
+                node_type: details
+                for node_type, details in node_type_details.items()
                 if node_type in supported_types
             },
             "capabilities": {
@@ -1287,9 +1313,9 @@ async def get_modern_supported_node_types(
                 "error_recovery": True,
                 "adaptive_memory": True,
                 "intelligent_tool_execution": True,
-            }
+            },
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to get modern node types: {e}")
         raise InternalServerProblem(
@@ -1316,23 +1342,27 @@ async def configure_memory_settings(
             "user_id": current_user.id,
             "updated_at": time.time(),
         }
-        
+
         # Store in user preferences service
-        from chatter.services.user_preferences import get_user_preferences_service
+        from chatter.services.user_preferences import (
+            get_user_preferences_service,
+        )
+
         preferences_service = get_user_preferences_service()
         result = await preferences_service.save_memory_config(
-            user_id=current_user.id,
-            config=memory_config
+            user_id=current_user.id, config=memory_config
         )
-        
-        logger.info(f"Memory configuration stored for user {current_user.id}: {memory_config}")
-        
+
+        logger.info(
+            f"Memory configuration stored for user {current_user.id}: {memory_config}"
+        )
+
         return {
             "status": "success",
             "config": result.get("config", memory_config),
-            "message": "Memory settings configured successfully"
+            "message": "Memory settings configured successfully",
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to configure memory settings: {e}")
         raise InternalServerProblem(
@@ -1353,8 +1383,10 @@ async def configure_tool_settings(
         # Validate recursion strategy
         valid_strategies = ["strict", "adaptive", "lenient"]
         if recursion_strategy not in valid_strategies:
-            raise ValueError(f"Invalid recursion strategy. Must be one of: {valid_strategies}")
-        
+            raise ValueError(
+                f"Invalid recursion strategy. Must be one of: {valid_strategies}"
+            )
+
         tool_config = {
             "max_total_calls": max_total_calls,
             "max_consecutive_calls": max_consecutive_calls,
@@ -1363,24 +1395,28 @@ async def configure_tool_settings(
             "user_id": current_user.id,
             "updated_at": time.time(),
         }
-        
+
         # Store in user preferences service
-        from chatter.services.user_preferences import get_user_preferences_service
+        from chatter.services.user_preferences import (
+            get_user_preferences_service,
+        )
+
         preferences_service = get_user_preferences_service()
         result = await preferences_service.save_tool_config(
-            user_id=current_user.id,
-            config=tool_config
+            user_id=current_user.id, config=tool_config
         )
-        
-        logger.info(f"Tool configuration stored for user {current_user.id}: {tool_config}")
-        
+
+        logger.info(
+            f"Tool configuration stored for user {current_user.id}: {tool_config}"
+        )
+
         return {
             "status": "success",
             "config": result.get("config", tool_config),
             "valid_strategies": valid_strategies,
-            "message": "Tool settings configured successfully"
+            "message": "Tool settings configured successfully",
         }
-        
+
     except Exception as e:
         logger.error(f"Failed to configure tool settings: {e}")
         raise InternalServerProblem(
@@ -1392,15 +1428,17 @@ async def configure_tool_settings(
 async def get_workflow_defaults(
     node_type: str | None = None,
     current_user: User = Depends(get_current_user),
-    defaults_service: WorkflowDefaultsService = Depends(get_workflow_defaults_service),
+    defaults_service: WorkflowDefaultsService = Depends(
+        get_workflow_defaults_service
+    ),
 ) -> dict[str, Any]:
     """Get workflow defaults from profiles, models, and prompts.
-    
+
     Args:
         node_type: Optional specific node type to get defaults for
         current_user: Current authenticated user
         defaults_service: Workflow defaults service
-        
+
     Returns:
         Dictionary containing default configurations
     """
@@ -1410,36 +1448,57 @@ async def get_workflow_defaults(
             config = await defaults_service.get_default_node_config(
                 node_type, current_user.id
             )
-            return {
-                "node_type": node_type,
-                "config": config
-            }
+            return {"node_type": node_type, "config": config}
         else:
             # Get general model defaults
-            model_config = await defaults_service.get_default_model_config(
-                current_user.id
+            model_config = (
+                await defaults_service.get_default_model_config(
+                    current_user.id
+                )
             )
-            prompt_text = await defaults_service.get_default_prompt_text(
-                user_id=current_user.id
+            prompt_text = (
+                await defaults_service.get_default_prompt_text(
+                    user_id=current_user.id
+                )
             )
-            
+
             return {
                 "model_config": model_config,
                 "default_prompt": prompt_text,
                 "node_types": {
-                    "model": await defaults_service.get_default_node_config("model", current_user.id),
-                    "retrieval": await defaults_service.get_default_node_config("retrieval", current_user.id),
-                    "memory": await defaults_service.get_default_node_config("memory", current_user.id),
-                    "loop": await defaults_service.get_default_node_config("loop", current_user.id),
-                    "conditional": await defaults_service.get_default_node_config("conditional", current_user.id),
-                    "variable": await defaults_service.get_default_node_config("variable", current_user.id),
-                    "errorHandler": await defaults_service.get_default_node_config("errorHandler", current_user.id),
-                    "delay": await defaults_service.get_default_node_config("delay", current_user.id),
-                    "tool": await defaults_service.get_default_node_config("tool", current_user.id),
-                    "start": await defaults_service.get_default_node_config("start", current_user.id),
-                }
+                    "model": await defaults_service.get_default_node_config(
+                        "model", current_user.id
+                    ),
+                    "retrieval": await defaults_service.get_default_node_config(
+                        "retrieval", current_user.id
+                    ),
+                    "memory": await defaults_service.get_default_node_config(
+                        "memory", current_user.id
+                    ),
+                    "loop": await defaults_service.get_default_node_config(
+                        "loop", current_user.id
+                    ),
+                    "conditional": await defaults_service.get_default_node_config(
+                        "conditional", current_user.id
+                    ),
+                    "variable": await defaults_service.get_default_node_config(
+                        "variable", current_user.id
+                    ),
+                    "errorHandler": await defaults_service.get_default_node_config(
+                        "errorHandler", current_user.id
+                    ),
+                    "delay": await defaults_service.get_default_node_config(
+                        "delay", current_user.id
+                    ),
+                    "tool": await defaults_service.get_default_node_config(
+                        "tool", current_user.id
+                    ),
+                    "start": await defaults_service.get_default_node_config(
+                        "start", current_user.id
+                    ),
+                },
             }
-            
+
     except Exception as e:
         logger.error(f"Failed to get workflow defaults: {e}")
         raise InternalServerProblem(

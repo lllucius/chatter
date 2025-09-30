@@ -770,7 +770,8 @@ class WorkflowValidator(BaseValidator):
 
     def __init__(self) -> None:
         super().__init__(
-            "workflow", "Validates workflow configurations and definitions"
+            "workflow",
+            "Validates workflow configurations and definitions",
         )
         self.supported_rules = [
             "workflow_config",
@@ -933,7 +934,9 @@ class WorkflowValidator(BaseValidator):
                 errors.append(
                     ValidationError(f"Missing required field: {field}")
                 )
-            elif field in ["nodes", "edges"] and not isinstance(definition[field], list):
+            elif field in ["nodes", "edges"] and not isinstance(
+                definition[field], list
+            ):
                 errors.append(
                     ValidationError(f"Field '{field}' must be a list")
                 )
@@ -959,7 +962,9 @@ class WorkflowValidator(BaseValidator):
                 )
 
         # Validate nodes
-        if "nodes" in definition and isinstance(definition["nodes"], list):
+        if "nodes" in definition and isinstance(
+            definition["nodes"], list
+        ):
             if len(definition["nodes"]) == 0:
                 warnings.append("Workflow has no nodes")
             else:
@@ -970,7 +975,9 @@ class WorkflowValidator(BaseValidator):
                 warnings.extend(node_warnings)
 
         # Validate edges
-        if "edges" in definition and isinstance(definition["edges"], list):
+        if "edges" in definition and isinstance(
+            definition["edges"], list
+        ):
             edge_errors, edge_warnings = self._validate_edges(
                 definition["edges"], definition.get("nodes", [])
             )
@@ -1029,7 +1036,7 @@ class WorkflowValidator(BaseValidator):
                     "conditional",
                     "passthrough",
                     "memory",
-                    "retrieval", 
+                    "retrieval",
                     "model",
                     "variable",
                     "loop",
@@ -1049,7 +1056,7 @@ class WorkflowValidator(BaseValidator):
         """Validate workflow edges."""
         errors = []
         warnings = []
-        
+
         # Get valid node IDs
         node_ids = {node.get("id") for node in nodes if "id" in node}
 

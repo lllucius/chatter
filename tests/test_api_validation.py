@@ -34,7 +34,9 @@ class TestULIDValidation:
 
         assert "Invalid ULID format" in str(exc_info.value.detail)
         # Updated to match new detailed error messages
-        assert "must be exactly 26 characters" in str(exc_info.value.detail)
+        assert "must be exactly 26 characters" in str(
+            exc_info.value.detail
+        )
 
     def test_empty_ulid(self):
         """Test validation fails for empty ULID."""
@@ -73,26 +75,39 @@ class TestULIDValidation:
         # Test workflow name gives name-specific error (spaces detected)
         with pytest.raises(BadRequestProblem) as exc_info:
             ValidatedULID.validate("Untitled Workflow")
-        
-        assert "appears to be a name or title, not a ULID" in str(exc_info.value.detail)
-        assert "must be exactly 26 characters without spaces" in str(exc_info.value.detail)
+
+        assert "appears to be a name or title, not a ULID" in str(
+            exc_info.value.detail
+        )
+        assert "must be exactly 26 characters without spaces" in str(
+            exc_info.value.detail
+        )
         assert "Untitled Workflow" in str(exc_info.value.detail)
-        assert "there may be a bug where a workflow/resource name is being used as an ID" in str(exc_info.value.detail)
-        
+        assert (
+            "there may be a bug where a workflow/resource name is being used as an ID"
+            in str(exc_info.value.detail)
+        )
+
         # Test empty string gives length-specific error
         with pytest.raises(BadRequestProblem) as exc_info:
             ValidatedULID.validate("")
-        
-        assert "must be exactly 26 characters" in str(exc_info.value.detail)
+
+        assert "must be exactly 26 characters" in str(
+            exc_info.value.detail
+        )
         assert "got 0 characters" in str(exc_info.value.detail)
-        
+
         # Test descriptive names get appropriate error (this may be generic if it's short)
         with pytest.raises(BadRequestProblem) as exc_info:
             ValidatedULID.validate("untitled")
-        
+
         # Accept either detailed message or generic message for short strings
-        assert ("appears to be a descriptive name rather than a ULID" in str(exc_info.value.detail) or
-                "must be exactly 26 characters, got 8 characters" in str(exc_info.value.detail))
+        assert (
+            "appears to be a descriptive name rather than a ULID"
+            in str(exc_info.value.detail)
+            or "must be exactly 26 characters, got 8 characters"
+            in str(exc_info.value.detail)
+        )
 
 
 if __name__ == "__main__":

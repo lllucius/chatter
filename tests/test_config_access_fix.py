@@ -1,9 +1,13 @@
 """Test for workflow config access fix."""
 
-import pytest
 from unittest.mock import Mock
 
-from chatter.core.workflow_graph_builder import WorkflowDefinition, WorkflowGraphBuilder
+import pytest
+
+from chatter.core.workflow_graph_builder import (
+    WorkflowDefinition,
+    WorkflowGraphBuilder,
+)
 
 
 class TestWorkflowConfigAccess:
@@ -21,20 +25,20 @@ class TestWorkflowConfigAccess:
 
     def test_simple_config_format(self, workflow_builder, mock_llm):
         """Test that simple config format works (original format)."""
-        # Create a simple workflow definition  
+        # Create a simple workflow definition
         definition = WorkflowDefinition()
         definition.nodes = [
             {
                 "id": "test_node",
-                "type": "variable", 
+                "type": "variable",
                 "config": {
                     "operation": "set",
                     "variable_name": "test_var",
-                    "value": "test_value"
-                }
+                    "value": "test_value",
+                },
             }
         ]
-        
+
         # This should work without KeyError
         nodes = workflow_builder._create_nodes(definition, mock_llm)
         assert "test_node" in nodes
@@ -54,13 +58,13 @@ class TestWorkflowConfigAccess:
                     "nodeType": "variable",
                     "config": {
                         "operation": "set",
-                        "variable_name": "test_var", 
-                        "value": "test_value"
-                    }
-                }
+                        "variable_name": "test_var",
+                        "value": "test_value",
+                    },
+                },
             }
         ]
-        
+
         # This should work without KeyError after fix
         nodes = workflow_builder._create_nodes(definition, mock_llm)
         assert "test_node" in nodes
@@ -77,8 +81,8 @@ class TestWorkflowConfigAccess:
                 "config": {
                     "operation": "set",
                     "variable_name": "test_var",
-                    "value": "test_value"
-                }
+                    "value": "test_value",
+                },
             },
             # Complex format with valid conditional config
             {
@@ -89,11 +93,11 @@ class TestWorkflowConfigAccess:
                     "nodeType": "conditional",
                     "config": {
                         "condition": "variable test_var equals test_value"
-                    }
-                }
-            }
+                    },
+                },
+            },
         ]
-        
+
         nodes = workflow_builder._create_nodes(definition, mock_llm)
         assert "simple_node" in nodes
         assert "complex_node" in nodes
@@ -111,13 +115,10 @@ class TestWorkflowConfigAccess:
             {
                 "id": "complex_node",
                 "type": "delay",
-                "data": {
-                    "label": "Delay Node",
-                    "nodeType": "delay"
-                }
-            }
+                "data": {"label": "Delay Node", "nodeType": "delay"},
+            },
         ]
-        
+
         nodes = workflow_builder._create_nodes(definition, mock_llm)
         assert "simple_node" in nodes
         assert "complex_node" in nodes

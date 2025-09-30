@@ -1,7 +1,6 @@
 """Profile management service."""
 
 import time
-from datetime import UTC, datetime
 from typing import Any
 
 from sqlalchemy import and_, asc, desc, func, or_, select
@@ -644,10 +643,8 @@ class ProfileService:
                         )
                     )
                     if default_provider_info:
-                        provider_info = (
-                            await self.get_provider_info(
-                                default_provider_info.name
-                            )
+                        provider_info = await self.get_provider_info(
+                            default_provider_info.name
                         )
                         providers["default"] = {
                             "display_name": f"Default ({provider_info.get('display_name', default_provider_info.name)})",
@@ -673,10 +670,8 @@ class ProfileService:
             for (
                 provider_name
             ) in await self.llm_service.list_available_providers():
-                provider_info = (
-                    await self.get_provider_info(
-                        provider_name
-                    )
+                provider_info = await self.get_provider_info(
+                    provider_name
                 )
                 providers[provider_name] = provider_info
 

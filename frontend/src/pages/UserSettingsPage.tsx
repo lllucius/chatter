@@ -213,14 +213,14 @@ const UserSettingsPage: React.FC = () => {
     try {
       await getSDK().auth.deactivateAccountApiV1AuthAccount();
       toastService.success('Account deactivated successfully');
-      
+
       // Clear localStorage and cookies, then redirect
       localStorage.clear();
       sessionStorage.clear();
-      
+
       // Clear auth service tokens
       await authService.logout();
-      
+
       // Redirect to login page
       navigate('/login', { replace: true });
     } catch (error: unknown) {
@@ -432,15 +432,9 @@ const UserSettingsPage: React.FC = () => {
                       apiKeys.map((key) => (
                         <TableRow key={key.id}>
                           <TableCell>{key.api_key_name}</TableCell>
-                          <TableCell>
-                            {'Not available'}
-                          </TableCell>
-                          <TableCell>
-                            {'Not available'}
-                          </TableCell>
-                          <TableCell>
-                            {'Not available'}
-                          </TableCell>
+                          <TableCell>{'Not available'}</TableCell>
+                          <TableCell>{'Not available'}</TableCell>
+                          <TableCell>{'Not available'}</TableCell>
                           <TableCell>
                             <IconButton
                               size="small"

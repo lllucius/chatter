@@ -32,7 +32,10 @@ import {
   ConversationResponse,
 } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
-import { workflowDefaultsService, WorkflowDefaults } from '../services/workflow-defaults-service';
+import {
+  workflowDefaultsService,
+  WorkflowDefaults,
+} from '../services/workflow-defaults-service';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -95,7 +98,8 @@ const ChatConfigPanel: React.FC<Props> = ({
     const saved = localStorage.getItem('chatter_expandedPanel');
     return saved ? saved : 'profile';
   });
-  const [workflowDefaults, setWorkflowDefaults] = useState<WorkflowDefaults | null>(null);
+  const [workflowDefaults, setWorkflowDefaults] =
+    useState<WorkflowDefaults | null>(null);
 
   // Load workflow defaults on mount
   useEffect(() => {

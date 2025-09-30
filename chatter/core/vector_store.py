@@ -526,7 +526,7 @@ class VectorStoreManager:
 vector_store_manager = VectorStoreManager()
 
 
-def get_vector_store_retriever(
+async def get_vector_store_retriever(
     user_id: str = None, collection_name: str = "documents"
 ):
     """Get a retriever for vector search operations.
@@ -543,7 +543,11 @@ def get_vector_store_retriever(
 
         # Get embedding service
         embedding_service = get_embedding_service()
-        embeddings = embedding_service.get_embedding_client()
+        embeddings = await embedding_service.get_default_provider()
+
+        if not embeddings:
+            logger.warning("No default embedding provider available")
+            return None
 
         # Create or get vector store
         store = vector_store_manager.create_store(

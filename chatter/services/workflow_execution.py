@@ -343,7 +343,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info(
@@ -601,7 +601,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info("Loaded retriever from vector store")
@@ -921,7 +921,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info(
@@ -992,25 +992,34 @@ class WorkflowExecutionService:
                 thread_id=conversation.id,
                 enable_llm_streaming=True,
             ):
-                if isinstance(update, dict) and "messages" in update:
-                    # Extract streaming content
-                    messages = update["messages"]
-                    if messages:
-                        last_message = messages[-1]
-                        if hasattr(last_message, "content"):
-                            new_content = last_message.content[
-                                len(content_buffer) :
-                            ]
-                            if new_content:
-                                content_buffer += new_content
-                                yield StreamingChatChunk(
-                                    type="content",
-                                    content=new_content,
-                                    metadata={
-                                        **update.get("metadata", {}),
-                                        "universal_template": True,
-                                    },
-                                )
+                # Handle LangGraph streaming events
+                if isinstance(update, dict):
+                    event_name = update.get("name", "")
+
+                    # Handle chat model streaming events
+                    if event_name == "on_chat_model_stream":
+                        # Extract the chunk from the event data
+                        data = update.get("data", {})
+                        chunk = data.get("chunk", {})
+
+                        # Get content from the chunk
+                        if hasattr(chunk, "content"):
+                            content = chunk.content
+                        elif isinstance(chunk, dict):
+                            content = chunk.get("content", "")
+                        else:
+                            content = str(chunk) if chunk else ""
+
+                        if content:
+                            content_buffer += content
+                            yield StreamingChatChunk(
+                                type="content",
+                                content=content,
+                                metadata={
+                                    "universal_template": True,
+                                    "event": event_name,
+                                },
+                            )
 
             performance_monitor.log_debug(
                 "Streaming workflow execution completed",
@@ -1207,22 +1216,33 @@ class WorkflowExecutionService:
                 thread_id=conversation.id,
                 enable_llm_streaming=True,
             ):
-                if isinstance(update, dict) and "messages" in update:
-                    # Extract streaming content
-                    messages = update["messages"]
-                    if messages:
-                        last_message = messages[-1]
-                        if hasattr(last_message, "content"):
-                            new_content = last_message.content[
-                                len(content_buffer) :
-                            ]
-                            if new_content:
-                                content_buffer += new_content
-                                yield StreamingChatChunk(
-                                    type="content",
-                                    content=new_content,
-                                    metadata=update.get("metadata", {}),
-                                )
+                # Handle LangGraph streaming events
+                if isinstance(update, dict):
+                    event_name = update.get("name", "")
+
+                    # Handle chat model streaming events
+                    if event_name == "on_chat_model_stream":
+                        # Extract the chunk from the event data
+                        data = update.get("data", {})
+                        chunk = data.get("chunk", {})
+
+                        # Get content from the chunk
+                        if hasattr(chunk, "content"):
+                            content = chunk.content
+                        elif isinstance(chunk, dict):
+                            content = chunk.get("content", "")
+                        else:
+                            content = str(chunk) if chunk else ""
+
+                        if content:
+                            content_buffer += content
+                            yield StreamingChatChunk(
+                                type="content",
+                                content=content,
+                                metadata={
+                                    "event": event_name,
+                                },
+                            )
 
             performance_monitor.log_debug(
                 "Streaming workflow execution completed",

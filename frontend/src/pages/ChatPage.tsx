@@ -112,6 +112,7 @@ const ChatPage: React.FC = () => {
         )
       );
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
     []
   );
 
@@ -119,6 +120,7 @@ const ChatPage: React.FC = () => {
     (messageId: string) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
     []
   );
 
@@ -287,6 +289,7 @@ const ChatPage: React.FC = () => {
         throw error; // Re-throw for caller to handle
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
     []
   );
 
@@ -417,6 +420,7 @@ const ChatPage: React.FC = () => {
         });
       }
     },
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
     [sendWorkflowMessage, focusInput, processStreamingResponse]
   );
 

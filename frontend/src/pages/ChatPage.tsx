@@ -101,6 +101,9 @@ const ChatPage: React.FC = () => {
   >(null);
 
   // Message handlers
+  // Note: State setters (setMessages, setMessage, setLoading) are intentionally NOT included
+  // in dependency arrays below. React guarantees state setters are stable references, and
+  // including them can cause unnecessary callback re-creations and potential race conditions.
   const handleEditMessage = useCallback(
     (messageId: string, newContent: string) => {
       setMessages((prev) =>

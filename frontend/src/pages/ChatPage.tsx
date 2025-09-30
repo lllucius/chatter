@@ -328,6 +328,10 @@ const ChatPage: React.FC = () => {
             }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = initialAssistantMessage;
+            } else {
+              // If no assistant message found to replace, add it instead
+              console.warn('[ChatPage] No assistant message found to replace during streaming regeneration, adding new message');
+              newMessages.push(initialAssistantMessage);
             }
             return newMessages;
           });
@@ -393,6 +397,10 @@ const ChatPage: React.FC = () => {
             }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = errorMessage;
+            } else {
+              // If no assistant message found to replace, add the error message instead
+              console.warn('[ChatPage] No assistant message found to replace during error handling in streaming, adding error message');
+              newMessages.push(errorMessage);
             }
             return newMessages;
           });
@@ -497,6 +505,10 @@ const ChatPage: React.FC = () => {
               }
               if (lastAssistantIndex !== -1) {
                 newMessages[lastAssistantIndex] = assistantMessage;
+              } else {
+                // If no assistant message found to replace, add it instead
+                console.warn('[ChatPage] No assistant message found to replace during regeneration, adding new message');
+                newMessages.push(assistantMessage);
               }
               return newMessages;
             });
@@ -712,6 +724,10 @@ const ChatPage: React.FC = () => {
             }
             if (lastAssistantIndex !== -1) {
               newMessages[lastAssistantIndex] = assistantMessage;
+            } else {
+              // If no assistant message found to replace, add it instead
+              console.warn('[ChatPage] No assistant message found to replace during regeneration in sendMessage, adding new message');
+              newMessages.push(assistantMessage);
             }
             return newMessages;
           });

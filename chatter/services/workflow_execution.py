@@ -343,7 +343,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info(
@@ -601,7 +601,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info("Loaded retriever from vector store")
@@ -921,7 +921,7 @@ class WorkflowExecutionService:
                         get_vector_store_retriever,
                     )
 
-                    retriever = get_vector_store_retriever(
+                    retriever = await get_vector_store_retriever(
                         user_id=user_id
                     )
                     logger.info(

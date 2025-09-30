@@ -101,6 +101,9 @@ const ChatPage: React.FC = () => {
   >(null);
 
   // Message handlers
+  // Note: State setters (setMessages, setMessage, setLoading) are intentionally NOT included
+  // in dependency arrays below. React guarantees state setters are stable references, and
+  // including them can cause unnecessary callback re-creations and potential race conditions.
   const handleEditMessage = useCallback(
     (messageId: string, newContent: string) => {
       setMessages((prev) =>
@@ -109,14 +112,16 @@ const ChatPage: React.FC = () => {
         )
       );
     },
-    [setMessages]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
+    []
   );
 
   const handleDeleteMessage = useCallback(
     (messageId: string) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     },
-    [setMessages]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
+    []
   );
 
   const handleRateMessage = useCallback((messageId: string, rating: number) => {
@@ -284,7 +289,8 @@ const ChatPage: React.FC = () => {
         throw error; // Re-throw for caller to handle
       }
     },
-    [setMessages]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
+    []
   );
 
   const handleWorkflowStreamingResponse = useCallback(
@@ -414,7 +420,8 @@ const ChatPage: React.FC = () => {
         });
       }
     },
-    [setMessages, sendWorkflowMessage, focusInput, processStreamingResponse]
+    // eslint-disable-next-line react-hooks/exhaustive-deps -- setMessages is a stable state setter
+    [sendWorkflowMessage, focusInput, processStreamingResponse]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -525,14 +532,12 @@ const ChatPage: React.FC = () => {
     },
     [
       messages,
-      setLoading,
       selectedProfile,
       selectedDocuments,
       currentConversation,
       customPromptText,
       streamingEnabled,
       customWorkflowConfig,
-      setMessages,
       buildWorkflowRequest,
       getEffectiveConfig,
       sendWorkflowMessage,
@@ -765,9 +770,6 @@ const ChatPage: React.FC = () => {
       customPromptText,
       streamingEnabled,
       customWorkflowConfig,
-      setMessage,
-      setMessages,
-      setLoading,
       buildWorkflowRequest,
       getEffectiveConfig,
       sendWorkflowMessage,

@@ -654,11 +654,11 @@ const ChatPage: React.FC = () => {
           return; // Streaming handling is complete
         } else {
           // Use non-streaming workflow endpoint
-          // Use non-streaming workflow endpoint
           response = (await sendWorkflowMessage(
             workflowRequest,
             false
           )) as ChatResponse;
+          console.log('[ChatPage] Received non-streaming response:', response);
         }
 
         // Validate response structure
@@ -667,6 +667,12 @@ const ChatPage: React.FC = () => {
           !response.message ||
           typeof response.message.content !== 'string'
         ) {
+          console.error('[ChatPage] Invalid response structure:', {
+            hasResponse: !!response,
+            hasMessage: !!(response?.message),
+            contentType: typeof response?.message?.content,
+            response
+          });
           throw new Error('Invalid response from chat API');
         }
 
@@ -689,6 +695,9 @@ const ChatPage: React.FC = () => {
           },
         };
 
+        console.log('[ChatPage] Created assistant message:', assistantMessage);
+        console.log('[ChatPage] isRegeneration:', isRegeneration);
+
         if (isRegeneration) {
           // Replace the last assistant message
           setMessages((prev) => {
@@ -707,9 +716,11 @@ const ChatPage: React.FC = () => {
             return newMessages;
           });
         } else {
+          console.log('[ChatPage] Adding assistant message to state (not regeneration)');
           setMessages((prev) => [...prev, assistantMessage]);
         }
 
+        console.log('[ChatPage] Message handling complete, focusing input');
         focusInput();
       } catch (error) {
         handleError(error, {

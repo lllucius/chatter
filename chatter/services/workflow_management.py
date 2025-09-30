@@ -462,7 +462,17 @@ class WorkflowManagementService:
         definition_data: dict[str, Any],
         owner_id: str,
     ) -> dict[str, Any]:
-        """Validate a workflow definition and return validation results."""
+        """Validate a workflow definition and return validation results.
+        
+        This delegates to the authoritative validation in chatter.core.validation.
+        
+        Args:
+            definition_data: Workflow definition data to validate
+            owner_id: Owner user ID (for logging/audit)
+            
+        Returns:
+            Validation result dictionary with valid, errors, warnings
+        """
         try:
             validation_result = validate_workflow_definition(
                 definition_data
@@ -779,33 +789,6 @@ class WorkflowManagementService:
                 f"Failed to delete workflow template {template_id}: {e}"
             )
             await self.session.rollback()
-            raise
-
-    # Simplified validation
-    async def validate_workflow_structure(
-        self,
-        nodes: list[dict[str, Any]],
-        edges: list[dict[str, Any]],
-    ) -> dict[str, Any]:
-        """Validate a workflow definition using simplified validation."""
-        try:
-            validation_result = validate_workflow_definition(
-                {
-                    "nodes": nodes,
-                    "edges": edges,
-                    "name": "validation_check",
-                }
-            )
-
-            return {
-                "is_valid": validation_result.is_valid,
-                "errors": validation_result.errors,
-                "warnings": validation_result.warnings,
-                "suggestions": [],  # No suggestions in simplified version
-            }
-
-        except Exception as e:
-            logger.error(f"Failed to validate workflow definition: {e}")
             raise
 
     async def create_workflow_definition_from_template(

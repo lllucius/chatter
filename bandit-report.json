@@ -1,17 +1,17 @@
 {
   "errors": [],
-  "generated_at": "2025-09-30T05:50:43Z",
+  "generated_at": "2025-09-30T06:07:35Z",
   "metrics": {
     "_totals": {
-      "CONFIDENCE.HIGH": 19,
+      "CONFIDENCE.HIGH": 17,
       "CONFIDENCE.LOW": 1,
       "CONFIDENCE.MEDIUM": 15,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 2,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 32,
       "SEVERITY.MEDIUM": 1,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 69219,
+      "loc": 69181,
       "nosec": 0,
       "skipped_tests": 3
     },
@@ -297,7 +297,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 1376,
+      "loc": 1343,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -653,11 +653,11 @@
       "skipped_tests": 0
     },
     "chatter/core/enhanced_memory_manager.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
@@ -921,7 +921,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 765,
+      "loc": 763,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -1641,11 +1641,11 @@
       "skipped_tests": 0
     },
     "chatter/services/simplified_workflow_analytics.py": {
-      "CONFIDENCE.HIGH": 1,
+      "CONFIDENCE.HIGH": 0,
       "CONFIDENCE.LOW": 0,
       "CONFIDENCE.MEDIUM": 0,
       "CONFIDENCE.UNDEFINED": 0,
-      "SEVERITY.HIGH": 1,
+      "SEVERITY.HIGH": 0,
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
@@ -1727,7 +1727,7 @@
       "SEVERITY.LOW": 0,
       "SEVERITY.MEDIUM": 0,
       "SEVERITY.UNDEFINED": 0,
-      "loc": 253,
+      "loc": 250,
       "nosec": 0,
       "skipped_tests": 0
     },
@@ -2070,26 +2070,6 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b608_hardcoded_sql_expressions.html",
       "test_id": "B608",
       "test_name": "hardcoded_sql_expressions"
-    },
-    {
-      "code": "185         # Create a hash of message contents for caching\n186         content_hash = hashlib.md5()\n187         for msg in messages:\n",
-      "col_offset": 23,
-      "end_col_offset": 36,
-      "filename": "chatter/core/enhanced_memory_manager.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 186,
-      "line_range": [
-        186
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
     },
     {
       "code": "61     # Password events\n62     PASSWORD_CHANGED = \"password_changed\"\n63     PASSWORD_RESET_REQUESTED = \"password_reset_requested\"\n",
@@ -2646,26 +2626,6 @@
       "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b110_try_except_pass.html",
       "test_id": "B110",
       "test_name": "try_except_pass"
-    },
-    {
-      "code": "73             # Include schema version to invalidate old cached data\n74             return f\"workflow_analytics_v2:{hashlib.md5(content.encode()).hexdigest()}\"\n75         except Exception:\n",
-      "col_offset": 44,
-      "end_col_offset": 73,
-      "filename": "chatter/services/simplified_workflow_analytics.py",
-      "issue_confidence": "HIGH",
-      "issue_cwe": {
-        "id": 327,
-        "link": "https://cwe.mitre.org/data/definitions/327.html"
-      },
-      "issue_severity": "HIGH",
-      "issue_text": "Use of weak MD5 hash for security. Consider usedforsecurity=False",
-      "line_number": 74,
-      "line_range": [
-        74
-      ],
-      "more_info": "https://bandit.readthedocs.io/en/1.8.6/plugins/b324_hashlib.html",
-      "test_id": "B324",
-      "test_name": "hashlib"
     },
     {
       "code": "22     START = \"start\"\n23     TOKEN = \"token\"\n24     TOOL_CALL_START = \"tool_call_start\"\n",

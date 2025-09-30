@@ -1,10 +1,4 @@
-import React, {
-  useState,
-  useEffect,
-  useMemo,
-  useCallback,
-  useRef,
-} from 'react';
+import React, { useState, useEffect, useMemo, useCallback } from 'react';
 import {
   ReactFlow,
   Node,
@@ -31,8 +25,6 @@ import {
   Typography,
   Menu,
   MenuItem,
-  Alert,
-  Snackbar,
   Dialog,
   DialogTitle,
   DialogContent,
@@ -79,7 +71,7 @@ import ErrorHandlerNode from './nodes/ErrorHandlerNode';
 import DelayNode from './nodes/DelayNode';
 import CustomEdge from './edges/CustomEdge';
 import TemplateManager from './TemplateManager';
-import { useWorkflowTemplates, WorkflowTemplate } from './useWorkflowTemplates';
+import { WorkflowTemplate } from './useWorkflowTemplates';
 import { exampleWorkflows, WorkflowValidator } from './WorkflowExamples';
 import {
   workflowDefaultsService,
@@ -205,7 +197,6 @@ const WorkflowEditor = React.forwardRef<
       isValid: boolean;
       errors: string[];
     } | null>(null);
-    const [showValidation, setShowValidation] = useState(false);
     const [selectedNode, setSelectedNode] =
       useState<Node<WorkflowNodeData> | null>(null);
     const [snapToGrid, setSnapToGrid] = useState(true);
@@ -220,7 +211,6 @@ const WorkflowEditor = React.forwardRef<
     const [showTemplateManager, setShowTemplateManager] = useState(false);
     const [workflowDefaults, setWorkflowDefaults] =
       useState<WorkflowDefaults | null>(null);
-    const [loadingDefaults, setLoadingDefaults] = useState(false);
     const [showMiniMap, setShowMiniMap] = useState(true);
 
     // Execution dialog state

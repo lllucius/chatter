@@ -17,10 +17,7 @@ import CrudDataTable, {
   CrudColumn,
   CrudDataTableRef,
 } from '../components/CrudDataTable';
-import {
-  createCategoryChipRenderer,
-  createDateRenderer,
-} from '../components/CrudRenderers';
+import { createCategoryChipRenderer } from '../components/CrudRenderers';
 import { getSDK } from '../services/auth-service';
 import {
   WorkflowTemplateResponse,

@@ -219,7 +219,7 @@ const DocumentsPage: React.FC = () => {
         } else {
           contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search, but no chunks are available for preview.`;
         }
-      } catch (error) {
+      } catch (_error) {
         // Fallback to status-based messaging if chunks API is not available
         const chunkCount = document.chunk_count || 0;
         if (chunkCount > 0) {

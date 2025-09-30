@@ -112,7 +112,7 @@ const WorkflowBuilderPage: React.FC = () => {
   const [saving, setSaving] = useState(false);
 
   // Use workflow data hook for API calls
-  const { createTemplate } = useWorkflowData();
+  useWorkflowData();
 
   // Handle node selection
   const handleNodeClick = useCallback(

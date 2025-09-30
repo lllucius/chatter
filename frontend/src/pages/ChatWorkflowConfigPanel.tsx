@@ -15,17 +15,12 @@ import {
   Chip,
   TextField,
   Button,
-  Card,
-  CardContent,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
   TextSnippet as PromptIcon,
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
-  Build as ToolIcon,
-  Storage as RetrievalIcon,
-  Memory as MemoryIcon,
   Settings as AdvancedIcon,
 } from '@mui/icons-material';
 import {

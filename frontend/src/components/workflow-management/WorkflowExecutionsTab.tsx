@@ -12,7 +12,6 @@ import {
   Box,
   Alert,
   IconButton,
-  Collapse,
   Button,
   Dialog,
   DialogTitle,
@@ -22,7 +21,7 @@ import {
   AccordionSummary,
   AccordionDetails,
 } from '../../utils/mui';
-import { ExpandMore, Visibility, BugReport } from '@mui/icons-material';
+import { ExpandMore, BugReport } from '@mui/icons-material';
 
 interface WorkflowExecution {
   id: string;

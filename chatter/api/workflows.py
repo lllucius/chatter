@@ -842,6 +842,44 @@ async def get_supported_node_types(
         ) from e
 
 
+@router.get("/executions", response_model=dict[str, Any])
+async def list_all_workflow_executions(
+    page: int = 1,
+    page_size: int = 20,
+    current_user: User = Depends(get_current_user),
+    workflow_service: WorkflowManagementService = Depends(
+        get_workflow_management_service
+    ),
+) -> dict[str, Any]:
+    """List all workflow executions for the current user with pagination."""
+    try:
+        # Calculate offset
+        offset = (page - 1) * page_size
+        
+        executions, total_count = await workflow_service.list_all_workflow_executions(
+            owner_id=current_user.id,
+            limit=page_size,
+            offset=offset,
+        )
+        
+        return {
+            "items": [
+                WorkflowExecutionResponse.model_validate(exec.to_dict())
+                for exec in executions
+            ],
+            "total": total_count,
+            "page": page,
+            "page_size": page_size,
+            "total_pages": (total_count + page_size - 1) // page_size,
+        }
+
+    except Exception as e:
+        logger.error(f"Failed to list all workflow executions: {e}")
+        raise InternalServerProblem(
+            detail=f"Failed to list all workflow executions: {str(e)}"
+        ) from e
+
+
 @router.get(
     "/definitions/{workflow_id}/executions",
     response_model=list[WorkflowExecutionResponse],

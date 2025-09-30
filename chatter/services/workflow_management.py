@@ -415,6 +415,37 @@ class WorkflowManagementService:
             logger.error(f"Failed to list workflow executions: {e}")
             raise
 
+    async def list_all_workflow_executions(
+        self,
+        owner_id: str,
+        limit: int = 50,
+        offset: int = 0,
+    ) -> tuple[list[WorkflowExecution], int]:
+        """List all workflow executions for a user with pagination."""
+        try:
+            # Get total count
+            count_result = await self.session.execute(
+                select(WorkflowExecution)
+                .where(WorkflowExecution.owner_id == owner_id)
+            )
+            total_count = len(list(count_result.scalars().all()))
+
+            # Get paginated results
+            result = await self.session.execute(
+                select(WorkflowExecution)
+                .where(WorkflowExecution.owner_id == owner_id)
+                .order_by(WorkflowExecution.created_at.desc())
+                .limit(limit)
+                .offset(offset)
+            )
+            executions = list(result.scalars().all())
+            
+            return executions, total_count
+
+        except Exception as e:
+            logger.error(f"Failed to list all workflow executions: {e}")
+            raise
+
     # Validation methods
     async def validate_workflow_definition(
         self,

@@ -109,14 +109,14 @@ const ChatPage: React.FC = () => {
         )
       );
     },
-    [setMessages]
+    []
   );
 
   const handleDeleteMessage = useCallback(
     (messageId: string) => {
       setMessages((prev) => prev.filter((msg) => msg.id !== messageId));
     },
-    [setMessages]
+    []
   );
 
   const handleRateMessage = useCallback((messageId: string, rating: number) => {
@@ -284,7 +284,7 @@ const ChatPage: React.FC = () => {
         throw error; // Re-throw for caller to handle
       }
     },
-    [setMessages]
+    []
   );
 
   const handleWorkflowStreamingResponse = useCallback(
@@ -414,7 +414,7 @@ const ChatPage: React.FC = () => {
         });
       }
     },
-    [setMessages, sendWorkflowMessage, focusInput, processStreamingResponse]
+    [sendWorkflowMessage, focusInput, processStreamingResponse]
   );
 
   const handleRegenerateMessage = useCallback(
@@ -525,14 +525,12 @@ const ChatPage: React.FC = () => {
     },
     [
       messages,
-      setLoading,
       selectedProfile,
       selectedDocuments,
       currentConversation,
       customPromptText,
       streamingEnabled,
       customWorkflowConfig,
-      setMessages,
       buildWorkflowRequest,
       getEffectiveConfig,
       sendWorkflowMessage,
@@ -765,9 +763,6 @@ const ChatPage: React.FC = () => {
       customPromptText,
       streamingEnabled,
       customWorkflowConfig,
-      setMessage,
-      setMessages,
-      setLoading,
       buildWorkflowRequest,
       getEffectiveConfig,
       sendWorkflowMessage,

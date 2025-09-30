@@ -296,6 +296,13 @@ export const exampleWorkflows: Record<string, WorkflowDefinition> = {
 };
 
 // Workflow validation utilities
+/**
+ * Basic client-side workflow validator for UX feedback.
+ * 
+ * This provides immediate validation feedback in the UI, but the backend
+ * validation in `chatter/core/validation/validators.py` is authoritative.
+ * All workflows are validated server-side before execution.
+ */
 export class WorkflowValidator {
   static validate(workflow: WorkflowDefinition): {
     isValid: boolean;
@@ -303,7 +310,7 @@ export class WorkflowValidator {
   } {
     const errors: string[] = [];
 
-    // Check basic structure
+    // Basic structure checks for immediate UX feedback
     if (!workflow.nodes || !Array.isArray(workflow.nodes)) {
       errors.push('Workflow must have a nodes array');
       return { isValid: false, errors };
@@ -327,95 +334,12 @@ export class WorkflowValidator {
       errors.push('Workflow must have at least one start node');
     }
 
-    // Check for isolated nodes (only if there are edges)
-    if (workflow.edges.length > 0) {
-      const connectedNodes = new Set<string>();
-
-      workflow.edges.forEach((edge: Edge) => {
-        connectedNodes.add(edge.source);
-        connectedNodes.add(edge.target);
-      });
-
-      const isolatedNodes = workflow.nodes.filter(
-        (node: Node) => node.type !== 'start' && !connectedNodes.has(node.id)
-      );
-
-      if (isolatedNodes.length > 0) {
-        errors.push(
-          `Isolated nodes found: ${isolatedNodes.map((n: Node) => n.data?.label || n.id).join(', ')}`
-        );
-      }
-    }
-
-    // Check for cycles (basic detection) - only if there are edges
-    if (workflow.edges.length > 0 && this.hasCycles(workflow)) {
-      errors.push('Workflow contains cycles - ensure proper loop structure');
-    }
-
-    // Validate conditional nodes have proper configuration
-    const conditionalNodes = workflow.nodes.filter(
-      (node: Node) => node.type === 'conditional'
-    );
-    conditionalNodes.forEach((node: Node) => {
-      const config = node.data?.config as Record<string, unknown> | undefined;
-      if (!config?.condition) {
-        errors.push(
-          `Conditional node "${node.data?.label || node.id}" needs a condition`
-        );
-      }
-    });
+    // Note: Complex validation (cycles, node configurations, etc.) is handled
+    // by the backend validation API. Call the server for complete validation.
 
     return {
       isValid: errors.length === 0,
       errors,
     };
-  }
-
-  private static hasCycles(workflow: WorkflowDefinition): boolean {
-    // Simple cycle detection using DFS
-    const graph = new Map<string, string[]>();
-
-    // Build adjacency list - only include valid nodes
-    const validNodeIds = new Set(workflow.nodes.map((node: Node) => node.id));
-
-    workflow.nodes.forEach((node: Node) => {
-      graph.set(node.id, []);
-    });
-
-    workflow.edges.forEach((edge: Edge) => {
-      // Only add edges between valid nodes
-      if (validNodeIds.has(edge.source) && validNodeIds.has(edge.target)) {
-        const sources = graph.get(edge.source) || [];
-        sources.push(edge.target);
-        graph.set(edge.source, sources);
-      }
-    });
-
-    const visited = new Set<string>();
-    const visiting = new Set<string>();
-
-    const dfs = (nodeId: string): boolean => {
-      if (visiting.has(nodeId)) return true; // Cycle detected
-      if (visited.has(nodeId)) return false;
-
-      visiting.add(nodeId);
-
-      const neighbors = graph.get(nodeId) || [];
-      for (const neighbor of neighbors) {
-        if (dfs(neighbor)) return true;
-      }
-
-      visiting.delete(nodeId);
-      visited.add(nodeId);
-      return false;
-    };
-
-    for (const nodeId of graph.keys()) {
-      if (!visited.has(nodeId)) {
-        if (dfs(nodeId)) return true;
-      }
-    }
-
-    return false;
   }
 }

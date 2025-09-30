@@ -108,9 +108,8 @@ class MessageService:
                 return messages
 
             except NotFoundError as e:
-                raise AuthorizationError(
-                    "Access denied to conversation messages"
-                ) from e
+                # Re-raise the original error to avoid misleading authorization errors
+                raise
             except Exception as e:
                 logger.error(
                     "Failed to get conversation messages",

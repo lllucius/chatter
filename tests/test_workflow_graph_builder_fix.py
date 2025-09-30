@@ -197,8 +197,9 @@ class TestWorkflowGraphBuilderArgumentFix:
             captured_kwargs.get("extra_param") == "should_be_preserved"
         ), "extra_param should be preserved"
 
-        print("✅ user_id and conversation_id filtering working correctly")
-
+        print(
+            "✅ user_id and conversation_id filtering working correctly"
+        )
 
 
 if __name__ == "__main__":

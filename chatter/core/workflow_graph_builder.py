@@ -105,7 +105,14 @@ class WorkflowGraphBuilder:
         filtered_kwargs = {
             k: v
             for k, v in kwargs.items()
-            if k not in ['llm', 'tools', 'retriever', 'user_id', 'conversation_id']
+            if k
+            not in [
+                'llm',
+                'tools',
+                'retriever',
+                'user_id',
+                'conversation_id',
+            ]
         }
         return self._create_llm_node(
             node_id, llm, tools, config, **filtered_kwargs
@@ -687,23 +694,35 @@ class WorkflowGraphBuilder:
             if " enable_memory equals " in condition:
                 variables = state.get("variables", {})
                 capabilities = variables.get("capabilities", {})
-                actual_value = str(capabilities.get("enable_memory", False)).lower()
+                actual_value = str(
+                    capabilities.get("enable_memory", False)
+                ).lower()
                 # Extract expected value from condition
-                expected_value = condition.split(" enable_memory equals ")[1].strip()
+                expected_value = condition.split(
+                    " enable_memory equals "
+                )[1].strip()
                 return actual_value == expected_value
             elif " enable_retrieval equals " in condition:
                 variables = state.get("variables", {})
                 capabilities = variables.get("capabilities", {})
-                actual_value = str(capabilities.get("enable_retrieval", False)).lower()
+                actual_value = str(
+                    capabilities.get("enable_retrieval", False)
+                ).lower()
                 # Extract expected value from condition
-                expected_value = condition.split(" enable_retrieval equals ")[1].strip()
+                expected_value = condition.split(
+                    " enable_retrieval equals "
+                )[1].strip()
                 return actual_value == expected_value
             elif " enable_tools equals " in condition:
                 variables = state.get("variables", {})
                 capabilities = variables.get("capabilities", {})
-                actual_value = str(capabilities.get("enable_tools", False)).lower()
+                actual_value = str(
+                    capabilities.get("enable_tools", False)
+                ).lower()
                 # Extract expected value from condition
-                expected_value = condition.split(" enable_tools equals ")[1].strip()
+                expected_value = condition.split(
+                    " enable_tools equals "
+                )[1].strip()
                 return actual_value == expected_value
             elif " max_tool_calls" in condition:
                 variables = state.get("variables", {})
@@ -720,7 +739,7 @@ class WorkflowGraphBuilder:
                     return tool_count < max_calls
 
         # Check general variable conditions
-        # This handles patterns like "variable capabilities enable_memory equals true" 
+        # This handles patterns like "variable capabilities enable_memory equals true"
         # or "variable.field equals value"
         if "variable" in condition and "equals" in condition:
             parts = condition.split()

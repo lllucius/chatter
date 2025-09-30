@@ -996,8 +996,8 @@ class WorkflowExecutionService:
                 if isinstance(update, dict):
                     event_name = update.get("name", "")
 
-                    # Handle chat model streaming events
-                    if event_name == "on_chat_model_stream":
+                    # Handle chat model and LLM streaming events
+                    if event_name in ["on_chat_model_stream", "on_llm_stream"]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
@@ -1220,8 +1220,8 @@ class WorkflowExecutionService:
                 if isinstance(update, dict):
                     event_name = update.get("name", "")
 
-                    # Handle chat model streaming events
-                    if event_name == "on_chat_model_stream":
+                    # Handle chat model and LLM streaming events
+                    if event_name in ["on_chat_model_stream", "on_llm_stream"]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})

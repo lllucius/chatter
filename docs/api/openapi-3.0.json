@@ -10314,6 +10314,133 @@
         ]
       }
     },
+    "/api/v1/workflows/executions": {
+      "get": {
+        "tags": [
+          "Workflows"
+        ],
+        "summary": "List All Workflow Executions",
+        "description": "List all workflow executions for the current user with pagination.",
+        "operationId": "list_all_workflow_executions_api_v1_workflows_executions_get",
+        "security": [
+          {
+            "CustomHTTPBearer": []
+          }
+        ],
+        "parameters": [
+          {
+            "name": "page",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 1,
+              "title": "Page"
+            }
+          },
+          {
+            "name": "page_size",
+            "in": "query",
+            "required": false,
+            "schema": {
+              "type": "integer",
+              "default": 20,
+              "title": "Page Size"
+            }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Successful Response",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "additionalProperties": true,
+                  "title": "Response List All Workflow Executions Api V1 Workflows Executions Get"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          "422": {
+            "description": "Validation Error",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/HTTPValidationError"
+                }
+              }
+            },
+            "headers": {
+              "x-correlation-id": {
+                "description": "Request correlation ID for tracing",
+                "schema": {
+                  "type": "string",
+                  "format": "ulid"
+                }
+              },
+              "X-RateLimit-Limit-Minute": {
+                "description": "Requests allowed per minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Limit-Hour": {
+                "description": "Requests allowed per hour",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Minute": {
+                "description": "Requests remaining this minute",
+                "schema": {
+                  "type": "integer"
+                }
+              },
+              "X-RateLimit-Remaining-Hour": {
+                "description": "Requests remaining this hour",
+                "schema": {
+                  "type": "integer"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
     "/api/v1/workflows/definitions/{workflow_id}/executions": {
       "get": {
         "tags": [

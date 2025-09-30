@@ -219,6 +219,26 @@ export class WorkflowsApi extends BaseAPI {
     const response = await this.request(requestContext);
     return response.json() as Promise<NodeTypeResponse[]>;
   }
+  /**List All Workflow Executions
+   * List all workflow executions for the current user with pagination.
+   */
+  public async listAllWorkflowExecutionsApiV1WorkflowsExecutions(options?: { page?: number; pageSize?: number; query?: HTTPQuery; headers?: HTTPHeaders; }): Promise<Record<string, unknown>> {
+    const requestContext: RequestOpts = {
+      path: `/api/v1/workflows/executions`,
+      method: 'GET' as HTTPMethod,
+      headers: {
+        ...options?.headers,
+      },
+      query: {
+        'page': options?.page,
+        'page_size': options?.pageSize,
+        ...options?.query
+      },
+    };
+
+    const response = await this.request(requestContext);
+    return response.json() as Promise<Record<string, unknown>>;
+  }
   /**List Workflow Executions
    * List executions for a workflow definition.
    */

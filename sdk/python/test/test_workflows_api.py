@@ -153,6 +153,13 @@ class TestWorkflowsApi(unittest.IsolatedAsyncioTestCase):
         """
         pass
 
+    async def test_list_all_workflow_executions_api_v1_workflows_executions_get(self) -> None:
+        """Test case for list_all_workflow_executions_api_v1_workflows_executions_get
+
+        List All Workflow Executions
+        """
+        pass
+
     async def test_list_workflow_definitions_api_v1_workflows_definitions_get(self) -> None:
         """Test case for list_workflow_definitions_api_v1_workflows_definitions_get
 

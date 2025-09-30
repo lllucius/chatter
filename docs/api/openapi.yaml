@@ -20484,6 +20484,58 @@ paths:
       summary: Execute Chat Workflow Streaming
       tags:
       - Workflows
+  /api/v1/workflows/executions:
+    get:
+      description: List all workflow executions for the current user with pagination.
+      operationId: list_all_workflow_executions_api_v1_workflows_executions_get
+      parameters:
+      - in: query
+        name: page
+        required: false
+        schema:
+          default: 1
+          title: Page
+          type: integer
+      - in: query
+        name: page_size
+        required: false
+        schema:
+          default: 20
+          title: Page Size
+          type: integer
+      responses:
+        '200':
+          content:
+            application/json:
+              schema:
+                additionalProperties: true
+                title: Response List All Workflow Executions Api V1 Workflows Executions
+                  Get
+                type: object
+          description: Successful Response
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+        '422':
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/HTTPValidationError'
+          description: Validation Error
+          headers:
+            X-RateLimit-Limit-Hour: *id001
+            X-RateLimit-Limit-Minute: *id002
+            X-RateLimit-Remaining-Hour: *id003
+            X-RateLimit-Remaining-Minute: *id004
+            x-correlation-id: *id005
+      security:
+      - CustomHTTPBearer: []
+      summary: List All Workflow Executions
+      tags:
+      - Workflows
   /api/v1/workflows/memory/configure:
     post:
       description: Configure memory management settings for the user.

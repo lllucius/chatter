@@ -995,13 +995,13 @@ class WorkflowExecutionService:
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
                     event_name = update.get("name", "")
-                    
+
                     # Handle chat model streaming events
                     if event_name == "on_chat_model_stream":
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
-                        
+
                         # Get content from the chunk
                         if hasattr(chunk, "content"):
                             content = chunk.content
@@ -1009,7 +1009,7 @@ class WorkflowExecutionService:
                             content = chunk.get("content", "")
                         else:
                             content = str(chunk) if chunk else ""
-                        
+
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(
@@ -1219,13 +1219,13 @@ class WorkflowExecutionService:
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
                     event_name = update.get("name", "")
-                    
+
                     # Handle chat model streaming events
                     if event_name == "on_chat_model_stream":
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
-                        
+
                         # Get content from the chunk
                         if hasattr(chunk, "content"):
                             content = chunk.content
@@ -1233,7 +1233,7 @@ class WorkflowExecutionService:
                             content = chunk.get("content", "")
                         else:
                             content = str(chunk) if chunk else ""
-                        
+
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(

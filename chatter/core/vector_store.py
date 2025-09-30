@@ -544,7 +544,7 @@ async def get_vector_store_retriever(
         # Get embedding service
         embedding_service = get_embedding_service()
         embeddings = await embedding_service.get_default_provider()
-        
+
         if not embeddings:
             logger.warning("No default embedding provider available")
             return None

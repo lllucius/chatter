@@ -1087,10 +1087,10 @@ class EmbeddingService:
 
 def get_embedding_service(session: AsyncSession | None = None) -> EmbeddingService:
     """Get an EmbeddingService instance.
-    
+
     Args:
         session: Optional database session. If not provided, the service will create one as needed.
-        
+
     Returns:
         EmbeddingService instance
     """

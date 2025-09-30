@@ -197,7 +197,7 @@ class ConditionalNode(WorkflowNode):
         """Validate that condition is provided."""
         errors = []
         if not self.condition:
-            errors.append("Conditional node must have a condition defined")
+            errors.append("Conditional node must have a condition defined. Add a 'condition' field to the node configuration.")
         return errors
 
     async def execute(self, context: WorkflowNodeContext) -> dict[str, Any]:
@@ -332,7 +332,7 @@ class VariableNode(WorkflowNode):
         if self.variable_name.startswith(f"var_{self.node_id}"):
             logger.warning(
                 f"Variable node {self.node_id} using auto-generated variable name: {self.variable_name}. "
-                "Consider providing an explicit variable_name in the configuration."
+                "Consider providing an explicit 'variable_name' in the node configuration to avoid this warning."
             )
         
         return errors

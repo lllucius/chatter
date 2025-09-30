@@ -584,9 +584,7 @@ class WorkflowGraphBuilder:
                         state: WorkflowNodeContext,
                     ) -> str:
                         # Check conditional results
-                        conditional_results = state.get(
-                            "conditional_results", {}
-                        )
+                        state.get("conditional_results", {})
 
                         for edge in edge_list:
                             if edge.get("condition"):

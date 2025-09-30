@@ -164,11 +164,10 @@ class WorkflowDefaultsService:
             if user_id:
                 # Prefer user's prompts, fall back to public prompts
                 query = query.where(
-                    (Prompt.owner_id == user_id)
-                    | (Prompt.is_public == True)
+                    (Prompt.owner_id == user_id) | (Prompt.is_public)
                 ).order_by(Prompt.owner_id == user_id)
             else:
-                query = query.where(Prompt.is_public == True)
+                query = query.where(Prompt.is_public)
 
             query = query.order_by(Prompt.created_at.desc()).limit(1)
 
@@ -218,9 +217,7 @@ class WorkflowDefaultsService:
         """Get system default model configuration from registry."""
         try:
             # Get default provider and model
-            provider_query = select(Provider).where(
-                Provider.is_default == True
-            )
+            provider_query = select(Provider).where(Provider.is_default)
             provider_result = await self.session.execute(
                 provider_query.limit(1)
             )
@@ -236,7 +233,7 @@ class WorkflowDefaultsService:
             if provider:
                 model_query = select(ModelDef).where(
                     ModelDef.provider_id == provider.id,
-                    ModelDef.is_default == True,
+                    ModelDef.is_default,
                 )
                 model_result = await self.session.execute(
                     model_query.limit(1)

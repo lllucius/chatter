@@ -57,7 +57,7 @@ class TestWorkflowGraphBuilderArgumentFix:
             if "got multiple values for argument 'llm'" in str(e):
                 raise AssertionError(
                     f"Argument duplication not fixed: {e}"
-                )
+                ) from e
             else:
                 # Other TypeError might be expected due to fake LLM
                 print(
@@ -87,7 +87,7 @@ class TestWorkflowGraphBuilderArgumentFix:
             if "got multiple values for argument 'tools'" in str(e):
                 raise AssertionError(
                     f"Argument duplication not fixed: {e}"
-                )
+                ) from e
             else:
                 # Other TypeError might be expected due to mock tools
                 print(
@@ -105,7 +105,6 @@ class TestWorkflowGraphBuilderArgumentFix:
         fake_llm = FakeLLM("test_llm")
 
         # Mock the _create_llm_node method to capture the kwargs
-        original_method = builder._create_llm_node
         captured_kwargs = {}
 
         def mock_create_llm_node(node_id, llm, tools, config, **kwargs):

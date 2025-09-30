@@ -2900,7 +2900,7 @@ class AnalyticsService:
                     )
                 )
             )
-            calls_today = calls_today_result.scalar() or 0
+            calls_today_result.scalar() or 0
 
             calls_week_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
@@ -2917,7 +2917,7 @@ class AnalyticsService:
                     )
                 )
             )
-            calls_week = calls_week_result.scalar() or 0
+            calls_week_result.scalar() or 0
 
             calls_month_result = await self.session.execute(
                 select(func.count(ToolUsage.id)).where(
@@ -2950,7 +2950,7 @@ class AnalyticsService:
                     )
                 )
             )
-            errors_today = errors_today_result.scalar() or 0
+            errors_today_result.scalar() or 0
 
             # Success rate
             total_calls = calls_month
@@ -2971,7 +2971,7 @@ class AnalyticsService:
                 )
             )
             total_errors = total_errors.scalar() or 0
-            overall_success_rate = (
+            (
                 (total_calls - total_errors) / total_calls
                 if total_calls > 0
                 else 1.0
@@ -3009,7 +3009,7 @@ class AnalyticsService:
                     )
                 )
             )
-            p95_response_time = float(p95_response_result.scalar() or 0)
+            float(p95_response_result.scalar() or 0)
 
             # Server metrics
             server_metrics_result = await self.session.execute(

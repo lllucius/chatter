@@ -451,7 +451,7 @@ class EnhancedMemoryManager:
             return messages, []
 
         # Score all messages
-        scored_messages = [
+        [
             (i, msg, self.importance_scorer.score_message(msg))
             for i, msg in enumerate(messages)
         ]
@@ -490,7 +490,7 @@ class EnhancedMemoryManager:
 
         # Everything else goes to older messages
         older_messages = []
-        selected_set = set(id(msg) for msg in selected_messages)
+        selected_set = {id(msg) for msg in selected_messages}
         for msg in messages:
             if id(msg) not in selected_set:
                 older_messages.append(msg)

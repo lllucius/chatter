@@ -127,11 +127,11 @@ class SimplifiedWorkflowAnalyticsService:
         # Simple complexity scoring
         complexity_score = node_count + (edge_count * 0.5)
         if complexity_score < 5:
-            complexity_level = "low"
+            pass
         elif complexity_score < 15:
-            complexity_level = "medium"
+            pass
         else:
-            complexity_level = "high"
+            pass
 
         # Calculate depth (maximum path length)
         depth = self._calculate_max_depth(nodes, edges)

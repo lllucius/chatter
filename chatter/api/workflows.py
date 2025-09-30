@@ -1159,46 +1159,6 @@ async def execute_custom_workflow(
         tools = None
         retriever = None
 
-        # Import tool registry for tool support
-        from chatter.core.tool_registry import ToolRegistry
-
-        # Get available tools based on request
-        if hasattr(request, 'enable_tools') and request.enable_tools:
-            try:
-                tool_registry = ToolRegistry()
-                tools = tool_registry.get_tools_for_workspace(
-                    workspace_id=current_user.id,  # Use user ID as workspace
-                    user_permissions=[],  # TODO: Add user permission system
-                )
-                logger.info(
-                    f"Loaded {len(tools) if tools else 0} tools for custom workflow"
-                )
-            except Exception as e:
-                logger.warning(
-                    f"Could not load tools for custom workflow: {e}"
-                )
-                tools = []
-
-        # Get retriever if needed
-        if (
-            hasattr(request, 'enable_retrieval')
-            and request.enable_retrieval
-        ):
-            try:
-                from chatter.core.vector_store import (
-                    get_vector_store_retriever,
-                )
-
-                retriever = get_vector_store_retriever(
-                    user_id=current_user.id
-                )
-                logger.info("Loaded retriever for custom workflow")
-            except Exception as e:
-                logger.warning(
-                    f"Could not load retriever for custom workflow: {e}"
-                )
-                retriever = None
-
         workflow = await workflow_manager.create_custom_workflow(
             nodes=nodes,
             edges=edges,

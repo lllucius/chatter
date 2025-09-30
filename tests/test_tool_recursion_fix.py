@@ -104,7 +104,7 @@ class TestToolRecursionFix:
         )  # Should have made exactly 3 tool calls
 
         # Should have stopped generating more tool calls
-        last_message = result["messages"][-1]
+        result["messages"][-1]
         # The last message should be a ToolMessage from the 3rd tool execution
         # The workflow should have ended before generating another AIMessage with tool calls
         assert len(result["messages"]) > 1
@@ -129,7 +129,6 @@ class TestToolRecursionFix:
         manager = LangGraphWorkflowManager()
 
         # Create a mock LLM that returns 2 tool calls then stops
-        call_count = 0
 
         class LimitedMockLLM:
             def __init__(self):

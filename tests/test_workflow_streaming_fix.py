@@ -12,6 +12,7 @@ from chatter.core.workflow_capabilities import (
 )
 from chatter.models.conversation import Conversation
 from chatter.schemas.chat import ChatRequest
+from chatter.services.workflow_execution import WorkflowExecutionService
 
 
 class MockWorkflow:

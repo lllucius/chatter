@@ -359,7 +359,9 @@ export class WorkflowValidator {
     conditionalNodes.forEach((node: Node) => {
       const config = node.data?.config as Record<string, unknown> | undefined;
       if (!config?.condition) {
-        errors.push(`Conditional node "${node.data?.label || node.id}" needs a condition`);
+        errors.push(
+          `Conditional node "${node.data?.label || node.id}" needs a condition`
+        );
       }
     });
 
@@ -375,7 +377,7 @@ export class WorkflowValidator {
 
     // Build adjacency list - only include valid nodes
     const validNodeIds = new Set(workflow.nodes.map((node: Node) => node.id));
-    
+
     workflow.nodes.forEach((node: Node) => {
       graph.set(node.id, []);
     });

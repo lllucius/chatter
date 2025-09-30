@@ -57,7 +57,7 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
     if (collapsed) {
       return (
         <Box sx={{ p: 1, display: 'flex', flexDirection: 'column', gap: 1 }}>
-          <IconButton 
+          <IconButton
             onClick={() => {
               setPropertiesExpanded(!propertiesExpanded);
               if (collapsed) {
@@ -65,13 +65,13 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
               }
             }}
             size="small"
-            sx={{ 
+            sx={{
               color: selectedNode ? 'primary.main' : 'text.secondary',
             }}
           >
             <PropertiesIcon />
           </IconButton>
-          <IconButton 
+          <IconButton
             onClick={() => {
               setAnalyticsExpanded(!analyticsExpanded);
               if (collapsed) {
@@ -91,20 +91,18 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
         <List disablePadding>
           {/* Properties Section */}
           <ListItem disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => setPropertiesExpanded(!propertiesExpanded)}
               sx={{ py: 1 }}
             >
               <ListItemIcon sx={{ minWidth: 36 }}>
-                <PropertiesIcon 
-                  color={selectedNode ? 'primary' : 'inherit'} 
-                />
+                <PropertiesIcon color={selectedNode ? 'primary' : 'inherit'} />
               </ListItemIcon>
-              <ListItemText 
-                primary="Properties" 
-                primaryTypographyProps={{ 
+              <ListItemText
+                primary="Properties"
+                primaryTypographyProps={{
                   variant: 'subtitle2',
-                  fontWeight: selectedNode ? 'bold' : 'normal'
+                  fontWeight: selectedNode ? 'bold' : 'normal',
                 }}
               />
               {propertiesExpanded ? <ExpandLess /> : <ExpandMore />}
@@ -127,20 +125,20 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
               )}
             </Box>
           </Collapse>
-          
+
           <Divider />
-          
+
           {/* Analytics Section */}
           <ListItem disablePadding>
-            <ListItemButton 
+            <ListItemButton
               onClick={() => setAnalyticsExpanded(!analyticsExpanded)}
               sx={{ py: 1 }}
             >
               <ListItemIcon sx={{ minWidth: 36 }}>
                 <AnalyticsIcon />
               </ListItemIcon>
-              <ListItemText 
-                primary="Analytics" 
+              <ListItemText
+                primary="Analytics"
                 primaryTypographyProps={{ variant: 'subtitle2' }}
               />
               {analyticsExpanded ? <ExpandLess /> : <ExpandMore />}
@@ -183,9 +181,7 @@ const WorkflowSectionDrawer: React.FC<WorkflowSectionDrawerProps> = ({
           {collapsed ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Toolbar>
-      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>
-        {sectionContent()}
-      </Box>
+      <Box sx={{ flexGrow: 1, overflow: 'auto' }}>{sectionContent()}</Box>
     </div>
   );
 

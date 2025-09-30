@@ -319,7 +319,7 @@ export class SSEEventManager {
 
     // Extract unified event metadata if available
     const unifiedMetadata = this.extractUnifiedMetadata(event);
-    
+
     // Process unified metadata for analytics and monitoring
     if (unifiedMetadata) {
       this.processUnifiedMetadata(event, unifiedMetadata);
@@ -603,7 +603,9 @@ export class SSEEventManager {
    */
   private trackCorrelationId(correlationId: string, event: AnySSEEvent): void {
     // This could be used for distributed tracing
-    console.debug(`SSE Correlation ID: ${correlationId} for event ${event.type}`);
+    console.debug(
+      `SSE Correlation ID: ${correlationId} for event ${event.type}`
+    );
   }
 
   /**

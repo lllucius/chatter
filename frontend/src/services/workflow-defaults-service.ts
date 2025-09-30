@@ -79,17 +79,19 @@ class WorkflowDefaultsService {
   async getWorkflowDefaults(): Promise<WorkflowDefaults> {
     try {
       const token = authService.getToken();
-      
+
       const response = await fetch('/api/v1/workflows/defaults', {
         method: 'GET',
         headers: {
-          ...(token && { 'Authorization': `Bearer ${token}` }),
+          ...(token && { Authorization: `Bearer ${token}` }),
           'Content-Type': 'application/json',
         },
       });
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch workflow defaults: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch workflow defaults: ${response.statusText}`
+        );
       }
 
       return await response.json();
@@ -106,26 +108,34 @@ class WorkflowDefaultsService {
   async getNodeDefaults(nodeType: string): Promise<NodeDefaultConfig> {
     try {
       const token = authService.getToken();
-      
-      const response = await fetch(`/api/v1/workflows/defaults?node_type=${nodeType}`, {
-        method: 'GET',
-        headers: {
-          ...(token && { 'Authorization': `Bearer ${token}` }),
-          'Content-Type': 'application/json',
-        },
-      });
+
+      const response = await fetch(
+        `/api/v1/workflows/defaults?node_type=${nodeType}`,
+        {
+          method: 'GET',
+          headers: {
+            ...(token && { Authorization: `Bearer ${token}` }),
+            'Content-Type': 'application/json',
+          },
+        }
+      );
 
       if (!response.ok) {
-        throw new Error(`Failed to fetch node defaults: ${response.statusText}`);
+        throw new Error(
+          `Failed to fetch node defaults: ${response.statusText}`
+        );
       }
 
       return await response.json();
     } catch (error) {
-      console.error(`Error fetching defaults for node type ${nodeType}:`, error);
+      console.error(
+        `Error fetching defaults for node type ${nodeType}:`,
+        error
+      );
       // Return fallback defaults for the specific node type
       return {
         node_type: nodeType,
-        config: this.getFallbackNodeConfig(nodeType)
+        config: this.getFallbackNodeConfig(nodeType),
       };
     }
   }
@@ -204,7 +214,11 @@ class WorkflowDefaultsService {
    */
   private getFallbackNodeConfig(nodeType: string): Record<string, any> {
     const fallbackDefaults = this.getFallbackDefaults();
-    return fallbackDefaults.node_types[nodeType as keyof typeof fallbackDefaults.node_types] || {};
+    return (
+      fallbackDefaults.node_types[
+        nodeType as keyof typeof fallbackDefaults.node_types
+      ] || {}
+    );
   }
 }
 

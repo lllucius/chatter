@@ -12,7 +12,8 @@ vi.mock('../../services/auth-service', () => {
   return {
     getSDK: vi.fn(() => ({
       workflows: {
-        executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming: mockStreamingFn,
+        executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming:
+          mockStreamingFn,
         executeChatWorkflowApiV1WorkflowsExecuteChat: mockNonStreamingFn,
       },
       profiles: {

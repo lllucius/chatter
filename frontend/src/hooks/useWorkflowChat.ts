@@ -1,16 +1,10 @@
 import { useState, useCallback, useEffect } from 'react';
 import { getSDK } from '../services/auth-service';
 import { handleError } from '../utils/error-handler';
-import {
-  ChatWorkflowConfig,
-  ChatWorkflowRequest,
-} from 'chatter-sdk';
+import { ChatWorkflowConfig, ChatWorkflowRequest } from 'chatter-sdk';
 
 // Re-export types for components
-export type {
-  ChatWorkflowConfig,
-  ChatWorkflowRequest,
-} from 'chatter-sdk';
+export type { ChatWorkflowConfig, ChatWorkflowRequest } from 'chatter-sdk';
 
 export const useWorkflowChat = () => {
   const [customWorkflowConfig, setCustomWorkflowConfig] =
@@ -24,7 +18,7 @@ export const useWorkflowChat = () => {
           // If parsing fails, fall through to sync with individual settings
         }
       }
-      
+
       // If no saved config, initialize from individual settings stored in localStorage
       const enableRetrieval = localStorage.getItem('chatter_enableRetrieval');
       const enableTools = localStorage.getItem('chatter_enableTools');

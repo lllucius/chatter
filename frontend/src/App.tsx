@@ -42,9 +42,15 @@ const WorkflowManagementPage = lazy(
   () => import('./pages/WorkflowManagementPage')
 );
 const WorkflowBuilderPage = lazy(() => import('./pages/WorkflowBuilderPage'));
-const WorkflowTemplatesPage = lazy(() => import('./pages/WorkflowTemplatesPage'));
-const WorkflowExecutionsPage = lazy(() => import('./pages/WorkflowExecutionsPage'));
-const WorkflowAnalyticsPage = lazy(() => import('./pages/WorkflowAnalyticsPage'));
+const WorkflowTemplatesPage = lazy(
+  () => import('./pages/WorkflowTemplatesPage')
+);
+const WorkflowExecutionsPage = lazy(
+  () => import('./pages/WorkflowExecutionsPage')
+);
+const WorkflowAnalyticsPage = lazy(
+  () => import('./pages/WorkflowAnalyticsPage')
+);
 const ABTestingPage = lazy(() => import('./pages/ABTestingPage'));
 const UserSettingsPage = lazy(() => import('./pages/UserSettingsPage'));
 const SSEMonitorPage = lazy(() => import('./pages/SSEMonitorPage'));
@@ -185,8 +191,6 @@ function App() {
                       </SectionErrorBoundary>
                     }
                   />
-
-
 
                   {/* Protected routes */}
                   <Route
@@ -393,8 +397,6 @@ function App() {
                         </SuspenseWrapper>
                       }
                     />
-
-
 
                     <Route
                       path="sse-monitor"

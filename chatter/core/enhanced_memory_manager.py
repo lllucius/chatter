@@ -183,7 +183,7 @@ class SummaryCache:
     def _generate_key(self, messages: list[BaseMessage]) -> str:
         """Generate a cache key from messages."""
         # Create a hash of message contents for caching
-        content_hash = hashlib.md5()
+        content_hash = hashlib.md5(usedforsecurity=False)
         for msg in messages:
             content_hash.update(
                 f"{type(msg).__name__}:{getattr(msg, 'content', '')}".encode()

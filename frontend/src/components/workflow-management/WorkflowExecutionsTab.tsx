@@ -46,7 +46,8 @@ interface WorkflowExecutionsTabProps {
 const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
   ({ executions, loading }) => {
     const [debugDialogOpen, setDebugDialogOpen] = useState(false);
-    const [selectedExecution, setSelectedExecution] = useState<WorkflowExecution | null>(null);
+    const [selectedExecution, setSelectedExecution] =
+      useState<WorkflowExecution | null>(null);
 
     const getStatusColor = (status: string) => {
       switch (status.toLowerCase()) {
@@ -154,14 +155,12 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
           <DialogTitle>
             <Box display="flex" alignItems="center" gap={1}>
               <BugReport />
-              <Typography variant="h6">
-                Execution Debug Information
-              </Typography>
+              <Typography variant="h6">Execution Debug Information</Typography>
               {selectedExecution && (
-                <Chip 
-                  label={selectedExecution.status} 
-                  size="small" 
-                  color={getStatusColor(selectedExecution.status)} 
+                <Chip
+                  label={selectedExecution.status}
+                  size="small"
+                  color={getStatusColor(selectedExecution.status)}
                 />
               )}
             </Box>
@@ -172,17 +171,33 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                 {/* Basic Information */}
                 <Accordion defaultExpanded>
                   <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1">Basic Information</Typography>
+                    <Typography variant="subtitle1">
+                      Basic Information
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Box display="flex" flexDirection="column" gap={1}>
-                      <Typography><strong>Execution ID:</strong> {selectedExecution.id}</Typography>
-                      <Typography><strong>Workflow:</strong> {selectedExecution.workflow_name}</Typography>
-                      <Typography><strong>Status:</strong> {selectedExecution.status}</Typography>
-                      <Typography><strong>Duration:</strong> {selectedExecution.execution_time_ms ? `${selectedExecution.execution_time_ms}ms` : 'N/A'}</Typography>
+                      <Typography>
+                        <strong>Execution ID:</strong> {selectedExecution.id}
+                      </Typography>
+                      <Typography>
+                        <strong>Workflow:</strong>{' '}
+                        {selectedExecution.workflow_name}
+                      </Typography>
+                      <Typography>
+                        <strong>Status:</strong> {selectedExecution.status}
+                      </Typography>
+                      <Typography>
+                        <strong>Duration:</strong>{' '}
+                        {selectedExecution.execution_time_ms
+                          ? `${selectedExecution.execution_time_ms}ms`
+                          : 'N/A'}
+                      </Typography>
                       {selectedExecution.error && (
                         <Alert severity="error">
-                          <Typography><strong>Error:</strong> {selectedExecution.error}</Typography>
+                          <Typography>
+                            <strong>Error:</strong> {selectedExecution.error}
+                          </Typography>
                         </Alert>
                       )}
                     </Box>
@@ -190,44 +205,82 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                 </Accordion>
 
                 {/* Execution Logs */}
-                {selectedExecution.execution_log && selectedExecution.execution_log.length > 0 && (
-                  <Accordion>
-                    <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography variant="subtitle1">
-                        Execution Logs ({selectedExecution.execution_log.length} entries)
-                      </Typography>
-                    </AccordionSummary>
-                    <AccordionDetails>
-                      <Box display="flex" flexDirection="column" gap={1} maxHeight={400} overflow="auto">
-                        {selectedExecution.execution_log.map((logEntry, index) => (
-                          <Paper key={index} variant="outlined" sx={{ p: 1 }}>
-                            <Typography variant="caption" color="text.secondary">
-                              {(logEntry as any).timestamp} - {(logEntry as any).level}
-                              {(logEntry as any).node_id && ` - Node: ${(logEntry as any).node_id}`}
-                            </Typography>
-                            <Typography variant="body2">
-                              {(logEntry as any).message}
-                            </Typography>
-                            {(logEntry as any).data && Object.keys(logEntry as any).length > 0 && (
-                              <pre style={{ fontSize: '0.75rem', margin: '4px 0', overflow: 'auto' }}>
-                                {JSON.stringify((logEntry as any).data, null, 2)}
-                              </pre>
-                            )}
-                          </Paper>
-                        ))}
-                      </Box>
-                    </AccordionDetails>
-                  </Accordion>
-                )}
+                {selectedExecution.execution_log &&
+                  selectedExecution.execution_log.length > 0 && (
+                    <Accordion>
+                      <AccordionSummary expandIcon={<ExpandMore />}>
+                        <Typography variant="subtitle1">
+                          Execution Logs (
+                          {selectedExecution.execution_log.length} entries)
+                        </Typography>
+                      </AccordionSummary>
+                      <AccordionDetails>
+                        <Box
+                          display="flex"
+                          flexDirection="column"
+                          gap={1}
+                          maxHeight={400}
+                          overflow="auto"
+                        >
+                          {selectedExecution.execution_log.map(
+                            (logEntry, index) => (
+                              <Paper
+                                key={index}
+                                variant="outlined"
+                                sx={{ p: 1 }}
+                              >
+                                <Typography
+                                  variant="caption"
+                                  color="text.secondary"
+                                >
+                                  {(logEntry as any).timestamp} -{' '}
+                                  {(logEntry as any).level}
+                                  {(logEntry as any).node_id &&
+                                    ` - Node: ${(logEntry as any).node_id}`}
+                                </Typography>
+                                <Typography variant="body2">
+                                  {(logEntry as any).message}
+                                </Typography>
+                                {(logEntry as any).data &&
+                                  Object.keys(logEntry as any).length > 0 && (
+                                    <pre
+                                      style={{
+                                        fontSize: '0.75rem',
+                                        margin: '4px 0',
+                                        overflow: 'auto',
+                                      }}
+                                    >
+                                      {JSON.stringify(
+                                        (logEntry as any).data,
+                                        null,
+                                        2
+                                      )}
+                                    </pre>
+                                  )}
+                              </Paper>
+                            )
+                          )}
+                        </Box>
+                      </AccordionDetails>
+                    </Accordion>
+                  )}
 
                 {/* Debug Info */}
                 {selectedExecution.debug_info && (
                   <Accordion>
                     <AccordionSummary expandIcon={<ExpandMore />}>
-                      <Typography variant="subtitle1">Debug Information</Typography>
+                      <Typography variant="subtitle1">
+                        Debug Information
+                      </Typography>
                     </AccordionSummary>
                     <AccordionDetails>
-                      <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: 400 }}>
+                      <pre
+                        style={{
+                          fontSize: '0.75rem',
+                          overflow: 'auto',
+                          maxHeight: 400,
+                        }}
+                      >
                         {JSON.stringify(selectedExecution.debug_info, null, 2)}
                       </pre>
                     </AccordionDetails>
@@ -237,20 +290,34 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                 {/* Input/Output Data */}
                 <Accordion>
                   <AccordionSummary expandIcon={<ExpandMore />}>
-                    <Typography variant="subtitle1">Input & Output Data</Typography>
+                    <Typography variant="subtitle1">
+                      Input & Output Data
+                    </Typography>
                   </AccordionSummary>
                   <AccordionDetails>
                     <Box display="flex" flexDirection="column" gap={2}>
                       <Box>
                         <Typography variant="subtitle2">Input:</Typography>
-                        <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: 200 }}>
+                        <pre
+                          style={{
+                            fontSize: '0.75rem',
+                            overflow: 'auto',
+                            maxHeight: 200,
+                          }}
+                        >
                           {JSON.stringify(selectedExecution.input, null, 2)}
                         </pre>
                       </Box>
                       {selectedExecution.output && (
                         <Box>
                           <Typography variant="subtitle2">Output:</Typography>
-                          <pre style={{ fontSize: '0.75rem', overflow: 'auto', maxHeight: 200 }}>
+                          <pre
+                            style={{
+                              fontSize: '0.75rem',
+                              overflow: 'auto',
+                              maxHeight: 200,
+                            }}
+                          >
                             {JSON.stringify(selectedExecution.output, null, 2)}
                           </pre>
                         </Box>
@@ -262,15 +329,13 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
             )}
           </DialogContent>
           <DialogActions>
-            <Button onClick={() => setDebugDialogOpen(false)}>
-              Close
-            </Button>
+            <Button onClick={() => setDebugDialogOpen(false)}>Close</Button>
           </DialogActions>
         </Dialog>
       </>
     );
   }
-);;
+);
 
 WorkflowExecutionsTab.displayName = 'WorkflowExecutionsTab';
 

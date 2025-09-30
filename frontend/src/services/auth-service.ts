@@ -17,10 +17,12 @@ class AuthService {
     this.basePath =
       import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000';
 
-    this.baseSDK = new ChatterSDK(new Configuration({
-      basePath: this.basePath,
-      credentials: 'include', // Include cookies for refresh token
-    }));
+    this.baseSDK = new ChatterSDK(
+      new Configuration({
+        basePath: this.basePath,
+        credentials: 'include', // Include cookies for refresh token
+      })
+    );
     // Don't call initialize() in constructor anymore - it's async now
   }
 

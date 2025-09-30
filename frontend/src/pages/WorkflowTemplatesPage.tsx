@@ -22,7 +22,11 @@ import {
   createDateRenderer,
 } from '../components/CrudRenderers';
 import { getSDK } from '../services/auth-service';
-import { WorkflowTemplateResponse, WorkflowTemplateCreate, WorkflowTemplateUpdate } from 'chatter-sdk';
+import {
+  WorkflowTemplateResponse,
+  WorkflowTemplateCreate,
+  WorkflowTemplateUpdate,
+} from 'chatter-sdk';
 import { toastService } from '../services/toast-service';
 import { handleError } from '../utils/error-handler';
 import { useWorkflowData } from '../hooks/useWorkflowData';
@@ -30,7 +34,8 @@ import { useWorkflowData } from '../hooks/useWorkflowData';
 const WorkflowTemplatesPage: React.FC = () => {
   const navigate = useNavigate();
   const crudTableRef = useRef<CrudDataTableRef>(null);
-  const [selectedTemplate, setSelectedTemplate] = useState<WorkflowTemplateResponse | null>(null);
+  const [selectedTemplate, setSelectedTemplate] =
+    useState<WorkflowTemplateResponse | null>(null);
   const [executeDialogOpen, setExecuteDialogOpen] = useState(false);
   const [executionInput, setExecutionInput] = useState('');
 
@@ -46,11 +51,11 @@ const WorkflowTemplatesPage: React.FC = () => {
 
   const handleEditTemplate = (template: WorkflowTemplateResponse) => {
     // Navigate to builder page with template data
-    navigate('/workflows/builder', { 
-      state: { 
+    navigate('/workflows/builder', {
+      state: {
         editTemplate: template,
-        mode: 'edit'
-      } 
+        mode: 'edit',
+      },
     });
   };
 
@@ -67,7 +72,7 @@ const WorkflowTemplatesPage: React.FC = () => {
       }
 
       await executeTemplate(selectedTemplate.id, input);
-      
+
       toastService.success('Workflow execution started');
       setExecuteDialogOpen(false);
     } catch (error) {
@@ -142,10 +147,15 @@ const WorkflowTemplatesPage: React.FC = () => {
   };
 
   // Define service methods
-  const service: CrudService<WorkflowTemplateResponse, WorkflowTemplateCreate, WorkflowTemplateUpdate> = {
+  const service: CrudService<
+    WorkflowTemplateResponse,
+    WorkflowTemplateCreate,
+    WorkflowTemplateUpdate
+  > = {
     list: async (_page: number, _pageSize: number) => {
       const sdk = await getSDK();
-      const response = await sdk.workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
+      const response =
+        await sdk.workflows.listWorkflowTemplatesApiV1WorkflowsTemplates();
       return {
         items: response.templates || [],
         total: response.total_count || 0,
@@ -153,11 +163,16 @@ const WorkflowTemplatesPage: React.FC = () => {
     },
     create: async (data: WorkflowTemplateCreate) => {
       const sdk = await getSDK();
-      return await sdk.workflows.createWorkflowTemplateApiV1WorkflowsTemplates(data);
+      return await sdk.workflows.createWorkflowTemplateApiV1WorkflowsTemplates(
+        data
+      );
     },
     update: async (_id: string, data: WorkflowTemplateUpdate) => {
       const sdk = await getSDK();
-      return await sdk.workflows.updateWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(_id, data);
+      return await sdk.workflows.updateWorkflowTemplateApiV1WorkflowsTemplatesTemplateId(
+        _id,
+        data
+      );
     },
     delete: async (_id: string) => {
       // Note: Delete method may not be available in API, will need to implement
@@ -180,10 +195,10 @@ const WorkflowTemplatesPage: React.FC = () => {
         startIcon={<AddIcon />}
         onClick={() => {
           // Navigate to builder page to create new template
-          navigate('/workflows/builder', { 
-            state: { 
-              mode: 'create'
-            } 
+          navigate('/workflows/builder', {
+            state: {
+              mode: 'create',
+            },
           });
         }}
       >
@@ -231,7 +246,7 @@ const WorkflowTemplatesPage: React.FC = () => {
               resize: 'vertical',
             }}
             value={executionInput}
-            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => 
+            onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) =>
               setExecutionInput(e.target.value)
             }
             placeholder={`{\n  "message": "Hello, world!",\n  "options": {\n    "temperature": 0.7\n  }\n}`}
@@ -239,10 +254,7 @@ const WorkflowTemplatesPage: React.FC = () => {
         </DialogContent>
         <DialogActions>
           <Button onClick={() => setExecuteDialogOpen(false)}>Cancel</Button>
-          <Button
-            onClick={handleExecuteWorkflow}
-            variant="contained"
-          >
+          <Button onClick={handleExecuteWorkflow} variant="contained">
             Execute
           </Button>
         </DialogActions>

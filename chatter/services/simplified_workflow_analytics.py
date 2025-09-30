@@ -71,7 +71,7 @@ class SimplifiedWorkflowAnalyticsService:
             }
             content = json.dumps(workflow_data, sort_keys=True)
             # Include schema version to invalidate old cached data
-            return f"workflow_analytics_v2:{hashlib.md5(content.encode()).hexdigest()}"
+            return f"workflow_analytics_v2:{hashlib.md5(content.encode(), usedforsecurity=False).hexdigest()}"
         except Exception:
             # Fallback to simple hash
             return f"workflow_analytics_v2:fallback_{len(nodes)}_{len(edges)}"

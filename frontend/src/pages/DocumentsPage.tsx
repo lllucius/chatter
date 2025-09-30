@@ -201,15 +201,19 @@ const DocumentsPage: React.FC = () => {
 
       // Get document chunks for content preview
       try {
-        const chunksResponse = await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
-          document.id,
-          { limit: 3, offset: 0 }
-        );
-        
+        const chunksResponse =
+          await getSDK().documents.getDocumentChunksApiV1DocumentsDocumentIdChunks(
+            document.id,
+            { limit: 3, offset: 0 }
+          );
+
         if (chunksResponse.chunks && chunksResponse.chunks.length > 0) {
           const chunkPreviews = chunksResponse.chunks
             .slice(0, 3)
-            .map((chunk, index) => `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`)
+            .map(
+              (chunk, index) =>
+                `Chunk ${index + 1}: ${chunk.content.substring(0, 200)}...`
+            )
             .join('\n\n');
           contentPreview = `Document preview (${chunksResponse.total_count} chunks total):\n\n${chunkPreviews}`;
         } else {
@@ -221,9 +225,11 @@ const DocumentsPage: React.FC = () => {
         if (chunkCount > 0) {
           contentPreview = `This document has been successfully processed into ${chunkCount} chunks for vector search. Individual chunk content preview is not currently available.`;
         } else if (document.status === 'processing') {
-          contentPreview = 'This document is currently being processed for vector search. Please check back shortly.';
+          contentPreview =
+            'This document is currently being processed for vector search. Please check back shortly.';
         } else {
-          contentPreview = 'This document is available for vector search but chunk content preview is not currently supported.';
+          contentPreview =
+            'This document is available for vector search but chunk content preview is not currently supported.';
         }
       }
 
@@ -326,8 +332,11 @@ const DocumentsPage: React.FC = () => {
   const handleDownloadDocument = async (document: DocumentResponse) => {
     try {
       // Use the new document download API
-      const response = await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(document.id);
-      
+      const response =
+        await getSDK().documents.downloadDocumentApiV1DocumentsDocumentIdDownload(
+          document.id
+        );
+
       // Create a blob from the response and trigger download
       const blob = new Blob([response], { type: 'application/octet-stream' });
       const url = window.URL.createObjectURL(blob);
@@ -338,8 +347,10 @@ const DocumentsPage: React.FC = () => {
       a.click();
       window.URL.revokeObjectURL(url);
       window.document.body.removeChild(a);
-      
-      toastService.success(`Downloaded "${document.original_filename || document.filename}" successfully`);
+
+      toastService.success(
+        `Downloaded "${document.original_filename || document.filename}" successfully`
+      );
     } catch (err: unknown) {
       // If download API is not available, provide helpful feedback
       const error = err as { status?: number; message?: string };
@@ -548,9 +559,11 @@ const DocumentsPage: React.FC = () => {
                             variant="body2"
                             sx={{ whiteSpace: 'pre-wrap' }}
                           >
-                            {String(result.content ||
-                              result.text ||
-                              'No content available')}
+                            {String(
+                              result.content ||
+                                result.text ||
+                                'No content available'
+                            )}
                           </Typography>
                         }
                       />

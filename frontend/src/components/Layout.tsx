@@ -110,9 +110,21 @@ const navSections: NavSection[] = [
     defaultExpanded: true,
     items: [
       { label: 'Builder', path: '/workflows/builder', icon: <WorkflowIcon /> },
-      { label: 'Templates', path: '/workflows/templates', icon: <TemplateIcon /> },
-      { label: 'Executions', path: '/workflows/executions', icon: <SpeedIcon /> },
-      { label: 'Analytics', path: '/workflows/analytics', icon: <AnalyticsIcon /> },
+      {
+        label: 'Templates',
+        path: '/workflows/templates',
+        icon: <TemplateIcon />,
+      },
+      {
+        label: 'Executions',
+        path: '/workflows/executions',
+        icon: <SpeedIcon />,
+      },
+      {
+        label: 'Analytics',
+        path: '/workflows/analytics',
+        icon: <AnalyticsIcon />,
+      },
     ],
   },
   {

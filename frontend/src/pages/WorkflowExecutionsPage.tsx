@@ -1,10 +1,5 @@
 import React, { useRef } from 'react';
-import {
-  Typography,
-  Box,
-  Button,
-  Chip,
-} from '../utils/mui';
+import { Typography, Box, Button, Chip } from '../utils/mui';
 import { RefreshIcon, InfoIcon } from '../utils/icons';
 import PageLayout from '../components/PageLayout';
 import CrudDataTable, {
@@ -13,9 +8,7 @@ import CrudDataTable, {
   CrudColumn,
   CrudDataTableRef,
 } from '../components/CrudDataTable';
-import {
-  createDateRenderer,
-} from '../components/CrudRenderers';
+import { createDateRenderer } from '../components/CrudRenderers';
 import { getSDK } from '../services/auth-service';
 import { WorkflowExecutionResponse } from 'chatter-sdk';
 
@@ -31,8 +24,15 @@ const WorkflowExecutionsPage: React.FC = () => {
   // Status chip renderer
   const renderStatus = (status: unknown) => {
     const statusStr = String(status).toLowerCase();
-    let color: 'default' | 'primary' | 'secondary' | 'error' | 'info' | 'success' | 'warning';
-    
+    let color:
+      | 'default'
+      | 'primary'
+      | 'secondary'
+      | 'error'
+      | 'info'
+      | 'success'
+      | 'warning';
+
     switch (statusStr) {
       case 'completed':
         color = 'success';
@@ -49,7 +49,7 @@ const WorkflowExecutionsPage: React.FC = () => {
       default:
         color = 'default';
     }
-    
+
     return (
       <Chip
         label={String(status)}
@@ -94,11 +94,13 @@ const WorkflowExecutionsPage: React.FC = () => {
       width: '80px',
       render: (value: unknown, execution: WorkflowExecutionResponse) => {
         if (!execution.started_at) return '-';
-        
+
         const start = new Date(execution.started_at);
-        const end = execution.completed_at ? new Date(execution.completed_at) : new Date();
+        const end = execution.completed_at
+          ? new Date(execution.completed_at)
+          : new Date();
         const duration = Math.round((end.getTime() - start.getTime()) / 1000);
-        
+
         if (duration < 60) return `${duration}s`;
         if (duration < 3600) return `${Math.round(duration / 60)}m`;
         return `${Math.round(duration / 3600)}h`;
@@ -156,7 +158,10 @@ const WorkflowExecutionsPage: React.FC = () => {
     list: async (page: number, pageSize: number) => {
       try {
         // FOR DEMONSTRATION: Show mock data directly when auth is not available
-        if (!import.meta.env.VITE_API_BASE_URL || import.meta.env.VITE_API_BASE_URL.includes('localhost:8000')) {
+        if (
+          !import.meta.env.VITE_API_BASE_URL ||
+          import.meta.env.VITE_API_BASE_URL.includes('localhost:8000')
+        ) {
           console.log('Using mock data for demonstration');
           const mockExecutions: WorkflowExecutionResponse[] = [
             {
@@ -167,7 +172,10 @@ const WorkflowExecutionsPage: React.FC = () => {
               started_at: '2024-09-29T16:30:00Z',
               completed_at: '2024-09-29T16:30:45Z',
               execution_time_ms: 45000,
-              input_data: { message: 'Hello, how can you help me?', enable_tools: true },
+              input_data: {
+                message: 'Hello, how can you help me?',
+                enable_tools: true,
+              },
               output_data: { response: 'I can help you with various tasks...' },
               tokens_used: 150,
               cost: 0.002,
@@ -182,7 +190,10 @@ const WorkflowExecutionsPage: React.FC = () => {
               started_at: '2024-09-29T16:25:00Z',
               completed_at: '2024-09-29T16:25:30Z',
               execution_time_ms: 30000,
-              input_data: { message: 'Generate a report', enable_retrieval: true },
+              input_data: {
+                message: 'Generate a report',
+                enable_retrieval: true,
+              },
               error_message: 'Failed to connect to retrieval service',
               tokens_used: 75,
               cost: 0.001,
@@ -214,11 +225,11 @@ const WorkflowExecutionsPage: React.FC = () => {
               updated_at: '2024-09-29T16:50:00Z',
             },
           ];
-          
+
           const startIndex = (page - 1) * pageSize;
           const endIndex = startIndex + pageSize;
           const paginatedItems = mockExecutions.slice(startIndex, endIndex);
-          
+
           return {
             items: paginatedItems,
             total: mockExecutions.length,
@@ -227,19 +238,22 @@ const WorkflowExecutionsPage: React.FC = () => {
 
         const sdk = getSDK();
         // Use direct HTTP call to the new endpoint since SDK might not be regenerated yet
-        const response = await fetch(`${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/workflows/executions?page=${page}&page_size=${pageSize}`, {
-          method: 'GET',
-          headers: {
-            'Authorization': `Bearer ${sdk.configuration?.accessToken || ''}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-        });
-        
+        const response = await fetch(
+          `${import.meta.env.VITE_API_BASE_URL || 'http://localhost:8000'}/api/v1/workflows/executions?page=${page}&page_size=${pageSize}`,
+          {
+            method: 'GET',
+            headers: {
+              Authorization: `Bearer ${sdk.configuration?.accessToken || ''}`,
+              'Content-Type': 'application/json',
+            },
+            credentials: 'include',
+          }
+        );
+
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
-        
+
         const data = await response.json();
         return {
           items: data.items || [],
@@ -247,7 +261,7 @@ const WorkflowExecutionsPage: React.FC = () => {
         };
       } catch (error) {
         console.error('Failed to fetch workflow executions:', error);
-        
+
         // FOR DEMONSTRATION: Return mock data to show the page working
         // In a real scenario, this would be removed and the API would provide real data
         const mockExecutions: WorkflowExecutionResponse[] = [
@@ -259,7 +273,10 @@ const WorkflowExecutionsPage: React.FC = () => {
             started_at: '2024-09-29T16:30:00Z',
             completed_at: '2024-09-29T16:30:45Z',
             execution_time_ms: 45000,
-            input_data: { message: 'Hello, how can you help me?', enable_tools: true },
+            input_data: {
+              message: 'Hello, how can you help me?',
+              enable_tools: true,
+            },
             output_data: { response: 'I can help you with various tasks...' },
             tokens_used: 150,
             cost: 0.002,
@@ -274,7 +291,10 @@ const WorkflowExecutionsPage: React.FC = () => {
             started_at: '2024-09-29T16:25:00Z',
             completed_at: '2024-09-29T16:25:30Z',
             execution_time_ms: 30000,
-            input_data: { message: 'Generate a report', enable_retrieval: true },
+            input_data: {
+              message: 'Generate a report',
+              enable_retrieval: true,
+            },
             error_message: 'Failed to connect to retrieval service',
             tokens_used: 75,
             cost: 0.001,
@@ -306,11 +326,11 @@ const WorkflowExecutionsPage: React.FC = () => {
             updated_at: '2024-09-29T16:50:00Z',
           },
         ];
-        
+
         const startIndex = (page - 1) * pageSize;
         const endIndex = startIndex + pageSize;
         const paginatedItems = mockExecutions.slice(startIndex, endIndex);
-        
+
         return {
           items: paginatedItems,
           total: mockExecutions.length,
@@ -345,16 +365,12 @@ const WorkflowExecutionsPage: React.FC = () => {
     <PageLayout title="Workflow Executions" toolbar={toolbar}>
       <Box sx={{ mb: 2 }}>
         <Typography variant="body2" color="text.secondary">
-          View and monitor workflow execution history. Executions are automatically
-          created when workflows are run.
+          View and monitor workflow execution history. Executions are
+          automatically created when workflows are run.
         </Typography>
       </Box>
-      
-      <CrudDataTable
-        ref={crudTableRef}
-        config={config}
-        service={service}
-      />
+
+      <CrudDataTable ref={crudTableRef} config={config} service={service} />
     </PageLayout>
   );
 };

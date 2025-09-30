@@ -733,7 +733,13 @@ const ChatPage: React.FC = () => {
           });
         } else {
           console.log('[ChatPage] Adding assistant message to state (not regeneration)');
-          setMessages((prev) => [...prev, assistantMessage]);
+          setMessages((prev) => {
+            console.log('[ChatPage] setMessages updater called, prev.length:', prev.length);
+            const newMessages = [...prev, assistantMessage];
+            console.log('[ChatPage] setMessages updater returning, newMessages.length:', newMessages.length);
+            return newMessages;
+          });
+          console.log('[ChatPage] setMessages call completed');
         }
 
         console.log('[ChatPage] Message handling complete, focusing input');

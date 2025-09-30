@@ -147,10 +147,64 @@ class TestWorkflowGraphBuilderArgumentFix:
 
         print("✅ Kwargs filtering working correctly")
 
+    def test_user_id_and_conversation_id_filtered(self):
+        """Test that user_id and conversation_id are filtered from kwargs."""
+        builder = WorkflowGraphBuilder()
+        fake_llm = FakeLLM("test_llm")
+
+        # Mock the _create_llm_node method to capture the kwargs
+        captured_kwargs = {}
+
+        def mock_create_llm_node(node_id, llm, tools, config, **kwargs):
+            nonlocal captured_kwargs
+            captured_kwargs = kwargs
+
+            # Return a simple mock object instead of WorkflowNode
+            class MockNode:
+                def __init__(self, node_id, config):
+                    self.node_id = node_id
+                    self.config = config
+
+            return MockNode(node_id, config)
+
+        builder._create_llm_node = mock_create_llm_node
+
+        # Call the wrapper with user_id and conversation_id parameters
+        builder._create_llm_node_wrapper(
+            node_id="test",
+            config={"test": "config"},
+            llm=fake_llm,
+            tools=None,
+            user_id="test_user_123",
+            conversation_id="test_conv_456",
+            extra_param="should_be_preserved",
+        )
+
+        # Verify that user_id and conversation_id are filtered out
+        assert (
+            "user_id" not in captured_kwargs
+        ), "user_id should be filtered out of kwargs"
+        assert (
+            "conversation_id" not in captured_kwargs
+        ), "conversation_id should be filtered out of kwargs"
+        assert (
+            "llm" not in captured_kwargs
+        ), "llm should be filtered out of kwargs"
+        assert (
+            "tools" not in captured_kwargs
+        ), "tools should be filtered out of kwargs"
+        assert (
+            captured_kwargs.get("extra_param") == "should_be_preserved"
+        ), "extra_param should be preserved"
+
+        print("✅ user_id and conversation_id filtering working correctly")
+
+
 
 if __name__ == "__main__":
     test = TestWorkflowGraphBuilderArgumentFix()
     test.test_create_llm_node_wrapper_no_duplicate_args()
     test.test_create_tool_node_wrapper_no_duplicate_args()
     test.test_kwargs_filtering_preserves_other_params()
+    test.test_user_id_and_conversation_id_filtered()
     print("✅ All tests passed!")

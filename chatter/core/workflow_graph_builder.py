@@ -101,11 +101,11 @@ class WorkflowGraphBuilder:
             raise ValueError("LLM node requires 'llm' parameter")
 
         # Remove extracted parameters from kwargs to prevent duplication
-        # Also remove 'retriever' as it's not a valid LLM parameter
+        # Also remove 'retriever', 'user_id', 'conversation_id' as they are not valid LLM parameters
         filtered_kwargs = {
             k: v
             for k, v in kwargs.items()
-            if k not in ['llm', 'tools', 'retriever']
+            if k not in ['llm', 'tools', 'retriever', 'user_id', 'conversation_id']
         }
         return self._create_llm_node(
             node_id, llm, tools, config, **filtered_kwargs

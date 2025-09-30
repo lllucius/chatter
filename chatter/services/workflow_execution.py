@@ -450,7 +450,7 @@ class WorkflowExecutionService:
         definition = await workflow_mgmt.create_workflow_definition(
             owner_id=user_id,
             name="Dynamic Chat Workflow",
-            description="Dynamically created chat workflow",
+            description="Dynamically created chat workflow for execution tracking",
             nodes=[
                 {"id": "call_model", "type": "model", "config": {
                     "provider": chat_request.provider,
@@ -464,6 +464,7 @@ class WorkflowExecutionService:
             ],
             metadata={
                 "dynamic": True,
+                "execution_only": True,  # Mark as execution-only definition
                 "enable_memory": chat_request.enable_memory,
                 "enable_retrieval": chat_request.enable_retrieval,
                 "enable_tools": chat_request.enable_tools,

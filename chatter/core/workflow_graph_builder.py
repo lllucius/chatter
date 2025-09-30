@@ -700,10 +700,19 @@ def create_workflow_definition_from_model(db_definition) -> WorkflowDefinition:
     
     # Copy nodes
     for node in db_definition.nodes:
+        # Handle both simple and complex node config formats
+        node_config = {}
+        if "config" in node:
+            # Simple format: {"id": ..., "type": ..., "config": {...}}
+            node_config = node["config"]
+        elif "data" in node and "config" in node["data"]:
+            # Complex format: {"id": ..., "type": ..., "data": {"config": {...}}}
+            node_config = node["data"]["config"]
+        
         definition.add_node(
             node_id=node["id"],
             node_type=node["type"], 
-            config=node.get("config", {})
+            config=node_config
         )
     
     # Copy edges

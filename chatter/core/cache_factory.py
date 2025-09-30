@@ -32,7 +32,9 @@ class SimplifiedCacheFactory:
         self._cache_instances: dict[str, CacheInterface] = {}
         logger.debug("Simplified cache factory initialized")
 
-    def _get_config_for_type(self, cache_type: CacheType) -> CacheConfig:
+    def _get_config_for_type(
+        self, cache_type: CacheType
+    ) -> CacheConfig:
         """Get configuration for cache type."""
         configs = {
             CacheType.GENERAL: CacheConfig(
@@ -125,6 +127,7 @@ class SimplifiedCacheFactory:
         for cache in self._cache_instances.values():
             try:
                 import asyncio
+
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     # Schedule for later execution
@@ -140,12 +143,15 @@ class SimplifiedCacheFactory:
         for key, cache in self._cache_instances.items():
             try:
                 import asyncio
+
                 loop = asyncio.get_event_loop()
                 if loop.is_running():
                     # Return placeholder for async context
                     stats[key] = {"status": "available"}
                 else:
-                    stats[key] = loop.run_until_complete(cache.get_stats())
+                    stats[key] = loop.run_until_complete(
+                        cache.get_stats()
+                    )
             except Exception as e:
                 stats[key] = {"error": str(e)}
         return stats
@@ -155,7 +161,7 @@ class SimplifiedCacheFactory:
         health_results = {}
         healthy_count = 0
         total_count = len(self._cache_instances)
-        
+
         for key, cache in self._cache_instances.items():
             try:
                 health = await cache.health_check()
@@ -165,9 +171,9 @@ class SimplifiedCacheFactory:
             except Exception as e:
                 health_results[key] = {
                     "status": "unhealthy",
-                    "error": str(e)
+                    "error": str(e),
                 }
-        
+
         # Determine overall status
         if total_count == 0:
             overall_status = "healthy"  # No caches to check
@@ -177,12 +183,12 @@ class SimplifiedCacheFactory:
             overall_status = "degraded"
         else:
             overall_status = "unhealthy"
-        
+
         return {
             "overall_status": overall_status,
             "total_instances": total_count,
             "healthy_instances": healthy_count,
-            "cache_instances": health_results
+            "cache_instances": health_results,
         }
 
     async def get_stats_all(self) -> dict[str, Any]:
@@ -191,7 +197,7 @@ class SimplifiedCacheFactory:
         total_entries = 0
         total_hits = 0
         total_misses = 0
-        
+
         for key, cache in self._cache_instances.items():
             try:
                 stats = await cache.get_stats()
@@ -203,7 +209,7 @@ class SimplifiedCacheFactory:
                     total_misses += stats.get("cache_misses", 0)
             except Exception as e:
                 stats_results[key] = {"error": str(e)}
-        
+
         return {
             "aggregate": {
                 "total_instances": len(self._cache_instances),
@@ -212,9 +218,10 @@ class SimplifiedCacheFactory:
                 "total_misses": total_misses,
                 "overall_hit_rate": (
                     total_hits / max(1, total_hits + total_misses)
-                ) * 100
+                )
+                * 100,
             },
-            "instances": stats_results
+            "instances": stats_results,
         }
 
 

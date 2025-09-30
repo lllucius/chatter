@@ -176,7 +176,9 @@ class ValidationEngine:
         context = context or DEFAULT_CONTEXT
 
         if validator_name not in self._validators:
-            raise ValidationError(f"Validator '{validator_name}' not found")
+            raise ValidationError(
+                f"Validator '{validator_name}' not found"
+            )
 
         validator = self._validators[validator_name]
         return validator.validate(value, rule, context)

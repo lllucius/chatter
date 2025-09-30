@@ -858,12 +858,12 @@ class ConfigurableSeeder(DatabaseSeeder):
         self, skip_existing: bool = True
     ) -> None:
         """Create default registry data using the parent module function.
-        
+
         Args:
             skip_existing: Whether to skip if data already exists
         """
         from chatter.utils.seeding import _create_default_registry_data
-        
+
         # The standalone function already handles checking for existing data,
         # so we call it directly regardless of skip_existing parameter
         await _create_default_registry_data(self.session)

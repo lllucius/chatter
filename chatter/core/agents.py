@@ -15,8 +15,8 @@ from langchain_core.tools import BaseTool
 from sqlalchemy import func, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from chatter.core.cache_factory import get_general_cache
 from chatter.core.cache import CacheConfig
+from chatter.core.cache_factory import get_general_cache
 from chatter.core.langgraph import workflow_manager
 from chatter.core.workflow_node_factory import WorkflowNodeContext
 from chatter.schemas.agents import (
@@ -44,9 +44,9 @@ class BaseAgent(ABC):
         self.profile = profile
         self.llm = llm
         self.tools: dict[str, BaseTool] = {}
-        self.conversation_history: dict[
-            str, list[AgentInteraction]
-        ] = {}
+        self.conversation_history: dict[str, list[AgentInteraction]] = (
+            {}
+        )
         self.performance_metrics: dict[str, Any] = {
             "total_interactions": 0,
             "average_confidence": 0.0,
@@ -451,7 +451,11 @@ class TaskOrientedAgent(BaseAgent):
             if result and "tool_call_count" in result:
                 # For now, we'll just note that tools were used
                 # The actual tool names would need to be extracted from execution_history
-                tools_used = ["tools_executed"] if result["tool_call_count"] > 0 else []
+                tools_used = (
+                    ["tools_executed"]
+                    if result["tool_call_count"] > 0
+                    else []
+                )
 
             # Calculate response time and confidence
             response_time = (

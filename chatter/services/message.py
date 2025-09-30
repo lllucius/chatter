@@ -107,7 +107,7 @@ class MessageService:
 
                 return messages
 
-            except NotFoundError as e:
+            except NotFoundError:
                 # Re-raise the original error to avoid misleading authorization errors
                 raise
             except Exception as e:

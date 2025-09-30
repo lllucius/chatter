@@ -1,6 +1,5 @@
 """Test for tool recursion loop fix."""
 
-
 import pytest
 from langchain_core.messages import AIMessage, HumanMessage, ToolMessage
 from langchain_core.tools import tool

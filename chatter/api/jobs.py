@@ -135,27 +135,26 @@ async def create_job(
 
 @router.get("/", response_model=JobListResponse)
 async def list_jobs(
-    status: JobStatus
-    | None = Query(None, description="Filter by status"),
-    priority: JobPriority
-    | None = Query(None, description="Filter by priority"),
-    function_name: str
-    | None = Query(None, description="Filter by function name"),
-    created_after: datetime
-    | None = Query(
+    status: JobStatus | None = Query(
+        None, description="Filter by status"
+    ),
+    priority: JobPriority | None = Query(
+        None, description="Filter by priority"
+    ),
+    function_name: str | None = Query(
+        None, description="Filter by function name"
+    ),
+    created_after: datetime | None = Query(
         None, description="Filter jobs created after this date"
     ),
-    created_before: datetime
-    | None = Query(
+    created_before: datetime | None = Query(
         None, description="Filter jobs created before this date"
     ),
-    tags: list[str]
-    | None = Query(
+    tags: list[str] | None = Query(
         None,
         description="Filter by job tags (any of the provided tags)",
     ),
-    search: str
-    | None = Query(
+    search: str | None = Query(
         None, description="Search in job names and metadata"
     ),
     limit: int = Query(

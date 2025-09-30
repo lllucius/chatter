@@ -1,7 +1,7 @@
 """Schemas for workflow management API."""
 
 from datetime import datetime
-from typing import Any, Dict
+from typing import Any
 
 from pydantic import BaseModel, Field
 
@@ -16,7 +16,7 @@ class WorkflowNodeData(BaseModel):
         default_factory=dict, description="Node configuration"
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -54,7 +54,7 @@ class WorkflowNode(BaseModel):
         default=False, description="Whether node is being dragged"
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -73,11 +73,17 @@ class WorkflowNode(BaseModel):
             _dict['data'] = self.data.to_dict()
         # set to None if selected (nullable) is None
         # and model_fields_set contains the field
-        if self.selected is None and "selected" in self.model_fields_set:
+        if (
+            self.selected is None
+            and "selected" in self.model_fields_set
+        ):
             _dict['selected'] = None
         # set to None if dragging (nullable) is None
         # and model_fields_set contains the field
-        if self.dragging is None and "dragging" in self.model_fields_set:
+        if (
+            self.dragging is None
+            and "dragging" in self.model_fields_set
+        ):
             _dict['dragging'] = None
 
         return _dict
@@ -91,7 +97,7 @@ class WorkflowEdgeData(BaseModel):
     )
     label: str | None = Field(default=None, description="Edge label")
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -107,7 +113,10 @@ class WorkflowEdgeData(BaseModel):
         )
         # set to None if condition (nullable) is None
         # and model_fields_set contains the field
-        if self.condition is None and "condition" in self.model_fields_set:
+        if (
+            self.condition is None
+            and "condition" in self.model_fields_set
+        ):
             _dict['condition'] = None
         # set to None if label (nullable) is None
         # and model_fields_set contains the field
@@ -135,7 +144,7 @@ class WorkflowEdge(BaseModel):
         description="Edge data",
     )
 
-    def to_dict(self) -> Dict[str, Any]:
+    def to_dict(self) -> dict[str, Any]:
         """Return the dictionary representation of the model using alias.
 
         This has the following differences from calling pydantic's
@@ -154,11 +163,17 @@ class WorkflowEdge(BaseModel):
             _dict['data'] = self.data.to_dict()
         # set to None if sourceHandle (nullable) is None
         # and model_fields_set contains the field
-        if self.sourceHandle is None and "sourceHandle" in self.model_fields_set:
+        if (
+            self.sourceHandle is None
+            and "sourceHandle" in self.model_fields_set
+        ):
             _dict['sourceHandle'] = None
         # set to None if targetHandle (nullable) is None
         # and model_fields_set contains the field
-        if self.targetHandle is None and "targetHandle" in self.model_fields_set:
+        if (
+            self.targetHandle is None
+            and "targetHandle" in self.model_fields_set
+        ):
             _dict['targetHandle'] = None
         # set to None if type (nullable) is None
         # and model_fields_set contains the field
@@ -540,7 +555,8 @@ class WorkflowExecutionRequest(WorkflowExecutionBase):
         ..., description="Workflow definition ID"
     )
     debug_mode: bool = Field(
-        default=False, description="Enable debug mode for detailed logging"
+        default=False,
+        description="Enable debug mode for detailed logging",
     )
 
 
@@ -787,12 +803,22 @@ class WorkflowExecutionLogEntry(BaseModel):
     """Schema for individual execution log entries."""
 
     timestamp: datetime = Field(..., description="Log entry timestamp")
-    level: str = Field(..., description="Log level (DEBUG, INFO, WARN, ERROR)")
-    node_id: str | None = Field(None, description="Associated workflow node ID")
-    step_name: str | None = Field(None, description="Execution step name")
+    level: str = Field(
+        ..., description="Log level (DEBUG, INFO, WARN, ERROR)"
+    )
+    node_id: str | None = Field(
+        None, description="Associated workflow node ID"
+    )
+    step_name: str | None = Field(
+        None, description="Execution step name"
+    )
     message: str = Field(..., description="Log message")
-    data: dict[str, Any] | None = Field(None, description="Additional log data")
-    execution_time_ms: int | None = Field(None, description="Step execution time")
+    data: dict[str, Any] | None = Field(
+        None, description="Additional log data"
+    )
+    execution_time_ms: int | None = Field(
+        None, description="Step execution time"
+    )
 
 
 class WorkflowDebugInfo(BaseModel):

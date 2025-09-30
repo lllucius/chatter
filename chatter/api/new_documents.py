@@ -21,6 +21,7 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from chatter.api.auth import get_current_user
 from chatter.models.user import User
 from chatter.schemas.document import (
+    DocumentChunksResponse,
     DocumentCreate,
     DocumentDeleteResponse,
     DocumentListRequest,
@@ -30,7 +31,6 @@ from chatter.schemas.document import (
     DocumentSearchRequest,
     DocumentStatsResponse,
     SearchResultResponse,
-    DocumentChunksResponse,
 )
 from chatter.services.new_document_service import (
     DocumentServiceError,
@@ -333,7 +333,9 @@ async def reprocess_document(
         ) from e
 
 
-@router.get("/{document_id}/chunks", response_model=DocumentChunksResponse)
+@router.get(
+    "/{document_id}/chunks", response_model=DocumentChunksResponse
+)
 async def get_document_chunks(
     document_id: str,
     limit: int = 10,
@@ -347,9 +349,9 @@ async def get_document_chunks(
         result = await service.get_document_chunks(
             document_id, current_user.id, limit, offset
         )
-        
+
         return DocumentChunksResponse(**result)
-        
+
     except Exception as e:
         logger.error(
             "Error getting document chunks",
@@ -371,32 +373,34 @@ async def download_document(
     """Download original document file."""
     try:
         service = NewDocumentService(session)
-        
+
         # First get document info for filename
-        document = await service.get_document(document_id, current_user.id)
+        document = await service.get_document(
+            document_id, current_user.id
+        )
         if not document:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document not found",
             )
-            
+
         # Get file path
         file_path = await service.get_document_file_path(
             document_id, current_user.id
         )
-        
+
         if not file_path:
             raise HTTPException(
                 status_code=status.HTTP_404_NOT_FOUND,
                 detail="Document file not found",
             )
-            
+
         return FileResponse(
             path=file_path,
             filename=document.original_filename,
             media_type="application/octet-stream",
         )
-        
+
     except HTTPException:
         raise
     except Exception as e:

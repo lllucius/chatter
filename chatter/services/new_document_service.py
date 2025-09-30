@@ -585,16 +585,20 @@ class NewDocumentService:
             return {}
 
     async def get_document_chunks(
-        self, document_id: str, user_id: str, limit: int = 10, offset: int = 0
+        self,
+        document_id: str,
+        user_id: str,
+        limit: int = 10,
+        offset: int = 0,
     ) -> dict[str, Any]:
         """Get document chunks with pagination.
-        
+
         Args:
             document_id: Document ID
             user_id: User ID (for ownership check)
             limit: Maximum number of chunks to return
             offset: Number of chunks to skip
-            
+
         Returns:
             Dictionary with chunks and pagination info
         """
@@ -609,17 +613,18 @@ class NewDocumentService:
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if not document:
                 raise DocumentServiceError("Document not found")
-            
+
             # Get total count
             count_result = await self.session.execute(
-                select(func.count(DocumentChunk.id))
-                .where(DocumentChunk.document_id == document_id)
+                select(func.count(DocumentChunk.id)).where(
+                    DocumentChunk.document_id == document_id
+                )
             )
             total_count = count_result.scalar() or 0
-            
+
             # Get chunks with pagination
             chunks_result = await self.session.execute(
                 select(DocumentChunk)
@@ -629,14 +634,14 @@ class NewDocumentService:
                 .limit(limit)
             )
             chunks = chunks_result.scalars().all()
-            
+
             return {
                 "chunks": chunks,
                 "total_count": total_count,
                 "limit": limit,
                 "offset": offset,
             }
-            
+
         except DocumentServiceError:
             raise
         except Exception as e:
@@ -645,17 +650,19 @@ class NewDocumentService:
                 document_id=document_id,
                 error=str(e),
             )
-            raise DocumentServiceError("Failed to get document chunks") from e
+            raise DocumentServiceError(
+                "Failed to get document chunks"
+            ) from e
 
     async def get_document_file_path(
         self, document_id: str, user_id: str
     ) -> str | None:
         """Get document file path for download.
-        
+
         Args:
             document_id: Document ID
             user_id: User ID (for ownership check)
-            
+
         Returns:
             File path if document exists and user owns it, None otherwise
         """
@@ -669,10 +676,10 @@ class NewDocumentService:
                 )
             )
             document = result.scalar_one_or_none()
-            
+
             if not document or not document.file_path:
                 return None
-                
+
             file_path = Path(document.file_path)
             if not file_path.exists():
                 logger.warning(
@@ -681,9 +688,9 @@ class NewDocumentService:
                     file_path=str(file_path),
                 )
                 return None
-                
+
             return str(file_path)
-            
+
         except Exception as e:
             logger.error(
                 "Failed to get document file path",

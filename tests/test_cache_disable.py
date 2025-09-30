@@ -2,7 +2,13 @@
 
 import pytest
 
-from chatter.core.cache import CacheConfig, CacheStats, MemoryCache, MultiTierCache, RedisCache
+from chatter.core.cache import (
+    CacheConfig,
+    CacheStats,
+    MemoryCache,
+    MultiTierCache,
+    RedisCache,
+)
 
 
 class TestCacheDisableFunctionality:

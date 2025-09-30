@@ -526,40 +526,45 @@ class VectorStoreManager:
 vector_store_manager = VectorStoreManager()
 
 
-def get_vector_store_retriever(user_id: str = None, collection_name: str = "documents"):
+def get_vector_store_retriever(
+    user_id: str = None, collection_name: str = "documents"
+):
     """Get a retriever for vector search operations.
-    
+
     Args:
         user_id: User ID for personalized retrieval (optional)
         collection_name: Collection name for the vector store
-        
+
     Returns:
         Retriever instance that can be used with LangChain workflows
     """
     try:
         from chatter.services.embeddings import get_embedding_service
-        
+
         # Get embedding service
         embedding_service = get_embedding_service()
         embeddings = embedding_service.get_embedding_client()
-        
+
         # Create or get vector store
         store = vector_store_manager.create_store(
-            "pgvector", 
-            embeddings, 
-            collection_name=collection_name
+            "pgvector", embeddings, collection_name=collection_name
         )
-        
+
         # Return retriever interface
         if hasattr(store._store, 'as_retriever'):
             return store._store.as_retriever(
-                search_kwargs={"k": 5, "filter": {"user_id": user_id} if user_id else None}
+                search_kwargs={
+                    "k": 5,
+                    "filter": {"user_id": user_id} if user_id else None,
+                }
             )
         else:
             # Fallback implementation
-            logger.warning("Vector store does not support as_retriever, returning None")
+            logger.warning(
+                "Vector store does not support as_retriever, returning None"
+            )
             return None
-            
+
     except Exception as e:
         logger.error(f"Could not create vector store retriever: {e}")
         return None

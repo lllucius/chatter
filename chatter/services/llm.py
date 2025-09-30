@@ -7,10 +7,7 @@ from typing import TYPE_CHECKING, Any
 from langchain_anthropic import ChatAnthropic
 from langchain_core.language_models import BaseChatModel
 from langchain_core.messages import (
-    AIMessage,
     BaseMessage,
-    HumanMessage,
-    SystemMessage,
 )
 from langchain_openai import ChatOpenAI
 from pydantic import SecretStr
@@ -26,8 +23,7 @@ from chatter.utils.logging import get_logger
 
 # Use TYPE_CHECKING to avoid circular imports at runtime
 if TYPE_CHECKING:
-    from chatter.models.conversation import Conversation
-    from chatter.models.profile import Profile
+    pass
 
 logger = get_logger(__name__)
 
@@ -55,7 +51,11 @@ class LLMService:
         return session_maker()
 
     async def _create_provider_instance(
-        self, provider, model_def, temperature: float | None = None, max_tokens: int | None = None
+        self,
+        provider,
+        model_def,
+        temperature: float | None = None,
+        max_tokens: int | None = None,
     ) -> BaseChatModel | None:
         """Create a provider instance based on registry data with optional custom parameters."""
         try:
@@ -84,9 +84,18 @@ class LLMService:
                     api_key=SecretStr(api_key) if api_key else None,
                     base_url=provider.base_url,
                     model=model_def.model_name,
-                    temperature=temperature if temperature is not None else config.get("temperature", 0.7),
-                    max_completion_tokens=max_tokens if max_tokens is not None else (
-                        model_def.max_tokens or config.get("max_tokens", 4096)
+                    temperature=(
+                        temperature
+                        if temperature is not None
+                        else config.get("temperature", 0.7)
+                    ),
+                    max_completion_tokens=(
+                        max_tokens
+                        if max_tokens is not None
+                        else (
+                            model_def.max_tokens
+                            or config.get("max_tokens", 4096)
+                        )
                     ),
                 )
 
@@ -94,9 +103,18 @@ class LLMService:
                 return ChatAnthropic(
                     api_key=SecretStr(api_key) if api_key else None,
                     model_name=model_def.model_name,
-                    temperature=temperature if temperature is not None else config.get("temperature", 0.7),
-                    max_tokens_to_sample=max_tokens if max_tokens is not None else (
-                        model_def.max_tokens or config.get("max_tokens", 4096)
+                    temperature=(
+                        temperature
+                        if temperature is not None
+                        else config.get("temperature", 0.7)
+                    ),
+                    max_tokens_to_sample=(
+                        max_tokens
+                        if max_tokens is not None
+                        else (
+                            model_def.max_tokens
+                            or config.get("max_tokens", 4096)
+                        )
                     ),
                     timeout=None,
                     stop=None,
@@ -198,16 +216,6 @@ class LLMService:
             raise LLMProviderError("No default LLM provider configured")
 
         return await self.get_provider(provider.name)
-
-
-
-
-
-
-
-
-
-
 
     async def generate_response(
         self,
@@ -380,10 +388,6 @@ class LLMService:
                     provider_count=provider_count,
                 )
 
-
-
-
-
     async def get_llm(
         self,
         provider: str | None = None,
@@ -392,16 +396,16 @@ class LLMService:
         max_tokens: int | None = None,
     ) -> BaseChatModel:
         """Get LLM instance with custom parameters.
-        
+
         Args:
             provider: Provider name (optional, uses default if not provided)
             model: Model name (optional, uses default for provider if not provided)
             temperature: Temperature override
             max_tokens: Max tokens override
-            
+
         Returns:
             BaseChatModel instance
-            
+
         Raises:
             LLMProviderError: If provider/model not available
         """
@@ -423,9 +427,13 @@ class LLMService:
 
         if provider_name is None:
             # Get default provider
-            provider_info = await registry.get_default_provider(ModelType.LLM)
+            provider_info = await registry.get_default_provider(
+                ModelType.LLM
+            )
             if not provider_info:
-                raise LLMProviderError("No default LLM provider configured")
+                raise LLMProviderError(
+                    "No default LLM provider configured"
+                )
             provider_name = provider_info.name
 
         # Get provider and model info
@@ -436,7 +444,9 @@ class LLMService:
             )
 
         # Get default LLM model for this provider
-        models, _ = await registry.list_models(provider.id, ModelType.LLM)
+        models, _ = await registry.list_models(
+            provider.id, ModelType.LLM
+        )
         default_model = None
         for model in models:
             if model.is_default and model.is_active:
@@ -465,11 +475,3 @@ class LLMService:
             )
 
         return instance
-
-
-
-
-
-
-
-

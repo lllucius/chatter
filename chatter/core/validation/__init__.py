@@ -70,7 +70,10 @@ def validate_workflow_definition(
 ) -> ValidationResult:
     """Validate workflow definition structure."""
     return validation_engine.validate(
-        "workflow", definition, "workflow_definition", context or DEFAULT_CONTEXT
+        "workflow",
+        definition,
+        "workflow_definition",
+        context or DEFAULT_CONTEXT,
     )
 
 

@@ -6,7 +6,6 @@ from unittest.mock import AsyncMock, MagicMock
 import pytest
 from langchain_core.messages import AIMessage
 
-from chatter.core.langgraph import workflow_manager
 from chatter.core.workflow_capabilities import (
     WorkflowCapabilities,
     WorkflowSpec,

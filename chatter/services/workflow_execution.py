@@ -994,7 +994,7 @@ class WorkflowExecutionService:
             ):
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
-                    event_name = update.get("name", "")
+                    event_name = update.get("event", "")
 
                     # Handle chat model and LLM streaming events
                     if event_name in ["on_chat_model_stream", "on_llm_stream"]:
@@ -1218,7 +1218,7 @@ class WorkflowExecutionService:
             ):
                 # Handle LangGraph streaming events
                 if isinstance(update, dict):
-                    event_name = update.get("name", "")
+                    event_name = update.get("event", "")
 
                     # Handle chat model and LLM streaming events
                     if event_name in ["on_chat_model_stream", "on_llm_stream"]:

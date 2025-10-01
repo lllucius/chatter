@@ -714,7 +714,7 @@ class ModelNode(WorkflowNode):
     async def execute(
         self, context: WorkflowNodeContext
     ) -> dict[str, Any]:
-        """Execute LLM call with context - this is a placeholder that should be overridden by graph builder."""
+        """Execute LLM call with context and extract usage metadata."""
         if not self.llm:
             return {
                 "messages": [
@@ -744,7 +744,26 @@ class ModelNode(WorkflowNode):
                 else self.llm
             )
             response = await llm_to_use.ainvoke(messages, **llm_kwargs)
-            return {"messages": [response]}
+            
+            # Extract usage metadata from response
+            usage_metadata = {}
+            if hasattr(response, 'usage_metadata'):
+                usage_metadata = response.usage_metadata or {}
+            elif hasattr(response, 'response_metadata'):
+                usage_metadata = response.response_metadata.get('token_usage', {})
+            
+            # Convert usage_metadata to dict if it's not already
+            if not isinstance(usage_metadata, dict):
+                usage_metadata = {
+                    'input_tokens': getattr(usage_metadata, 'input_tokens', None),
+                    'output_tokens': getattr(usage_metadata, 'output_tokens', None),
+                    'total_tokens': getattr(usage_metadata, 'total_tokens', None),
+                }
+            
+            return {
+                "messages": [response],
+                "usage_metadata": usage_metadata,
+            }
         except Exception as e:
             logger.error(f"Model node execution failed: {e}")
             return {

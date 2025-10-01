@@ -424,16 +424,23 @@ class WorkflowExecutionService:
             # Extract AI response
             ai_message = self._extract_ai_response(result)
 
-            # Create and save message
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            # Create and save message with token statistics
             message = await self._create_and_save_message(
                 conversation=conversation,
                 content=ai_message.content,
                 role=MessageRole.ASSISTANT,
                 metadata=result.get("metadata", {}),
+                prompt_tokens=result.get("prompt_tokens"),
+                completion_tokens=result.get("completion_tokens"),
+                cost=result.get("cost"),
+                provider_used=chat_request.provider,
+                response_time_ms=execution_time_ms,
             )
 
             # Calculate usage info
-            execution_time_ms = int((time.time() - start_time) * 1000)
             usage_info = {
                 "execution_time_ms": execution_time_ms,
                 "tool_calls": result.get("tool_call_count", 0),
@@ -678,16 +685,23 @@ class WorkflowExecutionService:
             # Extract AI response
             ai_message = self._extract_ai_response(result)
 
-            # Create and save message
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            # Create and save message with token statistics
             message = await self._create_and_save_message(
                 conversation=conversation,
                 content=ai_message.content,
                 role=MessageRole.ASSISTANT,
                 metadata=result.get("metadata", {}),
+                prompt_tokens=result.get("prompt_tokens"),
+                completion_tokens=result.get("completion_tokens"),
+                cost=result.get("cost"),
+                provider_used=chat_request.provider,
+                response_time_ms=execution_time_ms,
             )
 
             # Calculate usage info
-            execution_time_ms = int((time.time() - start_time) * 1000)
             usage_info = {
                 "execution_time_ms": execution_time_ms,
                 "tool_calls": result.get("tool_call_count", 0),
@@ -1898,8 +1912,13 @@ class WorkflowExecutionService:
         content: str,
         role: MessageRole,
         metadata: dict[str, Any] | None = None,
+        prompt_tokens: int | None = None,
+        completion_tokens: int | None = None,
+        cost: float | None = None,
+        provider_used: str | None = None,
+        response_time_ms: int | None = None,
     ) -> Message:
-        """Create and save a message to the conversation."""
+        """Create and save a message to the conversation with token statistics."""
         from datetime import datetime
 
         from sqlalchemy import func, select
@@ -1912,17 +1931,26 @@ class WorkflowExecutionService:
         message_count = result.scalar() or 0
         sequence_number = message_count + 1
 
-        # Create message object with all required fields
-        # Note: Base class automatically sets id, created_at, updated_at, but we need to
-        # ensure all the Message-specific required fields are set
+        # Calculate total tokens
+        total_tokens = None
+        if prompt_tokens is not None or completion_tokens is not None:
+            total_tokens = (prompt_tokens or 0) + (completion_tokens or 0)
+
+        # Create message object with all fields including token statistics
         message = Message(
             id=generate_ulid(),
             conversation_id=conversation.id,
             role=role,
             content=content,
             sequence_number=sequence_number,
-            rating_count=0,  # Default value for required field
+            rating_count=0,
             extra_metadata=metadata or {},
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            cost=cost,
+            provider_used=provider_used,
+            response_time_ms=response_time_ms,
         )
 
         # The Base class will automatically set created_at and updated_at
@@ -1937,7 +1965,9 @@ class WorkflowExecutionService:
         try:
             self.session.add(message)
             await self.session.commit()
-            logger.debug(f"Saved message {message.id} to database")
+            logger.debug(
+                f"Saved message {message.id} to database with tokens: {total_tokens}"
+            )
         except Exception as e:
             logger.error(f"Failed to save message to database: {e}")
             await self.session.rollback()

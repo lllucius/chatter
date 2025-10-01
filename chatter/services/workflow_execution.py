@@ -985,6 +985,17 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
+            
+            # Send start event
+            yield StreamingChatChunk(
+                type="start",
+                content="",
+                conversation_id=conversation.id,
+                metadata={
+                    "universal_template": True,
+                },
+            )
+            
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -1013,7 +1024,7 @@ class WorkflowExecutionService:
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(
-                                type="content",
+                                type="token",
                                 content=content,
                                 metadata={
                                     "universal_template": True,
@@ -1026,14 +1037,21 @@ class WorkflowExecutionService:
                 data={"content_length": len(content_buffer)},
             )
 
-            # Send completion chunk
+            # Send completion chunk with metadata
             yield StreamingChatChunk(
-                type="done",
+                type="complete",
                 content="",
                 metadata={
                     "streaming_complete": True,
                     "universal_template": True,
                 },
+            )
+
+            # Send done marker
+            yield StreamingChatChunk(
+                type="done",
+                content="",
+                metadata={},
             )
 
             # Update execution with success
@@ -1209,6 +1227,15 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
+            
+            # Send start event
+            yield StreamingChatChunk(
+                type="start",
+                content="",
+                conversation_id=conversation.id,
+                metadata={},
+            )
+            
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -1237,7 +1264,7 @@ class WorkflowExecutionService:
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(
-                                type="content",
+                                type="token",
                                 content=content,
                                 metadata={
                                     "event": event_name,
@@ -1249,11 +1276,18 @@ class WorkflowExecutionService:
                 data={"content_length": len(content_buffer)},
             )
 
-            # Send completion chunk
+            # Send completion chunk with metadata
+            yield StreamingChatChunk(
+                type="complete",
+                content="",
+                metadata={"streaming_complete": True},
+            )
+
+            # Send done marker
             yield StreamingChatChunk(
                 type="done",
                 content="",
-                metadata={"streaming_complete": True},
+                metadata={},
             )
 
             # Update execution with success

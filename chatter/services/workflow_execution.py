@@ -985,6 +985,7 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
+            
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -996,8 +997,24 @@ class WorkflowExecutionService:
                 if isinstance(update, dict):
                     event_name = update.get("event", "")
 
+                    # Handle chat model start event
+                    if event_name == "on_chat_model_start":
+                        # Extract metadata from the start event
+                        metadata = update.get("metadata", {})
+                        yield StreamingChatChunk(
+                            type="start",
+                            content="",
+                            conversation_id=conversation.id,
+                            metadata={
+                                "universal_template": True,
+                                "model_name": metadata.get("ls_model_name"),
+                                "temperature": metadata.get("ls_temperature"),
+                                "max_tokens": metadata.get("ls_max_tokens"),
+                            },
+                        )
+
                     # Handle chat model and LLM streaming events
-                    if event_name in ["on_chat_model_stream", "on_llm_stream"]:
+                    elif event_name in ["on_chat_model_stream", "on_llm_stream"]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
@@ -1013,7 +1030,7 @@ class WorkflowExecutionService:
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(
-                                type="content",
+                                type="token",
                                 content=content,
                                 metadata={
                                     "universal_template": True,
@@ -1021,19 +1038,50 @@ class WorkflowExecutionService:
                                 },
                             )
 
+                    # Handle chat model end event
+                    elif event_name == "on_chat_model_end":
+                        # Extract usage metadata from the end event
+                        data = update.get("data", {})
+                        output = data.get("output", {})
+                        
+                        # Get usage_metadata from the output
+                        usage_metadata = {}
+                        if hasattr(output, "usage_metadata"):
+                            usage_metadata = output.usage_metadata or {}
+                        elif isinstance(output, dict):
+                            usage_metadata = output.get("usage_metadata", {})
+                        
+                        # Get response_metadata for model info
+                        response_metadata = {}
+                        if hasattr(output, "response_metadata"):
+                            response_metadata = output.response_metadata or {}
+                        elif isinstance(output, dict):
+                            response_metadata = output.get("response_metadata", {})
+
+                        yield StreamingChatChunk(
+                            type="complete",
+                            content="",
+                            metadata={
+                                "streaming_complete": True,
+                                "universal_template": True,
+                                "total_tokens": usage_metadata.get("total_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "total_tokens", None),
+                                "input_tokens": usage_metadata.get("input_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "input_tokens", None),
+                                "output_tokens": usage_metadata.get("output_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "output_tokens", None),
+                                "model_used": response_metadata.get("model_name") if isinstance(response_metadata, dict) else getattr(response_metadata, "model_name", None),
+                                "finish_reason": response_metadata.get("finish_reason") if isinstance(response_metadata, dict) else getattr(response_metadata, "finish_reason", None),
+                            },
+                        )
+
             performance_monitor.log_debug(
                 "Streaming workflow execution completed",
                 data={"content_length": len(content_buffer)},
             )
 
-            # Send completion chunk
+            # Send done marker
             yield StreamingChatChunk(
                 type="done",
                 content="",
-                metadata={
-                    "streaming_complete": True,
-                    "universal_template": True,
-                },
+                metadata={},
             )
 
             # Update execution with success
@@ -1209,6 +1257,7 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
+            
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -1220,8 +1269,23 @@ class WorkflowExecutionService:
                 if isinstance(update, dict):
                     event_name = update.get("event", "")
 
+                    # Handle chat model start event
+                    if event_name == "on_chat_model_start":
+                        # Extract metadata from the start event
+                        metadata = update.get("metadata", {})
+                        yield StreamingChatChunk(
+                            type="start",
+                            content="",
+                            conversation_id=conversation.id,
+                            metadata={
+                                "model_name": metadata.get("ls_model_name"),
+                                "temperature": metadata.get("ls_temperature"),
+                                "max_tokens": metadata.get("ls_max_tokens"),
+                            },
+                        )
+
                     # Handle chat model and LLM streaming events
-                    if event_name in ["on_chat_model_stream", "on_llm_stream"]:
+                    elif event_name in ["on_chat_model_stream", "on_llm_stream"]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
@@ -1237,23 +1301,56 @@ class WorkflowExecutionService:
                         if content:
                             content_buffer += content
                             yield StreamingChatChunk(
-                                type="content",
+                                type="token",
                                 content=content,
                                 metadata={
                                     "event": event_name,
                                 },
                             )
 
+                    # Handle chat model end event
+                    elif event_name == "on_chat_model_end":
+                        # Extract usage metadata from the end event
+                        data = update.get("data", {})
+                        output = data.get("output", {})
+                        
+                        # Get usage_metadata from the output
+                        usage_metadata = {}
+                        if hasattr(output, "usage_metadata"):
+                            usage_metadata = output.usage_metadata or {}
+                        elif isinstance(output, dict):
+                            usage_metadata = output.get("usage_metadata", {})
+                        
+                        # Get response_metadata for model info
+                        response_metadata = {}
+                        if hasattr(output, "response_metadata"):
+                            response_metadata = output.response_metadata or {}
+                        elif isinstance(output, dict):
+                            response_metadata = output.get("response_metadata", {})
+
+                        yield StreamingChatChunk(
+                            type="complete",
+                            content="",
+                            metadata={
+                                "streaming_complete": True,
+                                "total_tokens": usage_metadata.get("total_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "total_tokens", None),
+                                "input_tokens": usage_metadata.get("input_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "input_tokens", None),
+                                "output_tokens": usage_metadata.get("output_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "output_tokens", None),
+                                "model_used": response_metadata.get("model_name") if isinstance(response_metadata, dict) else getattr(response_metadata, "model_name", None),
+                                "finish_reason": response_metadata.get("finish_reason") if isinstance(response_metadata, dict) else getattr(response_metadata, "finish_reason", None),
+                            },
+                        )
+
             performance_monitor.log_debug(
                 "Streaming workflow execution completed",
                 data={"content_length": len(content_buffer)},
             )
 
-            # Send completion chunk
+            # Send done marker
             yield StreamingChatChunk(
                 type="done",
                 content="",
-                metadata={"streaming_complete": True},
+                metadata={},
             )
 
             # Update execution with success

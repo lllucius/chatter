@@ -15,7 +15,9 @@ from langchain_core.messages import BaseMessage, HumanMessage
 
 from chatter.core.enhanced_memory_manager import EnhancedMemoryManager
 from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
+from chatter.core.events import EventCategory, EventPriority, UnifiedEvent
 from chatter.core.langgraph import workflow_manager
+from chatter.core.monitoring import get_monitoring_service
 from chatter.core.workflow_graph_builder import (
     create_simple_workflow_definition,
     create_workflow_definition_from_model,
@@ -35,6 +37,27 @@ from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+# Global event emitter (will be initialized on first use)
+_event_emitter = None
+
+
+async def _emit_event(event: UnifiedEvent) -> None:
+    """Emit an event to the unified event system."""
+    global _event_emitter
+    if _event_emitter is None:
+        try:
+            from chatter.core.events import get_event_emitter
+            _event_emitter = await get_event_emitter()
+        except Exception as e:
+            logger.warning(f"Could not initialize event emitter: {e}")
+            return
+    
+    try:
+        await _event_emitter.emit(event)
+    except Exception as e:
+        logger.warning(f"Could not emit event: {e}")
 
 
 def _log_workflow_debug_info(
@@ -298,6 +321,39 @@ class WorkflowExecutionService:
             },
         )
 
+        # Start workflow tracking with monitoring service
+        monitoring = await get_monitoring_service()
+        correlation_id = generate_ulid()
+        workflow_id = monitoring.start_workflow_tracking(
+            user_id=user_id,
+            conversation_id=conversation.id,
+            provider_name=chat_request.provider or "",
+            model_name=chat_request.model or "",
+            workflow_config={
+                "template_id": universal_template.id,
+                "enable_tools": chat_request.enable_tools,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_memory": chat_request.enable_memory,
+            },
+            correlation_id=correlation_id,
+        )
+
+        # Emit workflow started event
+        await _emit_event(UnifiedEvent(
+            category=EventCategory.WORKFLOW,
+            event_type="workflow_started",
+            user_id=user_id,
+            session_id=conversation.id,
+            correlation_id=correlation_id,
+            data={
+                "workflow_id": workflow_id,
+                "execution_id": execution.id,
+                "template_id": universal_template.id,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+            },
+        ))
+
         try:
             # Update execution status to running
             execution = await workflow_mgmt.update_workflow_execution(
@@ -467,6 +523,33 @@ class WorkflowExecutionService:
                 execution_log=performance_monitor.debug_logs,
             )
 
+            # Update monitoring metrics
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                tool_calls=result.get("tool_call_count", 0),
+            )
+
+            # Finish workflow tracking
+            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow completed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_completed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "tokens_used": result.get("tokens_used", 0),
+                    "cost": result.get("cost", 0.0),
+                    "execution_time_ms": execution_time_ms,
+                    "success": True,
+                },
+            ))
+
             logger.info(
                 f"Universal template execution {execution.id} completed successfully"
             )
@@ -474,6 +557,29 @@ class WorkflowExecutionService:
             return message, usage_info
 
         except Exception as e:
+            # Update monitoring metrics with error
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                error=str(e),
+            )
+            monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow failed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_failed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                priority=EventPriority.HIGH,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            ))
+
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
             performance_monitor.log_debug(
@@ -562,6 +668,39 @@ class WorkflowExecutionService:
                 "conversation_id": conversation.id,
             },
         )
+
+        # Start workflow tracking with monitoring service
+        monitoring = await get_monitoring_service()
+        correlation_id = generate_ulid()
+        workflow_id = monitoring.start_workflow_tracking(
+            user_id=user_id,
+            conversation_id=conversation.id,
+            provider_name=chat_request.provider or "",
+            model_name=chat_request.model or "",
+            workflow_config={
+                "dynamic": True,
+                "enable_tools": chat_request.enable_tools,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_memory": chat_request.enable_memory,
+            },
+            correlation_id=correlation_id,
+        )
+
+        # Emit workflow started event
+        await _emit_event(UnifiedEvent(
+            category=EventCategory.WORKFLOW,
+            event_type="workflow_started",
+            user_id=user_id,
+            session_id=conversation.id,
+            correlation_id=correlation_id,
+            data={
+                "workflow_id": workflow_id,
+                "execution_id": execution.id,
+                "dynamic": True,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+            },
+        ))
 
         try:
             # Update execution status to running
@@ -727,6 +866,33 @@ class WorkflowExecutionService:
                 execution_log=performance_monitor.debug_logs,
             )
 
+            # Update monitoring metrics
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                tool_calls=result.get("tool_call_count", 0),
+            )
+
+            # Finish workflow tracking
+            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow completed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_completed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "tokens_used": result.get("tokens_used", 0),
+                    "cost": result.get("cost", 0.0),
+                    "execution_time_ms": execution_time_ms,
+                    "success": True,
+                },
+            ))
+
             logger.info(
                 f"Dynamic workflow execution {execution.id} completed successfully"
             )
@@ -734,6 +900,29 @@ class WorkflowExecutionService:
             return message, usage_info
 
         except Exception as e:
+            # Update monitoring metrics with error
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                error=str(e),
+            )
+            monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow failed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_failed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                priority=EventPriority.HIGH,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            ))
+
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
             performance_monitor.log_debug(

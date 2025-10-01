@@ -313,8 +313,10 @@ class LangGraphWorkflowManager:
                 async for event in workflow.astream_events(
                     context, config=config, version="v2"
                 ):
+                    # Yield streaming events or all events if tracing is enabled
                     if enable_node_tracing or event.get("name") in [
-                        "on_chat_model_stream"
+                        "on_chat_model_stream",
+                        "on_llm_stream",
                     ]:
                         yield event
             else:

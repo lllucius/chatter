@@ -545,6 +545,72 @@ class ConversationService:
             )
             raise
 
+    async def update_conversation_aggregates(
+        self,
+        conversation_id: str,
+        user_id: str,
+        tokens_delta: int = 0,
+        cost_delta: float = 0.0,
+        message_count_delta: int = 0,
+    ) -> Conversation:
+        """Update conversation aggregate statistics.
+
+        Args:
+            conversation_id: Conversation ID
+            user_id: User ID for access control
+            tokens_delta: Change in total tokens (can be negative)
+            cost_delta: Change in total cost (can be negative)
+            message_count_delta: Change in message count (typically 1 or 0)
+
+        Returns:
+            Updated conversation
+
+        Raises:
+            NotFoundError: If conversation not found
+        """
+        try:
+            # Get conversation with access control
+            conversation = await self.get_conversation(
+                conversation_id, user_id, include_messages=False
+            )
+
+            # Update aggregates
+            conversation.total_tokens = max(
+                0, (conversation.total_tokens or 0) + tokens_delta
+            )
+            conversation.total_cost = max(
+                0.0, (conversation.total_cost or 0.0) + cost_delta
+            )
+            conversation.message_count = max(
+                0, (conversation.message_count or 0) + message_count_delta
+            )
+
+            # Commit changes
+            await self.session.commit()
+            await self.session.refresh(conversation)
+
+            logger.debug(
+                "Updated conversation aggregates",
+                conversation_id=conversation_id,
+                total_tokens=conversation.total_tokens,
+                total_cost=conversation.total_cost,
+                message_count=conversation.message_count,
+            )
+
+            return conversation
+
+        except NotFoundError:
+            raise
+        except Exception as e:
+            logger.error(
+                "Failed to update conversation aggregates",
+                conversation_id=conversation_id,
+                user_id=user_id,
+                error=str(e),
+            )
+            await self.session.rollback()
+            raise
+
     async def archive_old_conversations(
         self, user_id: str, days_old: int = 30, limit: int = 100
     ) -> int:

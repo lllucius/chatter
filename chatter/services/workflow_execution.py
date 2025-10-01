@@ -496,6 +496,17 @@ class WorkflowExecutionService:
                 response_time_ms=execution_time_ms,
             )
 
+            # Update conversation aggregates
+            from chatter.services.conversation import ConversationService
+            conversation_service = ConversationService(self.session)
+            await conversation_service.update_conversation_aggregates(
+                conversation_id=conversation.id,
+                user_id=user_id,
+                tokens_delta=result.get("tokens_used", 0),
+                cost_delta=result.get("cost", 0.0),
+                message_count_delta=1,  # One new assistant message
+            )
+
             # Calculate usage info
             usage_info = {
                 "execution_time_ms": execution_time_ms,
@@ -838,6 +849,17 @@ class WorkflowExecutionService:
                 cost=result.get("cost"),
                 provider_used=chat_request.provider,
                 response_time_ms=execution_time_ms,
+            )
+
+            # Update conversation aggregates
+            from chatter.services.conversation import ConversationService
+            conversation_service = ConversationService(self.session)
+            await conversation_service.update_conversation_aggregates(
+                conversation_id=conversation.id,
+                user_id=user_id,
+                tokens_delta=result.get("tokens_used", 0),
+                cost_delta=result.get("cost", 0.0),
+                message_count_delta=1,  # One new assistant message
             )
 
             # Calculate usage info

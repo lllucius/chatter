@@ -1,6 +1,7 @@
 """Authentication schemas for request/response models."""
 
 from datetime import datetime
+from typing import Self
 
 from pydantic import (
     BaseModel,
@@ -131,7 +132,7 @@ class UserLogin(BaseModel):
     remember_me: bool = Field(False, description="Remember login")
 
     @model_validator(mode="after")
-    def validate_email_or_username(self):
+    def validate_email_or_username(self) -> Self:
         """Ensure either email or username is provided."""
         if not self.email and not self.username:
             raise ValueError(
@@ -234,7 +235,7 @@ class UserPreferences(BaseModel):
 
     @field_validator("language")
     @classmethod
-    def validate_language(cls, v):
+    def validate_language(cls, v: str) -> str:
         """Validate language code."""
         valid_languages = [
             "en",
@@ -256,39 +257,17 @@ class UserPreferences(BaseModel):
 
     @field_validator("timezone")
     @classmethod
-    def validate_timezone(cls, v):
+    def validate_timezone(cls, v: str) -> str:
         """Validate timezone."""
         # Basic timezone validation
         if not v or len(v) < 3:
             raise ValueError("Invalid timezone")
         return v
 
-    # Remove duplicate UserRegistration class and clean up
 
-    theme: str = Field(
-        default="light", description="UI theme preference"
-    )
-    language: str = Field(
-        default="en", description="Language preference"
-    )
-    timezone: str = Field(
-        default="UTC", description="Timezone preference"
-    )
-    email_notifications: bool = Field(
-        default=True, description="Email notifications enabled"
-    )
-    push_notifications: bool = Field(
-        default=True, description="Push notifications enabled"
-    )
-    default_model: str | None = Field(
-        None, description="Default AI model preference"
-    )
-    created_at: datetime = Field(..., description="Creation date")
+class UserPreferencesUpdate(BaseModel):
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    from_attributes = True
 
 
 class TokenRefreshResponse(BaseModel):

@@ -219,7 +219,7 @@ const DocumentsPage: React.FC = () => {
         } else {
           contentPreview = `Document is processed into ${document.chunk_count || 0} chunks for vector search, but no chunks are available for preview.`;
         }
-      } catch (_error) {
+      } catch {
         // Fallback to status-based messaging if chunks API is not available
         const chunkCount = document.chunk_count || 0;
         if (chunkCount > 0) {
@@ -338,7 +338,12 @@ const DocumentsPage: React.FC = () => {
         );
 
       // Create a blob from the response and trigger download
-      const blob = new Blob([response], { type: 'application/octet-stream' });
+      const blob =
+        response instanceof Blob
+          ? response
+          : new Blob([JSON.stringify(response)], {
+              type: 'application/octet-stream',
+            });
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;

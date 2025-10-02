@@ -226,14 +226,11 @@ const WorkflowEditor = React.forwardRef<
     // Load workflow defaults on mount
     useEffect(() => {
       const loadDefaults = async () => {
-        setLoadingDefaults(true);
         try {
           const defaults = await workflowDefaultsService.getWorkflowDefaults();
           setWorkflowDefaults(defaults);
         } catch (error) {
           console.error('Failed to load workflow defaults:', error);
-        } finally {
-          setLoadingDefaults(false);
         }
       };
 
@@ -242,7 +239,7 @@ const WorkflowEditor = React.forwardRef<
 
     // Save current state to history with optional debouncing for property updates
     const saveToHistory = useCallback(
-      (immediate = false) => {
+      (_immediate = false) => {
         const currentState = { nodes, edges };
 
         // Don't save duplicate states

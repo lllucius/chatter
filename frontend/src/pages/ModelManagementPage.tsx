@@ -16,6 +16,7 @@ import CrudDataTable, {
   CrudColumn,
   CrudAction,
   CrudDataTableRef,
+  CrudFormProps,
 } from '../components/CrudDataTable';
 import ProviderForm from '../components/ProviderForm';
 import ModelForm from '../components/ModelForm';
@@ -270,9 +271,14 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'provider',
       label: 'Provider',
-      render: (value: { displayName?: string }): JSX.Element => (
-        <Typography variant="body2">{value?.displayName || '—'}</Typography>
-      ),
+      render: (value: unknown, _item: ModelDefWithProvider): JSX.Element => {
+        const provider = value as { displayName?: string } | undefined;
+        return (
+          <Typography variant="body2">
+            {provider?.displayName || '—'}
+          </Typography>
+        );
+      },
     },
     {
       id: 'model_type',
@@ -389,9 +395,9 @@ const ModelManagementPage: React.FC = () => {
   const getModelId = (item: ModelDefWithProvider) => item.id || '';
 
   // Enhanced ModelForm component that receives providers
-  const EnhancedModelForm: React.FC<{ providers: Provider[] }> = (
-    props
-  ): JSX.Element => <ModelForm {...props} providers={providers} />;
+  const EnhancedModelForm: React.FC<
+    CrudFormProps<ModelDefCreate, ModelDefUpdate>
+  > = (props): JSX.Element => <ModelForm {...props} providers={providers} />;
 
   return (
     <PageLayout title="Model Management" toolbar={toolbar}>

@@ -39,7 +39,7 @@ export interface WorkflowDefaults {
     };
     conditional: {
       condition: string;
-      branches: Record<string, any>;
+      branches: Record<string, unknown>;
     };
     variable: {
       operation: string;
@@ -58,7 +58,7 @@ export interface WorkflowDefaults {
       unit: string;
     };
     tool: {
-      tools: any[];
+      tools: unknown[];
       parallel: boolean;
     };
     start: {
@@ -69,7 +69,7 @@ export interface WorkflowDefaults {
 
 export interface NodeDefaultConfig {
   node_type: string;
-  config: Record<string, any>;
+  config: Record<string, unknown>;
 }
 
 class WorkflowDefaultsService {

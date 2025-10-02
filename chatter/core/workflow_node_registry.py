@@ -434,7 +434,9 @@ class NodeTypeRegistry:
         return node_type in cls.get_supported_node_types()
 
     @classmethod
-    def get_required_properties(cls, node_type: str) -> list[dict[str, Any]]:
+    def get_required_properties(
+        cls, node_type: str
+    ) -> list[dict[str, Any]]:
         """Get required properties for a node type.
 
         Args:

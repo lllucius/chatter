@@ -921,10 +921,8 @@ const DashboardPage: React.FC = () => {
                       </Typography>
                       <Typography variant="h5">
                         {safeLocaleString(
-                          ((toolServerData as any).active_servers as
-                            | number
-                            | undefined
-                            | null) ?? 0
+                          (toolServerData as { active_servers?: number | null })
+                            ?.active_servers ?? 0
                         )}
                       </Typography>
                     </Grid>

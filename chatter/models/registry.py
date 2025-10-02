@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 from enum import Enum
+from typing import Any
 
 from sqlalchemy import (
     JSON,
@@ -56,7 +57,7 @@ class ReductionStrategy(str, Enum):
 class Provider(Base):
     """AI provider registry."""
 
-    __tablename__ = "providers"  # type: ignore[assignment]
+    __tablename__ = "providers"
 
     __table_args__ = (
         CheckConstraint(
@@ -85,7 +86,9 @@ class Provider(Base):
         Boolean, default=True
     )
     base_url: Mapped[str | None] = mapped_column(String(500))
-    default_config: Mapped[dict] = mapped_column(JSON, default=dict)
+    default_config: Mapped[dict[str, Any]] = mapped_column(
+        JSON, default=dict
+    )
 
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -105,7 +108,7 @@ class Provider(Base):
 class ModelDef(Base):
     """AI model definition registry."""
 
-    __tablename__ = "model_defs"  # type: ignore[assignment]
+    __tablename__ = "model_defs"
 
     # Constraints
     __table_args__ = (
@@ -176,7 +179,9 @@ class ModelDef(Base):
     max_batch_size: Mapped[int | None] = mapped_column(Integer)
 
     # Configuration
-    default_config: Mapped[dict] = mapped_column(JSON, default=dict)
+    default_config: Mapped[dict[str, Any]] = mapped_column(
+        JSON, default=dict
+    )
 
     # Status
     is_active: Mapped[bool] = mapped_column(Boolean, default=True)
@@ -197,7 +202,7 @@ class ModelDef(Base):
 class EmbeddingSpace(Base):
     """Embedding space definition with dimensional reduction support."""
 
-    __tablename__ = "embedding_spaces"  # type: ignore[assignment]
+    __tablename__ = "embedding_spaces"
 
     __table_args__ = (
         CheckConstraint(
@@ -271,7 +276,7 @@ class EmbeddingSpace(Base):
     index_type: Mapped[str] = mapped_column(
         String(50), default="hnsw"
     )  # hnsw, ivfflat
-    index_config: Mapped[dict] = mapped_column(
+    index_config: Mapped[dict[str, Any]] = mapped_column(
         JSON, default=dict
     )  # index-specific parameters
 

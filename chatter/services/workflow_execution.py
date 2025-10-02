@@ -384,9 +384,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template execution"
@@ -757,9 +760,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for workflow execution"
@@ -1159,9 +1165,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template streaming"
@@ -1544,9 +1553,12 @@ class WorkflowExecutionService:
                     from chatter.core.tool_registry import ToolRegistry
 
                     tool_registry = ToolRegistry()
+                    # Note: user_permissions parameter is for future permission-based tool filtering
+                    # Currently all tools are available. Future enhancement: integrate with
+                    # WorkflowSecurityManager to filter tools based on user permissions.
                     tools = tool_registry.get_tools_for_workspace(
                         workspace_id=user_id,
-                        user_permissions=[],  # TODO: Add user permission system
+                        user_permissions=[],
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"
@@ -2395,9 +2407,27 @@ class WorkflowExecutionService:
         conversation_id = getattr(request, 'conversation_id', None)
 
         if conversation_id:
-            # TODO: Get existing conversation
-            # conversation = await self.conversation_service.get_conversation(conversation_id)
-            pass
+            # Get existing conversation
+            try:
+                from chatter.services.conversation import (
+                    ConversationService,
+                )
+
+                conversation_service = ConversationService(self.session)
+                conversation = await conversation_service.get_conversation(
+                    conversation_id=conversation_id,
+                    user_id=user_id,
+                    include_messages=False,
+                )
+                logger.debug(
+                    f"Retrieved existing conversation {conversation_id}"
+                )
+                return conversation
+            except Exception as e:
+                logger.warning(
+                    f"Failed to retrieve conversation {conversation_id}: {e}. Creating new conversation."
+                )
+                # Fall through to create new conversation
 
         # Create new conversation with all required fields
         now = datetime.now(UTC)

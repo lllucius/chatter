@@ -387,9 +387,10 @@ class WorkflowExecutionService:
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
-                    tools = tool_registry.get_tools_for_workspace(
+                    tools = await tool_registry.get_enabled_tools_for_workspace(
                         workspace_id=user_id,
                         user_permissions=[],
+                        session=self.session,
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template execution"
@@ -767,9 +768,10 @@ class WorkflowExecutionService:
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
-                    tools = tool_registry.get_tools_for_workspace(
+                    tools = await tool_registry.get_enabled_tools_for_workspace(
                         workspace_id=user_id,
                         user_permissions=[],
+                        session=self.session,
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for workflow execution"
@@ -1173,9 +1175,10 @@ class WorkflowExecutionService:
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
-                    tools = tool_registry.get_tools_for_workspace(
+                    tools = await tool_registry.get_enabled_tools_for_workspace(
                         workspace_id=user_id,
                         user_permissions=[],
+                        session=self.session,
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for universal template streaming"
@@ -1565,9 +1568,10 @@ class WorkflowExecutionService:
                     # Note: user_permissions parameter is for future permission-based tool filtering
                     # Currently all tools are available. Future enhancement: integrate with
                     # WorkflowSecurityManager to filter tools based on user permissions.
-                    tools = tool_registry.get_tools_for_workspace(
+                    tools = await tool_registry.get_enabled_tools_for_workspace(
                         workspace_id=user_id,
                         user_permissions=[],
+                        session=self.session,
                     )
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"

@@ -407,10 +407,12 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
                     logger.info(
-                        "Loaded retriever from vector store for universal template"
+                        "Loaded retriever from vector store for universal template",
+                        document_ids=chat_request.document_ids,
                     )
                 except Exception as e:
                     logger.warning(
@@ -778,9 +780,13 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
-                    logger.info("Loaded retriever from vector store")
+                    logger.info(
+                        "Loaded retriever from vector store",
+                        document_ids=chat_request.document_ids,
+                    )
                 except Exception as e:
                     logger.warning(
                         f"Could not load retriever from vector store: {e}"
@@ -1176,10 +1182,12 @@ class WorkflowExecutionService:
                     )
 
                     retriever = await get_vector_store_retriever(
-                        user_id=user_id
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
                     )
                     logger.info(
-                        "Loaded retriever from vector store for universal template streaming"
+                        "Loaded retriever from vector store for universal template streaming",
+                        document_ids=chat_request.document_ids,
                     )
                 except Exception as e:
                     logger.warning(
@@ -1530,6 +1538,48 @@ class WorkflowExecutionService:
                 max_tokens=chat_request.max_tokens,
             )
 
+            # Get tools and retriever if needed
+            tools = None
+            retriever = None
+
+            if chat_request.enable_tools:
+                try:
+                    from chatter.core.tool_registry import ToolRegistry
+
+                    tool_registry = ToolRegistry()
+                    tools = tool_registry.get_tools_for_workspace(
+                        workspace_id=user_id,
+                        user_permissions=[],  # TODO: Add user permission system
+                    )
+                    logger.info(
+                        f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Could not load tools from tool registry: {e}"
+                    )
+                    tools = []
+
+            if chat_request.enable_retrieval:
+                try:
+                    from chatter.core.vector_store import (
+                        get_vector_store_retriever,
+                    )
+
+                    retriever = await get_vector_store_retriever(
+                        user_id=user_id,
+                        document_ids=chat_request.document_ids,
+                    )
+                    logger.info(
+                        "Loaded retriever from vector store for streaming",
+                        document_ids=chat_request.document_ids,
+                    )
+                except Exception as e:
+                    logger.warning(
+                        f"Could not load retriever from vector store: {e}"
+                    )
+                    retriever = None
+
             # Create workflow
             workflow = await workflow_manager.create_workflow(
                 llm=llm,
@@ -1538,6 +1588,8 @@ class WorkflowExecutionService:
                 enable_memory=chat_request.enable_memory,
                 enable_streaming=True,
                 system_message=chat_request.system_prompt_override,
+                retriever=retriever,
+                tools=tools,
                 user_id=user_id,
                 conversation_id=conversation.id,
             )
@@ -2387,6 +2439,20 @@ class WorkflowExecutionService:
 
     def _convert_to_chat_request(self, request: Any) -> ChatRequest:
         """Convert workflow request to ChatRequest for compatibility."""
+        # Extract document_ids from request or workflow_config.retrieval_config
+        document_ids = getattr(request, 'document_ids', None)
+        if not document_ids:
+            # Check if document_ids is in workflow_config.retrieval_config
+            workflow_config = getattr(request, 'workflow_config', None)
+            if workflow_config:
+                retrieval_config = getattr(
+                    workflow_config, 'retrieval_config', None
+                )
+                if retrieval_config:
+                    document_ids = getattr(
+                        retrieval_config, 'document_ids', None
+                    )
+
         return ChatRequest(
             message=request.message,
             conversation_id=getattr(request, 'conversation_id', None),
@@ -2406,6 +2472,7 @@ class WorkflowExecutionService:
             ),
             enable_tools=getattr(request, 'enable_tools', False),
             enable_memory=getattr(request, 'enable_memory', True),
+            document_ids=document_ids,
         )
 
 

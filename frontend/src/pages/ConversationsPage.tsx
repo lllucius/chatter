@@ -19,7 +19,7 @@ import {
   Person as PersonIcon,
   SmartToy as BotIcon,
 } from '@mui/icons-material';
-import { format } from 'date-fns';
+import { format, isValid, parseISO } from 'date-fns';
 import { getSDK } from '../services/auth-service';
 import { ConversationResponse, MessageResponse } from 'chatter-sdk';
 import CustomScrollbar from '../components/CustomScrollbar';
@@ -34,6 +34,19 @@ import { createDateRenderer } from '../components/CrudRenderers';
 
 const ConversationsPage: React.FC = () => {
   const crudTableRef = useRef<CrudDataTableRef>(null);
+
+  // Helper function to safely format timestamps
+  const formatTimestamp = (timestamp: string, formatString: string): string => {
+    try {
+      const date = parseISO(timestamp);
+      if (!isValid(date)) {
+        return '--:--';
+      }
+      return format(date, formatString);
+    } catch {
+      return '--:--';
+    }
+  };
 
   // View conversation dialog state
   const [selectedConversation, setSelectedConversation] =
@@ -58,8 +71,7 @@ const ConversationsPage: React.FC = () => {
             conversation.id,
             { includeMessages: true }
           );
-        const messages = response.messages || [];
-        setConversationMessages(messages);
+        setConversationMessages(response.messages);
       } catch {
         setConversationMessages([]);
       } finally {
@@ -303,7 +315,7 @@ const ConversationsPage: React.FC = () => {
                             opacity: 0.7,
                           }}
                         >
-                          {format(new Date(message.created_at), 'HH:mm:ss')}
+                          {formatTimestamp(message.created_at, 'HH:mm:ss')}
                         </Typography>
                         {message.total_tokens && (
                           <Chip

@@ -400,7 +400,7 @@ class WorkflowExecutionService:
                     )
                     tools = []
 
-            if chat_request.enable_retrieval:
+            if chat_request.enable_retrieval and chat_request.document_ids:
                 try:
                     from chatter.core.vector_store import (
                         get_vector_store_retriever,
@@ -419,6 +419,10 @@ class WorkflowExecutionService:
                         f"Could not load retriever from vector store: {e}"
                     )
                     retriever = None
+            elif chat_request.enable_retrieval and not chat_request.document_ids:
+                logger.info(
+                    "Document retrieval is enabled but no documents selected, skipping retrieval"
+                )
 
             # Create workflow from definition
             # Convert database WorkflowDefinition to graph builder WorkflowDefinition
@@ -776,7 +780,7 @@ class WorkflowExecutionService:
                     )
                     tools = []
 
-            if chat_request.enable_retrieval:
+            if chat_request.enable_retrieval and chat_request.document_ids:
                 try:
                     from chatter.core.vector_store import (
                         get_vector_store_retriever,
@@ -795,6 +799,10 @@ class WorkflowExecutionService:
                         f"Could not load retriever from vector store: {e}"
                     )
                     retriever = None
+            elif chat_request.enable_retrieval and not chat_request.document_ids:
+                logger.info(
+                    "Document retrieval is enabled but no documents selected, skipping retrieval"
+                )
 
             # Create workflow using modern system
             workflow = await workflow_manager.create_workflow(
@@ -1178,7 +1186,7 @@ class WorkflowExecutionService:
                     )
                     tools = []
 
-            if chat_request.enable_retrieval:
+            if chat_request.enable_retrieval and chat_request.document_ids:
                 try:
                     from chatter.core.vector_store import (
                         get_vector_store_retriever,
@@ -1197,6 +1205,10 @@ class WorkflowExecutionService:
                         f"Could not load retriever from vector store: {e}"
                     )
                     retriever = None
+            elif chat_request.enable_retrieval and not chat_request.document_ids:
+                logger.info(
+                    "Document retrieval is enabled but no documents selected, skipping retrieval"
+                )
 
             # Create workflow from definition
             # Convert database WorkflowDefinition to graph builder WorkflowDefinition
@@ -1566,7 +1578,7 @@ class WorkflowExecutionService:
                     )
                     tools = []
 
-            if chat_request.enable_retrieval:
+            if chat_request.enable_retrieval and chat_request.document_ids:
                 try:
                     from chatter.core.vector_store import (
                         get_vector_store_retriever,
@@ -1585,6 +1597,10 @@ class WorkflowExecutionService:
                         f"Could not load retriever from vector store: {e}"
                     )
                     retriever = None
+            elif chat_request.enable_retrieval and not chat_request.document_ids:
+                logger.info(
+                    "Document retrieval is enabled but no documents selected, skipping retrieval"
+                )
 
             # Create workflow
             workflow = await workflow_manager.create_workflow(

@@ -541,6 +541,13 @@ async def get_vector_store_retriever(
     Returns:
         Retriever instance that can be used with LangChain workflows
     """
+    logger.info(
+        "Creating vector store retriever",
+        user_id=user_id,
+        collection_name=collection_name,
+        document_ids=document_ids,
+    )
+    
     try:
         from chatter.services.embeddings import get_embedding_service
 
@@ -564,14 +571,24 @@ async def get_vector_store_retriever(
         if document_ids:
             filter_dict["document_id"] = {"$in": document_ids}
 
+        logger.info(
+            "Creating retriever with filters",
+            filter_dict=filter_dict,
+        )
+
         # Return retriever interface
         if hasattr(store._store, 'as_retriever'):
-            return store._store.as_retriever(
+            retriever = store._store.as_retriever(
                 search_kwargs={
                     "k": 5,
                     "filter": filter_dict if filter_dict else None,
                 }
             )
+            logger.info(
+                "Vector store retriever created successfully",
+                retriever_type=type(retriever).__name__,
+            )
+            return retriever
         else:
             # Fallback implementation
             logger.warning(

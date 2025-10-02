@@ -302,6 +302,13 @@ class WorkflowGraphBuilder:
         """Create all nodes from the definition."""
         nodes = {}
 
+        logger.info(
+            "Creating workflow nodes",
+            node_count=len(definition.nodes),
+            has_retriever=retriever is not None,
+            has_tools=tools is not None and len(tools) > 0,
+        )
+
         for node_def in definition.nodes:
             node_id = node_def["id"]
             node_type = node_def["type"]
@@ -331,6 +338,9 @@ class WorkflowGraphBuilder:
             if hasattr(node, "set_llm") and llm:
                 node.set_llm(llm)
             if hasattr(node, "set_retriever") and retriever:
+                logger.info(
+                    f"Setting retriever on node {node_id} (type: {node_type})"
+                )
                 node.set_retriever(retriever)
             if hasattr(node, "set_tools") and tools:
                 node.set_tools(tools)
@@ -421,9 +431,15 @@ class WorkflowGraphBuilder:
                     self.system_message
                     or "You are a helpful assistant."
                 )
-                if context.get("retrieval_context"):
+                retrieval_context = context.get("retrieval_context")
+                logger.info(
+                    f"LLM Node {self.node_id} applying context",
+                    has_retrieval_context=bool(retrieval_context),
+                    retrieval_context_length=len(retrieval_context) if retrieval_context else 0,
+                )
+                if retrieval_context:
                     system_content += (
-                        f"\n\nContext:\n{context['retrieval_context']}"
+                        f"\n\nContext:\n{retrieval_context}"
                     )
 
                 prefixed.append(SystemMessage(content=system_content))

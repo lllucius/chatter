@@ -170,12 +170,24 @@ class RetrievalNode(WorkflowNode):
     def set_retriever(self, retriever: Any) -> None:
         """Set the retriever for document search."""
         self.retriever = retriever
+        logger.info(
+            f"Retriever set on RetrievalNode {self.node_id}",
+            has_retriever=retriever is not None,
+        )
 
     async def execute(
         self, context: WorkflowNodeContext
     ) -> dict[str, Any]:
         """Retrieve relevant documents for the current query."""
+        logger.info(
+            f"RetrievalNode {self.node_id} executing",
+            has_retriever=self.retriever is not None,
+        )
+        
         if not self.retriever:
+            logger.warning(
+                f"RetrievalNode {self.node_id} has no retriever, returning empty context"
+            )
             return {"retrieval_context": ""}
 
         messages = context["messages"]
@@ -188,7 +200,15 @@ class RetrievalNode(WorkflowNode):
                 break
 
         if not last_human_message:
+            logger.warning(
+                f"RetrievalNode {self.node_id} found no human message"
+            )
             return {"retrieval_context": ""}
+
+        logger.info(
+            f"RetrievalNode {self.node_id} retrieving for query",
+            query=last_human_message.content[:100],
+        )
 
         try:
             docs = await self.retriever.ainvoke(
@@ -196,9 +216,20 @@ class RetrievalNode(WorkflowNode):
             )
             limited_docs = docs[: self.max_documents] if docs else []
 
+            logger.info(
+                f"RetrievalNode {self.node_id} retrieved documents",
+                doc_count=len(limited_docs),
+                max_documents=self.max_documents,
+            )
+
             context_text = "\n\n".join(
                 getattr(doc, "page_content", str(doc))
                 for doc in limited_docs
+            )
+
+            logger.info(
+                f"RetrievalNode {self.node_id} generated context",
+                context_length=len(context_text),
             )
 
             return {
@@ -210,7 +241,9 @@ class RetrievalNode(WorkflowNode):
                 },
             }
         except Exception as e:
-            logger.error(f"Retrieval failed: {e}")
+            logger.error(
+                f"Retrieval failed in RetrievalNode {self.node_id}: {e}"
+            )
             return {"retrieval_context": ""}
 
 

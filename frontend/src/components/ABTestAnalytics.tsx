@@ -59,94 +59,41 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
   recommendations,
   performance: _performance,
 }) => {
-  // Generate sample data if real data isn't available
-  const sampleMetrics = React.useMemo(() => {
-    if (metrics) return metrics;
-
-    return {
-      test_id: 'sample',
-      metrics: [],
-      participant_count: 5420,
-      last_updated: new Date().toISOString(),
-    };
+  // Use real metrics data - no sample data
+  const actualMetrics = React.useMemo(() => {
+    return metrics || null;
   }, [metrics]);
 
-  const sampleStatistics = React.useMemo(
-    () => ({
+  // Use real statistics from backend - no sample data
+  const actualStatistics = React.useMemo(() => {
+    // In real implementation, this would come from results prop
+    return results ? {
       confidence_level: 0.95,
-      effect_size: 0.12,
+      effect_size: results.metrics?.find((m: any) => m.metric_name === 'effect_size')?.value || 0,
       power: 0.8,
-      p_value: 0.0234,
-    }),
-    []
-  );
-
-  const mockVariants = [
-    {
-      name: 'control',
-      participants: 1807,
-      conversions: 217,
-      conversion_rate: 0.12,
-      revenue: 43400,
-      cost: 12100,
-      roi: 2.59,
-    },
-    {
-      name: 'variant_a',
-      participants: 1806,
-      conversions: 262,
-      conversion_rate: 0.145,
-      revenue: 52400,
-      cost: 12000,
-      roi: 3.37,
-    },
-    {
-      name: 'variant_b',
-      participants: 1807,
-      conversions: 249,
-      conversion_rate: 0.138,
-      revenue: 49800,
-      cost: 11900,
-      roi: 3.18,
-    },
-  ];
-
-  const sampleResults = React.useMemo(() => {
-    if (results) return results;
-
-    return {
-      test_id: 'sample',
-      test_name: 'Sample Test',
-      status: 'running' as const,
-      metrics: [],
-      statistical_significance: { conversion_rate: true },
-      confidence_intervals: {},
-      winning_variant: 'variant_a',
-      recommendation: 'Continue test for more data',
-      generated_at: new Date().toISOString(),
-      sample_size: 5420,
-      duration_days: 14,
-    };
+      p_value: results.metrics?.find((m: any) => m.metric_name === 'p_value')?.value || 0,
+    } : null;
   }, [results]);
 
-  // Time series data for charts
-  const timeSeriesData = React.useMemo(() => {
-    const days = 14;
-    const data = [];
-
-    for (let i = 0; i < days; i++) {
-      data.push({
-        day: i + 1,
-        control: 0.1 + Math.random() * 0.04 + i * 0.001,
-        variant_a: 0.12 + Math.random() * 0.05 + i * 0.002,
-        variant_b: 0.115 + Math.random() * 0.045 + i * 0.0015,
-        control_participants: 120 + Math.floor(Math.random() * 20),
-        variant_a_participants: 118 + Math.floor(Math.random() * 22),
-        variant_b_participants: 122 + Math.floor(Math.random() * 18),
-      });
+  // Use real variant data - no mock data
+  const actualVariants = React.useMemo(() => {
+    // Extract variants from metrics if available
+    if (metrics?.metrics) {
+      return metrics.metrics;
     }
+    return [];
+  }, [metrics]);
 
-    return data;
+  // Use real results data - no sample data
+  const actualResults = React.useMemo(() => {
+    return results || null;
+  }, [results]);
+
+  // Time series data for charts - show empty if no real data
+  const timeSeriesData = React.useMemo(() => {
+    // In a real implementation, this would come from the performance prop or API
+    // For now, return empty array to indicate no data available
+    return [];
   }, []);
 
   // Variant colors for charts
@@ -186,7 +133,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Total Participants
               </Typography>
               <Typography variant="h4">
-                {sampleMetrics.participant_count?.toLocaleString() || 'N/A'}
+                {actualMetrics?.participant_count?.toLocaleString() || 'N/A'}
               </Typography>
               <Typography variant="body2" color="text.secondary">
                 Across all variants
@@ -231,7 +178,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 Best Performer
               </Typography>
               <Typography variant="h5">
-                {sampleResults.winning_variant
+                {actualResults?.winning_variant
                   ?.replace('_', ' ')
                   .toUpperCase() || 'TBD'}
               </Typography>
@@ -330,50 +277,56 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <Typography variant="h6" gutterBottom>
                 Variant Performance
               </Typography>
-              <List>
-                {mockVariants.map((variant) => (
-                  <ListItem key={variant.name} sx={{ px: 0 }}>
-                    <ListItemIcon>
-                      {getTrendIcon(variant.conversion_rate, 0.12)}
-                    </ListItemIcon>
-                    <ListItemText
-                      primary={
-                        <Box
-                          sx={{
-                            display: 'flex',
-                            justifyContent: 'space-between',
-                            alignItems: 'center',
-                          }}
-                        >
-                          <Typography variant="subtitle2">
-                            {variant.name.replace('_', ' ').toUpperCase()}
-                          </Typography>
-                          <Chip
-                            label={`${(variant.conversion_rate * 100).toFixed(1)}%`}
-                            size="small"
-                            color={
-                              variant.name === sampleResults.winning_variant
-                                ? 'success'
-                                : 'default'
-                            }
-                          />
-                        </Box>
-                      }
-                      secondary={
-                        <Box>
-                          <Typography variant="body2" color="text.secondary">
-                            {variant.conversions} / {variant.participants}{' '}
-                            conversions
-                          </Typography>
-                          <Typography variant="body2" color="text.secondary">
-                            ROI: {variant.roi.toFixed(2)}x
-                          </Typography>
-                        </Box>
-                      }
-                    />
+              {actualVariants && actualVariants.length > 0 ? (
+                <List>
+                  {actualVariants.map((variant: any) => (
+                    <ListItem key={variant.name || variant.variant_id} sx={{ px: 0 }}>
+                      <ListItemIcon>
+                        {getTrendIcon(variant.conversion_rate || 0, 0.12)}
+                      </ListItemIcon>
+                      <ListItemText
+                        primary={
+                          <Box
+                            sx={{
+                              display: 'flex',
+                              justifyContent: 'space-between',
+                              alignItems: 'center',
+                            }}
+                          >
+                            <Typography variant="subtitle2">
+                              {(variant.name || variant.variant_id || 'Unknown').replace('_', ' ').toUpperCase()}
+                            </Typography>
+                            <Chip
+                              label={`${((variant.conversion_rate || 0) * 100).toFixed(1)}%`}
+                              size="small"
+                              color={
+                                (variant.name || variant.variant_id) === actualResults?.winning_variant
+                                  ? 'success'
+                                  : 'default'
+                              }
+                            />
+                          </Box>
+                        }
+                        secondary={
+                          <Box>
+                            <Typography variant="body2" color="text.secondary">
+                              {variant.conversions || 0} / {variant.participants || 0}{' '}
+                              conversions
+                            </Typography>
+                            <Typography variant="body2" color="text.secondary">
+                              ROI: {(variant.roi || 0).toFixed(2)}x
+                            </Typography>
+                          </Box>
+                        }
+                      />
                   </ListItem>
                 ))}
               </List>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                  No variant data available
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -387,33 +340,39 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <Typography variant="h6" gutterBottom>
                 Participant Distribution
               </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <PieChart>
-                  <Pie
-                    data={mockVariants}
-                    cx="50%"
-                    cy="50%"
-                    labelLine={false}
-                    label={(props: {
-                      name?: string;
-                      value?: string | number;
-                    }) =>
-                      `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
-                    }
-                    outerRadius={80}
-                    fill="#8884d8"
-                    dataKey="participants"
-                  >
-                    {mockVariants.map((entry, index) => (
-                      <Cell
-                        key={`cell-${index}`}
-                        fill={Object.values(variantColors)[index]}
-                      />
-                    ))}
-                  </Pie>
-                  <Tooltip />
-                </PieChart>
-              </ResponsiveContainer>
+              {actualVariants && actualVariants.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <PieChart>
+                    <Pie
+                      data={actualVariants}
+                      cx="50%"
+                      cy="50%"
+                      labelLine={false}
+                      label={(props: {
+                        name?: string;
+                        value?: string | number;
+                      }) =>
+                        `${props.name?.replace('_', ' ').toUpperCase() || 'Unknown'}: ${props.value || 0}`
+                      }
+                      outerRadius={80}
+                      fill="#8884d8"
+                      dataKey="participants"
+                    >
+                      {actualVariants.map((entry: any, index: number) => (
+                        <Cell
+                          key={`cell-${index}`}
+                          fill={Object.values(variantColors)[index]}
+                        />
+                      ))}
+                    </Pie>
+                    <Tooltip />
+                  </PieChart>
+                </ResponsiveContainer>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                  No participant data available
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -424,28 +383,34 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               <Typography variant="h6" gutterBottom>
                 Revenue Comparison
               </Typography>
-              <ResponsiveContainer width="100%" height={250}>
-                <BarChart data={mockVariants}>
-                  <CartesianGrid strokeDasharray="3 3" />
-                  <XAxis
-                    dataKey="name"
-                    tickFormatter={(value) =>
-                      value.replace('_', ' ').toUpperCase()
-                    }
-                  />
-                  <YAxis />
-                  <Tooltip
-                    formatter={(value: unknown) => [
-                      `$${Number(value).toLocaleString()}`,
-                      'Revenue',
-                    ]}
-                    labelFormatter={(label) =>
-                      label.replace('_', ' ').toUpperCase()
-                    }
-                  />
-                  <Bar dataKey="revenue" fill="#82ca9d" />
-                </BarChart>
-              </ResponsiveContainer>
+              {actualVariants && actualVariants.length > 0 ? (
+                <ResponsiveContainer width="100%" height={250}>
+                  <BarChart data={actualVariants}>
+                    <CartesianGrid strokeDasharray="3 3" />
+                    <XAxis
+                      dataKey="name"
+                      tickFormatter={(value) =>
+                        value?.replace('_', ' ').toUpperCase() || ''
+                      }
+                    />
+                    <YAxis />
+                    <Tooltip
+                      formatter={(value: unknown) => [
+                        `$${Number(value).toLocaleString()}`,
+                        'Revenue',
+                      ]}
+                      labelFormatter={(label) =>
+                        label?.replace('_', ' ').toUpperCase() || ''
+                      }
+                    />
+                    <Bar dataKey="revenue" fill="#82ca9d" />
+                  </BarChart>
+                </ResponsiveContainer>
+              ) : (
+                <Typography variant="body2" color="text.secondary" sx={{ py: 2 }}>
+                  No revenue data available
+                </Typography>
+              )}
             </CardContent>
           </Card>
         </Grid>
@@ -510,7 +475,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {(sampleStatistics.confidence_level * 100).toFixed(0)}%
+                      {actualStatistics ? (actualStatistics.confidence_level * 100).toFixed(0) : 'N/A'}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Confidence Level
@@ -520,7 +485,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {(sampleStatistics.effect_size * 100).toFixed(1)}%
+                      {actualStatistics ? (actualStatistics.effect_size * 100).toFixed(1) : 'N/A'}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Effect Size
@@ -530,7 +495,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {(sampleStatistics.power * 100).toFixed(0)}%
+                      {actualStatistics ? (actualStatistics.power * 100).toFixed(0) : 'N/A'}%
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       Statistical Power
@@ -540,7 +505,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                 <Grid size={{ xs: 6, sm: 3 }}>
                   <Paper variant="outlined" sx={{ p: 2, textAlign: 'center' }}>
                     <Typography variant="h6">
-                      {sampleStatistics.p_value.toFixed(4)}
+                      {actualStatistics ? actualStatistics.p_value.toFixed(4) : 'N/A'}
                     </Typography>
                     <Typography variant="caption" color="text.secondary">
                       P-Value

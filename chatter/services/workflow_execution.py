@@ -1010,7 +1010,7 @@ class WorkflowExecutionService:
     async def execute_chat_workflow_streaming(
         self,
         user_id: str,
-        request: Any,  # ChatWorkflowRequest
+        request: ChatRequest,
     ) -> AsyncGenerator[StreamingChatChunk, None]:
         """Execute a chat workflow with streaming using the universal template system."""
         try:
@@ -1019,16 +1019,13 @@ class WorkflowExecutionService:
                 user_id, request
             )
 
-            # Convert to ChatRequest for compatibility
-            chat_request = self._convert_to_chat_request(request)
-
             # Try universal template first, fallback to dynamic creation
             try:
                 async for (
                     chunk
                 ) in self._execute_streaming_with_universal_template(
                     conversation=conversation,
-                    chat_request=chat_request,
+                    chat_request=request,
                     user_id=user_id,
                     request=request,
                 ):
@@ -1041,7 +1038,7 @@ class WorkflowExecutionService:
                     chunk
                 ) in self._execute_streaming_with_dynamic_workflow(
                     conversation=conversation,
-                    chat_request=chat_request,
+                    chat_request=request,
                     user_id=user_id,
                     request=request,
                 ):

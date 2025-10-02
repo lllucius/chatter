@@ -527,13 +527,16 @@ vector_store_manager = VectorStoreManager()
 
 
 async def get_vector_store_retriever(
-    user_id: str = None, collection_name: str = "documents"
+    user_id: str = None,
+    collection_name: str = "documents",
+    document_ids: list[str] | None = None,
 ):
     """Get a retriever for vector search operations.
 
     Args:
         user_id: User ID for personalized retrieval (optional)
         collection_name: Collection name for the vector store
+        document_ids: Specific document IDs to filter retrieval (optional)
 
     Returns:
         Retriever instance that can be used with LangChain workflows
@@ -554,12 +557,19 @@ async def get_vector_store_retriever(
             "pgvector", embeddings, collection_name=collection_name
         )
 
+        # Build filter based on provided parameters
+        filter_dict = {}
+        if user_id:
+            filter_dict["user_id"] = user_id
+        if document_ids:
+            filter_dict["document_id"] = {"$in": document_ids}
+
         # Return retriever interface
         if hasattr(store._store, 'as_retriever'):
             return store._store.as_retriever(
                 search_kwargs={
                     "k": 5,
-                    "filter": {"user_id": user_id} if user_id else None,
+                    "filter": filter_dict if filter_dict else None,
                 }
             )
         else:

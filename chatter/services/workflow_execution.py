@@ -829,8 +829,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -843,6 +846,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for workflow execution"
                     )
@@ -1646,8 +1663,11 @@ class WorkflowExecutionService:
             # Get tools and retriever if needed
             tools = None
             retriever = None
+            
+            # Extract workflow configuration settings
+            wf_settings = self._extract_workflow_config_settings(chat_request)
 
-            if chat_request.enable_tools:
+            if wf_settings['enable_tools']:
                 try:
                     from chatter.core.tool_registry import ToolRegistry
 
@@ -1660,6 +1680,20 @@ class WorkflowExecutionService:
                         user_permissions=[],
                         session=self.session,
                     )
+                    
+                    # Filter tools by allowed_tools if specified
+                    if wf_settings['allowed_tools']:
+                        allowed_tools_set = set(wf_settings['allowed_tools'])
+                        filtered_tools = [
+                            tool for tool in tools
+                            if tool_registry._get_tool_name(tool) in allowed_tools_set
+                        ]
+                        logger.info(
+                            f"Filtered {len(tools)} tools down to {len(filtered_tools)} "
+                            f"allowed tools: {wf_settings['allowed_tools']}"
+                        )
+                        tools = filtered_tools
+                    
                     logger.info(
                         f"Loaded {len(tools) if tools else 0} tools for streaming workflow execution"
                     )

@@ -15,7 +15,9 @@ from langchain_core.messages import BaseMessage, HumanMessage
 
 from chatter.core.enhanced_memory_manager import EnhancedMemoryManager
 from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
+from chatter.core.events import EventCategory, EventPriority, UnifiedEvent
 from chatter.core.langgraph import workflow_manager
+from chatter.core.monitoring import get_monitoring_service
 from chatter.core.workflow_graph_builder import (
     create_simple_workflow_definition,
     create_workflow_definition_from_model,
@@ -35,6 +37,27 @@ from chatter.services.message import MessageService
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
+
+
+# Global event emitter (will be initialized on first use)
+_event_emitter = None
+
+
+async def _emit_event(event: UnifiedEvent) -> None:
+    """Emit an event to the unified event system."""
+    global _event_emitter
+    if _event_emitter is None:
+        try:
+            from chatter.core.events import get_event_emitter
+            _event_emitter = await get_event_emitter()
+        except Exception as e:
+            logger.warning(f"Could not initialize event emitter: {e}")
+            return
+    
+    try:
+        await _event_emitter.emit(event)
+    except Exception as e:
+        logger.warning(f"Could not emit event: {e}")
 
 
 def _log_workflow_debug_info(
@@ -298,6 +321,39 @@ class WorkflowExecutionService:
             },
         )
 
+        # Start workflow tracking with monitoring service
+        monitoring = await get_monitoring_service()
+        correlation_id = generate_ulid()
+        workflow_id = monitoring.start_workflow_tracking(
+            user_id=user_id,
+            conversation_id=conversation.id,
+            provider_name=chat_request.provider or "",
+            model_name=chat_request.model or "",
+            workflow_config={
+                "template_id": universal_template.id,
+                "enable_tools": chat_request.enable_tools,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_memory": chat_request.enable_memory,
+            },
+            correlation_id=correlation_id,
+        )
+
+        # Emit workflow started event
+        await _emit_event(UnifiedEvent(
+            category=EventCategory.WORKFLOW,
+            event_type="workflow_started",
+            user_id=user_id,
+            session_id=conversation.id,
+            correlation_id=correlation_id,
+            data={
+                "workflow_id": workflow_id,
+                "execution_id": execution.id,
+                "template_id": universal_template.id,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+            },
+        ))
+
         try:
             # Update execution status to running
             execution = await workflow_mgmt.update_workflow_execution(
@@ -424,16 +480,34 @@ class WorkflowExecutionService:
             # Extract AI response
             ai_message = self._extract_ai_response(result)
 
-            # Create and save message
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            # Create and save message with token statistics
             message = await self._create_and_save_message(
                 conversation=conversation,
                 content=ai_message.content,
                 role=MessageRole.ASSISTANT,
                 metadata=result.get("metadata", {}),
+                prompt_tokens=result.get("prompt_tokens"),
+                completion_tokens=result.get("completion_tokens"),
+                cost=result.get("cost"),
+                provider_used=chat_request.provider,
+                response_time_ms=execution_time_ms,
+            )
+
+            # Update conversation aggregates
+            from chatter.services.conversation import ConversationService
+            conversation_service = ConversationService(self.session)
+            await conversation_service.update_conversation_aggregates(
+                conversation_id=conversation.id,
+                user_id=user_id,
+                tokens_delta=result.get("tokens_used", 0),
+                cost_delta=result.get("cost", 0.0),
+                message_count_delta=1,  # One new assistant message
             )
 
             # Calculate usage info
-            execution_time_ms = int((time.time() - start_time) * 1000)
             usage_info = {
                 "execution_time_ms": execution_time_ms,
                 "tool_calls": result.get("tool_call_count", 0),
@@ -460,6 +534,33 @@ class WorkflowExecutionService:
                 execution_log=performance_monitor.debug_logs,
             )
 
+            # Update monitoring metrics
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                tool_calls=result.get("tool_call_count", 0),
+            )
+
+            # Finish workflow tracking
+            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow completed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_completed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "tokens_used": result.get("tokens_used", 0),
+                    "cost": result.get("cost", 0.0),
+                    "execution_time_ms": execution_time_ms,
+                    "success": True,
+                },
+            ))
+
             logger.info(
                 f"Universal template execution {execution.id} completed successfully"
             )
@@ -467,6 +568,29 @@ class WorkflowExecutionService:
             return message, usage_info
 
         except Exception as e:
+            # Update monitoring metrics with error
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                error=str(e),
+            )
+            monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow failed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_failed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                priority=EventPriority.HIGH,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            ))
+
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
             performance_monitor.log_debug(
@@ -555,6 +679,39 @@ class WorkflowExecutionService:
                 "conversation_id": conversation.id,
             },
         )
+
+        # Start workflow tracking with monitoring service
+        monitoring = await get_monitoring_service()
+        correlation_id = generate_ulid()
+        workflow_id = monitoring.start_workflow_tracking(
+            user_id=user_id,
+            conversation_id=conversation.id,
+            provider_name=chat_request.provider or "",
+            model_name=chat_request.model or "",
+            workflow_config={
+                "dynamic": True,
+                "enable_tools": chat_request.enable_tools,
+                "enable_retrieval": chat_request.enable_retrieval,
+                "enable_memory": chat_request.enable_memory,
+            },
+            correlation_id=correlation_id,
+        )
+
+        # Emit workflow started event
+        await _emit_event(UnifiedEvent(
+            category=EventCategory.WORKFLOW,
+            event_type="workflow_started",
+            user_id=user_id,
+            session_id=conversation.id,
+            correlation_id=correlation_id,
+            data={
+                "workflow_id": workflow_id,
+                "execution_id": execution.id,
+                "dynamic": True,
+                "provider": chat_request.provider,
+                "model": chat_request.model,
+            },
+        ))
 
         try:
             # Update execution status to running
@@ -678,16 +835,34 @@ class WorkflowExecutionService:
             # Extract AI response
             ai_message = self._extract_ai_response(result)
 
-            # Create and save message
+            # Calculate execution time
+            execution_time_ms = int((time.time() - start_time) * 1000)
+
+            # Create and save message with token statistics
             message = await self._create_and_save_message(
                 conversation=conversation,
                 content=ai_message.content,
                 role=MessageRole.ASSISTANT,
                 metadata=result.get("metadata", {}),
+                prompt_tokens=result.get("prompt_tokens"),
+                completion_tokens=result.get("completion_tokens"),
+                cost=result.get("cost"),
+                provider_used=chat_request.provider,
+                response_time_ms=execution_time_ms,
+            )
+
+            # Update conversation aggregates
+            from chatter.services.conversation import ConversationService
+            conversation_service = ConversationService(self.session)
+            await conversation_service.update_conversation_aggregates(
+                conversation_id=conversation.id,
+                user_id=user_id,
+                tokens_delta=result.get("tokens_used", 0),
+                cost_delta=result.get("cost", 0.0),
+                message_count_delta=1,  # One new assistant message
             )
 
             # Calculate usage info
-            execution_time_ms = int((time.time() - start_time) * 1000)
             usage_info = {
                 "execution_time_ms": execution_time_ms,
                 "tool_calls": result.get("tool_call_count", 0),
@@ -713,6 +888,33 @@ class WorkflowExecutionService:
                 execution_log=performance_monitor.debug_logs,
             )
 
+            # Update monitoring metrics
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                tool_calls=result.get("tool_call_count", 0),
+            )
+
+            # Finish workflow tracking
+            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow completed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_completed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "tokens_used": result.get("tokens_used", 0),
+                    "cost": result.get("cost", 0.0),
+                    "execution_time_ms": execution_time_ms,
+                    "success": True,
+                },
+            ))
+
             logger.info(
                 f"Dynamic workflow execution {execution.id} completed successfully"
             )
@@ -720,6 +922,29 @@ class WorkflowExecutionService:
             return message, usage_info
 
         except Exception as e:
+            # Update monitoring metrics with error
+            monitoring.update_workflow_metrics(
+                workflow_id=workflow_id,
+                error=str(e),
+            )
+            monitoring.finish_workflow_tracking(workflow_id)
+
+            # Emit workflow failed event
+            await _emit_event(UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_failed",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                priority=EventPriority.HIGH,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "error": str(e),
+                    "error_type": type(e).__name__,
+                },
+            ))
+
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
             performance_monitor.log_debug(
@@ -1898,8 +2123,13 @@ class WorkflowExecutionService:
         content: str,
         role: MessageRole,
         metadata: dict[str, Any] | None = None,
+        prompt_tokens: int | None = None,
+        completion_tokens: int | None = None,
+        cost: float | None = None,
+        provider_used: str | None = None,
+        response_time_ms: int | None = None,
     ) -> Message:
-        """Create and save a message to the conversation."""
+        """Create and save a message to the conversation with token statistics."""
         from datetime import datetime
 
         from sqlalchemy import func, select
@@ -1912,17 +2142,26 @@ class WorkflowExecutionService:
         message_count = result.scalar() or 0
         sequence_number = message_count + 1
 
-        # Create message object with all required fields
-        # Note: Base class automatically sets id, created_at, updated_at, but we need to
-        # ensure all the Message-specific required fields are set
+        # Calculate total tokens
+        total_tokens = None
+        if prompt_tokens is not None or completion_tokens is not None:
+            total_tokens = (prompt_tokens or 0) + (completion_tokens or 0)
+
+        # Create message object with all fields including token statistics
         message = Message(
             id=generate_ulid(),
             conversation_id=conversation.id,
             role=role,
             content=content,
             sequence_number=sequence_number,
-            rating_count=0,  # Default value for required field
+            rating_count=0,
             extra_metadata=metadata or {},
+            prompt_tokens=prompt_tokens,
+            completion_tokens=completion_tokens,
+            total_tokens=total_tokens,
+            cost=cost,
+            provider_used=provider_used,
+            response_time_ms=response_time_ms,
         )
 
         # The Base class will automatically set created_at and updated_at
@@ -1937,7 +2176,9 @@ class WorkflowExecutionService:
         try:
             self.session.add(message)
             await self.session.commit()
-            logger.debug(f"Saved message {message.id} to database")
+            logger.debug(
+                f"Saved message {message.id} to database with tokens: {total_tokens}"
+            )
         except Exception as e:
             logger.error(f"Failed to save message to database: {e}")
             await self.session.rollback()

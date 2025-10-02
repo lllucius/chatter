@@ -429,6 +429,8 @@ const LayoutFrame: React.FC = () => {
           justifyContent: 'space-between',
           borderBottom: '1px solid',
           borderColor: 'divider',
+          minHeight: { xs: 56, sm: 64 },
+          px: { xs: 2, sm: 3 },
         }}
       >
         {!rightCollapsed && (

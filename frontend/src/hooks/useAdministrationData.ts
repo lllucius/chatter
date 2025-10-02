@@ -123,27 +123,8 @@ export const useAdministrationData = () => {
   const [jobStats, setJobStats] = useState<JobStatsResponse | null>(null);
   const [dataLoading, setDataLoading] = useState(false);
 
-  // Mock user data - in real app this would come from API
-  const [users] = useState<User[]>([
-    {
-      id: 'admin@chatter.ai',
-      email: 'admin@chatter.ai',
-      role: 'Administrator',
-      lastLogin: '2 hours ago',
-      status: 'Active',
-      name: 'Admin User',
-      isActive: true,
-    },
-    {
-      id: 'user@example.com',
-      email: 'user@example.com',
-      role: 'User',
-      lastLogin: '1 day ago',
-      status: 'Active',
-      name: 'Regular User',
-      isActive: true,
-    },
-  ]);
+  // Users should come from backend API - removed mock data
+  const [users] = useState<User[]>([]);
 
   const [lastJobStates, setLastJobStates] = useState<Map<string, string>>(
     new Map()

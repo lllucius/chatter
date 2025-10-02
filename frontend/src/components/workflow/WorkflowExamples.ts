@@ -298,7 +298,7 @@ export const exampleWorkflows: Record<string, WorkflowDefinition> = {
 // Workflow validation utilities
 /**
  * Basic client-side workflow validator for UX feedback.
- * 
+ *
  * This provides immediate validation feedback in the UI, but the backend
  * validation in `chatter/core/validation/validators.py` is authoritative.
  * All workflows are validated server-side before execution.

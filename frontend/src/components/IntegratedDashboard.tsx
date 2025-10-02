@@ -199,7 +199,11 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       {(statsApi.loading || chartDataApi.loading) && (
         <Box sx={{ mb: 4 }}>
           <LinearProgress />
-          <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+          <Typography
+            variant="body2"
+            color="text.secondary"
+            sx={{ mt: 2, textAlign: 'center' }}
+          >
             Loading dashboard data...
           </Typography>
         </Box>
@@ -216,7 +220,9 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                   Unable to Load Dashboard Data
                 </Typography>
                 <Typography variant="body2" color="error">
-                  {statsApi.error || chartDataApi.error || 'Failed to fetch dashboard data. Please try refreshing the page.'}
+                  {statsApi.error ||
+                    chartDataApi.error ||
+                    'Failed to fetch dashboard data. Please try refreshing the page.'}
                 </Typography>
               </div>
             </Box>

@@ -541,6 +541,13 @@ async def get_vector_store_retriever(
     Returns:
         Retriever instance that can be used with LangChain workflows
     """
+    logger.info(
+        "Creating vector store retriever",
+        user_id=user_id,
+        collection_name=collection_name,
+        document_ids=document_ids,
+    )
+    
     try:
         from chatter.services.embeddings import get_embedding_service
 
@@ -552,33 +559,23 @@ async def get_vector_store_retriever(
             logger.warning("No default embedding provider available")
             return None
 
-        # Create or get vector store
-        store = vector_store_manager.create_store(
-            "pgvector", embeddings, collection_name=collection_name
+        # Create custom retriever that works with document_chunks table
+        from chatter.core.custom_retriever import DocumentChunkRetriever
+        
+        retriever = DocumentChunkRetriever(
+            embeddings=embeddings,
+            user_id=user_id,
+            document_ids=document_ids,
         )
-
-        # Build filter based on provided parameters
-        filter_dict = {}
-        if user_id:
-            filter_dict["user_id"] = user_id
-        if document_ids:
-            filter_dict["document_id"] = {"$in": document_ids}
-
-        # Return retriever interface
-        if hasattr(store._store, 'as_retriever'):
-            return store._store.as_retriever(
-                search_kwargs={
-                    "k": 5,
-                    "filter": filter_dict if filter_dict else None,
-                }
-            )
-        else:
-            # Fallback implementation
-            logger.warning(
-                "Vector store does not support as_retriever, returning None"
-            )
-            return None
+        
+        logger.info(
+            "Custom document chunk retriever created successfully",
+            retriever_type=type(retriever).__name__,
+        )
+        return retriever
 
     except Exception as e:
         logger.error(f"Could not create vector store retriever: {e}")
+        import traceback
+        logger.error(f"Traceback: {traceback.format_exc()}")
         return None

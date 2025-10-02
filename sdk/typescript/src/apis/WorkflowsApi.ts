@@ -1,7 +1,7 @@
 /**
  * Generated API client for Workflows
  */
-import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatResponse, ChatWorkflowRequest, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
+import { Body_execute_custom_workflow_api_v1_workflows_definitions_custom_execute_post, ChatRequest, ChatResponse, DetailedWorkflowExecutionResponse, NodeTypeResponse, WorkflowAnalyticsResponse, WorkflowDefinitionCreate, WorkflowDefinitionFromTemplateRequest, WorkflowDefinitionResponse, WorkflowDefinitionUpdate, WorkflowDefinitionsResponse, WorkflowDeleteResponse, WorkflowExecutionRequest, WorkflowExecutionResponse, WorkflowTemplateCreate, WorkflowTemplateResponse, WorkflowTemplateUpdate, WorkflowTemplatesResponse, WorkflowValidationResponse } from '../models/index';
 import { BaseAPI, Configuration, RequestOpts, HTTPMethod, HTTPQuery, HTTPHeaders } from '../runtime';
 
 export class WorkflowsApi extends BaseAPI {
@@ -371,7 +371,7 @@ Available templates:
 - `data_analyst`: Data analysis with computation tools
 
    */
-  public async executeChatWorkflowApiV1WorkflowsExecuteChat(data: ChatWorkflowRequest): Promise<ChatResponse> {
+  public async executeChatWorkflowApiV1WorkflowsExecuteChat(data: ChatRequest): Promise<ChatResponse> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/execute/chat`,
       method: 'POST' as HTTPMethod,
@@ -468,7 +468,7 @@ Available templates:
 - `data_analyst`: Data analysis with computation tools
 
    */
-  public async executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(data: ChatWorkflowRequest): Promise<ReadableStream<Uint8Array>> {
+  public async executeChatWorkflowStreamingApiV1WorkflowsExecuteChatStreaming(data: ChatRequest): Promise<ReadableStream<Uint8Array>> {
     const requestContext: RequestOpts = {
       path: `/api/v1/workflows/execute/chat/streaming`,
       method: 'POST' as HTTPMethod,
@@ -571,7 +571,7 @@ Args:
     node_type: Optional specific node type to get defaults for
     current_user: Current authenticated user
     defaults_service: Workflow defaults service
-    
+
 Returns:
     Dictionary containing default configurations
    */

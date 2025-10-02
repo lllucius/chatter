@@ -598,7 +598,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **execute_chat_workflow_api_v1_workflows_execute_chat_post**
-> ChatResponse execute_chat_workflow_api_v1_workflows_execute_chat_post(chat_workflow_request)
+> ChatResponse execute_chat_workflow_api_v1_workflows_execute_chat_post(chat_request)
 
 Execute Chat Workflow
 
@@ -691,8 +691,8 @@ Available templates:
 
 ```python
 import chatter_sdk
+from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse
-from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -716,11 +716,11 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.WorkflowsApi(api_client)
-    chat_workflow_request = chatter_sdk.ChatWorkflowRequest() # ChatWorkflowRequest | 
+    chat_request = chatter_sdk.ChatRequest() # ChatRequest | 
 
     try:
         # Execute Chat Workflow
-        api_response = await api_instance.execute_chat_workflow_api_v1_workflows_execute_chat_post(chat_workflow_request)
+        api_response = await api_instance.execute_chat_workflow_api_v1_workflows_execute_chat_post(chat_request)
         print("The response of WorkflowsApi->execute_chat_workflow_api_v1_workflows_execute_chat_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -734,7 +734,7 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **chat_workflow_request** | [**ChatWorkflowRequest**](ChatWorkflowRequest.md)|  | 
+ **chat_request** | [**ChatRequest**](ChatRequest.md)|  | 
 
 ### Return type
 
@@ -759,7 +759,7 @@ Name | Type | Description  | Notes
 [[Back to top]](#) [[Back to API list]](../README.md#documentation-for-api-endpoints) [[Back to Model list]](../README.md#documentation-for-models) [[Back to README]](../README.md)
 
 # **execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post**
-> object execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(chat_workflow_request)
+> object execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(chat_request)
 
 Execute Chat Workflow Streaming
 
@@ -852,7 +852,7 @@ Available templates:
 
 ```python
 import chatter_sdk
-from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest
+from chatter_sdk.models.chat_request import ChatRequest
 from chatter_sdk.rest import ApiException
 from pprint import pprint
 
@@ -876,11 +876,11 @@ configuration = chatter_sdk.Configuration(
 async with chatter_sdk.ApiClient(configuration) as api_client:
     # Create an instance of the API class
     api_instance = chatter_sdk.WorkflowsApi(api_client)
-    chat_workflow_request = chatter_sdk.ChatWorkflowRequest() # ChatWorkflowRequest | 
+    chat_request = chatter_sdk.ChatRequest() # ChatRequest | 
 
     try:
         # Execute Chat Workflow Streaming
-        api_response = await api_instance.execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(chat_workflow_request)
+        api_response = await api_instance.execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post(chat_request)
         print("The response of WorkflowsApi->execute_chat_workflow_streaming_api_v1_workflows_execute_chat_streaming_post:\n")
         pprint(api_response)
     except Exception as e:
@@ -894,7 +894,7 @@ async with chatter_sdk.ApiClient(configuration) as api_client:
 
 Name | Type | Description  | Notes
 ------------- | ------------- | ------------- | -------------
- **chat_workflow_request** | [**ChatWorkflowRequest**](ChatWorkflowRequest.md)|  | 
+ **chat_request** | [**ChatRequest**](ChatRequest.md)|  | 
 
 ### Return type
 
@@ -1326,7 +1326,7 @@ Args:
     node_type: Optional specific node type to get defaults for
     current_user: Current authenticated user
     defaults_service: Workflow defaults service
-    
+
 Returns:
     Dictionary containing default configurations
 

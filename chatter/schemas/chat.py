@@ -261,7 +261,11 @@ class PerformanceStatsResponse(BaseModel):
 
 
 class ChatRequest(BaseModel):
-    """Schema for chat request."""
+    """Schema for chat request.
+    
+    This unified schema supports both simple chat and workflow execution,
+    eliminating the need for separate ChatWorkflowRequest type.
+    """
 
     message: str = Field(..., description="User message")
     conversation_id: str | None = Field(
@@ -269,6 +273,17 @@ class ChatRequest(BaseModel):
     )
     profile_id: str | None = Field(
         None, description="Profile ID to use"
+    )
+
+    # Workflow specification (optional - for workflow execution)
+    workflow_config: dict[str, Any] | None = Field(
+        None, description="Dynamic workflow configuration"
+    )
+    workflow_definition_id: str | None = Field(
+        None, description="Existing workflow definition ID"
+    )
+    workflow_template_name: str | None = Field(
+        None, description="Workflow template name"
     )
 
     # Workflow capability flags
@@ -312,8 +327,10 @@ class ChatRequest(BaseModel):
     system_prompt_override: str | None = Field(
         None, description="Override system prompt for this request"
     )
-    workflow_config: dict[str, Any] | None = Field(
-        None, description="Workflow configuration"
+    
+    # Debug configuration
+    enable_tracing: bool = Field(
+        default=False, description="Enable backend workflow tracing"
     )
 
 

@@ -104,6 +104,62 @@ class ToolRegistry:
 
         return available_tools
 
+    async def get_enabled_tools_for_workspace(
+        self,
+        workspace_id: str,
+        user_permissions: list[str] | None = None,
+        session=None,
+    ) -> list[Any]:
+        """Get enabled tools for a workspace, checking database status.
+        
+        This method checks both the in-memory registry and the database
+        to ensure only enabled tools are returned.
+        
+        Args:
+            workspace_id: Workspace ID
+            user_permissions: User permissions for filtering
+            session: Optional database session
+            
+        Returns:
+            List of enabled tools
+        """
+        from chatter.models.toolserver import ServerTool, ToolStatus
+        from sqlalchemy import select
+        
+        # Get all tools from registry
+        registry_tools = self.get_tools_for_workspace(
+            workspace_id, user_permissions
+        )
+        
+        if not session:
+            # If no session provided, return all registry tools
+            # (backward compatible behavior)
+            return registry_tools
+        
+        # Get enabled tools from database
+        result = await session.execute(
+            select(ServerTool).where(
+                ServerTool.status == ToolStatus.ENABLED
+            )
+        )
+        enabled_tool_names = {tool.name for tool in result.scalars().all()}
+        
+        # Filter registry tools to only include enabled ones
+        enabled_tools = [
+            tool for tool in registry_tools
+            if self._get_tool_name(tool) in enabled_tool_names
+        ]
+        
+        return enabled_tools
+    
+    def _get_tool_name(self, tool: Any) -> str:
+        """Extract tool name from a tool object."""
+        return (
+            getattr(tool, 'name', None)
+            or getattr(tool, 'name_', None)
+            or getattr(tool, '__name__', 'unknown_tool')
+        )
+
     def get_tools_by_category(self, category: str) -> list[Any]:
         """Get all tools in a specific category."""
         tool_names = self._categories.get(category, [])

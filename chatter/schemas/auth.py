@@ -5,6 +5,7 @@ from typing import Self
 
 from pydantic import (
     BaseModel,
+    ConfigDict,
     EmailStr,
     Field,
     field_validator,
@@ -113,10 +114,7 @@ class UserResponse(UserBase):
         None, description="Last login date"
     )
 
-    class Config:
-        """Pydantic configuration."""
-
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
 
 
 class UserLogin(BaseModel):
@@ -266,8 +264,19 @@ class UserPreferences(BaseModel):
 
 
 class UserPreferencesUpdate(BaseModel):
+    """Schema for user preferences update."""
 
-    from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
+
+    language: str | None = Field(None, description="Preferred language")
+    timezone: str | None = Field(None, description="Preferred timezone")
+    theme: str | None = Field(None, description="UI theme preference")
+    notifications_enabled: bool | None = Field(
+        None, description="Enable notifications"
+    )
+    email_notifications: bool | None = Field(
+        None, description="Enable email notifications"
+    )
 
 
 class TokenRefreshResponse(BaseModel):

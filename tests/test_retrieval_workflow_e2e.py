@@ -41,7 +41,7 @@ async def test_retrieval_workflow_end_to_end():
         'chatter.core.vector_store.get_embedding_service',
         return_value=mock_embedding_service
     ), patch(
-        'chatter.core.custom_retriever.get_async_session',
+        'chatter.core.custom_retriever.get_session_generator',
         return_value=mock_session_generator()
     ), patch(
         'chatter.core.custom_retriever.SimpleVectorStore',
@@ -160,7 +160,7 @@ async def test_retrieval_with_no_results():
         'chatter.core.vector_store.get_embedding_service',
         return_value=mock_embedding_service
     ), patch(
-        'chatter.core.custom_retriever.get_async_session',
+        'chatter.core.custom_retriever.get_session_generator',
         return_value=mock_session_generator()
     ), patch(
         'chatter.core.custom_retriever.SimpleVectorStore',

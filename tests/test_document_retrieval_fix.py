@@ -47,12 +47,12 @@ async def test_document_chunk_retriever_ainvoke():
         return_value=[(mock_chunk, 0.95)]
     )
     
-    # Mock get_async_session
+    # Mock get_session_generator
     async def mock_session_generator():
         yield AsyncMock()
     
     with patch(
-        'chatter.core.custom_retriever.get_async_session',
+        'chatter.core.custom_retriever.get_session_generator',
         return_value=mock_session_generator()
     ), patch(
         'chatter.core.custom_retriever.SimpleVectorStore',

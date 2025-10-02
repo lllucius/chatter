@@ -51,12 +51,10 @@ export class WorkflowTranslator {
   static toLangGraphConfig(
     workflow: WorkflowDefinition
   ): LangGraphWorkflowConfig {
-    // Validate workflow before translation
-    const validation = this.validateForLangGraph(workflow);
-    if (!validation.valid) {
-      throw new Error(
-        `Workflow validation failed: ${validation.errors.join(', ')}`
-      );
+    // Backend will handle comprehensive validation
+    // Only do minimal frontend checks for immediate UX feedback
+    if (!workflow.nodes || workflow.nodes.length === 0) {
+      throw new Error('Workflow must have at least one node');
     }
 
     const nodes = this.translateNodes(workflow);
@@ -113,125 +111,17 @@ export class WorkflowTranslator {
    */
   private static translateNodes(workflow: WorkflowDefinition): LangGraphNode[] {
     return workflow.nodes.map((node) => {
-      try {
-        const langGraphType = this.mapNodeTypeToLangGraph(
-          node.type as WorkflowNodeType
-        );
+      const langGraphType = this.mapNodeTypeToLangGraph(
+        node.type as WorkflowNodeType
+      );
 
-        // Validate node configuration
-        this.validateNodeConfig(
-          node.type as WorkflowNodeType,
-          node.data.config
-        );
-
-        return {
-          id: node.id,
-          type: langGraphType,
-          config: node.data.config || {},
-        };
-      } catch (error) {
-        throw new Error(
-          `Failed to translate node ${node.id}: ${(error as Error).message}`
-        );
-      }
+      // No frontend validation - backend will validate node configurations
+      return {
+        id: node.id,
+        type: langGraphType,
+        config: node.data.config || {},
+      };
     });
-  }
-
-  /**
-   * Validate node configuration based on node type
-   */
-  private static validateNodeConfig(
-    nodeType: WorkflowNodeType,
-    config: Record<string, unknown> | undefined
-  ): void {
-    switch (nodeType) {
-      case 'conditional':
-        if (!config || !config.condition) {
-          throw new Error('Conditional nodes must have a condition defined');
-        }
-        break;
-      case 'tool':
-        if (!config || !config.tools || !Array.isArray(config.tools)) {
-          throw new Error('Tool nodes must have tools configured');
-        }
-        break;
-      case 'retrieval':
-        if (!config || (!config.collection && !config.topK)) {
-          throw new Error(
-            'Retrieval nodes must have collection or topK configured'
-          );
-        }
-        break;
-      case 'loop':
-        if (!config || (!config.maxIterations && !config.condition)) {
-          throw new Error(
-            'Loop nodes must have maxIterations or condition defined'
-          );
-        }
-        if (
-          config.maxIterations &&
-          (typeof config.maxIterations !== 'number' ||
-            config.maxIterations <= 0)
-        ) {
-          throw new Error('Loop maxIterations must be a positive number');
-        }
-        break;
-      case 'variable':
-        if (!config || !config.variableName || !config.operation) {
-          throw new Error(
-            'Variable nodes must have variableName and operation defined'
-          );
-        }
-        const validOps = ['set', 'get', 'append', 'increment', 'decrement'];
-        if (!validOps.includes(String(config.operation))) {
-          throw new Error(
-            `Variable operation must be one of: ${validOps.join(', ')}`
-          );
-        }
-        break;
-      case 'errorHandler':
-        if (
-          config &&
-          config.retryCount &&
-          (typeof config.retryCount !== 'number' || config.retryCount < 0)
-        ) {
-          throw new Error(
-            'Error handler retryCount must be a non-negative number'
-          );
-        }
-        break;
-      case 'delay':
-        if (
-          !config ||
-          !config.duration ||
-          typeof config.duration !== 'number'
-        ) {
-          throw new Error('Delay nodes must have a numeric duration defined');
-        }
-        if (config.duration <= 0) {
-          throw new Error('Delay duration must be positive');
-        }
-        const validDelayTypes = ['fixed', 'random', 'exponential', 'dynamic'];
-        if (
-          config.delayType &&
-          !validDelayTypes.includes(String(config.delayType))
-        ) {
-          throw new Error(
-            `Delay type must be one of: ${validDelayTypes.join(', ')}`
-          );
-        }
-        break;
-      case 'memory':
-        if (
-          config &&
-          config.memoryWindow &&
-          (typeof config.memoryWindow !== 'number' || config.memoryWindow <= 0)
-        ) {
-          throw new Error('Memory window must be a positive number');
-        }
-        break;
-      // Other node types have optional configuration
-    }
   }
 
   /**
@@ -366,7 +256,8 @@ export class WorkflowTranslator {
   }
 
   /**
-   * Validate that workflow can be converted to LangGraph
+   * Basic validation for LangGraph conversion.
+   * Backend performs comprehensive validation - this is for immediate UX feedback only.
    */
   static validateForLangGraph(workflow: WorkflowDefinition): {
     valid: boolean;
@@ -374,90 +265,19 @@ export class WorkflowTranslator {
   } {
     const errors: string[] = [];
 
-    // Must have at least one start node
+    // Basic structure check
+    if (!workflow.nodes || workflow.nodes.length === 0) {
+      errors.push('Workflow must have at least one node');
+    }
+
+    // Check for start node (basic UX requirement)
     const startNodes = workflow.nodes.filter((n) => n.type === 'start');
     if (startNodes.length === 0) {
       errors.push('Workflow must have a start node');
-    } else if (startNodes.length > 1) {
-      errors.push('Workflow can only have one start node for LangGraph');
     }
 
-    // Must have at least one model node
-    const modelNodes = workflow.nodes.filter((n) => n.type === 'model');
-    if (modelNodes.length === 0) {
-      errors.push('Workflow must have at least one model node');
-    }
-
-    // Conditional nodes must have conditions
-    const conditionalNodes = workflow.nodes.filter(
-      (n) => n.type === 'conditional'
-    );
-    conditionalNodes.forEach((node) => {
-      if (!node.data.config?.condition) {
-        errors.push(
-          `Conditional node "${node.data.label}" must have a condition defined`
-        );
-      }
-    });
-
-    // Loop nodes must have proper configuration
-    const loopNodes = workflow.nodes.filter((n) => n.type === 'loop');
-    loopNodes.forEach((node) => {
-      const config = node.data.config;
-      if (!config || (!config.maxIterations && !config.condition)) {
-        errors.push(
-          `Loop node "${node.data.label}" must have maxIterations or condition defined`
-        );
-      }
-    });
-
-    // Variable nodes must have proper configuration
-    const variableNodes = workflow.nodes.filter((n) => n.type === 'variable');
-    variableNodes.forEach((node) => {
-      const config = node.data.config;
-      if (!config || !config.variableName || !config.operation) {
-        errors.push(
-          `Variable node "${node.data.label}" must have variableName and operation defined`
-        );
-      }
-    });
-
-    // Error handler nodes validation
-    const errorNodes = workflow.nodes.filter((n) => n.type === 'errorHandler');
-    errorNodes.forEach((node) => {
-      const config = node.data.config;
-      if (
-        config &&
-        config.retryCount &&
-        (typeof config.retryCount !== 'number' || config.retryCount < 0)
-      ) {
-        errors.push(
-          `Error handler node "${node.data.label}" retryCount must be a non-negative number`
-        );
-      }
-    });
-
-    // Delay nodes validation
-    const delayNodes = workflow.nodes.filter((n) => n.type === 'delay');
-    delayNodes.forEach((node) => {
-      const config = node.data.config;
-      if (
-        !config ||
-        !config.duration ||
-        typeof config.duration !== 'number' ||
-        config.duration <= 0
-      ) {
-        errors.push(
-          `Delay node "${node.data.label}" must have a positive numeric duration`
-        );
-      }
-    });
-
-    // Check for proper connectivity
-    const executionOrder = this.generateExecutionOrder(workflow);
-    if (executionOrder.length !== workflow.nodes.length) {
-      errors.push('Workflow has cycles or disconnected components');
-    }
+    // All other validation (node configs, cycles, connectivity, etc.) 
+    // is handled by the backend validation API
 
     return {
       valid: errors.length === 0,

@@ -727,65 +727,12 @@ class ChatWorkflowConfig(BaseModel):
     )
 
 
-class ChatWorkflowRequest(BaseModel):
-    """Request for executing chat via workflow system."""
+# Import ChatRequest from chat module to use as base for workflows
+from chatter.schemas.chat import ChatRequest
 
-    message: str = Field(..., min_length=1, description="User message")
-    conversation_id: str | None = Field(
-        None, description="Conversation ID"
-    )
-
-    # Workflow specification (exactly one must be provided)
-    workflow_config: ChatWorkflowConfig | None = Field(
-        None, description="Dynamic workflow config"
-    )
-    workflow_definition_id: str | None = Field(
-        None, description="Existing workflow definition ID"
-    )
-    workflow_template_name: str | None = Field(
-        None, description="Template name"
-    )
-
-    # Workflow capability flags (at root level for compatibility with ChatRequest)
-    enable_retrieval: bool = Field(
-        False, description="Enable retrieval capabilities"
-    )
-    enable_tools: bool = Field(
-        False, description="Enable tool calling capabilities"
-    )
-    enable_memory: bool = Field(
-        True, description="Enable memory capabilities"
-    )
-    enable_web_search: bool = Field(
-        False, description="Enable web search capabilities"
-    )
-
-    # Request configuration fields
-    profile_id: str | None = Field(None, description="Profile ID")
-    provider: str | None = Field(None, description="LLM provider")
-    model: str | None = Field(None, description="LLM model")
-    temperature: float | None = Field(
-        None, ge=0.0, le=2.0, description="Temperature"
-    )
-    max_tokens: int | None = Field(
-        None, ge=1, le=8192, description="Max tokens"
-    )
-    context_limit: int | None = Field(
-        None, ge=1, description="Context limit"
-    )
-    document_ids: list[str] | None = Field(
-        None, description="Document IDs"
-    )
-
-    # System override
-    system_prompt_override: str | None = Field(
-        None, description="System prompt override"
-    )
-
-    # Debug configuration
-    enable_tracing: bool = Field(
-        False, description="Enable backend workflow tracing"
-    )
+# ChatWorkflowRequest is now just an alias to ChatRequest
+# This maintains backward compatibility while eliminating duplication
+ChatWorkflowRequest = ChatRequest
 
 
 class WorkflowDeleteResponse(BaseModel):

@@ -177,7 +177,7 @@ class WorkflowExecutionService:
     async def execute_chat_workflow(
         self,
         user_id: str,
-        request: Any,
+        request: ChatRequest,
     ) -> tuple[Conversation, Message]:
         """Execute chat workflow - API wrapper method."""
         # Get or create conversation
@@ -185,13 +185,10 @@ class WorkflowExecutionService:
             user_id, request
         )
 
-        # Convert request to ChatRequest
-        chat_request = self._convert_to_chat_request(request)
-
-        # Execute the actual workflow
+        # Execute the actual workflow directly with ChatRequest
         message, result = await self._execute_chat_workflow_internal(
             conversation=conversation,
-            chat_request=chat_request,
+            chat_request=request,
             user_id=user_id,
         )
 
@@ -2392,7 +2389,7 @@ class WorkflowExecutionService:
         return message
 
     async def _get_or_create_conversation(
-        self, user_id: str, request: Any
+        self, user_id: str, request: ChatRequest
     ) -> Conversation:
         """Get existing conversation or create new one."""
         conversation_id = getattr(request, 'conversation_id', None)
@@ -2437,43 +2434,7 @@ class WorkflowExecutionService:
 
         return conversation
 
-    def _convert_to_chat_request(self, request: Any) -> ChatRequest:
-        """Convert workflow request to ChatRequest for compatibility."""
-        # Extract document_ids from request or workflow_config.retrieval_config
-        document_ids = getattr(request, 'document_ids', None)
-        if not document_ids:
-            # Check if document_ids is in workflow_config.retrieval_config
-            workflow_config = getattr(request, 'workflow_config', None)
-            if workflow_config:
-                retrieval_config = getattr(
-                    workflow_config, 'retrieval_config', None
-                )
-                if retrieval_config:
-                    document_ids = getattr(
-                        retrieval_config, 'document_ids', None
-                    )
 
-        return ChatRequest(
-            message=request.message,
-            conversation_id=getattr(request, 'conversation_id', None),
-            provider=getattr(
-                request, 'provider', None
-            ),  # Let system choose default
-            model=getattr(
-                request, 'model', None
-            ),  # Let system choose default
-            temperature=getattr(request, 'temperature', None),
-            max_tokens=getattr(request, 'max_tokens', None),
-            system_prompt_override=getattr(
-                request, 'system_prompt_override', None
-            ),
-            enable_retrieval=getattr(
-                request, 'enable_retrieval', False
-            ),
-            enable_tools=getattr(request, 'enable_tools', False),
-            enable_memory=getattr(request, 'enable_memory', True),
-            document_ids=document_ids,
-        )
 
 
 # Factory function for dependency injection

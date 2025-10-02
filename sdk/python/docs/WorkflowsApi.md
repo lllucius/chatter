@@ -1326,7 +1326,7 @@ Args:
     node_type: Optional specific node type to get defaults for
     current_user: Current authenticated user
     defaults_service: Workflow defaults service
-    
+
 Returns:
     Dictionary containing default configurations
 

@@ -19683,7 +19683,7 @@ paths:
       description: "Get workflow defaults from profiles, models, and prompts.\n\n\
         Args:\n    node_type: Optional specific node type to get defaults for\n  \
         \  current_user: Current authenticated user\n    defaults_service: Workflow\
-        \ defaults service\n    \nReturns:\n    Dictionary containing default configurations"
+        \ defaults service\n\nReturns:\n    Dictionary containing default configurations"
       operationId: get_workflow_defaults_api_v1_workflows_defaults_get
       parameters:
       - in: query

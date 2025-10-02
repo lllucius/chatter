@@ -4036,7 +4036,7 @@ class WorkflowsApi:
     ) -> Dict[str, object]:
         """Get Workflow Defaults
 
-        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service      Returns:     Dictionary containing default configurations
+        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service  Returns:     Dictionary containing default configurations
 
         :param node_type:
         :type node_type: str
@@ -4104,7 +4104,7 @@ class WorkflowsApi:
     ) -> ApiResponse[Dict[str, object]]:
         """Get Workflow Defaults
 
-        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service      Returns:     Dictionary containing default configurations
+        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service  Returns:     Dictionary containing default configurations
 
         :param node_type:
         :type node_type: str
@@ -4172,7 +4172,7 @@ class WorkflowsApi:
     ) -> RESTResponseType:
         """Get Workflow Defaults
 
-        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service      Returns:     Dictionary containing default configurations
+        Get workflow defaults from profiles, models, and prompts.  Args:     node_type: Optional specific node type to get defaults for     current_user: Current authenticated user     defaults_service: Workflow defaults service  Returns:     Dictionary containing default configurations
 
         :param node_type:
         :type node_type: str

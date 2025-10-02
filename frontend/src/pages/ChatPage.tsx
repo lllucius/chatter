@@ -26,6 +26,13 @@ import type {
 import { parseSSELine } from '../utils/sse-parser';
 import { useRightSidebar } from '../components/RightSidebarContext';
 
+interface EventMetadata {
+  model_used?: string;
+  total_tokens?: number;
+  response_time_ms?: number;
+  [key: string]: unknown;
+}
+
 const ChatPage: React.FC = () => {
   // Use right sidebar context
   const { setPanelContent, setTitle, setOpen } = useRightSidebar();
@@ -233,13 +240,9 @@ const ChatPage: React.FC = () => {
                       ? {
                           ...msg,
                           metadata: {
-                            model: (eventData.metadata as any)?.model_used as
-                              | string
-                              | undefined,
-                            tokens: (eventData.metadata as any)
-                              ?.total_tokens as number | undefined,
-                            processingTime: (eventData.metadata as any)
-                              ?.response_time_ms as number | undefined,
+                            model: (eventData.metadata as EventMetadata)?.model_used,
+                            tokens: (eventData.metadata as EventMetadata)?.total_tokens,
+                            processingTime: (eventData.metadata as EventMetadata)?.response_time_ms,
                             workflow: {
                               stage: 'Complete',
                               currentStep: 1,
@@ -253,7 +256,7 @@ const ChatPage: React.FC = () => {
                 );
                 break;
 
-              case 'error':
+              case 'error': {
                 // Handle error events gracefully
                 // Server sends error in 'error' field, but fallback to 'message' for compatibility
                 const errorMessage =
@@ -266,6 +269,7 @@ const ChatPage: React.FC = () => {
 
                 // Throw the error to be caught by handleWorkflowStreamingResponse
                 throw new Error(errorMessage);
+              }
 
               default:
                 // Handle other event types if needed

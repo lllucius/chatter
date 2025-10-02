@@ -271,7 +271,7 @@ const ModelManagementPage: React.FC = () => {
     {
       id: 'provider',
       label: 'Provider',
-      render: (value: unknown, item: ModelDefWithProvider): JSX.Element => {
+      render: (value: unknown, _item: ModelDefWithProvider): JSX.Element => {
         const provider = value as { displayName?: string } | undefined;
         return (
           <Typography variant="body2">{provider?.displayName || '—'}</Typography>

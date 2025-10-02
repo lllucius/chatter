@@ -237,7 +237,7 @@ const WorkflowBuilderPage: React.FC = () => {
 
   // Handle template data from navigation state
   useEffect(() => {
-    const state = location.state as any;
+    const state = location.state as { editTemplate?: { workflow?: { nodes?: unknown[]; edges?: unknown[] }; name?: string; description?: string } } | null;
     if (state?.editTemplate) {
       const template = state.editTemplate;
       // If template has workflow data, load it

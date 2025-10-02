@@ -21,33 +21,33 @@ import json
 from pydantic import BaseModel, ConfigDict, Field, StrictBool, StrictStr
 from typing import Any, ClassVar, Dict, List, Optional, Union
 from typing_extensions import Annotated
-from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig
 from typing import Optional, Set
 from typing_extensions import Self
 
-class ChatWorkflowRequest(BaseModel):
+class ChatRequest(BaseModel):
     """
-    Request for executing chat via workflow system.
+    Schema for chat request.  This unified schema supports both simple chat and workflow execution, eliminating the need for separate ChatWorkflowRequest type.
     """ # noqa: E501
-    message: Annotated[str, Field(min_length=1, strict=True)] = Field(description="User message")
+    message: StrictStr = Field(description="User message")
     conversation_id: Optional[StrictStr] = None
-    workflow_config: Optional[ChatWorkflowConfig] = None
+    profile_id: Optional[StrictStr] = None
+    workflow_config: Optional[Dict[str, Any]] = None
     workflow_definition_id: Optional[StrictStr] = None
     workflow_template_name: Optional[StrictStr] = None
     enable_retrieval: Optional[StrictBool] = Field(default=False, description="Enable retrieval capabilities")
     enable_tools: Optional[StrictBool] = Field(default=False, description="Enable tool calling capabilities")
     enable_memory: Optional[StrictBool] = Field(default=True, description="Enable memory capabilities")
     enable_web_search: Optional[StrictBool] = Field(default=False, description="Enable web search capabilities")
-    profile_id: Optional[StrictStr] = None
     provider: Optional[StrictStr] = None
     model: Optional[StrictStr] = None
     temperature: Optional[Union[Annotated[float, Field(le=2.0, strict=True, ge=0.0)], Annotated[int, Field(le=2, strict=True, ge=0)]]] = None
     max_tokens: Optional[Annotated[int, Field(le=8192, strict=True, ge=1)]] = None
     context_limit: Optional[Annotated[int, Field(strict=True, ge=1)]] = None
     document_ids: Optional[List[StrictStr]] = None
+    prompt_id: Optional[StrictStr] = None
     system_prompt_override: Optional[StrictStr] = None
     enable_tracing: Optional[StrictBool] = Field(default=False, description="Enable backend workflow tracing")
-    __properties: ClassVar[List[str]] = ["message", "conversation_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "enable_retrieval", "enable_tools", "enable_memory", "enable_web_search", "profile_id", "provider", "model", "temperature", "max_tokens", "context_limit", "document_ids", "system_prompt_override", "enable_tracing"]
+    __properties: ClassVar[List[str]] = ["message", "conversation_id", "profile_id", "workflow_config", "workflow_definition_id", "workflow_template_name", "enable_retrieval", "enable_tools", "enable_memory", "enable_web_search", "provider", "model", "temperature", "max_tokens", "context_limit", "document_ids", "prompt_id", "system_prompt_override", "enable_tracing"]
 
     model_config = ConfigDict(
         populate_by_name=True,
@@ -67,7 +67,7 @@ class ChatWorkflowRequest(BaseModel):
 
     @classmethod
     def from_json(cls, json_str: str) -> Optional[Self]:
-        """Create an instance of ChatWorkflowRequest from a JSON string"""
+        """Create an instance of ChatRequest from a JSON string"""
         return cls.from_dict(json.loads(json_str))
 
     def to_dict(self) -> Dict[str, Any]:
@@ -88,13 +88,15 @@ class ChatWorkflowRequest(BaseModel):
             exclude=excluded_fields,
             exclude_none=True,
         )
-        # override the default output from pydantic by calling `to_dict()` of workflow_config
-        if self.workflow_config:
-            _dict['workflow_config'] = self.workflow_config.to_dict()
         # set to None if conversation_id (nullable) is None
         # and model_fields_set contains the field
         if self.conversation_id is None and "conversation_id" in self.model_fields_set:
             _dict['conversation_id'] = None
+
+        # set to None if profile_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.profile_id is None and "profile_id" in self.model_fields_set:
+            _dict['profile_id'] = None
 
         # set to None if workflow_config (nullable) is None
         # and model_fields_set contains the field
@@ -110,11 +112,6 @@ class ChatWorkflowRequest(BaseModel):
         # and model_fields_set contains the field
         if self.workflow_template_name is None and "workflow_template_name" in self.model_fields_set:
             _dict['workflow_template_name'] = None
-
-        # set to None if profile_id (nullable) is None
-        # and model_fields_set contains the field
-        if self.profile_id is None and "profile_id" in self.model_fields_set:
-            _dict['profile_id'] = None
 
         # set to None if provider (nullable) is None
         # and model_fields_set contains the field
@@ -146,6 +143,11 @@ class ChatWorkflowRequest(BaseModel):
         if self.document_ids is None and "document_ids" in self.model_fields_set:
             _dict['document_ids'] = None
 
+        # set to None if prompt_id (nullable) is None
+        # and model_fields_set contains the field
+        if self.prompt_id is None and "prompt_id" in self.model_fields_set:
+            _dict['prompt_id'] = None
+
         # set to None if system_prompt_override (nullable) is None
         # and model_fields_set contains the field
         if self.system_prompt_override is None and "system_prompt_override" in self.model_fields_set:
@@ -155,7 +157,7 @@ class ChatWorkflowRequest(BaseModel):
 
     @classmethod
     def from_dict(cls, obj: Optional[Dict[str, Any]]) -> Optional[Self]:
-        """Create an instance of ChatWorkflowRequest from a dict"""
+        """Create an instance of ChatRequest from a dict"""
         if obj is None:
             return None
 
@@ -165,20 +167,21 @@ class ChatWorkflowRequest(BaseModel):
         _obj = cls.model_validate({
             "message": obj.get("message"),
             "conversation_id": obj.get("conversation_id"),
-            "workflow_config": ChatWorkflowConfig.from_dict(obj["workflow_config"]) if obj.get("workflow_config") is not None else None,
+            "profile_id": obj.get("profile_id"),
+            "workflow_config": obj.get("workflow_config"),
             "workflow_definition_id": obj.get("workflow_definition_id"),
             "workflow_template_name": obj.get("workflow_template_name"),
             "enable_retrieval": obj.get("enable_retrieval") if obj.get("enable_retrieval") is not None else False,
             "enable_tools": obj.get("enable_tools") if obj.get("enable_tools") is not None else False,
             "enable_memory": obj.get("enable_memory") if obj.get("enable_memory") is not None else True,
             "enable_web_search": obj.get("enable_web_search") if obj.get("enable_web_search") is not None else False,
-            "profile_id": obj.get("profile_id"),
             "provider": obj.get("provider"),
             "model": obj.get("model"),
             "temperature": obj.get("temperature"),
             "max_tokens": obj.get("max_tokens"),
             "context_limit": obj.get("context_limit"),
             "document_ids": obj.get("document_ids"),
+            "prompt_id": obj.get("prompt_id"),
             "system_prompt_override": obj.get("system_prompt_override"),
             "enable_tracing": obj.get("enable_tracing") if obj.get("enable_tracing") is not None else False
         })

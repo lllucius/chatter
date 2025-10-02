@@ -93,9 +93,8 @@ __all__ = [
     "CacheStatusResponse",
     "ChartDataPoint",
     "ChartReadyAnalytics",
+    "ChatRequest",
     "ChatResponse",
-    "ChatWorkflowConfig",
-    "ChatWorkflowRequest",
     "CleanupResponse",
     "ComplexityMetrics",
     "ConversationCreate",
@@ -160,7 +159,6 @@ __all__ = [
     "MetricsResponse",
     "MetricsSummaryResponse",
     "MinValue",
-    "ModelConfig",
     "ModelDefCreate",
     "ModelDefList",
     "ModelDefUpdate",
@@ -220,7 +218,6 @@ __all__ = [
     "Request",
     "RestoreRequest",
     "RestoreResponse",
-    "RetrievalConfig",
     "RoleToolAccessCreate",
     "RoleToolAccessResponse",
     "SSEStatsResponse",
@@ -243,7 +240,6 @@ __all__ = [
     "TokenResponse",
     "ToolAccessLevel",
     "ToolAccessResult",
-    "ToolConfig",
     "ToolOperationResponse",
     "ToolPermissionCreate",
     "ToolPermissionResponse",
@@ -371,9 +367,8 @@ from chatter_sdk.models.bulk_tool_server_operation import BulkToolServerOperatio
 from chatter_sdk.models.cache_status_response import CacheStatusResponse as CacheStatusResponse
 from chatter_sdk.models.chart_data_point import ChartDataPoint as ChartDataPoint
 from chatter_sdk.models.chart_ready_analytics import ChartReadyAnalytics as ChartReadyAnalytics
+from chatter_sdk.models.chat_request import ChatRequest as ChatRequest
 from chatter_sdk.models.chat_response import ChatResponse as ChatResponse
-from chatter_sdk.models.chat_workflow_config import ChatWorkflowConfig as ChatWorkflowConfig
-from chatter_sdk.models.chat_workflow_request import ChatWorkflowRequest as ChatWorkflowRequest
 from chatter_sdk.models.cleanup_response import CleanupResponse as CleanupResponse
 from chatter_sdk.models.complexity_metrics import ComplexityMetrics as ComplexityMetrics
 from chatter_sdk.models.conversation_create import ConversationCreate as ConversationCreate
@@ -438,7 +433,6 @@ from chatter_sdk.models.metric_type import MetricType as MetricType
 from chatter_sdk.models.metrics_response import MetricsResponse as MetricsResponse
 from chatter_sdk.models.metrics_summary_response import MetricsSummaryResponse as MetricsSummaryResponse
 from chatter_sdk.models.min_value import MinValue as MinValue
-from chatter_sdk.models.model_config import ModelConfig as ModelConfig
 from chatter_sdk.models.model_def_create import ModelDefCreate as ModelDefCreate
 from chatter_sdk.models.model_def_list import ModelDefList as ModelDefList
 from chatter_sdk.models.model_def_update import ModelDefUpdate as ModelDefUpdate
@@ -498,7 +492,6 @@ from chatter_sdk.models.reduction_strategy import ReductionStrategy as Reduction
 from chatter_sdk.models.request import Request as Request
 from chatter_sdk.models.restore_request import RestoreRequest as RestoreRequest
 from chatter_sdk.models.restore_response import RestoreResponse as RestoreResponse
-from chatter_sdk.models.retrieval_config import RetrievalConfig as RetrievalConfig
 from chatter_sdk.models.role_tool_access_create import RoleToolAccessCreate as RoleToolAccessCreate
 from chatter_sdk.models.role_tool_access_response import RoleToolAccessResponse as RoleToolAccessResponse
 from chatter_sdk.models.sse_stats_response import SSEStatsResponse as SSEStatsResponse
@@ -521,7 +514,6 @@ from chatter_sdk.models.token_refresh_response import TokenRefreshResponse as To
 from chatter_sdk.models.token_response import TokenResponse as TokenResponse
 from chatter_sdk.models.tool_access_level import ToolAccessLevel as ToolAccessLevel
 from chatter_sdk.models.tool_access_result import ToolAccessResult as ToolAccessResult
-from chatter_sdk.models.tool_config import ToolConfig as ToolConfig
 from chatter_sdk.models.tool_operation_response import ToolOperationResponse as ToolOperationResponse
 from chatter_sdk.models.tool_permission_create import ToolPermissionCreate as ToolPermissionCreate
 from chatter_sdk.models.tool_permission_response import ToolPermissionResponse as ToolPermissionResponse

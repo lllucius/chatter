@@ -10857,7 +10857,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChatWorkflowRequest"
+                "$ref": "#/components/schemas/ChatRequest"
               }
             }
           },
@@ -10970,7 +10970,7 @@
           "content": {
             "application/json": {
               "schema": {
-                "$ref": "#/components/schemas/ChatWorkflowRequest"
+                "$ref": "#/components/schemas/ChatRequest"
               }
             }
           },
@@ -11614,7 +11614,7 @@
           "Workflows"
         ],
         "summary": "Get Workflow Defaults",
-        "description": "Get workflow defaults from profiles, models, and prompts.\n\nArgs:\n    node_type: Optional specific node type to get defaults for\n    current_user: Current authenticated user\n    defaults_service: Workflow defaults service\n    \nReturns:\n    Dictionary containing default configurations",
+        "description": "Get workflow defaults from profiles, models, and prompts.\n\nArgs:\n    node_type: Optional specific node type to get defaults for\n    current_user: Current authenticated user\n    defaults_service: Workflow defaults service\n\nReturns:\n    Dictionary containing default configurations",
         "operationId": "get_workflow_defaults_api_v1_workflows_defaults_get",
         "security": [
           {
@@ -28935,100 +28935,10 @@
         "title": "ChartReadyAnalytics",
         "description": "Schema for chart-ready analytics data."
       },
-      "ChatResponse": {
-        "properties": {
-          "conversation_id": {
-            "type": "string",
-            "title": "Conversation Id",
-            "description": "Conversation ID"
-          },
-          "message": {
-            "$ref": "#/components/schemas/MessageResponse",
-            "description": "Assistant response message"
-          },
-          "conversation": {
-            "$ref": "#/components/schemas/ConversationResponse",
-            "description": "Updated conversation"
-          }
-        },
-        "type": "object",
-        "required": [
-          "conversation_id",
-          "message",
-          "conversation"
-        ],
-        "title": "ChatResponse",
-        "description": "Schema for chat response."
-      },
-      "ChatWorkflowConfig": {
-        "properties": {
-          "enable_retrieval": {
-            "type": "boolean",
-            "title": "Enable Retrieval",
-            "description": "Enable document retrieval",
-            "default": false
-          },
-          "enable_tools": {
-            "type": "boolean",
-            "title": "Enable Tools",
-            "description": "Enable function calling",
-            "default": false
-          },
-          "enable_memory": {
-            "type": "boolean",
-            "title": "Enable Memory",
-            "description": "Enable conversation memory",
-            "default": true
-          },
-          "enable_web_search": {
-            "type": "boolean",
-            "title": "Enable Web Search",
-            "description": "Enable web search",
-            "default": false
-          },
-          "llm_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ModelConfig"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Model configuration"
-          },
-          "retrieval_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/RetrievalConfig"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Retrieval configuration"
-          },
-          "tool_config": {
-            "anyOf": [
-              {
-                "$ref": "#/components/schemas/ToolConfig"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "description": "Tool configuration"
-          }
-        },
-        "type": "object",
-        "title": "ChatWorkflowConfig",
-        "description": "Configuration for building chat workflows dynamically."
-      },
-      "ChatWorkflowRequest": {
+      "ChatRequest": {
         "properties": {
           "message": {
             "type": "string",
-            "minLength": 1,
             "title": "Message",
             "description": "User message"
           },
@@ -29042,18 +28952,32 @@
               }
             ],
             "title": "Conversation Id",
-            "description": "Conversation ID"
+            "description": "Conversation ID for continuing chat"
           },
-          "workflow_config": {
+          "profile_id": {
             "anyOf": [
               {
-                "$ref": "#/components/schemas/ChatWorkflowConfig"
+                "type": "string"
               },
               {
                 "type": "null"
               }
             ],
-            "description": "Dynamic workflow config"
+            "title": "Profile Id",
+            "description": "Profile ID to use"
+          },
+          "workflow_config": {
+            "anyOf": [
+              {
+                "additionalProperties": true,
+                "type": "object"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Workflow Config",
+            "description": "Dynamic workflow configuration"
           },
           "workflow_definition_id": {
             "anyOf": [
@@ -29077,7 +29001,7 @@
               }
             ],
             "title": "Workflow Template Name",
-            "description": "Template name"
+            "description": "Workflow template name"
           },
           "enable_retrieval": {
             "type": "boolean",
@@ -29103,18 +29027,6 @@
             "description": "Enable web search capabilities",
             "default": false
           },
-          "profile_id": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Profile Id",
-            "description": "Profile ID"
-          },
           "provider": {
             "anyOf": [
               {
@@ -29125,7 +29037,7 @@
               }
             ],
             "title": "Provider",
-            "description": "LLM provider"
+            "description": "Override LLM provider for this request"
           },
           "model": {
             "anyOf": [
@@ -29137,7 +29049,7 @@
               }
             ],
             "title": "Model",
-            "description": "LLM model"
+            "description": "Override LLM model for this request"
           },
           "temperature": {
             "anyOf": [
@@ -29151,7 +29063,7 @@
               }
             ],
             "title": "Temperature",
-            "description": "Temperature"
+            "description": "Temperature override"
           },
           "max_tokens": {
             "anyOf": [
@@ -29165,7 +29077,7 @@
               }
             ],
             "title": "Max Tokens",
-            "description": "Max tokens"
+            "description": "Max tokens override"
           },
           "context_limit": {
             "anyOf": [
@@ -29178,7 +29090,7 @@
               }
             ],
             "title": "Context Limit",
-            "description": "Context limit"
+            "description": "Context limit override"
           },
           "document_ids": {
             "anyOf": [
@@ -29193,7 +29105,19 @@
               }
             ],
             "title": "Document Ids",
-            "description": "Document IDs"
+            "description": "Document IDs to include in context"
+          },
+          "prompt_id": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Prompt Id",
+            "description": "Prompt template ID to use for this request"
           },
           "system_prompt_override": {
             "anyOf": [
@@ -29205,7 +29129,7 @@
               }
             ],
             "title": "System Prompt Override",
-            "description": "System prompt override"
+            "description": "Override system prompt for this request"
           },
           "enable_tracing": {
             "type": "boolean",
@@ -29218,8 +29142,33 @@
         "required": [
           "message"
         ],
-        "title": "ChatWorkflowRequest",
-        "description": "Request for executing chat via workflow system."
+        "title": "ChatRequest",
+        "description": "Schema for chat request.\n\nThis unified schema supports both simple chat and workflow execution,\neliminating the need for separate ChatWorkflowRequest type."
+      },
+      "ChatResponse": {
+        "properties": {
+          "conversation_id": {
+            "type": "string",
+            "title": "Conversation Id",
+            "description": "Conversation ID"
+          },
+          "message": {
+            "$ref": "#/components/schemas/MessageResponse",
+            "description": "Assistant response message"
+          },
+          "conversation": {
+            "$ref": "#/components/schemas/ConversationResponse",
+            "description": "Updated conversation"
+          }
+        },
+        "type": "object",
+        "required": [
+          "conversation_id",
+          "message",
+          "conversation"
+        ],
+        "title": "ChatResponse",
+        "description": "Schema for chat response."
       },
       "CleanupResponse": {
         "properties": {
@@ -33013,77 +32962,6 @@
         ],
         "title": "MetricsSummaryResponse",
         "description": "Schema for metrics summary response."
-      },
-      "ModelConfig": {
-        "properties": {
-          "provider": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Provider",
-            "description": "LLM provider"
-          },
-          "model": {
-            "anyOf": [
-              {
-                "type": "string"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Model",
-            "description": "Model name"
-          },
-          "temperature": {
-            "type": "number",
-            "maximum": 2.0,
-            "minimum": 0.0,
-            "title": "Temperature",
-            "description": "Temperature",
-            "default": 0.7
-          },
-          "max_tokens": {
-            "type": "integer",
-            "maximum": 8192.0,
-            "minimum": 1.0,
-            "title": "Max Tokens",
-            "description": "Max tokens",
-            "default": 1000
-          },
-          "top_p": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Top P",
-            "description": "Top-p sampling",
-            "default": 1.0
-          },
-          "presence_penalty": {
-            "type": "number",
-            "maximum": 2.0,
-            "minimum": -2.0,
-            "title": "Presence Penalty",
-            "description": "Presence penalty",
-            "default": 0.0
-          },
-          "frequency_penalty": {
-            "type": "number",
-            "maximum": 2.0,
-            "minimum": -2.0,
-            "title": "Frequency Penalty",
-            "description": "Frequency penalty",
-            "default": 0.0
-          }
-        },
-        "type": "object",
-        "title": "ModelConfig",
-        "description": "Model configuration for chat workflows."
       },
       "ModelDefCreate": {
         "properties": {
@@ -37672,71 +37550,6 @@
         "title": "RestoreResponse",
         "description": "Response schema for restore operation."
       },
-      "RetrievalConfig": {
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled",
-            "description": "Enable retrieval",
-            "default": true
-          },
-          "max_documents": {
-            "type": "integer",
-            "maximum": 20.0,
-            "minimum": 1.0,
-            "title": "Max Documents",
-            "description": "Max documents to retrieve",
-            "default": 5
-          },
-          "similarity_threshold": {
-            "type": "number",
-            "maximum": 1.0,
-            "minimum": 0.0,
-            "title": "Similarity Threshold",
-            "description": "Similarity threshold",
-            "default": 0.7
-          },
-          "document_ids": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Document Ids",
-            "description": "Specific document IDs"
-          },
-          "collections": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Collections",
-            "description": "Document collections"
-          },
-          "rerank": {
-            "type": "boolean",
-            "title": "Rerank",
-            "description": "Enable reranking",
-            "default": false
-          }
-        },
-        "type": "object",
-        "title": "RetrievalConfig",
-        "description": "Retrieval configuration for RAG workflows."
-      },
       "RoleToolAccessCreate": {
         "properties": {
           "role": {
@@ -38907,56 +38720,6 @@
         ],
         "title": "ToolAccessResult",
         "description": "Schema for tool access check result."
-      },
-      "ToolConfig": {
-        "properties": {
-          "enabled": {
-            "type": "boolean",
-            "title": "Enabled",
-            "description": "Enable tools",
-            "default": true
-          },
-          "allowed_tools": {
-            "anyOf": [
-              {
-                "items": {
-                  "type": "string"
-                },
-                "type": "array"
-              },
-              {
-                "type": "null"
-              }
-            ],
-            "title": "Allowed Tools",
-            "description": "Allowed tool names"
-          },
-          "max_tool_calls": {
-            "type": "integer",
-            "maximum": 20.0,
-            "minimum": 1.0,
-            "title": "Max Tool Calls",
-            "description": "Max tool calls",
-            "default": 5
-          },
-          "parallel_tool_calls": {
-            "type": "boolean",
-            "title": "Parallel Tool Calls",
-            "description": "Enable parallel tool calls",
-            "default": false
-          },
-          "tool_timeout_ms": {
-            "type": "integer",
-            "maximum": 300000.0,
-            "minimum": 1000.0,
-            "title": "Tool Timeout Ms",
-            "description": "Tool timeout in ms",
-            "default": 30000
-          }
-        },
-        "type": "object",
-        "title": "ToolConfig",
-        "description": "Tool configuration for function calling workflows."
       },
       "ToolOperationResponse": {
         "properties": {

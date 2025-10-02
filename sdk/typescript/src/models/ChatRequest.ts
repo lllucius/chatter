@@ -1,18 +1,18 @@
 /**
- * Generated from OpenAPI schema: ChatWorkflowRequest
+ * Generated from OpenAPI schema: ChatRequest
  */
-import { ChatWorkflowConfig } from './ChatWorkflowConfig';
-
-export interface ChatWorkflowRequest {
+export interface ChatRequest {
   /** User message */
   message: string;
-  /** Conversation ID */
+  /** Conversation ID for continuing chat */
   conversation_id?: string | null;
-  /** Dynamic workflow config */
-  workflow_config?: ChatWorkflowConfig | null;
+  /** Profile ID to use */
+  profile_id?: string | null;
+  /** Dynamic workflow configuration */
+  workflow_config?: Record<string, unknown> | null;
   /** Existing workflow definition ID */
   workflow_definition_id?: string | null;
-  /** Template name */
+  /** Workflow template name */
   workflow_template_name?: string | null;
   /** Enable retrieval capabilities */
   enable_retrieval?: boolean;
@@ -22,21 +22,21 @@ export interface ChatWorkflowRequest {
   enable_memory?: boolean;
   /** Enable web search capabilities */
   enable_web_search?: boolean;
-  /** Profile ID */
-  profile_id?: string | null;
-  /** LLM provider */
+  /** Override LLM provider for this request */
   provider?: string | null;
-  /** LLM model */
+  /** Override LLM model for this request */
   model?: string | null;
-  /** Temperature */
+  /** Temperature override */
   temperature?: number | null;
-  /** Max tokens */
+  /** Max tokens override */
   max_tokens?: number | null;
-  /** Context limit */
+  /** Context limit override */
   context_limit?: number | null;
-  /** Document IDs */
+  /** Document IDs to include in context */
   document_ids?: string[] | null;
-  /** System prompt override */
+  /** Prompt template ID to use for this request */
+  prompt_id?: string | null;
+  /** Override system prompt for this request */
   system_prompt_override?: string | null;
   /** Enable backend workflow tracing */
   enable_tracing?: boolean;

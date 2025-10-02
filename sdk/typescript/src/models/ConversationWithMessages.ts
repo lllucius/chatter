@@ -58,5 +58,5 @@ export interface ConversationWithMessages {
   /** Last message timestamp */
   last_message_at?: string | null;
   /** Conversation messages */
-  messages?: MessageResponse[];
+  messages: MessageResponse[];
 }

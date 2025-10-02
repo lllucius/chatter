@@ -204,7 +204,7 @@ class ConversationWithMessages(ConversationResponse):
     """Schema for conversation with messages."""
 
     messages: list[MessageResponse] = Field(
-        default_factory=list, description="Conversation messages"
+        ..., description="Conversation messages"
     )
 
 

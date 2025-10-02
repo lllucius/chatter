@@ -250,7 +250,8 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                                   {(logEntry as LogEntry).message}
                                 </Typography>
                                 {(logEntry as LogEntry).data &&
-                                  Object.keys((logEntry as LogEntry).data || {}).length > 0 && (
+                                  Object.keys((logEntry as LogEntry).data || {})
+                                    .length > 0 && (
                                     <pre
                                       style={{
                                         fontSize: '0.75rem',

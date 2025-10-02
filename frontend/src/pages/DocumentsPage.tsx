@@ -338,7 +338,12 @@ const DocumentsPage: React.FC = () => {
         );
 
       // Create a blob from the response and trigger download
-      const blob = response instanceof Blob ? response : new Blob([JSON.stringify(response)], { type: 'application/octet-stream' });
+      const blob =
+        response instanceof Blob
+          ? response
+          : new Blob([JSON.stringify(response)], {
+              type: 'application/octet-stream',
+            });
       const url = window.URL.createObjectURL(blob);
       const a = window.document.createElement('a');
       a.href = url;

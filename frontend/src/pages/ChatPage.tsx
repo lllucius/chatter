@@ -240,9 +240,13 @@ const ChatPage: React.FC = () => {
                       ? {
                           ...msg,
                           metadata: {
-                            model: (eventData.metadata as EventMetadata)?.model_used,
-                            tokens: (eventData.metadata as EventMetadata)?.total_tokens,
-                            processingTime: (eventData.metadata as EventMetadata)?.response_time_ms,
+                            model: (eventData.metadata as EventMetadata)
+                              ?.model_used,
+                            tokens: (eventData.metadata as EventMetadata)
+                              ?.total_tokens,
+                            processingTime: (
+                              eventData.metadata as EventMetadata
+                            )?.response_time_ms,
                             workflow: {
                               stage: 'Complete',
                               currentStep: 1,

@@ -83,12 +83,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
       ? {
           confidence_level: 0.95,
           effect_size:
-            results.metrics?.find((m: MetricData) => m.metric_name === 'effect_size')
-              ?.value || 0,
+            results.metrics?.find(
+              (m: MetricData) => m.metric_name === 'effect_size'
+            )?.value || 0,
           power: 0.8,
           p_value:
-            results.metrics?.find((m: MetricData) => m.metric_name === 'p_value')
-              ?.value || 0,
+            results.metrics?.find(
+              (m: MetricData) => m.metric_name === 'p_value'
+            )?.value || 0,
         }
       : null;
   }, [results]);
@@ -386,12 +388,14 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                       fill="#8884d8"
                       dataKey="participants"
                     >
-                      {actualVariants.map((entry: VariantData, index: number) => (
-                        <Cell
-                          key={`cell-${index}`}
-                          fill={Object.values(variantColors)[index]}
-                        />
-                      ))}
+                      {actualVariants.map(
+                        (entry: VariantData, index: number) => (
+                          <Cell
+                            key={`cell-${index}`}
+                            fill={Object.values(variantColors)[index]}
+                          />
+                        )
+                      )}
                     </Pie>
                     <Tooltip />
                   </PieChart>

@@ -274,7 +274,9 @@ const ModelManagementPage: React.FC = () => {
       render: (value: unknown, _item: ModelDefWithProvider): JSX.Element => {
         const provider = value as { displayName?: string } | undefined;
         return (
-          <Typography variant="body2">{provider?.displayName || '—'}</Typography>
+          <Typography variant="body2">
+            {provider?.displayName || '—'}
+          </Typography>
         );
       },
     },
@@ -393,9 +395,9 @@ const ModelManagementPage: React.FC = () => {
   const getModelId = (item: ModelDefWithProvider) => item.id || '';
 
   // Enhanced ModelForm component that receives providers
-  const EnhancedModelForm: React.FC<CrudFormProps<ModelDefCreate, ModelDefUpdate>> = (
-    props
-  ): JSX.Element => <ModelForm {...props} providers={providers} />;
+  const EnhancedModelForm: React.FC<
+    CrudFormProps<ModelDefCreate, ModelDefUpdate>
+  > = (props): JSX.Element => <ModelForm {...props} providers={providers} />;
 
   return (
     <PageLayout title="Model Management" toolbar={toolbar}>

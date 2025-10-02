@@ -98,7 +98,11 @@ export const createDateRenderer = <T,>(
 };
 
 export const createNameWithDescriptionRenderer = <
-  T extends { name?: string; display_name?: string; description?: string | null },
+  T extends {
+    name?: string;
+    display_name?: string;
+    description?: string | null;
+  },
 >(): CrudColumn<T>['render'] => {
   return (value: unknown, item: T): React.ReactElement => {
     const displayText = String(value || item.display_name || item.name || '');

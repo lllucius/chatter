@@ -260,31 +260,39 @@ class LangGraphWorkflowManager:
             total_tokens = 0
             prompt_tokens = 0
             completion_tokens = 0
-            
+
             if isinstance(usage_metadata, dict):
                 # Extract tokens using various field names
-                prompt_tokens = usage_metadata.get('input_tokens') or usage_metadata.get('prompt_tokens', 0)
-                completion_tokens = usage_metadata.get('output_tokens') or usage_metadata.get('completion_tokens', 0)
+                prompt_tokens = usage_metadata.get(
+                    'input_tokens'
+                ) or usage_metadata.get('prompt_tokens', 0)
+                completion_tokens = usage_metadata.get(
+                    'output_tokens'
+                ) or usage_metadata.get('completion_tokens', 0)
                 total_tokens = usage_metadata.get('total_tokens', 0)
-                
+
                 # Calculate total if not provided
-                if not total_tokens and (prompt_tokens or completion_tokens):
+                if not total_tokens and (
+                    prompt_tokens or completion_tokens
+                ):
                     total_tokens = prompt_tokens + completion_tokens
 
             # Add execution metadata
             result["metadata"] = result.get("metadata", {})
             result["metadata"]["execution_time_ms"] = execution_time
             result["metadata"]["thread_id"] = thread_id
-            
+
             # Add aggregated token information to result
             if total_tokens > 0:
                 result["tokens_used"] = total_tokens
                 result["prompt_tokens"] = prompt_tokens
                 result["completion_tokens"] = completion_tokens
-                
+
                 # Estimate cost (rough estimate, should be provider-specific in production)
                 # Using approximate OpenAI GPT-4 pricing as default
-                cost = (prompt_tokens * 0.00003) + (completion_tokens * 0.00006)
+                cost = (prompt_tokens * 0.00003) + (
+                    completion_tokens * 0.00006
+                )
                 result["cost"] = cost
 
             return result

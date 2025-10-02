@@ -4,8 +4,6 @@ This test verifies that conditions like "variable enable_retrieval equals false"
 work correctly after the fix to _evaluate_single_condition.
 """
 
-import pytest
-
 from chatter.core.workflow_graph_builder import WorkflowGraphBuilder
 from chatter.core.workflow_node_factory import WorkflowNodeContext
 
@@ -42,7 +40,9 @@ class TestConditionalEvaluationFix:
         # Test condition: variable enable_retrieval equals false
         condition = "variable enable_retrieval equals false"
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is True, "Should return True when enable_retrieval is False and condition checks for false"
+        assert (
+            result is True
+        ), "Should return True when enable_retrieval is False and condition checks for false"
 
     def test_enable_retrieval_equals_true(self):
         """Test that 'variable enable_retrieval equals true' works correctly."""
@@ -73,7 +73,9 @@ class TestConditionalEvaluationFix:
         # Test condition: variable enable_retrieval equals true
         condition = "variable enable_retrieval equals true"
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is True, "Should return True when enable_retrieval is True and condition checks for true"
+        assert (
+            result is True
+        ), "Should return True when enable_retrieval is True and condition checks for true"
 
     def test_enable_retrieval_false_when_checking_true(self):
         """Test that 'variable enable_retrieval equals true' returns False when value is False."""
@@ -104,7 +106,9 @@ class TestConditionalEvaluationFix:
         # Test condition: variable enable_retrieval equals true
         condition = "variable enable_retrieval equals true"
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is False, "Should return False when enable_retrieval is False but condition checks for true"
+        assert (
+            result is False
+        ), "Should return False when enable_retrieval is False but condition checks for true"
 
     def test_enable_tools_equals_false(self):
         """Test that 'variable enable_tools equals false' works correctly."""
@@ -133,7 +137,9 @@ class TestConditionalEvaluationFix:
 
         condition = "variable enable_tools equals false"
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is True, "Should return True when enable_tools is False and condition checks for false"
+        assert (
+            result is True
+        ), "Should return True when enable_tools is False and condition checks for false"
 
     def test_enable_memory_equals_false(self):
         """Test that 'variable enable_memory equals false' works correctly."""
@@ -162,7 +168,9 @@ class TestConditionalEvaluationFix:
 
         condition = "variable enable_memory equals false"
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is True, "Should return True when enable_memory is False and condition checks for false"
+        assert (
+            result is True
+        ), "Should return True when enable_memory is False and condition checks for false"
 
     def test_compound_condition_with_false_values(self):
         """Test compound conditions with false values."""
@@ -190,6 +198,10 @@ class TestConditionalEvaluationFix:
         }
 
         # Test: variable enable_tools equals false AND no_tool_calls
-        condition = "variable enable_tools equals false OR no_tool_calls"
+        condition = (
+            "variable enable_tools equals false OR no_tool_calls"
+        )
         result = builder._evaluate_routing_condition(condition, state)
-        assert result is True, "Should return True when either part of OR condition is true"
+        assert (
+            result is True
+        ), "Should return True when either part of OR condition is true"

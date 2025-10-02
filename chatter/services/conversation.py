@@ -582,7 +582,8 @@ class ConversationService:
                 0.0, (conversation.total_cost or 0.0) + cost_delta
             )
             conversation.message_count = max(
-                0, (conversation.message_count or 0) + message_count_delta
+                0,
+                (conversation.message_count or 0) + message_count_delta,
             )
 
             # Commit changes

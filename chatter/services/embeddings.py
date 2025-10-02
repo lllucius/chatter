@@ -1085,7 +1085,9 @@ class EmbeddingService:
             }
 
 
-def get_embedding_service(session: AsyncSession | None = None) -> EmbeddingService:
+def get_embedding_service(
+    session: AsyncSession | None = None,
+) -> EmbeddingService:
     """Get an EmbeddingService instance.
 
     Args:

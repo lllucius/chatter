@@ -15,7 +15,11 @@ from langchain_core.messages import BaseMessage, HumanMessage
 
 from chatter.core.enhanced_memory_manager import EnhancedMemoryManager
 from chatter.core.enhanced_tool_executor import EnhancedToolExecutor
-from chatter.core.events import EventCategory, EventPriority, UnifiedEvent
+from chatter.core.events import (
+    EventCategory,
+    EventPriority,
+    UnifiedEvent,
+)
 from chatter.core.langgraph import workflow_manager
 from chatter.core.monitoring import get_monitoring_service
 from chatter.core.workflow_graph_builder import (
@@ -49,11 +53,12 @@ async def _emit_event(event: UnifiedEvent) -> None:
     if _event_emitter is None:
         try:
             from chatter.core.events import get_event_emitter
+
             _event_emitter = await get_event_emitter()
         except Exception as e:
             logger.warning(f"Could not initialize event emitter: {e}")
             return
-    
+
     try:
         await _event_emitter.emit(event)
     except Exception as e:
@@ -339,20 +344,22 @@ class WorkflowExecutionService:
         )
 
         # Emit workflow started event
-        await _emit_event(UnifiedEvent(
-            category=EventCategory.WORKFLOW,
-            event_type="workflow_started",
-            user_id=user_id,
-            session_id=conversation.id,
-            correlation_id=correlation_id,
-            data={
-                "workflow_id": workflow_id,
-                "execution_id": execution.id,
-                "template_id": universal_template.id,
-                "provider": chat_request.provider,
-                "model": chat_request.model,
-            },
-        ))
+        await _emit_event(
+            UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_started",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "template_id": universal_template.id,
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                },
+            )
+        )
 
         try:
             # Update execution status to running
@@ -497,7 +504,10 @@ class WorkflowExecutionService:
             )
 
             # Update conversation aggregates
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
+
             conversation_service = ConversationService(self.session)
             await conversation_service.update_conversation_aggregates(
                 conversation_id=conversation.id,
@@ -537,29 +547,34 @@ class WorkflowExecutionService:
             # Update monitoring metrics
             monitoring.update_workflow_metrics(
                 workflow_id=workflow_id,
-                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                token_usage={
+                    chat_request.provider
+                    or "unknown": result.get("tokens_used", 0)
+                },
                 tool_calls=result.get("tool_call_count", 0),
             )
 
             # Finish workflow tracking
-            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+            monitoring.finish_workflow_tracking(workflow_id)
 
             # Emit workflow completed event
-            await _emit_event(UnifiedEvent(
-                category=EventCategory.WORKFLOW,
-                event_type="workflow_completed",
-                user_id=user_id,
-                session_id=conversation.id,
-                correlation_id=correlation_id,
-                data={
-                    "workflow_id": workflow_id,
-                    "execution_id": execution.id,
-                    "tokens_used": result.get("tokens_used", 0),
-                    "cost": result.get("cost", 0.0),
-                    "execution_time_ms": execution_time_ms,
-                    "success": True,
-                },
-            ))
+            await _emit_event(
+                UnifiedEvent(
+                    category=EventCategory.WORKFLOW,
+                    event_type="workflow_completed",
+                    user_id=user_id,
+                    session_id=conversation.id,
+                    correlation_id=correlation_id,
+                    data={
+                        "workflow_id": workflow_id,
+                        "execution_id": execution.id,
+                        "tokens_used": result.get("tokens_used", 0),
+                        "cost": result.get("cost", 0.0),
+                        "execution_time_ms": execution_time_ms,
+                        "success": True,
+                    },
+                )
+            )
 
             logger.info(
                 f"Universal template execution {execution.id} completed successfully"
@@ -576,20 +591,22 @@ class WorkflowExecutionService:
             monitoring.finish_workflow_tracking(workflow_id)
 
             # Emit workflow failed event
-            await _emit_event(UnifiedEvent(
-                category=EventCategory.WORKFLOW,
-                event_type="workflow_failed",
-                user_id=user_id,
-                session_id=conversation.id,
-                correlation_id=correlation_id,
-                priority=EventPriority.HIGH,
-                data={
-                    "workflow_id": workflow_id,
-                    "execution_id": execution.id,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                },
-            ))
+            await _emit_event(
+                UnifiedEvent(
+                    category=EventCategory.WORKFLOW,
+                    event_type="workflow_failed",
+                    user_id=user_id,
+                    session_id=conversation.id,
+                    correlation_id=correlation_id,
+                    priority=EventPriority.HIGH,
+                    data={
+                        "workflow_id": workflow_id,
+                        "execution_id": execution.id,
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                    },
+                )
+            )
 
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
@@ -698,20 +715,22 @@ class WorkflowExecutionService:
         )
 
         # Emit workflow started event
-        await _emit_event(UnifiedEvent(
-            category=EventCategory.WORKFLOW,
-            event_type="workflow_started",
-            user_id=user_id,
-            session_id=conversation.id,
-            correlation_id=correlation_id,
-            data={
-                "workflow_id": workflow_id,
-                "execution_id": execution.id,
-                "dynamic": True,
-                "provider": chat_request.provider,
-                "model": chat_request.model,
-            },
-        ))
+        await _emit_event(
+            UnifiedEvent(
+                category=EventCategory.WORKFLOW,
+                event_type="workflow_started",
+                user_id=user_id,
+                session_id=conversation.id,
+                correlation_id=correlation_id,
+                data={
+                    "workflow_id": workflow_id,
+                    "execution_id": execution.id,
+                    "dynamic": True,
+                    "provider": chat_request.provider,
+                    "model": chat_request.model,
+                },
+            )
+        )
 
         try:
             # Update execution status to running
@@ -852,7 +871,10 @@ class WorkflowExecutionService:
             )
 
             # Update conversation aggregates
-            from chatter.services.conversation import ConversationService
+            from chatter.services.conversation import (
+                ConversationService,
+            )
+
             conversation_service = ConversationService(self.session)
             await conversation_service.update_conversation_aggregates(
                 conversation_id=conversation.id,
@@ -891,29 +913,34 @@ class WorkflowExecutionService:
             # Update monitoring metrics
             monitoring.update_workflow_metrics(
                 workflow_id=workflow_id,
-                token_usage={chat_request.provider or "unknown": result.get("tokens_used", 0)},
+                token_usage={
+                    chat_request.provider
+                    or "unknown": result.get("tokens_used", 0)
+                },
                 tool_calls=result.get("tool_call_count", 0),
             )
 
             # Finish workflow tracking
-            workflow_metrics = monitoring.finish_workflow_tracking(workflow_id)
+            monitoring.finish_workflow_tracking(workflow_id)
 
             # Emit workflow completed event
-            await _emit_event(UnifiedEvent(
-                category=EventCategory.WORKFLOW,
-                event_type="workflow_completed",
-                user_id=user_id,
-                session_id=conversation.id,
-                correlation_id=correlation_id,
-                data={
-                    "workflow_id": workflow_id,
-                    "execution_id": execution.id,
-                    "tokens_used": result.get("tokens_used", 0),
-                    "cost": result.get("cost", 0.0),
-                    "execution_time_ms": execution_time_ms,
-                    "success": True,
-                },
-            ))
+            await _emit_event(
+                UnifiedEvent(
+                    category=EventCategory.WORKFLOW,
+                    event_type="workflow_completed",
+                    user_id=user_id,
+                    session_id=conversation.id,
+                    correlation_id=correlation_id,
+                    data={
+                        "workflow_id": workflow_id,
+                        "execution_id": execution.id,
+                        "tokens_used": result.get("tokens_used", 0),
+                        "cost": result.get("cost", 0.0),
+                        "execution_time_ms": execution_time_ms,
+                        "success": True,
+                    },
+                )
+            )
 
             logger.info(
                 f"Dynamic workflow execution {execution.id} completed successfully"
@@ -930,20 +957,22 @@ class WorkflowExecutionService:
             monitoring.finish_workflow_tracking(workflow_id)
 
             # Emit workflow failed event
-            await _emit_event(UnifiedEvent(
-                category=EventCategory.WORKFLOW,
-                event_type="workflow_failed",
-                user_id=user_id,
-                session_id=conversation.id,
-                correlation_id=correlation_id,
-                priority=EventPriority.HIGH,
-                data={
-                    "workflow_id": workflow_id,
-                    "execution_id": execution.id,
-                    "error": str(e),
-                    "error_type": type(e).__name__,
-                },
-            ))
+            await _emit_event(
+                UnifiedEvent(
+                    category=EventCategory.WORKFLOW,
+                    event_type="workflow_failed",
+                    user_id=user_id,
+                    session_id=conversation.id,
+                    correlation_id=correlation_id,
+                    priority=EventPriority.HIGH,
+                    data={
+                        "workflow_id": workflow_id,
+                        "execution_id": execution.id,
+                        "error": str(e),
+                        "error_type": type(e).__name__,
+                    },
+                )
+            )
 
             # Update execution with failure
             execution_time_ms = int((time.time() - start_time) * 1000)
@@ -1210,7 +1239,7 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
-            
+
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -1232,14 +1261,23 @@ class WorkflowExecutionService:
                             conversation_id=conversation.id,
                             metadata={
                                 "universal_template": True,
-                                "model_name": metadata.get("ls_model_name"),
-                                "temperature": metadata.get("ls_temperature"),
-                                "max_tokens": metadata.get("ls_max_tokens"),
+                                "model_name": metadata.get(
+                                    "ls_model_name"
+                                ),
+                                "temperature": metadata.get(
+                                    "ls_temperature"
+                                ),
+                                "max_tokens": metadata.get(
+                                    "ls_max_tokens"
+                                ),
                             },
                         )
 
                     # Handle chat model and LLM streaming events
-                    elif event_name in ["on_chat_model_stream", "on_llm_stream"]:
+                    elif event_name in [
+                        "on_chat_model_stream",
+                        "on_llm_stream",
+                    ]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
@@ -1268,20 +1306,26 @@ class WorkflowExecutionService:
                         # Extract usage metadata from the end event
                         data = update.get("data", {})
                         output = data.get("output", {})
-                        
+
                         # Get usage_metadata from the output
                         usage_metadata = {}
                         if hasattr(output, "usage_metadata"):
                             usage_metadata = output.usage_metadata or {}
                         elif isinstance(output, dict):
-                            usage_metadata = output.get("usage_metadata", {})
-                        
+                            usage_metadata = output.get(
+                                "usage_metadata", {}
+                            )
+
                         # Get response_metadata for model info
                         response_metadata = {}
                         if hasattr(output, "response_metadata"):
-                            response_metadata = output.response_metadata or {}
+                            response_metadata = (
+                                output.response_metadata or {}
+                            )
                         elif isinstance(output, dict):
-                            response_metadata = output.get("response_metadata", {})
+                            response_metadata = output.get(
+                                "response_metadata", {}
+                            )
 
                         yield StreamingChatChunk(
                             type="complete",
@@ -1289,11 +1333,57 @@ class WorkflowExecutionService:
                             metadata={
                                 "streaming_complete": True,
                                 "universal_template": True,
-                                "total_tokens": usage_metadata.get("total_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "total_tokens", None),
-                                "input_tokens": usage_metadata.get("input_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "input_tokens", None),
-                                "output_tokens": usage_metadata.get("output_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "output_tokens", None),
-                                "model_used": response_metadata.get("model_name") if isinstance(response_metadata, dict) else getattr(response_metadata, "model_name", None),
-                                "finish_reason": response_metadata.get("finish_reason") if isinstance(response_metadata, dict) else getattr(response_metadata, "finish_reason", None),
+                                "total_tokens": (
+                                    usage_metadata.get("total_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "total_tokens",
+                                        None,
+                                    )
+                                ),
+                                "input_tokens": (
+                                    usage_metadata.get("input_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "input_tokens",
+                                        None,
+                                    )
+                                ),
+                                "output_tokens": (
+                                    usage_metadata.get("output_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "output_tokens",
+                                        None,
+                                    )
+                                ),
+                                "model_used": (
+                                    response_metadata.get("model_name")
+                                    if isinstance(
+                                        response_metadata, dict
+                                    )
+                                    else getattr(
+                                        response_metadata,
+                                        "model_name",
+                                        None,
+                                    )
+                                ),
+                                "finish_reason": (
+                                    response_metadata.get(
+                                        "finish_reason"
+                                    )
+                                    if isinstance(
+                                        response_metadata, dict
+                                    )
+                                    else getattr(
+                                        response_metadata,
+                                        "finish_reason",
+                                        None,
+                                    )
+                                ),
                             },
                         )
 
@@ -1482,7 +1572,7 @@ class WorkflowExecutionService:
             performance_monitor.log_debug(
                 "Starting streaming workflow execution"
             )
-            
+
             content_buffer = ""
             async for update in workflow_manager.stream_workflow(
                 workflow=workflow,
@@ -1503,14 +1593,23 @@ class WorkflowExecutionService:
                             content="",
                             conversation_id=conversation.id,
                             metadata={
-                                "model_name": metadata.get("ls_model_name"),
-                                "temperature": metadata.get("ls_temperature"),
-                                "max_tokens": metadata.get("ls_max_tokens"),
+                                "model_name": metadata.get(
+                                    "ls_model_name"
+                                ),
+                                "temperature": metadata.get(
+                                    "ls_temperature"
+                                ),
+                                "max_tokens": metadata.get(
+                                    "ls_max_tokens"
+                                ),
                             },
                         )
 
                     # Handle chat model and LLM streaming events
-                    elif event_name in ["on_chat_model_stream", "on_llm_stream"]:
+                    elif event_name in [
+                        "on_chat_model_stream",
+                        "on_llm_stream",
+                    ]:
                         # Extract the chunk from the event data
                         data = update.get("data", {})
                         chunk = data.get("chunk", {})
@@ -1538,31 +1637,83 @@ class WorkflowExecutionService:
                         # Extract usage metadata from the end event
                         data = update.get("data", {})
                         output = data.get("output", {})
-                        
+
                         # Get usage_metadata from the output
                         usage_metadata = {}
                         if hasattr(output, "usage_metadata"):
                             usage_metadata = output.usage_metadata or {}
                         elif isinstance(output, dict):
-                            usage_metadata = output.get("usage_metadata", {})
-                        
+                            usage_metadata = output.get(
+                                "usage_metadata", {}
+                            )
+
                         # Get response_metadata for model info
                         response_metadata = {}
                         if hasattr(output, "response_metadata"):
-                            response_metadata = output.response_metadata or {}
+                            response_metadata = (
+                                output.response_metadata or {}
+                            )
                         elif isinstance(output, dict):
-                            response_metadata = output.get("response_metadata", {})
+                            response_metadata = output.get(
+                                "response_metadata", {}
+                            )
 
                         yield StreamingChatChunk(
                             type="complete",
                             content="",
                             metadata={
                                 "streaming_complete": True,
-                                "total_tokens": usage_metadata.get("total_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "total_tokens", None),
-                                "input_tokens": usage_metadata.get("input_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "input_tokens", None),
-                                "output_tokens": usage_metadata.get("output_tokens") if isinstance(usage_metadata, dict) else getattr(usage_metadata, "output_tokens", None),
-                                "model_used": response_metadata.get("model_name") if isinstance(response_metadata, dict) else getattr(response_metadata, "model_name", None),
-                                "finish_reason": response_metadata.get("finish_reason") if isinstance(response_metadata, dict) else getattr(response_metadata, "finish_reason", None),
+                                "total_tokens": (
+                                    usage_metadata.get("total_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "total_tokens",
+                                        None,
+                                    )
+                                ),
+                                "input_tokens": (
+                                    usage_metadata.get("input_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "input_tokens",
+                                        None,
+                                    )
+                                ),
+                                "output_tokens": (
+                                    usage_metadata.get("output_tokens")
+                                    if isinstance(usage_metadata, dict)
+                                    else getattr(
+                                        usage_metadata,
+                                        "output_tokens",
+                                        None,
+                                    )
+                                ),
+                                "model_used": (
+                                    response_metadata.get("model_name")
+                                    if isinstance(
+                                        response_metadata, dict
+                                    )
+                                    else getattr(
+                                        response_metadata,
+                                        "model_name",
+                                        None,
+                                    )
+                                ),
+                                "finish_reason": (
+                                    response_metadata.get(
+                                        "finish_reason"
+                                    )
+                                    if isinstance(
+                                        response_metadata, dict
+                                    )
+                                    else getattr(
+                                        response_metadata,
+                                        "finish_reason",
+                                        None,
+                                    )
+                                ),
                             },
                         )
 
@@ -2145,7 +2296,9 @@ class WorkflowExecutionService:
         # Calculate total tokens
         total_tokens = None
         if prompt_tokens is not None or completion_tokens is not None:
-            total_tokens = (prompt_tokens or 0) + (completion_tokens or 0)
+            total_tokens = (prompt_tokens or 0) + (
+                completion_tokens or 0
+            )
 
         # Create message object with all fields including token statistics
         message = Message(

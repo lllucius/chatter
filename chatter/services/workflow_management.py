@@ -9,7 +9,6 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from sqlalchemy.orm import selectinload
 
 from chatter.core.validation import validate_workflow_definition
-from chatter.core.workflow_capabilities import WorkflowCapabilities
 from chatter.models.workflow import (
     TemplateCategory,
     WorkflowDefinition,
@@ -463,13 +462,13 @@ class WorkflowManagementService:
         owner_id: str,
     ) -> dict[str, Any]:
         """Validate a workflow definition and return validation results.
-        
+
         This delegates to the authoritative validation in chatter.core.validation.
-        
+
         Args:
             definition_data: Workflow definition data to validate
             owner_id: Owner user ID (for logging/audit)
-            
+
         Returns:
             Validation result dictionary with valid, errors, warnings
         """
@@ -895,7 +894,8 @@ class WorkflowManagementService:
         )
 
         # Delegate to the centralized template generator
-        return workflow_template_generator.generate_workflow_from_template(
-            template, input_params
+        return (
+            workflow_template_generator.generate_workflow_from_template(
+                template, input_params
+            )
         )
-

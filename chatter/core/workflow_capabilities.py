@@ -3,7 +3,14 @@
 from __future__ import annotations
 
 from dataclasses import asdict, dataclass, field
-from typing import Any
+from typing import TYPE_CHECKING, Any
+
+if TYPE_CHECKING:
+    from chatter.schemas.chat import ChatRequest
+    from chatter.schemas.workflows import (
+        ChatWorkflowConfig,
+        WorkflowDefinitionResponse,
+    )
 
 
 @dataclass
@@ -130,7 +137,9 @@ class WorkflowSpec:
         return result
 
     @classmethod
-    def from_chat_request(cls, chat_request) -> WorkflowSpec:
+    def from_chat_request(
+        cls, chat_request: ChatRequest
+    ) -> WorkflowSpec:
         """Create workflow spec from ChatRequest."""
         # Determine capabilities from request configuration
         capabilities = WorkflowCapabilities(
@@ -157,7 +166,9 @@ class WorkflowSpec:
         )
 
     @classmethod
-    def from_workflow_definition(cls, definition) -> WorkflowSpec:
+    def from_workflow_definition(
+        cls, definition: WorkflowDefinitionResponse
+    ) -> WorkflowSpec:
         """Create workflow spec from WorkflowDefinition."""
         # Extract capabilities from workflow structure
         capabilities = cls._analyze_workflow_capabilities(
@@ -174,7 +185,9 @@ class WorkflowSpec:
         )
 
     @classmethod
-    def from_chat_workflow_config(cls, config) -> WorkflowSpec:
+    def from_chat_workflow_config(
+        cls, config: ChatWorkflowConfig
+    ) -> WorkflowSpec:
         """Create workflow spec from ChatWorkflowConfig."""
         capabilities = WorkflowCapabilities(
             enable_retrieval=config.enable_retrieval,

@@ -23,6 +23,15 @@ import {
 } from '../../utils/mui';
 import { ExpandMore, BugReport } from '@mui/icons-material';
 
+interface LogEntry {
+  timestamp: string;
+  level: string;
+  node_id?: string;
+  message: string;
+  data?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
 interface WorkflowExecution {
   id: string;
   workflow_name: string;
@@ -232,16 +241,16 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                                   variant="caption"
                                   color="text.secondary"
                                 >
-                                  {(logEntry as any).timestamp} -{' '}
-                                  {(logEntry as any).level}
-                                  {(logEntry as any).node_id &&
-                                    ` - Node: ${(logEntry as any).node_id}`}
+                                  {(logEntry as LogEntry).timestamp} -{' '}
+                                  {(logEntry as LogEntry).level}
+                                  {(logEntry as LogEntry).node_id &&
+                                    ` - Node: ${(logEntry as LogEntry).node_id}`}
                                 </Typography>
                                 <Typography variant="body2">
-                                  {(logEntry as any).message}
+                                  {(logEntry as LogEntry).message}
                                 </Typography>
-                                {(logEntry as any).data &&
-                                  Object.keys(logEntry as any).length > 0 && (
+                                {(logEntry as LogEntry).data &&
+                                  Object.keys((logEntry as LogEntry).data || {}).length > 0 && (
                                     <pre
                                       style={{
                                         fontSize: '0.75rem',
@@ -250,7 +259,7 @@ const WorkflowExecutionsTab: React.FC<WorkflowExecutionsTabProps> = memo(
                                       }}
                                     >
                                       {JSON.stringify(
-                                        (logEntry as any).data,
+                                        (logEntry as LogEntry).data,
                                         null,
                                         2
                                       )}

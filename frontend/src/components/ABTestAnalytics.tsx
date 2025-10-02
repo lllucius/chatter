@@ -36,6 +36,18 @@ import {
   Pie,
   Cell,
 } from 'recharts';
+
+interface MetricData {
+  metric_name: string;
+  value: number;
+}
+
+interface VariantData {
+  name?: string;
+  variant_id: string;
+  participants?: number;
+  [key: string]: unknown;
+}
 import { ABTestMetricsResponse, ABTestResultsResponse } from 'chatter-sdk';
 import {
   TestRecommendations,
@@ -71,11 +83,11 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
       ? {
           confidence_level: 0.95,
           effect_size:
-            results.metrics?.find((m: any) => m.metric_name === 'effect_size')
+            results.metrics?.find((m: MetricData) => m.metric_name === 'effect_size')
               ?.value || 0,
           power: 0.8,
           p_value:
-            results.metrics?.find((m: any) => m.metric_name === 'p_value')
+            results.metrics?.find((m: MetricData) => m.metric_name === 'p_value')
               ?.value || 0,
         }
       : null;
@@ -285,7 +297,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
               </Typography>
               {actualVariants && actualVariants.length > 0 ? (
                 <List>
-                  {actualVariants.map((variant: any) => (
+                  {actualVariants.map((variant: VariantData) => (
                     <ListItem
                       key={variant.name || variant.variant_id}
                       sx={{ px: 0 }}
@@ -374,7 +386,7 @@ const ABTestAnalytics: React.FC<ABTestAnalyticsProps> = ({
                       fill="#8884d8"
                       dataKey="participants"
                     >
-                      {actualVariants.map((entry: any, index: number) => (
+                      {actualVariants.map((entry: VariantData, index: number) => (
                         <Cell
                           key={`cell-${index}`}
                           fill={Object.values(variantColors)[index]}

@@ -239,7 +239,7 @@ const WorkflowEditor = React.forwardRef<
 
     // Save current state to history with optional debouncing for property updates
     const saveToHistory = useCallback(
-      (immediate = false) => {
+      (_immediate = false) => {
         const currentState = { nodes, edges };
 
         // Don't save duplicate states

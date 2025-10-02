@@ -1,5 +1,5 @@
 import { WorkflowDefinition } from './WorkflowEditor';
-import type { Node, Edge } from '@xyflow/react';
+import type { Node } from '@xyflow/react';
 
 // Example workflows that demonstrate different patterns
 export const exampleWorkflows: Record<string, WorkflowDefinition> = {

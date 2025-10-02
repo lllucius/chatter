@@ -1236,6 +1236,26 @@ class ToolServerService:
             # Define built-in servers
             builtin_servers = [
                 {
+                    "name": "builtin_tools",
+                    "display_name": "Built-in Tools",
+                    "description": "Core built-in tools (calculator, get_time)",
+                    "command": None,
+                    "args": None,
+                    "env": None,
+                    "tools": [
+                        {
+                            "name": "calculator",
+                            "display_name": "Calculator",
+                            "description": "Perform basic mathematical calculations",
+                        },
+                        {
+                            "name": "get_time",
+                            "display_name": "Get Time",
+                            "description": "Get the current date and time. Call this function once if needed, optionally specifying a timezone using 'tz' (e.g., 'America/Denver'). After calling, use the returned time to answer the user's question in natural language.",
+                        },
+                    ],
+                },
+                {
                     "name": "filesystem",
                     "display_name": "File System",
                     "description": "Access to file system operations",
@@ -1261,14 +1281,6 @@ class ToolServerService:
                     ],
                     "env": {"BRAVE_API_KEY": "your_brave_api_key"},
                 },
-                {
-                    "name": "calculator",
-                    "display_name": "Calculator",
-                    "description": "Mathematical calculations",
-                    "command": "python",
-                    "args": ["-m", "mcp_math_server"],
-                    "env": None,
-                },
             ]
 
             for server_data in builtin_servers:
@@ -1279,7 +1291,9 @@ class ToolServerService:
                     )
                 )
 
-                if not existing.scalar_one_or_none():
+                existing_server = existing.scalar_one_or_none()
+                
+                if not existing_server:
                     # Create built-in server
                     server = ToolServer(
                         name=server_data["name"],
@@ -1296,6 +1310,45 @@ class ToolServerService:
                     )
 
                     self.session.add(server)
+                    await self.session.flush()  # Get the server ID
+                    
+                    # Create tools if they are defined for this server
+                    if "tools" in server_data:
+                        for tool_data in server_data["tools"]:
+                            tool = ServerTool(
+                                server_id=server.id,
+                                name=tool_data["name"],
+                                display_name=tool_data["display_name"],
+                                description=tool_data["description"],
+                                status=ToolStatus.ENABLED,
+                                is_available=True,
+                            )
+                            self.session.add(tool)
+                else:
+                    # If server exists but tools are defined, ensure tools exist
+                    if "tools" in server_data:
+                        # Get existing tools for this server
+                        existing_tools_result = await self.session.execute(
+                            select(ServerTool).where(
+                                ServerTool.server_id == existing_server.id
+                            )
+                        )
+                        existing_tool_names = {
+                            tool.name for tool in existing_tools_result.scalars().all()
+                        }
+                        
+                        # Add missing tools
+                        for tool_data in server_data["tools"]:
+                            if tool_data["name"] not in existing_tool_names:
+                                tool = ServerTool(
+                                    server_id=existing_server.id,
+                                    name=tool_data["name"],
+                                    display_name=tool_data["display_name"],
+                                    description=tool_data["description"],
+                                    status=ToolStatus.ENABLED,
+                                    is_available=True,
+                                )
+                                self.session.add(tool)
 
             await self.session.commit()
             logger.info("Built-in servers initialized")

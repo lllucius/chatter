@@ -141,44 +141,12 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
     { immediate: true }
   );
 
-  // Get stats from API or use fallback
+  // Get stats from API - no fallback, show loading/error states instead
   const stats = React.useMemo(() => {
-    if (statsApi.data) {
-      return statsApi.data;
-    }
-
-    // Fallback data if API not available
-    return {
-      workflows: {
-        total: 42,
-        active: 8,
-        completedToday: 15,
-        failureRate: 0.05,
-        avgExecutionTime: 2.5,
-      },
-      agents: {
-        total: 200,
-        active: 8,
-        conversationsToday: 234,
-        avgResponseTime: 1.2,
-        satisfactionScore: 4.6,
-      },
-      abTesting: {
-        activeTests: 5,
-        significantResults: 3,
-        totalImprovement: 0.18,
-        testsThisMonth: 12,
-      },
-      system: {
-        tokensUsed: 1250000,
-        apiCalls: 8520,
-        cost: 125.5,
-        uptime: 99.8,
-      },
-    };
+    return statsApi.data || null;
   }, [statsApi.data]);
 
-  // Use chart data from backend API instead of generating mock data
+  // Use chart data from backend API - no fallback mock data
   const timeSeriesData = React.useMemo(() => {
     if (chartDataApi.data?.hourly_performance_data) {
       // Transform backend data to frontend format
@@ -186,46 +154,26 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
         .slice(0, 7)
         .map((item: HourlyPerformanceItem, index: number) => ({
           date: format(subDays(new Date(), 6 - index), 'MMM dd'),
-          workflows: item.workflows || 40,
-          agents: item.agents || 180,
-          abTests: item.tests || 8,
-          tokens: 800000 + (item.workflows || 0) * 10000,
-          cost: 80 + (item.workflows || 0) * 2,
+          workflows: item.workflows || 0,
+          agents: item.agents || 0,
+          abTests: item.tests || 0,
+          tokens: (item.workflows || 0) * 10000,
+          cost: (item.workflows || 0) * 2,
         }));
     }
 
-    // Fallback to generating data if API not available
-    const days = 7;
-    const data = [];
-
-    for (let i = days - 1; i >= 0; i--) {
-      const date = subDays(new Date(), i);
-      data.push({
-        date: format(date, 'MMM dd'),
-        workflows: 40 + Math.floor(Math.random() * 20),
-        agents: 180 + Math.floor(Math.random() * 60),
-        abTests: 8 + Math.floor(Math.random() * 4),
-        tokens: 800000 + Math.floor(Math.random() * 400000),
-        cost: 80 + Math.random() * 40,
-      });
-    }
-
-    return data;
+    // No data available - return empty array to show no data state
+    return [];
   }, [chartDataApi.data]);
 
-  // Use integration data from backend if available
+  // Use integration data from backend - no fallback
   const integrationData = React.useMemo(() => {
     if (chartDataApi.data?.integration_data) {
       return chartDataApi.data.integration_data;
     }
 
-    // Fallback data
-    return [
-      { name: 'Workflow → Agent', value: 35, color: '#8884d8' },
-      { name: 'Agent → A/B Test', value: 25, color: '#82ca9d' },
-      { name: 'A/B Test → Workflow', value: 15, color: '#ffc658' },
-      { name: 'Standalone', value: 25, color: '#ff7300' },
-    ];
+    // No data available
+    return [];
   }, [chartDataApi.data]);
 
   const performanceData = React.useMemo(() => {
@@ -233,13 +181,8 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
       return chartDataApi.data.hourly_performance_data;
     }
 
-    // Fallback to generating data
-    return Array.from({ length: 24 }, (_, i) => ({
-      hour: `${i}:00`,
-      workflows: 5 + Math.floor(Math.random() * 15),
-      agents: 20 + Math.floor(Math.random() * 30),
-      tests: 1 + Math.floor(Math.random() * 3),
-    }));
+    // No data available
+    return [];
   }, [chartDataApi.data]);
 
   const handleNavigate = (path: string) => {
@@ -252,6 +195,35 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
 
   return (
     <Box>
+      {/* Loading State */}
+      {(statsApi.loading || chartDataApi.loading) && (
+        <Box sx={{ mb: 4 }}>
+          <LinearProgress />
+          <Typography variant="body2" color="text.secondary" sx={{ mt: 2, textAlign: 'center' }}>
+            Loading dashboard data...
+          </Typography>
+        </Box>
+      )}
+
+      {/* Error State */}
+      {(statsApi.error || chartDataApi.error) && !stats && (
+        <Card sx={{ mb: 4, bgcolor: 'error.light' }}>
+          <CardContent>
+            <Box sx={{ display: 'flex', alignItems: 'center', gap: 2 }}>
+              <WarningIcon color="error" />
+              <div>
+                <Typography variant="h6" color="error">
+                  Unable to Load Dashboard Data
+                </Typography>
+                <Typography variant="body2" color="error">
+                  {statsApi.error || chartDataApi.error || 'Failed to fetch dashboard data. Please try refreshing the page.'}
+                </Typography>
+              </div>
+            </Box>
+          </CardContent>
+        </Card>
+      )}
+
       {/* Summary Statistics */}
       <Grid container spacing={3} sx={{ mb: 4 }}>
         <Grid size={{ xs: 12, sm: 6, md: 3 }}>
@@ -707,7 +679,7 @@ const IntegratedDashboard: React.FC<IntegratedDashboardProps> = ({
                     <Typography
                       variant="h6"
                       color="info"
-                    >{`${stats.system.uptime}%`}</Typography>
+                    >{`${stats?.system?.uptime || 0}%`}</Typography>
                     <Typography variant="caption" color="text.secondary">
                       System Uptime
                     </Typography>

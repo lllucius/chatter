@@ -97,8 +97,10 @@ class WorkflowDefaultsService {
       return await response.json();
     } catch (error) {
       console.error('Error fetching workflow defaults:', error);
-      // Return fallback defaults if API fails
-      return this.getFallbackDefaults();
+      // No fallback - throw error to caller
+      throw new Error(
+        'Unable to fetch workflow defaults from server. Please check your connection and try again.'
+      );
     }
   }
 
@@ -132,93 +134,11 @@ class WorkflowDefaultsService {
         `Error fetching defaults for node type ${nodeType}:`,
         error
       );
-      // Return fallback defaults for the specific node type
-      return {
-        node_type: nodeType,
-        config: this.getFallbackNodeConfig(nodeType),
-      };
+      // No fallback - throw error to caller
+      throw new Error(
+        `Unable to fetch defaults for ${nodeType} node. Please check your connection and try again.`
+      );
     }
-  }
-
-  /**
-   * Get fallback defaults when API is unavailable
-   */
-  private getFallbackDefaults(): WorkflowDefaults {
-    return {
-      model_config: {
-        provider: 'openai',
-        model: 'gpt-4',
-        temperature: 0.7,
-        max_tokens: 1000,
-        top_p: 1.0,
-        frequency_penalty: 0.0,
-        presence_penalty: 0.0,
-      },
-      default_prompt: '',
-      node_types: {
-        model: {
-          systemMessage: '',
-          temperature: 0.7,
-          maxTokens: 1000,
-          model: 'gpt-4',
-          provider: 'openai',
-        },
-        retrieval: {
-          collection: '',
-          topK: 5,
-          threshold: 0.7,
-        },
-        memory: {
-          enabled: true,
-          window: 20,
-          memoryType: 'conversation',
-        },
-        loop: {
-          maxIterations: 10,
-          condition: '',
-          breakCondition: '',
-        },
-        conditional: {
-          condition: '',
-          branches: {},
-        },
-        variable: {
-          operation: 'set',
-          variableName: '',
-          value: '',
-          scope: 'workflow',
-        },
-        errorHandler: {
-          retryCount: 3,
-          fallbackAction: 'continue',
-          logErrors: true,
-        },
-        delay: {
-          duration: 1,
-          type: 'fixed',
-          unit: 'seconds',
-        },
-        tool: {
-          tools: [],
-          parallel: false,
-        },
-        start: {
-          isEntryPoint: true,
-        },
-      },
-    };
-  }
-
-  /**
-   * Get fallback config for a specific node type
-   */
-  private getFallbackNodeConfig(nodeType: string): Record<string, any> {
-    const fallbackDefaults = this.getFallbackDefaults();
-    return (
-      fallbackDefaults.node_types[
-        nodeType as keyof typeof fallbackDefaults.node_types
-      ] || {}
-    );
   }
 }
 

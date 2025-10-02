@@ -464,7 +464,7 @@ const ChatConfigPanel: React.FC<Props> = ({
                     return (
                       <Chip
                         key={value}
-                        label={doc?.title || value}
+                        label={doc?.title || doc?.filename || value}
                         size="small"
                         variant="outlined"
                       />
@@ -475,7 +475,7 @@ const ChatConfigPanel: React.FC<Props> = ({
             >
               {documents.map((document) => (
                 <MenuItem key={document.id} value={document.id}>
-                  {document.title}
+                  {document.title || document.filename}
                 </MenuItem>
               ))}
             </Select>

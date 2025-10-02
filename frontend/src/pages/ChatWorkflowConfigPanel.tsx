@@ -15,6 +15,8 @@ import {
   Chip,
   TextField,
   Button,
+  IconButton,
+  Tooltip,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -80,7 +82,7 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   setEnableTracing,
   onSelectConversation: _onSelectConversation,
 }) => {
-  const { collapsed, setCollapsed: _setCollapsed } = useRightSidebar();
+  const { collapsed, setCollapsed } = useRightSidebar();
   const [expandedPanel, setExpandedPanel] = useState<string>(() => {
     const saved = localStorage.getItem('chatter_expandedPanel');
     return saved ? saved : 'workflow';
@@ -95,6 +97,58 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   const handlePanelChange = (panel: string) => {
     setExpandedPanel(expandedPanel === panel ? '' : panel);
   };
+
+  // Collapsed view with icon buttons
+  if (collapsed) {
+    return (
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1, mt: 1 }}>
+        <Tooltip title="Workflow Configuration" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('workflow');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <AdvancedIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Profile Settings" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('profile');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <ProfileIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Prompt Templates" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('prompt');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <PromptIcon />
+          </IconButton>
+        </Tooltip>
+        <Tooltip title="Knowledge Base" placement="left">
+          <IconButton
+            onClick={() => {
+              setCollapsed(false);
+              setExpandedPanel('documents');
+            }}
+            sx={{ borderRadius: 1 }}
+          >
+            <DocumentIcon />
+          </IconButton>
+        </Tooltip>
+      </Box>
+    );
+  }
 
   return (
     <Box sx={{ width: '100%', p: collapsed ? 0 : 1 }}>
@@ -474,7 +528,9 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 }
                 label={
                   <Box>
-                    <Typography variant="body2">{doc.title}</Typography>
+                    <Typography variant="body2">
+                      {doc.title || doc.filename}
+                    </Typography>
                     <Typography variant="caption" color="text.secondary">
                       {doc.document_type}
                     </Typography>

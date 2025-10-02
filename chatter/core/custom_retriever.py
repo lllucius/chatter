@@ -5,7 +5,7 @@ from typing import Any
 from langchain_core.documents import Document
 from langchain_core.embeddings import Embeddings
 
-from chatter.database import get_async_session
+from chatter.utils.database import get_session_generator
 from chatter.utils.logging import get_logger
 
 logger = get_logger(__name__)
@@ -62,7 +62,7 @@ class DocumentChunkRetriever:
             )
             
             # Get database session
-            async for session in get_async_session():
+            async for session in get_session_generator():
                 # Use SimpleVectorStore to search
                 from chatter.core.embedding_pipeline import SimpleVectorStore
                 

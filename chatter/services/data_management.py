@@ -67,7 +67,7 @@ class DataManager:
             operation_type=DataOperation.EXPORT.value,
             created_by=created_by,
             metadata={
-                "export_request": request.dict(),
+                "export_request": request.model_dump(),
                 "expires_at": expires_at,
             },
         )
@@ -106,7 +106,7 @@ class DataManager:
             operation_type=DataOperation.BACKUP.value,
             created_by=created_by,
             metadata={
-                "backup_request": request.dict(),
+                "backup_request": request.model_dump(),
             },
         )
         self.operations[operation.id] = operation
@@ -143,7 +143,7 @@ class DataManager:
             operation_type=DataOperation.RESTORE.value,
             created_by=created_by,
             metadata={
-                "restore_request": request.dict(),
+                "restore_request": request.model_dump(),
             },
         )
         self.operations[operation.id] = operation
@@ -649,7 +649,7 @@ class DataManager:
             "entity_type": filters.entity_type,
             "total_matching": total,
             "sample_items": [item.to_dict() for item in items],
-            "filters_applied": filters.dict(),
+            "filters_applied": filters.model_dump(),
         }
 
     async def _get_filtered_conversation_ids(

@@ -423,7 +423,14 @@ const LayoutFrame: React.FC = () => {
   );
 
   const rightDrawerContent = (
-    <div style={{ height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box
+      sx={{
+        height: '100vh',
+        display: 'flex',
+        flexDirection: 'column',
+        overflow: 'hidden',
+      }}
+    >
       <Toolbar
         sx={{
           justifyContent: 'space-between',
@@ -431,6 +438,7 @@ const LayoutFrame: React.FC = () => {
           borderColor: 'divider',
           minHeight: { xs: 56, sm: 64 },
           px: { xs: 2, sm: 3 },
+          flexShrink: 0,
         }}
       >
         {!rightCollapsed && (
@@ -451,10 +459,12 @@ const LayoutFrame: React.FC = () => {
           {rightCollapsed ? <ChevronLeft /> : <ChevronRight />}
         </IconButton>
       </Toolbar>
-      <CustomScrollbar style={{ flexGrow: 1 }}>
-        <Box sx={{ p: rightCollapsed ? 1 : 2 }}>{panelContent}</Box>
-      </CustomScrollbar>
-    </div>
+      <Box sx={{ flexGrow: 1, minHeight: 0, overflow: 'hidden' }}>
+        <CustomScrollbar>
+          <Box sx={{ p: rightCollapsed ? 1 : 2 }}>{panelContent}</Box>
+        </CustomScrollbar>
+      </Box>
+    </Box>
   );
 
   return (

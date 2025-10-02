@@ -17,6 +17,15 @@ import {
   Button,
   IconButton,
   Tooltip,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemButton,
+  ListItemText,
+  Checkbox,
 } from '@mui/material';
 import {
   ExpandMore as ExpandMoreIcon,
@@ -24,6 +33,7 @@ import {
   AccountBox as ProfileIcon,
   Description as DocumentIcon,
   Settings as AdvancedIcon,
+  Build as ToolIcon,
 } from '@mui/icons-material';
 import {
   ProfileResponse,
@@ -33,6 +43,7 @@ import {
 } from 'chatter-sdk';
 import { useRightSidebar } from '../components/RightSidebarContext';
 import { ChatWorkflowConfig } from '../hooks/useWorkflowChat';
+import { getSDK } from '../services/auth-service';
 
 interface Props {
   profiles: ProfileResponse[];
@@ -89,10 +100,39 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
   });
 
   const [showAdvancedConfig, setShowAdvancedConfig] = useState(false);
+  
+  // Dialog states
+  const [documentDialogOpen, setDocumentDialogOpen] = useState(false);
+  const [toolDialogOpen, setToolDialogOpen] = useState(false);
+  
+  // Tool selection state
+  const [availableTools, setAvailableTools] = useState<Array<{ id: string; name: string; display_name: string; description?: string }>>([]);
+  const [selectedTools, setSelectedTools] = useState<string[]>([]);
 
   useEffect(() => {
     localStorage.setItem('chatter_expandedPanel', expandedPanel);
   }, [expandedPanel]);
+
+  // Fetch available tools
+  useEffect(() => {
+    const fetchTools = async () => {
+      try {
+        const sdk = getSDK();
+        const response = await sdk.toolServers.listAllToolsApiV1ToolserversToolsAll();
+        setAvailableTools((response || []) as Array<{ id: string; name: string; display_name: string; description?: string }>);
+      } catch (error) {
+        console.error('Failed to fetch tools:', error);
+      }
+    };
+    fetchTools();
+  }, []);
+
+  // Initialize selected tools from workflow config
+  useEffect(() => {
+    if (workflowConfig.tool_config?.allowed_tools) {
+      setSelectedTools(workflowConfig.tool_config.allowed_tools);
+    }
+  }, [workflowConfig.tool_config?.allowed_tools]);
 
   const handlePanelChange = (panel: string) => {
     setExpandedPanel(expandedPanel === panel ? '' : panel);
@@ -133,17 +173,6 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
             sx={{ borderRadius: 1 }}
           >
             <PromptIcon />
-          </IconButton>
-        </Tooltip>
-        <Tooltip title="Knowledge Base" placement="left">
-          <IconButton
-            onClick={() => {
-              setCollapsed(false);
-              setExpandedPanel('documents');
-            }}
-            sx={{ borderRadius: 1 }}
-          >
-            <DocumentIcon />
           </IconButton>
         </Tooltip>
       </Box>
@@ -188,6 +217,20 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 }
                 label="Document Retrieval (RAG)"
               />
+              
+              {workflowConfig.enable_retrieval && (
+                <Box sx={{ ml: 4, mt: 1, mb: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<DocumentIcon />}
+                    onClick={() => setDocumentDialogOpen(true)}
+                    fullWidth
+                  >
+                    Select Documents ({selectedDocuments.length})
+                  </Button>
+                </Box>
+              )}
 
               <FormControlLabel
                 control={
@@ -200,6 +243,20 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
                 }
                 label="Function Calling (Tools)"
               />
+              
+              {workflowConfig.enable_tools && (
+                <Box sx={{ ml: 4, mt: 1, mb: 1 }}>
+                  <Button
+                    variant="outlined"
+                    size="small"
+                    startIcon={<ToolIcon />}
+                    onClick={() => setToolDialogOpen(true)}
+                    fullWidth
+                  >
+                    Select Tools ({selectedTools.length})
+                  </Button>
+                </Box>
+              )}
 
               <FormControlLabel
                 control={
@@ -489,59 +546,113 @@ const ChatWorkflowConfigPanel: React.FC<Props> = ({
         </AccordionDetails>
       </Accordion>
 
-      {/* Documents */}
-      <Accordion
-        expanded={expandedPanel === 'documents'}
-        onChange={() => handlePanelChange('documents')}
+      {/* Document Selection Dialog */}
+      <Dialog
+        open={documentDialogOpen}
+        onClose={() => setDocumentDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
       >
-        <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <DocumentIcon />
-            <Typography>Documents</Typography>
-            {selectedDocuments.length > 0 && (
-              <Chip
-                size="small"
-                label={selectedDocuments.length}
-                color="primary"
-              />
-            )}
-          </Box>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Box sx={{ maxHeight: 200, overflowY: 'auto' }}>
-            {documents.map((doc) => (
-              <FormControlLabel
-                key={doc.id}
-                control={
-                  <Switch
-                    checked={selectedDocuments.includes(doc.id)}
-                    onChange={(e) => {
-                      if (e.target.checked) {
-                        setSelectedDocuments([...selectedDocuments, doc.id]);
-                      } else {
+        <DialogTitle>Select Documents</DialogTitle>
+        <DialogContent>
+          {documents.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No documents available. Please upload documents first.
+            </Typography>
+          ) : (
+            <List sx={{ pt: 1 }}>
+              {documents.map((doc) => (
+                <ListItem key={doc.id} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      if (selectedDocuments.includes(doc.id)) {
                         setSelectedDocuments(
                           selectedDocuments.filter((id) => id !== doc.id)
                         );
+                      } else {
+                        setSelectedDocuments([...selectedDocuments, doc.id]);
                       }
                     }}
-                  />
-                }
-                label={
-                  <Box>
-                    <Typography variant="body2">
-                      {doc.title || doc.filename}
-                    </Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      {doc.document_type}
-                    </Typography>
-                  </Box>
-                }
-                sx={{ display: 'block', mb: 1 }}
-              />
-            ))}
-          </Box>
-        </AccordionDetails>
-      </Accordion>
+                    dense
+                  >
+                    <Checkbox
+                      edge="start"
+                      checked={selectedDocuments.includes(doc.id)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText
+                      primary={doc.title || doc.filename}
+                      secondary={doc.document_type}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setDocumentDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Tool Selection Dialog */}
+      <Dialog
+        open={toolDialogOpen}
+        onClose={() => setToolDialogOpen(false)}
+        maxWidth="sm"
+        fullWidth
+      >
+        <DialogTitle>Select Tools</DialogTitle>
+        <DialogContent>
+          {availableTools.length === 0 ? (
+            <Typography variant="body2" color="text.secondary" sx={{ p: 2 }}>
+              No tools available. Please configure tool servers first.
+            </Typography>
+          ) : (
+            <List sx={{ pt: 1 }}>
+              {availableTools.map((tool) => (
+                <ListItem key={tool.id} disablePadding>
+                  <ListItemButton
+                    onClick={() => {
+                      const newSelectedTools = selectedTools.includes(tool.name)
+                        ? selectedTools.filter((name) => name !== tool.name)
+                        : [...selectedTools, tool.name];
+                      setSelectedTools(newSelectedTools);
+                      updateWorkflowConfig({
+                        tool_config: {
+                          ...workflowConfig.tool_config,
+                          enabled: true,
+                          allowed_tools: newSelectedTools,
+                        },
+                      });
+                    }}
+                    dense
+                  >
+                    <Checkbox
+                      edge="start"
+                      checked={selectedTools.includes(tool.name)}
+                      tabIndex={-1}
+                      disableRipple
+                    />
+                    <ListItemText
+                      primary={tool.display_name || tool.name}
+                      secondary={tool.description || tool.name}
+                      primaryTypographyProps={{ variant: 'body2' }}
+                      secondaryTypographyProps={{ variant: 'caption' }}
+                    />
+                  </ListItemButton>
+                </ListItem>
+              ))}
+            </List>
+          )}
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setToolDialogOpen(false)}>Close</Button>
+        </DialogActions>
+      </Dialog>
     </Box>
   );
 };
